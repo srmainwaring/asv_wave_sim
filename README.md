@@ -32,7 +32,7 @@ Clone the ASV Wave Simulator repository:
 
 ```bash
 cd src
-git clone ssh://rhys@diskstation.local:/volume1/git/robotics/asv_wave_sim.git
+git clone https://github.com/srmainwaring/asv_wave_sim.git
 ```
 
 Compile the packages:
