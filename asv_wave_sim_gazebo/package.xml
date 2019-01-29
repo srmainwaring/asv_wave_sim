@@ -14,8 +14,8 @@
   <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+
   <exec_depend>asv_wave_sim_gazebo_plugins</exec_depend>
-  <exec_depend>gazebo</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
 
   <export>

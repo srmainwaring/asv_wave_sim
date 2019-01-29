@@ -17,11 +17,9 @@
 
   <build_depend>cgal</build_depend>
   <build_depend>eigen</build_depend>
-  <build_depend>gazebo</build_depend>
+  <build_depend>gazebo_ros</build_depend>
   
-  <exec_depend>gazebo</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
-
 
   <export>
     <gazebo_ros plugin_path="${prefix}/lib"/>
