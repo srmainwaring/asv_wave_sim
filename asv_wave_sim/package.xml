@@ -13,6 +13,7 @@
   <url type="bugtracker">https://github.com/srmainwaring/asv_wave_sim/issues</url>
   <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
   <buildtool_depend>catkin</buildtool_depend>
+
   <exec_depend>asv_wave_sim_gazebo</exec_depend>
   <exec_depend>asv_wave_sim_gazebo_plugins</exec_depend>
   <export>
