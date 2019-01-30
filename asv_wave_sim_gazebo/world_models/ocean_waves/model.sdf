@@ -22,7 +22,7 @@
   Modified to include wave field model and visual plugins.
 -->
 <sdf version="1.6">
-  <model name="ocean">
+  <model name="ocean_waves">
     <static>true</static>
     <plugin name="wavefield_plugin" filename="libWavefieldModelPlugin.so">
       <static>false</static>
@@ -44,32 +44,32 @@
       </markers>
     </plugin>
 
-    <link name="ocean_link">
-      <visual name="ocean_visual">
-        <plugin name="ocean_visual_plugin" filename="libWavefieldVisualPlugin.so" />
+    <link name="ocean_waves_link">
+      <visual name="ocean_waves_visual">
+        <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so" />
         <geometry>
           <mesh>
-            <uri>model://ocean/meshes/mesh.dae</uri>
+            <uri>model://ocean_waves/meshes/mesh.dae</uri>
           </mesh>
         </geometry>
         <material>
           <script>
-            <uri>model://ocean/materials/scripts/waves.material</uri>
-            <name>UUVSimulator/SimpleWaves</name>
+            <uri>model://ocean_waves/materials/scripts/waves.material</uri>
+            <name>ASVWaveSim/GerstnerWaves</name>
           </script>
         </material>
       </visual>
-      <visual name="ocean_below_visual">
-        <plugin name="ocean_below_visual_plugin" filename="libWavefieldVisualPlugin.so" />
+      <visual name="ocean_waves_below_visual">
+        <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so" />
         <geometry>
           <mesh>
-            <uri>model://ocean/meshes/mesh_below.dae</uri>
+            <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
           </mesh>
         </geometry>
         <material>
           <script>
-            <uri>model://ocean/materials/scripts/waves.material</uri>
-            <name>UUVSimulator/SimpleWaves</name>
+            <uri>model://ocean_waves/materials/scripts/waves.material</uri>
+            <name>ASVWaveSim/GerstnerWaves</name>
           </script>
         </material>
       </visual>
