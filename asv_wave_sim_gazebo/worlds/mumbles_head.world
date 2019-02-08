@@ -63,7 +63,7 @@
     </include>
 
     <include>
-      <uri>model://ocean</uri>
+      <uri>model://ocean_waves</uri>
     </include>
 
   </world>
