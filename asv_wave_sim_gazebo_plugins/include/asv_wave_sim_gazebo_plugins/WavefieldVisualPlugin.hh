@@ -35,29 +35,78 @@ namespace asv
   /// \brief Class to hold private data for WavefieldModelPlugin.
   class WavefieldVisualPluginPrivate;
 
-  /// \brief Visual plugin class to synchronise and control a vertex shader generating Gerstner waves
+  /// \brief A Gazebo visual plugin to synchronise and control 
+  /// a vertex shader rendering Gerstner waves.
   ///
-  /// SDF parameters: 
+  /// # Usage
   ///
-  /// <static>: Display a static wave field if set to true. Default value is false.
-  /// <wave>
-  ///   <number>: The number of commponent waves. 
-  ///   <scale>: The scale between the mean and largest / smallest component waves 
-  ///   <angle>: The angle between the mean wave direction and the largest / smallest component waves
-  ///   <steepness>: A parameter in [0, 1] controlling the wave steepness with 1 being steepest.
-  ///   <amplitude>: The amplitude of the mean wave in [m].
-  ///   <period>: The period of the mean wave in [s]
-  ///   <phase>: The phase of the mean wave. 
-  ///   <direction>: A two component vector specifiying the direction of the mean wave.
-  /// </wave>
+  /// Add the SDF for the plugin to the <visual> element of your wave model.
   ///
-  /// The SDF parameters specifying the wave are all optional, and in the standard
-  /// use case will be overridden.
+  /// The SDF parameters specifying the wave are all optional, and normal
+  /// use will be overridden.
   ///
   /// If this visual is loaded as part of a wave model that also contains 
   /// the plugin libWavefieldModelPlugin.so, then it will receive a response
   /// to its request for ~/wave_param and set the wave parameters to be
   /// consistent with the wave generator operating on the physics server.
+  ///
+  /// \code
+  /// <plugin name="wavefield_visual" filename="libWavefieldVisualPlugin.so">
+  ///   <static>false</static>
+  ///   <wave>
+  ///     <number>3</number>
+  ///     <scale>1.5</scale>
+  ///     <angle>0.4</angle>
+  ///     <steepness>1.0</steepness>
+  ///     <amplitude>0.4</amplitude>
+  ///     <period>8.0</period>
+  ///     <direction>1 1</direction>
+  ///   </wave>
+  /// </plugin>
+  /// \endcode
+  ///
+  /// # Subscribed Topics
+  ///
+  /// 1. ~/reponse (gazebo::msgs::Response)
+  ///   
+  /// 2. ~/wave (gazebo::msgs::Param_V)
+  ///
+  /// 3. ~/world_stats (gazebo::msgs::WorldStatistics)
+  ///
+  /// 4. /marker (ignition::msgs::Marker)
+  ///
+  /// # Published Topics
+  ///
+  /// 1. ~/request (gazebo::msgs::Request)
+  ///
+  /// # Parameters
+  ///
+  /// 1. <static> (bool, default: false)
+  ///   Display a static wave field if set to true.
+  ///   
+  /// 2. <number> (int, default: 1)
+  ///   The number of component waves.
+  ///
+  /// 3. <scale> (double, default: 2.0)
+  ///   The scale between the mean and largest / smallest component waves.
+  ///
+  /// 4. <angle> (double, default: 2*pi/10)
+  ///   The angle between the mean wave direction and the largest / smallest component waves.
+  ///
+  /// 5. <steepness> (double, default: 1.0)
+  ///   A parameter in [0, 1] controlling the wave steepness with 1 being steepest.
+  ///
+  /// 6. <amplitude> (double, default: 0.0)
+  ///   The amplitude of the mean wave in [m].
+  ///
+  /// 7. <period> (double, default: 1.0)
+  ///   The period of the mean wave in [s].
+  ///
+  /// 8. <phase> (double, default: 0.0)
+  ///   The phase of the mean wave.
+  ///
+  /// 9. <direction> (Vector2D, default: (1 0))
+  ///   A two component vector specifiying the direction of the mean wave.
   ///
   class GZ_RENDERING_VISIBLE WavefieldVisualPlugin : public gazebo::VisualPlugin
   {

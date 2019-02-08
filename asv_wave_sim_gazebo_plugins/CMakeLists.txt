@@ -24,7 +24,7 @@ include(${CGAL_USE_FILE})
 ###############################################################################
 # Other dependencies...
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS gazebo_ros)
 find_package(gazebo REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB REQUIRED)
@@ -35,19 +35,13 @@ find_package(TBB REQUIRED)
 catkin_package(
   INCLUDE_DIRS
     include
-    ${Boost_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIR}
-    ${GAZEBO_INCLUDE_DIRS}
-    ${GAZEBO_MSG_INCLUDE_DIRS}
-    ${TBB_INCLUDE_DIRS}
   LIBRARIES
     Hydrodynamics
     HydrodynamicsPlugin
     WavefieldModelPlugin
     WavefieldVisualPlugin
   DEPENDS
-    gazebo
+    gazebo_ros
 )
 
 include_directories(

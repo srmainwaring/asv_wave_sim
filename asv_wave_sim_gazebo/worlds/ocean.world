@@ -30,10 +30,10 @@
 
     <!-- Scene -->
     <scene>
-      <time>10</time>
-      <sunrise>6</sunrise>
-      <sunset>18</sunset>
       <sky>
+        <time>10</time>
+        <sunrise>6</sunrise>
+        <sunset>18</sunset>
         <clouds>
           <speed>12</speed>
           <direction>1.57079</direction>
@@ -50,7 +50,7 @@
 
     <!-- World models  -->
     <include>
-      <uri>model://ocean</uri>
+      <uri>model://ocean_waves</uri>
     </include>
 
   </world>
