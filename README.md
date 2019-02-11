@@ -2,6 +2,8 @@
 
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
+![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_rs750.jpg)
+
 ## Dependencies
 
 You will need a working installation of ROS and Gazebo in order to use this package.
@@ -79,7 +81,7 @@ Manually run the tests:
 
 ## Examples
 
-![image](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_box_example.gif)
+![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_box_example.gif)
 
 Launch a Gazebo session with `roslaunch`:
 
