@@ -310,8 +310,13 @@ namespace asv
     { 
       std::string shaderType = "vertex";
       float simTime = this->data->simTime;
+#if 0
       this->data->visual->SetMaterialShaderParam(
         "time", shaderType, std::to_string(simTime));
+#else
+      rendering::SetMaterialShaderParam(*this->data->visual,
+        "time", shaderType, std::to_string(simTime));
+#endif
     }
   }
 
