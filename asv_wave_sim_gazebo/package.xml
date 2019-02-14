@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>asv_wave_sim_gazebo</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <description>
     This package contains Gazebo media, models and worlds for simulating
     water waves and dynamics for surface vessels. There are ROS 
