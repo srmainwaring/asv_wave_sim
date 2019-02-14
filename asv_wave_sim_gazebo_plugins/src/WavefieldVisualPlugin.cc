@@ -16,6 +16,7 @@
 #include "asv_wave_sim_gazebo_plugins/WavefieldVisualPlugin.hh"
 
 #include "asv_wave_sim_gazebo_plugins/Convert.hh"
+#include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
 #include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
@@ -386,6 +387,7 @@ namespace asv
 
     // These parameters are updated on initialisation
     auto& visual = *this->data->visual;
+#if 0
     visual.SetMaterialShaderParam(
       "amplitude", shaderType, Ogre::StringConverter::toString(amplitude));
     visual.SetMaterialShaderParam(
@@ -400,6 +402,22 @@ namespace asv
       "dir1", shaderType, Ogre::StringConverter::toString(dir1));
     visual.SetMaterialShaderParam(
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
+#else
+    rendering::SetMaterialShaderParam(visual,
+      "amplitude", shaderType, Ogre::StringConverter::toString(amplitude));
+    rendering::SetMaterialShaderParam(visual,
+      "wavenumber", shaderType, Ogre::StringConverter::toString(wavenumber));
+    rendering::SetMaterialShaderParam(visual,
+      "omega", shaderType, Ogre::StringConverter::toString(omega));
+    rendering::SetMaterialShaderParam(visual,
+      "steepness", shaderType, Ogre::StringConverter::toString(steepness));
+    rendering::SetMaterialShaderParam(visual,
+      "dir0", shaderType, Ogre::StringConverter::toString(dir0));
+    rendering::SetMaterialShaderParam(visual,
+      "dir1", shaderType, Ogre::StringConverter::toString(dir1));
+    rendering::SetMaterialShaderParam(visual,
+      "dir2", shaderType, Ogre::StringConverter::toString(dir2));
+#endif
   }
 
 } // namespace asv
