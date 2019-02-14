@@ -21,34 +21,13 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_GAZEBO_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_GAZEBO_HH_
 
-#include <gazebo/rendering/Visual.hh>
-#include "gazebo/rendering/ogre_gazebo.h"
-
-#include <ignition/math/Vector3.hh>
-
-#include <memory>
 #include <string>
-#include <vector>
 
 namespace gazebo
 {
   namespace rendering
   {
     class Visual;
-
-    void ToOgreVector3(
-      const std::vector<double>& _v,
-      Ogre::Vector3& _vout);
-
-    void ToOgreVector3(
-      const ignition::math::Vector3d& _v,
-      Ogre::Vector3& _vout);
-
-    void ToOgreVector3(
-      const std::vector<ignition::math::Vector3d>& _v,
-      Ogre::Vector3& _vout0,
-      Ogre::Vector3& _vout1,
-      Ogre::Vector3& _vout2);
 
     /// \brief Set a shader program parameter associated to this visual's
     /// material
@@ -65,34 +44,6 @@ namespace gazebo
       const std::string &_paramName,
       const std::string &_shaderType,
       const std::string &_value);
-
-    /// \brief Override Visual::AttachMesh.
-    /// Derived from gazebo/rendering/Visual.cc
-    ///
-    Ogre::MovableObject* AttachMesh(
-      Visual& _visual,
-      const std::string& _meshName,
-      const std::string& _subMesh="",
-      bool _centerSubmesh=false,
-      const std::string& _objName="");
-
-    /// \brief Override HasElement("material") in Visual::Load.
-    /// Derived from gazebo/rendering/Visual.cc lines 454-497
-    /// 
-    void SetMaterial(
-      Visual& _visual,
-      sdf::ElementPtr _sdf);
-
-    /// \brief Custom implementation to insert a mesh into Ogre.
-    /// \param[in] _mesh Pointer to the mesh to insert.
-    /// \param[in] _subMesh Name of the mesh within _meshName to insert.
-    /// \param[in] _centerSubmesh True to center the submesh.
-    void InsertMesh(
-      const common::Mesh *_mesh,
-      const std::string &_subMesh="",
-      bool _centerSubmesh=false);
-
-
 
   }; // namespace rendering
 
