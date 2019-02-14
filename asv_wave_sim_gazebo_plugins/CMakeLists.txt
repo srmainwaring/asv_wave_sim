@@ -73,6 +73,7 @@ add_library(Hydrodynamics
   SHARED
     src/Algorithm.cc
     src/Convert.cc
+    src/Gazebo.cc
     src/Geometry.cc
     src/Grid.cc
     src/MeshTools.cc

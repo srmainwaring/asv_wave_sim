@@ -7,11 +7,31 @@ This package contains plugins that support the simulation of waves and surface v
 ## Dependencies
 
 You will need a working installation of ROS and Gazebo in order to use this package.
-It has been tested with:
 
-- Gazebo version 9.4.1
+
+## Ubuntu
+
+- Ubuntu 18.04
 - ROS Melodic Morenia
+- Gazebo version 9.0.0
+
+Install CGAL 4.13 libraries:
+
+```bash
+sudo apt-get install libcgal-dev
+```
+
+### macOS
+
 - OSX 10.11.6
+- ROS Melodic Morenia
+- Gazebo version 9.6.0
+
+Install CGAL 4.13 libraries:
+
+```bash
+brew install cgal
+```
 
 ## Installation
 
