@@ -286,9 +286,13 @@ namespace asv
 
       // Initialise vertex shader
       std::string shaderType = "vertex";
+#if 0
       this->data->visual->SetMaterialShaderParam(
         "time", shaderType, std::to_string(0.0));
-
+#else
+      rendering::SetMaterialShaderParam(*this->data->visual,
+        "time", shaderType, std::to_string(0.0));
+#endif
       this->SetShaderParams();
       this->data->isInitialised = true;   
     }
