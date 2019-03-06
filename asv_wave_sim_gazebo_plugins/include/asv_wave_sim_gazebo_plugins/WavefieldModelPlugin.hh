@@ -57,10 +57,6 @@ namespace asv
   ///     <period>8.0</period>
   ///     <direction>1 1</direction>
   ///   </wave>
-  ///   <markers>
-  ///     <wave_patch>false</wave_patch>
-  ///     <wave_patch_size>4 4</wave_patch_size>
-  ///   </markers>
   /// </plugin>
   /// \endcode
   ///
@@ -73,8 +69,6 @@ namespace asv
   /// # Published Topics
   ///
   /// 1. ~/reponse (gazebo::msgs::Response)
-  ///
-  /// 2. /marker (ignition::msgs::Marker)
   ///
   /// # Parameters
   ///
@@ -114,12 +108,6 @@ namespace asv
   /// 12. <direction> (Vector2D, default: (1 0))
   ///   A two component vector specifiying the direction of the mean wave.
   ///
-  /// 13. <wave_patch> (bool, default: false)
-  ///   Display a wave patch marker if set to true.
-  ///
-  /// 14. <wave_patch_size> (Vector2D, default: (4 4))
-  ///   A two component vector for the size of the wave marker (in units of the wave grid).
-  ///
   class GAZEBO_VISIBLE WavefieldModelPlugin : public gazebo::ModelPlugin
   {
     /// \brief Destructor.
@@ -155,13 +143,6 @@ namespace asv
     ///
     /// \param[in] _msg Wave message.
     private: void OnWaveMsg(ConstParam_VPtr &_msg);
-
-    /// \internal
-    /// \brief Private methods for managing markers.
-    private: void InitMarker();
-    private: void FiniMarker();
-    private: void ResetMarker();
-    private: void UpdateMarker();
 
     /// \internal
     /// \brief Pointer to the class private data.

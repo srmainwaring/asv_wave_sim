@@ -30,7 +30,7 @@ namespace asv
 ///////////////////////////////////////////////////////////////////////////////
 // WavefieldEntity
 
-  class Wavefield;
+  class WaveParameters;
 
   /// \internal
   /// \brief Class to hold private data for WavefieldEntity.
@@ -60,8 +60,8 @@ namespace asv
     /// \brief Update the object.
     public: virtual void Update();
     
-    /// \brief Get a pointer to the wavefield.
-    std::shared_ptr<const Wavefield> GetWavefield() const;
+    /// \brief Get a pointer to the wave pararameters.
+    std::shared_ptr<const WaveParameters> GetWaveParams() const;
 
     /// \brief Make a wave field entity name given a parent object name.
     ///

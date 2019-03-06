@@ -16,7 +16,6 @@
 #include "asv_wave_sim_gazebo_plugins/WavefieldModelPlugin.hh"
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 #include "asv_wave_sim_gazebo_plugins/Convert.hh"
-#include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
@@ -61,20 +60,11 @@ namespace asv
     /// \brief WavefieldEntity pointer.
     public: boost::shared_ptr<::asv::WavefieldEntity> wavefieldEntity;
 
-    /// \brief Wavefield Marker
-    public: ignition::msgs::Marker wavefieldMsg;
-
     /// \brief Set the wavefield to be static [false].
     public: bool isStatic;
 
     /// \brief Update rate [30].
     public: double updateRate;
-
-    /// \brief Set to true to show the marker [false].
-    public: bool showWavePatch;
-
-    /// \brief Number of grid points to show along each axis [4 4].
-    public: Vector2 wavePatchSize;
 
     /// \brief Previous update time.
     public: common::Time prevTime;
@@ -157,12 +147,6 @@ namespace asv
     // Parameters
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
     this->data->updateRate = Utilities::SdfParamDouble(*_sdf, "update_rate", 30.0);
-    if (_sdf->HasElement("markers"))
-    {
-      sdf::ElementPtr sdfMarkers = _sdf->GetElement("markers");
-      this->data->showWavePatch = Utilities::SdfParamBool(*sdfMarkers, "wave_patch", false);
-      this->data->wavePatchSize = Utilities::SdfParamVector2(*sdfMarkers, "wave_patch_size", Vector2(4, 4));
-    }
 
     // Wavefield
     this->data->wavefieldEntity.reset(new ::asv::WavefieldEntity(this->data->model));
@@ -180,25 +164,16 @@ namespace asv
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
     // gzmsg << "Init WavefieldModelPlugin [thread: " << threadId << "]" << std::endl;
-
-    if (this->data->showWavePatch)
-      this->InitMarker();
   }
 
   void WavefieldModelPlugin::Fini()
   {
-    if (this->data->showWavePatch)
-      this->FiniMarker();
   }
 
   void WavefieldModelPlugin::Reset()
   {
     // Reset time
     this->data->prevTime = this->data->world->SimTime(); 
-
-    // Reset markers
-    if (this->data->showWavePatch)
-      this->ResetMarker();
   }
 
   void WavefieldModelPlugin::OnUpdate()
@@ -220,8 +195,6 @@ namespace asv
 
       // Wavefield
       this->data->wavefieldEntity->Update();
-      if (this->data->showWavePatch)
-        this->UpdateMarker();
     }
   }
 
@@ -232,7 +205,7 @@ namespace asv
     
     if (_msg->request() == "wave_param")
     {
-      auto waveParams = this->data->wavefieldEntity->GetWavefield()->GetParameters();
+      auto waveParams = this->data->wavefieldEntity->GetWaveParams();
 
       msgs::Param_V waveMsg;
       waveParams->FillMsg(waveMsg);
@@ -254,7 +227,7 @@ namespace asv
     GZ_ASSERT(_msg != nullptr, "Wave message must not be null");
 
     // Update wave params 
-    auto constWaveParams = this->data->wavefieldEntity->GetWavefield()->GetParameters();
+    auto constWaveParams = this->data->wavefieldEntity->GetWaveParams();
     GZ_ASSERT(constWaveParams != nullptr, "WaveParameters must not be null");
     auto& waveParams = const_cast<WaveParameters&>(*constWaveParams);
     waveParams.SetFromMsg(*_msg);
@@ -264,81 +237,4 @@ namespace asv
       << this->data->waveSub->GetTopic() << "]" << std::endl;
     waveParams.DebugPrint();
   }
-
-  void WavefieldModelPlugin::InitMarker()
-  {
-    auto& wavefieldMsg = this->data->wavefieldMsg;
-
-    int markerId = 0;
-    wavefieldMsg.set_ns("wave");
-    wavefieldMsg.set_id(markerId++);
-    wavefieldMsg.set_action(ignition::msgs::Marker::ADD_MODIFY);
-    wavefieldMsg.set_type(ignition::msgs::Marker::TRIANGLE_LIST);
-    std::string waveMat("Gazebo/RedTransparent");
-    ignition::msgs::Material *waveMatMsg = wavefieldMsg.mutable_material();
-    GZ_ASSERT(waveMatMsg != nullptr, "Invalid Material pointer from wavefieldMsg");
-    waveMatMsg->mutable_script()->set_name(waveMat);
-  }
-
-  void WavefieldModelPlugin::FiniMarker()
-  {
-    std::string topicName("/marker");
-
-    auto& ignNode = this->data->ignNode;
-    auto& wavefieldMsg = this->data->wavefieldMsg;
-
-    wavefieldMsg.set_action(ignition::msgs::Marker::DELETE_MARKER);
-    ignNode.Request(topicName, wavefieldMsg);
-  }
-
-  void WavefieldModelPlugin::ResetMarker()
-  {
-    std::string topicName("/marker");
-
-    auto& ignNode = this->data->ignNode;
-    auto& wavefieldMsg = this->data->wavefieldMsg;
- 
-    wavefieldMsg.mutable_point()->Clear();
-    ignition::msgs::Set(wavefieldMsg.add_point(), ignition::math::Vector3d::Zero);
-    ignition::msgs::Set(wavefieldMsg.add_point(), ignition::math::Vector3d::Zero);
-    ignition::msgs::Set(wavefieldMsg.add_point(), ignition::math::Vector3d::Zero);
-    ignNode.Request(topicName, wavefieldMsg);
-  }
-
-  void WavefieldModelPlugin::UpdateMarker()
-  {
-    std::string topicName("/marker");
-
-    auto grid = this->data->wavefieldEntity->GetWavefield()->GetGrid();
-    auto& wavefieldMsg = this->data->wavefieldMsg;
-    auto& ignNode = this->data->ignNode;
- 
-    // Determine marker extents and set bound using grid dimensions.
-    int xext = static_cast<int>(this->data->wavePatchSize[0])/2;
-    int xmid = grid->GetCellCount()[0]/2;
-    int xbeg = std::max(0, xmid-xext);
-    int xend = std::min(static_cast<int>(grid->GetCellCount()[0]), xmid+xext);
-
-    int yext = static_cast<int>(this->data->wavePatchSize[1])/2;
-    int ymid = grid->GetCellCount()[1]/2;
-    int ybeg = std::max(0, ymid-yext);
-    int yend = std::min(static_cast<int>(grid->GetCellCount()[1]), ymid+yext);
-
-    wavefieldMsg.mutable_point()->Clear();
-    for (int ix=xbeg; ix<xend; ++ix)
-    {
-      for (int iy=ybeg; iy<yend; ++iy)
-      {
-        for (int k=0; k<2; ++k)
-        {
-          Triangle tri(grid->GetTriangle(ix, iy, k));
-          ignition::msgs::Set(wavefieldMsg.add_point(), ToIgn(tri[0]));
-          ignition::msgs::Set(wavefieldMsg.add_point(), ToIgn(tri[1]));
-          ignition::msgs::Set(wavefieldMsg.add_point(), ToIgn(tri[2]));
-        }
-      }
-    }
-    ignNode.Request(topicName, wavefieldMsg);
-  }
-
 } // namespace gazebo

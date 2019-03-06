@@ -17,7 +17,6 @@
 
 #include "asv_wave_sim_gazebo_plugins/Convert.hh"
 #include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
-#include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 

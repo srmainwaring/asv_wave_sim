@@ -38,10 +38,6 @@
         <period>8.0</period>
         <direction>1 1</direction>
       </wave>
-      <markers>
-        <wave_patch>false</wave_patch>
-        <wave_patch_size>4 4</wave_patch_size>
-      </markers>
     </plugin>
 
     <link name="ocean_waves_link">

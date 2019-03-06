@@ -27,7 +27,6 @@ include(${CGAL_USE_FILE})
 find_package(catkin REQUIRED COMPONENTS gazebo_ros)
 find_package(gazebo REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(TBB REQUIRED)
 
 ############################################################################### 
 # Catkin...
@@ -54,7 +53,6 @@ include_directories(
   ${IGNITION-COMMON_INCLUDE_DIRS}
   ${IGNITION-MATHS_INCLUDE_DIRS}
   ${IGNITION-MSGS_INCLUDE_DIRS}
-  ${TBB_INCLUDE_DIRS}
   )
 
 link_directories(
@@ -62,7 +60,6 @@ link_directories(
   ${IGNITION-COMMON_LIBRARY_DIRS}
   ${IGNITION-MATHS_LIBRARY_DIRS}
   ${IGNITION-MSGS_LIBRARY_DIRS}
-  ${TBB_LIBRARY_DIRS}
   )
 
 ############################################################################### 
@@ -71,12 +68,9 @@ link_directories(
 # Hydrodynamics
 add_library(Hydrodynamics
   SHARED
-    src/Algorithm.cc
     src/Convert.cc
     src/Gazebo.cc
     src/Geometry.cc
-    src/Grid.cc
-    src/MeshTools.cc
     src/PhysicalConstants.cc
     src/Physics.cc
     src/Utilities.cc
@@ -97,23 +91,6 @@ list(APPEND ASV_WAVE_GAZEBO_LIBRARIES_LIST Hydrodynamics)
 
 ############################################################################### 
 # Plugins...
-
-# HydrodynamicsPlugin
-add_library(HydrodynamicsPlugin
-  SHARED
-    src/HydrodynamicsPlugin.cc
-)
-
-target_link_libraries(HydrodynamicsPlugin
-  ${Boost_LIBRARIES}
-  ${catkin_LIBRARIES}
-  ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-target_compile_options(HydrodynamicsPlugin PRIVATE "-Wno-unknown-pragmas")
-
-list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST HydrodynamicsPlugin)
 
 # WavefieldModelPlugin
 add_library(WavefieldModelPlugin
@@ -160,73 +137,6 @@ link_directories(
   ${GAZEBO_LIBRARY_DIRS}
 )
 
-add_executable(TestRunner
-  src/TestRunner.cc
-  src/CGAL_TEST.cc
-  src/MeshTools_TEST.cc
-)
-
-target_link_libraries(TestRunner  
-  ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
-  ${CGAL_LIBRARIES}
-  ${CGAL_3RD_PARTY_LIBRARIES}
-  ${TBB_LIBRARIES}
-)
-
-target_compile_options(TestRunner PRIVATE "-Wno-unknown-pragmas")
-
-list(APPEND ASV_WAVE_GAZEBO_EXECUTABLES_LIST TestRunner)
-
-add_executable(GzTestRunner
-  src/GzTestRunner.cc
-  src/GzPhysics_TEST.cc
-)
-
-target_link_libraries(GzTestRunner  
-  ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
-  pthread
-)
-
-target_compile_options(GzTestRunner PRIVATE "-Wno-unknown-pragmas")
-
-list(APPEND ASV_WAVE_GAZEBO_EXECUTABLES_LIST GzTestRunner)
-
-add_executable(HydrodynamicsMsgPublisher
-  src/HydrodynamicsMsgPublisher.cc
-)
-
-target_link_libraries(HydrodynamicsMsgPublisher  
-  ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-target_compile_options(HydrodynamicsMsgPublisher PRIVATE "-Wno-unknown-pragmas")
-
-add_dependencies(HydrodynamicsMsgPublisher
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-list(APPEND ASV_WAVE_GAZEBO_EXECUTABLES_LIST HydrodynamicsMsgPublisher)
-
-add_executable(HydrodynamicsMsgSubscriber
-  src/HydrodynamicsMsgSubscriber.cc
-)
-
-target_link_libraries(HydrodynamicsMsgSubscriber  
-  ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-target_compile_options(HydrodynamicsMsgSubscriber PRIVATE "-Wno-unknown-pragmas")
-
-add_dependencies(HydrodynamicsMsgSubscriber
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-list(APPEND ASV_WAVE_GAZEBO_EXECUTABLES_LIST HydrodynamicsMsgSubscriber)
-
 add_executable(WaveMsgPublisher
   src/WaveMsgPublisher.cc
 )
@@ -268,17 +178,9 @@ list(APPEND ASV_WAVE_GAZEBO_EXECUTABLES_LIST WaveMsgSubscriber)
 
 if(CATKIN_ENABLE_TESTING)
 
-  catkin_add_gtest(UNIT_Algorithm_TEST src/Algorithm_TEST.cc)
-  target_link_libraries(UNIT_Algorithm_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
-  target_compile_options(UNIT_Algorithm_TEST PRIVATE "-Wno-unknown-pragmas")
-
   catkin_add_gtest(UNIT_Geometry_TEST src/Geometry_TEST.cc)
   target_link_libraries(UNIT_Geometry_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Geometry_TEST PRIVATE "-Wno-unknown-pragmas")
-
-  catkin_add_gtest(UNIT_Grid_TEST src/Grid_TEST.cc)
-  target_link_libraries(UNIT_Grid_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
-  target_compile_options(UNIT_Grid_TEST PRIVATE "-Wno-unknown-pragmas")
 
   catkin_add_gtest(UNIT_Physics_TEST src/Physics_TEST.cc)
   target_link_libraries(UNIT_Physics_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})

@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 
 #include <Eigen/Dense>
@@ -21,7 +20,6 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
-#include <memory>
 #include <string>
 
 using namespace asv;

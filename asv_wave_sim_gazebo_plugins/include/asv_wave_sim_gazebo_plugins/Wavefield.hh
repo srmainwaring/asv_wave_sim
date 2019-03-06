@@ -32,10 +32,6 @@
 
 namespace gazebo
 {
-  // namespace common
-  // {
-  //   class Mesh; 
-  // }
   namespace msgs
   {
     class Param_V;
@@ -49,7 +45,6 @@ namespace sdf
 
 namespace asv
 {
-  class Grid;
 
 ///////////////////////////////////////////////////////////////////////////////
 // WaveParameters
@@ -188,119 +183,11 @@ namespace asv
   };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Wavefield
-
-  /// \internal
-  /// \brief Class to hold private data for Wavefield.
-  class WavefieldPrivate;
-  
-  /// \brief A class to manage a wave field.
-  class Wavefield
-  {
-    /// Destructor.
-    public: ~Wavefield();
-
-    /// Constructor.
-    ///
-    /// \param[in] _name    The name for the wave field mesh.
-    public: Wavefield(const std::string& _name);
-
-    /// Constructor.
-    ///
-    /// \param[in] _name      The name for the wave field mesh.
-    /// \param[in] _size      A two component array defining the size of the wavefield [m].
-    /// \param[in] _cellCount A two component array defining the number of cells in each direction.
-    public: Wavefield(
-      const std::string& _name,
-      const std::array<double, 2>& _size,
-      const std::array<size_t, 2>& _cellCount);
-
-    /// \brief Access the wave field mesh.
-    public: std::shared_ptr<const Mesh> GetMesh() const;
-
-    /// \brief Access the wave field grid.
-    public: std::shared_ptr<const Grid> GetGrid() const;
-
-    /// \brief Access the wave field mesh as a Gazebo Mesh.
-    // public: std::shared_ptr<const gazebo::common::Mesh> GetGzMesh() const;
-
-    /// \brief Get the wave parameters.
-    public: std::shared_ptr<const WaveParameters> GetParameters() const;
-
-    /// \brief Set the wave parameters.
-    ///
-    /// \param[in] _params    The new wave parameters.
-    public: void SetParameters(std::shared_ptr<WaveParameters> _params) const;
-
-    /// \brief Update (recalculate) the wave field for the given time.
-    ///
-    /// \param[in] _time    The time parameter for the wave evolution.
-    public: void Update(double _time);
-
-    /// internal
-    /// \brief Update (recalculate) a Gerstner wave field for the given time.
-    ///
-    /// \param[in] _time    The time parameter for the wave evolution.
-    private: void UpdateGerstnerWave(double _time);
-
-    /// internal
-    /// \brief Initialise the Gazebo version of the wave field mesh.
-    // private: void InitGzMesh();
-
-    /// internal
-    /// \brief Just-in-time update of the Gazebo version of the wave field mesh.
-    // private: void LazyUpdateGzMesh() const;
-
-    /// \internal
-    /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldPrivate> data;
-  };
-
-///////////////////////////////////////////////////////////////////////////////
 // WavefieldSampler
 
-  /// \internal
-  /// \brief Class to hold private data for WavefieldSampler.
-  class WavefieldSamplerPrivate;
-  
   /// \brief A class to manage sampling depths from a wave field.
   class WavefieldSampler
   {
-    /// \brief Destructor
-    public: ~WavefieldSampler();
-
-    /// \brief Constructor
-    ///
-    /// \param[in] _wavefield     The wave field being sampled.
-    /// \param[in] _waterPatch    The area of the wave field being sampled.
-    public: WavefieldSampler(
-      std::shared_ptr<const Wavefield> _wavefield,
-      std::shared_ptr<const Grid> _waterPatch);
-
-    /// \brief Get the water patch (i.e. the area of the wave field sampled).
-    public: std::shared_ptr<const Grid> GetWaterPatch() const;
-
-    /// \brief Translate the initial water patch using the Pose X Y coordinates.
-    ///
-    /// \param[in] _pose    The pose of the rigid body the water patch supports.
-    public: void ApplyPose(const ignition::math::Pose3d& _pose);
-
-    /// \brief Update the water patch 
-    public: void UpdatePatch();
-
-    /// \brief Compute the depth at a point.
-    ///
-    /// \param[in] _point       The point at which we want the depth
-    /// \return                 The depth 'h' at the point.
-    public: double ComputeDepth(const Point3& _point) const;
-
-    /// \brief Compute the depth at a point.
-    ///
-    /// \param[in] _patch       A water patch. 
-    /// \param[in] _point       The point at which we want the depth
-    /// \return                 The depth 'h' at the point.
-    public: static double ComputeDepth(const Grid& _patch, const Point3& _point);
-
     /// \brief Compute the depth at a point directly (no sampling or interpolation).
     ///
     /// This method solves for (x, y) that when input into the Gerstner wave function
@@ -319,10 +206,6 @@ namespace asv
       const WaveParameters& _waveParams,
       const Point3& _point,
       double time);
-
-    /// \internal
-    /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldSamplerPrivate> data;
   };
 
 ///////////////////////////////////////////////////////////////////////////////

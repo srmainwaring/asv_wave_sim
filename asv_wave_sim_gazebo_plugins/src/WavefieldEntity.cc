@@ -45,9 +45,6 @@ namespace asv
 
     /// \brief The wave parameters.
     public: std::shared_ptr<asv::WaveParameters> waveParams;
-
-    /// \brief The wavefield.
-    public: std::shared_ptr<Wavefield> wavefield;
   };
 
   WavefieldEntity::~WavefieldEntity()
@@ -93,33 +90,19 @@ namespace asv
     // Wavefield  
     std::string meshName = "_WAVEFIELD";
     std::string meshPath = "";
-
-    double simTime = this->GetWorld()->SimTime().Double();
-    this->data->wavefield.reset(new Wavefield(
-      meshName,
-      { this->data->size[0], this->data->size[1] },
-      { static_cast<size_t>(this->data->cellCount[0]), static_cast<size_t>(this->data->cellCount[1]) }
-    ));
-    this->data->wavefield->SetParameters(this->data->waveParams);
-    this->data->wavefield->Update(simTime);
   }
 
   void WavefieldEntity::Reset()
   {
-    double simTime = this->GetWorld()->SimTime().Double();
-    this->data->wavefield->Update(simTime);
   }
 
   void WavefieldEntity::Update()
   {
-    // Update the mesh
-    double simTime = this->GetWorld()->SimTime().Double();
-    this->data->wavefield->Update(simTime);
   }
 
-  std::shared_ptr<const Wavefield> WavefieldEntity::GetWavefield() const
+  std::shared_ptr<const WaveParameters> WavefieldEntity::GetWaveParams() const
   {
-    return this->data->wavefield;
+    return this->data->waveParams;
   }
 
   std::string WavefieldEntity::MakeName(const std::string& _parentName)
