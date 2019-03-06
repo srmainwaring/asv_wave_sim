@@ -204,7 +204,17 @@ namespace asv
 // WavefieldVisualPlugin
 
   WavefieldVisualPlugin::~WavefieldVisualPlugin()
-  {
+  { 
+    // Clean up.
+    this->data->waveParams.reset();
+
+    // Reset connections and transport.
+    this->data->connection.reset();
+    this->data->statsSub.reset();
+    this->data->waveSub.reset();
+    this->data->responseSub.reset();
+    this->data->requestPub.reset();
+    this->data->gzNode.reset();
   }
 
   WavefieldVisualPlugin::WavefieldVisualPlugin() :
@@ -225,7 +235,7 @@ namespace asv
     // gzmsg << "Load WavefieldVisualPlugin [thread: " << threadId << "]" << std::endl;
 
     // Capture visual and plugin SDF
-    GZ_ASSERT(_visual != nullptr, "Visual mus not be null");
+    GZ_ASSERT(_visual != nullptr, "Visual must not be null");
     GZ_ASSERT(_sdf != nullptr, "SDF Element must not be null");
 
     // Capture the visual and sdf.
