@@ -286,6 +286,16 @@ namespace asv
   /// for each link in a model.
   class HydrodynamicsLinkData
   {
+    /// \brief Destructor.
+    public: virtual ~HydrodynamicsLinkData()
+    {
+      for (auto&& ptr : this->hydrodynamics)
+        ptr.reset();
+      for (auto&& ptr : this->initLinkMeshes)
+        ptr.reset();
+      this->wavefieldSampler.reset();
+    }
+
     /// \brief A Link pointer.
     public: physics::LinkPtr link;
 
@@ -369,7 +379,17 @@ namespace asv
 
   HydrodynamicsPlugin::~HydrodynamicsPlugin()
   {
+    // Clean up.
     this->Fini();
+    for (auto&& ptr : this->data->hydroData)
+      ptr.reset();
+    this->data->hydroParams.reset();
+    this->data->wavefield.reset();
+
+    // Reset connections and transport.
+    this->data->updateConnection.reset();
+    this->data->hydroSub.reset();
+    this->data->gzNode->Fini();
   }
 
   HydrodynamicsPlugin::HydrodynamicsPlugin() : 

@@ -103,7 +103,11 @@ namespace asv
 
   WavefieldModelPlugin::~WavefieldModelPlugin()
   {
-    // Remove node from the topic manager.
+    // Clean up.
+    this->data->wavefieldEntity.reset();
+
+    // Reset connections and transport.
+    this->data->updateConnection.reset();
     this->data->requestSub.reset();
     this->data->waveSub.reset();
     this->data->responsePub.reset();
