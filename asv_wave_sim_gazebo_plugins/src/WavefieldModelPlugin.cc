@@ -14,8 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "asv_wave_sim_gazebo_plugins/WavefieldModelPlugin.hh"
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
-#include "asv_wave_sim_gazebo_plugins/Convert.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
@@ -29,8 +27,6 @@
 #include <gazebo/msgs/gz_string.pb.h>
 #include <gazebo/msgs/param.pb.h>
 #include <gazebo/msgs/param_v.pb.h>
-
-#include <ignition/math/Vector3.hh>
 
 #include <algorithm>
 #include <iostream>

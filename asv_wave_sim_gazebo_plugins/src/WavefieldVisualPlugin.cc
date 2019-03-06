@@ -14,8 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "asv_wave_sim_gazebo_plugins/WavefieldVisualPlugin.hh"
-
-#include "asv_wave_sim_gazebo_plugins/Convert.hh"
 #include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
@@ -31,6 +29,9 @@
 #include <gazebo/rendering/Visual.hh>
 #include <gazebo/transport/transport.hh>
 #include <gazebo/transport/Node.hh>
+
+#include <ignition/math/Vector2.hh>
+#include <ignition/math/Vector3.hh>
 
 #include <memory>
 #include <thread>
@@ -82,29 +83,29 @@ namespace asv
     }
   }
 
-  /// \brief Convert a CGAL Vector2 to an Ogre Vector2.
+  /// \brief Convert an ignition Vector2 to an Ogre Vector2.
   ///
-  /// \param[in] _v       A CGAL vector.
+  /// \param[in] _v       An ignition vector.
   /// \param[out] _vout   The Ogre vector to be populated.
-  void ToOgreVector2(const Vector2& _v, Ogre::Vector2& _vout)
+  void ToOgreVector2(const ignition::math::Vector2d& _v, Ogre::Vector2& _vout)
   {
-    _vout.x = _v.x();
-    _vout.y = _v.y();
+    _vout.x = _v.X();
+    _vout.y = _v.Y();
   }
 
-  /// \brief Convert a CGAL Vector3 to an Ogre Vector3.
+  /// \brief Convert an ignition Vector3 to an Ogre Vector3.
   ///
-  /// \param[in] _v       A CGAL vector.
+  /// \param[in] _v       An ignition vector.
   /// \param[out] _vout   The Ogre vector to be populated.
-  void ToOgreVector3(const Vector3& _v, Ogre::Vector3& _vout)
+  void ToOgreVector3(const ignition::math::Vector3d& _v, Ogre::Vector3& _vout)
   {
-    _vout.x = _v.x();
-    _vout.y = _v.y();
-    _vout.z = _v.z();
+    _vout.x = _v.X();
+    _vout.y = _v.Y();
+    _vout.z = _v.Z();
   }
 
   void ToOgreVector2(
-    const std::vector<Vector2>& _v,
+    const std::vector<ignition::math::Vector2d>& _v,
     Ogre::Vector2& _vout0,
     Ogre::Vector2& _vout1,
     Ogre::Vector2& _vout2
@@ -128,7 +129,7 @@ namespace asv
   }
   
   void ToOgreVector3(
-    const std::vector<Vector3>& _v,
+    const std::vector<ignition::math::Vector3d>& _v,
     Ogre::Vector3& _vout0,
     Ogre::Vector3& _vout1,
     Ogre::Vector3& _vout2

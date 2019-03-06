@@ -21,9 +21,8 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
 
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
-
-#include <ignition/math/Pose3.hh>
+#include <ignition/math/Vector2.hh>
+#include <ignition/math/Vector3.hh>
 
 #include <memory>
 
@@ -111,7 +110,7 @@ namespace asv
     public: double Wavenumber() const;
 
     /// \brief A two component vector specifiying the direction of the mean wave.
-    public: Vector2 Direction() const;
+    public: ignition::math::Vector2d Direction() const;
 
     /// \brief Set the number of wave components (3 max).
     ///
@@ -154,7 +153,7 @@ namespace asv
     /// \brief Set the mean wave direction.
     ///
     /// \param[in] _direction The direction parameter, a two component vector.
-    public: void SetDirection(const Vector2& _direction);
+    public: void SetDirection(const ignition::math::Vector2d& _direction);
 
     /// \brief Access the component angular frequencies.
     public: const std::vector<double>& AngularFrequency_V() const;
@@ -172,7 +171,7 @@ namespace asv
     public: const std::vector<double>& Wavenumber_V() const;
 
     /// \brief Access the component directions.
-    public: const std::vector<Vector2>& Direction_V() const;
+    public: const std::vector<ignition::math::Vector2d>& Direction_V() const;
 
     /// \brief Print a summary of the wave parameters to the gzmsg stream.
     public: void DebugPrint() const;
@@ -204,7 +203,7 @@ namespace asv
     /// \return                 The depth 'h' at the point.
     public: static double ComputeDepthDirectly(
       const WaveParameters& _waveParams,
-      const Point3& _point,
+      const ignition::math::Vector3d& _point,
       double time);
   };
 

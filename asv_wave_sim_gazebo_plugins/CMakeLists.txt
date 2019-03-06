@@ -8,20 +8,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ###############################################################################
-# CGAL and its components...
-
-find_package(CGAL REQUIRED COMPONENTS Core)
-
-if(NOT CGAL_FOUND)
-  message(STATUS "This project requires the CGAL library, and will not be compiled.")
-  return()  
-endif()
-
-# include helper file
-include(${CGAL_USE_FILE})
-# message("CGAL_USE_FILE: " ${CGAL_USE_FILE})
-
-###############################################################################
 # Other dependencies...
 
 find_package(catkin REQUIRED COMPONENTS gazebo_ros)
@@ -36,7 +22,6 @@ catkin_package(
     include
   LIBRARIES
     Hydrodynamics
-    HydrodynamicsPlugin
     WavefieldModelPlugin
     WavefieldVisualPlugin
   DEPENDS
@@ -68,7 +53,6 @@ link_directories(
 # Hydrodynamics
 add_library(Hydrodynamics
   SHARED
-    src/Convert.cc
     src/Gazebo.cc
     src/Geometry.cc
     src/PhysicalConstants.cc
@@ -82,7 +66,6 @@ target_link_libraries(Hydrodynamics
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
-  ${TBB_LIBRARIES}
 )
 
 target_compile_options(Hydrodynamics PRIVATE "-Wno-unknown-pragmas")

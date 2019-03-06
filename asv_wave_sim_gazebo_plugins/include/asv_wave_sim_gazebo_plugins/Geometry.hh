@@ -19,9 +19,8 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_GEOMETRY_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_GEOMETRY_HH_
 
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
-
-#include <array>
+#include <ignition/math/Vector2.hh>
+#include <ignition/math/Vector3.hh>
 
 namespace asv
 {
@@ -31,24 +30,17 @@ namespace asv
   /// \brief A collection of static methods concerning linear geometry.
   class Geometry
   {
-    /// \brief Calculate the point on a line from the origin passing through _p
-    /// such that the vector from the origin to returned point has unit length.
-    ///
-    /// \param[in] _p     A point.
-    /// \return           The point that normalises the vector from the origin to _p.
-    public: static Point3 Normalize(const Point3& _p);
-
     /// \brief Normalise a Vector2 (i.e. ensure it has unit length)
     ///
     /// \param[in] _v     The vector to normalise.
     /// \return           The normalized vector.
-    public: static Vector2 Normalize(const Vector2& _v);
+    public: static ignition::math::Vector2d Normalize(const ignition::math::Vector2d& _v);
 
     /// \brief Normalise a Vector3 (i.e. ensure it has unit length)
     ///
     /// \param[in] _v     The vector to normalise.
     /// \return           The normalized vector.
-    public: static Vector3 Normalize(const Vector3& _v);
+    public: static ignition::math::Vector3d Normalize(const ignition::math::Vector3d& _v);
 
     /// \brief Compute the (normalised) normal to the plane defined by a triangle.
     ///
@@ -56,10 +48,10 @@ namespace asv
     /// \param[in] _p1    Point at the second vertex.
     /// \param[in] _p2    Point at the third vertex.
     /// \return           The normal vector.
-    public: static Vector3 Normal(
-      const Point3& _v0,
-      const Point3& _v1,
-      const Point3& _v2
+    public: static ignition::math::Vector3d Normal(
+      const ignition::math::Vector3d& _v0,
+      const ignition::math::Vector3d& _v1,
+      const ignition::math::Vector3d& _v2
     );
   };
 

@@ -14,17 +14,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
-#include "asv_wave_sim_gazebo_plugins/Convert.hh"
 #include "asv_wave_sim_gazebo_plugins/Geometry.hh"
 #include "asv_wave_sim_gazebo_plugins/Physics.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
-
-#include <CGAL/Aff_transformation_3.h>
-#include <CGAL/number_utils.h>
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Timer.h>
 
 #include <Eigen/Dense>
 
@@ -36,8 +28,6 @@
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
-#include <tbb/tbb.h>
-
 #include <array>
 #include <iostream>
 #include <cmath>
@@ -45,8 +35,6 @@
 
 namespace asv 
 {
-  typedef CGAL::Aff_transformation_2<Kernel> TransformMatrix;
-
 ///////////////////////////////////////////////////////////////////////////////
 // Utilities
 
@@ -102,7 +90,7 @@ namespace asv
     public: double phase;
 
     /// \brief The mean wave direction.
-    public: Vector2 direction;
+    public: ignition::math::Vector2d direction;
 
     /// \brief The mean wave angular frequency (derived).    
     public: double angularFrequency;
@@ -129,7 +117,7 @@ namespace asv
     public: std::vector<double> wavenumbers;
 
     /// \brief The component wave dirctions (derived).
-    public: std::vector<Vector2> directions;
+    public: std::vector<ignition::math::Vector2d> directions;
 
     /// \brief Recalculate all derived quantities from inputs.
     public: void Recalculate()
@@ -173,11 +161,15 @@ namespace asv
         // Direction
         const double c = std::cos(n * this->angle);
         const double s = std::sin(n * this->angle);
-        const TransformMatrix T(
-          c, -s,
-          s,  c
+        // const TransformMatrix T(
+        //   c, -s,
+        //   s,  c
+        // );
+        // const ignition::math::Vector2d d = T(this->direction);
+        const ignition::math::Vector2d d(
+          c * this->direction.X() - s * this->direction.Y(),
+          s * this->direction.X() + c * this->direction.Y()
         );
-        const Vector2 d = T(this->direction);
         directions.push_back(d);
       }
     }
@@ -249,8 +241,8 @@ namespace asv
       auto nextParam = _msg.add_param();
       nextParam->set_name("direction");
       nextParam->mutable_value()->set_type(gazebo::msgs::Any::VECTOR3D);
-      nextParam->mutable_value()->mutable_vector3d_value()->set_x(direction.x());
-      nextParam->mutable_value()->mutable_vector3d_value()->set_y(direction.y());
+      nextParam->mutable_value()->mutable_vector3d_value()->set_x(direction.X());
+      nextParam->mutable_value()->mutable_vector3d_value()->set_y(direction.Y());
       nextParam->mutable_value()->mutable_vector3d_value()->set_z(0);
     }
   }
@@ -333,7 +325,7 @@ namespace asv
     return this->data->wavenumber;
   }    
 
-  Vector2 WaveParameters::Direction() const
+  ignition::math::Vector2d WaveParameters::Direction() const
   {
     return this->data->direction;
   }
@@ -380,7 +372,7 @@ namespace asv
     this->data->Recalculate();
   }
   
-  void WaveParameters::SetDirection(const Vector2& _direction)
+  void WaveParameters::SetDirection(const ignition::math::Vector2d& _direction)
   {
     this->data->direction = _direction;
     this->data->Recalculate();
@@ -411,7 +403,7 @@ namespace asv
     return this->data->wavenumbers;
   }
 
-  const std::vector<Vector2>& WaveParameters::Direction_V() const
+  const std::vector<ignition::math::Vector2d>& WaveParameters::Direction_V() const
   {
     return this->data->directions;
   }
@@ -438,7 +430,7 @@ namespace asv
 
   double WavefieldSampler::ComputeDepthDirectly(  
     const WaveParameters& _waveParams,
-    const Point3& _point,
+    const ignition::math::Vector3d& _point,
     double time
   )
   {
@@ -451,7 +443,7 @@ namespace asv
         const std::vector<double>& _omega,
         const std::vector<double>& _phi,
         const std::vector<double>& _q,
-        const std::vector<Vector2>& _dir) :
+        const std::vector<ignition::math::Vector2d>& _dir) :
         a(_a), k(_k), omega(_omega), phi(_phi), q(_q), dir(_dir) {}
 
       const std::vector<double>& a;
@@ -459,7 +451,7 @@ namespace asv
       const std::vector<double>& omega;
       const std::vector<double>& phi;
       const std::vector<double>& q;
-      const std::vector<Vector2>& dir;
+      const std::vector<ignition::math::Vector2d>& dir;
     };
 
     // Compute the target function and Jacobian. Also calculate pz,
@@ -476,8 +468,8 @@ namespace asv
       const size_t n = wp.a.size();
       for (auto&& i=0; i<n; ++i)
       {
-        const double dx = wp.dir[i].x();
-        const double dy = wp.dir[i].y();
+        const double dx = wp.dir[i].X();
+        const double dy = wp.dir[i].Y();
         const double q = wp.q[i];
         const double a = wp.a[i];
         const double k = wp.k[i];
@@ -537,9 +529,9 @@ namespace asv
     const double nmax = 30;
 
     // Use the target point as the initial guess (this is within sum{amplitudes} of the solution)
-    Eigen::Vector2d p2(_point.x(), _point.y());
+    Eigen::Vector2d p2(_point.X(), _point.Y());
     const double pz = solver(wave_fdf, p2, p2, time, wp, tol, nmax);
-    const double h = pz - _point.z();
+    const double h = pz - _point.Z();
     return h;
   }
 

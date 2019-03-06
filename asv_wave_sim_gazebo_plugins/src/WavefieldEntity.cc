@@ -14,12 +14,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
-#include "asv_wave_sim_gazebo_plugins/Convert.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
 #include <gazebo/common/Assert.hh>
 #include <gazebo/physics/physics.hh>
+
+#include <ignition/math/Vector2.hh>
 
 #include <iostream>
 #include <string>
@@ -38,10 +39,10 @@ namespace asv
   class WavefieldEntityPrivate
   {
     /// \brief The size of the wavefield. Default value is [1000 1000].
-    public: Vector2 size;
+    public: ignition::math::Vector2d size;
 
     /// \brief The number of grid cells in the wavefield. Default value is [50 50].
-    public: Vector2 cellCount;
+    public: ignition::math::Vector2d cellCount;
 
     /// \brief The wave parameters.
     public: std::shared_ptr<asv::WaveParameters> waveParams;
@@ -64,8 +65,8 @@ namespace asv
     Base::Load(_sdf);
 
     // Wavefield Parameters
-    this->data->size      = Utilities::SdfParamVector2(*_sdf, "size",       Vector2(1000, 1000));
-    this->data->cellCount = Utilities::SdfParamVector2(*_sdf, "cell_count", Vector2(50, 50));
+    this->data->size      = Utilities::SdfParamVector2(*_sdf, "size",       ignition::math::Vector2d(1000, 1000));
+    this->data->cellCount = Utilities::SdfParamVector2(*_sdf, "cell_count", ignition::math::Vector2d(50, 50));
 
     // Wave Parameters
     this->data->waveParams.reset(new WaveParameters());

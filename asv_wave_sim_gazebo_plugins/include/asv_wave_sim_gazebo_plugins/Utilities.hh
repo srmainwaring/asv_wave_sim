@@ -19,7 +19,8 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_UTILITIES_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_UTILITIES_HH_
 
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
+#include <ignition/math/Vector2.hh>
+#include <ignition/math/Vector3.hh>
 
 #include <string>
 
@@ -90,8 +91,8 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in SDF.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static Vector2 SdfParamVector2(sdf::Element& _sdf,
-      const std::string &_paramName, const Vector2 _defaultVal);
+    public: static ignition::math::Vector2d SdfParamVector2(sdf::Element& _sdf,
+      const std::string &_paramName, const ignition::math::Vector2d _defaultVal);
 
     /// \brief Extract a named Vector3 parameter from an SDF element.
     ///
@@ -99,8 +100,8 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in SDF.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static Vector3 SdfParamVector3(sdf::Element& _sdf,
-      const std::string &_paramName, const Vector3 _defaultVal);
+    public: static ignition::math::Vector3d SdfParamVector3(sdf::Element& _sdf,
+      const std::string &_paramName, const ignition::math::Vector3d _defaultVal);
 
     /// \brief Extract a named bool parameter from a Param_V message.
     ///
@@ -144,8 +145,8 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static Vector2 MsgParamVector2(const gazebo::msgs::Param_V& _msg,
-      const std::string &_paramName, const Vector2 _defaultVal);
+    public: static ignition::math::Vector2d MsgParamVector2(const gazebo::msgs::Param_V& _msg,
+      const std::string &_paramName, const ignition::math::Vector2d _defaultVal);
 
     /// \brief Extract a named Vector3 parameter from a Param_V message.
     ///
@@ -153,8 +154,8 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static Vector3 MsgParamVector3(const gazebo::msgs::Param_V& _msg,
-      const std::string &_paramName, const Vector3 _defaultVal);
+    public: static ignition::math::Vector3d MsgParamVector3(const gazebo::msgs::Param_V& _msg,
+      const std::string &_paramName, const ignition::math::Vector3d _defaultVal);
   };
 
 } // namespace asv

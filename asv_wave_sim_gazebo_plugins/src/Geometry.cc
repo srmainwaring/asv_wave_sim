@@ -15,54 +15,40 @@
 
 #include "asv_wave_sim_gazebo_plugins/Geometry.hh"
 
-#include <array>
-#include <functional>
-#include <iostream>
+#include <ignition/math/Vector2.hh>
+#include <ignition/math/Vector3.hh>
+
 #include <cmath>
-#include <limits>
-#include <string>
 
 namespace asv 
 {
-  Point3 Geometry::Normalize(const Point3& _p)
+  ignition::math::Vector2d Geometry::Normalize(const ignition::math::Vector2d& _v)
   {
-    if (_p == CGAL::ORIGIN)
-      return _p;
-    else
-    {
-      Vector3 v = _p - CGAL::ORIGIN;
-      double norm = std::sqrt(v.squared_length());
-      return Point3(_p.x()/norm, _p.y()/norm, _p.z()/norm);
-    }
-  }
-
-  Vector2 Geometry::Normalize(const Vector2& _v)
-  {
-    if (_v == CGAL::NULL_VECTOR)
+    if (_v == ignition::math::Vector2d::Zero)
       return _v;
     else
-      return _v/std::sqrt(_v.squared_length()); 
+      return _v/_v.Length(); 
   }
 
-  Vector3 Geometry::Normalize(const Vector3& _v)
+  ignition::math::Vector3d Geometry::Normalize(const ignition::math::Vector3d& _v)
   {
-    if (_v == CGAL::NULL_VECTOR)
+    if (_v == ignition::math::Vector3d::Zero)
       return _v;
     else
-      return _v/std::sqrt(_v.squared_length()); 
+      return _v/_v.Length(); 
   }
 
-  Vector3 Geometry::Normal(
-    const Point3& _p0,
-    const Point3& _p1,
-    const Point3& _p2
+  ignition::math::Vector3d Geometry::Normal(
+    const ignition::math::Vector3d& _p0,
+    const ignition::math::Vector3d& _p1,
+    const ignition::math::Vector3d& _p2
   )
   {
-    auto n = CGAL::normal(_p0, _p1, _p2);
-    if (n == CGAL::NULL_VECTOR)
+    auto n = ignition::math::Vector3d::Normal(_p0, _p1, _p2);
+    if (n == ignition::math::Vector3d::Zero)
       return n;
     else
-      return n/std::sqrt(n.squared_length()); 
+      return n/n.Length(); 
   }
   
 } // namespace asv
