@@ -19,22 +19,17 @@
   <model name="box">        
     <static>false</static>
 
-    <plugin name="hydrodynamics" filename="libHydrodynamicsPlugin.so">
-      <!-- Wave Model -->
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
       <wave_model>ocean_waves</wave_model>
-
-      <!-- Hydrodynamics -->
-      <damping_on>true</damping_on>
-      <viscous_drag_on>true</viscous_drag_on>
-      <pressure_drag_on>true</pressure_drag_on>
-
-      <!-- Markers -->
-      <markers>
-        <update_rate>30</update_rate>
-        <water_patch>false</water_patch>
-        <waterline>false</waterline>
-        <underwater_surface>false</underwater_surface>
-      </markers>
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <fluid_drag>5.0</fluid_drag>
+      <link>
+        <name>base_link</name>
+        <center_of_volume>0 0 0</center_of_volume>
+        <area>40.0</area>
+        <height>2.0</height>
+      </link>
     </plugin>
 
     <link name="base_link">
