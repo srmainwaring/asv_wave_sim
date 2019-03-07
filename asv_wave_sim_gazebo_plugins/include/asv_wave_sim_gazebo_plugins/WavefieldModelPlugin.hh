@@ -32,9 +32,9 @@ namespace asv
 ///////////////////////////////////////////////////////////////////////////////
 // WavefieldModelPlugin
 
-  /// \internal
-  /// \brief Class to hold private data for WavefieldModelPlugin.
+  // Forward declarations
   class WavefieldModelPluginPrivate;
+  class WaveParameters;
 
   /// \brief A Gazebo model plugin to simulate water waves.
   ///
@@ -127,6 +127,15 @@ namespace asv
 
     // Documentation inherited.
     public: void Reset();
+
+    /// \brief Retrive a pointer to the wavefield parameters from the Wavefield plugin.
+    ///
+    /// \param _world           A pointer to the world containing the wave field.
+    /// \param _waveModelName   The name of the wavefield model containing the wave field. 
+    /// \return A valid pointer to WaveParameters if found and nullptr if not.
+    public: static std::shared_ptr<const WaveParameters> GetWaveParams(
+      gazebo::physics::WorldPtr _world,
+      const std::string& _waveModelName);
 
     /// internal
     /// \brief Callback for World Update events.
