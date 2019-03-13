@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>wave_sim</name>
+  <version>0.1.3</version>
+  <description>
+    This package contains Gazebo plugins and models for simulating water waves.
+  </description>
+
+  <maintainer email="rhys.mainwaring@me.com">Rhys Mainwaring</maintainer>
+  <license>Apache 2.0</license>
+  <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>wave_gazebo</exec_depend>
+  <exec_depend>wave_gazebo_plugins</exec_depend>
+
+  <export>
+    <metapackage />
+  </export>
+</package>
