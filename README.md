@@ -1,6 +1,13 @@
-# Wave Simulator
+# Gazebo Wave Simulator
 
-This package contains plugins that support the simulation of waves in Gazebo.  
+
+This package contains plugins that support the simulation and visualisation
+of waves in Gazebo. It is a simplified version of the
+[full wave simulator](https://github.com/srmainwaring/asv_wave_sim/):
+it includes a trochoidal wave generator but excludes boat dynamics. It comprises
+a visual plugin for the Gazebo client that synchronises the rendered scene with
+the wave physics running in the server.
+This package is licensed under [Apache 2.0](LICENSE).
 
 ![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_rs750.jpg)
 
