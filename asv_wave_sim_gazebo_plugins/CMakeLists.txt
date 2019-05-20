@@ -28,6 +28,8 @@ find_package(catkin REQUIRED COMPONENTS gazebo_ros)
 find_package(gazebo REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB REQUIRED)
+find_package (OpenCL REQUIRED)
+find_package (clFFT REQUIRED)
 
 ############################################################################### 
 # Catkin...
@@ -55,7 +57,9 @@ include_directories(
   ${IGNITION-MATHS_INCLUDE_DIRS}
   ${IGNITION-MSGS_INCLUDE_DIRS}
   ${TBB_INCLUDE_DIRS}
-  )
+  ${OpenCL_INCLUDE_DIRS}
+  ${CLFFT_INCLUDE_DIRS}
+)
 
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
@@ -82,6 +86,9 @@ add_library(Hydrodynamics
     src/Utilities.cc
     src/Wavefield.cc
     src/WavefieldEntity.cc
+    src/WaveSimulation.cc
+    src/WaveSimulationOpenCL.cc
+    src/WaveSpectrum.cc
 )
 
 target_link_libraries(Hydrodynamics
@@ -89,6 +96,8 @@ target_link_libraries(Hydrodynamics
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${TBB_LIBRARIES}
+  ${OpenCL_LIBRARIES}
+  ${CLFFT_LIBRARIES}
 )
 
 target_compile_options(Hydrodynamics PRIVATE "-Wno-unknown-pragmas")
