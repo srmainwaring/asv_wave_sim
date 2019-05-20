@@ -28,6 +28,8 @@ find_package(catkin REQUIRED COMPONENTS gazebo_ros)
 find_package(gazebo REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB REQUIRED)
+find_package (OpenCL REQUIRED)
+find_package (clFFT REQUIRED)
 
 ###############################################################################
 # Find FFTW3 (double-precision) (GPL) as FFT library.
@@ -86,7 +88,6 @@ include_directories(
   ${IGNITION-MATHS_INCLUDE_DIRS}
   ${IGNITION-MSGS_INCLUDE_DIRS}
   ${TBB_INCLUDE_DIRS}
-  ${FFT_INCLUDE_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${CLFFT_INCLUDE_DIRS}
 )
@@ -118,13 +119,8 @@ add_library(Hydrodynamics
     src/Utilities.cc
     src/Wavefield.cc
     src/WavefieldEntity.cc
-    src/WavefieldSampler.cc
-    src/WaveParameters.cc
     src/WaveSimulation.cc
-    src/WaveSimulationFFTW.cc
     src/WaveSimulationOpenCL.cc
-    src/WaveSimulationSinusoidal.cc
-    src/WaveSimulationTrochoid.cc
     src/WaveSpectrum.cc
 )
 
@@ -133,7 +129,6 @@ target_link_libraries(Hydrodynamics
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${TBB_LIBRARIES}
-  ${FFT_LIBRARIES}
   ${OpenCL_LIBRARIES}
   ${CLFFT_LIBRARIES}
 )
