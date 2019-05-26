@@ -25,16 +25,14 @@ namespace asv
 
   class OceanVisualPrivate
   {
-    /// \brief The visuals to attach
-    public: rendering::VisualPtr aboveOceanVisual;
-    public: rendering::VisualPtr belowOceanVisual;
+    /// \brief The visual to attach
+    public: rendering::VisualPtr vis;
 
     /// \brief The visual plugin SDF.
     public: sdf::ElementPtr sdf;
 
     /// \brief Generated mesh name (duplicated in tile->mesh...)
-    public: std::string aboveOceanMeshName;
-    public: std::string belowOceanMeshName;
+    public: std::string meshName;
 
     /// \brief World stats.
     public: double simTime, realTime, pauseTime;
@@ -75,8 +73,6 @@ namespace asv
     rendering::Visual(_name, _parent),
     data(new OceanVisualPrivate)
   {
-    gzmsg << "Constructing OceanVisual..." << std::endl;
-
     rendering::Visual::SetType(VT_VISUAL);
   }
 
@@ -118,71 +114,33 @@ namespace asv
       this->data->connection = event::Events::ConnectPreRender(
           std::bind(&OceanVisual::OnUpdate, this));
 
-      // Shader visuals
-      std::string aboveOceanVisualName  = this->Name() + "_ABOVE_OCEAN";
-      std::string belowOceanVisualName  = this->Name() + "_BELOW_OCEAN";
+      // Shader visual
+      std::string visName  = this->Name() + "_OCEAN";
+      // this->data->meshName = this->Name() + "_OCEAN";
+      this->data->meshName = "OceanTileMesh";
 
-      // @TODO: pass name to OceanTile where it is created independently but must match.
-      this->data->aboveOceanMeshName = "AboveOceanTileMesh";
-      this->data->belowOceanMeshName = "BelowOceanTileMesh";
-
-      // @TODO Synchronise visual with physics...
-      int N = 128;
-      double L = 256.0;
-      double u = 5.0;
-
-      this->data->oceanTile.reset(new OceanTile(N, L));
-      this->data->oceanTile->SetWindVelocity(u, 0.0);
-      this->data->oceanTile->Create();
-      this->data->oceanTile->Update(0.0);
-
-      // Mesh Visual: Above
-      {
-        this->data->aboveOceanVisual.reset(new rendering::Visual(aboveOceanVisualName, shared_from_this()));
-        this->data->aboveOceanVisual->Load();
-        gazebo::rendering::AttachMesh(*this->data->aboveOceanVisual, this->data->aboveOceanMeshName);
-        this->data->aboveOceanVisual->SetPosition(this->Position());
-        this->data->aboveOceanVisual->SetType(rendering::Visual::VT_VISUAL);
-
-        // Set the material from the parent visual
-        auto materialName = this->GetMaterialName();
-        // std::string materialName("Gazebo/Green");
-        this->data->aboveOceanVisual->SetMaterial(materialName);
-      }
-
-      // Mesh Visual: Below
-      {
-        this->data->belowOceanVisual.reset(new rendering::Visual(belowOceanVisualName, shared_from_this()));
-        this->data->belowOceanVisual->Load();
-        gazebo::rendering::AttachMesh(*this->data->belowOceanVisual, this->data->belowOceanMeshName);
-        this->data->belowOceanVisual->SetPosition(this->Position());
-        this->data->belowOceanVisual->SetType(rendering::Visual::VT_VISUAL);
-
-        // Set the material from the parent visual
-        auto materialName = this->GetMaterialName();
-        // std::string materialName("Gazebo/Orange");
-        this->data->belowOceanVisual->SetMaterial(materialName);
-      }
-
-#if DEBUG
-      gzmsg << "AboveOceanVisual..." << std::endl;
-      gzmsg << "Name: "                 << this->data->aboveOceanVisual->Name() << std::endl;
-      gzmsg << "Id: "                   << this->data->aboveOceanVisual->GetId() << std::endl;
-      gzmsg << "MaterialName: "         << this->data->aboveOceanVisual->GetMaterialName() << std::endl;
-      gzmsg << "MeshName: "             << this->data->aboveOceanVisual->GetMeshName() << std::endl;
-      gzmsg << "ShaderType: "           << this->data->aboveOceanVisual->GetShaderType() << std::endl;
-      gzmsg << "AttachedObjectCount: "  << this->data->aboveOceanVisual->GetAttachedObjectCount() << std::endl;
-
-      gzmsg << "BelowOceanVisual..." << std::endl;
-      gzmsg << "Name: "                 << this->data->belowOceanVisual->Name() << std::endl;
-      gzmsg << "Id: "                   << this->data->belowOceanVisual->GetId() << std::endl;
-      gzmsg << "MaterialName: "         << this->data->belowOceanVisual->GetMaterialName() << std::endl;
-      gzmsg << "MeshName: "             << this->data->belowOceanVisual->GetMeshName() << std::endl;
-      gzmsg << "ShaderType: "           << this->data->belowOceanVisual->GetShaderType() << std::endl;
-      gzmsg << "AttachedObjectCount: "  << this->data->belowOceanVisual->GetAttachedObjectCount() << std::endl;
+#if 0
+      // Insert the mesh into OGRE (now in Tile)
+      // asv::InsertMesh(tile.mesh.release());
 #endif
+      this->data->oceanTile.reset(new OceanTile(256, 512.0));
+      this->data->oceanTile->setWindVelocity(25.0, 0.0);
+      this->data->oceanTile->create();
+      this->data->oceanTile->update(0.0);
 
-      this->SetVisibilityFlags(GZ_VISIBILITY_ALL);    
+      // Mesh Visual
+      this->data->vis.reset(new rendering::Visual(visName, shared_from_this()));
+      this->data->vis->Load();
+      gazebo::rendering::AttachMesh(*this->data->vis, this->data->meshName);
+      this->data->vis->SetPosition(this->Position());
+      this->data->vis->SetType(rendering::Visual::VT_VISUAL);
+
+      // Set the material from the parent visual
+      auto materialName = this->GetMaterialName();
+      this->data->vis->SetMaterial(materialName);
+      // this->data->vis->SetMaterial("Gazebo/BlueTransparent");
+      this->SetVisibilityFlags(GZ_VISIBILITY_GUI);
+    
       this->data->isInitialised = true;
     }
 
@@ -217,7 +175,14 @@ namespace asv
     // double time = std::fmod(this->data->simTime, _cycleTime);
     // gzmsg << "Time: " << time << std::endl;
 
-    this->data->oceanTile->Update(time);
+#if 0
+    // Set shader uniforms
+    std::string shaderType = "vertex";
+    this->data->vis->SetMaterialShaderParam(
+      "time", shaderType, std::to_string(time));
+#endif
+
+    this->data->oceanTile->update(time);
 
     // gzmsg << "Done updating OceanVisual." << std::endl;
   }

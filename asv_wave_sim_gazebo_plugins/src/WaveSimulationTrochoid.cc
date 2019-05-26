@@ -17,7 +17,6 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
 #include <vector>
 
@@ -60,12 +59,12 @@ namespace asv
 
     private: void ComputeCurrentAmplitudes(double _time);
     
-    private: int N;
-    private: int N2;
-    private: int NOver2;
-    private: double L;
-    private: double time;
-    private: std::shared_ptr<WaveParameters> params;
+    public: int N;
+    public: int N2;
+    public: int NOver2;
+    public: double L;
+    public: double time;
+    public: std::shared_ptr<WaveParameters> params;
   };
 
   WaveSimulationTrochoidImpl::~WaveSimulationTrochoidImpl()
@@ -114,7 +113,6 @@ namespace asv
     }
 
     // Multiple wave update 
-    _heights.assign(this->N2, 0.0);
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -138,13 +136,13 @@ namespace asv
           // Multiple waves
           double ddotx = direction_i.x() * vx + direction_i.y() * vy;
           double angle  = ddotx * wavenumber_i - omega_i * time + phase_i;
-          // double s = std::sin(angle);
+          double s = std::sin(angle);
           double c = std::cos(angle);
-          // double sx = - direction_i.x() * q_i * amplitude_i * s;
-          // double sy = - direction_i.y() * q_i * amplitude_i * s;
+          double sx = - direction_i.x() * q_i * amplitude_i * s;
+          double sy = - direction_i.y() * q_i * amplitude_i * s;
           double h = amplitude_i * c;
 
-          _heights[idx] += h;
+          _heights[idx] = h;
         }
       }
     }
@@ -180,9 +178,7 @@ namespace asv
       _sy.resize(this->N2, 0.0);
     }
 
-    // Multiple wave update
-    _sx.assign(this->N2, 0.0);
-    _sy.assign(this->N2, 0.0);
+    // Multiple wave update 
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -207,13 +203,13 @@ namespace asv
           double ddotx = direction_i.x() * vx + direction_i.y() * vy;
           double angle  = ddotx * wavenumber_i - omega_i * time + phase_i;
           double s = std::sin(angle);
-          // double c = std::cos(angle);
+          double c = std::cos(angle);
           double sx = - direction_i.x() * q_i * amplitude_i * s;
           double sy = - direction_i.y() * q_i * amplitude_i * s;
-          // double h = amplitude_i * c;
+          double h = amplitude_i * c;
 
-          _sx[idx] += sx;
-          _sy[idx] += sy;
+          _sx[idx] = sx;
+          _sy[idx] = sy;
         }
       }
     }
@@ -278,22 +274,6 @@ namespace asv
     std::vector<double>& _dsxdy)
   {
     impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);      
-  }
-
-  void WaveSimulationTrochoid::ComputeDisplacementsAndDerivatives(
-    std::vector<double>& _h,
-    std::vector<double>& _sx,
-    std::vector<double>& _sy,
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy,
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
-  {
-    impl->ComputeHeights(_h);
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
-    impl->ComputeDisplacements(_sx, _sy);
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);    
   }
 
 }

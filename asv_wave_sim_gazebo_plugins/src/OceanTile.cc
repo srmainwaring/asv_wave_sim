@@ -1,12 +1,5 @@
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
 
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoidal.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
-
 // #include <Ogre.h>
 // #include <OgreRenderOperation.h>
 
@@ -17,78 +10,29 @@ namespace asv
     }
 
     OceanTile::OceanTile(
-    size_t _N,
-    double _L,
-    bool _hasVisuals) :
-        mHasVisuals(_hasVisuals),
-        mResolution(_N),
-        mRowLength(_N + 1),
-        mNumVertices((_N + 1) * (_N + 1)),
-        mNumFaces(2 * _N * _N),
-        mTileSize(_L),
-        mSpacing(_L / static_cast<double>(_N)),
-        // mWaveSim(_N, _L),
-        mHeights(_N * _N, 0.0),
-        mDhdx(_N * _N, 0.0),
-        mDhdy(_N * _N, 0.0),
-        mDisplacementsX(_N * _N, 0.0),
-        mDisplacementsY(_N * _N, 0.0),
-        mDxdx(_N * _N, 0.0),
-        mDydy(_N * _N, 0.0),
-        mDxdy(_N * _N, 0.0)
+    size_t resolution,
+    double tileSize) :
+        mResolution(resolution),
+        mRowLength(resolution + 1),
+        mNumVertices((resolution + 1) * (resolution + 1)),
+        mNumFaces(2 * resolution * resolution),
+        mTileSize(tileSize),
+        mSpacing(tileSize / static_cast<double>(resolution)),
+        mWaveSim(resolution, tileSize),
+        mHeights(resolution * resolution, 0.0),
+        mDhdx(resolution * resolution, 0.0),
+        mDhdy(resolution * resolution, 0.0),
+        mDisplacementsX(resolution * resolution, 0.0),
+        mDisplacementsY(resolution * resolution, 0.0),
+        mDxdx(resolution * resolution, 0.0),
+        mDydy(resolution * resolution, 0.0),
+        mDxdy(resolution * resolution, 0.0)
     {
-        // Different types of wave simulator are supported...
-        // 0 - WaveSimulationSinusoidal
-        // 1 - WaveSimulationTrochoid
-        // 2 - WaveSimulationFFTW
-        // 3 - WaveSimulationOpenCL
-        //
-        const int wave_sim_type = 2;
-        switch (wave_sim_type)
-        {
-            case 0:
-            {
-                // Simple
-                double amplitude = 1.0;
-                double period = 10.0;
-                std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
-                waveSim->SetParameters(amplitude, period);
-                mWaveSim = std::move(waveSim);
-                break;
-            }
-            case 1:
-            {
-                // Trochoid
-                std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
-                waveParams->SetNumber(3);
-                waveParams->SetAngle(0.6);
-                waveParams->SetScale(1.2);
-                waveParams->SetSteepness(1.0);
-                waveParams->SetAmplitude(1.0);
-                waveParams->SetPeriod(7.0);
-                waveParams->SetDirection(Vector2(1.0, 0.0));
-
-                mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
-                break;
-            }
-            case 2:
-            {
-                // FFTW
-                mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
-                break;
-            }
-            case 3:
-            {
-                // OpenCL
-                mWaveSim.reset(new WaveSimulationOpenCL(_N, _L));
-                break;
-            }
-        }
     }
 
-    void OceanTile::SetWindVelocity(double _ux, double _uy)
+    void OceanTile::setWindVelocity(double ux, double uy)
     {
-        mWaveSim->SetWindVelocity(_ux, _uy);
+        mWaveSim.SetWindVelocity(ux, uy);
     }
     
     // See:
@@ -101,7 +45,7 @@ namespace asv
     // (u, v) = (1, 1) at the bottom right 
     // The tangent space basis calculation is adjusted to 
     // conform with this convention.
-    void OceanTile::Create()
+    void OceanTile::create()
     {
         // auto&& logManager = Ogre::LogManager::getSingleton();
         // logManager.logMessage("Creating OceanTile...");
@@ -157,21 +101,12 @@ namespace asv
             }
         }
 
-        // Texture Coordinates
-        mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
-        mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
-        mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
-        
-        if (mHasVisuals) 
-        {
-          // ComputeNormals();
-          ComputeTangentSpace();
-          mAboveOceanSubMesh = CreateMesh(mAboveOceanMeshName, 0.0, false);
-          mBelowOceanSubMesh = CreateMesh(mBelowOceanMeshName, -0.05, true);
-        }
+        computeNormals();
+        computeTangentSpace();
+        createMesh("OceanTileMesh");
     }
 
-    void OceanTile::ComputeNormals()
+    void OceanTile::computeNormals()
     {
         // auto&& logManager = Ogre::LogManager::getSingleton();
         // logManager.logMessage("Computing normals...");
@@ -208,14 +143,15 @@ namespace asv
         // logManager.logMessage("Normals computed.");
     }
 
-    void OceanTile::ComputeTangentSpace()
+    void OceanTile::computeTangentSpace()
     {
         // auto&& logManager = Ogre::LogManager::getSingleton();
         // logManager.logMessage("Computing tangent space...");
 
-        ComputeTBN(mVertices, mTexCoords, mFaces, mTangents, mBitangents, mNormals);
+        computeTBN(mVertices, mTexCoords, mFaces, mTangents, mBitangents, mNormals);
 
-#if DEBUG
+        // @DEBUG
+        #if 0
         for (size_t i=0; i<std::min(static_cast<size_t>(20), mVertices.size()) ; ++i)
         {
             logManager.logMessage("V["
@@ -235,12 +171,12 @@ namespace asv
             + Ogre::StringConverter::toString(mNormals[i]));
             logManager.logMessage("");
         }
-#endif
+        #endif
 
         // logManager.logMessage("Tangent space computed.");
     }
 
-    // Compute the tangent space vectors (Tanget, Bitangent, Normal) for one face
+    // Compute the tangent space vectors (Tanget, Bitangent, Normal)
     //
     // Adapted from:
     // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
@@ -251,57 +187,56 @@ namespace asv
     // Bumpmapping with GLSL: http://fabiensanglard.net/bumpMapping/index.php
     // Lesson 8: Tangent Space: http://jerome.jouvie.free.fr/opengl-tutorials/Lesson8.php
     //
-    void OceanTile::ComputeTBN(
-        const Ogre::Vector3& _p0, 
-        const Ogre::Vector3& _p1, 
-        const Ogre::Vector3& _p2, 
-        const Ogre::Vector2& _uv0, 
-        const Ogre::Vector2& _uv1, 
-        const Ogre::Vector2& _uv2, 
-        Ogre::Vector3& _tangent, 
-        Ogre::Vector3& _bitangent, 
-        Ogre::Vector3& _normal)
+    void OceanTile::computeTBN(
+        const Ogre::Vector3& p0, 
+        const Ogre::Vector3& p1, 
+        const Ogre::Vector3& p2, 
+        const Ogre::Vector2& uv0, 
+        const Ogre::Vector2& uv1, 
+        const Ogre::Vector2& uv2, 
+        Ogre::Vector3& tangent, 
+        Ogre::Vector3& bitangent, 
+        Ogre::Vector3& normal)
     {
         // Correction to the TBN calculation when the v texture coordinate
         // is 0 at the top of a texture and 1 at the bottom. 
         double vsgn = -1.0;
-        auto edge1 = _p1 - _p0;
-        auto edge2 = _p2 - _p0;
-        auto duv1 = _uv1 - _uv0;
-        auto duv2 = _uv2 - _uv0;
+        auto edge1 = p1 - p0;
+        auto edge2 = p2 - p0;
+        auto duv1 = uv1 - uv0;
+        auto duv2 = uv2 - uv0;
 
         double f = 1.0f / (duv1.x * duv2.y - duv2.x * duv1.y) * vsgn;
 
-        _tangent.x = f * (duv2.y * edge1.x - duv1.y * edge2.x) * vsgn;
-        _tangent.y = f * (duv2.y * edge1.y - duv1.y * edge2.y) * vsgn;
-        _tangent.z = f * (duv2.y * edge1.z - duv1.y * edge2.z) * vsgn;
-        _tangent.normalise();
+        tangent.x = f * (duv2.y * edge1.x - duv1.y * edge2.x) * vsgn;
+        tangent.y = f * (duv2.y * edge1.y - duv1.y * edge2.y) * vsgn;
+        tangent.z = f * (duv2.y * edge1.z - duv1.y * edge2.z) * vsgn;
+        tangent.normalise();
 
-        _bitangent.x = f * (-duv2.x * edge1.x + duv1.x * edge2.x);
-        _bitangent.y = f * (-duv2.x * edge1.y + duv1.x * edge2.y);
-        _bitangent.z = f * (-duv2.x * edge1.z + duv1.x * edge2.z);
-        _bitangent.normalise();  
+        bitangent.x = f * (-duv2.x * edge1.x + duv1.x * edge2.x);
+        bitangent.y = f * (-duv2.x * edge1.y + duv1.x * edge2.y);
+        bitangent.z = f * (-duv2.x * edge1.z + duv1.x * edge2.z);
+        bitangent.normalise();  
 
-        _normal = _tangent.crossProduct(_bitangent);
-        _normal.normalise();  
+        normal = tangent.crossProduct(bitangent);
+        normal.normalise();  
     }
 
-    // Compute the tangent space for the entire mesh.
-    void OceanTile::ComputeTBN(
-        const std::vector<Ogre::Vector3>& _vertices,
-        const std::vector<Ogre::Vector2>& _texCoords,
-        const std::vector<ignition::math::Vector3i>& _faces, 
-        std::vector<Ogre::Vector3>& _tangents,
-        std::vector<Ogre::Vector3>& _bitangents,
-        std::vector<Ogre::Vector3>& _normals)
+    void OceanTile::computeTBN(
+        const std::vector<Ogre::Vector3>& vertices,
+        const std::vector<Ogre::Vector2>& texCoords,
+        const std::vector<ignition::math::Vector3i>& faces, 
+        std::vector<Ogre::Vector3>& tangents,
+        std::vector<Ogre::Vector3>& bitangents,
+        std::vector<Ogre::Vector3>& normals)
     {
         // 0. Resize and zero outputs.
-        _tangents.assign(_vertices.size(), Ogre::Vector3::ZERO);
-        _bitangents.assign(_vertices.size(), Ogre::Vector3::ZERO);
-        _normals.assign(_vertices.size(), Ogre::Vector3::ZERO);
+        tangents.assign(vertices.size(), Ogre::Vector3::ZERO);
+        bitangents.assign(vertices.size(), Ogre::Vector3::ZERO);
+        normals.assign(vertices.size(), Ogre::Vector3::ZERO);
 
         // 1. For each face calculate TBN and add to each vertex in the face.
-        for (auto&& face : _faces)
+        for (auto&& face : faces)
         {
             // Face vertex indices.
             auto idx0 = face[0];
@@ -309,189 +244,157 @@ namespace asv
             auto idx2 = face[2];
 
             // Face vertex points.
-            auto&& p0 = _vertices[idx0];    
-            auto&& p1 = _vertices[idx1];    
-            auto&& p2 = _vertices[idx2];    
+            auto&& p0 = vertices[idx0];    
+            auto&& p1 = vertices[idx1];    
+            auto&& p2 = vertices[idx2];    
 
             // Face vertex texture coordinates.
-            auto&& uv0 = _texCoords[idx0];
-            auto&& uv1 = _texCoords[idx1];
-            auto&& uv2 = _texCoords[idx2];
+            auto&& uv0 = texCoords[idx0];
+            auto&& uv1 = texCoords[idx1];
+            auto&& uv2 = texCoords[idx2];
 
             // Compute tangent space.
             Ogre::Vector3 T, B, N;
-            ComputeTBN(p0, p1, p2, uv0, uv1, uv2, T, B, N);
+            computeTBN(p0, p1, p2, uv0, uv1, uv2, T, B, N);
 
             // Assign to vertices.
             for (int i=0; i<3; ++i)
             {
                 auto idx = face[i];
-                _tangents[idx]   += T;
-                _bitangents[idx] += B;
-                _normals[idx]    += N;
+                tangents[idx]   += T;
+                bitangents[idx] += B;
+                normals[idx]    += N;
             }
         } 
 
         // 2. Normalise each vertex's tangent space basis.
-        for (size_t i=0; i<_vertices.size(); ++i)
+        for (size_t i=0; i<vertices.size(); ++i)
         {
-            _tangents[i].normalise();
-            _bitangents[i].normalise();
-            _normals[i].normalise();
+            tangents[i].normalise();
+            bitangents[i].normalise();
+            normals[i].normalise();
         }
     }
 
-    void OceanTile::Update(double _time)
+    void OceanTile::update(double time)
     {
-        UpdateVertices(_time);
-     
-        if (mHasVisuals)
-        {
-            // Uncomment to calculate the tangent space using finite differences
-            ComputeTangentSpace();
-            UpdateMesh(mAboveOceanSubMesh, 0.0, false);
-            UpdateMesh(mBelowOceanSubMesh, -0.05, false);
-        }
+        updateVertices(time);
+        // Uncomment to calculate the tangent space using finite differences
+        // computeTangentSpace();
+        updateMesh();
     }
 
-    void OceanTile::UpdateVertices(double _time)
-    {
-        mWaveSim->SetTime(_time);
-
-        if (mHasVisuals)
-        {
-            mWaveSim->ComputeDisplacementsAndDerivatives(
-                mHeights, mDisplacementsX, mDisplacementsY,
-                mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
-            }
-        else
-        {
-            mWaveSim->ComputeHeights(mHeights);
-            mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
-            // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
-            // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
-        }
-
-        const size_t N = mResolution;
-        const size_t NPlus1 = N + 1;
-        const size_t NMinus1 = N - 1;
-
-        for (size_t iy=0; iy<N; ++iy)
-        {
-            for (size_t ix=0; ix<N; ++ix)
-            {
-                // 1. Update vertices
-                size_t idx0 =  iy * NPlus1 + ix;
-                size_t idx1 =  iy * N + ix;
-
-                double h  = mHeights[idx1];
-                double sx = mDisplacementsX[idx1];
-                double sy = mDisplacementsY[idx1];
-
-                auto&& v0 = mVertices0[idx0];
-                auto&& v  = mVertices[idx0];
-                v.x = v0.x + sx;
-                v.y = v0.y + sy;
-                v.z = v0.z + h;
-
-                // 2. Update tangent and bitangent vectors (not normalised).
-                // @TODO Check sign for displacement terms
-                double dhdx  = mDhdx[idx1]; 
-                double dhdy  = mDhdy[idx1]; 
-                double dsxdx = mDxdx[idx1]; 
-                double dsydy = mDydy[idx1]; 
-                double dsxdy = mDxdy[idx1]; 
-
-                auto&& t = mTangents[idx0];
-                t.x = dsxdx + 1.0;
-                t.y = dsxdy;
-                t.z = dhdx;      
-                
-                auto&& b = mBitangents[idx0];
-                b.x = dsxdy;
-                b.y = dsydy + 1.0;
-                b.z = dhdy;       
-            }
-        }
-
-        // Set skirt values:
-        // Apply shifts from row / column adjoining skirt to the skirt vertices.
-        // Assume the tangent space vectors for the skirt match the adjoining row / column. 
-        for (size_t i=0; i<N; ++i)
-        {
-            // Top row
-            {
-                size_t idx0 =  NMinus1 * N + i;
-                size_t idx1 =  N * NPlus1 + i;
-
-                double h  = mHeights[idx0];
-                double sx = mDisplacementsX[idx0];
-                double sy = mDisplacementsY[idx0];
-
-                auto&& v0 = mVertices0[idx1];
-                auto&& v  = mVertices[idx1];
-                v.x = v0.x + sx;
-                v.y = v0.y + sy;
-                v.z = v0.z + h;
-
-                mTangents[idx1] = mTangents[idx0];
-                mBitangents[idx1] = mBitangents[idx0];
-            }
-            // Right column
-            {
-                size_t idx0 =  i * N + NMinus1;
-                size_t idx1 =  i * NPlus1 + N;
-
-                double h  = mHeights[idx0];
-                double sx = mDisplacementsX[idx0];
-                double sy = mDisplacementsY[idx0];
-
-                auto&& v0 = mVertices0[idx1];
-                auto&& v  = mVertices[idx1];
-                v.x = v0.x + sx;
-                v.y = v0.y + sy;
-                v.z = v0.z + h;
-
-                mTangents[idx1] = mTangents[idx0];
-                mBitangents[idx1] = mBitangents[idx0];
-            }
-        }
-        {
-            // Top right corner.
-            size_t idx0 =  NMinus1 * N + NMinus1;
-            size_t idx1 =  N * NPlus1 + N;
-
-            double h  = mHeights[idx0];
-            double sx = mDisplacementsX[idx0];
-            double sy = mDisplacementsY[idx0];
-
-            auto&& v0 = mVertices0[idx1];
-            auto&& v  = mVertices[idx1];
-            v.x = v0.x + sx;
-            v.y = v0.y + sy;
-            v.z = v0.z + h;
-            mTangents[idx1] = mTangents[idx0];
-            mBitangents[idx1] = mBitangents[idx0];
-        }
-    }
-
-    Ogre::SubMesh* OceanTile::CreateMesh(const Ogre::String &_name, double _offsetZ, bool _reverseOrientation)
+    void OceanTile::updateVertices(double time)
     {
         // Logging
-        gzmsg << "Creating OceanTile mesh..." << std::endl;
+        // auto& logManager = Ogre::LogManager::getSingleton();
+        // logManager.logMessage("Updating vertices...");
+
+        // logManager.logMessage("Set time");
+        mWaveSim.SetTime(time);
+
+        // logManager.logMessage("Compute heights");
+        mWaveSim.ComputeHeights(mHeights);
+        // for (auto&& h : mHeights)
+        // {
+        //   std::cout << h << std::endl;
+        // }
+        // std::cout << std::endl;
+
+        // logManager.logMessage("Compute displacements");
+        mWaveSim.ComputeDisplacements(mDisplacementsX, mDisplacementsY);
+
+        // @TODO_MOVE Set displacement scaling and check signs
+        double lambda = 0.9;
+
+        for (size_t iy=0; iy<mResolution; ++iy)
+        {
+            for (size_t ix=0; ix<mResolution; ++ix)
+            {
+                size_t idx0 =  iy * (mResolution + 1) + ix;
+                size_t idx1 =  iy * mResolution + ix;
+                auto&& v0 = mVertices0[idx0];
+                auto&& v  = mVertices[idx0];
+                v.x = v0.x - lambda * mDisplacementsX[idx1];
+                v.y = v0.y - lambda * mDisplacementsY[idx1];
+                v.z = v0.z + mHeights[idx1];
+            }
+        }
+
+        // logManager.logMessage("Compute height derivatives");
+        mWaveSim.ComputeHeightDerivatives(mDhdx, mDhdy);
+
+        // logManager.logMessage("Compute displacement derivatives");
+        mWaveSim.ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
+
+        // 0. Resize and zero outputs.
+        mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
+
+        // 1. Update tangent and bitangent vectors (not normalised).
+        // @TODO Check sign for displacement terms
+        for (size_t iy=0; iy<mResolution; ++iy)
+        {
+            for (size_t ix=0; ix<mResolution; ++ix)
+            {
+                size_t idx0 =  iy * (mResolution + 1) + ix;
+                size_t idx1 =  iy * mResolution + ix;
+                auto&& t = mTangents[idx0];
+                t.x = 1.0 - lambda * mDxdx[idx1];
+                t.y = 0.0 - lambda * mDxdy[idx1];
+                t.z = mDhdx[idx1];      
+                
+                auto&& b = mBitangents[idx0];
+                b.x = 0.0 - lambda * mDxdx[idx1];
+                b.y = 1.0 - lambda * mDydy[idx1];
+                b.z = mDhdy[idx1];       
+            }
+        }
+
+        // Set skirt values
+        // logManager.logMessage("Compute tile skirt vertices");
+        for (size_t ix=0; ix<=mResolution; ++ix)
+        {
+            size_t idx0 =  mResolution * (mResolution + 1) + ix;
+            size_t idx1 =  (mResolution - 1) * (mResolution + 1) + ix;
+            mVertices[idx0] = mVertices[idx1];
+            mTangents[idx0] = mTangents[idx1];
+            mBitangents[idx0] = mBitangents[idx1];
+        }
+        for (size_t iy=0; iy<=mResolution; ++iy)
+        {
+            size_t idx0 =  iy * (mResolution + 1) + mResolution;
+            size_t idx1 =  iy * (mResolution + 1) + (mResolution - 1);
+            mVertices[idx0] = mVertices[idx1];
+            mTangents[idx0] = mTangents[idx1];
+            mBitangents[idx0] = mBitangents[idx1];
+        }
+
+        // logManager.logMessage("Done updating vertices.");
+    }
+
+    void OceanTile::createMesh(const Ogre::String& name)
+    {
+        // Logging
+        auto& logManager = Ogre::LogManager::getSingleton();
+        logManager.logMessage("Creating OceanTile mesh...");
 
         // Create mesh
         // @NOTE  Cannot hold a reference to the mesh pointer in the class
         //        otherwise there will be a seg. fault on exit (ownership issue?).
-        Ogre::MeshPtr mMesh = Ogre::MeshManager::getSingleton().createManual(_name, "General");
+        Ogre::MeshPtr mMesh = Ogre::MeshManager::getSingleton().createManual(name, "General");
 
         // Create submesh
-        Ogre::SubMesh *subMesh = mMesh->createSubMesh();
+        mSubMesh = mMesh->createSubMesh();
 
         // Vertices
         const size_t nVertices = mVertices.size();
         const size_t posVertexBufferCount = (3 * 2) * nVertices;
+
+        #if USE_TEXTURE_COORDS
         const size_t texVertexBufferCount = (3 * 2 + 2) * nVertices;
+        #endif
 
         // Indices (orientation must be counter-clockwise for normals to be correct)
         const size_t nFaces = mFaces.size();
@@ -501,64 +404,74 @@ namespace asv
         auto& hardwareBufferManager = Ogre::HardwareBufferManager::getSingleton();
 
         // Create vertex data (also creates vertexDeclaration and vertexBufferBinding)
-        subMesh->vertexData = new Ogre::VertexData();
-        subMesh->vertexData->vertexCount = nVertices;
-        subMesh->vertexData->vertexStart = 0;
+        mSubMesh->vertexData = new Ogre::VertexData();
+        mSubMesh->vertexData->vertexCount = nVertices;
+        mSubMesh->vertexData->vertexStart = 0;
 
         // Create vertex declaration: positions, normals
         unsigned int posVertexBufferIndex = 0;
         size_t offset = 0;
-        subMesh->vertexData->vertexDeclaration->addElement(
+        mSubMesh->vertexData->vertexDeclaration->addElement(
             posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
 
-        subMesh->vertexData->vertexDeclaration->addElement(
+        mSubMesh->vertexData->vertexDeclaration->addElement(
             posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
 
+        #if USE_TEXTURE_COORDS
         // Create vertex declaration: texture coordinates, tangents, bitangents
         unsigned int texVertexBufferIndex = 1;
         offset = 0;
         // TexCoords: uv0
-        subMesh->vertexData->vertexDeclaration->addElement(
+        mSubMesh->vertexData->vertexDeclaration->addElement(
             texVertexBufferIndex, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2); 
 
         // Tangents: uv6
-        subMesh->vertexData->vertexDeclaration->addElement(
+        mSubMesh->vertexData->vertexDeclaration->addElement(
             texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 6);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
 
         // Bitangents: uv7
-        subMesh->vertexData->vertexDeclaration->addElement(
+        mSubMesh->vertexData->vertexDeclaration->addElement(
             texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 7);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
+        #endif
 
         // Allocate vertex buffer: positions
         auto posVertexBuffer =
             hardwareBufferManager.createVertexBuffer(
-                subMesh->vertexData->vertexDeclaration->getVertexSize(posVertexBufferIndex),
-                subMesh->vertexData->vertexCount,
+                mSubMesh->vertexData->vertexDeclaration->getVertexSize(posVertexBufferIndex),
+                mSubMesh->vertexData->vertexCount,
                 Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
                 true);
 
+        #if USE_TEXTURE_COORDS
         // Allocate vertex buffer: textures
         auto texVertexBuffer =
             hardwareBufferManager.createVertexBuffer(
-                subMesh->vertexData->vertexDeclaration->getVertexSize(texVertexBufferIndex),
-                subMesh->vertexData->vertexCount,
+                mSubMesh->vertexData->vertexDeclaration->getVertexSize(texVertexBufferIndex),
+                mSubMesh->vertexData->vertexCount,
                 Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
                 true);
+        #endif
 
         // Set vertex buffer bindings
-        subMesh->vertexData->vertexBufferBinding->setBinding(posVertexBufferIndex, posVertexBuffer);
-        subMesh->vertexData->vertexBufferBinding->setBinding(texVertexBufferIndex, texVertexBuffer);
+        mSubMesh->vertexData->vertexBufferBinding->setBinding(posVertexBufferIndex, posVertexBuffer);
+
+        #if USE_TEXTURE_COORDS
+        mSubMesh->vertexData->vertexBufferBinding->setBinding(texVertexBufferIndex, texVertexBuffer);
+        #endif
 
         // Lock vertex buffers for write
         float* gpuPosVertices = static_cast<float*>(
             posVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+
+        #if USE_TEXTURE_COORDS
         float* gpuTexVertices = static_cast<float*>(
             texVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+        #endif
 
         // Allocate index buffer of the requested number of vertices (ibufCount) 
         auto indexBuffer = 
@@ -573,22 +486,27 @@ namespace asv
             indexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));    
 
         // Set submesh index parameters
-        subMesh->useSharedVertices = false;
-        subMesh->indexData->indexBuffer = indexBuffer;
-        subMesh->indexData->indexCount = indexBufferCount;
-        subMesh->indexData->indexStart = 0;
+        mSubMesh->useSharedVertices = false;
+        mSubMesh->indexData->indexBuffer = indexBuffer;
+        mSubMesh->indexData->indexCount = indexBufferCount;
+        mSubMesh->indexData->indexStart = 0;
 
         // Copy position vertices to GPU
         for (size_t i=0; i<nVertices; ++i)
         {
             *gpuPosVertices++ = mVertices[i][0];
             *gpuPosVertices++ = mVertices[i][1];
-            *gpuPosVertices++ = mVertices[i][2] + _offsetZ;
+            *gpuPosVertices++ = mVertices[i][2];
 
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
             *gpuPosVertices++ = mNormals[i][2];
+        }
 
+        #if USE_TEXTURE_COORDS
+        // Copy texture vertices to GPU
+        for (size_t i=0; i<nVertices; ++i)
+        {
             // uv0
             *gpuTexVertices++ = mTexCoords[i][0];
             *gpuTexVertices++ = mTexCoords[i][1];
@@ -603,52 +521,45 @@ namespace asv
             *gpuTexVertices++ = mBitangents[i][1];
             *gpuTexVertices++ = mBitangents[i][2];
         }
+        #endif
 
         // Copy indices to GPU
         for (size_t i=0; i<nFaces; ++i)
         {
-            // Reverse orientation on faces
-            if (_reverseOrientation)
-            {
-              *gpuIndices++ = mFaces[i][0];
-              *gpuIndices++ = mFaces[i][2];
-              *gpuIndices++ = mFaces[i][1];
-            }
-            else
-            {
-              *gpuIndices++ = mFaces[i][0];
-              *gpuIndices++ = mFaces[i][1];
-              *gpuIndices++ = mFaces[i][2];
-            }
+            *gpuIndices++ = mFaces[i][0];
+            *gpuIndices++ = mFaces[i][1];
+            *gpuIndices++ = mFaces[i][2];
         }
 
         // Unlock buffers
         posVertexBuffer->unlock();
+
+        #if USE_TEXTURE_COORDS
         texVertexBuffer->unlock();
+        #endif
 
         indexBuffer->unlock();
 
         // Set bounds (box and sphere)
         mMesh->_setBounds(Ogre::AxisAlignedBox(
-            -mTileSize, -mTileSize, -mTileSize,
-            mTileSize,  mTileSize,  mTileSize));
+        -mTileSize, -mTileSize, -mTileSize,
+        mTileSize,  mTileSize,  mTileSize));
         mMesh->_setBoundingSphereRadius(Ogre::Math::Sqrt(3.0 * mTileSize * mTileSize));
 
         // Load mesh
         mMesh->load();
 
-        gzmsg << "OceanTile mesh created." << std::endl;
-        return subMesh;
+        logManager.logMessage("OceanTile mesh created.");
     }
 
-    void OceanTile::UpdateMesh(Ogre::SubMesh *_subMesh, double _offsetZ, bool _reverseOrientation)
+    void OceanTile::updateMesh()
     {
         // Logging
         // auto& logManager = Ogre::LogManager::getSingleton();
         // logManager.logMessage("Updating OceanTile mesh...");
 
         // Retrieve vertexData
-        auto vertexData = _subMesh->vertexData;
+        auto vertexData = mSubMesh->vertexData;
         
         // Get position vertex buffer and obtain lock for writing.
         auto posElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_POSITION);
@@ -657,22 +568,29 @@ namespace asv
             posVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
 
         // Get texcoord vertex buffer and obtain lock for writing.
+        #if USE_TEXTURE_COORDS
         auto texElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_TEXTURE_COORDINATES, 0);
         auto texVertexBuffer = vertexData->vertexBufferBinding->getBuffer(texElement->getSource());
         float* gpuTexVertices = static_cast<float*>(
             texVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+        #endif
 
         // Copy position vertices to GPU
         for (size_t i=0; i<mVertices.size(); ++i)
         {
             *gpuPosVertices++ = mVertices[i][0];
             *gpuPosVertices++ = mVertices[i][1];
-            *gpuPosVertices++ = mVertices[i][2] + _offsetZ;
+            *gpuPosVertices++ = mVertices[i][2];
 
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
             *gpuPosVertices++ = mNormals[i][2];
+        }
 
+        // Copy texture vertices to GPU
+        #if USE_TEXTURE_COORDS
+        for (size_t i=0; i<mVertices.size(); ++i)
+        {
             *gpuTexVertices++ = mTexCoords[i][0];
             *gpuTexVertices++ = mTexCoords[i][1];
 
@@ -684,10 +602,14 @@ namespace asv
             *gpuTexVertices++ = mBitangents[i][1];
             *gpuTexVertices++ = mBitangents[i][2];
         }
+        #endif
 
         // Unlock buffers
         posVertexBuffer->unlock();
+
+        #if USE_TEXTURE_COORDS
         texVertexBuffer->unlock();
+        #endif
 
         // Set bounds (box and sphere)
         // mMesh->_setBounds(Ogre::AxisAlignedBox(
@@ -701,14 +623,14 @@ namespace asv
         // logManager.logMessage("OceanTile mesh updated.");    
     }
 
-    void OceanTile::DebugPrintVertexBuffers(Ogre::SubMesh *_subMesh) const
+    void OceanTile::debugPrintVertexBuffers() const
     {
         // Logging
         auto& logManager = Ogre::LogManager::getSingleton();
         logManager.logMessage("DEBUG - READING VERTEX BUFFER...");    
-        auto vertexData = _subMesh->vertexData;
+        auto vertexData = mSubMesh->vertexData;
         logManager.logMessage("Use shared vertices: "
-            + Ogre::StringConverter::toString(_subMesh->useSharedVertices));    
+            + Ogre::StringConverter::toString(mSubMesh->useSharedVertices));    
         
         // VES_POSITION
         {
@@ -846,16 +768,6 @@ namespace asv
 
         logManager.logMessage("VERTEX BUFFER READ.");
     
-    }
-
-    const std::vector<Ogre::Vector3>& OceanTile::Vertices() const
-    {
-        return mVertices;
-    }
-
-    const std::vector<ignition::math::Vector3i>& OceanTile::Faces() const
-    {
-        return mFaces;        
     }
 
 }

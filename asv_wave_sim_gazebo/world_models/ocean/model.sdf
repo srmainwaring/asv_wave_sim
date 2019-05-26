@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="ocean">
+    <static>true</static>
+
+    <link name="base_link">
+      <visual name="base_visual">
+        <plugin name="ocean_plugin" filename="libOceanVisualPlugin.so">
+          <!-- <material>
+            <script>
+              <uri>model://ocean/materials/scripts/water.material</uri>
+              <name>Ocean</name>
+            </script>
+          </material> -->
+        </plugin>
+        <geometry>
+          <!-- <empty /> -->
+          <box>
+            <size>1 1 1</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://ocean/materials/scripts/water.material</uri>
+            <name>Water/Water</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
