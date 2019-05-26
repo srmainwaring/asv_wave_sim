@@ -88,6 +88,7 @@ add_library(Hydrodynamics
     src/WavefieldEntity.cc
     src/WaveSimulation.cc
     src/WaveSimulationOpenCL.cc
+    src/WaveSimulationTrochoid.cc
     src/WaveSpectrum.cc
 )
 
@@ -157,6 +158,25 @@ target_link_libraries(WavefieldVisualPlugin
 target_compile_options(WavefieldVisualPlugin PRIVATE "-Wno-unknown-pragmas")
 
 list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST WavefieldVisualPlugin)
+
+# OceanVisualPlugin
+add_library(OceanVisualPlugin
+  SHARED
+    src/OceanTile.cc
+    src/OceanVisual.cc
+    src/OceanVisualPlugin.cc
+)
+
+target_link_libraries(OceanVisualPlugin
+  ${Boost_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+)
+
+target_compile_options(OceanVisualPlugin PRIVATE "-Wno-unknown-pragmas")
+
+list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST OceanVisualPlugin)
 
 ############################################################################### 
 # Executables...
@@ -296,6 +316,10 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(UNIT_Wavefield_TEST src/Wavefield_TEST.cc)
   target_link_libraries(UNIT_Wavefield_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Wavefield_TEST PRIVATE "-Wno-unknown-pragmas")
+
+  catkin_add_gtest(UNIT_WaveSimulation_TEST src/WaveSimulation_TEST.cc)
+  target_link_libraries(UNIT_WaveSimulation_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
+  target_compile_options(UNIT_WaveSimulation_TEST PRIVATE "-Wno-unknown-pragmas")
 
 endif()
 
