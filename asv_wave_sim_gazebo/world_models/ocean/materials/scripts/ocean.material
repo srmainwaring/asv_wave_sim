@@ -1,0 +1,111 @@
+// Copyright (c) 2016 The UUV Simulator Authors.
+// All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.s
+
+// Copyright (c) 2019 Rhys Mainwaring.
+//
+// Modified for use with FFT generated waves:
+// Remove inputs for trochoid waves.
+
+vertex_program WavesVS glsl
+{
+  source ../programs/waves.vert
+}
+
+fragment_program WavesFS glsl
+{
+  source ../programs/waves.frag
+}
+
+vertex_program FoamVS glsl
+{
+  source ../programs/foam.vert
+}
+
+fragment_program FoamFS glsl
+{
+  source ../programs/foam.frag
+}
+
+material Ocean
+{
+  technique GLSL
+  {
+    pass ocean_surface
+    {
+      scene_blend alpha_blend
+      
+      vertex_program_ref WavesVS
+      {
+        param_named_auto eyePos camera_position_object_space
+        param_named bumpScale float2 25 25
+        param_named bumpSpeed float2 0.01 0.01
+        param_named time float 1.0
+      }
+
+      fragment_program_ref WavesFS
+      {
+        param_named deepColor float4 0 0.05 0.2 1.0
+        param_named shallowColor float4 0 0.6 1 1.0
+        param_named fresnelPower float 5
+        param_named hdrMultiplier float 0.4
+        param_named bumpMap int 0
+        param_named cubeMap int 1
+      }
+
+      texture_unit
+      {
+        texture ../textures/ocean_normals.dds
+        tex_coord_set 0
+        scale 0.1 0.1
+        filtering linear linear linear
+      }
+
+      texture_unit
+      {
+        cubic_texture ../textures/clouds.jpg combinedUVW
+        tex_address_mode clamp
+        tex_coord_set 1
+        filtering linear linear linear
+      }
+    }
+
+    pass ocean_foam
+    {
+      scene_blend add
+      
+      vertex_program_ref FoamVS
+      {
+        param_named_auto eyePos camera_position_object_space
+        param_named osgOcean_FoamScale float 0.5
+      }
+
+      fragment_program_ref FoamFS
+      {
+        param_named osgOcean_FresnelMul float 0.7
+        param_named osgOcean_FoamCapBottom float 2.2
+        param_named osgOcean_FoamCapTop float 3.0
+        param_named osgOcean_FoamMap int 0
+      }
+
+      texture_unit
+      {
+        texture ../textures/sea_foam.png
+        tex_coord_set 0
+        scale 1.0 1.0
+        filtering linear linear linear
+      }
+    }
+  }
+}

@@ -15,10 +15,15 @@
 
 #include "asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
 
-WaveSimulation::~WaveSimulation()
+namespace asv
 {
-}
 
-WaveSimulation::WaveSimulation()
-{
+  WaveSimulation::~WaveSimulation()
+  {
+  }
+
+  WaveSimulation::WaveSimulation()
+  {
+  }
+
 }

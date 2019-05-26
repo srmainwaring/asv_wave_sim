@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_OPENCL_HH_
-#define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_OPENCL_HH_
+#ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_TROCHOID_HH_
+#define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_TROCHOID_HH_
 
 #include "WaveSimulation.hh"
 
@@ -24,13 +24,17 @@
 namespace asv
 {
 
-  class WaveSimulationOpenCLImpl;
+  class WaveParameters;
+  class WaveSimulationTrochoidImpl;
 
-  class WaveSimulationOpenCL : public WaveSimulation
+  class WaveSimulationTrochoid : public WaveSimulation
   {
-    public: virtual ~WaveSimulationOpenCL();
+    public: virtual ~WaveSimulationTrochoid();
 
-    public: WaveSimulationOpenCL(int _N, double _L);
+    public: WaveSimulationTrochoid(
+      int _N,
+      double _L,
+      std::shared_ptr<WaveParameters> _params);
 
     public: virtual void SetWindVelocity(double _ux, double _uy) override;
 
@@ -52,9 +56,9 @@ namespace asv
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
-    private: std::unique_ptr<WaveSimulationOpenCLImpl> impl;
+    private: std::unique_ptr<WaveSimulationTrochoidImpl> impl;
   };
 
 }
 
-#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_OPENCL_HH_
+#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_TROCHOID_HH_
