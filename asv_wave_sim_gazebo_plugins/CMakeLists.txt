@@ -121,6 +121,7 @@ add_library(Hydrodynamics
     src/WavefieldEntity.cc
     src/WaveSimulation.cc
     src/WaveSimulationOpenCL.cc
+    src/WaveSimulationTrochoid.cc
     src/WaveSpectrum.cc
 )
 
@@ -194,6 +195,7 @@ list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST WavefieldVisualPlugin)
 # OceanVisualPlugin
 add_library(OceanVisualPlugin
   SHARED
+    src/OceanTile.cc
     src/OceanVisual.cc
     src/OceanVisualPlugin.cc
 )
@@ -205,7 +207,7 @@ target_link_libraries(OceanVisualPlugin
   ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
-target_compile_options(OceanVisualPlugin PRIVATE "-Wno-unknown-pragmas" "-Wno-deprecated-declarations")
+target_compile_options(OceanVisualPlugin PRIVATE "-Wno-unknown-pragmas")
 
 list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST OceanVisualPlugin)
 

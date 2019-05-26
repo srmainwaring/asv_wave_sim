@@ -21,33 +21,40 @@
 #include <memory>
 #include <vector>
 
-class WaveSimulationOpenCLImpl;
-
-class WaveSimulationOpenCL : public WaveSimulation
+namespace asv
 {
-  public: virtual ~WaveSimulationOpenCL();
 
-  public: WaveSimulationOpenCL(int N, double L);
+  class WaveSimulationOpenCLImpl;
 
-  public: virtual void SetTime(double _time) override;
+  class WaveSimulationOpenCL : public WaveSimulation
+  {
+    public: virtual ~WaveSimulationOpenCL();
 
-  public: virtual void ComputeHeights(
-    std::vector<double>& _h) override;
+    public: WaveSimulationOpenCL(int _N, double _L);
 
-  public: virtual void ComputeHeightsDerivatives(
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy) override;
+    public: virtual void SetWindVelocity(double _ux, double _uy) override;
 
-  public: virtual void ComputeDisplacements(
-    std::vector<double>& _sx,
-    std::vector<double>& _sy) override;
+    public: virtual void SetTime(double _time) override;
 
-  public: virtual void ComputeDisplacementDerivatives(
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy) override;
+    public: virtual void ComputeHeights(
+      std::vector<double>& _h) override;
 
-  private: std::unique_ptr<WaveSimulationOpenCLImpl> impl;
-};
+    public: virtual void ComputeHeightDerivatives(
+      std::vector<double>& _dhdx,
+      std::vector<double>& _dhdy) override;
+
+    public: virtual void ComputeDisplacements(
+      std::vector<double>& _sx,
+      std::vector<double>& _sy) override;
+
+    public: virtual void ComputeDisplacementDerivatives(
+      std::vector<double>& _dsxdx,
+      std::vector<double>& _dsydy,
+      std::vector<double>& _dsxdy) override;
+
+    private: std::unique_ptr<WaveSimulationOpenCLImpl> impl;
+  };
+
+}
 
 #endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_OPENCL_HH_

@@ -1,6 +1,5 @@
 #include "asv_wave_sim_gazebo_plugins/OceanVisual.hh"
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
-#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
 #include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
 
@@ -26,16 +25,14 @@ namespace asv
 
   class OceanVisualPrivate
   {
-    /// \brief The visuals to attach    
-    public: std::vector<rendering::VisualPtr> aboveOceanVisuals;
-    public: std::vector<rendering::VisualPtr> belowOceanVisuals;
+    /// \brief The visual to attach
+    public: rendering::VisualPtr vis;
 
     /// \brief The visual plugin SDF.
     public: sdf::ElementPtr sdf;
 
     /// \brief Generated mesh name (duplicated in tile->mesh...)
-    public: std::string aboveOceanMeshName;
-    public: std::string belowOceanMeshName;
+    public: std::string meshName;
 
     /// \brief World stats.
     public: double simTime, realTime, pauseTime;
@@ -56,9 +53,6 @@ namespace asv
     /// \brief Node used to establish communication with gzserver.
     public: transport::NodePtr node;
 
-    /// \brief Subscribe to gztopic "~/wave/wind".
-    public: transport::SubscriberPtr waveWindSub;
-
     /// \brief Subscribe to gztopic "~/world_stats".
     public: transport::SubscriberPtr statsSub;
   };
@@ -70,7 +64,6 @@ namespace asv
   {
     this->data->connection.reset();
     this->data->statsSub.reset();
-    this->data->waveWindSub.reset();
     this->data->node.reset();
   }
 
@@ -80,8 +73,6 @@ namespace asv
     rendering::Visual(_name, _parent),
     data(new OceanVisualPrivate)
   {
-    gzmsg << "Constructing OceanVisual..." << std::endl;
-
     rendering::Visual::SetType(VT_VISUAL);
   }
 
@@ -116,9 +107,6 @@ namespace asv
       // Publishers
 
       // Subscribers
-      this->data->waveWindSub = this->data->node->Subscribe(
-        "~/wave/wind", &OceanVisual::OnWaveWindMsg, this);
-
       this->data->statsSub = this->data->node->Subscribe(
         "~/world_stats", &OceanVisual::OnStatsMsg, this);
 
@@ -126,98 +114,33 @@ namespace asv
       this->data->connection = event::Events::ConnectPreRender(
           std::bind(&OceanVisual::OnUpdate, this));
 
-      // @TODO: pass name to OceanTile where it is created independently but must match.
-      this->data->aboveOceanMeshName = "AboveOceanTileMesh";
-      this->data->belowOceanMeshName = "BelowOceanTileMesh";
+      // Shader visual
+      std::string visName  = this->Name() + "_OCEAN";
+      // this->data->meshName = this->Name() + "_OCEAN";
+      this->data->meshName = "OceanTileMesh";
 
-      // @TODO Synchronise visual with physics...
-      const int N = 128;
-      const double L = 256.0;
-      const double u = 5.0;
-
-      this->data->oceanTile.reset(new OceanTile(N, L));
-      this->data->oceanTile->SetWindVelocity(u, 0.0);
-      this->data->oceanTile->Create();
-      this->data->oceanTile->Update(0.0);
-
-      // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
-      const int nX = 3;
-      const int nY = 3;
-
-      for (int iy=-nY; iy<=nY; ++iy)
-      {
-        for (int ix=-nX; ix<=nX; ++ix)
-        {
-          ignition::math::Vector3d position(
-            this->Position().X() + ix * L,
-            this->Position().Y() + iy * L,
-            this->Position().Z()
-          );
-
-          // Mesh Visual: Above
-          {
-            std::string visualName  = this->Name()
-              + "_ABOVE_OCEAN_" + std::to_string(ix) + "_" + std::to_string(iy);
-            rendering::VisualPtr visual(new rendering::Visual(visualName, shared_from_this()));
-            visual->Load();
-            gazebo::rendering::AttachMesh(*visual, this->data->aboveOceanMeshName);
-            visual->SetPosition(position);
-            visual->SetType(rendering::Visual::VT_VISUAL);
-
-            // Set the material from the parent visual
-            auto materialName = this->GetMaterialName();
-            // std::string materialName("Gazebo/Green");
-            visual->SetMaterial(materialName);
-
-            this->data->aboveOceanVisuals.push_back(visual);
-          }
-
-          // Mesh Visual: Below
-          {
-            std::string visualName  = this->Name()
-              + "_BELOW_OCEAN" + std::to_string(ix) + "_" + std::to_string(iy);
-            rendering::VisualPtr visual(new rendering::Visual(visualName, shared_from_this()));
-            visual->Load();
-            gazebo::rendering::AttachMesh(*visual, this->data->belowOceanMeshName);
-            visual->SetPosition(position);
-            visual->SetType(rendering::Visual::VT_VISUAL);
-
-            // Set the material from the parent visual
-            auto materialName = this->GetMaterialName();
-            // std::string materialName("Gazebo/Orange");
-            visual->SetMaterial(materialName);
-
-            this->data->belowOceanVisuals.push_back(visual);
-          }
-        }
-      }
-
-
-#if DEBUG
-      for (auto visual : this->data->aboveOceanVisuals)
-      {
-          gzmsg << "AboveOceanVisual..." << std::endl;
-          gzmsg << "Name: "                 << visual->Name() << std::endl;
-          gzmsg << "Id: "                   << visual->GetId() << std::endl;
-          gzmsg << "MaterialName: "         << visual->GetMaterialName() << std::endl;
-          gzmsg << "MeshName: "             << visual->GetMeshName() << std::endl;
-          gzmsg << "ShaderType: "           << visual->GetShaderType() << std::endl;
-          gzmsg << "AttachedObjectCount: "  << visual->GetAttachedObjectCount() << std::endl;
-      }
-      
-      for (auto visual : this->data->belowOceanVisuals)
-      {
-          gzmsg << "BelowOceanVisual..." << std::endl;
-          gzmsg << "Name: "                 << visual->Name() << std::endl;
-          gzmsg << "Id: "                   << visual->GetId() << std::endl;
-          gzmsg << "MaterialName: "         << visual->GetMaterialName() << std::endl;
-          gzmsg << "MeshName: "             << visual->GetMeshName() << std::endl;
-          gzmsg << "ShaderType: "           << visual->GetShaderType() << std::endl;
-          gzmsg << "AttachedObjectCount: "  << visual->GetAttachedObjectCount() << std::endl;
-      }
+#if 0
+      // Insert the mesh into OGRE (now in Tile)
+      // asv::InsertMesh(tile.mesh.release());
 #endif
+      this->data->oceanTile.reset(new OceanTile(256, 512.0));
+      this->data->oceanTile->setWindVelocity(25.0, 0.0);
+      this->data->oceanTile->create();
+      this->data->oceanTile->update(0.0);
 
-      this->SetVisibilityFlags(GZ_VISIBILITY_ALL);    
+      // Mesh Visual
+      this->data->vis.reset(new rendering::Visual(visName, shared_from_this()));
+      this->data->vis->Load();
+      gazebo::rendering::AttachMesh(*this->data->vis, this->data->meshName);
+      this->data->vis->SetPosition(this->Position());
+      this->data->vis->SetType(rendering::Visual::VT_VISUAL);
+
+      // Set the material from the parent visual
+      auto materialName = this->GetMaterialName();
+      this->data->vis->SetMaterial(materialName);
+      // this->data->vis->SetMaterial("Gazebo/BlueTransparent");
+      this->SetVisibilityFlags(GZ_VISIBILITY_GUI);
+    
       this->data->isInitialised = true;
     }
 
@@ -252,37 +175,16 @@ namespace asv
     // double time = std::fmod(this->data->simTime, _cycleTime);
     // gzmsg << "Time: " << time << std::endl;
 
-    this->data->oceanTile->Update(time);
+#if 0
+    // Set shader uniforms
+    std::string shaderType = "vertex";
+    this->data->vis->SetMaterialShaderParam(
+      "time", shaderType, std::to_string(time));
+#endif
+
+    this->data->oceanTile->update(time);
 
     // gzmsg << "Done updating OceanVisual." << std::endl;
-  }
-
-  void OceanVisual::OnWaveWindMsg(ConstParam_VPtr &_msg)
-  {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    GZ_ASSERT(_msg != nullptr, "Message must not be null");
-
-    // Get parameters from message
-    double wind_angle = 0.0;
-    double wind_speed = 0.0;
-    wind_angle = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
-    wind_speed = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
-
-    // Convert from polar to cartesian
-    double wind_vel_x = wind_speed * std::cos(wind_angle);
-    double wind_vel_y = wind_speed * std::sin(wind_angle);
-
-    // @DEBUG_INFO
-    gzmsg << "OceanVisual received message on topic ["
-      << this->data->waveWindSub->GetTopic() << "]" << std::endl;
-    gzmsg << "wind_angle: " << wind_angle << std::endl;
-    gzmsg << "wind_speed: " << wind_speed << std::endl;
-    gzmsg << "wind_vel_x: " << wind_vel_x << std::endl;
-    gzmsg << "wind_vel_y: " << wind_vel_y << std::endl;
-
-    // Update simulation
-    this->data->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
   }
 
   void OceanVisual::OnStatsMsg(ConstWorldStatisticsPtr &_msg)

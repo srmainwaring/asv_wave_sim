@@ -17,7 +17,7 @@
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_OCEAN_TILE_HH_
 
 #include <gazebo/rendering/Visual.hh>
-#include <gazebo/rendering/ogre_gazebo.h>
+#include "gazebo/rendering/ogre_gazebo.h"
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
@@ -28,13 +28,16 @@
 // #include <OgrePlane.h>
 // #include <OgreVector.h>
 
+#define USE_TEXTURE_COORDS 1
+
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
+
 #include <cmath>
 #include <memory>
 #include <iostream>
 
 namespace asv
 {
-  class WaveSimulation;
 
   class OceanTile
   {
@@ -42,15 +45,11 @@ namespace asv
 
     virtual ~OceanTile();
 
-    OceanTile(size_t _N, double _L, bool _hasVisuals=true);
+    OceanTile(
+      size_t resolution,
+      double tileSize);
 
-    /// \brief The tile size (or length) L. 
-    double TileSize() const;
-
-    /// \brief The tile resolution (N). The tile contains (N + 1)**2 vertices. 
-    size_t Resolution() const;
-
-    void SetWindVelocity(double _ux, double _uy);
+    void setWindVelocity(double ux, double uy);
 
     // See:
     //  osgOcean/OceanTile.
@@ -62,11 +61,11 @@ namespace asv
     // (u, v) = (1, 1) at the bottom right 
     // The tangent space basis calculation is adjusted to 
     // conform with this convention.
-    void Create();
+    void create();
 
-    void ComputeNormals();
+    void computeNormals();
 
-    void ComputeTangentSpace();
+    void computeTangentSpace();
 
     // Compute the tangent space vectors (Tanget, Bitangent, Normal)
     //
@@ -79,43 +78,33 @@ namespace asv
     // Bumpmapping with GLSL: http://fabiensanglard.net/bumpMapping/index.php
     // Lesson 8: Tangent Space: http://jerome.jouvie.free.fr/opengl-tutorials/Lesson8.php
     //
-    static void ComputeTBN(
-        const Ogre::Vector3& _p0, 
-        const Ogre::Vector3& _p1, 
-        const Ogre::Vector3& _p2, 
-        const Ogre::Vector2& _uv0, 
-        const Ogre::Vector2& _uv1, 
-        const Ogre::Vector2& _uv2, 
-        Ogre::Vector3& _tangent, 
-        Ogre::Vector3& _bitangent, 
-        Ogre::Vector3& _normal);
+    static void computeTBN(
+        const Ogre::Vector3& p0, 
+        const Ogre::Vector3& p1, 
+        const Ogre::Vector3& p2, 
+        const Ogre::Vector2& uv0, 
+        const Ogre::Vector2& uv1, 
+        const Ogre::Vector2& uv2, 
+        Ogre::Vector3& tangent, 
+        Ogre::Vector3& bitangent, 
+        Ogre::Vector3& normal);
 
-    static void ComputeTBN(
-        const std::vector<Ogre::Vector3>& _vertices,
-        const std::vector<Ogre::Vector2>& _texCoords,
-        const std::vector<ignition::math::Vector3i>& _faces, 
-        std::vector<Ogre::Vector3>& _tangents,
-        std::vector<Ogre::Vector3>& _bitangents,
-        std::vector<Ogre::Vector3>& _normals);
+    static void computeTBN(
+        const std::vector<Ogre::Vector3>& vertices,
+        const std::vector<Ogre::Vector2>& texCoords,
+        const std::vector<ignition::math::Vector3i>& faces, 
+        std::vector<Ogre::Vector3>& tangents,
+        std::vector<Ogre::Vector3>& bitangents,
+        std::vector<Ogre::Vector3>& normals);
 
-    void Update(double _time);
+    void update(double time);
+    void updateVertices(double time);
 
-    void UpdateVertices(double _time);
-
-    Ogre::SubMesh* CreateMesh(const Ogre::String &_name, double _offsetZ=0.0, bool _reverseOrientation=false);
-
-    void UpdateMesh(Ogre::SubMesh *_subMesh, double _offsetZ=0.0, bool _reverseOrientation=false);
-
-    void DebugPrintVertexBuffers(Ogre::SubMesh *_subMesh) const;
-
-    const std::vector<Ogre::Vector3>& Vertices() const;
-
-    const std::vector<ignition::math::Vector3i>& Faces() const;
+    void createMesh(const Ogre::String& name);
+    void updateMesh();
+    void debugPrintVertexBuffers() const;
 
   private:
-    void UpdateVertex(size_t idx0, size_t idx1);
-
-    bool    mHasVisuals;
 
     size_t  mResolution;                      /// \brief FFT size (N = 2^n)
     size_t  mRowLength;                       /// \brief Number of vertices per row (N+1)
@@ -133,12 +122,9 @@ namespace asv
     std::vector<Ogre::Vector3>  mBitangents;
     std::vector<Ogre::Vector3>  mNormals;
 
-    std::string                 mAboveOceanMeshName = "AboveOceanTileMesh";
-    std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
-    Ogre::SubMesh*              mAboveOceanSubMesh;
-    Ogre::SubMesh*              mBelowOceanSubMesh;
+    Ogre::SubMesh*              mSubMesh;
 
-    std::unique_ptr<WaveSimulation> mWaveSim;
+    WaveSimulationOpenCL        mWaveSim;
     std::vector<double>         mHeights;
     std::vector<double>         mDhdx;
     std::vector<double>         mDhdy;

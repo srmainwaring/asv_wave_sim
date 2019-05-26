@@ -16,31 +16,36 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SPECTRUM_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SPECTRUM_HH_
 
-class WaveSpectrum
+namespace asv
 {
-  public: virtual ~WaveSpectrum();
 
-  public: WaveSpectrum();
+  class WaveSpectrum
+  {
+    public: virtual ~WaveSpectrum();
 
-  public: void SetWindVelocity(double _ux, double _uy);
-  
-  public: static double Dispersion(double _k);
+    public: WaveSpectrum();
 
-  public: static double InvDispersion(double _omega);
+    public: void SetWindVelocity(double _ux, double _uy);
+    
+    public: static double Dispersion(double _k);
 
-  public: static double QuantisedDispersion(double _k);
+    public: static double InvDispersion(double _omega);
 
-  public: static double SignificantWaveHeight(double _u);
+    public: static double QuantisedDispersion(double _k);
 
-  public: static double Spectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
+    public: static double SignificantWaveHeight(double _u);
 
-  public: static double PiersonMoskowitzK0(double _u);
+    public: static double Spectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
 
-  public: static double PiersonMoskowitzSpectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
+    public: static double PiersonMoskowitzK0(double _u);
 
-  private: double ux;
-  private: double uy;
-  private: double u;
-};
+    public: static double PiersonMoskowitzSpectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
+
+    private: double ux;
+    private: double uy;
+    private: double u;
+  };
+
+}
 
 #endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SPECTRUM_HH_
