@@ -17,7 +17,7 @@
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_OCEAN_TILE_HH_
 
 #include <gazebo/rendering/Visual.hh>
-#include "gazebo/rendering/ogre_gazebo.h"
+#include <gazebo/rendering/ogre_gazebo.h>
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
@@ -28,16 +28,13 @@
 // #include <OgrePlane.h>
 // #include <OgreVector.h>
 
-#define USE_TEXTURE_COORDS 1
-
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
-
 #include <cmath>
 #include <memory>
 #include <iostream>
 
 namespace asv
 {
+  class WaveSimulation;
 
   class OceanTile
   {
@@ -124,7 +121,7 @@ namespace asv
 
     Ogre::SubMesh*              mSubMesh;
 
-    WaveSimulationOpenCL        mWaveSim;
+    std::unique_ptr<WaveSimulation> mWaveSim;
     std::vector<double>         mHeights;
     std::vector<double>         mDhdx;
     std::vector<double>         mDhdy;
