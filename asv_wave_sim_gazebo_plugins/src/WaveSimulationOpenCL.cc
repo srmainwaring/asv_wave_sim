@@ -20,6 +20,7 @@
 
 #include <complex>
 #include <random>
+#include <vector>
 
 namespace asv
 {
@@ -68,6 +69,7 @@ namespace asv
     double mUx;
     double mUy;
     double mScale;
+    double mLambda;
 
     std::vector<double> mX;
     std::vector<double> mK;
@@ -151,6 +153,7 @@ namespace asv
     mUx(0.0),
     mUy(0.0),
     mScale(4 * _N),
+    mLambda(0.6),
     mPlatform(0),
     mDevice(0),
     mContext(0),
@@ -400,8 +403,8 @@ namespace asv
     // logManager.logMessage("Populate output array.");
     for (size_t i=0; i<mN2; ++i)
     {
-      _sx[i] = mIn3[2*i] * mScale;
-      _sy[i] = mIn4[2*i] * mScale;
+      _sx[i] = - mIn3[2*i] * mScale * mLambda;
+      _sy[i] = - mIn4[2*i] * mScale * mLambda;
     }
 
     // Release OpenCL memory objects
@@ -474,9 +477,9 @@ namespace asv
     // logManager.logMessage("Populate output array.");
     for (size_t i=0; i<mN2; ++i)
     {
-      _dsxdx[i] = mIn5[2*i] * mScale;
-      _dsydy[i] = mIn6[2*i] * mScale;
-      _dsxdy[i] = mIn7[2*i] * mScale;
+      _dsxdx[i] = - mIn5[2*i] * mScale * mLambda;
+      _dsydy[i] = - mIn6[2*i] * mScale * mLambda;
+      _dsxdy[i] = - mIn7[2*i] * mScale * mLambda;
     }
 
     // Release OpenCL memory objects
@@ -695,6 +698,22 @@ namespace asv
     std::vector<double>& _dsxdy)
   {
     impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);      
+  }
+
+  void WaveSimulationOpenCL::ComputeDisplacementsAndDerivatives(
+    std::vector<double>& _h,
+    std::vector<double>& _sx,
+    std::vector<double>& _sy,
+    std::vector<double>& _dhdx,
+    std::vector<double>& _dhdy,
+    std::vector<double>& _dsxdx,
+    std::vector<double>& _dsydy,
+    std::vector<double>& _dsxdy)
+  {
+    impl->ComputeHeights(_h);
+    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeDisplacements(_sx, _sy);
+    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);    
   }
 
 }

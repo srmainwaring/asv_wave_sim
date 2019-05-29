@@ -47,6 +47,15 @@ namespace asv
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) = 0;
 
+    public: virtual void ComputeDisplacementsAndDerivatives(
+      std::vector<double>& _h,
+      std::vector<double>& _sx,
+      std::vector<double>& _sy,
+      std::vector<double>& _dhdx,
+      std::vector<double>& _dhdy,
+      std::vector<double>& _dsxdx,
+      std::vector<double>& _dsydy,
+      std::vector<double>& _dsxdy) = 0;
   };
 
 }
