@@ -1,5 +1,11 @@
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
 
+#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationSimple.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
+
 // #include <Ogre.h>
 // #include <OgreRenderOperation.h>
 
@@ -18,7 +24,7 @@ namespace asv
         mNumFaces(2 * resolution * resolution),
         mTileSize(tileSize),
         mSpacing(tileSize / static_cast<double>(resolution)),
-        mWaveSim(resolution, tileSize),
+        // mWaveSim(resolution, tileSize),
         mHeights(resolution * resolution, 0.0),
         mDhdx(resolution * resolution, 0.0),
         mDhdy(resolution * resolution, 0.0),
@@ -28,11 +34,37 @@ namespace asv
         mDydy(resolution * resolution, 0.0),
         mDxdy(resolution * resolution, 0.0)
     {
+        // Different types of wave simulator are supported...
+
+        // 1. FFTW / OpenCL
+        #if 0
+
+        // mWaveSim.reset(new WaveSimulationOpenCL(resolution, tileSize));
+        mWaveSim.reset(new WaveSimulationFFTW(resolution, tileSize));
+
+        #else
+
+        // 2. Trochoid
+        // std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
+        // waveParams->SetNumber(3);
+        // waveParams->SetAngle(0.6);
+        // waveParams->SetScale(1.2);
+        // waveParams->SetSteepness(1.0);
+        // waveParams->SetAmplitude(1.0);
+        // waveParams->SetPeriod(7.0);
+        // waveParams->SetDirection(Vector2(1.0, 0.0));
+
+        // mWaveSim.reset(new WaveSimulationTrochoid(resolution, tileSize, waveParams));
+
+        // 3. Simple
+        mWaveSim.reset(new WaveSimulationSimple(resolution, tileSize));
+
+        #endif
     }
 
     void OceanTile::setWindVelocity(double ux, double uy)
     {
-        mWaveSim.SetWindVelocity(ux, uy);
+        mWaveSim->SetWindVelocity(ux, uy);
     }
     
     // See:
@@ -101,6 +133,11 @@ namespace asv
             }
         }
 
+        // Texture Coordinates
+        mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        
         computeNormals();
         computeTangentSpace();
         createMesh("OceanTileMesh");
@@ -291,10 +328,14 @@ namespace asv
         // logManager.logMessage("Updating vertices...");
 
         // logManager.logMessage("Set time");
-        mWaveSim.SetTime(time);
+        mWaveSim->SetTime(time);
 
         // logManager.logMessage("Compute heights");
-        mWaveSim.ComputeHeights(mHeights);
+        mWaveSim->ComputeDisplacementsAndDerivatives(
+            mHeights, mDisplacementsX, mDisplacementsY,
+            mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
+
+        // mWaveSim->ComputeHeights(mHeights);
         // for (auto&& h : mHeights)
         // {
         //   std::cout << h << std::endl;
@@ -302,73 +343,87 @@ namespace asv
         // std::cout << std::endl;
 
         // logManager.logMessage("Compute displacements");
-        mWaveSim.ComputeDisplacements(mDisplacementsX, mDisplacementsY);
+        // mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
 
         // @TODO_MOVE Set displacement scaling and check signs
-        double lambda = 0.9;
+        // double lambda = 0.9;
+        const size_t N = mResolution;
+        const size_t NPlus1 = N + 1;
+        const size_t NMinus1 = N - 1;
 
-        for (size_t iy=0; iy<mResolution; ++iy)
+        for (size_t iy=0; iy<N; ++iy)
         {
-            for (size_t ix=0; ix<mResolution; ++ix)
+            for (size_t ix=0; ix<N; ++ix)
             {
-                size_t idx0 =  iy * (mResolution + 1) + ix;
-                size_t idx1 =  iy * mResolution + ix;
+                size_t idx0 =  iy * NPlus1 + ix;
+                size_t idx1 =  iy * N + ix;
+
+                double h  = mHeights[idx1];
+                double sx = mDisplacementsX[idx1];
+                double sy = mDisplacementsY[idx1];
+
                 auto&& v0 = mVertices0[idx0];
                 auto&& v  = mVertices[idx0];
-                v.x = v0.x - lambda * mDisplacementsX[idx1];
-                v.y = v0.y - lambda * mDisplacementsY[idx1];
-                v.z = v0.z + mHeights[idx1];
-            }
-        }
+                v.x = v0.x + sx;
+                v.y = v0.y + sy;
+                v.z = v0.z + h;
+        //     }
+        // }
 
         // logManager.logMessage("Compute height derivatives");
-        mWaveSim.ComputeHeightDerivatives(mDhdx, mDhdy);
+        // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
 
         // logManager.logMessage("Compute displacement derivatives");
-        mWaveSim.ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
+        // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
 
         // 0. Resize and zero outputs.
-        mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
-        mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
-        mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        // mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        // mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
+        // mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
 
         // 1. Update tangent and bitangent vectors (not normalised).
         // @TODO Check sign for displacement terms
-        for (size_t iy=0; iy<mResolution; ++iy)
-        {
-            for (size_t ix=0; ix<mResolution; ++ix)
-            {
-                size_t idx0 =  iy * (mResolution + 1) + ix;
-                size_t idx1 =  iy * mResolution + ix;
+        // for (size_t iy=0; iy<N; ++iy)
+        // {
+        //     for (size_t ix=0; ix<N; ++ix)
+        //     {
+                // size_t idx0 =  iy * NPlus1 + ix;
+                // size_t idx1 =  iy * N + ix;
+                double dhdx  = mDhdx[idx1]; 
+                double dhdy  = mDhdy[idx1]; 
+                double dsxdx = mDxdx[idx1]; 
+                double dsydy = mDydy[idx1]; 
+                double dsxdy = mDxdy[idx1]; 
+
                 auto&& t = mTangents[idx0];
-                t.x = 1.0 - lambda * mDxdx[idx1];
-                t.y = 0.0 - lambda * mDxdy[idx1];
-                t.z = mDhdx[idx1];      
+                t.x = dsxdx + 1.0;
+                t.y = dsxdy;
+                t.z = dhdx;      
                 
                 auto&& b = mBitangents[idx0];
-                b.x = 0.0 - lambda * mDxdx[idx1];
-                b.y = 1.0 - lambda * mDydy[idx1];
-                b.z = mDhdy[idx1];       
+                b.x = dsxdy;
+                b.y = dsydy + 1.0;
+                b.z = dhdy;       
             }
         }
 
         // Set skirt values
         // logManager.logMessage("Compute tile skirt vertices");
-        for (size_t ix=0; ix<=mResolution; ++ix)
+        for (size_t i=0; i<=N; ++i)
         {
-            size_t idx0 =  mResolution * (mResolution + 1) + ix;
-            size_t idx1 =  (mResolution - 1) * (mResolution + 1) + ix;
+            size_t idx0 =  N * NPlus1 + i;
+            size_t idx1 =  NMinus1 * NPlus1 + i;
             mVertices[idx0] = mVertices[idx1];
             mTangents[idx0] = mTangents[idx1];
             mBitangents[idx0] = mBitangents[idx1];
-        }
-        for (size_t iy=0; iy<=mResolution; ++iy)
-        {
-            size_t idx0 =  iy * (mResolution + 1) + mResolution;
-            size_t idx1 =  iy * (mResolution + 1) + (mResolution - 1);
-            mVertices[idx0] = mVertices[idx1];
-            mTangents[idx0] = mTangents[idx1];
-            mBitangents[idx0] = mBitangents[idx1];
+        // }
+        // for (size_t iy=0; iy<=N; ++iy)
+        // {
+            size_t idy0 =  i * NPlus1 + N;
+            size_t idy1 =  i * NPlus1 + NMinus1;
+            mVertices[idy0] = mVertices[idy1];
+            mTangents[idy0] = mTangents[idy1];
+            mBitangents[idy0] = mBitangents[idy1];
         }
 
         // logManager.logMessage("Done updating vertices.");
@@ -391,10 +446,7 @@ namespace asv
         // Vertices
         const size_t nVertices = mVertices.size();
         const size_t posVertexBufferCount = (3 * 2) * nVertices;
-
-        #if USE_TEXTURE_COORDS
         const size_t texVertexBufferCount = (3 * 2 + 2) * nVertices;
-        #endif
 
         // Indices (orientation must be counter-clockwise for normals to be correct)
         const size_t nFaces = mFaces.size();
@@ -419,7 +471,6 @@ namespace asv
             posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
 
-        #if USE_TEXTURE_COORDS
         // Create vertex declaration: texture coordinates, tangents, bitangents
         unsigned int texVertexBufferIndex = 1;
         offset = 0;
@@ -437,7 +488,6 @@ namespace asv
         mSubMesh->vertexData->vertexDeclaration->addElement(
             texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 7);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
-        #endif
 
         // Allocate vertex buffer: positions
         auto posVertexBuffer =
@@ -447,7 +497,6 @@ namespace asv
                 Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
                 true);
 
-        #if USE_TEXTURE_COORDS
         // Allocate vertex buffer: textures
         auto texVertexBuffer =
             hardwareBufferManager.createVertexBuffer(
@@ -455,23 +504,16 @@ namespace asv
                 mSubMesh->vertexData->vertexCount,
                 Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
                 true);
-        #endif
 
         // Set vertex buffer bindings
         mSubMesh->vertexData->vertexBufferBinding->setBinding(posVertexBufferIndex, posVertexBuffer);
-
-        #if USE_TEXTURE_COORDS
         mSubMesh->vertexData->vertexBufferBinding->setBinding(texVertexBufferIndex, texVertexBuffer);
-        #endif
 
         // Lock vertex buffers for write
         float* gpuPosVertices = static_cast<float*>(
             posVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-
-        #if USE_TEXTURE_COORDS
         float* gpuTexVertices = static_cast<float*>(
             texVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-        #endif
 
         // Allocate index buffer of the requested number of vertices (ibufCount) 
         auto indexBuffer = 
@@ -501,12 +543,11 @@ namespace asv
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
             *gpuPosVertices++ = mNormals[i][2];
-        }
+        // }
 
-        #if USE_TEXTURE_COORDS
         // Copy texture vertices to GPU
-        for (size_t i=0; i<nVertices; ++i)
-        {
+        // for (size_t i=0; i<nVertices; ++i)
+        // {
             // uv0
             *gpuTexVertices++ = mTexCoords[i][0];
             *gpuTexVertices++ = mTexCoords[i][1];
@@ -521,7 +562,6 @@ namespace asv
             *gpuTexVertices++ = mBitangents[i][1];
             *gpuTexVertices++ = mBitangents[i][2];
         }
-        #endif
 
         // Copy indices to GPU
         for (size_t i=0; i<nFaces; ++i)
@@ -533,10 +573,7 @@ namespace asv
 
         // Unlock buffers
         posVertexBuffer->unlock();
-
-        #if USE_TEXTURE_COORDS
         texVertexBuffer->unlock();
-        #endif
 
         indexBuffer->unlock();
 
@@ -568,12 +605,10 @@ namespace asv
             posVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
 
         // Get texcoord vertex buffer and obtain lock for writing.
-        #if USE_TEXTURE_COORDS
         auto texElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_TEXTURE_COORDINATES, 0);
         auto texVertexBuffer = vertexData->vertexBufferBinding->getBuffer(texElement->getSource());
         float* gpuTexVertices = static_cast<float*>(
             texVertexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-        #endif
 
         // Copy position vertices to GPU
         for (size_t i=0; i<mVertices.size(); ++i)
@@ -585,12 +620,11 @@ namespace asv
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
             *gpuPosVertices++ = mNormals[i][2];
-        }
+        // }
 
         // Copy texture vertices to GPU
-        #if USE_TEXTURE_COORDS
-        for (size_t i=0; i<mVertices.size(); ++i)
-        {
+        // for (size_t i=0; i<mVertices.size(); ++i)
+        // {
             *gpuTexVertices++ = mTexCoords[i][0];
             *gpuTexVertices++ = mTexCoords[i][1];
 
@@ -602,14 +636,10 @@ namespace asv
             *gpuTexVertices++ = mBitangents[i][1];
             *gpuTexVertices++ = mBitangents[i][2];
         }
-        #endif
 
         // Unlock buffers
         posVertexBuffer->unlock();
-
-        #if USE_TEXTURE_COORDS
         texVertexBuffer->unlock();
-        #endif
 
         // Set bounds (box and sphere)
         // mMesh->_setBounds(Ogre::AxisAlignedBox(
