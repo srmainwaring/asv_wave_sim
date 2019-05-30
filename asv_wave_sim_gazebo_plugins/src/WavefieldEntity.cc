@@ -105,7 +105,7 @@ namespace asv
       { static_cast<size_t>(this->data->cellCount[0]), static_cast<size_t>(this->data->cellCount[1]) }
     ));
 #else
-    this->data->wavefield.reset(new WavefieldOceanTile(meshName));
+    this->data->wavefield.reset(new WavefieldFFT(meshName));
 
     this->data->wavefield->SetParameters(this->data->waveParams);
     this->data->wavefield->Update(simTime);

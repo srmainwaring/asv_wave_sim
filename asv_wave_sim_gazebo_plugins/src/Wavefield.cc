@@ -20,7 +20,6 @@
 
 
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
-#include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
 
 #include <gazebo/gazebo.hh>
 
@@ -84,10 +83,7 @@ namespace asv
     public: std::shared_ptr<const Grid> initialGrid;
 
     /// \brief The current position of the wave field.
-    public: std::shared_ptr<Grid> grid;
-
-    /// \brief The current position of the wave field.
-    public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
+    public: std::shared_ptr<Grid> grid;    
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,11 +103,6 @@ namespace asv
     this->data->grid.reset(new Grid(
       this->data->size, this->data->cellCount));
     
-    // Point Locator
-    int N = this->data->cellCount[0];
-    double L = this->data->size[0];
-    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
-
     // Update
     this->Update(0.0);
   }
@@ -128,12 +119,6 @@ namespace asv
     this->data->grid.reset(new Grid(
       this->data->size, this->data->cellCount));
     
-    // Point Locator
-    int64_t N = this->data->cellCount[0];
-    double L = this->data->size[0];
-    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
-    // this->data->triangulatedGrid->DebugPrintTriangulation();
-
     // Update
     this->Update(0.0);
   }
@@ -146,11 +131,6 @@ namespace asv
   std::shared_ptr<const Grid> WavefieldGerstner::GetGrid() const
   {
     return this->data->grid;
-  }
-
-  bool WavefieldGerstner::Height(const Point3& point, double& height) const
-  {
-    return this->data->triangulatedGrid->Height(point, height);    
   }
 
   std::shared_ptr<const WaveParameters> WavefieldGerstner::GetParameters() const
@@ -167,10 +147,6 @@ namespace asv
   void WavefieldGerstner::Update(double _time)
   {
     this->UpdateGerstnerWave(_time);
-
-    // Update point locator
-    auto& mesh = *this->data->grid->GetMesh();
-    this->data->triangulatedGrid->UpdatePoints(mesh);
   }
 
   void WavefieldGerstner::UpdateGerstnerWave(double _time)
@@ -271,11 +247,11 @@ namespace asv
   }
 
 ///////////////////////////////////////////////////////////////////////////////
-// WavefieldOceanTilePrivate
+// WavefieldFFTPrivate
 
   /// \internal
-  /// \brief Private data for the WavefieldOceanTile.
-  class WavefieldOceanTilePrivate
+  /// \brief Private data for the WavefieldFFT.
+  class WavefieldFFTPrivate
   {
     /// \brief Wave parameters
     public: std::shared_ptr<WaveParameters> params;
@@ -285,28 +261,24 @@ namespace asv
 
     /// \brief The current position of the wave field.
     public: std::shared_ptr<Grid> grid;
-
-    /// \brief The current position of the wave field.
-    public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
-// WavefieldOceanTile
+// WavefieldFFT
 
-  WavefieldOceanTile::~WavefieldOceanTile()
+  WavefieldFFT::~WavefieldFFT()
   {
   }
 
-  WavefieldOceanTile::WavefieldOceanTile(
+  WavefieldFFT::WavefieldFFT(
     const std::string& _name) :
-    data(new WavefieldOceanTilePrivate())
+    data(new WavefieldFFTPrivate())
   {
-    gzmsg << "Constructing WavefieldOceanTile..." <<  std::endl;
+    gzmsg << "Constructing Wavefield FFT..." <<  std::endl;
 
-    int N = 128;
-    int NPlus1 = N + 1;
-    double L = 256.0;
-    double u = 5.0;
+    size_t N = 128;
+    size_t NPlus1 = N + 1;
+    double L = 512.0;
 
     // Wave parameters
     gzmsg << "Creating WaveParameters." <<  std::endl;
@@ -315,52 +287,42 @@ namespace asv
     // OceanTile
     gzmsg << "Creating OceanTile." <<  std::endl;
     this->data->oceanTile.reset(new OceanTile(N, L, false));
-    this->data->oceanTile->SetWindVelocity(u, 0.0);
+    this->data->oceanTile->SetWindVelocity(25.0, 0.0);
     this->data->oceanTile->Create();
     this->data->oceanTile->Update(0.0);
 
     // Grid
     gzmsg << "Creating grid." <<  std::endl;
-    this->data->grid.reset(new Grid({ L, L }, { static_cast<size_t>(NPlus1), static_cast<size_t>(NPlus1) }));
-    
-    // Point Locator
-    gzmsg << "Creating triangulated grid." <<  std::endl;
-    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
-    // this->data->TriangulatedGrid->DebugPrintTriangulation();
+    this->data->grid.reset(new Grid({ L, L }, { NPlus1, NPlus1 }));
     
     // Update
     this->Update(0.0);
 
-    gzmsg << "Done constructing WavefieldOceanTile." <<  std::endl;
+    gzmsg << "Done constructing Wavefield FFT." <<  std::endl;
   }
 
-  std::shared_ptr<const Mesh> WavefieldOceanTile::GetMesh() const
+  std::shared_ptr<const Mesh> WavefieldFFT::GetMesh() const
   {
     return this->data->grid->GetMesh();
   }
 
-  std::shared_ptr<const Grid> WavefieldOceanTile::GetGrid() const
+  std::shared_ptr<const Grid> WavefieldFFT::GetGrid() const
   {
     return this->data->grid;
   }
 
-  bool WavefieldOceanTile::Height(const Point3& point, double& height) const
-  {
-    return this->data->triangulatedGrid->Height(point, height);    
-  }
-
-  std::shared_ptr<const WaveParameters> WavefieldOceanTile::GetParameters() const
+  std::shared_ptr<const WaveParameters> WavefieldFFT::GetParameters() const
   {
     return this->data->params;
   }
 
-  void WavefieldOceanTile::SetParameters(std::shared_ptr<WaveParameters> _params) const
+  void WavefieldFFT::SetParameters(std::shared_ptr<WaveParameters> _params) const
   {
     GZ_ASSERT(_params != nullptr, "Invalid parameter _params");
     this->data->params = _params;    
   }
 
-  void WavefieldOceanTile::Update(double _time)
+  void WavefieldFFT::Update(double _time)
   {
     // Update the tile.
     this->data->oceanTile->Update(_time);
@@ -379,9 +341,6 @@ namespace asv
       // Visual and physics out of phase? x-y transposed?
       mesh.point(vtx1) = Point3(vtx0.x, vtx0.y, vtx0.z);
     }
-
-    // Update the point locator.
-    this->data->triangulatedGrid->UpdatePoints(vertices);
 
   }
 

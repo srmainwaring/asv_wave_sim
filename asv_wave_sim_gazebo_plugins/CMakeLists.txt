@@ -149,6 +149,8 @@ add_library(Hydrodynamics
     src/Utilities.cc
     src/Wavefield.cc
     src/WavefieldEntity.cc
+    src/WavefieldSampler.cc
+    src/WaveParameters.cc
     src/WaveSimulation.cc
     src/WaveSimulationFFTW.cc
     src/WaveSimulationOpenCL.cc
@@ -228,7 +230,6 @@ list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST WavefieldVisualPlugin)
 # OceanVisualPlugin
 add_library(OceanVisualPlugin
   SHARED
-    src/OceanTile.cc
     src/OceanVisual.cc
     src/OceanVisualPlugin.cc
 )
