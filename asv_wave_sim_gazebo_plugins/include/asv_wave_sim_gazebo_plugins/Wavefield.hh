@@ -22,10 +22,10 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/gazebo.hh>
-#include <ignition/math/Pose3.hh>
-
 #include <memory>
+
+///////////////////////////////////////////////////////////////////////////////
+// Forward Declarations
 
 namespace asv
 {
@@ -47,9 +47,6 @@ namespace asv
 
     /// \brief Access the wave field grid.
     public: virtual std::shared_ptr<const Grid> GetGrid() const = 0;
-
-    // Compute the height at a point.
-    public: virtual bool Height(const Point3& point, double& height) const = 0;
 
     /// \brief Get the wave parameters.
     public: virtual std::shared_ptr<const WaveParameters> GetParameters() const = 0;
@@ -95,9 +92,6 @@ namespace asv
     /// \brief Access the wave field grid.
     public: std::shared_ptr<const Grid> GetGrid() const override;
 
-    // Compute the height at a point.
-    public: bool Height(const Point3& point, double& height) const override;
-
     /// \brief Access the wave field mesh as a Gazebo Mesh.
     // public: std::shared_ptr<const gazebo::common::Mesh> GetGzMesh() const;
 
@@ -128,17 +122,17 @@ namespace asv
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A class to manage a wave field.
-  class WavefieldOceanTilePrivate;
+  class WavefieldFFTPrivate;
 
-  class WavefieldOceanTile : public Wavefield
+  class WavefieldFFT : public Wavefield
   {
     /// Destructor.
-    public: ~WavefieldOceanTile() override;
+    public: ~WavefieldFFT() override;
 
     /// Constructor.
     ///
     /// \param[in] _name    The name for the wave field mesh.
-    public: WavefieldOceanTile(const std::string& _name);
+    public: WavefieldFFT(const std::string& _name);
 
     /// \brief Access the wave field mesh.
     public: std::shared_ptr<const Mesh> GetMesh() const override;
@@ -146,8 +140,8 @@ namespace asv
     /// \brief Access the wave field grid.
     public: std::shared_ptr<const Grid> GetGrid() const override;
 
-    // Compute the height at a point.
-    public: bool Height(const Point3& point, double& height) const override;
+    /// \brief Access the wave field mesh as a Gazebo Mesh.
+    // public: std::shared_ptr<const gazebo::common::Mesh> GetGzMesh() const;
 
     /// \brief Get the wave parameters.
     public: std::shared_ptr<const WaveParameters> GetParameters() const override;
@@ -164,12 +158,7 @@ namespace asv
 
     /// \internal
     /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldOceanTilePrivate> data;
-  
-  
-    // @TODO: relocate 
-    void OnWaveWindMsg(ConstParam_VPtr &_msg);
-
+    private: std::shared_ptr<WavefieldFFTPrivate> data;
   };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -123,10 +123,10 @@ namespace asv
       // Insert the mesh into OGRE (now in Tile)
       // asv::InsertMesh(tile.mesh.release());
 #endif
-      this->data->oceanTile.reset(new OceanTile(256, 512.0));
-      this->data->oceanTile->setWindVelocity(25.0, 0.0);
-      this->data->oceanTile->create();
-      this->data->oceanTile->update(0.0);
+      this->data->oceanTile.reset(new OceanTile(128, 512.0));
+      this->data->oceanTile->SetWindVelocity(25.0, 0.0);
+      this->data->oceanTile->Create();
+      this->data->oceanTile->Update(0.0);
 
       // Mesh Visual
       this->data->vis.reset(new rendering::Visual(visName, shared_from_this()));
@@ -182,7 +182,7 @@ namespace asv
       "time", shaderType, std::to_string(time));
 #endif
 
-    this->data->oceanTile->update(time);
+    this->data->oceanTile->Update(time);
 
     // gzmsg << "Done updating OceanVisual." << std::endl;
   }
