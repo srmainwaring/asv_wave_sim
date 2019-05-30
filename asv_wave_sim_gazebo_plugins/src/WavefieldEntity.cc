@@ -16,6 +16,7 @@
 #include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
 #include "asv_wave_sim_gazebo_plugins/Convert.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
 #include <gazebo/common/Assert.hh>
@@ -95,14 +96,21 @@ namespace asv
     std::string meshPath = "";
 
     double simTime = this->GetWorld()->SimTime().Double();
-    this->data->wavefield.reset(new Wavefield(
+
+// @TODO SWITCH WAVE SIMULATION TYPE
+#if 0
+    this->data->wavefield.reset(new WavefieldGerstner(
       meshName,
       { this->data->size[0], this->data->size[1] },
       { static_cast<size_t>(this->data->cellCount[0]), static_cast<size_t>(this->data->cellCount[1]) }
     ));
+#else
+    this->data->wavefield.reset(new WavefieldFFT(meshName));
+
     this->data->wavefield->SetParameters(this->data->waveParams);
     this->data->wavefield->Update(simTime);
   }
+#endif
 
   void WavefieldEntity::Reset()
   {

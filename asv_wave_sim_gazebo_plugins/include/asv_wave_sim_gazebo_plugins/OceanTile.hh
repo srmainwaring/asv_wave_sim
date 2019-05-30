@@ -42,11 +42,9 @@ namespace asv
 
     virtual ~OceanTile();
 
-    OceanTile(
-      size_t resolution,
-      double tileSize);
+    OceanTile(size_t _N, double _L, bool _hasVisuals=true);
 
-    void setWindVelocity(double ux, double uy);
+    void SetWindVelocity(double _ux, double _uy);
 
     // See:
     //  osgOcean/OceanTile.
@@ -58,11 +56,11 @@ namespace asv
     // (u, v) = (1, 1) at the bottom right 
     // The tangent space basis calculation is adjusted to 
     // conform with this convention.
-    void create();
+    void Create();
 
-    void computeNormals();
+    void ComputeNormals();
 
-    void computeTangentSpace();
+    void ComputeTangentSpace();
 
     // Compute the tangent space vectors (Tanget, Bitangent, Normal)
     //
@@ -75,33 +73,39 @@ namespace asv
     // Bumpmapping with GLSL: http://fabiensanglard.net/bumpMapping/index.php
     // Lesson 8: Tangent Space: http://jerome.jouvie.free.fr/opengl-tutorials/Lesson8.php
     //
-    static void computeTBN(
-        const Ogre::Vector3& p0, 
-        const Ogre::Vector3& p1, 
-        const Ogre::Vector3& p2, 
-        const Ogre::Vector2& uv0, 
-        const Ogre::Vector2& uv1, 
-        const Ogre::Vector2& uv2, 
-        Ogre::Vector3& tangent, 
-        Ogre::Vector3& bitangent, 
-        Ogre::Vector3& normal);
+    static void ComputeTBN(
+        const Ogre::Vector3& _p0, 
+        const Ogre::Vector3& _p1, 
+        const Ogre::Vector3& _p2, 
+        const Ogre::Vector2& _uv0, 
+        const Ogre::Vector2& _uv1, 
+        const Ogre::Vector2& _uv2, 
+        Ogre::Vector3& _tangent, 
+        Ogre::Vector3& _bitangent, 
+        Ogre::Vector3& _normal);
 
-    static void computeTBN(
-        const std::vector<Ogre::Vector3>& vertices,
-        const std::vector<Ogre::Vector2>& texCoords,
-        const std::vector<ignition::math::Vector3i>& faces, 
-        std::vector<Ogre::Vector3>& tangents,
-        std::vector<Ogre::Vector3>& bitangents,
-        std::vector<Ogre::Vector3>& normals);
+    static void ComputeTBN(
+        const std::vector<Ogre::Vector3>& _vertices,
+        const std::vector<Ogre::Vector2>& _texCoords,
+        const std::vector<ignition::math::Vector3i>& _faces, 
+        std::vector<Ogre::Vector3>& _tangents,
+        std::vector<Ogre::Vector3>& _bitangents,
+        std::vector<Ogre::Vector3>& _normals);
 
-    void update(double time);
-    void updateVertices(double time);
+    void Update(double _time);
 
-    void createMesh(const Ogre::String& name);
-    void updateMesh();
-    void debugPrintVertexBuffers() const;
+    void UpdateVertices(double _time);
+
+    void CreateMesh(const Ogre::String& _name);
+
+    void UpdateMesh();
+
+    void DebugPrintVertexBuffers() const;
+
+    const std::vector<Ogre::Vector3>& Vertices() const;
 
   private:
+    bool    mHasVisuals;
 
     size_t  mResolution;                      /// \brief FFT size (N = 2^n)
     size_t  mRowLength;                       /// \brief Number of vertices per row (N+1)

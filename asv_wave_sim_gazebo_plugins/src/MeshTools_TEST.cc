@@ -18,6 +18,7 @@
 #include "asv_wave_sim_gazebo_plugins/Geometry.hh"
 #include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
 #include <CGAL/Timer.h>
@@ -111,7 +112,7 @@ void TestExportWaveMesh()
   waveParams->SetDirection(Vector2(1.0, 1.0));
 
   // Wavefield
-  Wavefield wavefield("__WAVEFIELD__");
+  WavefieldGerstner wavefield("__WAVEFIELD__");
   wavefield.SetParameters(waveParams);
   wavefield.Update(0);
 

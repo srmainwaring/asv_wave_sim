@@ -17,6 +17,7 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
 #include <vector>
 

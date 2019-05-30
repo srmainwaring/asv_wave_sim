@@ -17,6 +17,7 @@
 #include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/common.hh>
@@ -507,7 +508,7 @@ void TestSurfaceMeshWavefield()
   params->SetPhase(0.0);
 
   // Wavefield
-  asv::Wavefield wavefield("TestSurfaceMeshWavefield"); 
+  asv::WavefieldGerstner wavefield("TestSurfaceMeshWavefield"); 
   wavefield.SetParameters(params);
 
   // Evolve to t=10 with 1000 updates
