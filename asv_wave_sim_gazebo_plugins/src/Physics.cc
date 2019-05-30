@@ -21,6 +21,7 @@
 #include "asv_wave_sim_gazebo_plugins/PhysicalConstants.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
 
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>

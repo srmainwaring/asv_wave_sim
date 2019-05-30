@@ -22,6 +22,7 @@
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
+#include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
 
 #include <gazebo/common/Assert.hh>
 #include <gazebo/physics/physics.hh>

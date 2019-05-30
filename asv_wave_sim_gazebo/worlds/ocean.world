@@ -53,5 +53,9 @@
       <uri>model://ocean</uri>
     </include>
 
+    <!-- <include>
+      <uri>model://ocean_waves</uri>
+    </include> -->
+
   </world>
 </sdf>
