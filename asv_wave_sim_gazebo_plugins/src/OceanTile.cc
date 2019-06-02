@@ -39,7 +39,7 @@ namespace asv
         // Different types of wave simulator are supported...
 
         // 1. FFTW / OpenCL
-        #if 1
+        #if 0
 
         mWaveSim.reset(new WaveSimulationOpenCL(_N, _L));
         // mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
@@ -59,8 +59,11 @@ namespace asv
         // mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
 
         // 3. Simple
-        mWaveSim.reset(new WaveSimulationSimple(_N, _L));
-
+        double amplitude = 1.0;
+        double period = 10.0;
+        std::unique_ptr<WaveSimulationSimple> waveSim(new WaveSimulationSimple(_N, _L));
+        waveSim->SetParameters(amplitude, period);
+        mWaveSim = std::move(waveSim);
         #endif
     }
 
@@ -344,10 +347,10 @@ namespace asv
         {
         mWaveSim->ComputeHeights(mHeights);
         mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
+        // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
+        // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
         }
 
-        // @TODO_MOVE Set displacement scaling and check signs
-        // double lambda = 0.9;
         const size_t N = mResolution;
         const size_t NPlus1 = N + 1;
         const size_t NMinus1 = N - 1;
@@ -356,6 +359,7 @@ namespace asv
         {
             for (size_t ix=0; ix<N; ++ix)
             {
+                // 1. Update vertices
                 size_t idx0 =  iy * NPlus1 + ix;
                 size_t idx1 =  iy * N + ix;
 
@@ -368,21 +372,9 @@ namespace asv
                 v.x = v0.x + sx;
                 v.y = v0.y + sy;
                 v.z = v0.z + h;
-        //     }
-        // }
 
-        // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
-
-        // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
-
-        // 1. Update tangent and bitangent vectors (not normalised).
-        // @TODO Check sign for displacement terms
-        // for (size_t iy=0; iy<N; ++iy)
-        // {
-        //     for (size_t ix=0; ix<N; ++ix)
-        //     {
-                // size_t idx0 =  iy * NPlus1 + ix;
-                // size_t idx1 =  iy * N + ix;
+                // 2. Update tangent and bitangent vectors (not normalised).
+                // @TODO Check sign for displacement terms
                 double dhdx  = mDhdx[idx1]; 
                 double dhdy  = mDhdy[idx1]; 
                 double dsxdx = mDxdx[idx1]; 
@@ -401,23 +393,68 @@ namespace asv
             }
         }
 
-        // Set skirt values
-        for (size_t i=0; i<=N; ++i)
+        // Set skirt values:
+        // Apply shifts from row / column adjoining skirt to the skirt vertices.
+        // Assume the tangent space vectors for the skirt match the adjoining row / column. 
+        for (size_t i=0; i<N; ++i)
         {
-            size_t idx0 =  N * NPlus1 + i;
-            size_t idx1 =  NMinus1 * NPlus1 + i;
-            mVertices[idx0] = mVertices[idx1];
-            mTangents[idx0] = mTangents[idx1];
-            mBitangents[idx0] = mBitangents[idx1];
-        // }
-        // for (size_t iy=0; iy<=N; ++iy)
-        // {
-            size_t idy0 =  i * NPlus1 + N;
-            size_t idy1 =  i * NPlus1 + NMinus1;
-            mVertices[idy0] = mVertices[idy1];
-            mTangents[idy0] = mTangents[idy1];
-            mBitangents[idy0] = mBitangents[idy1];
+            // Top row
+            {
+                size_t idx0 =  NMinus1 * N + i;
+                size_t idx1 =  N * NPlus1 + i;
+
+                double h  = mHeights[idx0];
+                double sx = mDisplacementsX[idx0];
+                double sy = mDisplacementsY[idx0];
+
+                auto&& v0 = mVertices0[idx1];
+                auto&& v  = mVertices[idx1];
+                v.x = v0.x + sx;
+                v.y = v0.y + sy;
+                v.z = v0.z + h;
+
+                mTangents[idx1] = mTangents[idx0];
+                mBitangents[idx1] = mBitangents[idx0];
+            }
+            // Right column
+            {
+                size_t idx0 =  i * N + NMinus1;
+                size_t idx1 =  i * NPlus1 + N;
+
+                double h  = mHeights[idx0];
+                double sx = mDisplacementsX[idx0];
+                double sy = mDisplacementsY[idx0];
+
+                auto&& v0 = mVertices0[idx1];
+                auto&& v  = mVertices[idx1];
+                v.x = v0.x + sx;
+                v.y = v0.y + sy;
+                v.z = v0.z + h;
+
+                mTangents[idx1] = mTangents[idx0];
+                mBitangents[idx1] = mBitangents[idx0];
+            }
         }
+        {
+            // Top right corner.
+            size_t idx0 =  NMinus1 * N + NMinus1;
+            size_t idx1 =  N * NPlus1 + N;
+
+            double h  = mHeights[idx0];
+            double sx = mDisplacementsX[idx0];
+            double sy = mDisplacementsY[idx0];
+
+            auto&& v0 = mVertices0[idx1];
+            auto&& v  = mVertices[idx1];
+            v.x = v0.x + sx;
+            v.y = v0.y + sy;
+            v.z = v0.z + h;
+            mTangents[idx1] = mTangents[idx0];
+            mBitangents[idx1] = mBitangents[idx0];
+        }
+
+
+
     }
 
     void OceanTile::CreateMesh(const Ogre::String& _name)
@@ -794,6 +831,11 @@ namespace asv
     const std::vector<Ogre::Vector3>& OceanTile::Vertices() const
     {
         return mVertices;
+    }
+
+    const std::vector<ignition::math::Vector3i>& OceanTile::Faces() const
+    {
+        return mFaces;        
     }
 
 }

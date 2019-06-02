@@ -336,6 +336,10 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(UNIT_Algorithm_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Algorithm_TEST PRIVATE "-Wno-unknown-pragmas")
 
+  catkin_add_gtest(UNIT_CGAL_TEST src/CGAL_TEST.cc)
+  target_link_libraries(UNIT_CGAL_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
+  target_compile_options(UNIT_CGAL_TEST PRIVATE "-Wno-unknown-pragmas")
+
   catkin_add_gtest(UNIT_Geometry_TEST src/Geometry_TEST.cc)
   target_link_libraries(UNIT_Geometry_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Geometry_TEST PRIVATE "-Wno-unknown-pragmas")

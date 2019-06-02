@@ -13,9 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
+#include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
+#include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationSimple.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSpectrum.hh"
 
@@ -57,14 +63,14 @@ TEST(WaveSimulation, WaveSimulationOpenCL)
   waveSim->ComputeHeights(h);
 
   // Wave heights should be zero. 
-  std::cout << h << std::endl;
+  // std::cout << h << std::endl;
 
   waveSim->SetWindVelocity(20.0, 20.0);
   waveSim->SetTime(0.0);
   waveSim->ComputeHeights(h);
 
   // Wave heights should be non-zero. 
-  std::cout << h << std::endl;
+  // std::cout << h << std::endl;
 
   EXPECT_EQ(h.size(), N*N);
   // EXPECT_DOUBLE_EQ(1.0, 1.0);
@@ -87,7 +93,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   waveSim->ComputeHeights(h);
 
   // Wave heights should be zero. 
-  std::cout << h << std::endl;
+  // std::cout << h << std::endl;
 
 
   waveParams->SetNumber(3);
@@ -102,10 +108,146 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   waveSim->ComputeHeights(h);
 
   // Wave heights should be non-zero. 
-  std::cout << h << std::endl;
+  // std::cout << h << std::endl;
 
   EXPECT_EQ(h.size(), N*N);
 }
+
+TEST(WaveSimulation, WaveSimulationSimple)
+{ 
+  // Wave parameters
+  int N = 4;
+  int N2 = N*N;
+  double L = 10.0;
+  double amplitude = 1.0;
+  double period = 10.0;
+  double time = 0.0;
+
+  // Wave simulation
+  std::unique_ptr<WaveSimulationSimple> waveSim(new WaveSimulationSimple(N, L));
+  waveSim->SetParameters(amplitude, period);
+  waveSim->SetTime(time);
+
+  // Wave spectrum
+  double omega = 2.0 * M_PI / period;
+  double k = omega * omega / 9.8;
+
+  // Grid spacing and offset
+  double lm = - L / 2.0;
+  double dl = L / N;
+
+  // Verify heights
+  std::vector<double> h(N2);
+  waveSim->ComputeHeights(h);
+
+  // @DEBUG_INFO Display heights. 
+  // std::cout << h << std::endl;
+
+  for (size_t iy=0, idx=0; iy<N; ++iy)
+  {
+    double vy = iy * dl + lm;
+    for (size_t ix=0; ix<N; ++ix, ++idx)
+    {
+      double vx = ix * dl + lm;
+      double theta = k * vx - omega * time;
+      double c = std::cos(theta);
+      double sz = amplitude * c;
+      
+      // size_t idx = iy * N + ix;
+      EXPECT_DOUBLE_EQ(h[idx], sz);
+    }
+  }
+
+  // Verify displacements
+  std::vector<double> sx(N2);
+  std::vector<double> sy(N2);
+  waveSim->ComputeDisplacements(sx, sy);
+
+  for (size_t iy=0, idx=0; iy<N; ++iy)
+  {
+    for (size_t ix=0; ix<N; ++ix, ++idx)
+    {
+      EXPECT_DOUBLE_EQ(sx[idx], 0.0);
+      EXPECT_DOUBLE_EQ(sy[idx], 0.0);
+    }
+  }
+
+}
+
+TEST(OceanTile, WaveSimulationSimple)
+{
+  // Wave parameters.
+  int N = 4;
+  int N2 = N*N;
+  int NPlus1 = N+1;
+  int NPlus12 = NPlus1*NPlus1;
+  double L = 10.0;
+  double amplitude = 1.0;
+  double period = 10.0;
+  double time = 0.0;
+
+  // Ocean tile (in server mode)
+  std::unique_ptr<OceanTile> oceanTile(new OceanTile(N, L, false));
+  oceanTile->SetWindVelocity(25.0, 0.0);
+  oceanTile->Create();
+
+  // Grid spacing and offset
+  double lm = - L / 2.0;
+  double dl = L / N;
+
+  // Check vertices before Update
+  for (auto&& v : oceanTile->Vertices())
+  {
+    std::cout << v << std::endl;
+  }
+
+  EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
+  for (size_t iy=0; iy<NPlus1; ++iy)
+  {
+    double vy = iy * dl + lm;
+    for (size_t ix=0; ix<NPlus1; ++ix)
+    {
+      double vx = ix * dl + lm;
+      size_t idx = iy * NPlus1 + ix;
+      auto& v = oceanTile->Vertices()[idx];
+      EXPECT_DOUBLE_EQ(v.x, vx);
+      EXPECT_DOUBLE_EQ(v.y, vy);
+    }
+  }
+
+  // Check vertices after Update
+  oceanTile->Update(time);
+  for (auto&& v : oceanTile->Vertices())
+  {
+    std::cout << v << std::endl;
+  }
+
+  EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
+  for (size_t iy=0; iy<NPlus1; ++iy)
+  {
+    double vy = iy * dl + lm;
+    for (size_t ix=0; ix<NPlus1; ++ix)
+    {
+      double vx = ix * dl + lm;
+      size_t idx = iy * NPlus1 + ix;
+      auto& v = oceanTile->Vertices()[idx];
+      EXPECT_DOUBLE_EQ(v.x, vx);
+      EXPECT_DOUBLE_EQ(v.y, vy);
+    }
+  }
+
+  // Check faces.
+  for (auto&& face : oceanTile->Faces())
+  {
+    std::cout << face << std::endl;
+  }
+
+  // Grid
+  // Grid grid({ L, L }, { NPlus1, NPlus1 });
+
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
