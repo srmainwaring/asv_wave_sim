@@ -104,6 +104,8 @@ namespace asv
 
     const std::vector<Ogre::Vector3>& Vertices() const;
 
+    const std::vector<ignition::math::Vector3i>& Faces() const;
+
   private:
     bool    mHasVisuals;
 
