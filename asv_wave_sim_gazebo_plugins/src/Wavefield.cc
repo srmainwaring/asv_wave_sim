@@ -247,11 +247,11 @@ namespace asv
   }
 
 ///////////////////////////////////////////////////////////////////////////////
-// WavefieldFFTPrivate
+// WavefieldOceanTilePrivate
 
   /// \internal
-  /// \brief Private data for the WavefieldFFT.
-  class WavefieldFFTPrivate
+  /// \brief Private data for the WavefieldOceanTile.
+  class WavefieldOceanTilePrivate
   {
     /// \brief Wave parameters
     public: std::shared_ptr<WaveParameters> params;
@@ -264,17 +264,17 @@ namespace asv
   };
 
 ///////////////////////////////////////////////////////////////////////////////
-// WavefieldFFT
+// WavefieldOceanTile
 
-  WavefieldFFT::~WavefieldFFT()
+  WavefieldOceanTile::~WavefieldOceanTile()
   {
   }
 
-  WavefieldFFT::WavefieldFFT(
+  WavefieldOceanTile::WavefieldOceanTile(
     const std::string& _name) :
-    data(new WavefieldFFTPrivate())
+    data(new WavefieldOceanTilePrivate())
   {
-    gzmsg << "Constructing Wavefield FFT..." <<  std::endl;
+    gzmsg << "Constructing WavefieldOceanTile..." <<  std::endl;
 
     size_t N = 128;
     size_t NPlus1 = N + 1;
@@ -298,31 +298,31 @@ namespace asv
     // Update
     this->Update(0.0);
 
-    gzmsg << "Done constructing Wavefield FFT." <<  std::endl;
+    gzmsg << "Done constructing WavefieldOceanTile." <<  std::endl;
   }
 
-  std::shared_ptr<const Mesh> WavefieldFFT::GetMesh() const
+  std::shared_ptr<const Mesh> WavefieldOceanTile::GetMesh() const
   {
     return this->data->grid->GetMesh();
   }
 
-  std::shared_ptr<const Grid> WavefieldFFT::GetGrid() const
+  std::shared_ptr<const Grid> WavefieldOceanTile::GetGrid() const
   {
     return this->data->grid;
   }
 
-  std::shared_ptr<const WaveParameters> WavefieldFFT::GetParameters() const
+  std::shared_ptr<const WaveParameters> WavefieldOceanTile::GetParameters() const
   {
     return this->data->params;
   }
 
-  void WavefieldFFT::SetParameters(std::shared_ptr<WaveParameters> _params) const
+  void WavefieldOceanTile::SetParameters(std::shared_ptr<WaveParameters> _params) const
   {
     GZ_ASSERT(_params != nullptr, "Invalid parameter _params");
     this->data->params = _params;    
   }
 
-  void WavefieldFFT::Update(double _time)
+  void WavefieldOceanTile::Update(double _time)
   {
     // Update the tile.
     this->data->oceanTile->Update(_time);

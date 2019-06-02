@@ -34,6 +34,8 @@ namespace asv
 
     public: void SetWindVelocity(double _ux, double _uy);
 
+    public: void SetParameters(double _amplitude, double _period);
+
     public: void SetTime(double _time);
 
     public: void ComputeHeights(
@@ -95,6 +97,12 @@ namespace asv
   void WaveSimulationSimpleImpl::SetWindVelocity(double _ux, double _uy)
   {
     // @TODO NO IMPLEMENTATION
+  }
+
+  void WaveSimulationSimpleImpl::SetParameters(double _amplitude, double _period)
+  {
+    this->amplitude = _amplitude;
+    this->period = _period;
   }
 
   void WaveSimulationSimpleImpl::SetTime(double _time)
@@ -251,6 +259,11 @@ namespace asv
 
   void WaveSimulationSimple::SetWindVelocity(double _ux, double _uy)
   {
+  }
+
+  void WaveSimulationSimple::SetParameters(double _amplitude, double _period)
+  {
+    impl->SetParameters(_amplitude, _period);
   }
 
   void WaveSimulationSimple::SetTime(double _time)

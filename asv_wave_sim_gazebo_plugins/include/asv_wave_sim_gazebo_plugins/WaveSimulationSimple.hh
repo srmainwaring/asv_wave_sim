@@ -36,6 +36,8 @@ namespace asv
 
     public: virtual void SetWindVelocity(double _ux, double _uy) override;
 
+    public: void SetParameters(double _amplitude, double _period);
+
     public: virtual void SetTime(double _time) override;
 
     public: virtual void ComputeHeights(

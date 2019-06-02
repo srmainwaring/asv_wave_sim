@@ -153,7 +153,8 @@ namespace asv
     mUx(0.0),
     mUy(0.0),
     mScale(4 * _N),
-    mLambda(0.6),
+    // @TODO Add accessors to control displacements...
+    mLambda(0.0),
     mPlatform(0),
     mDevice(0),
     mContext(0),
