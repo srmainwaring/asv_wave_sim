@@ -20,6 +20,8 @@
 #include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
 #include "asv_wave_sim_gazebo_plugins/PhysicalConstants.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
 #include <gazebo/common/common.hh>
 #include <ignition/math/Vector3.hh>
@@ -153,7 +155,7 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
 
   // Wavefield and water patch 2x2  
   std::shared_ptr<const Wavefield> wavefield(
-    new  Wavefield("wavefield", { 2, 2 }, { 2, 2 }));
+    new  WavefieldGerstner("wavefield", { 2, 2 }, { 2, 2 }));
   std::shared_ptr<Grid> patch(
     new  Grid({ 2, 2 }, { 2, 2 }));
   std::shared_ptr<const WavefieldSampler> wavefieldSampler(
@@ -191,7 +193,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
 
   // Wavefield and water patch 4x4
   std::shared_ptr<const Wavefield> wavefield(
-    new  Wavefield("wavefield", { 20, 20 }, { 4, 4 }));
+    new  WavefieldGerstner("wavefield", { 20, 20 }, { 4, 4 }));
   std::shared_ptr<Grid> patch(
     new  Grid({ 20, 20 }, { 4, 4 }));
   std::shared_ptr<const WavefieldSampler> wavefieldSampler(

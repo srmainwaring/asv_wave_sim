@@ -122,17 +122,17 @@ namespace asv
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A class to manage a wave field.
-  class WavefieldFFTPrivate;
+  class WavefieldOceanTilePrivate;
 
-  class WavefieldFFT : public Wavefield
+  class WavefieldOceanTile : public Wavefield
   {
     /// Destructor.
-    public: ~WavefieldFFT() override;
+    public: ~WavefieldOceanTile() override;
 
     /// Constructor.
     ///
     /// \param[in] _name    The name for the wave field mesh.
-    public: WavefieldFFT(const std::string& _name);
+    public: WavefieldOceanTile(const std::string& _name);
 
     /// \brief Access the wave field mesh.
     public: std::shared_ptr<const Mesh> GetMesh() const override;
@@ -158,7 +158,7 @@ namespace asv
 
     /// \internal
     /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldFFTPrivate> data;
+    private: std::shared_ptr<WavefieldOceanTilePrivate> data;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
