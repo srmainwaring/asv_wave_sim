@@ -16,6 +16,7 @@
 #include "asv_wave_sim_gazebo_plugins/Geometry.hh"
 #include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
+#include "asv_wave_sim_gazebo_plugins/PointLocator.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
@@ -599,27 +600,42 @@ TEST(CGAL, VertexRangeIterator)
 }
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Constrained_triangulation_2.h>
 #include <CGAL/Triangulation_2.h>
+#include <CGAL/Triangulation_face_base_with_info_2.h>
+#include <CGAL/Triangulation_hierarchy_2.h>
 #include <CGAL/Regular_triangulation_2.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/algorithm.h>
 
-TEST(CGAL, MeshToTriangulation2D)
+TEST(CGAL, CreateTriangulationN)
 {
-  typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-  typedef CGAL::Triangulation_2<K>         Triangulation;
-  typedef Triangulation::Vertex_circulator Vertex_circulator;
-  typedef Triangulation::Point             Point;
-  typedef Triangulation::Face              Face;
-  typedef Triangulation::Triangle          Triangle;
-  typedef Triangulation::Edge              Edge;
-  typedef Triangulation::Segment           Segment;
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel     K;
+  typedef CGAL::Triangulation_vertex_base_2<K>                    Vbb;
+  typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>        Vb;
+  typedef CGAL::Constrained_triangulation_face_base_2<K>          Fbb;
+  typedef CGAL::Triangulation_face_base_with_info_2<int, K, Fbb>  Fb;
+  typedef CGAL::Triangulation_data_structure_2<Vb, Fb>            Tds;
+  // typedef CGAL::Triangulation_2<K, Tds>                        TBase;
+  typedef CGAL::Constrained_triangulation_2<K, Tds>               TBase;
+
+  typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
+  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  typedef Triangulation::Vertex_handle            Vertex_handle;
+  typedef Triangulation::Face_handle              Face_handle;
+  typedef Triangulation::Point                    Point;
+  typedef Triangulation::Face                     Face;
+  typedef Triangulation::Triangle                 Triangle;
+  typedef Triangulation::Edge                     Edge;
+  typedef Triangulation::Segment                  Segment;
 
   // Create the mesh
   std::vector<Point> points;
-  std::vector<std::array<size_t, 3>> faces;
+  std::vector<std::array<size_t, 3>> indices;
+  std::vector<std::array<size_t, 2>> infiniteIndices;
 
-  size_t N = 4;
+  size_t N = 3;
   size_t NPlus1 = N + 1;
-  size_t N2 = N * N;
   double L = 10.0;
   double dl = L / N;
   double lm = - L / 2.0;
@@ -637,7 +653,7 @@ TEST(CGAL, MeshToTriangulation2D)
     }
   }
 
-  // Faces
+  // Face indices
   for (size_t iy=0; iy<N; ++iy)
   {
     for (size_t ix=0; ix<N; ++ix)
@@ -648,51 +664,507 @@ TEST(CGAL, MeshToTriangulation2D)
       size_t idx2 = (iy+1) * NPlus1 + ix + 1;
       size_t idx3 = (iy+1) * NPlus1 + ix;
 
-      // Faces
-      faces.push_back({ idx0, idx1, idx2 });
-      faces.push_back({ idx0, idx2, idx3 });
+      // Face indices
+      indices.push_back({ idx0, idx1, idx2 });
+      indices.push_back({ idx0, idx2, idx3 });
     }
   }
 
-  for (auto&& p : points)
+  // Infinite indices (follow edges counter clockwise around grid)
+  infiniteIndices.resize(4*N);
+  for (size_t i=0; i<N; ++i)
   {
-    // std::cout << p << std::endl;
+    // bottom
+    size_t idx = i;
+    infiniteIndices[i] = { idx, idx+1 };
+
+    // right
+    idx = i * NPlus1 + N;
+    infiniteIndices[N+i] = { idx, idx+NPlus1 };
+
+    // top
+    idx = N * NPlus1 + i;
+    infiniteIndices[3*N-1-i] = { idx+1, idx };
+
+    // left
+    idx = i * NPlus1;
+    infiniteIndices[4*N-1-i] = { idx+NPlus1, idx };
   }
-  for (auto&& f : faces)
-  {
-    // std::cout << f[0] << " " << f[1] << " " << f[2]  << std::endl;
-  }
 
-  // Save as triangulation
-  // Triangulation t;
-  // t.insert(std::begin(points), std::end(points));
-
-  // std::cout << "number of vertices: " << t.number_of_vertices() << std::endl;
-  // std::cout << "number of faces:    " << t.number_of_faces() << std::endl;
-
-  // for (auto&& it = t.all_faces_begin(); it != t.all_faces_end(); ++it)
+  // std::cout << "points:" << std::endl;
+  // for (auto&& p : points)
   // {
-  //   Face& face = *it;
-  //   std::cout << *face.vertex(0)
-  //     << ", " << *face.vertex(1)
-  //     << ", " << *face.vertex(2)
-  //     << std::endl;
+  //   std::cout << p << std::endl;
   // }
+  // std::cout << "indices:" << std::endl;
+  // for (auto&& i : indices)
+  // {
+  //   std::cout << i[0] << " " << i[1] << " " << i[2]  << std::endl;
+  // }
+  // std::cout << "infinite indices:" << std::endl;
+  // for (auto&& i : infiniteIndices)
+  // {
+  //   std::cout << i[0] << " " << i[1] << std::endl;
+  // }
+
+  // Manually create a triangulation
+  Triangulation t;
+  Triangulation::Triangulation_data_structure& tds = t.tds();
+  {
+    // Clear all finite faces and vertices
+    tds.clear();
+
+    // Set dimension
+    tds.set_dimension(2);
+
+    // Infinite Vertex
+    Vertex_handle vi = tds.create_vertex();
+    t.set_infinite_vertex(vi);
+    vi = t.infinite_vertex();
+  
+    // Finite vertices
+    std::vector<Vertex_handle> vertices;
+    for (auto&& p : points)
+    {
+      Vertex_handle v = tds.create_vertex();
+
+      // Assign points to finite vertices
+      v->set_point(p);
+      vertices.push_back(v);
+    }
+
+    // Finite faces
+    std::vector<Face_handle> faces;
+    for (auto&& i : indices)
+    {
+      auto& v0 = vertices[i[0]];
+      auto& v1 = vertices[i[1]];
+      auto& v2 = vertices[i[2]];
+      Face_handle f = tds.create_face(v0, v1, v2);
+      faces.push_back(f);
+    }
+  
+    // Infinite faces
+    std::vector<Face_handle> infiniteFaces;
+    for (auto&& i : infiniteIndices)
+    {
+      auto& v0 = vertices[i[0]];
+      auto& v2 = vertices[i[1]];
+      Face_handle f = tds.create_face(v0, vi, v2);
+      infiniteFaces.push_back(f);
+    }
+
+    // Set infinite vertex faces
+    vi->set_face(infiniteFaces[0]);
+
+    // Set vertex faces excluding top and right
+    // @DEBUG_INFO
+    std::vector<size_t> debugVertexFaces(NPlus1*NPlus1, -1);
+    for (size_t iy=0; iy<N; ++iy)
+    {
+      for (size_t ix=0; ix<N; ++ix)
+      {
+        size_t vidx = iy * NPlus1 + ix;
+        size_t fidx = 2 * (iy * N + ix);
+        vertices[vidx]->set_face(faces[fidx]);
+        // @DEBUG_INFO
+        debugVertexFaces[vidx] = fidx;
+      }
+    }
+    // Set vertex faces : top and right
+    for (size_t i=0; i<N; ++i)
+    {
+      // right
+      size_t vidx = i * NPlus1 + N;
+      size_t fidx = 2 * (i * N + N - 1);
+      vertices[vidx]->set_face(faces[fidx]);
+      // @DEBUG_INFO
+      debugVertexFaces[vidx] = fidx;
+
+      // top
+      vidx = N * NPlus1 + i;
+      fidx = 2 * ((N - 1) * N + i) + 1;
+      vertices[vidx]->set_face(faces[fidx]);    
+      // @DEBUG_INFO
+      debugVertexFaces[vidx] = fidx;
+    }
+    {
+      // top-right
+      size_t vidx = NPlus1*NPlus1-1;
+      size_t fidx = 2 * (N * N - 1);
+      vertices[vidx]->set_face(faces[fidx]);    
+      // @DEBUG_INFO
+      debugVertexFaces[vidx] = fidx;
+    }
+
+    // std::cout << "vertex : faces" << std::endl;
+    // for (size_t i=0; i<debugVertexFaces.size(); ++i)
+    // {
+    //   std::cout << i << " " << debugVertexFaces[i] << std::endl;
+    // }
+
+    // Set Finite Face neighbours
+    for (size_t iy=0; iy<N; ++iy)
+    {
+      for (size_t ix=0; ix<N; ++ix)
+      {
+        for (size_t k=0; k<2; ++k)
+        {
+          size_t idx = 2 * (iy * N + ix);
+
+          if (k == 0)          
+          {
+            if (iy == 0)
+            {
+              if (ix == N-1)
+              {
+                // case 1
+                size_t fk = idx;
+                size_t f0 = N;
+                size_t f1 = idx + 1;
+                size_t f2 = N - 1;
+                faces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], infiniteFaces[f2]);
+              }
+              else // ix != N-1
+              {
+                // case 2
+                size_t fk = idx;
+                size_t f0 = idx + 3;
+                size_t f1 = idx + 1;
+                size_t f2 = ix;
+                faces[fk]->set_neighbors(faces[f0], faces[f1], infiniteFaces[f2]);
+              }
+            }
+            else // iy != 0
+            {
+              if (ix == N-1)
+              {
+                // case 3
+                size_t fk = idx;
+                size_t f0 = N + iy;
+                size_t f1 = idx + 1;
+                size_t f2 = idx + 1 - 2 * N;
+                faces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], faces[f2]);
+              }
+              else
+              {
+                // case 4 (general)
+                size_t fk = idx;
+                size_t f0 = idx + 3;
+                size_t f1 = idx + 1;
+                size_t f2 = idx + 1 - 2 * N;
+                faces[fk]->set_neighbors(faces[f0], faces[f1], faces[f2]);
+              }
+            } 
+          }
+          if (k == 1)          
+          {
+            if (ix == 0)
+            {
+              if (iy == N-1)
+              {
+                // case 5
+                size_t fk = idx + 1;
+                size_t f0 = 3 * N - 1;
+                size_t f1 = 3 * N;
+                size_t f2 = idx;
+                faces[fk]->set_neighbors(infiniteFaces[f0], infiniteFaces[f1], faces[f2]);
+              }
+              else
+              {
+                // case 6
+                size_t fk = idx + 1;
+                size_t f0 = idx + 2 * N;
+                size_t f1 = 4 * N - 1 - iy;
+                size_t f2 = idx;
+                faces[fk]->set_neighbors(faces[f0], infiniteFaces[f1], faces[f2]);
+              }
+            }
+            else // ix != 0
+            {
+              if (iy == N-1)
+              {
+                // case 7
+                size_t fk = idx + 1;
+                size_t f0 = 3 * N - 1 - ix;
+                size_t f1 = idx - 2;
+                size_t f2 = idx;
+                faces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], faces[f2]);
+              }
+              else
+              {
+                // case 8 (general)
+                size_t fk = idx + 1;
+                size_t f0 = idx + 2 * N;
+                size_t f1 = idx - 2;
+                size_t f2 = idx;
+                faces[fk]->set_neighbors(faces[f0], faces[f1], faces[f2]);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Set Infinite Face neighbours
+    for (size_t i=0; i<N; ++i)
+    {
+      // bottom
+      {
+        size_t fk = i;
+        size_t f0 = fk + 1;
+        size_t f1 = 2 * i;
+        size_t f2 = fk - 1;
+        if (i == 0)
+          f2 = 4 * N - 1;
+        infiniteFaces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], infiniteFaces[f2]);
+      }
+
+      // right
+      {
+        size_t fk = N + i;
+        size_t f0 = fk + 1;
+        size_t f1 = 2 * (i * N + N - 1);
+        size_t f2 = fk - 1;
+        infiniteFaces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], infiniteFaces[f2]);        
+      }
+
+      // top
+      {
+        size_t fk = 2 * N + i;
+        size_t f0 = fk + 1;
+        size_t f1 = 2 * ((N - 1) * N + i) + 1;
+        size_t f2 = fk - 1;
+        infiniteFaces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], infiniteFaces[f2]);
+      }
+
+      // left
+      {
+        size_t fk = 3 * N + i;
+        size_t f0 = fk + 1;
+        size_t f1 = 2 * (i * N) + 1;
+        size_t f2 = fk - 1;
+        if (i == N - 1)
+          f0 = 0;
+        infiniteFaces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], infiniteFaces[f2]);
+      }
+    }
+
+    // Verify vertices
+    EXPECT_TRUE(vi->is_valid());
+    // for (auto v = tds.vertices_begin(); v !=  tds.vertices_end(); ++v)
+    // {
+    //   EXPECT_TRUE(v->is_valid(true));
+    // }
+    for (auto&& v : vertices)
+    {
+      EXPECT_TRUE(v->is_valid());
+    }
+
+    // Verify faces
+    // for (auto f = tds.faces_begin(); f !=  tds.faces_end(); ++f)
+    // {
+    //   EXPECT_TRUE(f->is_valid(true));
+    // }
+    for (auto&& f : faces)
+    {
+      EXPECT_TRUE(f->is_valid());
+    }
+    for (auto&& f : infiniteFaces)
+    {
+      EXPECT_TRUE(f->is_valid());
+    }
+
+    // Verify triangulation
+    // std::cout << "triangulation data structure" << std::endl;
+    // std::cout << tds << std::endl; 
+    // std::cout << "is valid: " << tds.is_valid() << std::endl;
+    // std::cout << "dimension: " << tds.dimension() << std::endl;
+    // std::cout << "number of vertices : " << tds.number_of_vertices() << std::endl;
+    // std::cout << "number of faces : " << tds.number_of_faces() << std::endl;
+    // std::cout << "number of edges : " << tds.number_of_edges() << std::endl;
+    EXPECT_TRUE(tds.is_valid());
+    EXPECT_EQ(tds.dimension(), 2);
+    // EXPECT_EQ(tds.number_of_vertices(), 5);
+    // EXPECT_EQ(tds.number_of_faces(), 6);
+    // EXPECT_EQ(tds.number_of_edges(), 9);
+
+    // std::cout << "triangulation" << std::endl;
+    // std::cout << t << std::endl; 
+    // std::cout << "is valid: " << t.is_valid() << std::endl;
+    // std::cout << "dimension: " << t.dimension() << std::endl;
+    // std::cout << "number of vertices : " << t.number_of_vertices() << std::endl;
+    // std::cout << "number of faces : " << t.number_of_faces() << std::endl;
+    EXPECT_TRUE(t.is_valid());
+    EXPECT_EQ(t.dimension(), 2);
+    // EXPECT_EQ(t.number_of_vertices(), 4);
+    // EXPECT_EQ(t.number_of_faces(), 2);
+  }
+
+  // Manually create a constrained triangulation hierarchy
+  Triangulation ct;
+  Triangulation::Triangulation_data_structure& ctds = ct.tds();
+  {
+    // Add all finite edges as constraints.
+    for (auto e = t.finite_edges_begin(); e != t.finite_edges_end(); ++e)
+    {      
+      const auto& f = e->first;
+      int i = e->second;
+      const auto& v0 = f->vertex(f->cw(i));
+      const auto& v1 = f->vertex(f->ccw(i));
+      ct.insert_constraint(v0->point(), v1->point());
+    }
+    // std::cout << "constrained triangulation" << std::endl;
+    // std::cout << t << std::endl; 
+
+    // Now insert all finite points (to force building the triangulation hierarchy)
+    for (auto v = ct.finite_vertices_begin(); v != ct.finite_vertices_end(); ++v)
+    {      
+      ct.insert(v->point());
+    }
+
+    // std::cout << "constrained triangulation" << std::endl;
+    // std::cout << t << std::endl; 
+    // std::cout << "is valid: " << ct.is_valid() << std::endl;
+    // std::cout << "dimension: " << ct.dimension() << std::endl;
+    // std::cout << "number of vertices : " << ct.number_of_vertices() << std::endl;
+    // std::cout << "number of faces : " << ct.number_of_faces() << std::endl;
+    EXPECT_TRUE(ct.is_valid());
+
+    // Face list mapping  
+
+    // Initialise face info
+    for (auto f = t.all_faces_begin(); f != t.all_faces_end(); ++f)
+    {
+      f->info() = -1; 
+    }
+
+    for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f)
+    {
+      f->info() = -2; 
+    }
+
+    // Face matching
+    Face_handle fh;
+    for (auto f = t.finite_faces_begin(); f != t.finite_faces_end(); ++f)
+    {
+      // Compute the centroid of f and locate the ct face containing this point.
+      Point p0 = f->vertex(0)->point();
+      Point p1 = f->vertex(1)->point();
+      Point p2 = f->vertex(2)->point();
+      Point p(
+        (p0.x() + p1.x() + p2.x())/3.0,
+        (p0.y() + p1.y() + p2.y())/3.0
+      );
+      fh = ct.locate(p, fh);
+      bool found = fh != nullptr;
+
+      // @ISSUE - the problem with using is_face is that fh is a handle
+      //          to a Face in triangulation t not ct. It appears that
+      //          is_face obtains the face from the vertices rather than
+      //          the list of faces stored in the triangular data structure. 
+      // bool found = ct.is_face(f->vertex(0), f->vertex(1), f->vertex(2), fh);
+
+      // Set the info value on the found face.
+      if (fh != nullptr)
+      {
+        auto d1 = std::distance(t.finite_faces_begin(), f);
+        fh->info() = d1;
+        // std::cout << "found: " << found
+        //   << ", is_infinite: " << ct.is_infinite(fh)
+        //   << ", info: " << fh->info()
+        //   << std::endl;
+      }
+    }
+ 
+    // Display.
+    // size_t idx = 0;
+    // std::cout << "t info:" << std::endl;
+    // for (auto f = t.all_faces_begin(); f != t.all_faces_end(); ++f, ++idx)
+    // {
+    //   std::cout << "idx: " << idx
+    //     << ", is_infinite: " << t.is_infinite(f)
+    //     << ", info: " << f->info()
+    //     << std::endl; 
+    // }
+
+    // idx = 0;
+    // std::cout << "ct info:" << std::endl;
+    // for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f, ++idx)
+    // {
+    //   std::cout << "idx: " << idx
+    //     << ", is_infinite: " << ct.is_infinite(f)
+    //     << ", info: " << f->info()
+    //     << std::endl; 
+    // }
+
+    // idx = 0;
+    // std::cout << "ct face info:" << std::endl;
+    // for (auto f = ct.finite_faces_begin(); f != ct.finite_faces_end(); ++f, ++idx)
+    // {
+    //   std::cout << "ct: " << idx
+    //     << ", t: " << f->info()
+    //     << std::endl; 
+    // }
+  }
 }
 
-TEST(CGAL, CreateVertex)
+TEST(CGAL, CreateTriangulationHierarchyN)
+{
+  CGAL::Timer timer;
+
+  asv::PointLocator pl(128, 500.0);
+
+  timer.reset();
+  timer.start();
+  pl.CreateMesh();
+  timer.stop();
+  std::cout << "CreateMesh: (" << timer.time() << " s)" << std::endl;
+
+  timer.reset();
+  timer.start();
+  pl.CreateTriangulation();
+  timer.stop();
+  std::cout << "CreateTriangulation: (" << timer.time() << " s)" << std::endl;
+
+  timer.reset();
+  timer.start();
+  pl.CreateTriangulationHierarchy();
+  timer.stop();
+  std::cout << "CreateTriangulationHierarchy: (" << timer.time() << " s)" << std::endl;
+
+  // pl.DebugPrintMesh();
+  // pl.DebugPrintTriangulation();
+  // pl.DebugPrintTriangulationHierarchy();
+
+  EXPECT_TRUE(pl.IsValid(true));
+}
+
+TEST(CGAL, CreateTriangulation3)
 {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-  typedef CGAL::Triangulation_2<K>          Triangulation;
-  typedef Triangulation::Vertex_circulator  Vertex_circulator;
-  typedef Triangulation::Vertex_handle      Vertex_handle;
-  typedef Triangulation::Face_handle        Face_handle;
-  typedef Triangulation::Point              Point;
-  typedef Triangulation::Face               Face;
-  typedef Triangulation::Triangle           Triangle;
-  typedef Triangulation::Edge               Edge;
-  typedef Triangulation::Segment            Segment;
 
+  // When not using the triangulation hierarchy use the default triangulation data structure
+  typedef CGAL::Triangulation_2<K>                         TSlow;
+
+  // Otherwise must use the extended vertex base class
+  typedef CGAL::Triangulation_vertex_base_2<K>             Vbb;
+  typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb> Vb;
+  typedef CGAL::Triangulation_face_base_2<K>               Fb;
+  typedef CGAL::Triangulation_data_structure_2<Vb, Fb>     Tds;
+  typedef CGAL::Triangulation_2<K, Tds>                    TBase;
+
+  typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
+  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  typedef Triangulation::Vertex_handle            Vertex_handle;
+  typedef Triangulation::Face_handle              Face_handle;
+  typedef Triangulation::Point                    Point;
+  typedef Triangulation::Face                     Face;
+  typedef Triangulation::Triangle                 Triangle;
+  typedef Triangulation::Edge                     Edge;
+  typedef Triangulation::Segment                  Segment;
+
+  
   // Points
   Point p1(0, 0);
   Point p2(0, 1);
@@ -740,7 +1212,7 @@ TEST(CGAL, CreateVertex)
 
   }
 
-  if (1)
+  if (0)
   {
     // Manually create a triangulation
     Triangulation t;
@@ -864,43 +1336,282 @@ TEST(CGAL, CreateVertex)
 
 
     // Point location.
-    
+    std::cout << "point location..." << std::endl;
+    Face_handle f = t.locate(Point(0.1, 0.1));
+    std::cout << "point found: " << !t.is_infinite(f) << std::endl;
+    std::cout << *f->vertex(0) << ", " << *f->vertex(1) << ", " << *f->vertex(2) << std::endl;
 
+    f = t.locate(Point(-1.0, -1.0));
+    std::cout << "point found: " << !t.is_infinite(f) << std::endl;
+    std::cout << *f->vertex(0) << ", " << *f->vertex(1) << ", " << *f->vertex(2) << std::endl;
 
+    // Now shift the points on the vertices.
+    v1->set_point(Point(-10, -10));
+    f = t.locate(Point(-1.0, -1.0));
+    std::cout << "point found: " << !t.is_infinite(f) << std::endl;
+    std::cout << *f->vertex(0) << ", " << *f->vertex(1) << ", " << *f->vertex(2) << std::endl;
+
+    // Point location using triangulation hierarchy
+    // Verbose mode of is_valid shows the number of vertices at each level.
+    std::cout << "number of vertices at successive levels:" << std::endl;
+    EXPECT_TRUE(t.is_valid(true));
+
+    {
+      typedef CGAL::Creator_uniform_2<double, Point> Creator;
+      std::cout << "insertion of random points" << std::endl;
+      size_t N = 256;
+      Triangulation tt;
+      CGAL::Random_points_in_square_2<Point, Creator> g(1.);
+      CGAL::cpp11::copy_n(g, (N+1)*(N+1), std::back_inserter(tt));
+
+      // Verbose mode of is_valid shows the number of vertices at each level.
+      std::cout << "The number of vertices at successive levels" << std::endl;
+      EXPECT_TRUE(tt.is_valid(true));
+
+      // Full search
+      CGAL::Timer timer;
+      timer.start();
+      for (size_t i=0; i<1000; ++i)
+      {
+        f = tt.locate(Point(0.1, 0.7));
+      }
+      timer.stop();
+
+      std::cout << "point found: " << !tt.is_infinite(f) << ", time (1000x): " << timer.time() << std::endl;
+      std::cout << *f->vertex(0) << ", " << *f->vertex(1) << ", " << *f->vertex(2) << std::endl;
+
+      // With hint
+      timer.reset();
+      timer.start();
+      for (size_t i=0; i<1000; ++i)
+      {
+        f = tt.locate(Point(0.1, 0.7), f);
+      }
+      timer.stop();
+
+      std::cout << "point found: " << !tt.is_infinite(f) << ", time (1000x): " << timer.time() << std::endl;
+      std::cout << *f->vertex(0) << ", " << *f->vertex(1) << ", " << *f->vertex(2) << std::endl;
+
+    }
+    {
+      // Point location without triangulation hierarchy.
+      typedef CGAL::Creator_uniform_2<double, TSlow::Point> Creator;
+      std::cout << "insertion of random points" << std::endl;
+      size_t N = 256;
+      TSlow tt;
+      CGAL::Random_points_in_square_2<TSlow::Point, Creator> g(1.);
+      CGAL::cpp11::copy_n(g, (N+1)*(N+1), std::back_inserter(tt));
+
+      // Verbose mode of is_valid shows the number of vertices at each level.
+      std::cout << "The number of vertices at successive levels" << std::endl;
+      EXPECT_TRUE(tt.is_valid(true));
+
+      CGAL::Timer timer;
+      timer.start();
+      TSlow::Face_handle ff;
+      for (size_t i=0; i<1000; ++i)
+      {
+        ff = tt.locate(TSlow::Point(0.1, 0.7));
+      }
+      timer.stop();
+
+      std::cout << "point found: " << !tt.is_infinite(ff) << ", time (1000x): " << timer.time() << std::endl;
+      std::cout << *ff->vertex(0) << ", " << *ff->vertex(1) << ", " << *ff->vertex(2) << std::endl;
+    }    
 
   }
 
-  // List vertices
+}
 
+TEST(CGAL, CreateTriangulation4)
+{
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+  typedef CGAL::Triangulation_2<K>                Triangulation;
+  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  typedef Triangulation::Vertex_handle            Vertex_handle;
+  typedef Triangulation::Face_handle              Face_handle;
+  typedef Triangulation::Point                    Point;
+  typedef Triangulation::Face                     Face;
+  typedef Triangulation::Triangle                 Triangle;
+  typedef Triangulation::Edge                     Edge;
+  typedef Triangulation::Segment                  Segment;
+  
+  // Points
+  Point p0(0, 0);
+  Point p1(1, 0);
+  Point p2(0, 1);
+  Point p3(1, 1);
 
-  // List faces
+  {
+    // Manually create a triangulation
+    Triangulation t;
+    Triangulation::Triangulation_data_structure& tds = t.tds();
 
+    // Clear all finite faces and vertices
+    tds.clear();
+
+    // Set dimension
+    tds.set_dimension(2);
+
+    // Infinite Vertex
+    Vertex_handle vi = tds.create_vertex();
+    t.set_infinite_vertex(vi);
+    vi = t.infinite_vertex();
+
+    // Finite Vertices
+    Vertex_handle v0 = tds.create_vertex();
+    Vertex_handle v1 = tds.create_vertex();
+    Vertex_handle v2 = tds.create_vertex();
+    Vertex_handle v3 = tds.create_vertex();
+
+    // Assign points to finite vertices
+    v0->set_point(p0);
+    v1->set_point(p1);
+    v2->set_point(p2);
+    v3->set_point(p3);
+
+    // Add faces
+    Face_handle ff0 = tds.create_face(v0, v1, v3);
+    Face_handle ff1 = tds.create_face(v0, v3, v2);
+
+    Face_handle if0 = tds.create_face(v0, vi, v1);
+    Face_handle if1 = tds.create_face(v1, vi, v3);
+    Face_handle if2 = tds.create_face(v3, vi, v2);
+    Face_handle if3 = tds.create_face(v2, vi, v0);
+
+    // Set vertex faces
+    vi->set_face(if0);
+    v0->set_face(ff0);
+    v1->set_face(ff0);
+    v2->set_face(ff1);
+    v3->set_face(ff1);
+
+    // Set face neighbours
+    ff0->set_neighbors(if1, ff1, if0);
+    ff1->set_neighbors(if2, if3, ff0);
+    if0->set_neighbors(if1, ff0, if3);
+    if1->set_neighbors(if2, ff0, if0);
+    if2->set_neighbors(if3, ff1, if1);
+    if3->set_neighbors(if0, ff1, if2);
+
+    // Check vertices valid
+    // std::cout << "vi->is_valid: " << vi->is_valid(true) << std::endl;
+    // std::cout << "v0->is_valid: " << v0->is_valid(true) << std::endl;
+    // std::cout << "v1->is_valid: " << v1->is_valid(true) << std::endl;
+    // std::cout << "v2->is_valid: " << v2->is_valid(true) << std::endl;
+    // std::cout << "v3->is_valid: " << v3->is_valid(true) << std::endl;
+    EXPECT_TRUE(vi->is_valid());
+    EXPECT_TRUE(v0->is_valid());
+    EXPECT_TRUE(v1->is_valid());
+    EXPECT_TRUE(v2->is_valid());
+    EXPECT_TRUE(v3->is_valid());
+
+    // Check faces valid
+    // std::cout << "ff0->is_valid: " << ff0->is_valid(true) << std::endl;
+    // std::cout << "ff1->is_valid: " << ff1->is_valid(true) << std::endl;
+    EXPECT_TRUE(ff0->is_valid());
+    EXPECT_TRUE(ff1->is_valid());
+
+    // std::cout << "if0->is_valid: " << if0->is_valid(true) << std::endl;
+    // std::cout << "if1->is_valid: " << if1->is_valid(true) << std::endl;
+    // std::cout << "if2->is_valid: " << if2->is_valid(true) << std::endl;
+    // std::cout << "if3->is_valid: " << if3->is_valid(true) << std::endl;
+    EXPECT_TRUE(if0->is_valid());
+    EXPECT_TRUE(if1->is_valid());
+    EXPECT_TRUE(if2->is_valid());
+    EXPECT_TRUE(if3->is_valid());
+
+    // Check valid
+    // std::cout << "is valid: " << tds.is_valid() << std::endl;
+    // std::cout << "dimension: " << tds.dimension() << std::endl;
+    // std::cout << "number of vertices : " << tds.number_of_vertices() << std::endl;
+    // std::cout << "number of faces : " << tds.number_of_faces() << std::endl;
+    // std::cout << "number of edges : " << tds.number_of_edges() << std::endl;
+    EXPECT_TRUE(tds.is_valid(true));
+    EXPECT_EQ(tds.dimension(), 2);
+    EXPECT_EQ(tds.number_of_vertices(), 5);
+    EXPECT_EQ(tds.number_of_faces(), 6);
+    EXPECT_EQ(tds.number_of_edges(), 9);
+
+    // std::cout << "triangulation data structure" << std::endl;
+    // std::cout << tds << std::endl; 
+
+    EXPECT_TRUE(t.is_infinite(vi));
+    EXPECT_TRUE(t.is_infinite(if0));
+    EXPECT_TRUE(t.is_infinite(if1));
+    EXPECT_TRUE(t.is_infinite(if2));
+    EXPECT_TRUE(t.is_infinite(if3));
+
+    EXPECT_FALSE(t.is_infinite(v0));
+    EXPECT_FALSE(t.is_infinite(v1));
+    EXPECT_FALSE(t.is_infinite(v2));
+    EXPECT_FALSE(t.is_infinite(v3));
+    EXPECT_FALSE(t.is_infinite(ff0));
+    EXPECT_FALSE(t.is_infinite(ff1));
+
+    // std::cout << "is valid: " << t.is_valid() << std::endl;
+    // std::cout << "dimension: " << t.dimension() << std::endl;
+    // std::cout << "number of vertices : " << t.number_of_vertices() << std::endl;
+    // std::cout << "number of faces : " << t.number_of_faces() << std::endl;
+    EXPECT_TRUE(t.is_valid(true));
+    EXPECT_EQ(t.dimension(), 2);
+    EXPECT_EQ(t.number_of_vertices(), 4);
+    EXPECT_EQ(t.number_of_faces(), 2);
+
+    // std::cout << "triangulation" << std::endl;
+    // std::cout << t << std::endl; 
+
+  }
 
 }
 
-// TEST(CGAL, PointLocation)
-// {
-//   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-//   typedef CGAL::Regular_triangulation_2<K> Regular_triangulation;
+TEST(CGAL, CreateConstrainedTrianguation4)
+{
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+  typedef CGAL::Triangulation_vertex_base_2<K>                Vbb;
+  typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
+  // typedef CGAL::Triangulation_face_base_2<K>                  Fb;
+  typedef CGAL::Constrained_triangulation_face_base_2<K>      Fb;
+  typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
+  typedef CGAL::Exact_predicates_tag                          Itag;
+  // typedef CGAL::Triangulation_2<K, Tds>                    TBase;
+  typedef CGAL::Constrained_triangulation_2<K, Tds>           TBase;
 
-//    std::ifstream in("data/regular.cin");
-//    Regular_triangulation::Weighted_point wp;
-//    int count = 0;
-//    std::vector<Regular_triangulation::Weighted_point> wpoints;
-//    while(in >> wp){
-//        count++;
-//      wpoints.push_back(wp);
-//    }
+  typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
+  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  typedef Triangulation::Vertex_handle            Vertex_handle;
+  typedef Triangulation::Face_handle              Face_handle;
+  typedef Triangulation::Point                    Point;
+  typedef Triangulation::Face                     Face;
+  
+  // Points
+  Point p0(0, 0);
+  Point p1(1, 0);
+  Point p2(0, 1);
+  Point p3(1, 1);
 
-//    Regular_triangulation rt(wpoints.begin(), wpoints.end());
-//    rt.is_valid();
-//    std::cout << "number of inserted points : " << count << std::endl;
-//    std::cout << "number of vertices :  " ;
-//    std::cout << rt.number_of_vertices() << std::endl;
-//    std::cout << "number of hidden vertices :  " ;
-//    std::cout << rt.number_of_hidden_vertices() << std::endl;
+  // Create a triangulation
+  Triangulation t;
+  Triangulation::Triangulation_data_structure& tds = t.tds();
 
-// }
+  // Insert constraints (i.e. all edges)
+  t.insert_constraint(p0, p1);
+  t.insert_constraint(p2, p3);
+  t.insert_constraint(p0, p2);
+  t.insert_constraint(p1, p3);
+  t.insert_constraint(p0, p3);
+
+
+  // std::cout << "triangulation data structure:" << std::endl;
+  // std::cout << tds << std::endl;
+
+  // std::cout << "triangulation:" << std::endl;
+  // std::cout << t << std::endl;
+
+  // std::cout << "is valid: " << t.is_valid(true) << std::endl;
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
