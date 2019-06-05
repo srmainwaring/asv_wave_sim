@@ -112,6 +112,7 @@ add_library(Hydrodynamics
     src/Grid.cc
     src/MeshTools.cc
     src/OceanTile.cc
+    src/PointLocator.cc
     src/PhysicalConstants.cc
     src/Physics.cc
     src/Utilities.cc
