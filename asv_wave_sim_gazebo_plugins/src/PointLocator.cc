@@ -17,12 +17,14 @@
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Constrained_triangulation_2.h>
+#include <CGAL/Regular_triangulation_2.h>
+#include <CGAL/Timer.h>
 #include <CGAL/Triangulation_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
 #include <CGAL/Triangulation_hierarchy_2.h>
-#include <CGAL/Regular_triangulation_2.h>
-#include <CGAL/point_generators_2.h>
+
 #include <CGAL/algorithm.h>
+#include <CGAL/point_generators_2.h>
 
 namespace asv
 {
@@ -52,7 +54,8 @@ namespace asv
     typedef CGAL::Constrained_triangulation_face_base_2<K>          Fbb;
     typedef CGAL::Triangulation_face_base_with_info_2<int, K, Fbb>  Fb;
     typedef CGAL::Triangulation_data_structure_2<Vb, Fb>            Tds;
-    typedef CGAL::Constrained_triangulation_2<K, Tds>               Tb;
+    typedef CGAL::No_intersection_tag                               Itag;
+    typedef CGAL::Constrained_triangulation_2<K, Tds, Itag>         Tb;
 
     typedef CGAL::Triangulation_hierarchy_2<Tb>     Triangulation;
     typedef Triangulation::Vertex_circulator        Vertex_circulator;
@@ -401,9 +404,16 @@ namespace asv
 
   void PointLocatorPrivate::CreateTriangulationHierarchy()
   {
+    CGAL::Timer timer;
+
     Triangulation::Triangulation_data_structure& ctds = ct.tds();
 
     // Add all finite edges as constraints.
+    std::cout << "adding finite edge constraints: ["
+      << std::distance(t.finite_edges_begin(), t.finite_edges_end())
+      << "]" << std::endl;
+    timer.reset();
+    timer.start();
     for (auto e = t.finite_edges_begin(); e != t.finite_edges_end(); ++e)
     {      
       const auto& f = e->first;
@@ -412,24 +422,37 @@ namespace asv
       const auto& v1 = f->vertex(f->ccw(i));
       ct.insert_constraint(v0->point(), v1->point());
     }
+    timer.stop();
+    std::cout << "finite edge constraints: (" << timer.time() << " s)" << std::endl;
 
     // Now insert all finite points (to force building the triangulation hierarchy)
+    timer.reset();
+    timer.start();
     for (auto v = ct.finite_vertices_begin(); v != ct.finite_vertices_end(); ++v)
     {      
       ct.insert(v->point());
     }
+    timer.stop();
+    std::cout << "finite points: (" << timer.time() << " s)" << std::endl;
 
     // Face list mapping  
 
     // Initialise face info
+    timer.reset();
+    timer.start();
     for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f)
     {
       f->info() = -1; 
     }
+    timer.stop();
+    std::cout << "initialise face info: (" << timer.time() << " s)" << std::endl;
 
     // Face matching
     Face_handle fh;
-    for (auto f = t.finite_faces_begin(); f != t.finite_faces_end(); ++f)
+    size_t idx = 0;
+    timer.reset();
+    timer.start();
+    for (auto f = t.finite_faces_begin(); f != t.finite_faces_end(); ++f, ++idx)
     {
       // Compute the centroid of f and locate the ct face containing this point.
       Point p0 = f->vertex(0)->point();
@@ -451,14 +474,18 @@ namespace asv
       // Set the info value on the found face.
       if (fh != nullptr)
       {
-        auto d1 = std::distance(t.finite_faces_begin(), f);
-        fh->info() = d1;
+        // std::distance is O(N) making this loop O(N^2)
+        // auto d1 = std::distance(t.finite_faces_begin(), f);
+        // fh->info() = d1;
+        fh->info() = idx;
         // std::cout << "found: " << found
         //   << ", is_infinite: " << ct.is_infinite(fh)
         //   << ", info: " << fh->info()
         //   << std::endl;
       }
     }
+    timer.stop();
+    std::cout << "face mapping: (" << timer.time() << " s)" << std::endl;
   }
 
   void PointLocatorPrivate::DebugPrintMesh() const
@@ -625,17 +652,29 @@ namespace asv
 
   void PointLocator::CreateMesh()
   {
+    CGAL::Timer timer;
+    timer.start();
     this->impl->CreateMesh();
+    timer.stop();
+    std::cout << "CreateMesh: (" << timer.time() << " s)" << std::endl;
   }
 
   void PointLocator::CreateTriangulation()
   {
+    CGAL::Timer timer;
+    timer.start();
     this->impl->CreateTriangulation();
+    timer.stop();
+    std::cout << "CreateTriangulation: (" << timer.time() << " s)" << std::endl;
   }
 
   void PointLocator::CreateTriangulationHierarchy()
   {
+    CGAL::Timer timer;
+    timer.start();
     this->impl->CreateTriangulationHierarchy();
+    timer.stop();
+    std::cout << "CreateTriangulationHierarchy: (" << timer.time() << " s)" << std::endl;
   }
 
   void PointLocator::DebugPrintMesh() const
