@@ -600,7 +600,9 @@ TEST(CGAL, VertexRangeIterator)
 }
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_2.h>
+#include <CGAL/Projection_traits_xy_3.h>
 #include <CGAL/Triangulation_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
 #include <CGAL/Triangulation_hierarchy_2.h>
@@ -1111,27 +1113,10 @@ TEST(CGAL, CreateTriangulationN)
 
 TEST(CGAL, CreateTriangulationHierarchyN)
 {
-  CGAL::Timer timer;
-
-  asv::PointLocator pl(128, 500.0);
-
-  timer.reset();
-  timer.start();
+  asv::PointLocator pl(64, 500.0);
   pl.CreateMesh();
-  timer.stop();
-  std::cout << "CreateMesh: (" << timer.time() << " s)" << std::endl;
-
-  timer.reset();
-  timer.start();
   pl.CreateTriangulation();
-  timer.stop();
-  std::cout << "CreateTriangulation: (" << timer.time() << " s)" << std::endl;
-
-  timer.reset();
-  timer.start();
   pl.CreateTriangulationHierarchy();
-  timer.stop();
-  std::cout << "CreateTriangulationHierarchy: (" << timer.time() << " s)" << std::endl;
 
   // pl.DebugPrintMesh();
   // pl.DebugPrintTriangulation();
@@ -1570,11 +1555,9 @@ TEST(CGAL, CreateConstrainedTrianguation4)
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
   typedef CGAL::Triangulation_vertex_base_2<K>                Vbb;
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
-  // typedef CGAL::Triangulation_face_base_2<K>                  Fb;
   typedef CGAL::Constrained_triangulation_face_base_2<K>      Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
-  typedef CGAL::Exact_predicates_tag                          Itag;
-  // typedef CGAL::Triangulation_2<K, Tds>                    TBase;
+  typedef CGAL::No_intersection_tag                          Itag;
   typedef CGAL::Constrained_triangulation_2<K, Tds>           TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
@@ -1611,6 +1594,147 @@ TEST(CGAL, CreateConstrainedTrianguation4)
   // std::cout << "is valid: " << t.is_valid(true) << std::endl;
 
 }
+
+TEST(CGAL, CreateCTAlt)
+{
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+  typedef CGAL::Triangulation_vertex_base_2<K>                Vbb;
+  typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
+  typedef CGAL::Constrained_triangulation_face_base_2<K>      Fb;
+  typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
+  typedef CGAL::No_intersection_tag                          Itag;
+  typedef CGAL::Constrained_triangulation_2<K, Tds>           TBase;
+
+  typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
+  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  typedef Triangulation::Vertex_handle            Vertex_handle;
+  typedef Triangulation::Face_handle              Face_handle;
+  typedef Triangulation::Point                    Point;
+  typedef Triangulation::Face                     Face;
+  
+  // Points
+  Point p0(0, 0);
+  Point p1(1, 0);
+  Point p2(0, 1);
+  Point p3(1, 1);
+
+  // Create a triangulation
+  Triangulation t;
+  Triangulation::Triangulation_data_structure& tds = t.tds();
+
+  // Insert first row
+  t.insert(p0);
+  t.insert(p1);
+
+  // Insert second row + diagonal constraints
+  t.insert(p2);
+  t.insert_constraint(p0, p3);
+
+  std::cout << "triangulation data structure:" << std::endl;
+  // std::cout << tds << std::endl;
+
+  // std::cout << "triangulation:" << std::endl;
+  // std::cout << t << std::endl;
+
+  std::cout << "is valid: " << t.is_valid() << std::endl;
+  t.is_valid(true);
+
+}
+
+TEST(CGAL, CreateCTAltN)
+{
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+  typedef CGAL::Projection_traits_xy_3<K>                     Kp;
+  typedef CGAL::Triangulation_vertex_base_2<Kp>               Vbb;
+  typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
+  typedef CGAL::Constrained_triangulation_face_base_2<Kp>     Fb;
+  typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
+  typedef CGAL::No_intersection_tag                           Itag;
+  // typedef CGAL::Constrained_triangulation_2<Kp, Tds>          TBase;
+  typedef CGAL::Constrained_Delaunay_triangulation_2<Kp, Tds> TBase;
+
+  typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
+  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  typedef Triangulation::Vertex_handle            Vertex_handle;
+  typedef Triangulation::Face_handle              Face_handle;
+  typedef K::Point_3                              Point;
+  typedef Triangulation::Face                     Face;
+  
+  // Create the mesh
+  std::vector<Point> points;
+  std::vector<std::array<size_t, 3>> indices;
+  std::vector<std::array<size_t, 2>> infiniteIndices;
+
+  size_t N = 256;
+  size_t NPlus1 = N + 1;
+  double L = 10.0;
+  double dl = L / N;
+  double lm = - L / 2.0;
+
+  // Create a triangulation
+  Triangulation t;
+  Triangulation::Triangulation_data_structure& tds = t.tds();
+
+  // Points - (N+1) points in each row / column 
+  for (size_t iy=0; iy<=N; ++iy)
+  {
+    double py = iy * dl + lm;
+    for (size_t ix=0; ix<=N; ++ix)
+    {
+      // Vertex position
+      double px = ix * dl + lm;
+      Point p(px, py, 0.0); 
+      points.push_back(p);
+
+      // Insert point
+      // t.insert(p);
+
+      // Add diagonal constraint
+      // if (ix > 0 && iy > 0)
+      // {
+      //   size_t idx = (iy - 1) * NPlus1 + (ix - 1);
+      //   t.insert_constraint(points[idx], p);        
+      // }
+    }
+  }
+
+  // Insert points - NOTE: must insert the points to build the triangulation hierarchy.
+  CGAL::Timer timer;
+  timer.start();
+  t.insert(points.begin(), points.end());
+  timer.stop();
+  std::cout << "point insertion: " << timer.time() << " s" << std::endl;
+
+  // Constraint indices 
+  std::vector<std::pair<size_t, size_t>> cindices;
+  for (size_t iy=0; iy<N; ++iy)
+  {
+    for (size_t ix=0; ix<N; ++ix)
+    {
+      size_t idx1 = iy * NPlus1 + ix;
+      size_t idx2 = (iy + 1) * NPlus1 + (ix + 1);
+      cindices.push_back(std::make_pair(idx1, idx2));
+    }
+  }
+
+  // Insert constraints
+  timer.reset();
+  timer.start();
+  t.insert_constraints(points.begin(), points.end(), cindices.begin(), cindices.end());   
+  timer.stop();
+  std::cout << "constraint insertion: " << timer.time() << " s" << std::endl;
+
+  std::cout << "triangulation data structure:" << std::endl;
+  // std::cout << tds << std::endl;
+
+  // std::cout << "triangulation:" << std::endl;
+  // std::cout << t << std::endl;
+
+  std::cout << "is valid: " << t.is_valid() << std::endl;
+  t.is_valid(true);
+
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
