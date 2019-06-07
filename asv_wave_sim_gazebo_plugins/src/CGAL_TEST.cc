@@ -1097,14 +1097,18 @@ TEST(CGAL, CreateTriangulationN)
 
 TEST(CGAL, CreateTriangulationHierarchyN)
 {
-  asv::PointLocator pl(64, 500.0);
+  // asv::PointLocator pl(2, 2);
+  asv::PointLocator pl(3, 3);
+  // asv::PointLocator pl(4, 4);
+  // asv::PointLocator pl(256, 256);
   pl.CreateMesh();
-  pl.CreateTriangulation();
-  pl.CreateTriangulationHierarchy();
+  // pl.CreateTriangulation();
+  // pl.CreateTriangulationHierarchy();
+  pl.CreateConstrainedDelaunayTriangulationHierarchy();
 
   // pl.DebugPrintMesh();
   // pl.DebugPrintTriangulation();
-  // pl.DebugPrintTriangulationHierarchy();
+  pl.DebugPrintTriangulationHierarchy();
 
   EXPECT_TRUE(pl.IsValid(true));
 }
@@ -1614,14 +1618,14 @@ TEST(CGAL, CreateCTAlt)
   t.insert(p2);
   t.insert_constraint(p0, p3);
 
-  std::cout << "triangulation data structure:" << std::endl;
+  // std::cout << "triangulation data structure:" << std::endl;
   // std::cout << tds << std::endl;
 
   // std::cout << "triangulation:" << std::endl;
   // std::cout << t << std::endl;
 
-  std::cout << "is valid: " << t.is_valid() << std::endl;
-  t.is_valid(true);
+  // std::cout << "is valid: " << t.is_valid() << std::endl;
+  EXPECT_TRUE(t.is_valid());
 
 }
 
@@ -1634,7 +1638,6 @@ TEST(CGAL, CreateCTAltN)
   typedef CGAL::Constrained_triangulation_face_base_2<Kp>     Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
   typedef CGAL::No_intersection_tag                           Itag;
-  // typedef CGAL::Constrained_triangulation_2<Kp, Tds>          TBase;
   typedef CGAL::Constrained_Delaunay_triangulation_2<Kp, Tds> TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
@@ -1687,7 +1690,7 @@ TEST(CGAL, CreateCTAltN)
   timer.start();
   t.insert(points.begin(), points.end());
   timer.stop();
-  std::cout << "point insertion: " << timer.time() << " s" << std::endl;
+  // std::cout << "point insertion: " << timer.time() << " s" << std::endl;
 
   // Constraint indices 
   std::vector<std::pair<size_t, size_t>> cindices;
@@ -1706,17 +1709,16 @@ TEST(CGAL, CreateCTAltN)
   timer.start();
   t.insert_constraints(points.begin(), points.end(), cindices.begin(), cindices.end());   
   timer.stop();
-  std::cout << "constraint insertion: " << timer.time() << " s" << std::endl;
+  // std::cout << "constraint insertion: " << timer.time() << " s" << std::endl;
 
-  std::cout << "triangulation data structure:" << std::endl;
+  // std::cout << "triangulation data structure:" << std::endl;
   // std::cout << tds << std::endl;
 
   // std::cout << "triangulation:" << std::endl;
   // std::cout << t << std::endl;
 
-  std::cout << "is valid: " << t.is_valid() << std::endl;
-  t.is_valid(true);
-
+  // std::cout << "is valid: " << t.is_valid() << std::endl;
+  EXPECT_TRUE(t.is_valid());
 }
 
 
