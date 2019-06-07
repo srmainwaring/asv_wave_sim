@@ -1113,20 +1113,84 @@ TEST(CGAL, CreateTriangulationN)
 
 TEST(CGAL, CreateTriangulationHierarchyN)
 {
-  // asv::PointLocator pl(2, 2);
-  asv::PointLocator pl(3, 3);
-  // asv::PointLocator pl(4, 4);
-  // asv::PointLocator pl(256, 256);
+  size_t N = 256;
+  double L = 500.0;
+  asv::PointLocator pl(N, L);
   pl.CreateMesh();
-  // pl.CreateTriangulation();
-  // pl.CreateTriangulationHierarchy();
-  pl.CreateConstrainedDelaunayTriangulationHierarchy();
+  pl.CreateTriangulation();
 
   // pl.DebugPrintMesh();
   // pl.DebugPrintTriangulation();
-  pl.DebugPrintTriangulationHierarchy();
 
-  EXPECT_TRUE(pl.IsValid(true));
+  EXPECT_TRUE(pl.IsValid());
+
+  // Location tests..
+  std::vector<Point3>                 points;
+  std::vector<std::array<size_t, 3>>  indices;
+  
+  // Create mesh
+  {
+    size_t NPlus1 = N + 1;
+    double dl = L / N;
+    double lm = - L / 2.0;
+
+    // Points - (N+1) points in each row / column 
+    for (size_t iy=0; iy<=N; ++iy)
+    {
+      double py = iy * dl + lm;
+      for (size_t ix=0; ix<=N; ++ix)
+      {
+        // Vertex position
+        double px = ix * dl + lm;
+        Point3 point(px, py, 0.0);
+        points.push_back(point);
+      }
+    }
+
+    // Face indices
+    for (size_t iy=0; iy<N; ++iy)
+    {
+      for (size_t ix=0; ix<N; ++ix)
+      {
+        // Get the points in the cell coordinates
+        size_t idx0 = iy * NPlus1 + ix;
+        size_t idx1 = iy * NPlus1 + ix + 1;
+        size_t idx2 = (iy+1) * NPlus1 + ix + 1;
+        size_t idx3 = (iy+1) * NPlus1 + ix;
+
+        // Face indices
+        indices.push_back({ idx0, idx1, idx2 });
+        indices.push_back({ idx0, idx2, idx3 });
+      }
+    } 
+  } 
+
+  CGAL::Timer timer;
+  timer.start();
+  // Locate faces
+  for (size_t i=0; i<indices.size(); ++i)
+  {
+    // Get face index.
+    auto& f  = indices[i]; 
+
+    // Compute centroid.
+    auto& p0 = points[f[0]];
+    auto& p1 = points[f[1]];
+    auto& p2 = points[f[2]];
+    Point3 p(
+      (p0.x() + p1.x() + p2.x())/3.0,
+      (p0.y() + p1.y() + p2.y())/3.0,
+      (p0.z() + p1.z() + p2.z())/3.0
+    );
+
+    // Locate point.
+    size_t fidx = 0;
+    bool found = pl.Locate(p, fidx);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(fidx, i);
+  }
+  timer.stop();
+  std::cout << "Locate " << indices.size() << " points: (" << timer.time() << " s)" << std::endl;
 }
 
 TEST(CGAL, CreateTriangulation3)
