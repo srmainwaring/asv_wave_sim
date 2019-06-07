@@ -39,6 +39,8 @@ namespace asv
     
     public: void CreateTriangulationHierarchy();
     
+    public: void CreateConstrainedDelaunayTriangulationHierarchy();
+
     public: bool IsValid(bool verbose=false) const;
 
     public: void DebugPrintMesh() const;
