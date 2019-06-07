@@ -18,6 +18,8 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_POINT_LOCATOR_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_POINT_LOCATOR_HH_
 
+#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
+
 #include <memory>
 
 namespace asv
@@ -33,22 +35,18 @@ namespace asv
     
     public: PointLocator(size_t _N, double _L);
     
+    public: bool Locate(const Point3& p, size_t& faceIndex) const;
+
     public: void CreateMesh();
     
     public: void CreateTriangulation();
-    
-    public: void CreateTriangulationHierarchy();
-    
-    public: void CreateConstrainedDelaunayTriangulationHierarchy();
-
+        
     public: bool IsValid(bool verbose=false) const;
 
     public: void DebugPrintMesh() const;
     
     public: void DebugPrintTriangulation() const;
     
-    public: void DebugPrintTriangulationHierarchy() const;
-
     private: std::unique_ptr<PointLocatorPrivate> impl;
   };
 
