@@ -16,12 +16,15 @@
 #include "asv_wave_sim_gazebo_plugins/PointLocator.hh"
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_2.h>
+#include <CGAL/Projection_traits_xy_3.h>
 #include <CGAL/Regular_triangulation_2.h>
 #include <CGAL/Timer.h>
 #include <CGAL/Triangulation_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
 #include <CGAL/Triangulation_hierarchy_2.h>
+#include <CGAL/Triangulation_vertex_base_with_info_2.h>
 
 #include <CGAL/algorithm.h>
 #include <CGAL/point_generators_2.h>
@@ -40,6 +43,7 @@ namespace asv
     void CreateMesh();
     void CreateTriangulation();
     void CreateTriangulationHierarchy();
+    void CreateConstrainedDelaunayTriangulationHierarchy();
     
     bool IsValid(bool verbose=false) const;
 
@@ -48,24 +52,28 @@ namespace asv
     void DebugPrintTriangulationHierarchy() const;
 
     // Type definitions
-    typedef CGAL::Exact_predicates_inexact_constructions_kernel     K;
-    typedef CGAL::Triangulation_vertex_base_2<K>                    Vbb;
-    typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>        Vb;
-    typedef CGAL::Constrained_triangulation_face_base_2<K>          Fbb;
-    typedef CGAL::Triangulation_face_base_with_info_2<int, K, Fbb>  Fb;
-    typedef CGAL::Triangulation_data_structure_2<Vb, Fb>            Tds;
-    typedef CGAL::No_intersection_tag                               Itag;
-    typedef CGAL::Constrained_triangulation_2<K, Tds, Itag>         Tb;
+    typedef CGAL::Exact_predicates_inexact_constructions_kernel         K;
+    typedef CGAL::Projection_traits_xy_3<K>                             Kp;
 
+    // typedef CGAL::Triangulation_vertex_base_2<Kp>                       Vbbb;
+    // typedef CGAL::Triangulation_vertex_base_with_info_2<int, Kp, Vbbb>  Vbb;
+    typedef CGAL::Triangulation_vertex_base_with_info_2<int, Kp>        Vbb;
+    typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>            Vb;
+
+    typedef CGAL::Constrained_triangulation_face_base_2<Kp>             Fbb;
+    typedef CGAL::Triangulation_face_base_with_info_2<int, Kp, Fbb>     Fb;
+
+    typedef CGAL::Triangulation_data_structure_2<Vb, Fb>                Tds;
+    typedef CGAL::No_intersection_tag                                   Itag;
+    typedef CGAL::Constrained_Delaunay_triangulation_2<Kp, Tds, Itag>   Tb;
+
+    // typedef Tb                                      Triangulation;
     typedef CGAL::Triangulation_hierarchy_2<Tb>     Triangulation;
-    typedef Triangulation::Vertex_circulator        Vertex_circulator;
     typedef Triangulation::Vertex_handle            Vertex_handle;
     typedef Triangulation::Face_handle              Face_handle;
-    typedef Triangulation::Point                    Point;
     typedef Triangulation::Face                     Face;
     typedef Triangulation::Triangle                 Triangle;
-    typedef Triangulation::Edge                     Edge;
-    typedef Triangulation::Segment                  Segment;
+    typedef K::Point_3                              Point;
 
     // Dimensions
     size_t N;
@@ -108,7 +116,7 @@ namespace asv
       {
         // Vertex position
         double px = ix * dl + lm;
-        Point point(px, py);        
+        Point point(px, py, 0.0);
         points.push_back(point);
       }
     }
@@ -460,7 +468,8 @@ namespace asv
       Point p2 = f->vertex(2)->point();
       Point p(
         (p0.x() + p1.x() + p2.x())/3.0,
-        (p0.y() + p1.y() + p2.y())/3.0
+        (p0.y() + p1.y() + p2.y())/3.0,
+        0.0
       );
       fh = ct.locate(p, fh);
       bool found = fh != nullptr;
@@ -486,6 +495,105 @@ namespace asv
     }
     timer.stop();
     std::cout << "face mapping: (" << timer.time() << " s)" << std::endl;
+  }
+
+  void PointLocatorPrivate::CreateConstrainedDelaunayTriangulationHierarchy()
+  {
+    // Insert points - NOTE: must insert the points to build the triangulation hierarchy.
+    CGAL::Timer timer;
+
+    // Point with info
+    std::vector<std::pair<Point, int>> pointsWithInfo;
+    for (size_t i=0; i<points.size(); ++i)
+    {
+      pointsWithInfo.push_back(std::make_pair(points[i], i));
+    }
+
+    timer.start();
+    // @NOTE insert poinst with info not compiling for a triangulation hierarcy. See below. 
+    // ct.insert(pointsWithInfo.begin(), pointsWithInfo.end());
+    ct.insert(points.begin(), points.end());
+    timer.stop();
+    std::cout << "insert points: " << timer.time() << " s" << std::endl;
+
+    // Set vertex info
+    // @NOTE - use this work around because the insert for points with info
+    // does not compile for a triangulation hierarchy.
+    timer.reset();
+    timer.start();
+    Face_handle fh;
+    for (size_t i=0; i<points.size(); ++i)
+    {
+      auto vh = ct.insert(points[i] ,fh);
+      if (vh != nullptr)
+      {
+        vh->info() = i;
+      }
+    }
+    timer.stop();
+    std::cout << "set vertex info: " << timer.time() << " s" << std::endl;
+
+    // Constraint indices 
+    std::vector<std::pair<size_t, size_t>> cindices;
+    for (size_t iy=0; iy<N; ++iy)
+    {
+      for (size_t ix=0; ix<N; ++ix)
+      {
+        size_t idx1 = iy * NPlus1 + ix;
+        size_t idx2 = (iy + 1) * NPlus1 + (ix + 1);
+        cindices.push_back(std::make_pair(idx1, idx2));
+      }
+    }
+
+    // Insert constraints
+    timer.reset();
+    timer.start();
+    ct.insert_constraints(points.begin(), points.end(), cindices.begin(), cindices.end());   
+    timer.stop();
+    std::cout << "insert constraints: " << timer.time() << " s" << std::endl;
+
+    // Set info on infinite vertex
+    ct.infinite_vertex()->info() = -1;
+
+    // Face list mapping  
+
+    // Initialise face info
+    timer.reset();
+    timer.start();
+    for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f)
+    {
+      f->info() = -1; 
+    }
+    timer.stop();
+    std::cout << "initialise face info: (" << timer.time() << " s)" << std::endl;
+
+    // Face matching
+    // Face_handle fh;
+    fh = nullptr;
+    size_t idx = 0;
+    timer.reset();
+    timer.start();
+    for (auto f = indices.begin(); f != indices.end(); ++f, ++idx)
+    {
+      // Compute the centroid of f and locate the ct face containing this point.
+      auto& p0 = points[f->at(0)];
+      auto& p1 = points[f->at(1)];
+      auto& p2 = points[f->at(2)];
+      Point p(
+        (p0.x() + p1.x() + p2.x())/3.0,
+        (p0.y() + p1.y() + p2.y())/3.0,
+        0.0
+      );
+      fh = ct.locate(p, fh);
+
+      // Set the info value on the found face.
+      if (fh != nullptr)
+      {
+        fh->info() = idx;
+      }
+    }
+    timer.stop();
+    std::cout << "face mapping: (" << timer.time() << " s)" << std::endl;    
   }
 
   void PointLocatorPrivate::DebugPrintMesh() const
@@ -573,11 +681,20 @@ namespace asv
     std::cout << "number of faces : " << ct.number_of_faces() << std::endl;
 
     size_t idx = 0;
-    std::cout << "face -> index:" << std::endl;
-    for (auto f = ct.finite_faces_begin(); f != ct.finite_faces_end(); ++f, ++idx)
+    std::cout << "vertex -> mesh vertex:" << std::endl;
+    for (auto v = ct.all_vertices_begin(); v != ct.all_vertices_end(); ++v, ++idx)
+    {
+      std::cout << "vertex: " << idx
+        << ", mesh vertex: " << v->info()
+        << std::endl; 
+    }
+
+    idx = 0;
+    std::cout << "face -> mesh face:" << std::endl;
+    for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f, ++idx)
     {
       std::cout << "face: " << idx
-        << ", index: " << f->info()
+        << ", mesh face: " << f->info()
         << std::endl; 
     }
   }
@@ -675,6 +792,15 @@ namespace asv
     this->impl->CreateTriangulationHierarchy();
     timer.stop();
     std::cout << "CreateTriangulationHierarchy: (" << timer.time() << " s)" << std::endl;
+  }
+
+  void PointLocator::CreateConstrainedDelaunayTriangulationHierarchy()
+  {
+    CGAL::Timer timer;
+    timer.start();
+    this->impl->CreateConstrainedDelaunayTriangulationHierarchy();
+    timer.stop();
+    std::cout << "CreateConstrainedDelaunayTriangulationHierarchy: (" << timer.time() << " s)" << std::endl;
   }
 
   void PointLocator::DebugPrintMesh() const
