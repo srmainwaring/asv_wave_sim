@@ -123,8 +123,13 @@ namespace asv
       // Insert the mesh into OGRE (now in Tile)
       // asv::InsertMesh(tile.mesh.release());
 #endif
-      this->data->oceanTile.reset(new OceanTile(128, 512.0));
-      this->data->oceanTile->SetWindVelocity(25.0, 0.0);
+      // @TODO Synchronise visual with physics...
+      int N = 128;
+      double L = 512.0;
+      double u = 15.0;
+
+      this->data->oceanTile.reset(new OceanTile(N, L));
+      this->data->oceanTile->SetWindVelocity(u, 0.0);
       this->data->oceanTile->Create();
       this->data->oceanTile->Update(0.0);
 
@@ -133,7 +138,7 @@ namespace asv
       this->data->vis->Load();
       gazebo::rendering::AttachMesh(*this->data->vis, this->data->meshName);
       this->data->vis->SetPosition(this->Position());
-      this->data->vis->SetType(rendering::Visual::VT_VISUAL);
+      ->data->vis->thisSetType(rendering::Visual::VT_VISUAL);
 
       // Set the material from the parent visual
       auto materialName = this->GetMaterialName();
