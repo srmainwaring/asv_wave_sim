@@ -227,7 +227,6 @@ link_directories(
 
 add_executable(TestRunner
   src/TestRunner.cc
-  src/CGAL_TEST.cc
   src/MeshTools_TEST.cc
 )
 

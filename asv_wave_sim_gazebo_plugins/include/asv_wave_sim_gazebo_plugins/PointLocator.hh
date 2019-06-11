@@ -19,35 +19,35 @@
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_POINT_LOCATOR_HH_
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
+#include <gazebo/rendering/ogre_gazebo.h>
 
 #include <memory>
+#include <vector>
 
-namespace asv
-{
+namespace asv {
+
 ///////////////////////////////////////////////////////////////////////////////
 // PointLocator
   
   class PointLocatorPrivate;
   
-  class PointLocator
-  {
-    public: virtual ~PointLocator();
-    
-    public: PointLocator(size_t _N, double _L);
-    
-    public: bool Locate(const Point3& p, size_t& faceIndex) const;
+  class PointLocator {
+   public:
+    virtual ~PointLocator();
+    PointLocator(int _N, double _L);
+    bool Locate(const Point3& query, int64_t *faceIndex) const;
+    double Height(const Point3& query) const;
+    void CreateMesh();
+    void CreateTriangulation();
+    bool IsValid(bool verbose=false) const;
+    void DebugPrintMesh() const;
+    void DebugPrintTriangulation() const;
+    void UpdatePoints(const std::vector<Point3>& from);
+    void UpdatePoints(const std::vector<Ogre::Vector3>& from);
+    void UpdatePoints(const Mesh& from);
 
-    public: void CreateMesh();
-    
-    public: void CreateTriangulation();
-        
-    public: bool IsValid(bool verbose=false) const;
-
-    public: void DebugPrintMesh() const;
-    
-    public: void DebugPrintTriangulation() const;
-    
-    private: std::unique_ptr<PointLocatorPrivate> impl;
+   private:
+    std::unique_ptr<PointLocatorPrivate> impl;
   };
 
 ///////////////////////////////////////////////////////////////////////////////

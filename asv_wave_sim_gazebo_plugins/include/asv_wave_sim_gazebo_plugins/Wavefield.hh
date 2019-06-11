@@ -48,6 +48,9 @@ namespace asv
     /// \brief Access the wave field grid.
     public: virtual std::shared_ptr<const Grid> GetGrid() const = 0;
 
+    // Compute the height at a point.
+    public: virtual double Height(const Point3& point) const = 0;
+
     /// \brief Get the wave parameters.
     public: virtual std::shared_ptr<const WaveParameters> GetParameters() const = 0;
 
@@ -91,6 +94,9 @@ namespace asv
 
     /// \brief Access the wave field grid.
     public: std::shared_ptr<const Grid> GetGrid() const override;
+
+    // Compute the height at a point.
+    public: double Height(const Point3& point) const override;
 
     /// \brief Access the wave field mesh as a Gazebo Mesh.
     // public: std::shared_ptr<const gazebo::common::Mesh> GetGzMesh() const;
@@ -140,8 +146,8 @@ namespace asv
     /// \brief Access the wave field grid.
     public: std::shared_ptr<const Grid> GetGrid() const override;
 
-    /// \brief Access the wave field mesh as a Gazebo Mesh.
-    // public: std::shared_ptr<const gazebo::common::Mesh> GetGzMesh() const;
+    // Compute the height at a point.
+    public: double Height(const Point3& point) const override;
 
     /// \brief Get the wave parameters.
     public: std::shared_ptr<const WaveParameters> GetParameters() const override;

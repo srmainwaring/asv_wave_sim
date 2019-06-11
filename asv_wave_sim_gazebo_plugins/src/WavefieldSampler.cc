@@ -102,6 +102,7 @@ namespace asv
 
   void WavefieldSampler::UpdatePatch()
   {
+#if 0
     // Direction of the line search (i.e. positive z-axis)
     Direction3 direction(0, 0, 1);
 
@@ -142,6 +143,28 @@ namespace asv
 
       target->point(v1) = point;
     }
+#else
+
+    // @NOTE: alternative approach using CGAL triangulation.
+
+    // Update the water patch Mesh
+    // gzmsg << "Update water patch..." << std::endl;
+    const auto& target = this->data->waterPatch->GetMesh();
+    for (
+      auto&& vb = std::begin(target->vertices()); 
+      vb != std::end(target->vertices());
+      ++vb
+    )
+    {
+      const auto& vertex = *vb;
+      const auto& p0 = target->point(vertex);
+      double height = this->data->wavefield->Height(p0);
+      Point3 p1(p0.x(), p0.y(), height);
+      target->point(vertex) = p1;
+      // gzmsg << target->point(vertex) << std::endl;
+    }
+
+#endif
   }
 
   double WavefieldSampler::ComputeDepth(const Point3& _point) const
