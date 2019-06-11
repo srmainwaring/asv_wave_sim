@@ -20,6 +20,7 @@
 
 
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
+#include "asv_wave_sim_gazebo_plugins/PointLocator.hh"
 
 #include <gazebo/gazebo.hh>
 
@@ -83,7 +84,10 @@ namespace asv
     public: std::shared_ptr<const Grid> initialGrid;
 
     /// \brief The current position of the wave field.
-    public: std::shared_ptr<Grid> grid;    
+    public: std::shared_ptr<Grid> grid;
+
+    /// \brief The current position of the wave field.
+    public: std::shared_ptr<PointLocator> pointLocator;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,6 +107,11 @@ namespace asv
     this->data->grid.reset(new Grid(
       this->data->size, this->data->cellCount));
     
+    // Point Locator
+    int N = this->data->cellCount[0];
+    double L = this->data->size[0];
+    this->data->pointLocator.reset(new PointLocator(N, L));
+
     // Update
     this->Update(0.0);
   }
@@ -119,6 +128,14 @@ namespace asv
     this->data->grid.reset(new Grid(
       this->data->size, this->data->cellCount));
     
+    // Point Locator
+    int64_t N = this->data->cellCount[0];
+    double L = this->data->size[0];
+    this->data->pointLocator.reset(new PointLocator(N, L));
+    this->data->pointLocator->CreateMesh();
+    this->data->pointLocator->CreateTriangulation();
+    // this->data->pointLocator->DebugPrintTriangulation();
+
     // Update
     this->Update(0.0);
   }
@@ -131,6 +148,12 @@ namespace asv
   std::shared_ptr<const Grid> WavefieldGerstner::GetGrid() const
   {
     return this->data->grid;
+  }
+
+  double WavefieldGerstner::Height(const Point3& point) const
+  {
+    double h = this->data->pointLocator->Height(point);    
+    return h;
   }
 
   std::shared_ptr<const WaveParameters> WavefieldGerstner::GetParameters() const
@@ -147,6 +170,10 @@ namespace asv
   void WavefieldGerstner::Update(double _time)
   {
     this->UpdateGerstnerWave(_time);
+
+    // Update point locator
+    auto& mesh = *this->data->grid->GetMesh();
+    this->data->pointLocator->UpdatePoints(mesh);
   }
 
   void WavefieldGerstner::UpdateGerstnerWave(double _time)
@@ -261,6 +288,9 @@ namespace asv
 
     /// \brief The current position of the wave field.
     public: std::shared_ptr<Grid> grid;
+
+    /// \brief The current position of the wave field.
+    public: std::shared_ptr<PointLocator> pointLocator;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -276,9 +306,10 @@ namespace asv
   {
     gzmsg << "Constructing WavefieldOceanTile..." <<  std::endl;
 
-    size_t N = 128;
-    size_t NPlus1 = N + 1;
+    int N = 128;
+    int NPlus1 = N + 1;
     double L = 512.0;
+    double u = 15.0;
 
     // Wave parameters
     gzmsg << "Creating WaveParameters." <<  std::endl;
@@ -287,13 +318,20 @@ namespace asv
     // OceanTile
     gzmsg << "Creating OceanTile." <<  std::endl;
     this->data->oceanTile.reset(new OceanTile(N, L, false));
-    this->data->oceanTile->SetWindVelocity(25.0, 0.0);
+    this->data->oceanTile->SetWindVelocity(u, 0.0);
     this->data->oceanTile->Create();
     this->data->oceanTile->Update(0.0);
 
     // Grid
     gzmsg << "Creating grid." <<  std::endl;
-    this->data->grid.reset(new Grid({ L, L }, { NPlus1, NPlus1 }));
+    this->data->grid.reset(new Grid({ L, L }, { static_cast<size_t>(NPlus1), static_cast<size_t>(NPlus1) }));
+    
+    // Point Locator
+    gzmsg << "Creating point locator." <<  std::endl;
+    this->data->pointLocator.reset(new PointLocator(N, L));
+    this->data->pointLocator->CreateMesh();
+    this->data->pointLocator->CreateTriangulation();
+    // this->data->pointLocator->DebugPrintTriangulation();
     
     // Update
     this->Update(0.0);
@@ -309,6 +347,12 @@ namespace asv
   std::shared_ptr<const Grid> WavefieldOceanTile::GetGrid() const
   {
     return this->data->grid;
+  }
+
+  double WavefieldOceanTile::Height(const Point3& point) const
+  {
+    double h = this->data->pointLocator->Height(point);    
+    return h;
   }
 
   std::shared_ptr<const WaveParameters> WavefieldOceanTile::GetParameters() const
@@ -341,6 +385,9 @@ namespace asv
       // Visual and physics out of phase? x-y transposed?
       mesh.point(vtx1) = Point3(vtx0.x, vtx0.y, vtx0.z);
     }
+
+    // Update the point locator.
+    this->data->pointLocator->UpdatePoints(vertices);
 
   }
 
