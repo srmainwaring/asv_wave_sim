@@ -40,6 +40,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <list>
@@ -50,8 +51,7 @@
 // Utilities
 
 // Extract a triangle from a face
-namespace 
-{
+namespace {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Triangle_3 Triangle;
   typedef K::Point_3 Point3;
@@ -87,8 +87,7 @@ namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests
-TEST(CGAL, Surprising)
-{
+TEST(CGAL, Surprising) {
   typedef CGAL::Simple_cartesian<double> Kernel;
   typedef Kernel::Point_2 Point_2;
 
@@ -106,8 +105,7 @@ TEST(CGAL, Surprising)
   }  
 }
 
-TEST(CGAL, SurfaceMesh)
-{
+TEST(CGAL, SurfaceMesh) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
   typedef K::Plane_3 Plane;
@@ -137,12 +135,10 @@ TEST(CGAL, SurfaceMesh)
   Segment segment_query(a,b);
 
   // tests intersections with segment query
-  if(tree.do_intersect(segment_query))
-  {
+  if(tree.do_intersect(segment_query)) {
       // std::cout << "intersection(s)" << std::endl;
   }
-  else
-  {
+  else {
     // std::cout << "no intersection" << std::endl;
   }
 
@@ -154,11 +150,9 @@ TEST(CGAL, SurfaceMesh)
   // (generally a point)
   Segment_intersection intersection =
       tree.any_intersection(segment_query);
-  if(intersection)
-  {
+  if(intersection) {
     // gets intersection object
-    if(boost::get<Point3>(&(intersection->first)))
-    {
+    if(boost::get<Point3>(&(intersection->first))) {
       Point3* p = boost::get<Point3>(&(intersection->first));
       // std::cout << "intersection object is a point " << *p <<  std::endl;
       // std::cout << "with face "<< intersection->second  <<  std::endl;
@@ -181,10 +175,8 @@ TEST(CGAL, SurfaceMesh)
   // computes first encountered intersection with plane query
   // (generally a segment)
   Plane_intersection plane_intersection = tree.any_intersection(plane_query);
-  if(plane_intersection)
-  {
-    if(boost::get<Segment>(&(plane_intersection->first)))
-    {
+  if(plane_intersection) {
+    if(boost::get<Segment>(&(plane_intersection->first))) {
       Segment* s = boost::get<Segment>(&(plane_intersection->first));
       // std::cout << "one intersection object is the segment " << s << std::endl;
       // std::cout << "with face "<< intersection->second  <<  std::endl;
@@ -196,8 +188,7 @@ TEST(CGAL, SurfaceMesh)
 /// CGAL-4.13/examples/AABB_tree/AABB_polyhedron_facet_intersection_example.cpp
 /// Author(s) : Camille Wormser, Pierre Alliez
 ///
-TEST(CGAL, AABBPolyhedronFacetIntersection)
-{
+TEST(CGAL, AABBPolyhedronFacetIntersection) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::FT FT;
   typedef K::Point_3 Point3;
@@ -243,8 +234,7 @@ TEST(CGAL, AABBPolyhedronFacetIntersection)
   //   << " )" << std::endl;
 }
 
-TEST(CGAL, SurfaceMeshGridCell)
-{
+TEST(CGAL, SurfaceMeshGridCell) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
   typedef K::Plane_3 Plane;
@@ -283,16 +273,14 @@ TEST(CGAL, SurfaceMeshGridCell)
 
  { 
     // std::cout << "Vertices " << std::endl;    
-    for(auto&& vertex : mesh.vertices())
-    {
+    for(auto&& vertex : mesh.vertices()) {
       // std::cout << vertex << std::endl;
     }
   }
 
   { 
     // std::cout << "Faces " << std::endl;
-    for(auto&& face : mesh.faces())
-    {
+    for(auto&& face : mesh.faces()) {
       // std::cout << face << std::endl;
 
       Triangle tri = asv::Geometry::MakeTriangle(mesh, face);
@@ -315,16 +303,13 @@ TEST(CGAL, SurfaceMeshGridCell)
     Ray ray_query(r0, r1);
     t.start();
     Ray_intersection intersection;
-    for (int i=0; i<1000; ++i)
-    {
+    for (int i=0; i<1000; ++i) {
       intersection = tree.first_intersection(ray_query);
     }
     // std::cout << "Intersect (x1000): " << t.time() << " sec" << std::endl;
 
-    if(intersection)
-    {
-      if(boost::get<Point3>(&(intersection->first)))
-      {
+    if(intersection) {
+      if(boost::get<Point3>(&(intersection->first))) {
         const Point3* p =  boost::get<Point3>(&(intersection->first));
         // std::cout <<  *p << std::endl;
       }
@@ -332,8 +317,7 @@ TEST(CGAL, SurfaceMeshGridCell)
   }
 }
 
-TEST(CGAL, SurfaceMeshGrid)
-{
+TEST(CGAL, SurfaceMeshGrid) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
   typedef K::Plane_3 Plane;
@@ -365,16 +349,14 @@ TEST(CGAL, SurfaceMeshGrid)
   // Properties
   // { 
   //   std::cout << "Vertices " << std::endl;    
-  //   for(auto&& vertex : mesh.vertices())
-  //   {
+  //   for(auto&& vertex : mesh.vertices()) {
   //     std::cout << vertex << std::endl;
   //   }
   // }
 
   // { 
   //   std::cout << "Faces " << std::endl;
-  //   for(auto&& face : mesh.faces())
-  //   {
+  //   for(auto&& face : mesh.faces()) {
   //     std::cout << face << std::endl;
 
   //     Triangle tri = asv::Geometry::MakeTriangle(mesh, face);
@@ -400,8 +382,7 @@ TEST(CGAL, SurfaceMeshGrid)
     t.reset();
     t.start();
     Ray_intersection intersection;
-    for (auto v : sphere->vertices())
-    {
+    for (auto v : sphere->vertices()) {
       Point3 r0 = sphere->point(v);
       Point3 r1(r0.x(), r0.y(), r0.z() - 10.0);
       Ray ray_query(r0, r1);
@@ -410,10 +391,8 @@ TEST(CGAL, SurfaceMeshGrid)
     t.stop();
     // std::cout << "Intersect (x" << sphere->number_of_vertices() << "): " << t.time() << " sec" << std::endl;
 
-    if(intersection)
-    {
-      if(boost::get<Point3>(&(intersection->first)))
-      {
+    if(intersection) {
+      if(boost::get<Point3>(&(intersection->first))) {
         const Point3* p =  boost::get<Point3>(&(intersection->first));
         // std::cout <<  *p << std::endl;
       }
@@ -421,8 +400,7 @@ TEST(CGAL, SurfaceMeshGrid)
   }
 }
 
-TEST(CGAL, SurfaceMeshModifyGrid)
-{
+TEST(CGAL, SurfaceMeshModifyGrid) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
   typedef K::Plane_3 Plane;
@@ -454,8 +432,7 @@ TEST(CGAL, SurfaceMeshModifyGrid)
   // Properties
   { 
     // std::cout << "Update Points" << std::endl;    
-    for(auto&& vertex : mesh.vertices())
-    {
+    for(auto&& vertex : mesh.vertices()) {
       Point3& point = mesh.point(vertex);
       point += Vector3(0, 0, 10);  
     }
@@ -463,8 +440,7 @@ TEST(CGAL, SurfaceMeshModifyGrid)
 
   { 
     // std::cout << "Faces" << std::endl;
-    for(auto&& face : mesh.faces())
-    {
+    for(auto&& face : mesh.faces()) {
       // std::cout << face << std::endl;
 
       Triangle tri = asv::Geometry::MakeTriangle(mesh, face);
@@ -473,8 +449,7 @@ TEST(CGAL, SurfaceMeshModifyGrid)
   }
 }
 
-TEST(CGAL, SurfaceMeshWavefield)
-{
+TEST(CGAL, SurfaceMeshWavefield) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
   typedef K::Plane_3 Plane;
@@ -511,8 +486,7 @@ TEST(CGAL, SurfaceMeshWavefield)
   // Evolve to t=10 with 1000 updates
   Timer t;
   t.start();
-  for (size_t i=0; i<1000; ++i)
-  {
+  for (size_t i=0; i<1000; ++i) {
     wavefield.Update(i/100.0);
   }
   t.stop();
@@ -522,45 +496,38 @@ TEST(CGAL, SurfaceMeshWavefield)
   // auto mesh = wavefield.GetMesh();
   // { 
   //   std::cout << "Faces" << std::endl;
-  //   for(auto&& face : mesh->faces())
-  //   {
+  //   for(auto&& face : mesh->faces()) {
   //     Triangle tri = asv::Geometry::MakeTriangle(*mesh, face);
   //     std::cout << face << ": " << tri << std::endl;
   //   }
   // }
 }
 
-TEST(CGAL, TBBParallelFor)
-{
+TEST(CGAL, TBBParallelFor) {
   typedef std::vector<double>::iterator Iterator;
 
   std::vector<double> a(10);
 
   // kernel lambda...
-  auto kernel = [=](double& a)
-  {
+  auto kernel = [=](double& a) {
     // do stuff with a
     a = 1;
   };
 
   // loop lambda
-  auto applyKernel = [=](const tbb::blocked_range<Iterator>& _r)
-  {
-    for (Iterator it=_r.begin(); it!=_r.end(); ++it)
-    { 
+  auto applyKernel = [=](const tbb::blocked_range<Iterator>& _r) {
+    for (Iterator it=_r.begin(); it!=_r.end(); ++it) { 
       kernel(*it);
     }
   };
 
   tbb::parallel_for(tbb::blocked_range<Iterator>(a.begin(), a.end()), applyKernel);
-  for (auto v : a)
-  {
+  for (auto v : a) {
     // std::cout << v << std::endl;
   }
 }
 
-TEST(CGAL, VertexRangeIterator)
-{
+TEST(CGAL, VertexRangeIterator) {
   // Mesh
   Point3 p0(0, 0, 0);
   Point3 p1(1, 0, 0);
@@ -579,8 +546,7 @@ TEST(CGAL, VertexRangeIterator)
   for (
     auto&& vb = std::begin(mesh.vertices());
     vb != std::end(mesh.vertices());
-    ++vb)
-  {
+    ++vb) {
     auto&& v  = *vb;
     const Point3& p = mesh.point(v);
     // std::cout << p << std::endl;
@@ -590,8 +556,7 @@ TEST(CGAL, VertexRangeIterator)
   for (
     auto&& it = std::make_pair(std::begin(mesh.vertices()), 0);
     it.first != std::end(mesh.vertices());
-    ++it.first, ++it.second)
-  {
+    ++it.first, ++it.second) {
     auto&& v = *it.first;
     const Point3& p = mesh.point(v);
     // std::cout << it.second << ": " << p << std::endl;
@@ -610,8 +575,7 @@ TEST(CGAL, VertexRangeIterator)
 #include <CGAL/point_generators_2.h>
 #include <CGAL/algorithm.h>
 
-TEST(CGAL, CreateTriangulationN)
-{
+TEST(CGAL, CreateTriangulationN) {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel     K;
   typedef CGAL::Triangulation_vertex_base_2<K>                    Vbb;
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>        Vb;
@@ -643,11 +607,9 @@ TEST(CGAL, CreateTriangulationN)
   double lm = - L / 2.0;
 
   // Points - (N+1) points in each row / column 
-  for (size_t iy=0; iy<=N; ++iy)
-  {
+  for (size_t iy=0; iy<=N; ++iy) {
     double py = iy * dl + lm;
-    for (size_t ix=0; ix<=N; ++ix)
-    {
+    for (size_t ix=0; ix<=N; ++ix) {
       // Vertex position
       double px = ix * dl + lm;
       Point point(px, py);        
@@ -656,10 +618,8 @@ TEST(CGAL, CreateTriangulationN)
   }
 
   // Face indices
-  for (size_t iy=0; iy<N; ++iy)
-  {
-    for (size_t ix=0; ix<N; ++ix)
-    {
+  for (size_t iy=0; iy<N; ++iy) {
+    for (size_t ix=0; ix<N; ++ix) {
       // Get the points in the cell coordinates
       size_t idx0 = iy * NPlus1 + ix;
       size_t idx1 = iy * NPlus1 + ix + 1;
@@ -674,8 +634,7 @@ TEST(CGAL, CreateTriangulationN)
 
   // Infinite indices (follow edges counter clockwise around grid)
   infiniteIndices.resize(4*N);
-  for (size_t i=0; i<N; ++i)
-  {
+  for (size_t i=0; i<N; ++i) {
     // bottom
     size_t idx = i;
     infiniteIndices[i] = { idx, idx+1 };
@@ -694,18 +653,15 @@ TEST(CGAL, CreateTriangulationN)
   }
 
   // std::cout << "points:" << std::endl;
-  // for (auto&& p : points)
-  // {
+  // for (auto&& p : points)  {
   //   std::cout << p << std::endl;
   // }
   // std::cout << "indices:" << std::endl;
-  // for (auto&& i : indices)
-  // {
+  // for (auto&& i : indices) {
   //   std::cout << i[0] << " " << i[1] << " " << i[2]  << std::endl;
   // }
   // std::cout << "infinite indices:" << std::endl;
-  // for (auto&& i : infiniteIndices)
-  // {
+  // for (auto&& i : infiniteIndices) {
   //   std::cout << i[0] << " " << i[1] << std::endl;
   // }
 
@@ -726,8 +682,7 @@ TEST(CGAL, CreateTriangulationN)
   
     // Finite vertices
     std::vector<Vertex_handle> vertices;
-    for (auto&& p : points)
-    {
+    for (auto&& p : points) {
       Vertex_handle v = tds.create_vertex();
 
       // Assign points to finite vertices
@@ -737,8 +692,7 @@ TEST(CGAL, CreateTriangulationN)
 
     // Finite faces
     std::vector<Face_handle> faces;
-    for (auto&& i : indices)
-    {
+    for (auto&& i : indices) {
       auto& v0 = vertices[i[0]];
       auto& v1 = vertices[i[1]];
       auto& v2 = vertices[i[2]];
@@ -748,8 +702,7 @@ TEST(CGAL, CreateTriangulationN)
   
     // Infinite faces
     std::vector<Face_handle> infiniteFaces;
-    for (auto&& i : infiniteIndices)
-    {
+    for (auto&& i : infiniteIndices) {
       auto& v0 = vertices[i[0]];
       auto& v2 = vertices[i[1]];
       Face_handle f = tds.create_face(v0, vi, v2);
@@ -762,10 +715,8 @@ TEST(CGAL, CreateTriangulationN)
     // Set vertex faces excluding top and right
     // @DEBUG_INFO
     std::vector<size_t> debugVertexFaces(NPlus1*NPlus1, -1);
-    for (size_t iy=0; iy<N; ++iy)
-    {
-      for (size_t ix=0; ix<N; ++ix)
-      {
+    for (size_t iy=0; iy<N; ++iy) {
+      for (size_t ix=0; ix<N; ++ix) {
         size_t vidx = iy * NPlus1 + ix;
         size_t fidx = 2 * (iy * N + ix);
         vertices[vidx]->set_face(faces[fidx]);
@@ -774,8 +725,7 @@ TEST(CGAL, CreateTriangulationN)
       }
     }
     // Set vertex faces : top and right
-    for (size_t i=0; i<N; ++i)
-    {
+    for (size_t i=0; i<N; ++i) {
       // right
       size_t vidx = i * NPlus1 + N;
       size_t fidx = 2 * (i * N + N - 1);
@@ -806,20 +756,14 @@ TEST(CGAL, CreateTriangulationN)
     // }
 
     // Set Finite Face neighbours
-    for (size_t iy=0; iy<N; ++iy)
-    {
-      for (size_t ix=0; ix<N; ++ix)
-      {
-        for (size_t k=0; k<2; ++k)
-        {
+    for (size_t iy=0; iy<N; ++iy) {
+      for (size_t ix=0; ix<N; ++ix) {
+        for (size_t k=0; k<2; ++k) {
           size_t idx = 2 * (iy * N + ix);
 
-          if (k == 0)          
-          {
-            if (iy == 0)
-            {
-              if (ix == N-1)
-              {
+          if (k == 0) {
+            if (iy == 0) {
+              if (ix == N-1) {
                 // case 1
                 size_t fk = idx;
                 size_t f0 = N;
@@ -827,8 +771,7 @@ TEST(CGAL, CreateTriangulationN)
                 size_t f2 = N - 1;
                 faces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], infiniteFaces[f2]);
               }
-              else // ix != N-1
-              {
+              else { // ix != N-1
                 // case 2
                 size_t fk = idx;
                 size_t f0 = idx + 3;
@@ -837,10 +780,8 @@ TEST(CGAL, CreateTriangulationN)
                 faces[fk]->set_neighbors(faces[f0], faces[f1], infiniteFaces[f2]);
               }
             }
-            else // iy != 0
-            {
-              if (ix == N-1)
-              {
+            else { // iy != 0
+              if (ix == N-1) { 
                 // case 3
                 size_t fk = idx;
                 size_t f0 = N + iy;
@@ -848,8 +789,7 @@ TEST(CGAL, CreateTriangulationN)
                 size_t f2 = idx + 1 - 2 * N;
                 faces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], faces[f2]);
               }
-              else
-              {
+              else {
                 // case 4 (general)
                 size_t fk = idx;
                 size_t f0 = idx + 3;
@@ -859,12 +799,9 @@ TEST(CGAL, CreateTriangulationN)
               }
             } 
           }
-          if (k == 1)          
-          {
-            if (ix == 0)
-            {
-              if (iy == N-1)
-              {
+          if (k == 1) {
+            if (ix == 0){
+              if (iy == N-1) {
                 // case 5
                 size_t fk = idx + 1;
                 size_t f0 = 3 * N - 1;
@@ -872,8 +809,7 @@ TEST(CGAL, CreateTriangulationN)
                 size_t f2 = idx;
                 faces[fk]->set_neighbors(infiniteFaces[f0], infiniteFaces[f1], faces[f2]);
               }
-              else
-              {
+              else {
                 // case 6
                 size_t fk = idx + 1;
                 size_t f0 = idx + 2 * N;
@@ -882,10 +818,8 @@ TEST(CGAL, CreateTriangulationN)
                 faces[fk]->set_neighbors(faces[f0], infiniteFaces[f1], faces[f2]);
               }
             }
-            else // ix != 0
-            {
-              if (iy == N-1)
-              {
+            else { // ix != 0
+              if (iy == N-1) {
                 // case 7
                 size_t fk = idx + 1;
                 size_t f0 = 3 * N - 1 - ix;
@@ -893,8 +827,7 @@ TEST(CGAL, CreateTriangulationN)
                 size_t f2 = idx;
                 faces[fk]->set_neighbors(infiniteFaces[f0], faces[f1], faces[f2]);
               }
-              else
-              {
+              else {
                 // case 8 (general)
                 size_t fk = idx + 1;
                 size_t f0 = idx + 2 * N;
@@ -909,8 +842,7 @@ TEST(CGAL, CreateTriangulationN)
     }
 
     // Set Infinite Face neighbours
-    for (size_t i=0; i<N; ++i)
-    {
+    for (size_t i=0; i<N; ++i) {
       // bottom
       {
         size_t fk = i;
@@ -954,26 +886,21 @@ TEST(CGAL, CreateTriangulationN)
 
     // Verify vertices
     EXPECT_TRUE(vi->is_valid());
-    // for (auto v = tds.vertices_begin(); v !=  tds.vertices_end(); ++v)
-    // {
+    // for (auto v = tds.vertices_begin(); v !=  tds.vertices_end(); ++v) {
     //   EXPECT_TRUE(v->is_valid(true));
     // }
-    for (auto&& v : vertices)
-    {
+    for (auto&& v : vertices) {
       EXPECT_TRUE(v->is_valid());
     }
 
     // Verify faces
-    // for (auto f = tds.faces_begin(); f !=  tds.faces_end(); ++f)
-    // {
+    // for (auto f = tds.faces_begin(); f !=  tds.faces_end(); ++f) {
     //   EXPECT_TRUE(f->is_valid(true));
     // }
-    for (auto&& f : faces)
-    {
+    for (auto&& f : faces) {
       EXPECT_TRUE(f->is_valid());
     }
-    for (auto&& f : infiniteFaces)
-    {
+    for (auto&& f : infiniteFaces) {
       EXPECT_TRUE(f->is_valid());
     }
 
@@ -1008,8 +935,7 @@ TEST(CGAL, CreateTriangulationN)
   Triangulation::Triangulation_data_structure& ctds = ct.tds();
   {
     // Add all finite edges as constraints.
-    for (auto e = t.finite_edges_begin(); e != t.finite_edges_end(); ++e)
-    {      
+    for (auto e = t.finite_edges_begin(); e != t.finite_edges_end(); ++e) {      
       const auto& f = e->first;
       int i = e->second;
       const auto& v0 = f->vertex(f->cw(i));
@@ -1020,8 +946,7 @@ TEST(CGAL, CreateTriangulationN)
     // std::cout << t << std::endl; 
 
     // Now insert all finite points (to force building the triangulation hierarchy)
-    for (auto v = ct.finite_vertices_begin(); v != ct.finite_vertices_end(); ++v)
-    {      
+    for (auto v = ct.finite_vertices_begin(); v != ct.finite_vertices_end(); ++v) {      
       ct.insert(v->point());
     }
 
@@ -1036,20 +961,17 @@ TEST(CGAL, CreateTriangulationN)
     // Face list mapping  
 
     // Initialise face info
-    for (auto f = t.all_faces_begin(); f != t.all_faces_end(); ++f)
-    {
+    for (auto f = t.all_faces_begin(); f != t.all_faces_end(); ++f) {
       f->info() = -1; 
     }
 
-    for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f)
-    {
+    for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f) {
       f->info() = -2; 
     }
 
     // Face matching
     Face_handle fh;
-    for (auto f = t.finite_faces_begin(); f != t.finite_faces_end(); ++f)
-    {
+    for (auto f = t.finite_faces_begin(); f != t.finite_faces_end(); ++f) {
       // Compute the centroid of f and locate the ct face containing this point.
       Point p0 = f->vertex(0)->point();
       Point p1 = f->vertex(1)->point();
@@ -1068,8 +990,7 @@ TEST(CGAL, CreateTriangulationN)
       // bool found = ct.is_face(f->vertex(0), f->vertex(1), f->vertex(2), fh);
 
       // Set the info value on the found face.
-      if (fh != nullptr)
-      {
+      if (fh != nullptr) {
         auto d1 = std::distance(t.finite_faces_begin(), f);
         fh->info() = d1;
         // std::cout << "found: " << found
@@ -1082,8 +1003,7 @@ TEST(CGAL, CreateTriangulationN)
     // Display.
     // size_t idx = 0;
     // std::cout << "t info:" << std::endl;
-    // for (auto f = t.all_faces_begin(); f != t.all_faces_end(); ++f, ++idx)
-    // {
+    // for (auto f = t.all_faces_begin(); f != t.all_faces_end(); ++f, ++idx) {
     //   std::cout << "idx: " << idx
     //     << ", is_infinite: " << t.is_infinite(f)
     //     << ", info: " << f->info()
@@ -1092,8 +1012,7 @@ TEST(CGAL, CreateTriangulationN)
 
     // idx = 0;
     // std::cout << "ct info:" << std::endl;
-    // for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f, ++idx)
-    // {
+    // for (auto f = ct.all_faces_begin(); f != ct.all_faces_end(); ++f, ++idx) {
     //   std::cout << "idx: " << idx
     //     << ", is_infinite: " << ct.is_infinite(f)
     //     << ", info: " << f->info()
@@ -1102,8 +1021,7 @@ TEST(CGAL, CreateTriangulationN)
 
     // idx = 0;
     // std::cout << "ct face info:" << std::endl;
-    // for (auto f = ct.finite_faces_begin(); f != ct.finite_faces_end(); ++f, ++idx)
-    // {
+    // for (auto f = ct.finite_faces_begin(); f != ct.finite_faces_end(); ++f, ++idx) {
     //   std::cout << "ct: " << idx
     //     << ", t: " << f->info()
     //     << std::endl; 
@@ -1111,10 +1029,9 @@ TEST(CGAL, CreateTriangulationN)
   }
 }
 
-TEST(CGAL, CreateTriangulationHierarchyN)
-{
-  size_t N = 256;
-  double L = 500.0;
+TEST(CGAL, CreateTriangulationHierarchyN) {
+  int N = 4;
+  double L = 4.0;
   asv::PointLocator pl(N, L);
   pl.CreateMesh();
   pl.CreateTriangulation();
@@ -1125,21 +1042,19 @@ TEST(CGAL, CreateTriangulationHierarchyN)
   EXPECT_TRUE(pl.IsValid());
 
   // Location tests..
-  std::vector<Point3>                 points;
-  std::vector<std::array<size_t, 3>>  indices;
+  std::vector<Point3> points;
+  std::vector<std::array<int64_t, 3>> indices;
   
   // Create mesh
   {
-    size_t NPlus1 = N + 1;
+    int NPlus1 = N + 1;
     double dl = L / N;
     double lm = - L / 2.0;
 
     // Points - (N+1) points in each row / column 
-    for (size_t iy=0; iy<=N; ++iy)
-    {
+    for (int64_t iy=0; iy<=N; ++iy) {
       double py = iy * dl + lm;
-      for (size_t ix=0; ix<=N; ++ix)
-      {
+      for (int64_t ix=0; ix<=N; ++ix) {
         // Vertex position
         double px = ix * dl + lm;
         Point3 point(px, py, 0.0);
@@ -1148,15 +1063,13 @@ TEST(CGAL, CreateTriangulationHierarchyN)
     }
 
     // Face indices
-    for (size_t iy=0; iy<N; ++iy)
-    {
-      for (size_t ix=0; ix<N; ++ix)
-      {
+    for (int64_t iy=0; iy<N; ++iy) {
+      for (int64_t ix=0; ix<N; ++ix) {
         // Get the points in the cell coordinates
-        size_t idx0 = iy * NPlus1 + ix;
-        size_t idx1 = iy * NPlus1 + ix + 1;
-        size_t idx2 = (iy+1) * NPlus1 + ix + 1;
-        size_t idx3 = (iy+1) * NPlus1 + ix;
+        int64_t idx0 = iy * NPlus1 + ix;
+        int64_t idx1 = iy * NPlus1 + ix + 1;
+        int64_t idx2 = (iy+1) * NPlus1 + ix + 1;
+        int64_t idx3 = (iy+1) * NPlus1 + ix;
 
         // Face indices
         indices.push_back({ idx0, idx1, idx2 });
@@ -1165,36 +1078,102 @@ TEST(CGAL, CreateTriangulationHierarchyN)
     } 
   } 
 
-  CGAL::Timer timer;
-  timer.start();
   // Locate faces
-  for (size_t i=0; i<indices.size(); ++i)
   {
-    // Get face index.
-    auto& f  = indices[i]; 
+    // CGAL::Timer timer;
+    // timer.start();
+    for (int64_t i=0; i<indices.size(); ++i) {
+      // Get face index.
+      auto& f  = indices[i]; 
 
-    // Compute centroid.
-    auto& p0 = points[f[0]];
-    auto& p1 = points[f[1]];
-    auto& p2 = points[f[2]];
-    Point3 p(
-      (p0.x() + p1.x() + p2.x())/3.0,
-      (p0.y() + p1.y() + p2.y())/3.0,
-      (p0.z() + p1.z() + p2.z())/3.0
-    );
+      // Compute centroid.
+      auto& p0 = points[f[0]];
+      auto& p1 = points[f[1]];
+      auto& p2 = points[f[2]];
+      Point3 p(
+        (p0.x() + p1.x() + p2.x())/3.0,
+        (p0.y() + p1.y() + p2.y())/3.0,
+        (p0.z() + p1.z() + p2.z())/3.0
+      );
 
-    // Locate point.
-    size_t fidx = 0;
-    bool found = pl.Locate(p, fidx);
-    EXPECT_TRUE(found);
-    EXPECT_EQ(fidx, i);
+      // Locate point.
+      int64_t fidx = 0;
+      bool found = pl.Locate(p, &fidx);
+      EXPECT_TRUE(found);
+      EXPECT_EQ(fidx, i);
+    }
+    // timer.stop();
+    // std::cout << "Locate " << indices.size() << " points: (" << timer.time() << " s)" << std::endl;
   }
-  timer.stop();
-  std::cout << "Locate " << indices.size() << " points: (" << timer.time() << " s)" << std::endl;
+
+  // Update mesh
+  std::vector<Point3> points2(points.size());
+  {
+    double g = 9.8;
+    double amplitude = 5.0;
+    double period    = 10.0;
+    double omega = 2.0 * M_PI / period;
+    double time = 1.0;
+    double k = omega * omega / g;
+    double kx = k;
+    double ky = 0.0;
+    EXPECT_LT(amplitude * k, 1.0); 
+
+    // Trochoid wave
+    for (int64_t i=0; i<points.size(); ++i) {
+      const auto& p0 = points[i]; 
+      auto& p = points2[i]; 
+      double theta = kx * p0.x() + ky * p0.y() - omega * time;
+      double c = std::cos(theta);
+      double s = std::sin(theta);
+      // double sx = amplitude * s;
+      // double sy = amplitude * s;
+      p = Point3(
+        p0.x() - kx / k * amplitude * s, 
+        p0.y() - ky / k * amplitude * s, 
+        p0.z() + amplitude * c 
+        );
+    } 
+  }
+
+  // std::cout << "points2: " << std::endl;
+  // std::copy(points2.begin(), points2.end(),
+  //   std::ostream_iterator<Point3>(std::cout, "\n"));
+  // std::cout << std::endl; 
+
+  pl.UpdatePoints(points2);
+  // pl.DebugPrintTriangulation();
+
+  // Locate faces in updated mesh
+  {
+    CGAL::Timer timer;
+    timer.start();
+    for (int64_t i=0; i<indices.size(); ++i) {
+      // Get face index.
+      auto& f  = indices[i]; 
+
+      // Compute centroid of updated point.
+      auto& p0 = points2[f[0]];
+      auto& p1 = points2[f[1]];
+      auto& p2 = points2[f[2]];
+      Point3 p(
+        (p0.x() + p1.x() + p2.x())/3.0,
+        (p0.y() + p1.y() + p2.y())/3.0,
+        (p0.z() + p1.z() + p2.z())/3.0
+      );
+
+      // Locate point.
+      int64_t fidx = 0;
+      bool found = pl.Locate(p, &fidx);
+      EXPECT_TRUE(found);
+      EXPECT_EQ(fidx, i);
+    }
+    timer.stop();
+    // std::cout << "Locate " << indices.size() << " points: (" << timer.time() << " s)" << std::endl;
+  }
 }
 
-TEST(CGAL, CreateTriangulation3)
-{
+TEST(CGAL, CreateTriangulation3) {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 
   // When not using the triangulation hierarchy use the default triangulation data structure
@@ -1251,22 +1230,19 @@ TEST(CGAL, CreateTriangulation3)
     // std::cout << t << std::endl; 
 
     // std::cout << "finite vertices" << std::endl;
-    // for (auto v=t.finite_vertices_begin(); v != t.finite_vertices_end(); ++v)
-    // {
+    // for (auto v=t.finite_vertices_begin(); v != t.finite_vertices_end(); ++v) {
     //   std::cout << *v << std::endl;
     // }
 
     // std::cout << "finite faces" << std::endl;
-    // for (auto f=t.finite_faces_begin(); f != t.finite_faces_end(); ++f)
-    // {
+    // for (auto f=t.finite_faces_begin(); f != t.finite_faces_end(); ++f) {
     //   std::cout << *f->vertex(0) << ", " << *f->vertex(1) << ", " << *f->vertex(2) << std::endl;
     // }
 
 
   }
 
-  if (0)
-  {
+  if (0) {
     // Manually create a triangulation
     Triangulation t;
     Triangulation::Triangulation_data_structure& tds = t.tds();
@@ -1412,7 +1388,7 @@ TEST(CGAL, CreateTriangulation3)
     {
       typedef CGAL::Creator_uniform_2<double, Point> Creator;
       std::cout << "insertion of random points" << std::endl;
-      size_t N = 256;
+      int N = 256;
       Triangulation tt;
       CGAL::Random_points_in_square_2<Point, Creator> g(1.);
       CGAL::cpp11::copy_n(g, (N+1)*(N+1), std::back_inserter(tt));
@@ -1424,8 +1400,7 @@ TEST(CGAL, CreateTriangulation3)
       // Full search
       CGAL::Timer timer;
       timer.start();
-      for (size_t i=0; i<1000; ++i)
-      {
+      for (int64_t i=0; i<1000; ++i) {
         f = tt.locate(Point(0.1, 0.7));
       }
       timer.stop();
@@ -1436,8 +1411,7 @@ TEST(CGAL, CreateTriangulation3)
       // With hint
       timer.reset();
       timer.start();
-      for (size_t i=0; i<1000; ++i)
-      {
+      for (int64_t i=0; i<1000; ++i) {
         f = tt.locate(Point(0.1, 0.7), f);
       }
       timer.stop();
@@ -1450,7 +1424,7 @@ TEST(CGAL, CreateTriangulation3)
       // Point location without triangulation hierarchy.
       typedef CGAL::Creator_uniform_2<double, TSlow::Point> Creator;
       std::cout << "insertion of random points" << std::endl;
-      size_t N = 256;
+      int N = 256;
       TSlow tt;
       CGAL::Random_points_in_square_2<TSlow::Point, Creator> g(1.);
       CGAL::cpp11::copy_n(g, (N+1)*(N+1), std::back_inserter(tt));
@@ -1462,8 +1436,7 @@ TEST(CGAL, CreateTriangulation3)
       CGAL::Timer timer;
       timer.start();
       TSlow::Face_handle ff;
-      for (size_t i=0; i<1000; ++i)
-      {
+      for (int64_t i=0; i<1000; ++i) {
         ff = tt.locate(TSlow::Point(0.1, 0.7));
       }
       timer.stop();
@@ -1476,8 +1449,7 @@ TEST(CGAL, CreateTriangulation3)
 
 }
 
-TEST(CGAL, CreateTriangulation4)
-{
+TEST(CGAL, CreateTriangulation4) {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
   typedef CGAL::Triangulation_2<K>                Triangulation;
   typedef Triangulation::Vertex_circulator        Vertex_circulator;
@@ -1618,8 +1590,7 @@ TEST(CGAL, CreateTriangulation4)
 
 }
 
-TEST(CGAL, CreateConstrainedTrianguation4)
-{
+TEST(CGAL, CreateConstrainedTrianguation4) {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
   typedef CGAL::Triangulation_vertex_base_2<K>                Vbb;
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
@@ -1663,8 +1634,7 @@ TEST(CGAL, CreateConstrainedTrianguation4)
 
 }
 
-TEST(CGAL, CreateCTAlt)
-{
+TEST(CGAL, CreateCTAlt) {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
   typedef CGAL::Triangulation_vertex_base_2<K>                Vbb;
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
@@ -1709,8 +1679,7 @@ TEST(CGAL, CreateCTAlt)
 
 }
 
-TEST(CGAL, CreateCTAltN)
-{
+TEST(CGAL, CreateCTAltN) {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
   typedef CGAL::Projection_traits_xy_3<K>                     Kp;
   typedef CGAL::Triangulation_vertex_base_2<Kp>               Vbb;
@@ -1743,11 +1712,9 @@ TEST(CGAL, CreateCTAltN)
   Triangulation::Triangulation_data_structure& tds = t.tds();
 
   // Points - (N+1) points in each row / column 
-  for (size_t iy=0; iy<=N; ++iy)
-  {
+  for (size_t iy=0; iy<=N; ++iy) {
     double py = iy * dl + lm;
-    for (size_t ix=0; ix<=N; ++ix)
-    {
+    for (size_t ix=0; ix<=N; ++ix) {
       // Vertex position
       double px = ix * dl + lm;
       Point p(px, py, 0.0); 
@@ -1757,8 +1724,7 @@ TEST(CGAL, CreateCTAltN)
       // t.insert(p);
 
       // Add diagonal constraint
-      // if (ix > 0 && iy > 0)
-      // {
+      // if (ix > 0 && iy > 0) {
       //   size_t idx = (iy - 1) * NPlus1 + (ix - 1);
       //   t.insert_constraint(points[idx], p);        
       // }
@@ -1774,10 +1740,8 @@ TEST(CGAL, CreateCTAltN)
 
   // Constraint indices 
   std::vector<std::pair<size_t, size_t>> cindices;
-  for (size_t iy=0; iy<N; ++iy)
-  {
-    for (size_t ix=0; ix<N; ++ix)
-    {
+  for (size_t iy=0; iy<N; ++iy) {
+    for (size_t ix=0; ix<N; ++ix) {
       size_t idx1 = iy * NPlus1 + ix;
       size_t idx2 = (iy + 1) * NPlus1 + (ix + 1);
       cindices.push_back(std::make_pair(idx1, idx2));
@@ -1806,8 +1770,7 @@ TEST(CGAL, CreateCTAltN)
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

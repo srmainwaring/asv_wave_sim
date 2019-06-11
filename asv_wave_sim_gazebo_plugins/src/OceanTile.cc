@@ -39,7 +39,7 @@ namespace asv
         // Different types of wave simulator are supported...
 
         // 1. FFTW / OpenCL
-        #if 0
+        #if 1
 
         mWaveSim.reset(new WaveSimulationOpenCL(_N, _L));
         // mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
