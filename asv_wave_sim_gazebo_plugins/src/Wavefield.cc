@@ -20,7 +20,7 @@
 
 
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
-#include "asv_wave_sim_gazebo_plugins/PointLocator.hh"
+#include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
 
 #include <gazebo/gazebo.hh>
 
@@ -87,7 +87,7 @@ namespace asv
     public: std::shared_ptr<Grid> grid;
 
     /// \brief The current position of the wave field.
-    public: std::shared_ptr<PointLocator> pointLocator;
+    public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ namespace asv
     // Point Locator
     int N = this->data->cellCount[0];
     double L = this->data->size[0];
-    this->data->pointLocator.reset(new PointLocator(N, L));
+    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
 
     // Update
     this->Update(0.0);
@@ -131,10 +131,8 @@ namespace asv
     // Point Locator
     int64_t N = this->data->cellCount[0];
     double L = this->data->size[0];
-    this->data->pointLocator.reset(new PointLocator(N, L));
-    this->data->pointLocator->CreateMesh();
-    this->data->pointLocator->CreateTriangulation();
-    // this->data->pointLocator->DebugPrintTriangulation();
+    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
+    // this->data->triangulatedGrid->DebugPrintTriangulation();
 
     // Update
     this->Update(0.0);
@@ -150,10 +148,9 @@ namespace asv
     return this->data->grid;
   }
 
-  double WavefieldGerstner::Height(const Point3& point) const
+  bool WavefieldGerstner::Height(const Point3& point, double& height) const
   {
-    double h = this->data->pointLocator->Height(point);    
-    return h;
+    return this->data->triangulatedGrid->Height(point, height);    
   }
 
   std::shared_ptr<const WaveParameters> WavefieldGerstner::GetParameters() const
@@ -173,7 +170,7 @@ namespace asv
 
     // Update point locator
     auto& mesh = *this->data->grid->GetMesh();
-    this->data->pointLocator->UpdatePoints(mesh);
+    this->data->triangulatedGrid->UpdatePoints(mesh);
   }
 
   void WavefieldGerstner::UpdateGerstnerWave(double _time)
@@ -290,7 +287,7 @@ namespace asv
     public: std::shared_ptr<Grid> grid;
 
     /// \brief The current position of the wave field.
-    public: std::shared_ptr<PointLocator> pointLocator;
+    public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -327,11 +324,9 @@ namespace asv
     this->data->grid.reset(new Grid({ L, L }, { static_cast<size_t>(NPlus1), static_cast<size_t>(NPlus1) }));
     
     // Point Locator
-    gzmsg << "Creating point locator." <<  std::endl;
-    this->data->pointLocator.reset(new PointLocator(N, L));
-    this->data->pointLocator->CreateMesh();
-    this->data->pointLocator->CreateTriangulation();
-    // this->data->pointLocator->DebugPrintTriangulation();
+    gzmsg << "Creating triangulated grid." <<  std::endl;
+    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
+    // this->data->TriangulatedGrid->DebugPrintTriangulation();
     
     // Update
     this->Update(0.0);
@@ -349,10 +344,9 @@ namespace asv
     return this->data->grid;
   }
 
-  double WavefieldOceanTile::Height(const Point3& point) const
+  bool WavefieldOceanTile::Height(const Point3& point, double& height) const
   {
-    double h = this->data->pointLocator->Height(point);    
-    return h;
+    return this->data->triangulatedGrid->Height(point, height);    
   }
 
   std::shared_ptr<const WaveParameters> WavefieldOceanTile::GetParameters() const
@@ -387,7 +381,7 @@ namespace asv
     }
 
     // Update the point locator.
-    this->data->pointLocator->UpdatePoints(vertices);
+    this->data->triangulatedGrid->UpdatePoints(vertices);
 
   }
 

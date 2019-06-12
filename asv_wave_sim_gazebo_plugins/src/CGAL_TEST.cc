@@ -16,7 +16,7 @@
 #include "asv_wave_sim_gazebo_plugins/Geometry.hh"
 #include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
-#include "asv_wave_sim_gazebo_plugins/PointLocator.hh"
+#include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
@@ -1032,14 +1032,14 @@ TEST(CGAL, CreateTriangulationN) {
 TEST(CGAL, CreateTriangulationHierarchyN) {
   int N = 4;
   double L = 4.0;
-  asv::PointLocator pl(N, L);
-  pl.CreateMesh();
-  pl.CreateTriangulation();
+  asv::TriangulatedGrid tri_grid(N, L);
+  tri_grid.CreateMesh();
+  tri_grid.CreateTriangulation();
 
-  // pl.DebugPrintMesh();
-  // pl.DebugPrintTriangulation();
+  // tri_grid.DebugPrintMesh();
+  // tri_grid.DebugPrintTriangulation();
 
-  EXPECT_TRUE(pl.IsValid());
+  EXPECT_TRUE(tri_grid.IsValid());
 
   // Location tests..
   std::vector<Point3> points;
@@ -1098,7 +1098,7 @@ TEST(CGAL, CreateTriangulationHierarchyN) {
 
       // Locate point.
       int64_t fidx = 0;
-      bool found = pl.Locate(p, &fidx);
+      bool found = tri_grid.Locate(p, fidx);
       EXPECT_TRUE(found);
       EXPECT_EQ(fidx, i);
     }
@@ -1141,8 +1141,8 @@ TEST(CGAL, CreateTriangulationHierarchyN) {
   //   std::ostream_iterator<Point3>(std::cout, "\n"));
   // std::cout << std::endl; 
 
-  pl.UpdatePoints(points2);
-  // pl.DebugPrintTriangulation();
+  tri_grid.UpdatePoints(points2);
+  // tri_grid.DebugPrintTriangulation();
 
   // Locate faces in updated mesh
   {
@@ -1164,7 +1164,7 @@ TEST(CGAL, CreateTriangulationHierarchyN) {
 
       // Locate point.
       int64_t fidx = 0;
-      bool found = pl.Locate(p, &fidx);
+      bool found = tri_grid.Locate(p, fidx);
       EXPECT_TRUE(found);
       EXPECT_EQ(fidx, i);
     }

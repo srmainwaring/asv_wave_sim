@@ -13,13 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/// \file PointLocator.hh
+/// \file TriangulatedGrid.hh
 
-#ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_POINT_LOCATOR_HH_
-#define _ASV_WAVE_SIM_GAZEBO_PLUGINS_POINT_LOCATOR_HH_
+#ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_TRIANGULATED_GRID_HH_
+#define _ASV_WAVE_SIM_GAZEBO_PLUGINS_TRIANGULATED_GRID_HH_
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
+
 #include <gazebo/rendering/ogre_gazebo.h>
+#include <ignition/math/Pose3.hh>
 
 #include <memory>
 #include <vector>
@@ -27,18 +29,33 @@
 namespace asv {
 
 ///////////////////////////////////////////////////////////////////////////////
-// PointLocator
+// TriangulatedGrid
   
-  class PointLocatorPrivate;
   
-  class PointLocator {
+  typedef std::array<int64_t, 3>  Index3;
+  typedef std::vector<Point3>     Point3Range;
+  typedef std::vector<Index3>     Index3Range;
+
+  class TriangulatedGrid {
    public:
-    virtual ~PointLocator();
-    PointLocator(int _N, double _L);
-    bool Locate(const Point3& query, int64_t *faceIndex) const;
-    double Height(const Point3& query) const;
+
+    virtual ~TriangulatedGrid();    
+    TriangulatedGrid(int num_segments, double length);
     void CreateMesh();
     void CreateTriangulation();
+    static std::unique_ptr<TriangulatedGrid> Create(int num_segments, double length);
+
+    bool Locate(const Point3& query, int64_t& faceIndex) const;
+    bool Height(const Point3& query, double& height) const;
+    bool Height(const std::vector<Point3>& queries, std::vector<double>& heights) const;
+    
+    bool Interpolate(TriangulatedGrid& patch) const;
+
+    const Point3Range& Points() const;
+    const Index3Range& Indices() const;
+    const Point3& Origin() const;
+    void ApplyPose(const ignition::math::Pose3d& pose);
+
     bool IsValid(bool verbose=false) const;
     void DebugPrintMesh() const;
     void DebugPrintTriangulation() const;
@@ -47,11 +64,12 @@ namespace asv {
     void UpdatePoints(const Mesh& from);
 
    private:
-    std::unique_ptr<PointLocatorPrivate> impl;
+    class Private;
+    std::unique_ptr<Private> impl_;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 } // namespace asv
 
-#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_POINT_LOCATOR_HH_
+#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_TRIANGULATED_GRID_HH_
