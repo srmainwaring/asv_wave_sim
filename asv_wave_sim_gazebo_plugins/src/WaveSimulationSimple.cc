@@ -22,13 +22,13 @@ namespace asv
 {
 
   ///////////////////////////////////////////////////////////////////////////////
-  // WaveSimulationSimpleImpl
+  // WaveSimulationSimple::Impl
 
-  class WaveSimulationSimpleImpl
+  class WaveSimulationSimple::Impl
   {
-    public: ~WaveSimulationSimpleImpl();
+    public: ~Impl();
 
-    public: WaveSimulationSimpleImpl(
+    public: Impl(
       int _N,
       double _L);
 
@@ -77,11 +77,11 @@ namespace asv
     private: double time;
   };
 
-  WaveSimulationSimpleImpl::~WaveSimulationSimpleImpl()
+  WaveSimulationSimple::Impl::~Impl()
   {
   }
 
-  WaveSimulationSimpleImpl::WaveSimulationSimpleImpl(
+  WaveSimulationSimple::Impl::Impl(
     int _N,
     double _L) :
     N(_N),
@@ -94,23 +94,23 @@ namespace asv
   {
   }
 
-  void WaveSimulationSimpleImpl::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationSimple::Impl::SetWindVelocity(double _ux, double _uy)
   {
     // @TODO NO IMPLEMENTATION
   }
 
-  void WaveSimulationSimpleImpl::SetParameters(double _amplitude, double _period)
+  void WaveSimulationSimple::Impl::SetParameters(double _amplitude, double _period)
   {
     this->amplitude = _amplitude;
     this->period = _period;
   }
 
-  void WaveSimulationSimpleImpl::SetTime(double _time)
+  void WaveSimulationSimple::Impl::SetTime(double _time)
   {
     this->time = _time;
   }
 
-  void WaveSimulationSimpleImpl::ComputeHeights(
+  void WaveSimulationSimple::Impl::ComputeHeights(
     std::vector<double>& _heights)
   {
     // Derived wave properties
@@ -143,7 +143,7 @@ namespace asv
     }
   }
 
-  void WaveSimulationSimpleImpl::ComputeHeightDerivatives(
+  void WaveSimulationSimple::Impl::ComputeHeightDerivatives(
     std::vector<double>& _dhdx,
     std::vector<double>& _dhdy)
   {
@@ -182,14 +182,14 @@ namespace asv
     }
   }
 
-  void WaveSimulationSimpleImpl::ComputeDisplacements(
+  void WaveSimulationSimple::Impl::ComputeDisplacements(
     std::vector<double>& _sx,
     std::vector<double>& _sy)
   {
     // No xy-displacement
   }
 
-  void WaveSimulationSimpleImpl::ComputeDisplacementDerivatives(
+  void WaveSimulationSimple::Impl::ComputeDisplacementDerivatives(
     std::vector<double>& _dsxdx,
     std::vector<double>& _dsydy,
     std::vector<double>& _dsxdy)
@@ -197,7 +197,7 @@ namespace asv
     // No xy-displacement
   }
 
-  void WaveSimulationSimpleImpl::ComputeDisplacementsAndDerivatives(
+  void WaveSimulationSimple::Impl::ComputeDisplacementsAndDerivatives(
     std::vector<double>& _h,
     std::vector<double>& _sx,
     std::vector<double>& _sy,
@@ -253,7 +253,7 @@ namespace asv
   WaveSimulationSimple::WaveSimulationSimple(
     int _N,
     double _L) :
-    impl(new WaveSimulationSimpleImpl(_N, _L))
+    impl(new WaveSimulationSimple::Impl(_N, _L))
   {
   }
 

@@ -112,9 +112,9 @@ add_library(Hydrodynamics
     src/Grid.cc
     src/MeshTools.cc
     src/OceanTile.cc
-    src/PointLocator.cc
     src/PhysicalConstants.cc
     src/Physics.cc
+    src/TriangulatedGrid.cc
     src/Utilities.cc
     src/Wavefield.cc
     src/WavefieldEntity.cc
@@ -351,6 +351,10 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(UNIT_Physics_TEST src/Physics_TEST.cc)
   target_link_libraries(UNIT_Physics_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Physics_TEST PRIVATE "-Wno-unknown-pragmas")
+
+  catkin_add_gtest(UNIT_TriangulatedGrid_TEST src/TriangulatedGrid_TEST.cc)
+  target_link_libraries(UNIT_TriangulatedGrid_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
+  target_compile_options(UNIT_TriangulatedGrid_TEST PRIVATE "-Wno-unknown-pragmas")
 
   catkin_add_gtest(UNIT_Wavefield_TEST src/Wavefield_TEST.cc)
   target_link_libraries(UNIT_Wavefield_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})

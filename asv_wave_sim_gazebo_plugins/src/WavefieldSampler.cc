@@ -158,7 +158,8 @@ namespace asv
     {
       const auto& vertex = *vb;
       const auto& p0 = target->point(vertex);
-      double height = this->data->wavefield->Height(p0);
+      double height = 0.0;
+      this->data->wavefield->Height(p0, height);
       Point3 p1(p0.x(), p0.y(), height);
       target->point(vertex) = p1;
       // gzmsg << target->point(vertex) << std::endl;
