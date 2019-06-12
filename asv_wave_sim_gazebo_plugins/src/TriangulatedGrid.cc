@@ -78,6 +78,7 @@ namespace asv {
     typedef Triangulation::Vertex_handle                                Vertex_handle;
     typedef Triangulation::Face_handle                                  Face_handle;
     typedef Triangulation::Face                                         Face;
+    typedef Kernel::Point_3                                             Point3;
 
     // Dimensions
     int num_segments_;
