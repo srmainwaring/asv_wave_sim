@@ -23,40 +23,35 @@
 
 namespace asv
 {
-
-  class WaveSimulationSimpleImpl;
-
   class WaveSimulationSimple : public WaveSimulation
   {
-    public: virtual ~WaveSimulationSimple();
+    public: ~WaveSimulationSimple();
 
-    public: WaveSimulationSimple(
-      int _N,
-      double _L);
+    public: WaveSimulationSimple(int _N, double _L);
 
-    public: virtual void SetWindVelocity(double _ux, double _uy) override;
+    public: void SetWindVelocity(double _ux, double _uy) override;
 
     public: void SetParameters(double _amplitude, double _period);
 
-    public: virtual void SetTime(double _time) override;
+    public: void SetTime(double _time) override;
 
-    public: virtual void ComputeHeights(
+    public: void ComputeHeights(
       std::vector<double>& _h) override;
 
-    public: virtual void ComputeHeightDerivatives(
+    public: void ComputeHeightDerivatives(
       std::vector<double>& _dhdx,
       std::vector<double>& _dhdy) override;
 
-    public: virtual void ComputeDisplacements(
+    public: void ComputeDisplacements(
       std::vector<double>& _sx,
       std::vector<double>& _sy) override;
 
-    public: virtual void ComputeDisplacementDerivatives(
+    public: void ComputeDisplacementDerivatives(
       std::vector<double>& _dsxdx,
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
-    public: virtual void ComputeDisplacementsAndDerivatives(
+    public: void ComputeDisplacementsAndDerivatives(
       std::vector<double>& _h,
       std::vector<double>& _sx,
       std::vector<double>& _sy,
@@ -66,7 +61,8 @@ namespace asv
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
-    private: std::unique_ptr<WaveSimulationSimpleImpl> impl;
+    class Impl;
+    private: std::unique_ptr<Impl> impl;
   };
 
 }
