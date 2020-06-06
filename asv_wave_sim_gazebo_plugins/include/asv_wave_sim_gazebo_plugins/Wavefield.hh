@@ -22,10 +22,10 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <memory>
+#include <gazebo/gazebo.hh>
+#include <ignition/math/Pose3.hh>
 
-///////////////////////////////////////////////////////////////////////////////
-// Forward Declarations
+#include <memory>
 
 namespace asv
 {
