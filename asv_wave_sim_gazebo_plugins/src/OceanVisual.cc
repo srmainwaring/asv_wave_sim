@@ -138,7 +138,7 @@ namespace asv
       this->data->vis->Load();
       gazebo::rendering::AttachMesh(*this->data->vis, this->data->meshName);
       this->data->vis->SetPosition(this->Position());
-      ->data->vis->thisSetType(rendering::Visual::VT_VISUAL);
+      this->data->vis->SetType(rendering::Visual::VT_VISUAL);
 
       // Set the material from the parent visual
       auto materialName = this->GetMaterialName();
