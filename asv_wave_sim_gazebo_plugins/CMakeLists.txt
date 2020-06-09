@@ -158,7 +158,7 @@ target_link_libraries(HydrodynamicsPlugin
   ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
-target_compile_options(HydrodynamicsPlugin PRIVATE "-Wno-unknown-pragmas")
+target_compile_options(HydrodynamicsPlugin PRIVATE "-Wno-unknown-pragmas -Wdeprecated-declarations")
 
 list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST HydrodynamicsPlugin)
 
@@ -175,7 +175,7 @@ target_link_libraries(WavefieldModelPlugin
   ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
-target_compile_options(WavefieldModelPlugin PRIVATE "-Wno-unknown-pragmas")
+target_compile_options(WavefieldModelPlugin PRIVATE "-Wno-unknown-pragmas" "-Wno-deprecated-declarations")
 
 list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST WavefieldModelPlugin)
 
@@ -192,7 +192,7 @@ target_link_libraries(WavefieldVisualPlugin
   ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
-target_compile_options(WavefieldVisualPlugin PRIVATE "-Wno-unknown-pragmas")
+target_compile_options(WavefieldVisualPlugin PRIVATE "-Wno-unknown-pragmas" "-Wno-deprecated-declarations")
 
 list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST WavefieldVisualPlugin)
 
@@ -210,7 +210,7 @@ target_link_libraries(OceanVisualPlugin
   ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
-target_compile_options(OceanVisualPlugin PRIVATE "-Wno-unknown-pragmas")
+target_compile_options(OceanVisualPlugin PRIVATE "-Wno-unknown-pragmas" "-Wno-deprecated-declarations")
 
 list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST OceanVisualPlugin)
 
