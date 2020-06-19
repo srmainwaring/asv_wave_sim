@@ -305,8 +305,8 @@ namespace asv
 
     int N = 128;
     int NPlus1 = N + 1;
-    double L = 512.0;
-    double u = 15.0;
+    double L = 256.0;
+    double u = 5.0;
 
     // Wave parameters
     gzmsg << "Creating WaveParameters." <<  std::endl;
