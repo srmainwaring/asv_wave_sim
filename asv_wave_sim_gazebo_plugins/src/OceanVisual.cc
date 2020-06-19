@@ -125,8 +125,8 @@ namespace asv
 #endif
       // @TODO Synchronise visual with physics...
       int N = 128;
-      double L = 512.0;
-      double u = 15.0;
+      double L = 256.0;
+      double u = 5.0;
 
       this->data->oceanTile.reset(new OceanTile(N, L));
       this->data->oceanTile->SetWindVelocity(u, 0.0);

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationSimple.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoidal.hh"
 #include "asv_wave_sim_gazebo_plugins/Physics.hh"
 
 #include <vector>
@@ -22,9 +22,9 @@ namespace asv
 {
 
   ///////////////////////////////////////////////////////////////////////////////
-  // WaveSimulationSimple::Impl
+  // WaveSimulationSinusoidal::Impl
 
-  class WaveSimulationSimple::Impl
+  class WaveSimulationSinusoidal::Impl
   {
     public: ~Impl();
 
@@ -77,11 +77,11 @@ namespace asv
     private: double time;
   };
 
-  WaveSimulationSimple::Impl::~Impl()
+  WaveSimulationSinusoidal::Impl::~Impl()
   {
   }
 
-  WaveSimulationSimple::Impl::Impl(
+  WaveSimulationSinusoidal::Impl::Impl(
     int _N,
     double _L) :
     N(_N),
@@ -94,23 +94,23 @@ namespace asv
   {
   }
 
-  void WaveSimulationSimple::Impl::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationSinusoidal::Impl::SetWindVelocity(double _ux, double _uy)
   {
     // @TODO NO IMPLEMENTATION
   }
 
-  void WaveSimulationSimple::Impl::SetParameters(double _amplitude, double _period)
+  void WaveSimulationSinusoidal::Impl::SetParameters(double _amplitude, double _period)
   {
     this->amplitude = _amplitude;
     this->period = _period;
   }
 
-  void WaveSimulationSimple::Impl::SetTime(double _time)
+  void WaveSimulationSinusoidal::Impl::SetTime(double _time)
   {
     this->time = _time;
   }
 
-  void WaveSimulationSimple::Impl::ComputeHeights(
+  void WaveSimulationSinusoidal::Impl::ComputeHeights(
     std::vector<double>& _heights)
   {
     // Derived wave properties
@@ -143,7 +143,7 @@ namespace asv
     }
   }
 
-  void WaveSimulationSimple::Impl::ComputeHeightDerivatives(
+  void WaveSimulationSinusoidal::Impl::ComputeHeightDerivatives(
     std::vector<double>& _dhdx,
     std::vector<double>& _dhdy)
   {
@@ -182,14 +182,14 @@ namespace asv
     }
   }
 
-  void WaveSimulationSimple::Impl::ComputeDisplacements(
+  void WaveSimulationSinusoidal::Impl::ComputeDisplacements(
     std::vector<double>& _sx,
     std::vector<double>& _sy)
   {
     // No xy-displacement
   }
 
-  void WaveSimulationSimple::Impl::ComputeDisplacementDerivatives(
+  void WaveSimulationSinusoidal::Impl::ComputeDisplacementDerivatives(
     std::vector<double>& _dsxdx,
     std::vector<double>& _dsydy,
     std::vector<double>& _dsxdy)
@@ -197,7 +197,7 @@ namespace asv
     // No xy-displacement
   }
 
-  void WaveSimulationSimple::Impl::ComputeDisplacementsAndDerivatives(
+  void WaveSimulationSinusoidal::Impl::ComputeDisplacementsAndDerivatives(
     std::vector<double>& _h,
     std::vector<double>& _sx,
     std::vector<double>& _sy,
@@ -244,54 +244,54 @@ namespace asv
   }
 
   ///////////////////////////////////////////////////////////////////////////////
-  // WaveSimulationSimple
+  // WaveSimulationSinusoidal
 
-  WaveSimulationSimple::~WaveSimulationSimple()
+  WaveSimulationSinusoidal::~WaveSimulationSinusoidal()
   {
   }
 
-  WaveSimulationSimple::WaveSimulationSimple(
+  WaveSimulationSinusoidal::WaveSimulationSinusoidal(
     int _N,
     double _L) :
-    impl(new WaveSimulationSimple::Impl(_N, _L))
+    impl(new WaveSimulationSinusoidal::Impl(_N, _L))
   {
   }
 
-  void WaveSimulationSimple::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationSinusoidal::SetWindVelocity(double _ux, double _uy)
   {
   }
 
-  void WaveSimulationSimple::SetParameters(double _amplitude, double _period)
+  void WaveSimulationSinusoidal::SetParameters(double _amplitude, double _period)
   {
     impl->SetParameters(_amplitude, _period);
   }
 
-  void WaveSimulationSimple::SetTime(double _time)
+  void WaveSimulationSinusoidal::SetTime(double _time)
   {
     impl->SetTime(_time);
   }
 
-  void WaveSimulationSimple::ComputeHeights(
+  void WaveSimulationSinusoidal::ComputeHeights(
     std::vector<double>& _h)
   {
     impl->ComputeHeights(_h);    
   }
 
-  void WaveSimulationSimple::ComputeHeightDerivatives(
+  void WaveSimulationSinusoidal::ComputeHeightDerivatives(
     std::vector<double>& _dhdx,
     std::vector<double>& _dhdy)
   {
     impl->ComputeHeightDerivatives(_dhdx, _dhdy);  
   }
 
-  void WaveSimulationSimple::ComputeDisplacements(
+  void WaveSimulationSinusoidal::ComputeDisplacements(
     std::vector<double>& _sx,
     std::vector<double>& _sy)
   {
     impl->ComputeDisplacements(_sx, _sy);    
   }
 
-  void WaveSimulationSimple::ComputeDisplacementDerivatives(
+  void WaveSimulationSinusoidal::ComputeDisplacementDerivatives(
     std::vector<double>& _dsxdx,
     std::vector<double>& _dsydy,
     std::vector<double>& _dsxdy)
@@ -299,7 +299,7 @@ namespace asv
     impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);      
   }
 
-  void WaveSimulationSimple::ComputeDisplacementsAndDerivatives(
+  void WaveSimulationSinusoidal::ComputeDisplacementsAndDerivatives(
     std::vector<double>& _h,
     std::vector<double>& _sx,
     std::vector<double>& _sy,
