@@ -2,13 +2,13 @@
 vertex_program Water_VS glsl
 {
   source ../programs/water.vert
-  syntax glsl110
+  // syntax glsl110
 }
 
 fragment_program Water_FS glsl
 {
   source ../programs/water.frag
-  syntax glsl110
+  // syntax glsl110
 }
 
 vertex_program Foam_VS glsl
@@ -32,8 +32,8 @@ material Water/Water
   {
     pass ocean_surface
     {
-      // scene_blend add
-      // scene_blend alpha_blend
+      scene_blend add
+      scene_blend alpha_blend
       // polygon_mode wireframe
       // polygon_mode solid
       // cull_software back
@@ -62,8 +62,8 @@ material Water/Water
       fragment_program_ref Water_FS
       {
         param_named_auto uViewPos camera_position
-        param_named uDeepColor float4 0 0.05 0.2 1.0
-        param_named uShallowColor float4 0 0.6 1 1.0
+        param_named uDeepColor float4 0 0.05 0.2 0.7
+        param_named uShallowColor float4 0 0.6 1 0.7
         param_named uFresnelPower float 5
         param_named uHdrMultiplier float 0.4
         param_named uBumpMap int 0
