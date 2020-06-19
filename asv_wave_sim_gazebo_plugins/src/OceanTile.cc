@@ -1,9 +1,10 @@
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
 
 #include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationSimple.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoidal.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
 
 // #include <Ogre.h>
@@ -37,34 +38,52 @@ namespace asv
         mDxdy(_N * _N, 0.0)
     {
         // Different types of wave simulator are supported...
+        // 0 - WaveSimulationSinusoidal
+        // 1 - WaveSimulationTrochoid
+        // 2 - WaveSimulationFFTW
+        // 3 - WaveSimulationOpenCL
+        //
+        const int wave_sim_type = 2;
+        switch (wave_sim_type)
+        {
+            case 0:
+            {
+                // Simple
+                double amplitude = 1.0;
+                double period = 10.0;
+                std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
+                waveSim->SetParameters(amplitude, period);
+                mWaveSim = std::move(waveSim);
+                break;
+            }
+            case 1:
+            {
+                // Trochoid
+                std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
+                waveParams->SetNumber(3);
+                waveParams->SetAngle(0.6);
+                waveParams->SetScale(1.2);
+                waveParams->SetSteepness(1.0);
+                waveParams->SetAmplitude(1.0);
+                waveParams->SetPeriod(7.0);
+                waveParams->SetDirection(Vector2(1.0, 0.0));
 
-        // 1. FFTW / OpenCL
-        #if 1
-
-        mWaveSim.reset(new WaveSimulationOpenCL(_N, _L));
-        // mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
-
-        #else
-
-        // 2. Trochoid
-        // std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
-        // waveParams->SetNumber(3);
-        // waveParams->SetAngle(0.6);
-        // waveParams->SetScale(1.2);
-        // waveParams->SetSteepness(1.0);
-        // waveParams->SetAmplitude(1.0);
-        // waveParams->SetPeriod(7.0);
-        // waveParams->SetDirection(Vector2(1.0, 0.0));
-
-        // mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
-
-        // 3. Simple
-        double amplitude = 1.0;
-        double period = 10.0;
-        std::unique_ptr<WaveSimulationSimple> waveSim(new WaveSimulationSimple(_N, _L));
-        waveSim->SetParameters(amplitude, period);
-        mWaveSim = std::move(waveSim);
-        #endif
+                mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
+                break;
+            }
+            case 2:
+            {
+                // FFTW
+                mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
+                break;
+            }
+            case 3:
+            {
+                // OpenCL
+                mWaveSim.reset(new WaveSimulationOpenCL(_N, _L));
+                break;
+            }
+        }
     }
 
     void OceanTile::SetWindVelocity(double _ux, double _uy)
@@ -327,9 +346,9 @@ namespace asv
      
         if (mHasVisuals)
         {
-        // Uncomment to calculate the tangent space using finite differences
-        // ComputeTangentSpace();
-        UpdateMesh();
+            // Uncomment to calculate the tangent space using finite differences
+            // ComputeTangentSpace();
+            UpdateMesh();
         }
     }
 
@@ -339,16 +358,16 @@ namespace asv
 
         if (mHasVisuals)
         {
-        mWaveSim->ComputeDisplacementsAndDerivatives(
-            mHeights, mDisplacementsX, mDisplacementsY,
-            mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
-        }
+            mWaveSim->ComputeDisplacementsAndDerivatives(
+                mHeights, mDisplacementsX, mDisplacementsY,
+                mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
+            }
         else
         {
-        mWaveSim->ComputeHeights(mHeights);
-        mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
-        // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
-        // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
+            mWaveSim->ComputeHeights(mHeights);
+            mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
+            // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
+            // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
         }
 
         const size_t N = mResolution;
@@ -452,9 +471,6 @@ namespace asv
             mTangents[idx1] = mTangents[idx0];
             mBitangents[idx1] = mBitangents[idx0];
         }
-
-
-
     }
 
     void OceanTile::CreateMesh(const Ogre::String& _name)
@@ -571,11 +587,7 @@ namespace asv
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
             *gpuPosVertices++ = mNormals[i][2];
-        // }
 
-        // Copy texture vertices to GPU
-        // for (size_t i=0; i<nVertices; ++i)
-        // {
             // uv0
             *gpuTexVertices++ = mTexCoords[i][0];
             *gpuTexVertices++ = mTexCoords[i][1];
@@ -607,8 +619,8 @@ namespace asv
 
         // Set bounds (box and sphere)
         mMesh->_setBounds(Ogre::AxisAlignedBox(
-        -mTileSize, -mTileSize, -mTileSize,
-        mTileSize,  mTileSize,  mTileSize));
+            -mTileSize, -mTileSize, -mTileSize,
+            mTileSize,  mTileSize,  mTileSize));
         mMesh->_setBoundingSphereRadius(Ogre::Math::Sqrt(3.0 * mTileSize * mTileSize));
 
         // Load mesh
@@ -648,11 +660,7 @@ namespace asv
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
             *gpuPosVertices++ = mNormals[i][2];
-        // }
 
-        // Copy texture vertices to GPU
-        // for (size_t i=0; i<mVertices.size(); ++i)
-        // {
             *gpuTexVertices++ = mTexCoords[i][0];
             *gpuTexVertices++ = mTexCoords[i][1];
 

@@ -154,7 +154,7 @@ add_library(Hydrodynamics
     src/WaveSimulation.cc
     src/WaveSimulationFFTW.cc
     src/WaveSimulationOpenCL.cc
-    src/WaveSimulationSimple.cc
+    src/WaveSimulationSinusoidal.cc
     src/WaveSimulationTrochoid.cc
     src/WaveSpectrum.cc
 )
