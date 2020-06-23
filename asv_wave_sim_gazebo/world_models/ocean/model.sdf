@@ -26,10 +26,17 @@
       <visual name="ocean_visual">
         <plugin name="ocean_plugin" filename="libOceanVisualPlugin.so" />
         <geometry>
+          <!-- 
+            The <empty> geometry element should work but gives rise to an error:
+            
+            [Err] [msgs.cc:2872] Unrecognized geometry type
+            
+            The message can be safely ignored.
+
+            See here also:
+            https://answers.gazebosim.org//question/13317/questions-about-the-appropriate-dealing-with-visualplugin/
+          -->
           <empty />
-          <!-- <box>
-            <size>1 1 1</size>
-          </box> -->
         </geometry>
         <material>
           <script>
