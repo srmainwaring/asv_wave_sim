@@ -144,7 +144,7 @@ namespace asv
       auto materialName = this->GetMaterialName();
       this->data->vis->SetMaterial(materialName);
       // this->data->vis->SetMaterial("Gazebo/BlueTransparent");
-      this->SetVisibilityFlags(GZ_VISIBILITY_GUI);
+      this->SetVisibilityFlags(GZ_VISIBILITY_ALL);
     
       this->data->isInitialised = true;
     }
