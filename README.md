@@ -2,7 +2,41 @@
 
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
-![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_rs750.jpg)
+![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_rs750_fft.jpg)
+
+## Notes
+
+This is a prototype branch `feature/fft_waves` which contains an updated wave engine
+that uses FFTs to generate the wavefield physics and visuals.
+
+There are changes in the way that the wave parameters need to be set, and it may
+not be possible to avoid breaking the existing interface used to specify trochoidal waves.
+This is still work in progress, and the current version has a fixed set of wave parameters.
+
+The library has additional dependencies on two FFT libraries:
+
+- [clMathLibraries/clFFT](https://github.com/clMathLibraries/clFFT)
+- [fftw](http://www.fftw.org/)
+
+These can be installed on linux with:
+
+```bash
+sudo apt-get update && apt-get install fftw clfft
+```
+
+And on macOS with:
+
+```bash
+brew fftw3 libclfft-dev libfftw3-dev
+```
+
+Aside from adding the option to use a FFT generated wavefield, the major change is
+in the way that the visuals are generated. Previously the wave displacements for visuals
+were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically
+updated in the the library then pushed into the rendering engine. This means there is no
+need to maintain various sized meshes in the media files, however it does require working
+around Gazebos requirement for static meshes and there is a custom Visual that implements
+this. The OpenCL FFT library allows this work to be offloaded to the GPU when configured.
 
 ## Dependencies
 
