@@ -6,22 +6,18 @@
     This package contains Gazebo plugins for the simulation of 
     water surface waves and hydrostatic and hydrodynamics forces. 
   </description>
-
   <maintainer email="rhys.mainwaring@me.com">Rhys Mainwaring</maintainer>
-
   <license>GPLv3</license>
-
+  <url type="website">https://github.com/srmainwaring/asv_wave_sim</url>
+  <url type="repository">https://github.com/srmainwaring/asv_wave_sim</url>
+  <url type="bugtracker">https://github.com/srmainwaring/asv_wave_sim/issues</url>
   <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
-
   <buildtool_depend>catkin</buildtool_depend>
-
   <build_depend>cgal</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>gazebo_ros</build_depend>
-  
   <exec_depend>cgal</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
-
   <export>
     <gazebo_ros plugin_path="${prefix}/lib"/>
   </export>
