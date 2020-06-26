@@ -46,6 +46,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests
 
+#if 0
 TEST(WaveSimulation, WaveSimulationOpenCL)
 {
   // Configure the wave spectrum.
@@ -75,6 +76,7 @@ TEST(WaveSimulation, WaveSimulationOpenCL)
   EXPECT_EQ(h.size(), N*N);
   // EXPECT_DOUBLE_EQ(1.0, 1.0);
 }
+#endif
 
 TEST(WaveSimulation, WaveSimulationTrochoid)
 {
@@ -174,7 +176,6 @@ TEST(WaveSimulation, WaveSimulationSinusoidal)
 
 }
 
-#if 0
 TEST(OceanTile, WaveSimulationSinusoidal)
 {
   // Wave parameters.
@@ -250,7 +251,6 @@ TEST(OceanTile, WaveSimulationSinusoidal)
 
 
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
