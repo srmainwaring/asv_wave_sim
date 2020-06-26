@@ -17,9 +17,11 @@
   <depend>eigen</depend>
   <depend>gazebo_ros</depend>
 
+  <!-- 
+  The following system dependencies are available in rosdep
   <depend>opencl</depend>
   <depend>fftw</depend>
-
+  -->
   <export>
     <gazebo_ros plugin_path="${prefix}/lib"/>
   </export>
