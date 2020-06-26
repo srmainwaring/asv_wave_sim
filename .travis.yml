@@ -23,7 +23,6 @@ env:
   matrix: # each line is a job
     - ROS_DISTRO="melodic"
       BEFORE_INSTALL_TARGET_DEPENDENCIES='apt-get install -y -qq libclfft-dev libfftw3-dev'
-      # UPSTREAM_WORKSPACE=file
 
 # clone and run industrial_ci
 install:
