@@ -174,6 +174,7 @@ TEST(WaveSimulation, WaveSimulationSinusoidal)
 
 }
 
+#if 0
 TEST(OceanTile, WaveSimulationSinusoidal)
 {
   // Wave parameters.
@@ -249,7 +250,7 @@ TEST(OceanTile, WaveSimulationSinusoidal)
 
 
 }
-
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
