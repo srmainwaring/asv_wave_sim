@@ -157,6 +157,22 @@ Publish a hydrodynamics parameters message:
 
 For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/wiki/Example) page in the wiki.
 
+## Build Status
+
+### Develop Job Status
+
+|    | Melodic |
+|--- |--- |
+| steer_bot | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
+
+
+### Release Job Status
+
+|    | Melodic |
+|--- |--- |
+| steer_bot | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
+
+
 ## License
 
 This is free software: you can redistribute it and/or modify
