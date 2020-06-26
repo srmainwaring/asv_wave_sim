@@ -178,14 +178,14 @@ For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/w
 
 |    | Melodic |
 |--- |--- |
-| steer_bot | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
+| asv_wave_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
 
 
 ### Release Job Status
 
 |    | Melodic |
 |--- |--- |
-| steer_bot | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
+| asv_wave_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
 
 
 ## License
