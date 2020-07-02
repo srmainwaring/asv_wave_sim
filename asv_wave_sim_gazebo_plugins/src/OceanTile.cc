@@ -164,9 +164,10 @@ namespace asv
         
         if (mHasVisuals) 
         {
-        ComputeNormals();
-        ComputeTangentSpace();
-        CreateMesh("OceanTileMesh");
+          // ComputeNormals();
+          ComputeTangentSpace();
+          mAboveOceanSubMesh = CreateMesh(mAboveOceanMeshName, 0.0, false);
+          mBelowOceanSubMesh = CreateMesh(mBelowOceanMeshName, -0.05, true);
         }
     }
 
@@ -214,8 +215,7 @@ namespace asv
 
         ComputeTBN(mVertices, mTexCoords, mFaces, mTangents, mBitangents, mNormals);
 
-        // @DEBUG
-        #if 0
+#if DEBUG
         for (size_t i=0; i<std::min(static_cast<size_t>(20), mVertices.size()) ; ++i)
         {
             logManager.logMessage("V["
@@ -235,12 +235,12 @@ namespace asv
             + Ogre::StringConverter::toString(mNormals[i]));
             logManager.logMessage("");
         }
-        #endif
+#endif
 
         // logManager.logMessage("Tangent space computed.");
     }
 
-    // Compute the tangent space vectors (Tanget, Bitangent, Normal)
+    // Compute the tangent space vectors (Tanget, Bitangent, Normal) for one face
     //
     // Adapted from:
     // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
@@ -286,6 +286,7 @@ namespace asv
         _normal.normalise();  
     }
 
+    // Compute the tangent space for the entire mesh.
     void OceanTile::ComputeTBN(
         const std::vector<Ogre::Vector3>& _vertices,
         const std::vector<Ogre::Vector2>& _texCoords,
@@ -347,8 +348,9 @@ namespace asv
         if (mHasVisuals)
         {
             // Uncomment to calculate the tangent space using finite differences
-            // ComputeTangentSpace();
-            UpdateMesh();
+            ComputeTangentSpace();
+            UpdateMesh(mAboveOceanSubMesh, 0.0, false);
+            UpdateMesh(mBelowOceanSubMesh, -0.05, false);
         }
     }
 
@@ -473,11 +475,10 @@ namespace asv
         }
     }
 
-    void OceanTile::CreateMesh(const Ogre::String& _name)
+    Ogre::SubMesh* OceanTile::CreateMesh(const Ogre::String &_name, double _offsetZ, bool _reverseOrientation)
     {
         // Logging
-        auto& logManager = Ogre::LogManager::getSingleton();
-        logManager.logMessage("Creating OceanTile mesh...");
+        gzmsg << "Creating OceanTile mesh..." << std::endl;
 
         // Create mesh
         // @NOTE  Cannot hold a reference to the mesh pointer in the class
@@ -485,7 +486,7 @@ namespace asv
         Ogre::MeshPtr mMesh = Ogre::MeshManager::getSingleton().createManual(_name, "General");
 
         // Create submesh
-        mSubMesh = mMesh->createSubMesh();
+        Ogre::SubMesh *subMesh = mMesh->createSubMesh();
 
         // Vertices
         const size_t nVertices = mVertices.size();
@@ -500,18 +501,18 @@ namespace asv
         auto& hardwareBufferManager = Ogre::HardwareBufferManager::getSingleton();
 
         // Create vertex data (also creates vertexDeclaration and vertexBufferBinding)
-        mSubMesh->vertexData = new Ogre::VertexData();
-        mSubMesh->vertexData->vertexCount = nVertices;
-        mSubMesh->vertexData->vertexStart = 0;
+        subMesh->vertexData = new Ogre::VertexData();
+        subMesh->vertexData->vertexCount = nVertices;
+        subMesh->vertexData->vertexStart = 0;
 
         // Create vertex declaration: positions, normals
         unsigned int posVertexBufferIndex = 0;
         size_t offset = 0;
-        mSubMesh->vertexData->vertexDeclaration->addElement(
+        subMesh->vertexData->vertexDeclaration->addElement(
             posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
 
-        mSubMesh->vertexData->vertexDeclaration->addElement(
+        subMesh->vertexData->vertexDeclaration->addElement(
             posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
 
@@ -519,39 +520,39 @@ namespace asv
         unsigned int texVertexBufferIndex = 1;
         offset = 0;
         // TexCoords: uv0
-        mSubMesh->vertexData->vertexDeclaration->addElement(
+        subMesh->vertexData->vertexDeclaration->addElement(
             texVertexBufferIndex, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2); 
 
         // Tangents: uv6
-        mSubMesh->vertexData->vertexDeclaration->addElement(
+        subMesh->vertexData->vertexDeclaration->addElement(
             texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 6);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
 
         // Bitangents: uv7
-        mSubMesh->vertexData->vertexDeclaration->addElement(
+        subMesh->vertexData->vertexDeclaration->addElement(
             texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 7);
         offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
 
         // Allocate vertex buffer: positions
         auto posVertexBuffer =
             hardwareBufferManager.createVertexBuffer(
-                mSubMesh->vertexData->vertexDeclaration->getVertexSize(posVertexBufferIndex),
-                mSubMesh->vertexData->vertexCount,
+                subMesh->vertexData->vertexDeclaration->getVertexSize(posVertexBufferIndex),
+                subMesh->vertexData->vertexCount,
                 Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
                 true);
 
         // Allocate vertex buffer: textures
         auto texVertexBuffer =
             hardwareBufferManager.createVertexBuffer(
-                mSubMesh->vertexData->vertexDeclaration->getVertexSize(texVertexBufferIndex),
-                mSubMesh->vertexData->vertexCount,
+                subMesh->vertexData->vertexDeclaration->getVertexSize(texVertexBufferIndex),
+                subMesh->vertexData->vertexCount,
                 Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
                 true);
 
         // Set vertex buffer bindings
-        mSubMesh->vertexData->vertexBufferBinding->setBinding(posVertexBufferIndex, posVertexBuffer);
-        mSubMesh->vertexData->vertexBufferBinding->setBinding(texVertexBufferIndex, texVertexBuffer);
+        subMesh->vertexData->vertexBufferBinding->setBinding(posVertexBufferIndex, posVertexBuffer);
+        subMesh->vertexData->vertexBufferBinding->setBinding(texVertexBufferIndex, texVertexBuffer);
 
         // Lock vertex buffers for write
         float* gpuPosVertices = static_cast<float*>(
@@ -572,17 +573,17 @@ namespace asv
             indexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));    
 
         // Set submesh index parameters
-        mSubMesh->useSharedVertices = false;
-        mSubMesh->indexData->indexBuffer = indexBuffer;
-        mSubMesh->indexData->indexCount = indexBufferCount;
-        mSubMesh->indexData->indexStart = 0;
+        subMesh->useSharedVertices = false;
+        subMesh->indexData->indexBuffer = indexBuffer;
+        subMesh->indexData->indexCount = indexBufferCount;
+        subMesh->indexData->indexStart = 0;
 
         // Copy position vertices to GPU
         for (size_t i=0; i<nVertices; ++i)
         {
             *gpuPosVertices++ = mVertices[i][0];
             *gpuPosVertices++ = mVertices[i][1];
-            *gpuPosVertices++ = mVertices[i][2];
+            *gpuPosVertices++ = mVertices[i][2] + _offsetZ;
 
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
@@ -606,9 +607,19 @@ namespace asv
         // Copy indices to GPU
         for (size_t i=0; i<nFaces; ++i)
         {
-            *gpuIndices++ = mFaces[i][0];
-            *gpuIndices++ = mFaces[i][1];
-            *gpuIndices++ = mFaces[i][2];
+            // Reverse orientation on faces
+            if (_reverseOrientation)
+            {
+              *gpuIndices++ = mFaces[i][0];
+              *gpuIndices++ = mFaces[i][2];
+              *gpuIndices++ = mFaces[i][1];
+            }
+            else
+            {
+              *gpuIndices++ = mFaces[i][0];
+              *gpuIndices++ = mFaces[i][1];
+              *gpuIndices++ = mFaces[i][2];
+            }
         }
 
         // Unlock buffers
@@ -626,17 +637,18 @@ namespace asv
         // Load mesh
         mMesh->load();
 
-        logManager.logMessage("OceanTile mesh created.");
+        gzmsg << "OceanTile mesh created." << std::endl;
+        return subMesh;
     }
 
-    void OceanTile::UpdateMesh()
+    void OceanTile::UpdateMesh(Ogre::SubMesh *_subMesh, double _offsetZ, bool _reverseOrientation)
     {
         // Logging
         // auto& logManager = Ogre::LogManager::getSingleton();
         // logManager.logMessage("Updating OceanTile mesh...");
 
         // Retrieve vertexData
-        auto vertexData = mSubMesh->vertexData;
+        auto vertexData = _subMesh->vertexData;
         
         // Get position vertex buffer and obtain lock for writing.
         auto posElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_POSITION);
@@ -655,7 +667,7 @@ namespace asv
         {
             *gpuPosVertices++ = mVertices[i][0];
             *gpuPosVertices++ = mVertices[i][1];
-            *gpuPosVertices++ = mVertices[i][2];
+            *gpuPosVertices++ = mVertices[i][2] + _offsetZ;
 
             *gpuPosVertices++ = mNormals[i][0];
             *gpuPosVertices++ = mNormals[i][1];
@@ -689,14 +701,14 @@ namespace asv
         // logManager.logMessage("OceanTile mesh updated.");    
     }
 
-    void OceanTile::DebugPrintVertexBuffers() const
+    void OceanTile::DebugPrintVertexBuffers(Ogre::SubMesh *_subMesh) const
     {
         // Logging
         auto& logManager = Ogre::LogManager::getSingleton();
         logManager.logMessage("DEBUG - READING VERTEX BUFFER...");    
-        auto vertexData = mSubMesh->vertexData;
+        auto vertexData = _subMesh->vertexData;
         logManager.logMessage("Use shared vertices: "
-            + Ogre::StringConverter::toString(mSubMesh->useSharedVertices));    
+            + Ogre::StringConverter::toString(_subMesh->useSharedVertices));    
         
         // VES_POSITION
         {
