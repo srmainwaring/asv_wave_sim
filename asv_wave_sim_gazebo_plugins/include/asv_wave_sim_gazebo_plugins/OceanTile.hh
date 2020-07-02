@@ -96,11 +96,11 @@ namespace asv
 
     void UpdateVertices(double _time);
 
-    void CreateMesh(const Ogre::String& _name);
+    Ogre::SubMesh* CreateMesh(const Ogre::String &_name, double _offsetZ=0.0, bool _reverseOrientation=false);
 
-    void UpdateMesh();
+    void UpdateMesh(Ogre::SubMesh *_subMesh, double _offsetZ=0.0, bool _reverseOrientation=false);
 
-    void DebugPrintVertexBuffers() const;
+    void DebugPrintVertexBuffers(Ogre::SubMesh *_subMesh) const;
 
     const std::vector<Ogre::Vector3>& Vertices() const;
 
@@ -125,7 +125,10 @@ namespace asv
     std::vector<Ogre::Vector3>  mBitangents;
     std::vector<Ogre::Vector3>  mNormals;
 
-    Ogre::SubMesh*              mSubMesh;
+    std::string                 mAboveOceanMeshName = "AboveOceanTileMesh";
+    std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
+    Ogre::SubMesh*              mAboveOceanSubMesh;
+    Ogre::SubMesh*              mBelowOceanSubMesh;
 
     std::unique_ptr<WaveSimulation> mWaveSim;
     std::vector<double>         mHeights;
