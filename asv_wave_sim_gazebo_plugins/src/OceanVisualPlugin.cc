@@ -23,7 +23,7 @@ namespace asv
   class OceanVisualPluginPrivate
   {
     /// \brief The visual containing this plugin.
-    public: rendering::VisualPtr visual;
+    public: rendering::VisualPtr parentVisual;
 
     /// \brief The visual plugin SDF.
     public: sdf::ElementPtr sdf;
@@ -64,7 +64,7 @@ namespace asv
     GZ_ASSERT(_sdf != nullptr, "SDF Element must not be null");
 
     // Capture the visual and sdf.
-    this->data->visual = _visual;
+    this->data->parentVisual = _visual;
     this->data->sdf = _sdf;
 
     gzmsg << "Done loading OceanVisualPlugin." << std::endl;
@@ -79,14 +79,33 @@ namespace asv
     if (!this->data->isInitialised)
     {
       // Load the shader visual
-      std::string visualName = this->data->visual->Name() + "_OCEAN_VISUAL";
+      std::string visualName = this->data->parentVisual->Name() + "_OCEAN_VISUAL";
 
       // typedef std::shared_ptr<OceanVisual> OceanVisualPtr;
-      this->data->oceanVisual.reset(new OceanVisual(visualName, this->data->visual));
+      this->data->oceanVisual.reset(new OceanVisual(visualName, this->data->parentVisual));
       this->data->oceanVisual->Load(/*this->data->sdf*/);
 
-      // Cascade this visuals material 
-      this->data->oceanVisual->SetMaterial(this->data->visual->GetMaterialName());
+      // Cascade this visuals material
+      // This will cascade to children (and overwite any value we might assign there)
+      // this->data->oceanVisual->SetMaterial(this->data->parentVisual->GetMaterialName());
+
+#if DEBUG
+      gzmsg << "OceanVisualPlugin::ParentVisual..." << std::endl;
+      gzmsg << "Name: "                 << this->data->parentVisual->Name() << std::endl;
+      gzmsg << "Id: "                   << this->data->parentVisual->GetId() << std::endl;
+      gzmsg << "MaterialName: "         << this->data->parentVisual->GetMaterialName() << std::endl;
+      gzmsg << "MeshName: "             << this->data->parentVisual->GetMeshName() << std::endl;
+      gzmsg << "ShaderType: "           << this->data->parentVisual->GetShaderType() << std::endl;
+      gzmsg << "AttachedObjectCount: "  << this->data->parentVisual->GetAttachedObjectCount() << std::endl;
+
+      gzmsg << "OceanVisual..." << std::endl;
+      gzmsg << "Name: "                 << this->data->oceanVisual->Name() << std::endl;
+      gzmsg << "Id: "                   << this->data->oceanVisual->GetId() << std::endl;
+      gzmsg << "MaterialName: "         << this->data->oceanVisual->GetMaterialName() << std::endl;
+      gzmsg << "MeshName: "             << this->data->oceanVisual->GetMeshName() << std::endl;
+      gzmsg << "ShaderType: "           << this->data->oceanVisual->GetShaderType() << std::endl;
+      gzmsg << "AttachedObjectCount: "  << this->data->oceanVisual->GetAttachedObjectCount() << std::endl;
+#endif
 
       this->data->isInitialised = true;
     }
