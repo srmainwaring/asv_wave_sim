@@ -1,5 +1,6 @@
 #include "asv_wave_sim_gazebo_plugins/OceanVisual.hh"
 #include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
+#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
 #include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
 
@@ -55,6 +56,9 @@ namespace asv
     /// \brief Node used to establish communication with gzserver.
     public: transport::NodePtr node;
 
+    /// \brief Subscribe to gztopic "~/wave".
+    public: transport::SubscriberPtr waveSub;
+
     /// \brief Subscribe to gztopic "~/world_stats".
     public: transport::SubscriberPtr statsSub;
   };
@@ -66,6 +70,7 @@ namespace asv
   {
     this->data->connection.reset();
     this->data->statsSub.reset();
+    this->data->waveSub.reset();
     this->data->node.reset();
   }
 
@@ -111,6 +116,9 @@ namespace asv
       // Publishers
 
       // Subscribers
+      this->data->waveSub = this->data->node->Subscribe(
+        "~/wave", &OceanVisual::OnWaveMsg, this);
+
       this->data->statsSub = this->data->node->Subscribe(
         "~/world_stats", &OceanVisual::OnStatsMsg, this);
 
@@ -220,6 +228,40 @@ namespace asv
     this->data->oceanTile->Update(time);
 
     // gzmsg << "Done updating OceanVisual." << std::endl;
+  }
+
+  void OceanVisual::OnWaveMsg(ConstParam_VPtr &_msg)
+  {
+    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
+
+    GZ_ASSERT(_msg != nullptr, "Wave message must not be null");
+
+    // Get parameters from message
+    double wind_angle = 0.0;
+    double wind_speed = 0.0;
+    double tile_size = 1000.0;;
+    size_t tile_resolution = 128;
+    wind_angle      = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
+    wind_speed      = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
+    tile_size       = Utilities::MsgParamDouble(*_msg, "tile_size", tile_size);
+    tile_resolution = Utilities::MsgParamSizeT(*_msg, "tile_resolution", tile_resolution);
+
+    // Convert from polar to cartesian
+    double wind_vel_x = wind_speed * std::cos(wind_angle);
+    double wind_vel_y = wind_speed * std::sin(wind_angle);
+
+    // @DEBUG_INFO
+    gzmsg << "OceanVisual received message on topic ["
+      << this->data->waveSub->GetTopic() << "]" << std::endl;
+    gzmsg << "wind_angle:       " << wind_angle << std::endl;
+    gzmsg << "wind_speed:       " << wind_speed << std::endl;
+    gzmsg << "tile_size:        " << tile_size << std::endl;
+    gzmsg << "tile_resolution:  " << tile_resolution << std::endl;
+    gzmsg << "wind_vel_x:       " << wind_vel_x << std::endl;
+    gzmsg << "wind_vel_y:       " << wind_vel_y << std::endl;
+
+    // Update simulation
+    this->data->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
   }
 
   void OceanVisual::OnStatsMsg(ConstWorldStatisticsPtr &_msg)
