@@ -50,6 +50,12 @@ namespace asv
     private: void OnUpdate();
 
     /// internal
+    /// \brief Callback for gztopic "~/wave".
+    ///
+    /// \param[in] _msg Wave message.
+    void OnWaveMsg(ConstParam_VPtr &_msg);
+
+    /// internal
     /// \brief Callback for topic "~/world_stats".
     ///
     /// \param[in] _msg World statistics message.
