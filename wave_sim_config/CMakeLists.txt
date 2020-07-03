@@ -34,7 +34,7 @@ catkin_package()
 # Install
 
 catkin_install_python(PROGRAMS
-    nodes/wave_sim_config
+    nodes/wave_sim_config_server
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
