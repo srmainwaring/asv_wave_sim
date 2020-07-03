@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2020  Rhys Mainwaring
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import math
+import rospy
+
+from dynamic_reconfigure.server import Server
+from dynamic_reconfigure.client import Client
+from wave_sim_config.cfg import WaveSimConfig
+
+class WaveSimConfigServer(object):
+    ''' Forward parameters updates from dynamic configure to Gazebo
+    '''
+
+    def __init__(self):
+        # Parameters
+        self._wind_angle = 0.0
+        self._wind_speed = 0.0
+        self._tile_size = 100.0
+        self._tile_resolution = 128
+
+        # Dynamic reconfiguration server
+        self._server = Server(WaveSimConfig, self._server_cb)
+
+        # Dynamic reconfiguration client
+        self._client = Client("wave_sim_config_server", timeout=30, config_callback=self._client_cb)
+
+    def update(self, event):
+        ''' Callback for the control loop.
+        
+        Parameters
+        ----------
+        event : rospy.Timer
+            A rospy.Timer event.
+        '''
+
+        time = event.current_real
+
+        # Example: update only the wind angle
+        # angle = (int(self._wind_angle * 180 / math.pi) + 1) % 360
+        # angle = int(angle * math.pi / 180)
+        # self._client.update_configuration({ "wind_angle": angle })
+
+    def _server_cb(self, config, level):
+        '''Dynamic reconfigure server callback
+        '''
+
+        # Logging
+        rospy.loginfo('server...')
+        rospy.loginfo('wind_angle: {wind_angle}'.format(**config))
+        rospy.loginfo('wind_speed: {wind_speed}'.format(**config))
+        rospy.loginfo('tile_size : {tile_size}'.format(**config))
+        rospy.loginfo('tile_resolution : {tile_resolution}'.format(**config))
+
+        return config
+
+    def _client_cb(self, config):
+        '''Dynamic reconfigure client callback
+        '''
+
+        rospy.loginfo('client...')
+        rospy.loginfo('wind_angle: {wind_angle}'.format(**config))
+        rospy.loginfo('wind_speed: {wind_speed}'.format(**config))
+        rospy.loginfo('tile_size : {tile_size}'.format(**config))
+        rospy.loginfo('tile_resolution : {tile_resolution}'.format(**config))
+
+        # Update parameters
+        self._wind_angle = config.wind_angle
+        self._wind_speed = config.wind_speed
+        self._tile_size = config.tile_size
+        self._tile_resolution = config.tile_resolution
+
+
+def main():
+    '''ROS node for wave_sim_config_server'''
+
+    rospy.init_node('wave_sim_config_server')
+    rospy.loginfo('Starting wave_sim_config_server')
+
+    # Create the server
+    server = WaveSimConfigServer()
+
+    # Start the control loop
+    control_frequency = 1.0
+    if rospy.has_param('~control_frequency'):
+        control_frequency = rospy.get_param('~control_frequency')
+
+    rospy.loginfo('Starting control loop at {} Hz'.format(control_frequency))
+    control_timer = rospy.Timer(
+        rospy.Duration(1.0 / control_frequency),
+        server.update)
+
+    # Spin
+    rospy.spin()
+
+if __name__ == '__main__':
+    main()
