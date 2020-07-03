@@ -61,6 +61,17 @@ namespace wave_sim_config
 
     void configCallback(wave_sim_config::WaveSimConfig &config, uint32_t level)
     {
+      // Parameters for trochoid waves
+      ROS_INFO("number: %d", config.number);
+      ROS_INFO("steepness: %f", config.steepness);
+      ROS_INFO("scale: %f", config.scale);
+      ROS_INFO("angle: %f", config.angle);
+      ROS_INFO("period: %f", config.period);
+      ROS_INFO("amplitude: %f", config.amplitude);
+      ROS_INFO("direction.x: %f", config.groups.direction.x);
+      ROS_INFO("direction.y: %f", config.groups.direction.y);
+
+      // Parameters for FFT waves
       ROS_INFO("wind_angle: %f", config.wind_angle);
       ROS_INFO("wind_speed: %f", config.wind_speed);
       ROS_INFO("tile_size: %f", config.tile_size);
@@ -80,29 +91,76 @@ namespace wave_sim_config
       {
         gazebo::msgs::Param_V wave_msg;
 
+        // Parameters for trochoid waves
         {
-          auto nextParam = wave_msg.add_param();
-          nextParam->set_name("wind_angle");
-          nextParam->mutable_value()->set_type(msgs::Any::DOUBLE);
-          nextParam->mutable_value()->set_int_value(config.wind_angle);
+          auto param = wave_msg.add_param();
+          param->set_name("number");
+          param->mutable_value()->set_type(msgs::Any::INT32);
+          param->mutable_value()->set_int_value(config.number);
         }
         {
-          auto nextParam = wave_msg.add_param();
-          nextParam->set_name("wind_speed");
-          nextParam->mutable_value()->set_type(msgs::Any::DOUBLE);
-          nextParam->mutable_value()->set_int_value(config.wind_speed);
+          auto param = wave_msg.add_param();
+          param->set_name("scale");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.scale);
         }
         {
-          auto nextParam = wave_msg.add_param();
-          nextParam->set_name("tile_size");
-          nextParam->mutable_value()->set_type(msgs::Any::DOUBLE);
-          nextParam->mutable_value()->set_int_value(config.tile_size);
+          auto param = wave_msg.add_param();
+          param->set_name("steepness");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.steepness);
         }
         {
-          auto nextParam = wave_msg.add_param();
-          nextParam->set_name("tile_resolution");
-          nextParam->mutable_value()->set_type(msgs::Any::INT32);
-          nextParam->mutable_value()->set_int_value(config.tile_resolution);
+          auto param = wave_msg.add_param();
+          param->set_name("angle");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.angle);
+        }
+        {
+          auto param = wave_msg.add_param();
+          param->set_name("period");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.period);
+        }
+        {
+          auto param = wave_msg.add_param();
+          param->set_name("amplitude");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.amplitude);
+        }
+        {
+          auto param = wave_msg.add_param();
+          param->set_name("direction");
+          param->mutable_value()->set_type(msgs::Any::VECTOR3D);
+          param->mutable_value()->mutable_vector3d_value()->set_x(config.groups.direction.x);
+          param->mutable_value()->mutable_vector3d_value()->set_y(config.groups.direction.y);
+          param->mutable_value()->mutable_vector3d_value()->set_z(0);
+        }
+
+        // Parameters for FFT waves
+        {
+          auto param = wave_msg.add_param();
+          param->set_name("wind_angle");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.wind_angle);
+        }
+        {
+          auto param = wave_msg.add_param();
+          param->set_name("wind_speed");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.wind_speed);
+        }
+        {
+          auto param = wave_msg.add_param();
+          param->set_name("tile_size");
+          param->mutable_value()->set_type(msgs::Any::DOUBLE);
+          param->mutable_value()->set_double_value(config.tile_size);
+        }
+        {
+          auto param = wave_msg.add_param();
+          param->set_name("tile_resolution");
+          param->mutable_value()->set_type(msgs::Any::INT32);
+          param->mutable_value()->set_int_value(config.tile_resolution);
         }
 
         // Don't block forever...
