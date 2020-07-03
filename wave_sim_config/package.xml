@@ -3,8 +3,8 @@
   <name>wave_sim_config</name>
   <version>0.0.0</version>
   <description>
-    This package contains a dynamic reconfigure node for setting
-    parameters for the wave simulation. 
+    This package contains a dynamic reconfigure server for setting
+    parameters for the wave simulation.
   </description>
   <maintainer email="rhys.mainwaring@me.com">Rhys Mainwaring</maintainer>
   <license>GPLv3</license>
@@ -13,7 +13,12 @@
   <url type="bugtracker">https://github.com/srmainwaring/asv_wave_sim/issues</url>
   <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>dyanmic_reconfigure</depend>
+  <buildtool_depend>message_generation</buildtool_depend>    
+  <depend>dynamic_reconfigure</depend>
   <depend>gazebo_ros</depend>
+  <depend>roscpp</depend>
   <depend>rospy</depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>rosunit</test_depend>
+  <exec_depend>message_runtime</exec_depend>
 </package>
