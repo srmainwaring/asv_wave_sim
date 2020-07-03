@@ -3,16 +3,20 @@ project(wave_sim_config)
 
 ################################################################################
 # Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+
+# set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ################################################################################
-# Find dependent catkin packages
+# Find dependent catkin and other packages
 
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   roscpp
   rospy
 )
+
+find_package(gazebo REQUIRED)
 
 ################################################################################
 # Setup python modules
@@ -45,13 +49,25 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+  ${GAZEBO_MSG_INCLUDE_DIRS}
+  # ${IGNITION-COMMON_INCLUDE_DIRS}
+  # ${IGNITION-MATHS_INCLUDE_DIRS}
+  # ${IGNITION-MSGS_INCLUDE_DIRS}
+)
+
+link_directories(
+  ${GAZEBO_LIBRARY_DIRS}
+  # ${IGNITION-COMMON_LIBRARY_DIRS}
+  # ${IGNITION-MATHS_LIBRARY_DIRS}
+  # ${IGNITION-MSGS_LIBRARY_DIRS}
 )
 
 # Executables
 add_executable(wave_sim_config_server
     src/server.cpp
 )
-target_link_libraries(wave_sim_config_server PRIVATE ${catkin_LIBRARIES})
+target_link_libraries(wave_sim_config_server PRIVATE ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 ################################################################################
 # Install
