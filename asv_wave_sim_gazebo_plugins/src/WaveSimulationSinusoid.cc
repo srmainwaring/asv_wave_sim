@@ -34,11 +34,7 @@ namespace asv
 
     public: void SetWindVelocity(double _ux, double _uy);
 
-    public: void SetDirection(double _dir_x, double _dir_y);
-
-    public: void SetAmplitude(double _amplitude);
-
-    public: void SetPeriod(double _period);
+    public: void SetParameters(double _amplitude, double _period);
 
     public: void SetTime(double _time);
 
@@ -76,8 +72,6 @@ namespace asv
     private: int N2;
     private: int NOver2;
     private: double L;
-    private: double wave_angle;
-    private: double dir_x, dir_y;
     private: double amplitude;
     private: double period;
     private: double time;
@@ -94,7 +88,6 @@ namespace asv
     N2(_N * _N),
     NOver2(_N / 2),
     L(_L),
-    wave_angle(0.0),
     amplitude(2.5),
     period(8.0),
     time(0.0)
@@ -106,19 +99,9 @@ namespace asv
     // @TODO NO IMPLEMENTATION
   }
 
-  void WaveSimulationSinusoid::Impl::SetDirection(double _dir_x, double _dir_y)
-  {
-    this->dir_x = _dir_x;
-    this->dir_y = _dir_y;
-  }
-
-  void WaveSimulationSinusoid::Impl::SetAmplitude(double _amplitude)
+  void WaveSimulationSinusoid::Impl::SetParameters(double _amplitude, double _period)
   {
     this->amplitude = _amplitude;
-  }
-
-  void WaveSimulationSinusoid::Impl::SetPeriod(double _period)
-  {
     this->period = _period;
   }
 
@@ -276,22 +259,11 @@ namespace asv
 
   void WaveSimulationSinusoid::SetWindVelocity(double _ux, double _uy)
   {
-    impl->SetWindVelocity(_ux, _uy);
   }
 
-  void WaveSimulationSinusoid::SetDirection(double _dir_x, double _dir_y)
+  void WaveSimulationSinusoid::SetParameters(double _amplitude, double _period)
   {
-    impl->SetDirection(_dir_x, _dir_y);
-  }
-
-  void WaveSimulationSinusoid::SetAmplitude(double _amplitude)
-  {
-    impl->SetAmplitude(_amplitude);
-  }
-
-  void WaveSimulationSinusoid::SetPeriod(double _period)
-  {
-    impl->SetPeriod(_period);
+    impl->SetParameters(_amplitude, _period);
   }
 
   void WaveSimulationSinusoid::SetTime(double _time)

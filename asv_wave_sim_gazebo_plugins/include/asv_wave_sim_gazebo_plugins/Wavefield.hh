@@ -165,6 +165,11 @@ namespace asv
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldOceanTilePrivate> data;
+  
+  
+    // @TODO: relocate 
+    void OnWaveWindMsg(ConstParam_VPtr &_msg);
+
   };
 
 ///////////////////////////////////////////////////////////////////////////////

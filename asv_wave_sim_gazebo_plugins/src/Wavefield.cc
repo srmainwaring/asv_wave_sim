@@ -24,6 +24,13 @@
 
 #include <gazebo/gazebo.hh>
 
+// @TODO: relocate (transport / messages etc) 
+#include <gazebo/common/common.hh>
+#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
+#include <thread>
+// @TODO: relocate (transport / messages etc) 
+
+
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
@@ -288,6 +295,11 @@ namespace asv
 
     /// \brief The current position of the wave field.
     public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
+
+    // @TODO: relocate
+    public: std::recursive_mutex mutex;
+    public: gazebo::transport::NodePtr node;
+    public: gazebo::transport::SubscriberPtr waveWindSub;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -295,6 +307,9 @@ namespace asv
 
   WavefieldOceanTile::~WavefieldOceanTile()
   {
+    // @TODO: relocate
+    this->data->waveWindSub.reset();
+    this->data->node.reset();
   }
 
   WavefieldOceanTile::WavefieldOceanTile(
@@ -302,6 +317,12 @@ namespace asv
     data(new WavefieldOceanTilePrivate())
   {
     gzmsg << "Constructing WavefieldOceanTile..." <<  std::endl;
+
+      // TODO: relocate
+      this->data->node = gazebo::transport::NodePtr(new gazebo::transport::Node());
+      this->data->node->Init();
+      this->data->waveWindSub = this->data->node->Subscribe(
+        "~/wave/wind", &WavefieldOceanTile::OnWaveWindMsg, this);
 
     int N = 128;
     int NPlus1 = N + 1;
@@ -362,6 +383,8 @@ namespace asv
 
   void WavefieldOceanTile::Update(double _time)
   {
+    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
+
     // Update the tile.
     this->data->oceanTile->Update(_time);
 
@@ -383,6 +406,34 @@ namespace asv
     // Update the point locator.
     this->data->triangulatedGrid->UpdatePoints(vertices);
 
+  }
+
+  void WavefieldOceanTile::OnWaveWindMsg(ConstParam_VPtr &_msg)
+  {
+    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
+
+    GZ_ASSERT(_msg != nullptr, "Message must not be null");
+
+    // Get parameters from message
+    double wind_angle = 0.0;
+    double wind_speed = 0.0;
+    wind_angle      = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
+    wind_speed      = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
+
+    // Convert from polar to cartesian
+    double wind_vel_x = wind_speed * std::cos(wind_angle);
+    double wind_vel_y = wind_speed * std::sin(wind_angle);
+
+    // @DEBUG_INFO
+    gzmsg << "WavefieldOceanTile received message on topic ["
+      << this->data->waveWindSub->GetTopic() << "]" << std::endl;
+    gzmsg << "wind_angle:       " << wind_angle << std::endl;
+    gzmsg << "wind_speed:       " << wind_speed << std::endl;
+    gzmsg << "wind_vel_x:       " << wind_vel_x << std::endl;
+    gzmsg << "wind_vel_y:       " << wind_vel_y << std::endl;
+
+    // Update simulation
+    this->data->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
   }
 
 ///////////////////////////////////////////////////////////////////////////////  
