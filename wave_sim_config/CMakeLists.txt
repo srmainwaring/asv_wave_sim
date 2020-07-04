@@ -27,7 +27,10 @@ catkin_python_setup()
 # Dynamic reconfigure
 
 generate_dynamic_reconfigure_options(
-  cfg/WaveSim.cfg
+  cfg/Wave.cfg
+  cfg/WaveSinusoid.cfg
+  cfg/WaveTile.cfg
+  cfg/WaveWind.cfg
 )
 
 ################################################################################

@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_SINUSOIDAL_HH_
-#define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_SINUSOIDAL_HH_
+#ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_SINUSOID_HH_
+#define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_SINUSOID_HH_
 
 #include "WaveSimulation.hh"
 
@@ -23,11 +23,11 @@
 
 namespace asv
 {
-  class WaveSimulationSinusoidal : public WaveSimulation
+  class WaveSimulationSinusoid : public WaveSimulation
   {
-    public: ~WaveSimulationSinusoidal();
+    public: ~WaveSimulationSinusoid();
 
-    public: WaveSimulationSinusoidal(int _N, double _L);
+    public: WaveSimulationSinusoid(int _N, double _L);
 
     public: void SetWindVelocity(double _ux, double _uy) override;
 
@@ -67,4 +67,4 @@ namespace asv
 
 }
 
-#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_SINUSOIDAL_HH_
+#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVE_SIMULATION_SINUSOID_HH_

@@ -4,7 +4,7 @@
 #include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoidal.hh"
+#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoid.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
 
 // #include <Ogre.h>
@@ -38,7 +38,7 @@ namespace asv
         mDxdy(_N * _N, 0.0)
     {
         // Different types of wave simulator are supported...
-        // 0 - WaveSimulationSinusoidal
+        // 0 - WaveSimulationSinusoid
         // 1 - WaveSimulationTrochoid
         // 2 - WaveSimulationFFTW
         // 3 - WaveSimulationOpenCL
@@ -51,7 +51,7 @@ namespace asv
                 // Simple
                 double amplitude = 1.0;
                 double period = 10.0;
-                std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
+                std::unique_ptr<WaveSimulationSinusoid> waveSim(new WaveSimulationSinusoid(_N, _L));
                 waveSim->SetParameters(amplitude, period);
                 mWaveSim = std::move(waveSim);
                 break;
