@@ -1,25 +1,27 @@
-// #version 110 core
-
 // Attributes
 attribute vec4 vertex;
-attribute vec3 normal;
+attribute vec4 normal;
 attribute vec4 uv0;     // tex coord
 attribute vec4 uv6;     // tangent
 attribute vec4 uv7;     // bitangent
 
 // Out
-varying vec3 vPosition;
-varying vec3 vNormal;
-varying mat3 vTBN;
-varying vec2 vBumpCoord;
+varying vec3 vWorldPosition;
+varying vec3 vWorldNormal;
+varying mat3 vWorldTBN;
+varying vec2 vTexCoord0;
+varying vec2 vTexCoord1;
+varying vec2 vTexCoord2;
+varying vec3 vWorldToCameraDir;
 
 // Uniform
 uniform mat4 uModelViewProjection;
 uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
+uniform mat4 uITModelMatrix;
+uniform vec3 uCameraPosition;
 
-uniform float uRescale;
 uniform vec2 uBumpScale;
 uniform vec2 uBumpSpeed;
 uniform float uTime;
@@ -63,7 +65,7 @@ void main(void)
 	vec3 bitangent = vec3(uv7);
 
   // World space
-  vec3 position = vec3(uModel * vertex);
+  vec3 worldPosition = vec3(uModel * vertex);
 
   // Compute normal.
   vec3 normal_ = normalize(cross(tangent, bitangent));
@@ -71,20 +73,25 @@ void main(void)
   // Tangent, bitangent and normal vectors.
   mat3 model = mat3(uModel[0].xyz, uModel[1].xyz, uModel[2].xyz);
   mat3 transpose_inverse_model = transpose(inverse(model));
-  vec3 T = normalize(transpose_inverse_model * tangent) * uRescale;
-  vec3 B = normalize(transpose_inverse_model * bitangent) * uRescale;
+  vec3 T = normalize(transpose_inverse_model * tangent);
+  vec3 B = normalize(transpose_inverse_model * bitangent);
   vec3 N = normalize(transpose_inverse_model * normal_);
   mat3 TBN = mat3(T, B, N);
 
   // Perturb texture coordinates for bump map.
-	vec2 bumpCoord = uv0.xy * uBumpScale + uTime * uBumpSpeed;
+	vec2 texCoord0 = uv0.xy * uBumpScale * 1.0 + uTime * uBumpSpeed * 1.0;
+	vec2 texCoord1 = uv0.xy * uBumpScale * 1.4142135 + uTime * uBumpSpeed * 3.0;
+	vec2 texCoord2 = uv0.xy * uBumpScale * 1.7320508 + uTime * uBumpSpeed * 5.0;
 
   // Out OpenGL
   gl_Position = uModelViewProjection * vertex;
 
   // Out
-  vPosition = position;
-  vNormal = N;
-  vTBN = TBN;
-  vBumpCoord = bumpCoord;
+  vWorldPosition = worldPosition;
+  vWorldNormal = N;
+  vWorldTBN = TBN;
+  vTexCoord0 = texCoord0;
+  vTexCoord1 = texCoord1;
+  vTexCoord2 = texCoord2;
+  vWorldToCameraDir = uCameraPosition - vWorldPosition;
 }
