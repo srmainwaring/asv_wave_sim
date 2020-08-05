@@ -26,9 +26,9 @@ namespace asv
 
   class OceanVisualPrivate
   {
-    /// \brief The visuals to attach
-    public: rendering::VisualPtr aboveOceanVisual;
-    public: rendering::VisualPtr belowOceanVisual;
+    /// \brief The visuals to attach    
+    public: std::vector<rendering::VisualPtr> aboveOceanVisuals;
+    public: std::vector<rendering::VisualPtr> belowOceanVisuals;
 
     /// \brief The visual plugin SDF.
     public: sdf::ElementPtr sdf;
@@ -126,68 +126,95 @@ namespace asv
       this->data->connection = event::Events::ConnectPreRender(
           std::bind(&OceanVisual::OnUpdate, this));
 
-      // Shader visuals
-      std::string aboveOceanVisualName  = this->Name() + "_ABOVE_OCEAN";
-      std::string belowOceanVisualName  = this->Name() + "_BELOW_OCEAN";
-
       // @TODO: pass name to OceanTile where it is created independently but must match.
       this->data->aboveOceanMeshName = "AboveOceanTileMesh";
       this->data->belowOceanMeshName = "BelowOceanTileMesh";
 
       // @TODO Synchronise visual with physics...
-      int N = 128;
-      double L = 256.0;
-      double u = 5.0;
+      const int N = 128;
+      const double L = 256.0;
+      const double u = 5.0;
 
       this->data->oceanTile.reset(new OceanTile(N, L));
       this->data->oceanTile->SetWindVelocity(u, 0.0);
       this->data->oceanTile->Create();
       this->data->oceanTile->Update(0.0);
 
-      // Mesh Visual: Above
-      {
-        this->data->aboveOceanVisual.reset(new rendering::Visual(aboveOceanVisualName, shared_from_this()));
-        this->data->aboveOceanVisual->Load();
-        gazebo::rendering::AttachMesh(*this->data->aboveOceanVisual, this->data->aboveOceanMeshName);
-        this->data->aboveOceanVisual->SetPosition(this->Position());
-        this->data->aboveOceanVisual->SetType(rendering::Visual::VT_VISUAL);
+      // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
+      const int nX = 3;
+      const int nY = 3;
 
-        // Set the material from the parent visual
-        auto materialName = this->GetMaterialName();
-        // std::string materialName("Gazebo/Green");
-        this->data->aboveOceanVisual->SetMaterial(materialName);
+      for (int iy=-nY; iy<=nY; ++iy)
+      {
+        for (int ix=-nX; ix<=nX; ++ix)
+        {
+          ignition::math::Vector3d position(
+            this->Position().X() + ix * L,
+            this->Position().Y() + iy * L,
+            this->Position().Z()
+          );
+
+          // Mesh Visual: Above
+          {
+            std::string visualName  = this->Name()
+              + "_ABOVE_OCEAN_" + std::to_string(ix) + "_" + std::to_string(iy);
+            rendering::VisualPtr visual(new rendering::Visual(visualName, shared_from_this()));
+            visual->Load();
+            gazebo::rendering::AttachMesh(*visual, this->data->aboveOceanMeshName);
+            visual->SetPosition(position);
+            visual->SetType(rendering::Visual::VT_VISUAL);
+
+            // Set the material from the parent visual
+            auto materialName = this->GetMaterialName();
+            // std::string materialName("Gazebo/Green");
+            visual->SetMaterial(materialName);
+
+            this->data->aboveOceanVisuals.push_back(visual);
+          }
+
+          // Mesh Visual: Below
+          {
+            std::string visualName  = this->Name()
+              + "_BELOW_OCEAN" + std::to_string(ix) + "_" + std::to_string(iy);
+            rendering::VisualPtr visual(new rendering::Visual(visualName, shared_from_this()));
+            visual->Load();
+            gazebo::rendering::AttachMesh(*visual, this->data->belowOceanMeshName);
+            visual->SetPosition(position);
+            visual->SetType(rendering::Visual::VT_VISUAL);
+
+            // Set the material from the parent visual
+            auto materialName = this->GetMaterialName();
+            // std::string materialName("Gazebo/Orange");
+            visual->SetMaterial(materialName);
+
+            this->data->belowOceanVisuals.push_back(visual);
+          }
+        }
       }
 
-      // Mesh Visual: Below
-      {
-        this->data->belowOceanVisual.reset(new rendering::Visual(belowOceanVisualName, shared_from_this()));
-        this->data->belowOceanVisual->Load();
-        gazebo::rendering::AttachMesh(*this->data->belowOceanVisual, this->data->belowOceanMeshName);
-        this->data->belowOceanVisual->SetPosition(this->Position());
-        this->data->belowOceanVisual->SetType(rendering::Visual::VT_VISUAL);
-
-        // Set the material from the parent visual
-        auto materialName = this->GetMaterialName();
-        // std::string materialName("Gazebo/Orange");
-        this->data->belowOceanVisual->SetMaterial(materialName);
-      }
 
 #if DEBUG
-      gzmsg << "AboveOceanVisual..." << std::endl;
-      gzmsg << "Name: "                 << this->data->aboveOceanVisual->Name() << std::endl;
-      gzmsg << "Id: "                   << this->data->aboveOceanVisual->GetId() << std::endl;
-      gzmsg << "MaterialName: "         << this->data->aboveOceanVisual->GetMaterialName() << std::endl;
-      gzmsg << "MeshName: "             << this->data->aboveOceanVisual->GetMeshName() << std::endl;
-      gzmsg << "ShaderType: "           << this->data->aboveOceanVisual->GetShaderType() << std::endl;
-      gzmsg << "AttachedObjectCount: "  << this->data->aboveOceanVisual->GetAttachedObjectCount() << std::endl;
-
-      gzmsg << "BelowOceanVisual..." << std::endl;
-      gzmsg << "Name: "                 << this->data->belowOceanVisual->Name() << std::endl;
-      gzmsg << "Id: "                   << this->data->belowOceanVisual->GetId() << std::endl;
-      gzmsg << "MaterialName: "         << this->data->belowOceanVisual->GetMaterialName() << std::endl;
-      gzmsg << "MeshName: "             << this->data->belowOceanVisual->GetMeshName() << std::endl;
-      gzmsg << "ShaderType: "           << this->data->belowOceanVisual->GetShaderType() << std::endl;
-      gzmsg << "AttachedObjectCount: "  << this->data->belowOceanVisual->GetAttachedObjectCount() << std::endl;
+      for (auto visual : this->data->aboveOceanVisuals)
+      {
+          gzmsg << "AboveOceanVisual..." << std::endl;
+          gzmsg << "Name: "                 << visual->Name() << std::endl;
+          gzmsg << "Id: "                   << visual->GetId() << std::endl;
+          gzmsg << "MaterialName: "         << visual->GetMaterialName() << std::endl;
+          gzmsg << "MeshName: "             << visual->GetMeshName() << std::endl;
+          gzmsg << "ShaderType: "           << visual->GetShaderType() << std::endl;
+          gzmsg << "AttachedObjectCount: "  << visual->GetAttachedObjectCount() << std::endl;
+      }
+      
+      for (auto visual : this->data->belowOceanVisuals)
+      {
+          gzmsg << "BelowOceanVisual..." << std::endl;
+          gzmsg << "Name: "                 << visual->Name() << std::endl;
+          gzmsg << "Id: "                   << visual->GetId() << std::endl;
+          gzmsg << "MaterialName: "         << visual->GetMaterialName() << std::endl;
+          gzmsg << "MeshName: "             << visual->GetMeshName() << std::endl;
+          gzmsg << "ShaderType: "           << visual->GetShaderType() << std::endl;
+          gzmsg << "AttachedObjectCount: "  << visual->GetAttachedObjectCount() << std::endl;
+      }
 #endif
 
       this->SetVisibilityFlags(GZ_VISIBILITY_ALL);    
