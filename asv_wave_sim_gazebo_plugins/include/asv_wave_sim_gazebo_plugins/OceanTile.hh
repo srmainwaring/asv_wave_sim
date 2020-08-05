@@ -107,6 +107,8 @@ namespace asv
     const std::vector<ignition::math::Vector3i>& Faces() const;
 
   private:
+    void UpdateVertex(size_t idx0, size_t idx1);
+
     bool    mHasVisuals;
 
     size_t  mResolution;                      /// \brief FFT size (N = 2^n)
