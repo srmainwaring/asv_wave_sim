@@ -49,10 +49,14 @@ namespace asv
             case 0:
             {
                 // Simple
+                double dir_x = 1.0;
+                double dir_y = 0.0;
                 double amplitude = 1.0;
                 double period = 10.0;
                 std::unique_ptr<WaveSimulationSinusoid> waveSim(new WaveSimulationSinusoid(_N, _L));
-                waveSim->SetParameters(amplitude, period);
+                waveSim->SetDirection(dir_x, dir_y);
+                waveSim->SetAmplitude(amplitude);
+                waveSim->SetPeriod(period);
                 mWaveSim = std::move(waveSim);
                 break;
             }
@@ -119,8 +123,12 @@ namespace asv
         const double Ly = this->mTileSize;
         const double lx = this->mSpacing;
         const double ly = this->mSpacing;
-        const double xTex = 1.0 * lx;
-        const double yTex = 1.0 * ly;
+        // Here we are actually mapping (u, v) to each quad in the tile (not the entire tile). 
+        // const double xTex = 1.0 * lx;
+        // const double yTex = 1.0 * ly;
+        double texScale = Lx;
+        const double xTex = texScale / mResolution;
+        const double yTex = texScale / mResolution;
 
         // Vertices - (N+1) vertices in each row / column 
         for (size_t iy=0; iy<=ny; ++iy)
@@ -158,6 +166,7 @@ namespace asv
         }
 
         // Texture Coordinates
+        gzmsg << "mVertices.size(): " << mVertices.size() << std::endl;
         mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
         mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
         mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
@@ -354,6 +363,41 @@ namespace asv
         }
     }
 
+    /// \brief Update a vertex and it's tangent space.
+    ///
+    /// \param idx0 is the index for the (N + 1) x (N + 1) mesh vertices, including skirt
+    /// \param idx1 is the index for the N x N simulated vertices
+    void OceanTile::UpdateVertex(size_t idx0, size_t idx1)
+    {
+        double h  = mHeights[idx1];
+        double sx = mDisplacementsX[idx1];
+        double sy = mDisplacementsY[idx1];
+
+        auto&& v0 = mVertices0[idx0];
+        auto&& v  = mVertices[idx0];
+        v.x = v0.x + sx;
+        v.y = v0.y + sy;
+        v.z = v0.z + h;
+
+        // 2. Update tangent and bitangent vectors (not normalised).
+        // @TODO Check sign for displacement terms
+        double dhdx  = mDhdx[idx1]; 
+        double dhdy  = mDhdy[idx1]; 
+        double dsxdx = mDxdx[idx1]; 
+        double dsydy = mDydy[idx1]; 
+        double dsxdy = mDxdy[idx1]; 
+
+        auto&& t = mTangents[idx0];
+        t.x = dsxdx + 1.0;
+        t.y = dsxdy;
+        t.z = dhdx;      
+        
+        auto&& b = mBitangents[idx0];
+        b.x = dsxdy;
+        b.y = dsydy + 1.0;
+        b.z = dhdy;
+    }
+
     void OceanTile::UpdateVertices(double _time)
     {
         mWaveSim->SetTime(_time);
@@ -373,105 +417,40 @@ namespace asv
         }
 
         const size_t N = mResolution;
-        const size_t NPlus1 = N + 1;
+        const size_t NPlus1  = N + 1;
         const size_t NMinus1 = N - 1;
 
         for (size_t iy=0; iy<N; ++iy)
         {
             for (size_t ix=0; ix<N; ++ix)
             {
-                // 1. Update vertices
-                size_t idx0 =  iy * NPlus1 + ix;
-                size_t idx1 =  iy * N + ix;
-
-                double h  = mHeights[idx1];
-                double sx = mDisplacementsX[idx1];
-                double sy = mDisplacementsY[idx1];
-
-                auto&& v0 = mVertices0[idx0];
-                auto&& v  = mVertices[idx0];
-                v.x = v0.x + sx;
-                v.y = v0.y + sy;
-                v.z = v0.z + h;
-
-                // 2. Update tangent and bitangent vectors (not normalised).
-                // @TODO Check sign for displacement terms
-                double dhdx  = mDhdx[idx1]; 
-                double dhdy  = mDhdy[idx1]; 
-                double dsxdx = mDxdx[idx1]; 
-                double dsydy = mDydy[idx1]; 
-                double dsxdy = mDxdy[idx1]; 
-
-                auto&& t = mTangents[idx0];
-                t.x = dsxdx + 1.0;
-                t.y = dsxdy;
-                t.z = dhdx;      
-                
-                auto&& b = mBitangents[idx0];
-                b.x = dsxdy;
-                b.y = dsydy + 1.0;
-                b.z = dhdy;       
+                size_t idx0 = iy * NPlus1 + ix;
+                size_t idx1 = iy * N + ix;
+                UpdateVertex(idx0, idx1);
             }
         }
 
-        // Set skirt values:
-        // Apply shifts from row / column adjoining skirt to the skirt vertices.
-        // Assume the tangent space vectors for the skirt match the adjoining row / column. 
+        // Set skirt values assuming periodic boundary conditions:
         for (size_t i=0; i<N; ++i)
         {
-            // Top row
+            // Top row (iy = N) periodic with bottom row (iy = 0)
             {
-                size_t idx0 =  NMinus1 * N + i;
-                size_t idx1 =  N * NPlus1 + i;
-
-                double h  = mHeights[idx0];
-                double sx = mDisplacementsX[idx0];
-                double sy = mDisplacementsY[idx0];
-
-                auto&& v0 = mVertices0[idx1];
-                auto&& v  = mVertices[idx1];
-                v.x = v0.x + sx;
-                v.y = v0.y + sy;
-                v.z = v0.z + h;
-
-                mTangents[idx1] = mTangents[idx0];
-                mBitangents[idx1] = mBitangents[idx0];
+                size_t idx0 = N * NPlus1 + i;
+                size_t idx1 = i;
+                UpdateVertex(idx0, idx1);
             }
-            // Right column
+            // Right column (ix = N) periodic with left column (ix = 0)
             {
-                size_t idx0 =  i * N + NMinus1;
-                size_t idx1 =  i * NPlus1 + N;
-
-                double h  = mHeights[idx0];
-                double sx = mDisplacementsX[idx0];
-                double sy = mDisplacementsY[idx0];
-
-                auto&& v0 = mVertices0[idx1];
-                auto&& v  = mVertices[idx1];
-                v.x = v0.x + sx;
-                v.y = v0.y + sy;
-                v.z = v0.z + h;
-
-                mTangents[idx1] = mTangents[idx0];
-                mBitangents[idx1] = mBitangents[idx0];
+                size_t idx0 = i * NPlus1 + N;
+                size_t idx1 = i * N;
+                UpdateVertex(idx0, idx1);
             }
         }
         {
-            // Top right corner.
-            size_t idx0 =  NMinus1 * N + NMinus1;
-            size_t idx1 =  N * NPlus1 + N;
-
-            double h  = mHeights[idx0];
-            double sx = mDisplacementsX[idx0];
-            double sy = mDisplacementsY[idx0];
-
-            auto&& v0 = mVertices0[idx1];
-            auto&& v  = mVertices[idx1];
-            v.x = v0.x + sx;
-            v.y = v0.y + sy;
-            v.z = v0.z + h;
-            mTangents[idx1] = mTangents[idx0];
-            mBitangents[idx1] = mBitangents[idx0];
+            // Top right corner period with bottom right corner.
+            size_t idx0 = NPlus1 * NPlus1 - 1;
+            size_t idx1 = 0;
+            UpdateVertex(idx0, idx1);
         }
     }
 

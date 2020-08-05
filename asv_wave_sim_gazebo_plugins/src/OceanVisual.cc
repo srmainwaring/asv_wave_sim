@@ -239,12 +239,8 @@ namespace asv
     // Get parameters from message
     double wind_angle = 0.0;
     double wind_speed = 0.0;
-    // double tile_size = 1000.0;;
-    // size_t tile_resolution = 128;
-    wind_angle      = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
-    wind_speed      = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
-    // tile_size       = Utilities::MsgParamDouble(*_msg, "tile_size", tile_size);
-    // tile_resolution = Utilities::MsgParamSizeT(*_msg, "tile_resolution", tile_resolution);
+    wind_angle = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
+    wind_speed = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
 
     // Convert from polar to cartesian
     double wind_vel_x = wind_speed * std::cos(wind_angle);
@@ -253,12 +249,10 @@ namespace asv
     // @DEBUG_INFO
     gzmsg << "OceanVisual received message on topic ["
       << this->data->waveWindSub->GetTopic() << "]" << std::endl;
-    gzmsg << "wind_angle:       " << wind_angle << std::endl;
-    gzmsg << "wind_speed:       " << wind_speed << std::endl;
-    // gzmsg << "tile_size:        " << tile_size << std::endl;
-    // gzmsg << "tile_resolution:  " << tile_resolution << std::endl;
-    gzmsg << "wind_vel_x:       " << wind_vel_x << std::endl;
-    gzmsg << "wind_vel_y:       " << wind_vel_y << std::endl;
+    gzmsg << "wind_angle: " << wind_angle << std::endl;
+    gzmsg << "wind_speed: " << wind_speed << std::endl;
+    gzmsg << "wind_vel_x: " << wind_vel_x << std::endl;
+    gzmsg << "wind_vel_y: " << wind_vel_y << std::endl;
 
     // Update simulation
     this->data->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);

@@ -23,6 +23,20 @@
 
 namespace asv
 {
+  /// L is the length of each side of a square tile.
+  ///
+  /// There are N + 1 vertices in each direction, the additional vertex
+  /// in each direction defines the tile skirt.
+  ///
+  /// The simulation updates N x N vertices
+  ///
+  /// The distance between vertices is N / L (because there
+  /// are N+1 vertices in each direction including the skirt).
+  ///
+  /// All storage is assumed to be sized to N x N and the
+  /// vertices are traversed in row major order:
+  /// i.e. the innermost loop is over the x direction.
+  ///
   class WaveSimulationSinusoid : public WaveSimulation
   {
     public: ~WaveSimulationSinusoid();
@@ -31,7 +45,11 @@ namespace asv
 
     public: void SetWindVelocity(double _ux, double _uy) override;
 
-    public: void SetParameters(double _amplitude, double _period);
+    public: void SetDirection(double _dir_x, double _dir_y);
+
+    public: void SetAmplitude(double _amplitude);
+
+    public: void SetPeriod(double _period);
 
     public: void SetTime(double _time) override;
 
