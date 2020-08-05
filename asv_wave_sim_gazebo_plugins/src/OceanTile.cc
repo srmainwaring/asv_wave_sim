@@ -90,6 +90,16 @@ namespace asv
         }
     }
 
+    double OceanTile::TileSize() const
+    {
+        return this->mTileSize;
+    }
+
+    size_t OceanTile::Resolution() const
+    {
+        return this->mResolution;
+    }
+
     void OceanTile::SetWindVelocity(double _ux, double _uy)
     {
         mWaveSim->SetWindVelocity(_ux, _uy);
