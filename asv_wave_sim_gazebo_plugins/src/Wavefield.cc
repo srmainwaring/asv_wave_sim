@@ -367,7 +367,22 @@ namespace asv
 
   bool WavefieldOceanTile::Height(const Point3& point, double& height) const
   {
-    return this->data->triangulatedGrid->Height(point, height);    
+    // @TODO the calculation assumes that the tile origin is at its center.
+    const double L = this->data->oceanTile->TileSize();
+    const double LOver2 = L/2.0;
+
+    auto pmod = [&](double x)
+    {
+        if (x < 0.0)
+          return std::fmod(x - LOver2, L) + LOver2;
+        else
+          return std::fmod(x + LOver2, L) - LOver2;
+    };
+
+    // Obtain the point modulo the tile dimensions
+    Point3 moduloPoint(pmod(point.x()), pmod(point.y()), point.z());
+
+    return this->data->triangulatedGrid->Height(moduloPoint, height);    
   }
 
   std::shared_ptr<const WaveParameters> WavefieldOceanTile::GetParameters() const
