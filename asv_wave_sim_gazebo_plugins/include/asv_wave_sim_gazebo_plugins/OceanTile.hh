@@ -44,6 +44,12 @@ namespace asv
 
     OceanTile(size_t _N, double _L, bool _hasVisuals=true);
 
+    /// \brief The tile size (or length) L. 
+    double TileSize() const;
+
+    /// \brief The tile resolution (N). The tile contains (N + 1)**2 vertices. 
+    size_t Resolution() const;
+
     void SetWindVelocity(double _ux, double _uy);
 
     // See:
