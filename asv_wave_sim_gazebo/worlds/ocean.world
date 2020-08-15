@@ -20,7 +20,6 @@
 
     <!-- GUI -->
     <gui>
-      <plugin name="keyboard_gui_plugin" filename="libKeyboardGUIPlugin.so"/>
       <camera name='user_camera'>
         <pose frame=''>73.3604 -0.353679 10.7644 0 0.271643 3.09219</pose>
         <view_controller>orbit</view_controller>
