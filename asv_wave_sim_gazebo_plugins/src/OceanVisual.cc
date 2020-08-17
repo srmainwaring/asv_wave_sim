@@ -133,7 +133,7 @@ namespace asv
       // @TODO Synchronise visual with physics...
       const int N = 128;
       const double L = 256.0;
-      const double u = 0.001;
+      const double u = 5.001;
 
       this->data->oceanTile.reset(new OceanTile(N, L));
       this->data->oceanTile->SetWindVelocity(u, 0.0);
