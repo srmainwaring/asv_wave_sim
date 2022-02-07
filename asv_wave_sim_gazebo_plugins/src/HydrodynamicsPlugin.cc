@@ -24,10 +24,8 @@
 #include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
 #include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
 
-#include <gazebo/common/Assert.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/physics/MeshShape.hh>
-#include <gazebo/physics/Shape.hh>
+#include <ignition/common.hh>
+#include <ignition/physics.hh>
 
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Triangle3.hh>
@@ -83,17 +81,17 @@ namespace asv
         // Shape
         physics::ShapePtr shape = collision->GetShape();
         GZ_ASSERT(shape != nullptr, "Shape must be valid");
-        gzmsg << "Shape:      " << shape->TypeStr() << std::endl;
-        gzmsg << "Scale:      " << shape->Scale() << std::endl;
-        gzmsg << "Type:       " << std::hex << shape->GetType() << std::dec << std::endl;
+        ignmsg << "Shape:      " << shape->TypeStr() << std::endl;
+        ignmsg << "Scale:      " << shape->Scale() << std::endl;
+        ignmsg << "Type:       " << std::hex << shape->GetType() << std::dec << std::endl;
 
         if (shape->HasType(physics::Base::EntityType::BOX_SHAPE))
         {
           // BoxShape
-          gzmsg << "Type:       " << "BOX_SHAPE" << std::endl;
+          ignmsg << "Type:       " << "BOX_SHAPE" << std::endl;
           physics::BoxShapePtr box = boost::dynamic_pointer_cast<physics::BoxShape>(shape);
           GZ_ASSERT(box != nullptr, "Failed to cast Shape to BoxShape");
-          gzmsg << "Size:       " << box->Size() << std::endl;
+          ignmsg << "Size:       " << box->Size() << std::endl;
 
           // Mesh
           std::string meshName = std::string(modelName)
@@ -113,18 +111,18 @@ namespace asv
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
           linkMeshes.push_back(mesh);
           
-          // gzmsg << "Mesh:       " << mesh->GetName() << std::endl;
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          // ignmsg << "Mesh:       " << mesh->GetName() << std::endl;
+          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
         }
       
         if (shape->HasType(physics::Base::EntityType::CYLINDER_SHAPE))
         {
           // CylinderShape
-          gzmsg << "Type:       " << "CYLINDER_SHAPE" << std::endl;
+          ignmsg << "Type:       " << "CYLINDER_SHAPE" << std::endl;
           physics::CylinderShapePtr cylinder = boost::dynamic_pointer_cast<physics::CylinderShape>(shape);
           GZ_ASSERT(cylinder != nullptr, "Failed to cast Shape to CylinderShape");
-          gzmsg << "Radius:     " << cylinder->GetRadius() << std::endl;
-          gzmsg << "Length:     " << cylinder->GetLength() << std::endl;
+          ignmsg << "Radius:     " << cylinder->GetRadius() << std::endl;
+          ignmsg << "Length:     " << cylinder->GetLength() << std::endl;
 
           // Mesh
           std::string meshName = std::string(modelName)
@@ -146,17 +144,17 @@ namespace asv
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
           linkMeshes.push_back(mesh);
 
-          gzmsg << "Mesh:       " << meshName << std::endl;
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          ignmsg << "Mesh:       " << meshName << std::endl;
+          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
         }      
 
         if (shape->HasType(physics::Base::EntityType::SPHERE_SHAPE))
         {
           // SphereShape
-          gzmsg << "Type:       " << "SPHERE_SHAPE" << std::endl;
+          ignmsg << "Type:       " << "SPHERE_SHAPE" << std::endl;
           physics::SphereShapePtr sphere = boost::dynamic_pointer_cast<physics::SphereShape>(shape);
           GZ_ASSERT(sphere != nullptr, "Failed to cast Shape to SphereShape");
-          gzmsg << "Radius:     " << sphere->GetRadius() << std::endl;
+          ignmsg << "Radius:     " << sphere->GetRadius() << std::endl;
 
           // Mesh
           std::string meshName = std::string(modelName)
@@ -177,26 +175,26 @@ namespace asv
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
           linkMeshes.push_back(mesh);
 
-          gzmsg << "Mesh:       " << meshName << std::endl;
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          ignmsg << "Mesh:       " << meshName << std::endl;
+          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
         }
 
         if (shape->HasType(physics::Base::EntityType::MESH_SHAPE))
         {
           // MeshShape
-          gzmsg << "Type:       " << "MESH_SHAPE" << std::endl;
+          ignmsg << "Type:       " << "MESH_SHAPE" << std::endl;
           physics::MeshShapePtr meshShape = boost::dynamic_pointer_cast<physics::MeshShape>(shape);
           GZ_ASSERT(meshShape != nullptr, "Failed to cast Shape to MeshShape");
 
           std::string meshUri = meshShape->GetMeshURI();
           std::string meshStr = common::find_file(meshUri);
-          gzmsg << "MeshURI:    " << meshUri << std::endl;
-          gzmsg << "MeshStr:    " << meshStr << std::endl;
+          ignmsg << "MeshURI:    " << meshUri << std::endl;
+          ignmsg << "MeshStr:    " << meshStr << std::endl;
 
           // Mesh
           if (!common::MeshManager::Instance()->HasMesh(meshStr))
           {
-            gzerr << "Mesh: " << meshStr << " was not loaded"<< std::endl;
+            ignerr << "Mesh: " << meshStr << " was not loaded"<< std::endl;
             return;
           } 
 
@@ -206,8 +204,8 @@ namespace asv
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
           linkMeshes.push_back(mesh);
 
-          gzmsg << "Mesh:       " << meshStr << std::endl;
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          ignmsg << "Mesh:       " << meshStr << std::endl;
+          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
         }
 
       }
@@ -260,7 +258,7 @@ namespace asv
     physics::ModelPtr wavefieldModel = _world->ModelByName(_waveModelName);    
     if(wavefieldModel == nullptr)
     {
-      gzerr << "No Wavefield Model found with name '" << _waveModelName << "'." << std::endl;
+      ignerr << "No Wavefield Model found with name '" << _waveModelName << "'." << std::endl;
       return nullptr;
     }
 
@@ -271,7 +269,7 @@ namespace asv
       = boost::dynamic_pointer_cast<WavefieldEntity>(base);
     if (wavefieldEntity == nullptr)
     {
-      gzerr << "Wavefield Entity is null: " << wavefieldEntityName << std::endl;
+      ignerr << "Wavefield Entity is null: " << wavefieldEntityName << std::endl;
       return nullptr;
     }    
     GZ_ASSERT(wavefieldEntity->GetWavefield() != nullptr, "Wavefield is null.");
@@ -402,7 +400,7 @@ namespace asv
   void HydrodynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     // @DEBUG_INFO
-    // gzmsg << "Load HydrodynamicsPlugin" << std::endl;
+    // ignmsg << "Load HydrodynamicsPlugin" << std::endl;
 
     GZ_ASSERT(_model != nullptr, "Invalid parameter _model");
     GZ_ASSERT(_sdf   != nullptr, "Invalid parameter _sdf");
@@ -455,7 +453,7 @@ namespace asv
       this->data->world, this->data->waveModelName);
     if (this->data->wavefield == nullptr) 
     {
-      gzerr << "Wavefield is NULL" << std::endl;
+      ignerr << "Wavefield is NULL" << std::endl;
       return;
     }
 
@@ -506,12 +504,12 @@ namespace asv
         nSubTri += hd->hydrodynamics[j]->GetSubmergedTriangles().size();
 
         // @DEBUG_INFO
-        // gzmsg << "Link:         " << hd->link->GetName() << std::endl;
-        // gzmsg << "Position:     " << linkPose.Pos() << std::endl;
-        // gzmsg << "Rotation:     " << linkPose.Rot().Euler() << std::endl;
-        // gzmsg << "SubTriCount:  " << nSubTri << std::endl;
-        // gzmsg << "Force:        " << force << std::endl;
-        // gzmsg << "Torque:       " << torque << std::endl;
+        // ignmsg << "Link:         " << hd->link->GetName() << std::endl;
+        // ignmsg << "Position:     " << linkPose.Pos() << std::endl;
+        // ignmsg << "Rotation:     " << linkPose.Rot().Euler() << std::endl;
+        // ignmsg << "SubTriCount:  " << nSubTri << std::endl;
+        // ignmsg << "Force:        " << force << std::endl;
+        // ignmsg << "Torque:       " << torque << std::endl;
       }
     }
   }
@@ -619,7 +617,7 @@ namespace asv
   void HydrodynamicsPlugin::Init()
   {
     // @DEBUG_INFO
-    // gzmsg << "Init HydrodynamicsPlugin" << std::endl;
+    // ignmsg << "Init HydrodynamicsPlugin" << std::endl;
     this->HydrodynamicsPlugin::InitPhysics();
     this->HydrodynamicsPlugin::InitMarkers();
   }
@@ -631,7 +629,7 @@ namespace asv
       this->data->world, this->data->waveModelName);
     if (this->data->wavefield == nullptr) 
     {
-      gzerr << "Wavefield is NULL" << std::endl;
+      ignerr << "Wavefield is NULL" << std::endl;
       return;
     }
 
@@ -641,8 +639,8 @@ namespace asv
     std::vector<physics::LinkPtr> links;
     std::vector<std::vector<std::shared_ptr<Mesh>>> meshes;
     CreateCollisionMeshes(this->data->model, links, meshes);
-    gzmsg << "links:  " << links.size() << std::endl;
-    gzmsg << "meshes: " << meshes.size() << std::endl;
+    ignmsg << "links:  " << links.size() << std::endl;
+    ignmsg << "meshes: " << meshes.size() << std::endl;
 
     for (size_t i=0; i<links.size(); ++i)
     {
@@ -666,7 +664,7 @@ namespace asv
       // Water patch grid
       auto boundingBox = hd->link->CollisionBoundingBox();
       double patchSize = 2.2 * boundingBox.Size().Length();
-      gzmsg << "Water patch size: " << patchSize << std::endl;
+      ignmsg << "Water patch size: " << patchSize << std::endl;
       std::shared_ptr<Grid> initWaterPatch(new Grid({patchSize, patchSize}, { 4, 4 }));
 
       // WavefieldSampler - this is updated by the pose of the link (not the CoM).
@@ -920,7 +918,7 @@ namespace asv
     hydroParams.SetFromMsg(*_msg);
 
     // @DEBUG_INFO
-    gzmsg << "Hydrodynamics Model received message on topic [" 
+    ignmsg << "Hydrodynamics Model received message on topic [" 
       << this->data->hydroSub->GetTopic() << "]" << std::endl;
     hydroParams.DebugPrint();
   }

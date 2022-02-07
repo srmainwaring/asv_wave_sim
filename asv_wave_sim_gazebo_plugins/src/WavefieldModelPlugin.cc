@@ -22,15 +22,15 @@
 #include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
-#include <gazebo/common/Assert.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
+// #include <ignition/common/Assert.hh>
+#include <ignition/common.hh>
+#include <ignition/physics.hh>
 
-#include <gazebo/msgs/any.pb.h>
-#include <gazebo/msgs/empty.pb.h>
-#include <gazebo/msgs/gz_string.pb.h>
-#include <gazebo/msgs/param.pb.h>
-#include <gazebo/msgs/param_v.pb.h>
+#include <ignition/msgs/any.pb.h>
+#include <ignition/msgs/empty.pb.h>
+#include <ignition/msgs/gz_string.pb.h>
+#include <ignition/msgs/param.pb.h>
+#include <ignition/msgs/param_v.pb.h>
 
 #include <ignition/math/Vector3.hh>
 
@@ -126,7 +126,7 @@ namespace asv
   {
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Load WavefieldModelPlugin [thread: " << threadId << "]" << std::endl;
+    // ignmsg << "Load WavefieldModelPlugin [thread: " << threadId << "]" << std::endl;
 
     GZ_ASSERT(_model != nullptr, "Invalid parameter _model");
     GZ_ASSERT(_sdf != nullptr, "Invalid parameter _sdf");
@@ -180,7 +180,7 @@ namespace asv
   {
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Init WavefieldModelPlugin [thread: " << threadId << "]" << std::endl;
+    // ignmsg << "Init WavefieldModelPlugin [thread: " << threadId << "]" << std::endl;
 
     if (this->data->showWavePatch)
       this->InitMarker();
@@ -261,7 +261,7 @@ namespace asv
     waveParams.SetFromMsg(*_msg);
 
     // @DEBUG_INFO
-    gzmsg << "Wavefield Model received message on topic ["
+    ignmsg << "Wavefield Model received message on topic ["
       << this->data->waveSub->GetTopic() << "]" << std::endl;
     waveParams.DebugPrint();
   }

@@ -13,11 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/msgs/msgs.hh>
+#include <ignition/common.hh>
+#include <ignition/transport.hh>
+#include <ignition/physics.hh>
+#include <ignition/msgs/msgs.hh>
 
 #include <atomic>
 #include <chrono>
@@ -84,7 +83,7 @@ int main(int _argc, char **_argv)
     hydroSub.reset();
     transport::fini();
   }
-  catch(const gazebo::common::Exception &_e)
+  catch(const ignition::common::Exception &_e)
   {
     std::cout << _e.GetErrorStr() << std::endl;
     transport::fini();

@@ -16,8 +16,8 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_OCEAN_VISUAL_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_OCEAN_VISUAL_HH_
 
-#include <gazebo/rendering/Visual.hh>
-#include <gazebo/msgs/msgs.hh>
+#include <ignition/rendering/Visual.hh>
+#include <ignition/msgs/msgs.hh>
 
 #include <memory>
 

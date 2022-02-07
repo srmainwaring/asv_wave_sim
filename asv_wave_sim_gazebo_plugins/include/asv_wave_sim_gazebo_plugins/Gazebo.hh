@@ -21,21 +21,20 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_GAZEBO_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_GAZEBO_HH_
 
-#include <gazebo/rendering/Visual.hh>
-#include "gazebo/rendering/ogre_gazebo.h"
-
-#include <ignition/math/Vector3.hh>
+#include <ignition/math.hh>
+#include <ignition/common.hh>
+#include <ignition/rendering.hh>
+#include <ignition/rendering/ogre.hh>
+#include <sdf/sdf.hh>
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace gazebo
+namespace ignition
 {
   namespace rendering
   {
-    class Visual;
-
     void ToOgreVector3(
       const std::vector<double>& _v,
       Ogre::Vector3& _vout);
@@ -88,7 +87,7 @@ namespace gazebo
     /// \param[in] _subMesh Name of the mesh within _meshName to insert.
     /// \param[in] _centerSubmesh True to center the submesh.
     void InsertMesh(
-      const common::Mesh *_mesh,
+      const ignition::common::Mesh *_mesh,
       const std::string &_subMesh="",
       bool _centerSubmesh=false);
 

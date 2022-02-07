@@ -65,15 +65,15 @@ namespace {
     double radius
   )
   {
-    gazebo::common::MeshManager::Instance()->CreateSphere(
+    ignition::common::MeshManager::Instance()->CreateSphere(
       meshName,
       radius,                   // radius
       32,                       // rings
       32);                      // segments
-    GZ_ASSERT(gazebo::common::MeshManager::Instance()->HasMesh(meshName),
+    GZ_ASSERT(ignition::common::MeshManager::Instance()->HasMesh(meshName),
       "Failed to create Mesh for Cylinder");
 
-    const gazebo::common::Mesh* source = gazebo::common::MeshManager::Instance()->GetMesh(meshName);
+    const ignition::common::Mesh* source = ignition::common::MeshManager::Instance()->GetMesh(meshName);
     GZ_ASSERT(source != nullptr, "Invalid Sphere Mesh");
     // std::cout << "Mesh:       " << source->GetName() << std::endl;
     // std::cout << "Vertex:     " << source->GetVertexCount() << std::endl;

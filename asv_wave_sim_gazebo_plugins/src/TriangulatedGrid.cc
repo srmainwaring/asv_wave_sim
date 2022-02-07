@@ -16,8 +16,6 @@
 #include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
 #include "asv_wave_sim_gazebo_plugins/Geometry.hh"
 
-#include <gazebo/gazebo.hh>
-
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>

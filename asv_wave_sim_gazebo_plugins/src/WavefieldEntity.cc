@@ -19,18 +19,19 @@
 #include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
-#include <gazebo/common/Assert.hh>
-#include <gazebo/physics/physics.hh>
+#include <ignition/common.hh>
+// #include <ignition/physics.hh>
 
 #include <iostream>
 #include <string>
 
-using namespace gazebo;
+using namespace ignition;
 using namespace common;
 
 namespace asv 
 {
 
+#if 0
 ///////////////////////////////////////////////////////////////////////////////    
 // WavefieldEntity
 
@@ -80,7 +81,7 @@ namespace asv
     }
 
     // @DEBUG_INFO
-    // gzmsg << "WavefieldEntity..." <<  std::endl;
+    // ignmsg << "WavefieldEntity..." <<  std::endl;
     // this->data->waveParams->DebugPrint();
   }
 
@@ -134,6 +135,7 @@ namespace asv
   {
     return std::string(_parentName + "::wavefield_entity");
   }
+#endif
 
 } // namespace asv
 

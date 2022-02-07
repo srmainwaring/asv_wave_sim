@@ -21,7 +21,7 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/gazebo.hh>
+#include <ignition/msgs.hh>
 #include <sdf/sdf.hh>
 
 #include <string>
@@ -95,7 +95,7 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static bool MsgParamBool(const gazebo::msgs::Param_V& _msg,
+    public: static bool MsgParamBool(const ignition::msgs::Param_V& _msg,
       const std::string &_paramName, const bool _defaultVal);
 
     /// \brief Extract a named size_t parameter from a Param_V message.
@@ -104,7 +104,7 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static size_t MsgParamSizeT(const gazebo::msgs::Param_V& _msg,
+    public: static size_t MsgParamSizeT(const ignition::msgs::Param_V& _msg,
       const std::string &_paramName, const size_t _defaultVal);
 
     /// \brief Extract a named double parameter from a Param_V message.
@@ -113,7 +113,7 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static double MsgParamDouble(const gazebo::msgs::Param_V& _msg,
+    public: static double MsgParamDouble(const ignition::msgs::Param_V& _msg,
       const std::string &_paramName, const double _defaultVal);
 
     /// \brief Extract a named std::string parameter from a Param_V message.
@@ -122,7 +122,7 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static std::string MsgParamString(const gazebo::msgs::Param_V& _msg,
+    public: static std::string MsgParamString(const ignition::msgs::Param_V& _msg,
       const std::string &_paramName, const std::string _defaultVal);
 
     /// \brief Extract a named Vector2 parameter from a Param_V message.
@@ -131,7 +131,7 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static Vector2 MsgParamVector2(const gazebo::msgs::Param_V& _msg,
+    public: static Vector2 MsgParamVector2(const ignition::msgs::Param_V& _msg,
       const std::string &_paramName, const Vector2 _defaultVal);
 
     /// \brief Extract a named Vector3 parameter from a Param_V message.
@@ -140,7 +140,7 @@ namespace asv
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static Vector3 MsgParamVector3(const gazebo::msgs::Param_V& _msg,
+    public: static Vector3 MsgParamVector3(const ignition::msgs::Param_V& _msg,
       const std::string &_paramName, const Vector3 _defaultVal);
   };
 

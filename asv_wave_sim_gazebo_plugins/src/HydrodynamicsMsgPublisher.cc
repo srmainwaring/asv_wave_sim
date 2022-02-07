@@ -13,11 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/msgs/msgs.hh>
+#include <ignition/common.hh>
+#include <ignition/transport.hh>
+#include <ignition/physics.hh>
+#include <ignition/msgs.hh>
 
 #include <boost/lexical_cast/try_lexical_convert.hpp>
 #include <boost/program_options.hpp>
@@ -146,10 +145,10 @@ int main(int _argc, char **_argv)
     }
     topic.append("/hydrodynamics");
     transport::PublisherPtr hydroPub =
-      node->Advertise<gazebo::msgs::Param_V>(topic);
+      node->Advertise<ignition::msgs::Param_V>(topic);
 
     // Message
-    gazebo::msgs::Param_V hydroMsg;
+    ignition::msgs::Param_V hydroMsg;
     if (vm.count("damping_on"))
     {
       auto nextParam = hydroMsg.add_param();
@@ -262,7 +261,7 @@ int main(int _argc, char **_argv)
     hydroPub.reset();
     transport::fini();    
   }
-  catch(const gazebo::common::Exception &_e)
+  catch(const ignition::common::Exception &_e)
   {
     std::cout << _e.GetErrorStr() << std::endl;
     transport::fini();

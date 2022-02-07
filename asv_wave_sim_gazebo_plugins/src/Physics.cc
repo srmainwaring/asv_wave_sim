@@ -27,10 +27,9 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Timer.h>
 
-#include <gazebo/gazebo.hh>
-
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
+#include <ignition/common.hh>
 
 #include <sdf/sdf.hh>
 
@@ -47,10 +46,10 @@ namespace asv
 // Utilities
   void DebugPrint(const Triangle& triangle)
   {
-    gzmsg << "Vertex[0]:   " << triangle[0] << std::endl;
-    gzmsg << "Vertex[1]:   " << triangle[1] << std::endl;
-    gzmsg << "Vertex[2]:   " << triangle[2] << std::endl;
-    gzmsg << "Normal:      " << Geometry::Normal(triangle) << std::endl;
+    ignmsg << "Vertex[0]:   " << triangle[0] << std::endl;
+    ignmsg << "Vertex[1]:   " << triangle[1] << std::endl;
+    ignmsg << "Vertex[2]:   " << triangle[2] << std::endl;
+    ignmsg << "Normal:      " << Geometry::Normal(triangle) << std::endl;
   }
 
 ///////////////////////////////////////////////////////////////////////////////    
@@ -171,20 +170,20 @@ namespace asv
       fU = fluidDensity * gravity * area * hCU;    
 
       // @DEBUG_INFO
-      // gzmsg << "_depthC: " << _depthC << std::endl; 
-      // gzmsg << "_C:      " << _C << std::endl; 
-      // gzmsg << "_H:      " << _H << std::endl; 
-      // gzmsg << "_M:      " << _M << std::endl; 
-      // gzmsg << "_L:      " << _L << std::endl; 
-      // gzmsg << "_normal: " << _normal << std::endl; 
-      // gzmsg << "D:       " << D << std::endl; 
-      // gzmsg << "B:       " << B << std::endl; 
-      // gzmsg << "z0:      " << z0 << std::endl; 
-      // gzmsg << "CpU:     " << CpU << std::endl; 
-      // gzmsg << "CU:      " << CU << std::endl; 
-      // gzmsg << "hCU:     " << hCU << std::endl; 
-      // gzmsg << "area:    " << area << std::endl; 
-      // gzmsg << "fU:      " << fU << std::endl; 
+      // ignmsg << "_depthC: " << _depthC << std::endl; 
+      // ignmsg << "_C:      " << _C << std::endl; 
+      // ignmsg << "_H:      " << _H << std::endl; 
+      // ignmsg << "_M:      " << _M << std::endl; 
+      // ignmsg << "_L:      " << _L << std::endl; 
+      // ignmsg << "_normal: " << _normal << std::endl; 
+      // ignmsg << "D:       " << D << std::endl; 
+      // ignmsg << "B:       " << B << std::endl; 
+      // ignmsg << "z0:      " << z0 << std::endl; 
+      // ignmsg << "CpU:     " << CpU << std::endl; 
+      // ignmsg << "CU:      " << CU << std::endl; 
+      // ignmsg << "hCU:     " << hCU << std::endl; 
+      // ignmsg << "area:    " << area << std::endl; 
+      // ignmsg << "fU:      " << fU << std::endl; 
     }
 
     // Lower triangle L < M
@@ -201,20 +200,20 @@ namespace asv
       fL = fluidDensity * gravity * area * hCL;
 
       // @DEBUG_INFO
-      // gzmsg << "_depthC: " << _depthC << std::endl; 
-      // gzmsg << "_C:      " << _C << std::endl; 
-      // gzmsg << "_H:      " << _H << std::endl; 
-      // gzmsg << "_M:      " << _M << std::endl; 
-      // gzmsg << "_L:      " << _L << std::endl; 
-      // gzmsg << "_normal: " << _normal << std::endl; 
-      // gzmsg << "D:       " << D << std::endl; 
-      // gzmsg << "B:       " << B << std::endl; 
-      // gzmsg << "z0:      " << z0 << std::endl; 
-      // gzmsg << "CpL:     " << CpL << std::endl; 
-      // gzmsg << "CL:      " << CL << std::endl; 
-      // gzmsg << "hCL:     " << hCL << std::endl; 
-      // gzmsg << "area:    " << area << std::endl;
-      // gzmsg << "fL:      " << fL << std::endl; 
+      // ignmsg << "_depthC: " << _depthC << std::endl; 
+      // ignmsg << "_C:      " << _C << std::endl; 
+      // ignmsg << "_H:      " << _H << std::endl; 
+      // ignmsg << "_M:      " << _M << std::endl; 
+      // ignmsg << "_L:      " << _L << std::endl; 
+      // ignmsg << "_normal: " << _normal << std::endl; 
+      // ignmsg << "D:       " << D << std::endl; 
+      // ignmsg << "B:       " << B << std::endl; 
+      // ignmsg << "z0:      " << z0 << std::endl; 
+      // ignmsg << "CpL:     " << CpL << std::endl; 
+      // ignmsg << "CL:      " << CL << std::endl; 
+      // ignmsg << "hCL:     " << hCL << std::endl; 
+      // ignmsg << "area:    " << area << std::endl;
+      // ignmsg << "fL:      " << fL << std::endl; 
     }
         
     // Calculate the force and centre of application
@@ -222,14 +221,14 @@ namespace asv
     _center = CenterOfForce(fU, fL, CpU, CpL);
 
     // @DEBUG_INFO
-    // gzmsg << "_depthC: " << _depthC << std::endl;
-    // gzmsg << "_C:      " << _C << std::endl;
-    // gzmsg << "_H:      " << _H << std::endl;
-    // gzmsg << "_M:      " << _M << std::endl;
-    // gzmsg << "_L:      " << _L << std::endl;
-    // gzmsg << "_normal: " << _normal << std::endl;
-    // gzmsg << "_force:  " << _force << std::endl;
-    // gzmsg << "_center: " << _center << std::endl;
+    // ignmsg << "_depthC: " << _depthC << std::endl;
+    // ignmsg << "_C:      " << _C << std::endl;
+    // ignmsg << "_H:      " << _H << std::endl;
+    // ignmsg << "_M:      " << _M << std::endl;
+    // ignmsg << "_L:      " << _L << std::endl;
+    // ignmsg << "_normal: " << _normal << std::endl;
+    // ignmsg << "_force:  " << _force << std::endl;
+    // ignmsg << "_center: " << _center << std::endl;
   }
 
   void Physics::BuoyancyForceAtCentroid(
@@ -277,11 +276,11 @@ namespace asv
 
     // @DEBUG_INFO
     // DebugPrint(_triangle);
-    // gzmsg << "vz:          "; for (auto z: vz)    { gzmsg << z << " "; }; gzmsg << std::endl;
-    // gzmsg << "index:       "; for (auto i: index) { gzmsg << i << " "; }; gzmsg << std::endl;
-    // gzmsg << "H:           " << H << std::endl;
-    // gzmsg << "M:           " << M << std::endl;
-    // gzmsg << "L:           " << L << std::endl;
+    // ignmsg << "vz:          "; for (auto z: vz)    { ignmsg << z << " "; }; ignmsg << std::endl;
+    // ignmsg << "index:       "; for (auto i: index) { ignmsg << i << " "; }; ignmsg << std::endl;
+    // ignmsg << "H:           " << H << std::endl;
+    // ignmsg << "M:           " << M << std::endl;
+    // ignmsg << "L:           " << L << std::endl;
 
     // Calculate the depth at the centroid
     Point3 C = Geometry::TriangleCentroid(_triangle);
@@ -445,7 +444,7 @@ namespace asv
     return this->data->vRDrag;
   }
 
-  void HydrodynamicsParameters::SetFromMsg(const gazebo::msgs::Param_V& _msg)
+  void HydrodynamicsParameters::SetFromMsg(const ignition::msgs::Param_V& _msg)
   {
     this->data->dampingOn      = Utilities::MsgParamBool(_msg,  "damping_on",       this->data->dampingOn);
     this->data->viscousDragOn  = Utilities::MsgParamBool(_msg,  "viscous_drag_on",  this->data->viscousDragOn);
@@ -485,20 +484,20 @@ namespace asv
 
   void HydrodynamicsParameters::DebugPrint() const
   {
-    gzmsg << "damping_on:       " << this->data->dampingOn << std::endl;
-    gzmsg << "viscous_drag_on:  " << this->data->viscousDragOn << std::endl;
-    gzmsg << "pressure_drag_on: " << this->data->pressureDragOn << std::endl;
-    gzmsg << "cDampL1:          " << this->data->cDampL1 << std::endl;
-    gzmsg << "cDampL2:          " << this->data->cDampL2 << std::endl;
-    gzmsg << "cDampR1:          " << this->data->cDampR1 << std::endl;
-    gzmsg << "cDampR2:          " << this->data->cDampR2 << std::endl;
-    gzmsg << "cPDrag1:          " << this->data->cPDrag1 << std::endl;
-    gzmsg << "cPDrag2:          " << this->data->cPDrag2 << std::endl;
-    gzmsg << "fPDrag:           " << this->data->fPDrag << std::endl;
-    gzmsg << "cSDrag1:          " << this->data->cSDrag1 << std::endl;
-    gzmsg << "cSDrag2:          " << this->data->cSDrag2 << std::endl;
-    gzmsg << "fSDrag:           " << this->data->fSDrag << std::endl;
-    gzmsg << "vRDrag:           " << this->data->vRDrag << std::endl;
+    ignmsg << "damping_on:       " << this->data->dampingOn << std::endl;
+    ignmsg << "viscous_drag_on:  " << this->data->viscousDragOn << std::endl;
+    ignmsg << "pressure_drag_on: " << this->data->pressureDragOn << std::endl;
+    ignmsg << "cDampL1:          " << this->data->cDampL1 << std::endl;
+    ignmsg << "cDampL2:          " << this->data->cDampL2 << std::endl;
+    ignmsg << "cDampR1:          " << this->data->cDampR1 << std::endl;
+    ignmsg << "cDampR2:          " << this->data->cDampR2 << std::endl;
+    ignmsg << "cPDrag1:          " << this->data->cPDrag1 << std::endl;
+    ignmsg << "cPDrag2:          " << this->data->cPDrag2 << std::endl;
+    ignmsg << "fPDrag:           " << this->data->fPDrag << std::endl;
+    ignmsg << "cSDrag1:          " << this->data->cSDrag1 << std::endl;
+    ignmsg << "cSDrag2:          " << this->data->cSDrag2 << std::endl;
+    ignmsg << "fSDrag:           " << this->data->fSDrag << std::endl;
+    ignmsg << "vRDrag:           " << this->data->vRDrag << std::endl;
   }
 
 ///////////////////////////////////////////////////////////////////////////////    
@@ -535,16 +534,16 @@ namespace asv
 
   void DebugPrint(const TriangleProperties& props)
   {
-    gzmsg << "index:        " << props.index << std::endl;
-    gzmsg << "normal:       " << props.normal << std::endl;
-    gzmsg << "area:         " << props.area << std::endl;
-    gzmsg << "subArea:      " << props.subArea << std::endl;
-    gzmsg << "vh:           " << props.vh << std::endl;
-    gzmsg << "vm:           " << props.vm << std::endl;
-    gzmsg << "vl:           " << props.vl << std::endl;
-    gzmsg << "hh:           " << props.hh << std::endl;
-    gzmsg << "hm:           " << props.hm << std::endl;
-    gzmsg << "hl:           " << props.hl << std::endl;
+    ignmsg << "index:        " << props.index << std::endl;
+    ignmsg << "normal:       " << props.normal << std::endl;
+    ignmsg << "area:         " << props.area << std::endl;
+    ignmsg << "subArea:      " << props.subArea << std::endl;
+    ignmsg << "vh:           " << props.vh << std::endl;
+    ignmsg << "vm:           " << props.vm << std::endl;
+    ignmsg << "vl:           " << props.vl << std::endl;
+    ignmsg << "hh:           " << props.hh << std::endl;
+    ignmsg << "hm:           " << props.hm << std::endl;
+    ignmsg << "hl:           " << props.hl << std::endl;
   }
 
   class SubmergedTriangleProperties
@@ -583,19 +582,19 @@ namespace asv
 
   void DebugPrint(const SubmergedTriangleProperties& props)
   {
-    gzmsg << "index:        " << props.index << std::endl;
-    gzmsg << "normal:       " << props.normal << std::endl;
-    gzmsg << "centroid:     " << props.centroid << std::endl;
-    gzmsg << "xr:           " << props.xr << std::endl;
-    gzmsg << "area:         " << props.area << std::endl;
-    gzmsg << "vp:           " << props.vp << std::endl;
-    gzmsg << "up:           " << props.up << std::endl;
-    gzmsg << "cosTheta:     " << props.cosTheta << std::endl;
-    gzmsg << "vn:           " << props.vn << std::endl;
-    gzmsg << "vt:           " << props.vt << std::endl;
-    gzmsg << "ut:           " << props.ut << std::endl;
-    gzmsg << "uf:           " << props.uf << std::endl;
-    gzmsg << "vf:           " << props.vf << std::endl;
+    ignmsg << "index:        " << props.index << std::endl;
+    ignmsg << "normal:       " << props.normal << std::endl;
+    ignmsg << "centroid:     " << props.centroid << std::endl;
+    ignmsg << "xr:           " << props.xr << std::endl;
+    ignmsg << "area:         " << props.area << std::endl;
+    ignmsg << "vp:           " << props.vp << std::endl;
+    ignmsg << "up:           " << props.up << std::endl;
+    ignmsg << "cosTheta:     " << props.cosTheta << std::endl;
+    ignmsg << "vn:           " << props.vn << std::endl;
+    ignmsg << "vt:           " << props.vt << std::endl;
+    ignmsg << "ut:           " << props.ut << std::endl;
+    ignmsg << "uf:           " << props.uf << std::endl;
+    ignmsg << "vf:           " << props.vf << std::endl;
   }
 
 ///////////////////////////////////////////////////////////////////////////////    
@@ -776,12 +775,12 @@ namespace asv
     }
 
     // @DEBUG_INFO
-    // gzmsg << "TriCount: " << this->data->triangleProperties.size() << std::endl;
+    // ignmsg << "TriCount: " << this->data->triangleProperties.size() << std::endl;
     // for (auto triProps : this->data->triangleProperties)
     // {
     //   DebugPrint(triProps);
     // }
-    // gzmsg << "SubTriCount: " << this->data->submergedTriangles.size() << std::endl;
+    // ignmsg << "SubTriCount: " << this->data->submergedTriangles.size() << std::endl;
     // for (auto subTriProps : this->data->submergedTriangleProperties)
     // {
     //   DebugPrint(subTriProps);
@@ -837,9 +836,9 @@ namespace asv
     Point3 vhi = vl + (vh - vl) * th; 
 
     // @DEBUG_INFO
-    // gzmsg << "index:         " << _triProps.index << std::endl;
-    // gzmsg << "vmi:           " << vmi << std::endl;
-    // gzmsg << "vhi:           " << vhi << std::endl;
+    // ignmsg << "index:         " << _triProps.index << std::endl;
+    // ignmsg << "vmi:           " << vmi << std::endl;
+    // ignmsg << "vhi:           " << vhi << std::endl;
             
     // Create the new submerged triangle
     Triangle tri0(vl, vmi, vhi);
@@ -982,7 +981,7 @@ namespace asv
     length *= 0.5;
     this->data->waterlineLength = length;
     // @DEBUG_INFO
-    // gzmsg << "waterline length: " << length << std::endl;
+    // ignmsg << "waterline length: " << length << std::endl;
   }
 
   // Compute the point velocity at a triangles centroid
@@ -1106,16 +1105,16 @@ namespace asv
     this->data->torque += torque;
 
     // @DEBUG_INF0
-    // gzmsg << "area:       " << area << std::endl; 
-    // gzmsg << "subArea:    " << subArea << std::endl; 
-    // gzmsg << "v:          " << v << std::endl; 
-    // gzmsg << "omega:      " << omega << std::endl; 
-    // gzmsg << "linSpeed:   " << linSpeed << std::endl; 
-    // gzmsg << "angSpeed:   " << angSpeed << std::endl; 
-    // gzmsg << "cR:         " << cR << std::endl; 
-    // gzmsg << "cL:         " << cL << std::endl; 
-    // gzmsg << "force:      " << force << std::endl; 
-    // gzmsg << "torque:     " << torque << std::endl; 
+    // ignmsg << "area:       " << area << std::endl; 
+    // ignmsg << "subArea:    " << subArea << std::endl; 
+    // ignmsg << "v:          " << v << std::endl; 
+    // ignmsg << "omega:      " << omega << std::endl; 
+    // ignmsg << "linSpeed:   " << linSpeed << std::endl; 
+    // ignmsg << "angSpeed:   " << angSpeed << std::endl; 
+    // ignmsg << "cR:         " << cR << std::endl; 
+    // ignmsg << "cL:         " << cL << std::endl; 
+    // ignmsg << "force:      " << force << std::endl; 
+    // ignmsg << "torque:     " << torque << std::endl; 
 
   }
 
@@ -1195,12 +1194,12 @@ namespace asv
     // @DEBUG_INFO
     // if (std::abs(sumForce.z()) > 1.0E+10)
     // {
-    //   gzmsg << "Overflow in ComputePressureDragForce..."    << std::endl;
-    //   gzmsg << "position:     " << this->data->position     << std::endl;
-    //   gzmsg << "linVelocity:  " << this->data->linVelocity  << std::endl;
-    //   gzmsg << "angVelocity:  " << this->data->angVelocity  << std::endl;
-    //   gzmsg << "force:        " << sumForce                 << std::endl;
-    //   gzmsg << "torque:       " << sumTorque                << std::endl;
+    //   ignmsg << "Overflow in ComputePressureDragForce..."    << std::endl;
+    //   ignmsg << "position:     " << this->data->position     << std::endl;
+    //   ignmsg << "linVelocity:  " << this->data->linVelocity  << std::endl;
+    //   ignmsg << "angVelocity:  " << this->data->angVelocity  << std::endl;
+    //   ignmsg << "force:        " << sumForce                 << std::endl;
+    //   ignmsg << "torque:       " << sumTorque                << std::endl;
     //   for (auto&& subTriProps : this->data->submergedTriangleProperties)
     //   {
     //     DebugPrint(subTriProps);

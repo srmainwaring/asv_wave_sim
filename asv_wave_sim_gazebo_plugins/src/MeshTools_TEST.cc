@@ -23,7 +23,7 @@
 
 #include <CGAL/Timer.h>
 
-#include <gazebo/common/common.hh>
+#include <ignition/common.hh>
 
 #include <iostream>
 #include <string>
@@ -41,7 +41,7 @@ void TestFillArraysUnitBox()
 
   // Mesh: 1 x 1 x 1 box
   std::string meshName("box_1x1x1");
-  gazebo::common::MeshManager::Instance()->CreateBox(
+  ignition::common::MeshManager::Instance()->CreateBox(
     meshName,
     ignition::math::Vector3d(1, 1, 1),
     ignition::math::Vector2d(1, 1));
@@ -50,7 +50,7 @@ void TestFillArraysUnitBox()
   std::vector<float> vertices;
   std::vector<int> indices;
   MeshTools::FillArrays(
-    *gazebo::common::MeshManager::Instance()->GetMesh(meshName),
+    *ignition::common::MeshManager::Instance()->GetMesh(meshName),
     vertices, indices);
 
   // std::cout << "Vertices..." << std::endl;
@@ -76,14 +76,14 @@ void TestMakeSurfaceMeshUnitBox()
 
   // Mesh: 1 x 1 x 1 box
   std::string meshName("box_1x1x1");
-  gazebo::common::MeshManager::Instance()->CreateBox(
+  ignition::common::MeshManager::Instance()->CreateBox(
     meshName,
     ignition::math::Vector3d(1, 1, 1),
     ignition::math::Vector2d(1, 1));
   
   Mesh mesh;
   MeshTools::MakeSurfaceMesh(
-    *gazebo::common::MeshManager::Instance()->GetMesh(meshName),
+    *ignition::common::MeshManager::Instance()->GetMesh(meshName),
     mesh);
 
   // std::cout << "Vertices " << std::endl;
@@ -124,10 +124,10 @@ void TestExportWaveMesh()
   t.start();
 
   std::string name("wavefield");
-  std::shared_ptr<gazebo::common::Mesh> gzMesh(new gazebo::common::Mesh());
+  std::shared_ptr<ignition::common::Mesh> gzMesh(new ignition::common::Mesh());
   gzMesh->SetName(name);
 
-  std::unique_ptr<gazebo::common::SubMesh> gzSubMesh(new gazebo::common::SubMesh());  
+  std::unique_ptr<ignition::common::SubMesh> gzSubMesh(new ignition::common::SubMesh());  
   unsigned long iv = 0;
   for(auto&& face : mesh.faces())
   {
@@ -158,7 +158,7 @@ void TestExportWaveMesh()
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;
 
-  auto& meshManager = *gazebo::common::MeshManager::Instance();
+  auto& meshManager = *ignition::common::MeshManager::Instance();
 
   meshManager.Export(
     gzMesh.get(),
@@ -182,10 +182,10 @@ void TestExportGridMesh()
   t.start();
 
   std::string name("grid_500m_x_500m_5m_x_5m");
-  std::shared_ptr<gazebo::common::Mesh> gzMesh(new gazebo::common::Mesh());
+  std::shared_ptr<ignition::common::Mesh> gzMesh(new ignition::common::Mesh());
   gzMesh->SetName(name);
 
-  std::unique_ptr<gazebo::common::SubMesh> gzSubMesh(new gazebo::common::SubMesh());  
+  std::unique_ptr<ignition::common::SubMesh> gzSubMesh(new ignition::common::SubMesh());  
   unsigned long iv = 0;
   for(auto&& face : mesh.faces())
   {
@@ -216,7 +216,7 @@ void TestExportGridMesh()
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;
 
-  auto& meshManager = *gazebo::common::MeshManager::Instance();
+  auto& meshManager = *ignition::common::MeshManager::Instance();
 
   meshManager.Export(
     gzMesh.get(),

@@ -23,7 +23,6 @@
 #include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
 #include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
-#include <gazebo/common/common.hh>
 #include <ignition/math/Vector3.hh>
 
 #include <gtest/gtest.h>
@@ -144,13 +143,13 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
   // Mesh: 1 x 1 x 1 box
   ignition::math::Pose3d linkPose;
   std::string linkMeshName("box_1x1x1");
-  gazebo::common::MeshManager::Instance()->CreateBox(
+  ignition::common::MeshManager::Instance()->CreateBox(
     linkMeshName,
     ignition::math::Vector3d(1, 1, 1),
     ignition::math::Vector2d(1, 1));
   std::shared_ptr<Mesh> linkMesh = std::make_shared<Mesh>();
   MeshTools::MakeSurfaceMesh(
-    *gazebo::common::MeshManager::Instance()->GetMesh(linkMeshName),
+    *ignition::common::MeshManager::Instance()->GetMesh(linkMeshName),
     *linkMesh);
 
   // Wavefield and water patch 2x2  
@@ -182,13 +181,13 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   // Mesh: 10 x 4 x 2 box
   ignition::math::Pose3d linkPose;
   std::string linkMeshName("box_10x4x2");
-  gazebo::common::MeshManager::Instance()->CreateBox(
+  ignition::common::MeshManager::Instance()->CreateBox(
     linkMeshName,
     ignition::math::Vector3d(10, 4, 2),
     ignition::math::Vector2d(1, 1));
   std::shared_ptr<Mesh> linkMesh = std::make_shared<Mesh>();
   MeshTools::MakeSurfaceMesh(
-    *gazebo::common::MeshManager::Instance()->GetMesh(linkMeshName),
+    *ignition::common::MeshManager::Instance()->GetMesh(linkMeshName),
     *linkMesh);
 
   // Wavefield and water patch 4x4

@@ -16,14 +16,12 @@
 #include "asv_wave_sim_gazebo_plugins/Grid.hh"
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 #include "asv_wave_sim_gazebo_plugins/Geometry.hh"
-#include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
 
 #include <CGAL/number_utils.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
+#include <ignition/common.hh>
 
 #include <array>
 #include <iostream>
@@ -294,19 +292,19 @@ namespace asv
   {
     auto&& mesh = *this->data->mesh;
 
-    gzmsg << "Center " << std::endl;    
-    gzmsg << "c0:  " << this->data->center << std::endl;
+    ignmsg << "Center " << std::endl;    
+    ignmsg << "c0:  " << this->data->center << std::endl;
 
-    gzmsg << "Vertices " << std::endl;    
+    ignmsg << "Vertices " << std::endl;    
     for(auto&& vertex : mesh.vertices())
     {
-      gzmsg << vertex << ": " << mesh.point(vertex) << std::endl;
+      ignmsg << vertex << ": " << mesh.point(vertex) << std::endl;
     }
-    gzmsg << "Faces " << std::endl;
+    ignmsg << "Faces " << std::endl;
     for(auto&& face : mesh.faces())
     {
       Triangle tri = Geometry::MakeTriangle(mesh, face);
-      gzmsg << face << ": " << tri << std::endl;
+      ignmsg << face << ": " << tri << std::endl;
     }
   }
 
@@ -351,13 +349,13 @@ namespace asv
     size_t k = _y > (m * _x + c) ? 1 : 0;
 
     // @DEBUG_INFO
-    // gzmsg << "ix: " << ix << std::endl;
-    // gzmsg << "iy: " << iy << std::endl;
-    // gzmsg << "x0: " << x0 << std::endl;
-    // gzmsg << "y0: " << y0 << std::endl;
-    // gzmsg << "m:  " << m  << std::endl;
-    // gzmsg << "c:  " << c  << std::endl;
-    // gzmsg << "k:  " << k  << std::endl;
+    // ignmsg << "ix: " << ix << std::endl;
+    // ignmsg << "iy: " << iy << std::endl;
+    // ignmsg << "x0: " << x0 << std::endl;
+    // ignmsg << "y0: " << y0 << std::endl;
+    // ignmsg << "m:  " << m  << std::endl;
+    // ignmsg << "c:  " << c  << std::endl;
+    // ignmsg << "k:  " << k  << std::endl;
 
     _index[0] = ix;
     _index[1] = iy;

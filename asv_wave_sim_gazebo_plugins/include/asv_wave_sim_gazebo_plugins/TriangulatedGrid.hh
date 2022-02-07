@@ -20,8 +20,8 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/rendering/ogre_gazebo.h>
-#include <ignition/math/Pose3.hh>
+#include <ignition/math.hh>
+#include <ignition/rendering/ogre.hh>
 
 #include <memory>
 #include <vector>

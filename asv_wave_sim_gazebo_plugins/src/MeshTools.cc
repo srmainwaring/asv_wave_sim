@@ -16,10 +16,8 @@
 #include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-
-#include <ignition/math/Vector3.hh>
+#include <ignition/common.hh>
+#include <ignition/math.hh>
 
 #include <array>
 #include <iostream>
@@ -31,7 +29,7 @@ namespace asv
 ///////////////////////////////////////////////////////////////////////////////
 // MeshTools
 
-  /// Vertex and Index conventions used by gazebo::common::Mesh 
+  /// Vertex and Index conventions used by ignition::common::Mesh 
   ///
   /// Mesh::GetVertexCount()
   ///   returns the number of vertices in the mesh, which means that
@@ -42,23 +40,23 @@ namespace asv
   ///   the size of _indices will be Mesh::GetIndexCount()
   ///
   void MeshTools::FillArrays(
-    const gazebo::common::Mesh& _source,
+    const ignition::common::Mesh& _source,
     std::vector<float>& _vertices,
     std::vector<int>& _indices
   )
   {    
-    float *vertices = nullptr;
+    double *vertices = nullptr;
     int   *indices  = nullptr;
 
     // No leaks...
     try
     {
-      size_t nv = _source.GetVertexCount();
-      size_t ni = _source.GetIndexCount();
+      size_t nv = _source.VertexCount();
+      size_t ni = _source.IndexCount();
 
       // @DEBUG_INFO
-      // gzmsg << "nv: " << nv << std::endl; 
-      // gzmsg << "ni: " << ni << std::endl; 
+      // ignmsg << "nv: " << nv << std::endl; 
+      // ignmsg << "ni: " << ni << std::endl; 
 
       _source.FillArrays(&vertices, &indices);
       
@@ -67,7 +65,7 @@ namespace asv
     }
     catch(...) 
     {
-      gzerr << "Unknown Error in Mesh::FillArrays" << std::endl;
+      ignerr << "Unknown Error in Mesh::FillArrays" << std::endl;
     }
     // Clean up
     if (vertices)
@@ -76,7 +74,7 @@ namespace asv
       delete[] indices;
   }
 
-  void MeshTools::MakeSurfaceMesh(const gazebo::common::Mesh& _source, Mesh& _target)
+  void MeshTools::MakeSurfaceMesh(const ignition::common::Mesh& _source, Mesh& _target)
   {
     std::vector<float> vertices;
     std::vector<int>   indices;
@@ -93,14 +91,14 @@ namespace asv
       auto&& v = _target.add_vertex(p);
       
       // @DEBUG_INFO
-      // gzmsg << v << ": " << _target.point(v) << std::endl; 
+      // ignmsg << v << ": " << _target.point(v) << std::endl; 
     }
 
     // Faces
     for (size_t i=0; i<indices.size(); )
     {
       // @DEBUG_INFO
-      // gzmsg << "face" << i/3 << std::endl; 
+      // ignmsg << "face" << i/3 << std::endl; 
 
       auto v0 = _target.vertices().begin();
       auto v1 = _target.vertices().begin(); 
@@ -114,10 +112,10 @@ namespace asv
       _target.add_face(*v0, *v1, *v2);  
 
       // @DEBUG_INFO
-      // gzmsg << i0 << ", " << i1 << ", " << i2 << std::endl; 
-      // gzmsg << *v0 << ": " << _target.point(*v0) << std::endl; 
-      // gzmsg << *v1 << ": " << _target.point(*v1) << std::endl; 
-      // gzmsg << *v2 << ": " << _target.point(*v2) << std::endl; 
+      // ignmsg << i0 << ", " << i1 << ", " << i2 << std::endl; 
+      // ignmsg << *v0 << ": " << _target.point(*v0) << std::endl; 
+      // ignmsg << *v1 << ": " << _target.point(*v1) << std::endl; 
+      // ignmsg << *v2 << ": " << _target.point(*v2) << std::endl; 
     }
   }
 

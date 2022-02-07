@@ -19,10 +19,10 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_MODEL_PLUGIN_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_MODEL_PLUGIN_HH_
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/msgs/msgs.hh>
+// #include <gazebo/gazebo.hh>
+// #include <ignition/common/Plugin.hh>
+#include <ignition/physics.hh>
+#include <ignition/msgs.hh>
 
 #include <memory>
 

@@ -4,12 +4,12 @@
 
 #include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
 
-#include <gazebo/common/common.hh>
-#include <gazebo/common/MeshManager.hh>
-#include <gazebo/rendering/ogre_gazebo.h>
-#include <gazebo/rendering/rendering.hh>
-#include <gazebo/rendering/RenderTypes.hh>
-#include <gazebo/rendering/Visual.hh>
+#include <ignition/common.hh>
+#include <ignition/common/MeshManager.hh>
+// #include <ignition/rendering/ogre_gazebo.h>
+#include <ignition/rendering.hh>
+// #include <ignition/rendering/RenderTypes.hh>
+// #include <ignition/rendering/Visual.hh>
 
 #include <cmath>
 #include <memory>
@@ -80,7 +80,7 @@ namespace asv
     rendering::Visual(_name, _parent),
     data(new OceanVisualPrivate)
   {
-    gzmsg << "Constructing OceanVisual..." << std::endl;
+    ignmsg << "Constructing OceanVisual..." << std::endl;
 
     rendering::Visual::SetType(VT_VISUAL);
   }
@@ -89,7 +89,7 @@ namespace asv
   {
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
-    gzmsg << "Loading OceanVisual..." << std::endl;
+    ignmsg << "Loading OceanVisual..." << std::endl;
  
     GZ_ASSERT(_sdf != nullptr, "SDF Element is NULL");
 
@@ -98,7 +98,7 @@ namespace asv
 
     this->Load();
 
-    gzmsg << "Done loading OceanVisual." << std::endl;
+    ignmsg << "Done loading OceanVisual." << std::endl;
   }
 
   void OceanVisual::Load()
@@ -143,6 +143,13 @@ namespace asv
       // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
       const int nX = 3;
       const int nY = 3;
+      // Mesh Visual: Above
+      {
+        this->data->aboveOceanVisual.reset(new rendering::Visual(aboveOceanVisualName, shared_from_this()));
+        this->data->aboveOceanVisual->Load();
+        ignition::rendering::AttachMesh(*this->data->aboveOceanVisual, this->data->aboveOceanMeshName);
+        this->data->aboveOceanVisual->SetPosition(this->Position());
+        this->data->aboveOceanVisual->SetType(rendering::Visual::VT_VISUAL);
 
       for (int iy=-nY; iy<=nY; ++iy)
       {
@@ -215,7 +222,19 @@ namespace asv
           gzmsg << "ShaderType: "           << visual->GetShaderType() << std::endl;
           gzmsg << "AttachedObjectCount: "  << visual->GetAttachedObjectCount() << std::endl;
       }
-#endif
+      // Mesh Visual: Below
+      {
+        this->data->belowOceanVisual.reset(new rendering::Visual(belowOceanVisualName, shared_from_this()));
+        this->data->belowOceanVisual->Load();
+        ignition::rendering::AttachMesh(*this->data->belowOceanVisual, this->data->belowOceanMeshName);
+        this->data->belowOceanVisual->SetPosition(this->Position());
+        this->data->belowOceanVisual->SetType(rendering::Visual::VT_VISUAL);
+
+        // Set the material from the parent visual
+        auto materialName = this->GetMaterialName();
+        // std::string materialName("Gazebo/Orange");
+        this->data->belowOceanVisual->SetMaterial(materialName);
+      }
 
       this->SetVisibilityFlags(GZ_VISIBILITY_ALL);    
       this->data->isInitialised = true;
@@ -243,18 +262,18 @@ namespace asv
   {
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
-    // gzmsg << "Updating OceanVisual..." << std::endl;
+    // ignmsg << "Updating OceanVisual..." << std::endl;
 
     if (this->data->paused)
       return;
 
     double time = this->data->simTime;
     // double time = std::fmod(this->data->simTime, _cycleTime);
-    // gzmsg << "Time: " << time << std::endl;
+    // ignmsg << "Time: " << time << std::endl;
 
     this->data->oceanTile->Update(time);
 
-    // gzmsg << "Done updating OceanVisual." << std::endl;
+    // ignmsg << "Done updating OceanVisual." << std::endl;
   }
 
   void OceanVisual::OnWaveWindMsg(ConstParam_VPtr &_msg)
@@ -289,9 +308,9 @@ namespace asv
   {
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
-    this->data->simTime = gazebo::msgs::Convert(_msg->sim_time()).Double();
-    this->data->realTime = gazebo::msgs::Convert(_msg->real_time()).Double();
-    this->data->pauseTime = gazebo::msgs::Convert(_msg->pause_time()).Double();
+    this->data->simTime = ignition::msgs::Convert(_msg->sim_time()).Double();
+    this->data->realTime = ignition::msgs::Convert(_msg->real_time()).Double();
+    this->data->pauseTime = ignition::msgs::Convert(_msg->pause_time()).Double();
     this->data->paused = _msg->paused();
   }
 

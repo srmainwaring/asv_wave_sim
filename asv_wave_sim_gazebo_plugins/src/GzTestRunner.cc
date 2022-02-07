@@ -27,14 +27,13 @@
 // the gazebo_ros <export> </export> directive in package.xml.
 //
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
+#include <ignition/common.hh>
+#include <ignition/physics.hh>
 #include <chrono>
 #include <thread>
 
-gazebo::physics::WorldPtr LoadASVWorld();
-void GzRunPhysicsTests(gazebo::physics::WorldPtr world);
+ignition::physics::WorldPtr LoadASVWorld();
+void GzRunPhysicsTests(ignition::physics::WorldPtr world);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +41,7 @@ int main(int _argc, char **_argv)
 {
   try
   {
-    gzmsg << "GzTestRunner...starting" << std::endl;
+    ignmsg << "GzTestRunner...starting" << std::endl;
 
     std::string  str = "worlds/empty.world";
     if (_argc > 1) 
@@ -51,18 +50,18 @@ int main(int _argc, char **_argv)
     }
 
     // Initialize gazebo.
-    gazebo::setupServer(_argc, _argv);
+    ignition::setupServer(_argc, _argv);
 
-    // Load a world from SDF (See gazebo/gazebo.cc gazebo::loadWorld)
-    // gazebo::physics::WorldPtr world = gazebo::loadWorld(str);
-    gazebo::physics::WorldPtr world = LoadASVWorld();
+    // Load a world from SDF (See gazebo/gazebo.cc ignition::loadWorld)
+    // ignition::physics::WorldPtr world = ignition::loadWorld(str);
+    ignition::physics::WorldPtr world = LoadASVWorld();
     if (!world) 
     {
       std::cerr << "Could not load world: " + str << std::endl;
-      gazebo::shutdown();
+      ignition::shutdown();
       return -1;
     }
-    gzmsg << "World:              " << world->Name() << std::endl;
+    ignmsg << "World:              " << world->Name() << std::endl;
 
     // Run tests
     GzRunPhysicsTests(world);
@@ -73,26 +72,26 @@ int main(int _argc, char **_argv)
     for (size_t i = 0; i < 2; ++i)
     {
       // Run simulation for 100 steps.
-      gazebo::runWorld(world, 100);
+      ignition::runWorld(world, 100);
     }
 
     // Close everything.
-    gazebo::shutdown();
-    gzmsg << "GzTestRunner...shutdown." << std::endl;
+    ignition::shutdown();
+    ignmsg << "GzTestRunner...shutdown." << std::endl;
   }
-  catch(const gazebo::common::Exception &_e)
+  catch(const ignition::common::Exception &_e)
   {
-    gzmsg << _e.GetErrorStr() << std::endl;
+    ignmsg << _e.GetErrorStr() << std::endl;
     return -1;
   }
   catch(const std::exception &_e)
   {
-    gzmsg << _e.what() << std::endl;
+    ignmsg << _e.what() << std::endl;
     return -1;
   }
   catch(...)
   {
-    gzmsg << "Unknown Error" << std::endl;
+    ignmsg << "Unknown Error" << std::endl;
     return -1;
   }
 

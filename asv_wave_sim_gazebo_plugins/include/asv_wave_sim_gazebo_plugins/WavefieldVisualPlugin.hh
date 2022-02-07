@@ -20,8 +20,8 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_VISUAL_PLUGIN_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_VISUAL_PLUGIN_HH_
 
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/msgs/msgs.hh>
+#include <ignition/common/Plugin.hh>
+#include <ignition/msgs.hh>
 
 #include <memory>
 

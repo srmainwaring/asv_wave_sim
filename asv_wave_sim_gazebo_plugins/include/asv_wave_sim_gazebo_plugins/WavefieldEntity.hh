@@ -20,8 +20,7 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_ENTITY_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_ENTITY_HH_
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/Base.hh>
+// #include <ignition/physics/Base.hh>
 #include <memory>
 
 namespace asv
@@ -29,7 +28,7 @@ namespace asv
   
 ///////////////////////////////////////////////////////////////////////////////
 // WavefieldEntity
-
+#if 0
   class Wavefield;
 
   /// \internal
@@ -73,6 +72,7 @@ namespace asv
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldEntityPrivate> data;
   };
+#endif
 
 } // namespace asv
 

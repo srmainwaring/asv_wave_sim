@@ -44,8 +44,9 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/gazebo.hh>
 #include <ignition/math/Pose3.hh>
+#include <ignition/msgs.hh>
+#include <sdf/sdf.hh>
 
 #include <memory>
 #include <vector>
@@ -250,14 +251,14 @@ namespace asv
     /// \brief Set the parameters from a message.
     ///
     /// \param[in] _msg   The message containing the hydrodynamics parameters.
-    public: void SetFromMsg(const gazebo::msgs::Param_V& _msg);
+    public: void SetFromMsg(const ignition::msgs::Param_V& _msg);
 
     /// \brief Set parameters from a SDF tree.
     ///
     /// \param[in] _sdf   A reference to a SDF element.
     public: void SetFromSDF(sdf::Element& _sdf);
 
-    /// \brief Print a summary of the hydrodynamics parameters to the gzmsg stream.
+    /// \brief Print a summary of the hydrodynamics parameters to the ignmsg stream.
     public: void DebugPrint() const;
 
     /// \internal

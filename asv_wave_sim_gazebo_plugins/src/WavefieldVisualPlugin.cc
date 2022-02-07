@@ -22,17 +22,15 @@
 #include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/Event.hh>
-#include <gazebo/common/Time.hh>
-#include <gazebo/common/Plugin.hh>
-#include "gazebo/rendering/ogre_gazebo.h"
-#include <gazebo/rendering/rendering.hh>
-#include <gazebo/rendering/RenderTypes.hh>
-#include <gazebo/rendering/Scene.hh>
-#include <gazebo/rendering/Visual.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/transport/Node.hh>
+#include <ignition/common/Event.hh>
+#include <ignition/common/Plugin.hh>
+// #include "ignition/rendering/ogre_gazebo.h"
+#include <ignition/rendering.hh>
+#include <ignition/rendering/RenderTypes.hh>
+#include <ignition/rendering/Scene.hh>
+#include <ignition/rendering/Visual.hh>
+#include <ignition/transport.hh>
+#include <gignition/gazebo/transport/Node.hh>
 
 #include <memory>
 #include <thread>
@@ -57,7 +55,7 @@ namespace asv
     _vout = Ogre::Vector2::ZERO;
     if (_v.size() > 2)
     {
-      gzerr << "Vector must have size 2 or less" << std::endl;
+      ignerr << "Vector must have size 2 or less" << std::endl;
       return;
     }
     for (size_t i=0; i<_v.size(); ++i)
@@ -75,7 +73,7 @@ namespace asv
     _vout = Ogre::Vector3::ZERO;
     if (_v.size() > 3)
     {
-      gzerr << "Vector must have size 3 or less" << std::endl;
+      ignerr << "Vector must have size 3 or less" << std::endl;
       return;
     }
     for (size_t i=0; i<_v.size(); ++i)
@@ -118,7 +116,7 @@ namespace asv
 
     if (_v.size() > 3)
     {
-      gzerr << "Vector must have size 3 or less" << std::endl;
+      ignerr << "Vector must have size 3 or less" << std::endl;
       return;
     }
     if (_v.size() > 0)
@@ -142,7 +140,7 @@ namespace asv
 
     if (_v.size() > 3)
     {
-      gzerr << "Vector must have size 3 or less" << std::endl;
+      ignerr << "Vector must have size 3 or less" << std::endl;
       return;
     }
     if (_v.size() > 0)
@@ -233,7 +231,7 @@ namespace asv
 
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Load WavefieldVisualPlugin [thread: " << threadId << "]" << std::endl;
+    // ignmsg << "Load WavefieldVisualPlugin [thread: " << threadId << "]" << std::endl;
 
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
@@ -277,7 +275,7 @@ namespace asv
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
 
     // @DEBUG_INFO
-    // gzmsg << "WavefieldVisualPlugin..." <<  std::endl;
+    // ignmsg << "WavefieldVisualPlugin..." <<  std::endl;
     // this->data->waveParams->DebugPrint();
   }
 
@@ -287,7 +285,7 @@ namespace asv
 
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Init WavefieldVisualPlugin [thread: " << threadId << "]" << std::endl;
+    // ignmsg << "Init WavefieldVisualPlugin [thread: " << threadId << "]" << std::endl;
   
     if (!this->data->isInitialised)
     {
@@ -314,7 +312,7 @@ namespace asv
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
     // @DEBUG_INFO
-    // gzmsg << "Reset WavefieldVisualPlugin" << std::endl;
+    // ignmsg << "Reset WavefieldVisualPlugin" << std::endl;
   }
 
   void WavefieldVisualPlugin::OnUpdate()
@@ -352,7 +350,7 @@ namespace asv
       this->SetShaderParams();
 
       // @DEBUG_INFO
-      gzmsg << "Wavefield Visual received message on topic [" 
+      ignmsg << "Wavefield Visual received message on topic [" 
         << this->data->responseSub->GetTopic() << "]" << std::endl;
       this->data->waveParams->DebugPrint();
     }
@@ -369,7 +367,7 @@ namespace asv
     this->SetShaderParams();
 
     // @DEBUG_INFO
-    gzmsg << "Wavefield Visual received message on topic [" 
+    ignmsg << "Wavefield Visual received message on topic [" 
       << this->data->waveSub->GetTopic() << "]" << std::endl;
     this->data->waveParams->DebugPrint();
   }
@@ -378,9 +376,9 @@ namespace asv
   {
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
-    this->data->simTime = gazebo::msgs::Convert(_msg->sim_time()).Double();
-    this->data->realTime = gazebo::msgs::Convert(_msg->real_time()).Double();
-    this->data->pauseTime = gazebo::msgs::Convert(_msg->pause_time()).Double();
+    this->data->simTime = ignition::msgs::Convert(_msg->sim_time()).Double();
+    this->data->realTime = ignition::msgs::Convert(_msg->real_time()).Double();
+    this->data->pauseTime = ignition::msgs::Convert(_msg->pause_time()).Double();
     this->data->paused = _msg->paused();
   }
 

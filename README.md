@@ -210,3 +210,26 @@ file [LICENSE_THIRDPARTY](LICENSE_THIRDPARTY).
 - The [UUV Simulator](https://github.com/uuvsimulator/uuv_simulator) package for the orginal vertex shaders used in the wave field visuals.
 - The [VMRC](https://bitbucket.org/osrf/vmrc) package for textures and meshes used
 in the wave field visuals.
+
+## Migration
+
+Notes concerning the migration to Ignition
+
+System:
+- macOS Big Sur 11.6.2
+- Xcode: 13.2.1
+- 
+
+### colcon build
+
+Legacy TBB version
+
+```bash
+export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/tbb@2020_u3
+export CPATH=${CPATH}:/usr/local/opt/tbb@2020_u3/include
+export LIBRARY_PATH=${LIBRARY_PATH}:/usr/local/opt/tbb@2020_u3/lib
+```
+
+```bash
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_STANDARD=17 -DCATKIN_ENABLE_TESTING=FALSE
+```

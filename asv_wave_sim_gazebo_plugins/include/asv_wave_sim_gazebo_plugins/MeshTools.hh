@@ -22,8 +22,8 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
+#include <ignition/common.hh>
+#include <ignition/common/mesh.hh>
 
 #include <memory>
 
@@ -42,7 +42,7 @@ namespace asv
     /// \param[out] _vertices   The vector of vertices to populate.
     /// \param[out] _indices    The vector of indices to populate.
     public: static void FillArrays(
-      const gazebo::common::Mesh& _source,
+      const ignition::common::Mesh& _source,
       std::vector<float>& _vertices,
       std::vector<int>& _indices
     );
@@ -52,7 +52,7 @@ namespace asv
     /// \param[in] _source      The source mesh (a Gazebo Mesh).
     /// \param[out] _target     The target mesg (a CGAL SurfaceMesh).
     public: static void MakeSurfaceMesh(
-      const gazebo::common::Mesh& _source,
+      const ignition::common::Mesh& _source,
       Mesh& _target
     );
   };

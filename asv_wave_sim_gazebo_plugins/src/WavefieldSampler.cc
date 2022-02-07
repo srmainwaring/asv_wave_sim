@@ -22,8 +22,7 @@
 
 #include <Eigen/Dense>
 
-#include <gazebo/gazebo.hh>
-
+#include <ignition/common.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
@@ -126,8 +125,8 @@ namespace asv
       if (!isFound)
       {
         // @DEBUG_INFO
-        gzmsg << "origin:   " << origin << std::endl;
-        gzerr << "Wavefield is too small" << std::endl;
+        ignmsg << "origin:   " << origin << std::endl;
+        ignerr << "Wavefield is too small" << std::endl;
         return;
       }
       isFound = GridTools::FindIntersectionGrid(
@@ -136,8 +135,8 @@ namespace asv
       if (!isFound)
       {
         // @DEBUG_INFO
-        gzmsg << "origin:   " << origin << std::endl;
-        gzerr << "Wavefield is too small" << std::endl;
+        ignmsg << "origin:   " << origin << std::endl;
+        ignerr << "Wavefield is too small" << std::endl;
         return;
       }
 
@@ -148,7 +147,7 @@ namespace asv
     // @NOTE: alternative approach using CGAL triangulation.
 
     // Update the water patch Mesh
-    // gzmsg << "Update water patch..." << std::endl;
+    // ignmsg << "Update water patch..." << std::endl;
     const auto& target = this->data->waterPatch->GetMesh();
     for (
       auto&& vb = std::begin(target->vertices()); 
@@ -162,7 +161,7 @@ namespace asv
       this->data->wavefield->Height(p0, height);
       Point3 p1(p0.x(), p0.y(), height);
       target->point(vertex) = p1;
-      // gzmsg << target->point(vertex) << std::endl;
+      // ignmsg << target->point(vertex) << std::endl;
     }
 
 #endif
@@ -192,9 +191,9 @@ namespace asv
     if (!isFound)
     {
       // @DEBUG_INFO
-      gzerr << "point:  " << _point << std::endl;
+      ignerr << "point:  " << _point << std::endl;
       // _patch.DebugPrint();
-      gzerr << "Water patch is too small" << std::endl;
+      ignerr << "Water patch is too small" << std::endl;
       return 0;
     }
     isFound = GridTools::FindIntersectionGrid(
@@ -202,9 +201,9 @@ namespace asv
     if (!isFound)
     {
       // @DEBUG_INFO
-      gzerr << "point:  " << _point << std::endl;
+      ignerr << "point:  " << _point << std::endl;
       // _patch.DebugPrint();
-      gzerr << "Water patch is too small" << std::endl;
+      ignerr << "Water patch is too small" << std::endl;
       return 0;
     }
     double h = wavePoint.z() - _point.z();

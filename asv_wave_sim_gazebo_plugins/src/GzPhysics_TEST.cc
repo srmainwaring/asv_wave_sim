@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <gazebo/common/Assert.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
+// #include <gazebo/common/Assert.hh>
+#include <ignition/common.hh>
+#include <ignition/physics.hh>
 
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Triangle3.hh>
@@ -114,19 +114,19 @@ sdf::SDFPtr CreateASVBoxSDF()
   return sdf;
 }
 
-gazebo::physics::WorldPtr LoadASVWorld()
+ignition::physics::WorldPtr LoadASVWorld()
 {
   sdf::SDFPtr sdfWorld = CreateASVWorldSDF();
-  gazebo::physics::WorldPtr world = gazebo::physics::create_world();
-  gazebo::physics::load_world(world, sdfWorld->Root()->GetElement("world"));
-  gazebo::physics::init_world(world);
+  ignition::physics::WorldPtr world = ignition::physics::create_world();
+  ignition::physics::load_world(world, sdfWorld->Root()->GetElement("world"));
+  ignition::physics::init_world(world);
   return world;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests
 
-void TestLinkProperties(gazebo::physics::WorldPtr _world)
+void TestLinkProperties(ignition::physics::WorldPtr _world)
 {
   std::cout << "TestLinkProperties..." << std::endl;
 
@@ -138,7 +138,7 @@ void TestLinkProperties(gazebo::physics::WorldPtr _world)
 
   // Model
   std::string modelName("asv_box");
-  gazebo::physics::ModelPtr model = _world->ModelByName(modelName);
+  ignition::physics::ModelPtr model = _world->ModelByName(modelName);
 
   // Links
   for (auto link : model->GetLinks())
@@ -148,7 +148,7 @@ void TestLinkProperties(gazebo::physics::WorldPtr _world)
 
   // Pose
   std::string linkName("base_link");
-  gazebo::physics::LinkPtr link = model->GetLink(linkName);
+  ignition::physics::LinkPtr link = model->GetLink(linkName);
   ignition::math::Pose3d linkPose = link->WorldPose();
   std::cout << "Link:               " << link->GetName() << std::endl;
   std::cout << "WorldPos:           " << linkPose.Pos() << std::endl;
@@ -167,7 +167,7 @@ void TestLinkProperties(gazebo::physics::WorldPtr _world)
   // Mock up the box object... 
   // Mesh: 10 x 4 x 2 box
   std::string linkMeshName(modelName + "::" + linkName);
-  gazebo::common::MeshManager::Instance()->CreateBox(
+  ignition::common::MeshManager::Instance()->CreateBox(
     linkMeshName,
     ignition::math::Vector3d(10, 4, 2),
     ignition::math::Vector2d(1, 1));
@@ -176,7 +176,7 @@ void TestLinkProperties(gazebo::physics::WorldPtr _world)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
-void GzRunPhysicsTests(gazebo::physics::WorldPtr _world)
+void GzRunPhysicsTests(ignition::physics::WorldPtr _world)
 {
   TestLinkProperties(_world);
 

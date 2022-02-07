@@ -22,8 +22,7 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/gazebo.hh>
-#include <ignition/math/Pose3.hh>
+#include <ignition/math.hh>
 
 #include <memory>
 

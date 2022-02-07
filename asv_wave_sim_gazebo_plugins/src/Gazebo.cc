@@ -17,16 +17,15 @@
 
 #include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/rendering/rendering.hh>
+#include <ignition/common.hh>
+#include <ignition/rendering.hh>
 
 #include <array>
 #include <iostream>
 #include <iterator>
 #include <string>
 
-namespace gazebo
+namespace ignition
 {
   namespace rendering
   {
@@ -37,7 +36,7 @@ namespace gazebo
       _vout = Ogre::Vector3::ZERO;
       if (_v.size() > 3)
       {
-        gzerr << "Vector must have size 3 or less" << std::endl;
+        ignerr << "Vector must have size 3 or less" << std::endl;
         return;
       }
       for (size_t i=0; i<_v.size(); ++i)
@@ -67,7 +66,7 @@ namespace gazebo
 
       if (_v.size() > 3)
       {
-        gzerr << "Vector must have size 3 or less" << std::endl;
+        ignerr << "Vector must have size 3 or less" << std::endl;
         return;
       }
       if (_v.size() > 0)
@@ -87,7 +86,7 @@ namespace gazebo
       // currently only vertex and fragment shaders are supported
       if (_shaderType != "vertex" && _shaderType != "fragment")
       {
-        gzerr << "Shader type: '" << _shaderType << "' is not supported"
+        ignerr << "Shader type: '" << _shaderType << "' is not supported"
               << std::endl;
         return;
       }
@@ -149,16 +148,18 @@ namespace gazebo
         }
       };
 
+      // TODO_IGNITION - get access to Ogre material
       // loop through material techniques and passes to find the param
       // std::cout << "MaterialName: " << _vis->GetMaterialName() << std::endl;
-      Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(
-          _visual.GetMaterialName());
+      Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName("name");
+          // _visual.Material());
           // this->dataPtr->myMaterialName);
       if (mat.isNull())
       {
-        gzerr << "Failed to find material: '" << _visual.GetMaterialName()
-              << std::endl;
-        // gzerr << "Failed to find material: '" << this->dataPtr->myMaterialName
+        // TODO_IGNITION
+        // ignerr << "Failed to find material: '" << _visual.GetMaterialName()
+        //       << std::endl;
+        // ignerr << "Failed to find material: '" << this->dataPtr->myMaterialName
         //       << std::endl;
         return;
       }
@@ -191,11 +192,13 @@ namespace gazebo
           }
           else
           {
-            gzerr << "Failed to retrieve shaders for material: '"
-                  << _visual.GetMaterialName() << "', technique: '"
-                  << technique->getName() << "', pass: '" << pass->getName() << "'"
-                  << std::endl;
-            // gzerr << "Failed to retrieve shaders for material: '"
+            // TODO_IGNITION
+            // ignerr << "Failed to retrieve shaders for material: '"
+            //       << _visual.GetMaterialName() << "', technique: '"
+            //       << technique->getName() << "', pass: '" << pass->getName() << "'"
+            //       << std::endl;
+
+            // ignerr << "Failed to retrieve shaders for material: '"
             //       << this->dataPtr->myMaterialName << "', technique: '"
             //       << technique->getName() << "', pass: '" << pass->getName() << "'"
             //       << std::endl;
@@ -215,7 +218,9 @@ namespace gazebo
       if (_meshName.empty())
         return nullptr;
 
-      Ogre::SceneNode* sceneNode = _visual.GetSceneNode();
+      // TODO_IGNITION
+      Ogre::SceneNode* sceneNode = nullptr; //_visual.GetSceneNode();
+
       // this->dataPtr->meshName = _meshName;
       // this->dataPtr->subMeshName = _subMesh;
 
@@ -237,31 +242,33 @@ namespace gazebo
       else
       {
         // build tangent vectors if normal mapping in tangent space is specified
-        if (_visual.GetShaderType() == "normal_map_tangent_space")
-        {
-          Ogre::MeshPtr ogreMesh = Ogre::MeshManager::getSingleton().getByName(_meshName);
-          if (!ogreMesh.isNull())
-          {
-            try
-            {
-              uint16_t src, dest;
-              if (!ogreMesh->suggestTangentVectorBuildParams(Ogre::VES_TANGENT, src, dest))
-              {
-                ogreMesh->buildTangentVectors(Ogre::VES_TANGENT, src, dest);
-              }
-            }
-            catch(Ogre::Exception &e)
-            {
-              gzwarn << "Problem generating tangent vectors for " << _meshName
-                    << ". Normal map will not work: " << e.what() << std::endl;
-            }
-          }
-        }
+        // TODO_IGNITION
+        // if (_visual.GetShaderType() == "normal_map_tangent_space")
+        // {
+        //   Ogre::MeshPtr ogreMesh = Ogre::MeshManager::getSingleton().getByName(_meshName);
+        //   if (!ogreMesh.isNull())
+        //   {
+        //     try
+        //     {
+        //       uint16_t src, dest;
+        //       if (!ogreMesh->suggestTangentVectorBuildParams(Ogre::VES_TANGENT, src, dest))
+        //       {
+        //         ogreMesh->buildTangentVectors(Ogre::VES_TANGENT, src, dest);
+        //       }
+        //     }
+        //     catch(Ogre::Exception &e)
+        //     {
+        //       gzwarn << "Problem generating tangent vectors for " << _meshName
+        //             << ". Normal map will not work: " << e.what() << std::endl;
+        //     }
+        //   }
+        // }
 
         obj = (Ogre::MovableObject*)(sceneNode->getCreator()->createEntity(objName, meshName));
       }
 
-      _visual.AttachObject(obj);
+      // TODO_IGNITION
+      // _visual.AttachObject(obj);
       return obj;
     }
 
@@ -271,7 +278,7 @@ namespace gazebo
     {
       if (_sdf == nullptr)
       {
-        gzerr << "Cannot set material: SDF Element is NULL" << std::endl;
+        ignerr << "Cannot set material: SDF Element is NULL" << std::endl;
         return;
       }
 
@@ -295,30 +302,33 @@ namespace gazebo
           while (uriElem)
           {
             std::string matUri = uriElem->Get<std::string>();
-            if (!matUri.empty())
-              rendering::RenderEngine::Instance()->AddResourcePath(matUri);
+            // TODO_IGNITION
+            // if (!matUri.empty())
+            //   rendering::RenderEngine::Instance()->AddResourcePath(matUri);
             uriElem = uriElem->GetNextElement("uri");
           }
 
           std::string matName = scriptElem->Get<std::string>("name");
 
-          if (!matName.empty())
-            _visual.SetMaterial(matName);
+          // TODO_IGNITION
+          // if (!matName.empty())
+            // _visual.SetMaterial(matName);
         }
 
-        if (matElemClone->HasElement("ambient"))
-          _visual.SetAmbient(matElemClone->Get<ignition::math::Color>("ambient"));
-        if (matElemClone->HasElement("diffuse"))
-          _visual.SetDiffuse(matElemClone->Get<ignition::math::Color>("diffuse"));
-        if (matElemClone->HasElement("specular"))
-          _visual.SetSpecular(matElemClone->Get<ignition::math::Color>("specular"));
-        if (matElemClone->HasElement("emissive"))
-          _visual.SetEmissive(matElemClone->Get<ignition::math::Color>("emissive"));
+        // TODO_IGNITION
+        // if (matElemClone->HasElement("ambient"))
+        //   _visual.SetAmbient(matElemClone->Get<ignition::math::Color>("ambient"));
+        // if (matElemClone->HasElement("diffuse"))
+        //   _visual.SetDiffuse(matElemClone->Get<ignition::math::Color>("diffuse"));
+        // if (matElemClone->HasElement("specular"))
+        //   _visual.SetSpecular(matElemClone->Get<ignition::math::Color>("specular"));
+        // if (matElemClone->HasElement("emissive"))
+        //   _visual.SetEmissive(matElemClone->Get<ignition::math::Color>("emissive"));
 
-        if (matElem->HasElement("lighting"))
-        {
-          _visual.SetLighting(matElem->Get<bool>("lighting"));
-        }
+        // if (matElem->HasElement("lighting"))
+        // {
+        //   _visual.SetLighting(matElem->Get<bool>("lighting"));
+        // }
       }
     }
 
@@ -327,6 +337,8 @@ namespace gazebo
       const std::string &_subMesh,
       bool _centerSubmesh)
     {
+      // TODO_IGNITION
+      #if 0
       Ogre::MeshPtr ogreMesh;
 
       GZ_ASSERT(_mesh != nullptr, "Unable to insert a null mesh");
@@ -335,7 +347,7 @@ namespace gazebo
 
       if (_mesh->GetSubMeshCount() == 0)
       {
-        gzerr << "Visual::InsertMesh no submeshes, this is an invalid mesh\n";
+        ignerr << "Visual::InsertMesh no submeshes, this is an invalid mesh\n";
         return;
       }
 
@@ -429,7 +441,7 @@ namespace gazebo
           else if (subMesh.GetPrimitiveType() == common::SubMesh::POINTS)
             ogreSubMesh->operationType = Ogre::RenderOperation::OT_POINT_LIST;
           else
-            gzerr << "Unknown primitive type["
+            ignerr << "Unknown primitive type["
                   << subMesh.GetPrimitiveType() << "]\n";
 
           ogreSubMesh->vertexData = new Ogre::VertexData();
@@ -582,8 +594,9 @@ namespace gazebo
       }
       catch(Ogre::Exception &e)
       {
-        gzerr << "Unable to insert mesh[" << e.getDescription() << "]" << std::endl;
+        ignerr << "Unable to insert mesh[" << e.getDescription() << "]" << std::endl;
       }
+      #endif
     }
 
 

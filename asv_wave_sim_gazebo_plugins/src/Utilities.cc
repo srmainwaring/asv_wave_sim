@@ -16,11 +16,8 @@
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 #include "asv_wave_sim_gazebo_plugins/Convert.hh"
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-
-#include <ignition/math/Vector3.hh>
-
+#include <ignition/common.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 
 #include <algorithm>
@@ -39,91 +36,100 @@ T SdfParam(sdf::Element& _sdf, const std::string &_paramName, const T _defaultVa
 {
   if (!_sdf.HasElement(_paramName))
   {
-    gzmsg << "Parameter <" << _paramName << "> not found: " 
+    ignmsg << "Parameter <" << _paramName << "> not found: " 
       <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
 
   T val = _sdf.Get<T>(_paramName);
-  gzmsg << "Parameter found - setting <" << _paramName 
+  ignmsg << "Parameter found - setting <" << _paramName 
     << "> to <" << val << ">." << std::endl;
   return val;
 }
 
 /// \brief Template function for extracting a value from a parameter message.
 template <typename T>
-T MsgParamGetValue(const gazebo::msgs::Param& _msg)
+T MsgParamGetValue(const ignition::msgs::Param& _msg)
 {
-  gzwarn << "Using default template for MsgParamGetValue" << std::endl;
+  ignwarn << "Using default template for MsgParamGetValue" << std::endl;
   return T();  
 }
 
 /// \brief Template specialization for extracting a bool from a parameter message.
 template <>
-bool MsgParamGetValue<bool>(const gazebo::msgs::Param& _msg)
+bool MsgParamGetValue<bool>(const ignition::msgs::Param& _msg)
 { 
-  auto paramValue = _msg.value();
+  auto paramValue = _msg.params().begin()->second;
+  // auto paramValue = _msg.value();
   return paramValue.bool_value();
 }
 
 /// \brief Template specialization for extracting an int from a parameter message.
 template <>
-int MsgParamGetValue<int>(const gazebo::msgs::Param& _msg)
+int MsgParamGetValue<int>(const ignition::msgs::Param& _msg)
 { 
-  auto paramValue = _msg.value();
+  auto paramValue = _msg.params().begin()->second;
+  // auto paramValue = _msg.value();
   return paramValue.int_value();
 }
 
 /// \brief Template specialization for extracting a size_t from a parameter message.
 template <>
-size_t MsgParamGetValue<size_t>(const gazebo::msgs::Param& _msg)
+size_t MsgParamGetValue<size_t>(const ignition::msgs::Param& _msg)
 { 
-  auto paramValue = _msg.value();
+  auto paramValue = _msg.params().begin()->second;
+  // auto paramValue = _msg.value();
   return paramValue.int_value();
 }
 
 /// \brief Template specialization for extracting a double from a parameter message.
 template <>
-double MsgParamGetValue<double>(const gazebo::msgs::Param& _msg)
+double MsgParamGetValue<double>(const ignition::msgs::Param& _msg)
 { 
-  auto paramValue = _msg.value();
+  auto paramValue = _msg.params().begin()->second;
+  // auto paramValue = _msg.value();
   return paramValue.double_value();
 }
 
 /// \brief Template specialization for extracting a string from a parameter message.
 template <>
-std::string MsgParamGetValue<std::string>(const gazebo::msgs::Param& _msg)
+std::string MsgParamGetValue<std::string>(const ignition::msgs::Param& _msg)
 { 
-  auto paramValue = _msg.value();
+  auto paramValue = _msg.params().begin()->second;
+  // auto paramValue = _msg.value();
   return paramValue.string_value();
 }
 
 /// \brief Template specialization for extracting a Vector2 from a parameter message.
 template <>
-Vector2 MsgParamGetValue<Vector2>(const gazebo::msgs::Param& _msg)
+Vector2 MsgParamGetValue<Vector2>(const ignition::msgs::Param& _msg)
 { 
-  auto paramValue = _msg.value();
+  auto paramValue = _msg.params().begin()->second;
+  // auto paramValue = _msg.value();
   auto vec = paramValue.vector3d_value();
   return Vector2(vec.x(), vec.y());
 }
 
 /// \brief Template specialization for extracting a Vector3 from a parameter message.
 template <>
-Vector3 MsgParamGetValue<Vector3>(const gazebo::msgs::Param& _msg)
+Vector3 MsgParamGetValue<Vector3>(const ignition::msgs::Param& _msg)
 { 
-  auto paramValue = _msg.value();
+  auto paramValue = _msg.params().begin()->second;
+  // auto paramValue = _msg.value();
   auto vec = paramValue.vector3d_value();
   return Vector3(vec.x(), vec.y(), vec.z());
 }
 
 /// \brief Template for extracting a named parameter from a parameter vector message.
 template <typename T>
-T MsgParam(const gazebo::msgs::Param_V& _msg, const std::string &_paramName, const T _defaultVal)
+T MsgParam(const ignition::msgs::Param_V& _msg, const std::string &_paramName, const T _defaultVal)
 {
   // Custom compare for params
   auto compare = [=](auto& _param)
   {
-    return _param.name() == _paramName;
+    bool has_key = _param.params().find(_paramName) !=  _param.params().end();
+    return has_key;
+    // return _param.name() == _paramName;
   };
 
   auto it = std::find_if(std::begin(_msg.param()), std::end(_msg.param()), compare);
@@ -132,7 +138,7 @@ T MsgParam(const gazebo::msgs::Param_V& _msg, const std::string &_paramName, con
   if (it == std::end(_msg.param()))
   {
   // @DEBUG_INFO
-    // gzmsg << "Parameter <" << _paramName << "> not found: " 
+    // ignmsg << "Parameter <" << _paramName << "> not found: " 
     //   <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
@@ -142,7 +148,7 @@ T MsgParam(const gazebo::msgs::Param_V& _msg, const std::string &_paramName, con
   T val = MsgParamGetValue<T>(param);
 
   // @DEBUG_INFO
-  // gzmsg << "Parameter found - setting <" << _paramName 
+  // ignmsg << "Parameter found - setting <" << _paramName 
   //   << "> to <" << val << ">." << std::endl;
   return val;
 }
@@ -189,37 +195,37 @@ Vector3 Utilities::SdfParamVector3(sdf::Element& _sdf,
     _sdf, _paramName, ToIgn(_defaultVal)));
 }
 
-bool Utilities::MsgParamBool(const gazebo::msgs::Param_V& _msg,
+bool Utilities::MsgParamBool(const ignition::msgs::Param_V& _msg,
   const std::string &_paramName, const bool _defaultVal)
 {
   return MsgParam<bool>(_msg, _paramName, _defaultVal);
 }
 
-size_t Utilities::MsgParamSizeT(const gazebo::msgs::Param_V& _msg,
+size_t Utilities::MsgParamSizeT(const ignition::msgs::Param_V& _msg,
   const std::string &_paramName, const size_t _defaultVal)
 {
   return MsgParam<size_t>(_msg, _paramName, _defaultVal);
 }
 
-double Utilities::MsgParamDouble(const gazebo::msgs::Param_V& _msg,
+double Utilities::MsgParamDouble(const ignition::msgs::Param_V& _msg,
   const std::string &_paramName, const double _defaultVal)
 {
   return MsgParam<double>(_msg, _paramName, _defaultVal);
 }
 
-std::string Utilities::MsgParamString(const gazebo::msgs::Param_V& _msg,
+std::string Utilities::MsgParamString(const ignition::msgs::Param_V& _msg,
   const std::string &_paramName, const std::string _defaultVal)
 {
   return MsgParam<std::string>(_msg, _paramName, _defaultVal);
 }
 
-Vector2 Utilities::MsgParamVector2(const gazebo::msgs::Param_V& _msg,
+Vector2 Utilities::MsgParamVector2(const ignition::msgs::Param_V& _msg,
   const std::string &_paramName, const Vector2 _defaultVal)
 {
   return MsgParam<Vector2>(_msg, _paramName, _defaultVal);
 }
 
-Vector3 Utilities::MsgParamVector3(const gazebo::msgs::Param_V& _msg,
+Vector3 Utilities::MsgParamVector3(const ignition::msgs::Param_V& _msg,
   const std::string &_paramName, const Vector3 _defaultVal)
 {
   return MsgParam<Vector3>(_msg, _paramName, _defaultVal);

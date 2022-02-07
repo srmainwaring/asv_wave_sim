@@ -16,17 +16,11 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_OCEAN_TILE_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_OCEAN_TILE_HH_
 
-#include <gazebo/rendering/Visual.hh>
-#include <gazebo/rendering/ogre_gazebo.h>
+#include <ignition/rendering.hh>
+#include <ignition/rendering/ogre.hh>
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
-
-// #include <Ogre.h>
-// #include <OgreMesh.h>
-// #include <OgreMeshManager.h>
-// #include <OgrePlane.h>
-// #include <OgreVector.h>
 
 #include <cmath>
 #include <memory>
@@ -148,8 +142,8 @@ namespace asv
     std::vector<double>         mDxdx;
     std::vector<double>         mDydy;
     std::vector<double>         mDxdy;
-  };
 
+  };
 }
 
 #endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_OCEAN_TILE_HH_

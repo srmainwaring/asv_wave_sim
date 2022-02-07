@@ -20,7 +20,7 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
-#include <gazebo/gazebo.hh>
+#include <ignition/msgs.hh>
 #include <sdf/sdf.hh>
 
 #include <memory>
@@ -47,12 +47,12 @@ namespace asv
     /// \brief Populate the message with the wave parameters.
     ///
     /// \param[out] _msg  The message to be populated (a vector of parameters).
-    public: void FillMsg(gazebo::msgs::Param_V& _msg) const;
+    public: void FillMsg(ignition::msgs::Param_V& _msg) const;
 
     /// \brief Set the parameters from a message.
     ///
     /// \param[in] _msg   The message containing the wave parameters.
-    public: void SetFromMsg(const gazebo::msgs::Param_V& _msg);
+    public: void SetFromMsg(const ignition::msgs::Param_V& _msg);
 
     /// \brief Set the parameters from an SDF Element tree.
     ///
@@ -156,7 +156,7 @@ namespace asv
     /// \brief Access the component directions.
     public: const std::vector<Vector2>& Direction_V() const;
 
-    /// \brief Print a summary of the wave parameters to the gzmsg stream.
+    /// \brief Print a summary of the wave parameters to the ignmsg stream.
     public: void DebugPrint() const;
 
     /// \internal

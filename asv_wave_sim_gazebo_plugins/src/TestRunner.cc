@@ -13,8 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
+#include <ignition/common.hh>
 #include <chrono>
 #include <thread>
 
@@ -29,7 +28,7 @@ int main(int _argc, char **_argv)
     
     RunMeshToolsTests();
   }
-  catch(const gazebo::common::Exception &_e)
+  catch(const ignition::common::Exception &_e)
   {
     std::cout << _e.GetErrorStr() << std::endl;
     return -1;

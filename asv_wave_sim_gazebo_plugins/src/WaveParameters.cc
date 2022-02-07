@@ -21,9 +21,8 @@
 #include "asv_wave_sim_gazebo_plugins/Physics.hh"
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/msgs/msgs.hh>
+#include <ignition/common.hh>
+#include <ignition/msgs.hh>
 
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector2.hh>
@@ -186,7 +185,7 @@ namespace asv
     this->data->Recalculate();
   }
 
-  void WaveParameters::FillMsg(gazebo::msgs::Param_V& _msg) const
+  void WaveParameters::FillMsg(ignition::msgs::Param_V& _msg) const
   {
     // Clear 
     _msg.mutable_param()->Clear();
@@ -194,58 +193,52 @@ namespace asv
     // "number"
     {
       auto nextParam = _msg.add_param();
-      nextParam->set_name("number");
-      nextParam->mutable_value()->set_type(gazebo::msgs::Any::INT32);
-      nextParam->mutable_value()->set_int_value(this->data->number);
+
+      (*nextParam->mutable_params())["number"].set_type(ignition::msgs::Any::INT32);
+      (*nextParam->mutable_params())["number"].set_int_value(this->data->number);
     }
     // "scale"
     {
       auto nextParam = _msg.add_param();
-      nextParam->set_name("scale");
-      nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
-      nextParam->mutable_value()->set_double_value(this->data->scale);
+      (*nextParam->mutable_params())["scale"].set_type(ignition::msgs::Any::DOUBLE);
+      (*nextParam->mutable_params())["scale"].set_double_value(this->data->scale);
     }
     // "angle"
     {
       auto nextParam = _msg.add_param();
-      nextParam->set_name("angle");
-      nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
-      nextParam->mutable_value()->set_double_value(this->data->angle);
+      (*nextParam->mutable_params())["angle"].set_type(ignition::msgs::Any::DOUBLE);
+      (*nextParam->mutable_params())["angle"].set_double_value(this->data->angle);
     }
     // "steepness"
     {
       auto nextParam = _msg.add_param();
-      nextParam->set_name("steepness");
-      nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
-      nextParam->mutable_value()->set_double_value(this->data->steepness);
+      (*nextParam->mutable_params())["steepness"].set_type(ignition::msgs::Any::DOUBLE);
+      (*nextParam->mutable_params())["steepness"].set_double_value(this->data->steepness);
     }
     // "amplitude"
     {
       auto nextParam = _msg.add_param();
-      nextParam->set_name("amplitude");
-      nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
-      nextParam->mutable_value()->set_double_value(this->data->amplitude);
+      (*nextParam->mutable_params())["amplitude"].set_type(ignition::msgs::Any::DOUBLE);
+      (*nextParam->mutable_params())["amplitude"].set_double_value(this->data->amplitude);
     }
     // "period"
     {
       auto nextParam = _msg.add_param();
-      nextParam->set_name("period");
-      nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
-      nextParam->mutable_value()->set_double_value(this->data->period);
+      (*nextParam->mutable_params())["period"].set_type(ignition::msgs::Any::DOUBLE);
+      (*nextParam->mutable_params())["period"].set_double_value(this->data->period);
     }
     // "direction"
     {
       const auto& direction = this->data->direction;
       auto nextParam = _msg.add_param();
-      nextParam->set_name("direction");
-      nextParam->mutable_value()->set_type(gazebo::msgs::Any::VECTOR3D);
-      nextParam->mutable_value()->mutable_vector3d_value()->set_x(direction.x());
-      nextParam->mutable_value()->mutable_vector3d_value()->set_y(direction.y());
-      nextParam->mutable_value()->mutable_vector3d_value()->set_z(0);
+      (*nextParam->mutable_params())["direction"].set_type(ignition::msgs::Any::VECTOR3D);
+      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_x(direction.x());
+      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_y(direction.y());
+      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_z(0);
     }
   }
 
-  void WaveParameters::SetFromMsg(const gazebo::msgs::Param_V& _msg)
+  void WaveParameters::SetFromMsg(const ignition::msgs::Param_V& _msg)
   {
     this->data->number    = Utilities::MsgParamSizeT(_msg,    "number",     this->data->number);
     this->data->amplitude = Utilities::MsgParamDouble(_msg,   "amplitude",  this->data->amplitude);
@@ -408,18 +401,18 @@ namespace asv
  
   void WaveParameters::DebugPrint() const
   {
-    gzmsg << "number:     " << this->data->number << std::endl;
-    gzmsg << "scale:      " << this->data->scale << std::endl;
-    gzmsg << "angle:      " << this->data->angle << std::endl;
-    gzmsg << "period:     " << this->data->period << std::endl;
-    gzmsg << "amplitude:  " << this->data->amplitudes << std::endl;
-    gzmsg << "wavenumber: " << this->data->wavenumbers << std::endl;
-    gzmsg << "omega:      " << this->data->angularFrequencies << std::endl;
-    gzmsg << "phase:      " << this->data->phases << std::endl;
-    gzmsg << "steepness:  " << this->data->steepnesses << std::endl;
+    ignmsg << "number:     " << this->data->number << std::endl;
+    ignmsg << "scale:      " << this->data->scale << std::endl;
+    ignmsg << "angle:      " << this->data->angle << std::endl;
+    ignmsg << "period:     " << this->data->period << std::endl;
+    ignmsg << "amplitude:  " << this->data->amplitudes << std::endl;
+    ignmsg << "wavenumber: " << this->data->wavenumbers << std::endl;
+    ignmsg << "omega:      " << this->data->angularFrequencies << std::endl;
+    ignmsg << "phase:      " << this->data->phases << std::endl;
+    ignmsg << "steepness:  " << this->data->steepnesses << std::endl;
     for (auto&& d : this->data->directions)
     {
-      gzmsg << "direction:  " << d << std::endl;
+      ignmsg << "direction:  " << d << std::endl;
     }
   }
 

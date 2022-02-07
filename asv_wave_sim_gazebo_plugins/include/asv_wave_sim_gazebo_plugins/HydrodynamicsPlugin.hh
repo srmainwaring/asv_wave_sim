@@ -20,9 +20,8 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_HYDRODYNAMICS_PLUGIN_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_HYDRODYNAMICS_PLUGIN_HH_
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
+#include <ignition/common.hh>
+#include <ignition/physics.hh>
 #include <memory>
 
 namespace asv
