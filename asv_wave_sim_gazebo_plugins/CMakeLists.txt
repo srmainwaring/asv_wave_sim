@@ -131,6 +131,14 @@ find_package (clFFT REQUIRED)
 #============================================================================
 # Configure the build
 #============================================================================
+
+# if (HAVE_OGRE2)
+#   list(APPEND RENDERING_COMPONENTS ogre2)
+# endif()
+
+# ign_configure_build(QUIT_IF_BUILD_ERRORS
+#     COMPONENTS ${RENDERING_COMPONENTS})
+
 ign_configure_build(QUIT_IF_BUILD_ERRORS)
 
 # add_subdirectory(examples)

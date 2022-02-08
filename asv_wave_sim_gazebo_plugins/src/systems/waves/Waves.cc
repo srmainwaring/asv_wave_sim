@@ -15,6 +15,11 @@
 #include <ignition/rendering/ShaderParams.hh>
 #include <ignition/rendering/Visual.hh>
 
+#include <ignition/rendering/Grid.hh>
+#include <ignition/rendering/COMVisual.hh>
+
+#include "ignition/rendering/OceanVisual.hh"
+
 #include <sdf/Element.hh>
 
 #include <ignition/gazebo/components/Name.hh>
@@ -49,6 +54,9 @@ class ignition::gazebo::systems::WavesPrivate
   /// \brief Pointer to visual
   public: rendering::VisualPtr visual;
 
+  /// \brief Pointer to ocean visual
+  public: rendering::VisualPtr oceanVisual;
+
   /// \brief Material used by this visual
   public: rendering::MaterialPtr material;
 
@@ -60,6 +68,9 @@ class ignition::gazebo::systems::WavesPrivate
 
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
+
+  /// \brief Destructor
+  public: ~WavesPrivate();
 
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
@@ -83,6 +94,9 @@ void Waves::Configure(const Entity &_entity,
     EventManager &_eventMgr)
 {
   IGN_PROFILE("Waves::Configure");
+
+  ignmsg << "Waves: configuring\n";
+
   // Ugly, but needed because the sdf::Element::GetElement is not a const
   // function and _sdf is a const shared pointer to a const sdf::Element.
   auto sdf = const_cast<sdf::Element *>(_sdf.get());
@@ -111,6 +125,16 @@ void Waves::PreUpdate(
 }
 
 //////////////////////////////////////////////////
+WavesPrivate::~WavesPrivate()
+{
+  if (this->oceanVisual != nullptr)
+  {
+    this->oceanVisual->Destroy();
+    this->oceanVisual.reset();
+  }
+};
+
+//////////////////////////////////////////////////
 void WavesPrivate::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->mutex);
@@ -118,13 +142,18 @@ void WavesPrivate::OnUpdate()
     return;
 
   if (!this->scene)
+  {
+    ignmsg << "Waves: retrieving scene from render engine\n";
     this->scene = rendering::sceneFromFirstRenderEngine();
+  }
 
   if (!this->scene)
     return;
 
   if (!this->visual)
   {
+    ignmsg << "Waves: searching for visual\n";
+
     // this does a breadth first search for visual with the entity id
     // \todo(anyone) provide a helper function in RenderUtil to search for
     // visual by entity id?
@@ -155,15 +184,60 @@ void WavesPrivate::OnUpdate()
   if (!this->visual)
     return;
 
+  if (!this->oceanVisual)
+  {
+    ignmsg << "Waves: creating ocean visual\n";
+
+    // create material
+    if (!this->scene->MaterialRegistered("Blue"))
+    {
+      auto mat = this->scene->CreateMaterial("Blue");
+      mat->SetAmbient(0.0, 0.0, 0.3);
+      mat->SetDiffuse(0.0, 0.0, 0.8);
+      mat->SetSpecular(0.8, 0.8, 0.8);
+      mat->SetShininess(50);
+      mat->SetReflectivity(0);
+    }
+
+    // create plane
+    // auto geometry = this->scene->CreatePlane()
+
+    // create grid (a dynamic renderable)
+    auto geometry = this->scene->CreateGrid();
+    geometry->SetCellCount(100);
+    geometry->SetCellLength(0.01);
+    geometry->SetVerticalCellCount(0);
+
+    // create visual
+    auto visual = this->scene->CreateVisual("ocean-tile");
+    visual->AddGeometry(geometry);
+    visual->SetLocalPosition(0.0, 0.0, 0.0);
+    visual->SetLocalRotation(0.0, 0.0, 0.0);
+    visual->SetLocalScale(100.0, 100.0, 100.0);
+    visual->SetMaterial("Blue");
+
+    // add visual to parent
+    auto parent = this->visual->Parent();
+    parent->AddChild(visual);
+
+    // keep reference
+    this->oceanVisual = visual;
+  }
+
+  if (!this->oceanVisual)
+    return;
+
   // get the material and set shaders
   if (!this->material)
   {
-    // auto mat = scene->CreateMaterial();
+    ignmsg << "Waves: creating material\n";
+
+    auto mat = scene->CreateMaterial();
     // mat->SetVertexShader(this->vertexShaderUri);
     // mat->SetFragmentShader(this->fragmentShaderUri);
-    // this->visual->SetMaterial(mat);
-    // scene->DestroyMaterial(mat);
-    // this->material = this->visual->Material();
+    this->visual->SetMaterial(mat);
+    scene->DestroyMaterial(mat);
+    this->material = this->visual->Material();
   }
 
   if (!this->material)
@@ -171,6 +245,33 @@ void WavesPrivate::OnUpdate()
 
 }
 
+#if 0
+//////////////////////////////////////////////////
+COMVisualPtr BaseScene::CreateCOMVisual(const std::string &_name)
+{
+  unsigned int objId = this->CreateObjectId();
+  return this->CreateCOMVisual(objId, _name);
+}
+
+COMVisualPtr BaseScene::CreateCOMVisual(unsigned int _id,
+    const std::string &_name)
+{
+  COMVisualPtr visual = this->CreateCOMVisualImpl(_id, _name);
+  bool result = this->RegisterVisual(visual);
+  return (result) ? visual : nullptr;
+}
+
+//////////////////////////////////////////////////
+COMVisualPtr Ogre2Scene::CreateCOMVisualImpl(unsigned int _id,
+    const std::string &_name)
+{
+  Ogre2COMVisualPtr visual(new Ogre2COMVisual);
+  bool result = this->InitObject(visual, _id, _name);
+  return (result) ? visual : nullptr;
+}
+#endif
+
+//////////////////////////////////////////////////
 IGNITION_ADD_PLUGIN(Waves,
                     ignition::gazebo::System,
                     Waves::ISystemConfigure,

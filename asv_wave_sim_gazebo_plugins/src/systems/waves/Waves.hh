@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "ignition/gazebo/System.hh"
+#include <ignition/gazebo/System.hh>
 
 namespace ignition
 {
