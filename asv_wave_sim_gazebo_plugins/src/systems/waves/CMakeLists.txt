@@ -1,0 +1,9 @@
+gz_add_system(waves
+  SOURCES
+    Waves.cc
+  PUBLIC_LINK_LIBS
+    ${rendering_target}
+    ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+    ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+    ignition-gazebo${IGN_GAZEBO_VER}::ignition-gazebo${IGN_GAZEBO_VER}
+)

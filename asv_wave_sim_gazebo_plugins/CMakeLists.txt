@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.10.2)
-project(asv_wave_sim_gazebo_plugins)
+project(ignition-marine1 VERSION 1.0.0)
 
 #============================================================================
 # Find ignition-cmake
 #============================================================================
 find_package(ignition-cmake2 2.8.0 REQUIRED)
 set(IGN_CMAKE_VER ${ignition-cmake2_VERSION_MAJOR})
+
+#============================================================================
+# Configure the project
+#============================================================================
+ign_configure_project()
 
 #============================================================================
 # Search for project-specific dependencies
@@ -32,6 +37,11 @@ set(IGN_COMMON_VER ${ignition-common5_VERSION_MAJOR})
 # Find ignition-msgs
 ign_find_package(ignition-msgs9 REQUIRED)
 set(IGN_MSGS_VER ${ignition-msgs9_VERSION_MAJOR})
+
+#--------------------------------------
+# Find ignition-plugin
+ign_find_package(ignition-plugin1 REQUIRED COMPONENTS loader register)
+set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 
 #--------------------------------------
 # Find ignition-rendering
@@ -117,6 +127,18 @@ find_package (OpenCL REQUIRED)
 # Find clFFT
 
 find_package (clFFT REQUIRED)
+
+#============================================================================
+# Configure the build
+#============================================================================
+ign_configure_build(QUIT_IF_BUILD_ERRORS)
+
+# add_subdirectory(examples)
+
+#============================================================================
+# Create package information
+#============================================================================
+ign_create_packages()
 
 #--------------------------------------
 # include_directories(
