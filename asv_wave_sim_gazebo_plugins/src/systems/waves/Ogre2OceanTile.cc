@@ -307,7 +307,7 @@ void Ogre2OceanTilePrivate::ComputeTangentSpace()
 {
   // auto&& logManager = Ogre::LogManager::getSingleton();
   // logManager.logMessage("Computing tangent space...");
-  ignmsg << "OceanTile: compute tangent space\n";
+  // ignmsg << "OceanTile: compute tangent space\n";
 
   ComputeTBN(mVertices, mTexCoords, mFaces, mTangents, mBitangents, mNormals);
 

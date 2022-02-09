@@ -54,6 +54,21 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       this->ogreItem = _ogreItem;
     }
 
+    // Work-around the protected accessors and protected methods in Scene
+    public: void InitObject(Ogre2ScenePtr _scene, unsigned int _id, const std::string &_name)
+    {
+      // would like to call these methods
+      // unsigned int objId = _scene->CreateObjectId();
+      // std::string objName = _scene->CreateObjectName(objId, "Mesh-" + meshName);
+      this->id = _id;
+      this->name = _name;
+      this->scene = _scene;
+
+      // initialize object
+      this->Load();
+      this->Init();
+    }
+
     private: friend class Ogre2MeshFactoryExt;
   };
   typedef std::shared_ptr<Ogre2MeshExt> Ogre2MeshExtPtr;
@@ -286,6 +301,7 @@ void WavesPrivate::OnUpdate()
   if (!this->visual)
     return;
 
+#if 0
   if (!this->oceanVisual)
   {
     ignmsg << "Waves: creating ocean visual\n";
@@ -303,12 +319,6 @@ void WavesPrivate::OnUpdate()
 
     // create plane
     auto geometry = this->scene->CreatePlane();
-
-    // create grid (a dynamic renderable)
-    // auto geometry = this->scene->CreateGrid();
-    // geometry->SetCellCount(100);
-    // geometry->SetCellLength(0.01);
-    // geometry->SetVerticalCellCount(0);
 
     // create visual
     auto visual = this->scene->CreateVisual("ocean-tile");
@@ -328,11 +338,14 @@ void WavesPrivate::OnUpdate()
 
   if (!this->oceanVisual)
     return;
+#endif
 
-  if (!this->oceanTile)
+  if (!this->oceanVisual && !this->oceanTile)
   {
     // \todo(srmainwaring) synchronise visual with physics...
-    int N = 128;
+    // int N = 128;
+    // double L = 256.0;
+    int N = 2;
     double L = 256.0;
     double u = 5.0;
 
@@ -354,7 +367,7 @@ void WavesPrivate::OnUpdate()
 
     // \todo: move to derived class Ogre2MeshFactoryExt and override
     // Replace std::string Ogre2MeshFactory::MeshName(const MeshDescriptor &_desc);
-    auto meshNameFunction = [&](const rendering::MeshDescriptor &_desc) -> std::string
+    auto MeshNameFunction = [&](const rendering::MeshDescriptor &_desc) -> std::string
     {
       std::stringstream ss;
       ss << _desc.meshName << "::";
@@ -363,20 +376,21 @@ void WavesPrivate::OnUpdate()
       return ss.str();
     };
 
-    ignmsg << "Mesh name: " << meshNameFunction(meshDescriptor) << "\n";
+    ignmsg << "Mesh name: " << MeshNameFunction(meshDescriptor) << "\n";
 
     ignmsg << "Create Ogre::Item\n";
 
     // \todo: move to derived class Ogre2MeshFactoryExt and override
     // Replace Ogre::Item *Ogre2MeshFactory::OgreItem(const MeshDescriptor &_desc)
-    auto ogreItemFunction = [&](const rendering::MeshDescriptor &_desc) -> Ogre::Item *
+    // Required to ensure Ogre v1 mesh is imported to Ogre v2
+    auto OgreItemFunction = [&](const rendering::MeshDescriptor &_desc) -> Ogre::Item *
     {
       // if (!this->Load(_desc))
       // {
       //   return nullptr;
       // }
 
-      std::string name = meshNameFunction(_desc);
+      std::string name = MeshNameFunction(_desc);
       ignmsg << "Get Ogre::SceneManager\n";
       Ogre::SceneManager *sceneManager = ogre2Scene->OgreSceneManager();
 
@@ -415,73 +429,75 @@ void WavesPrivate::OnUpdate()
     };
 
     ignmsg << "Creating ogre2 item\n";
-    auto ogreItem = ogreItemFunction(meshDescriptor);
+    auto ogreItem = OgreItemFunction(meshDescriptor);
     if (!ogreItem)
-      ignerr << "Failed to get ogre2 item for [" << meshNameFunction(meshDescriptor) << "]\n";
+      ignerr << "Failed to get ogre2 item for [" << MeshNameFunction(meshDescriptor) << "]\n";
 
     ignmsg << "Creating ogre2 mesh\n";
     auto ogre2Mesh = ogre2MeshFactory->Create(meshDescriptor);
-    if (!ogreItem)
-      ignerr << "Failed create ogre2 mesh for [" << meshNameFunction(meshDescriptor) << "]\n";
+    if (!ogre2Mesh)
+      ignerr << "Failed create ogre2 mesh for [" << MeshNameFunction(meshDescriptor) << "]\n";
+
+    // Equivalent to Ogre2Scene::InitObject 
+    unsigned int objId = 50000;
+    std::string objName = "ocean-tile";
+    rendering::Ogre2MeshExtPtr ogre2MeshExt =
+        std::dynamic_pointer_cast<rendering::Ogre2MeshExt>(ogre2Mesh);
+    ogre2MeshExt->InitObject(ogre2Scene, objId, objName);
+
+    // create material
+    if (!this->scene->MaterialRegistered("Blue"))
+    {
+      auto mat = this->scene->CreateMaterial("Blue");
+      mat->SetAmbient(0.0, 0.0, 0.3);
+      mat->SetDiffuse(0.0, 0.0, 0.8);
+      mat->SetSpecular(0.8, 0.8, 0.8);
+      mat->SetShininess(50);
+      mat->SetReflectivity(0);
+    }
+
+    // attach mesh to visuals
+    auto visual = this->scene->CreateVisual("ocean-tile");
+    visual->AddGeometry(ogre2MeshExt);
+    visual->SetLocalPosition(0.0, 0.0, 0.0);
+    visual->SetLocalRotation(0.0, 0.0, 0.0);
+    visual->SetLocalScale(1.0, 1.0, 1.0);
+    visual->SetMaterial("Blue"); 
+
+    visual->SetVisible(true);
 
 
+    // add visual to parent
+    auto parent = this->visual->Parent();
+    parent->AddChild(visual);
 
-    // IsLoaded
-    // {
-    //   bool result = Ogre::v1::MeshManager::getSingleton().resourceExists(desc.meshName);
-    //   ignmsg << "Mesh " << desc.meshName << (result ? " is " : " is NOT ") << "loaded\n";
-    // }
-
-    // auto mesh = common::MeshManager::Instance()->MeshByName(this->mAboveOceanMeshName);
-    // if (mesh == nullptr)
-    //   ignerr << "Mesh " << this->mAboveOceanMeshName << " not found in MeshManager\n"; 
-
-    // meshes should be available in the mesh manager
-    // auto aboveOceanMesh = this->scene->CreateMesh(this->mAboveOceanMeshName);
-    // auto belowOceanMesh = this->scene->CreateMesh(this->mBelowOceanMeshName);
-
-    // // Scene as Ogre2Scene (see for example Ogre2Mesh::Destroy())
-
-    // // Helper 
-    // // bool Ogre2Scene::InitObject(Ogre2ObjectPtr _object, unsigned int _id,
-    // Ogre2ObjectPtr object;
-    // unsigned int id;
-    // const std::string name;
-    // object->id = id;
-    // object->name = name;
-    // object->scene = ogre2Scene->SharedThis();
-    // object->Load();
-    // object->Init();
-    
-
-    // Attach mesh to visuals
-
-    // // ignition::rendering::AttachMesh(*visual, "ocean-tile");
-
-    // visual->SetLocalPosition(0.0, 0.0, 0.0);
-    // visual->SetLocalRotation(0.0, 0.0, 0.0);
-    // visual->SetLocalScale(1.0, 1.0, 1.0);
-    // visual->SetMaterial("Blue");
+    // keep reference
+    this->oceanVisual = visual;
   }
 
   if (!this->oceanTile)
     return;
 
+  // Update the tile
+  double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
+      this->currentSimTime).count()) * 1e-9;
+  this->oceanTile->Update(simTime);
+
   // get the material and set shaders
-  if (!this->material)
-  {
-    ignmsg << "Waves: creating material\n";
+  // if (!this->material)
+  // {
+  //   ignmsg << "Waves: creating material\n";
 
-    auto mat = scene->CreateMaterial();
-    // mat->SetVertexShader(this->vertexShaderUri);
-    // mat->SetFragmentShader(this->fragmentShaderUri);
-    this->visual->SetMaterial(mat);
-    scene->DestroyMaterial(mat);
-    this->material = this->visual->Material();
-  }
+  //   auto mat = scene->CreateMaterial();
+  //   // mat->SetVertexShader(this->vertexShaderUri);
+  //   // mat->SetFragmentShader(this->fragmentShaderUri);
+  //   this->visual->SetMaterial(mat);
+  //   scene->DestroyMaterial(mat);
+  //   this->material = this->visual->Material();
+  // }
 
-  if (!this->material)
-    return;
+  // if (!this->material)
+  //   return;
 
 }
 
