@@ -11,7 +11,7 @@ namespace ignition
 {
 namespace rendering
 {
-inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
+inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 
   class Ogre2OceanTilePrivate;
 
@@ -21,11 +21,11 @@ inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
 
     public: Ogre2OceanTile(size_t _N, double _L, bool _hasVisuals=true);
 
-    void SetWindVelocity(double _ux, double _uy);
+    public: void SetWindVelocity(double _ux, double _uy);
 
-    void Create();
+    public: void Create();
 
-    void Update(double _time);
+    public: void Update(double _time);
 
     private: std::unique_ptr<Ogre2OceanTilePrivate> dataPtr;
   };
