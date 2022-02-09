@@ -1,11 +1,7 @@
 
 #include "Waves.hh"
 
-#include <chrono>
-#include <list>
-#include <mutex>
-#include <vector>
-#include <string>
+#include "Ogre2OceanTile.hh"
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
@@ -18,8 +14,6 @@
 #include <ignition/rendering/Grid.hh>
 #include <ignition/rendering/COMVisual.hh>
 
-#include "ignition/rendering/OceanVisual.hh"
-
 #include <sdf/Element.hh>
 
 #include <ignition/gazebo/components/Name.hh>
@@ -27,6 +21,12 @@
 #include <ignition/gazebo/rendering/Events.hh>
 #include <ignition/gazebo/rendering/RenderUtil.hh>
 #include <ignition/gazebo/Util.hh>
+
+#include <chrono>
+#include <list>
+#include <mutex>
+#include <vector>
+#include <string>
 
 using namespace ignition;
 using namespace gazebo;
@@ -68,6 +68,9 @@ class ignition::gazebo::systems::WavesPrivate
 
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
+
+
+  public: std::unique_ptr<rendering::Ogre2OceanTile> oceanTile;
 
   /// \brief Destructor
   public: ~WavesPrivate();
@@ -112,6 +115,17 @@ void Waves::Configure(const Entity &_entity,
   this->dataPtr->connection =
       _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
       std::bind(&WavesPrivate::OnUpdate, this->dataPtr.get()));
+
+
+  // \todo(srmainwaring) synchronise visual with physics...
+  int N = 128;
+  double L = 256.0;
+  double u = 5.0;
+
+  this->dataPtr->oceanTile.reset(new rendering::Ogre2OceanTile(N, L));
+  this->dataPtr->oceanTile->SetWindVelocity(u, 0.0);
+  this->dataPtr->oceanTile->Create();
+  this->dataPtr->oceanTile->Update(0.0);
 }
 
 //////////////////////////////////////////////////
@@ -203,18 +217,40 @@ void WavesPrivate::OnUpdate()
     // auto geometry = this->scene->CreatePlane()
 
     // create grid (a dynamic renderable)
-    auto geometry = this->scene->CreateGrid();
-    geometry->SetCellCount(100);
-    geometry->SetCellLength(0.01);
-    geometry->SetVerticalCellCount(0);
+    // auto geometry = this->scene->CreateGrid();
+    // geometry->SetCellCount(100);
+    // geometry->SetCellLength(0.01);
+    // geometry->SetVerticalCellCount(0);
 
     // create visual
+    // auto visual = this->scene->CreateVisual("ocean-tile");
+    // visual->AddGeometry(geometry);
+    // visual->SetLocalPosition(0.0, 0.0, 0.0);
+    // visual->SetLocalRotation(0.0, 0.0, 0.0);
+    // visual->SetLocalScale(100.0, 100.0, 100.0);
+    // visual->SetMaterial("Blue");
+
+
+    // Mesh Visual: Above
     auto visual = this->scene->CreateVisual("ocean-tile");
-    visual->AddGeometry(geometry);
+
+    // \todo(srmainwaring) write custom attach mesh for Ogre2
+    //        Replace Gazebo.cc AttachMesh (in this project)
+    // 
+    //        Ogre2MeshFactory::LoadImpl
+    ignition::rendering::MeshDescriptor meshDescriptor;
+    meshDescriptor.mesh = nullptr;
+    meshDescriptor.meshName = "";
+    meshDescriptor.subMeshName = "";
+    meshDescriptor.centerSubMesh = false;
+
+    // ignition::rendering::AttachMesh(*visual, "ocean-tile");
+
     visual->SetLocalPosition(0.0, 0.0, 0.0);
     visual->SetLocalRotation(0.0, 0.0, 0.0);
-    visual->SetLocalScale(100.0, 100.0, 100.0);
+    visual->SetLocalScale(1.0, 1.0, 1.0);
     visual->SetMaterial("Blue");
+
 
     // add visual to parent
     auto parent = this->visual->Parent();

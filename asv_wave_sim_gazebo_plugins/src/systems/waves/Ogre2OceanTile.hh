@@ -3,9 +3,9 @@
 #ifndef IGNITION_GAZEBO_SYSTEMS_OGRE2OCEANTILE_HH_
 #define IGNITION_GAZEBO_SYSTEMS_OGRE2OCEANTILE_HH_
 
-#include <memory>
+#include <ignition/rendering.hh>
 
-#include <ignition/gazebo/System.hh>
+#include <memory>
 
 namespace ignition
 {
@@ -19,9 +19,13 @@ inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
   {
     public: virtual ~Ogre2OceanTile();
 
-    public: Ogre2OceanTile();
+    public: Ogre2OceanTile(size_t _N, double _L, bool _hasVisuals=true);
 
-    void Update();
+    void SetWindVelocity(double _ux, double _uy);
+
+    void Create();
+
+    void Update(double _time);
 
     private: std::unique_ptr<Ogre2OceanTilePrivate> dataPtr;
   };
