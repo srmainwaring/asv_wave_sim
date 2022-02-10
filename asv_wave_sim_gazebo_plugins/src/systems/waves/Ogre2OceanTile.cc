@@ -588,9 +588,13 @@ Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh(const Ogre::String &_name, 
   std::string group = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
   Ogre::v1::MeshPtr mMesh = Ogre::v1::MeshManager::getSingleton().createManual(_name, group);
 
+  std::string subMeshName = _name;
+
   ignmsg << "OceanTile: create submesh\n";
   // Create submesh
-  Ogre::v1::SubMesh *subMesh = mMesh->createSubMesh();
+  Ogre::v1::SubMesh *subMesh = mMesh->createSubMesh(subMeshName);
+  subMesh->useSharedVertices = false;
+  subMesh->operationType = Ogre::OT_TRIANGLE_LIST;
 
   ignmsg << "OceanTile: calculate vertex buf size\n";
   // Vertices
@@ -627,6 +631,10 @@ Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh(const Ogre::String &_name, 
   offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
 
   // Create vertex declaration: texture coordinates, tangents, bitangents
+  //
+  // NOTE: Ignition uses a single vertex buffer for vertices and texture coordinates 
+  //       texVertexBufferIndex = 0 and the offset is not reset
+  //
   unsigned int texVertexBufferIndex = 1;
   offset = 0;
   ignmsg << "OceanTile: create texture coords\n";
@@ -679,6 +687,9 @@ Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh(const Ogre::String &_name, 
 
   ignmsg << "OceanTile: allocate index buffers\n";
   // Allocate index buffer of the requested number of vertices (ibufCount) 
+  //
+  // NOTE: Ignition sets useShadowBuffer=true (last argument)
+  //
   auto indexBuffer = 
       hardwareBufferManager.createIndexBuffer(
           Ogre::v1::HardwareIndexBuffer::IT_32BIT, 
@@ -750,6 +761,18 @@ Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh(const Ogre::String &_name, 
   texVertexBuffer->unlock();
 
   indexBuffer->unlock();
+
+  //
+  // NOTE: Ignition sets a default material Default/White
+  //
+  ignmsg << "OceanTile: set default material\n";
+  subMesh->setMaterialName("Default/White");
+
+  ignmsg << "OceanTile: set shadow mapping buffers\n";
+  if (!mMesh->hasValidShadowMappingBuffers())
+  {
+    mMesh->prepareForShadowMapping(false);
+  }
 
   ignmsg << "OceanTile: set aabb\n";
   // Set bounds (box and sphere)

@@ -423,15 +423,13 @@ void WavesPrivate::OnUpdate()
         if (!v1Mesh)
           ignerr << "Did not find v1 mesh\n";
           // return nullptr
-        // create v2 mesh from v1
 
-        // Examine v1 mesh properties - this is a bit hacky to prevent a segfault if `load` is called
-        // v1Mesh->load(true);
-        v1Mesh->setToLoaded();
-        // ignmsg << "v1 mesh: calculateSize:  " << v1Mesh->calculateSize() << "\n"; // protected
+        // Examine v1 mesh properties
+        v1Mesh->load();
         ignmsg << "v1 mesh: isLoaded:       " << v1Mesh->isLoaded() << "\n";
 
         ignmsg << "Creating v2 mesh\n";
+        // create v2 mesh from v1
         mesh = Ogre::MeshManager::getSingleton().createManual(
             name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
@@ -470,8 +468,8 @@ void WavesPrivate::OnUpdate()
     visual->SetVisible(true);
 
     // add visual to parent
-    auto parent = this->visual->Parent();
-    parent->AddChild(visual);
+    // auto parent = this->visual->Parent();
+    // parent->AddChild(visual);
 
     // keep reference
     this->oceanVisual = visual;
@@ -482,9 +480,9 @@ void WavesPrivate::OnUpdate()
 
   // Update the tile
   this->ogre2OceanTile->Update(simTime);
-#endif
 
-#if 1
+#else
+
   // Test attaching a common::Mesh to the entity
   if (!this->oceanTile)
   {
@@ -512,20 +510,20 @@ void WavesPrivate::OnUpdate()
     visual->SetLocalPosition(0.0, 0.0, 0.0);
     visual->SetLocalRotation(0.0, 0.0, 0.0);
     visual->SetLocalScale(1.0, 1.0, 1.0);
-    // visual->SetMaterial("OceanBlue");
+    visual->SetMaterial("OceanBlue");
     visual->SetVisible(true);
 
     // retrive the material from the visual's geometry (it's not set on the visual)
-    ignmsg << "Waves: Visual Name:          " << this->visual->Name() << "\n";
-    ignmsg << "Waves: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
-    auto visualGeometry = this->visual->GeometryByIndex(0);
+    // ignmsg << "Waves: Visual Name:          " << this->visual->Name() << "\n";
+    // ignmsg << "Waves: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+    // auto visualGeometry = this->visual->GeometryByIndex(0);
 
-    auto material = visualGeometry->Material();
-    // auto material = this->visual->Material();
-    if (!material)
-      ignerr << "Waves: invalid material\n";
-    else
-      visual->SetMaterial(material);
+    // auto material = visualGeometry->Material();
+    // // auto material = this->visual->Material();
+    // if (!material)
+    //   ignerr << "Waves: invalid material\n";
+    // else
+    //   visual->SetMaterial(material);
 
     // add visual to parent
     // auto parent = this->visual->Parent();
