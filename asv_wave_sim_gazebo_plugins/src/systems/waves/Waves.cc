@@ -1,6 +1,7 @@
 
 #include "Waves.hh"
 
+#include "OceanTile.hh"
 #include "Ogre2OceanTile.hh"
 
 #include <ignition/common/Profiler.hh>
@@ -181,10 +182,15 @@ class ignition::gazebo::systems::WavesPrivate
   public: std::chrono::steady_clock::duration currentSimTime;
 
   /////////////////
-  /// OceanTile
+  /// OceanTile (both common::Mesh and Ogre2 versions)
   std::string mAboveOceanMeshName = "AboveOceanTileMesh";
   std::string mBelowOceanMeshName = "BelowOceanTileMesh";
-  public: std::unique_ptr<rendering::Ogre2OceanTile> oceanTile;
+
+  // using custom rendering::Ogre2Mesh
+  public: std::unique_ptr<rendering::Ogre2OceanTile> ogre2OceanTile;
+
+  // using standard (static) common::Mesh
+  public: std::unique_ptr<rendering::OceanTile> oceanTile;
 
   /// \brief Destructor
   public: ~WavesPrivate();
@@ -301,21 +307,23 @@ void WavesPrivate::OnUpdate()
   if (!this->visual)
     return;
 
+  if (!this->scene->MaterialRegistered("OceanBlue"))
+  {
+    ignmsg << "Waves: creating material `OceanBlue`\n";
+
+    auto mat = this->scene->CreateMaterial("OceanBlue");
+    mat->SetAmbient(0.0, 0.0, 0.3);
+    mat->SetDiffuse(0.0, 0.0, 0.8);
+    mat->SetSpecular(0.8, 0.8, 0.8);
+    mat->SetShininess(50);
+    mat->SetReflectivity(0);
+  }
+
 #if 0
+  // Test attaching another visual to the entity
   if (!this->oceanVisual)
   {
     ignmsg << "Waves: creating ocean visual\n";
-
-    // create material
-    if (!this->scene->MaterialRegistered("Blue"))
-    {
-      auto mat = this->scene->CreateMaterial("Blue");
-      mat->SetAmbient(0.0, 0.0, 0.3);
-      mat->SetDiffuse(0.0, 0.0, 0.8);
-      mat->SetSpecular(0.8, 0.8, 0.8);
-      mat->SetShininess(50);
-      mat->SetReflectivity(0);
-    }
 
     // create plane
     auto geometry = this->scene->CreatePlane();
@@ -326,7 +334,7 @@ void WavesPrivate::OnUpdate()
     visual->SetLocalPosition(0.0, 0.0, 0.0);
     visual->SetLocalRotation(0.0, 0.0, 0.0);
     visual->SetLocalScale(100.0, 100.0, 100.0);
-    visual->SetMaterial("Blue");
+    visual->SetMaterial("OceanBlue");
 
     // add visual to parent
     auto parent = this->visual->Parent();
@@ -340,8 +348,15 @@ void WavesPrivate::OnUpdate()
     return;
 #endif
 
-  if (!this->oceanVisual && !this->oceanTile)
+  double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
+      this->currentSimTime).count()) * 1e-9;
+
+#if 0
+  // Test attaching an Ogre2 mesh to the entity
+  if (!this->ogre2OceanTile)
   {
+    ignmsg << "Waves: creating Ogre2 Ocean Tile\n";
+
     // \todo(srmainwaring) synchronise visual with physics...
     // int N = 128;
     // double L = 256.0;
@@ -349,10 +364,10 @@ void WavesPrivate::OnUpdate()
     double L = 256.0;
     double u = 5.0;
 
-    this->oceanTile.reset(new rendering::Ogre2OceanTile(N, L));
-    this->oceanTile->SetWindVelocity(u, 0.0);
-    this->oceanTile->Create();
-    this->oceanTile->Update(0.0);
+    this->ogre2OceanTile.reset(new rendering::Ogre2OceanTile(N, L));
+    this->ogre2OceanTile->SetWindVelocity(u, 0.0);
+    this->ogre2OceanTile->Create();
+    this->ogre2OceanTile->Update(0.0);
 
     // ogre2 specific
     rendering::Ogre2ScenePtr ogre2Scene =
@@ -445,27 +460,63 @@ void WavesPrivate::OnUpdate()
         std::dynamic_pointer_cast<rendering::Ogre2MeshExt>(ogre2Mesh);
     ogre2MeshExt->InitObject(ogre2Scene, objId, objName);
 
-    // create material
-    if (!this->scene->MaterialRegistered("Blue"))
-    {
-      auto mat = this->scene->CreateMaterial("Blue");
-      mat->SetAmbient(0.0, 0.0, 0.3);
-      mat->SetDiffuse(0.0, 0.0, 0.8);
-      mat->SetSpecular(0.8, 0.8, 0.8);
-      mat->SetShininess(50);
-      mat->SetReflectivity(0);
-    }
-
     // attach mesh to visuals
     auto visual = this->scene->CreateVisual("ocean-tile");
     visual->AddGeometry(ogre2MeshExt);
     visual->SetLocalPosition(0.0, 0.0, 0.0);
     visual->SetLocalRotation(0.0, 0.0, 0.0);
     visual->SetLocalScale(1.0, 1.0, 1.0);
-    visual->SetMaterial("Blue"); 
-
+    visual->SetMaterial("OceanBlue");
     visual->SetVisible(true);
 
+    // add visual to parent
+    auto parent = this->visual->Parent();
+    parent->AddChild(visual);
+
+    // keep reference
+    this->oceanVisual = visual;
+  }
+
+  if (!this->ogre2OceanTile)
+    return;
+
+  // Update the tile
+  this->ogre2OceanTile->Update(simTime);
+#endif
+
+#if 1
+  // Test attaching a common::Mesh to the entity
+  if (!this->oceanTile)
+  {
+    ignmsg << "Waves: creating Ocean Tile\n";
+
+    // create ocean tile
+    int N = 2;
+    double L = 256.0;
+    double u = 5.0;
+
+    this->oceanTile.reset(new rendering::OceanTile(N, L));
+    this->oceanTile->SetWindVelocity(u, 0.0);
+    this->oceanTile->Create();
+    this->oceanTile->Update(0.0);
+
+    // create the common::Mesh
+    common::Mesh *mesh = this->oceanTile->Mesh();
+
+    // \todo(srmainwaring) move to OceanTile where mesh is created
+    // common::MeshManager::Instance()->AddMesh(mesh);
+
+    //convert common::Mesh to rendering::Mesh
+    rendering::MeshPtr renderingMesh = this->scene->CreateMesh(mesh);
+
+    // create ocean tile visual
+    auto visual = this->scene->CreateVisual("ocean-tile");
+    visual->AddGeometry(renderingMesh);
+    visual->SetLocalPosition(0.0, 0.0, 0.0);
+    visual->SetLocalRotation(0.0, 0.0, 0.0);
+    visual->SetLocalScale(1.0, 1.0, 1.0);
+    visual->SetMaterial("OceanBlue");
+    visual->SetVisible(true);
 
     // add visual to parent
     auto parent = this->visual->Parent();
@@ -479,25 +530,8 @@ void WavesPrivate::OnUpdate()
     return;
 
   // Update the tile
-  double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
-      this->currentSimTime).count()) * 1e-9;
   this->oceanTile->Update(simTime);
-
-  // get the material and set shaders
-  // if (!this->material)
-  // {
-  //   ignmsg << "Waves: creating material\n";
-
-  //   auto mat = scene->CreateMaterial();
-  //   // mat->SetVertexShader(this->vertexShaderUri);
-  //   // mat->SetFragmentShader(this->fragmentShaderUri);
-  //   this->visual->SetMaterial(mat);
-  //   scene->DestroyMaterial(mat);
-  //   this->material = this->visual->Material();
-  // }
-
-  // if (!this->material)
-  //   return;
+#endif
 
 }
 

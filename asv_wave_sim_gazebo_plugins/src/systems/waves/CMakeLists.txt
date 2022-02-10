@@ -8,6 +8,7 @@ link_directories(${IGNITION-RENDERING_LIBRARY_DIRS})
 gz_add_system(waves
   SOURCES
     Waves.cc
+    OceanTile.cc
     Ogre2OceanTile.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
