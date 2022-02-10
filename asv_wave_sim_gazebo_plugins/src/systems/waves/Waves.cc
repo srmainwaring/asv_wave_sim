@@ -503,9 +503,6 @@ void WavesPrivate::OnUpdate()
     // create the common::Mesh
     common::Mesh *mesh = this->oceanTile->Mesh();
 
-    // \todo(srmainwaring) move to OceanTile where mesh is created
-    // common::MeshManager::Instance()->AddMesh(mesh);
-
     //convert common::Mesh to rendering::Mesh
     rendering::MeshPtr renderingMesh = this->scene->CreateMesh(mesh);
 

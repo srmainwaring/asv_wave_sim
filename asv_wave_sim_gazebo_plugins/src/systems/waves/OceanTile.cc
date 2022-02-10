@@ -2,6 +2,10 @@
 #include "OceanTile.hh"
 
 #include <ignition/common.hh>
+#include <ignition/common/Mesh.hh>
+#include <ignition/common/MeshManager.hh>
+#include <ignition/common/SubMesh.hh>
+
 #include <ignition/rendering.hh>
 
 #include <cmath>
@@ -40,8 +44,8 @@ public:
   std::vector<math::Vector3d> mBitangents;
   std::vector<math::Vector3d> mNormals;
 
-  // std::string                 mAboveOceanMeshName = "AboveOceanTileMesh::::ORIGINAL";
-  // std::string                 mBelowOceanMeshName = "BelowOceanTileMesh::::ORIGINAL";
+  std::string                 mAboveOceanMeshName = "AboveOceanTileMesh::::ORIGINAL";
+  std::string                 mBelowOceanMeshName = "BelowOceanTileMesh::::ORIGINAL";
   // Ogre::v1::SubMesh*          mAboveOceanSubMesh;
   // Ogre::v1::SubMesh*          mBelowOceanSubMesh;
 
@@ -60,28 +64,28 @@ public:
 
   void Create();
 
-  // void ComputeNormals();
+  void ComputeNormals();
 
-  // void ComputeTangentSpace();
+  void ComputeTangentSpace();
 
-  // static void ComputeTBN(
-  //     const Ogre::Vector3& _p0, 
-  //     const Ogre::Vector3& _p1, 
-  //     const Ogre::Vector3& _p2, 
-  //     const Ogre::Vector2& _uv0, 
-  //     const Ogre::Vector2& _uv1, 
-  //     const Ogre::Vector2& _uv2, 
-  //     Ogre::Vector3& _tangent, 
-  //     Ogre::Vector3& _bitangent, 
-  //     Ogre::Vector3& _normal);
+  static void ComputeTBN(
+      const math::Vector3d& _p0, 
+      const math::Vector3d& _p1, 
+      const math::Vector3d& _p2, 
+      const math::Vector2d& _uv0, 
+      const math::Vector2d& _uv1, 
+      const math::Vector2d& _uv2, 
+      math::Vector3d& _tangent, 
+      math::Vector3d& _bitangent, 
+      math::Vector3d& _normal);
 
-  // static void ComputeTBN(
-  //     const std::vector<Ogre::Vector3>& _vertices,
-  //     const std::vector<Ogre::Vector2>& _texCoords,
-  //     const std::vector<ignition::math::Vector3i>& _faces, 
-  //     std::vector<Ogre::Vector3>& _tangents,
-  //     std::vector<Ogre::Vector3>& _bitangents,
-  //     std::vector<Ogre::Vector3>& _normals);
+  static void ComputeTBN(
+      const std::vector<math::Vector3d>& _vertices,
+      const std::vector<math::Vector2d>& _texCoords,
+      const std::vector<math::Vector3i>& _faces, 
+      std::vector<math::Vector3d>& _tangents,
+      std::vector<math::Vector3d>& _bitangents,
+      std::vector<math::Vector3d>& _normals);
 
   void Update(double _time);
 
@@ -89,15 +93,18 @@ public:
 
   void UpdateVertices(double _time);
 
+  void CreateMesh(const std::string &_name, double _offsetZ,
+      bool _reverseOrientation);
+
   // Ogre::v1::SubMesh* CreateMesh(const Ogre::String &_name, double _offsetZ=0.0, bool _reverseOrientation=false);
 
   // void UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ=0.0, bool _reverseOrientation=false);
 
   // void DebugPrintVertexBuffers(Ogre::v1::SubMesh *_subMesh) const;
 
-  // const std::vector<Ogre::Vector3>& Vertices() const;
+  const std::vector<math::Vector3d>& Vertices() const;
 
-  // const std::vector<ignition::math::Vector3i>& Faces() const;
+  const std::vector<ignition::math::Vector3i>& Faces() const;
 };
 
 //////////////////////////////////////////////////
@@ -197,14 +204,13 @@ void OceanTilePrivate::SetWindVelocity(double _ux, double _uy)
 // conform with this convention.
 void OceanTilePrivate::Create()
 {
-  // auto&& logManager = Ogre::LogManager::getSingleton();
-  // logManager.logMessage("Creating OceanTile...");
-  // logManager.logMessage("Resolution:    " + Ogre::StringConverter::toString(mResolution));
-  // logManager.logMessage("RowLength:     " + Ogre::StringConverter::toString(mRowLength));
-  // logManager.logMessage("NumVertices:   " + Ogre::StringConverter::toString(mNumVertices));
-  // logManager.logMessage("NumFaces:      " + Ogre::StringConverter::toString(mNumFaces));
-  // logManager.logMessage("TileSize:      " + Ogre::StringConverter::toString(mTileSize));
-  // logManager.logMessage("Spacing:       " + Ogre::StringConverter::toString(mSpacing));
+  ignmsg << "OceanTile: create tile\n";
+  ignmsg << "Resolution:    " << mResolution  << "\n";
+  ignmsg << "RowLength:     " << mRowLength   << "\n";
+  ignmsg << "NumVertices:   " << mNumVertices << "\n";
+  ignmsg << "NumFaces:      " << mNumFaces    << "\n";
+  ignmsg << "TileSize:      " << mTileSize    << "\n";
+  ignmsg << "Spacing:       " << mSpacing     << "\n";
 
   // Grid dimensions
   const size_t nx = this->mResolution;
@@ -225,14 +231,13 @@ void OceanTilePrivate::Create()
     {
       // Vertex position
       double px = ix * lx - Lx/2.0;
-#if 1
+
       math::Vector3d vertex(px, py, 0);
       mVertices0.push_back(vertex);
       mVertices.push_back(vertex);
       // Texture coordinates (u, v): top left: (0, 0), bottom right: (1, 1)
       math::Vector2d texCoord(ix * xTex, 1.0 - (iy * yTex));
       mTexCoords.push_back(texCoord);
-#endif
     }
   }
 
@@ -256,31 +261,27 @@ void OceanTilePrivate::Create()
 
   ignmsg << "OceanTile: assigning texture coords\n";
   // Texture Coordinates
-#if 0
-  mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
-  mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
-  mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
-#endif
+  mTangents.assign(mVertices.size(), math::Vector3d::Zero);
+  mBitangents.assign(mVertices.size(), math::Vector3d::Zero);
+  mNormals.assign(mVertices.size(), math::Vector3d::Zero);
   if (mHasVisuals) 
   {
-#if 0
-    // ComputeNormals();
+    ComputeNormals();
     ComputeTangentSpace();
-    mAboveOceanSubMesh = CreateMesh(mAboveOceanMeshName, 0.0, false);
+    CreateMesh(this->mAboveOceanMeshName, 0.0, false);
+#if 0
     mBelowOceanSubMesh = CreateMesh(mBelowOceanMeshName, -0.05, true);
 #endif
   }
 }
 
 //////////////////////////////////////////////////
-#if 0
 void OceanTilePrivate::ComputeNormals()
 {
-  // auto&& logManager = Ogre::LogManager::getSingleton();
-  // logManager.logMessage("Computing normals...");
+  // ignmsg << "OceanTile: compute normals\n";
 
   // 0. Reset normals.
-  mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
+  mNormals.assign(mVertices.size(), math::Vector3d::Zero);
 
   // 1. For each face calculate the normal and add to each vertex in the face
   for (size_t i=0; i<mNumFaces; ++i)
@@ -294,7 +295,7 @@ void OceanTilePrivate::ComputeNormals()
     auto&& v2 = mVertices[v2Idx];
 
     // Normal
-    Ogre::Vector3 normal(Ogre::Math::calculateBasicFaceNormal(v0, v1, v2));
+    math::Vector3d normal(math::Vector3d::Normal(v0, v1, v2));
 
     // Add to vertices
     mNormals[v0Idx] += normal;
@@ -305,18 +306,15 @@ void OceanTilePrivate::ComputeNormals()
   // 2. Normalise each vertex normal.
   for (auto&& normal : mNormals)
   {
-      normal.normalise();
+      normal.Normalize();
   }
 
-  // logManager.logMessage("Normals computed.");
+  // ignmsg << "OceanTile: done compute normals\n";
 }
-#endif
+
 //////////////////////////////////////////////////
-#if 0
 void OceanTilePrivate::ComputeTangentSpace()
 {
-  // auto&& logManager = Ogre::LogManager::getSingleton();
-  // logManager.logMessage("Computing tangent space...");
   // ignmsg << "OceanTile: compute tangent space\n";
 
   ComputeTBN(mVertices, mTexCoords, mFaces, mTangents, mBitangents, mNormals);
@@ -324,28 +322,17 @@ void OceanTilePrivate::ComputeTangentSpace()
 #if DEBUG
   for (size_t i=0; i<std::min(static_cast<size_t>(20), mVertices.size()) ; ++i)
   {
-    logManager.logMessage("V["
-    + Ogre::StringConverter::toString(i) + "]:  "
-    + Ogre::StringConverter::toString(mVertices[i]));
-    logManager.logMessage("UV["
-    + Ogre::StringConverter::toString(i) + "]: "
-    + Ogre::StringConverter::toString(mTexCoords[i]));
-    logManager.logMessage("T["
-    + Ogre::StringConverter::toString(i) + "]:  "
-    + Ogre::StringConverter::toString(mTangents[i]));
-    logManager.logMessage("B["
-    + Ogre::StringConverter::toString(i) + "]:  "
-    + Ogre::StringConverter::toString(mBitangents[i]));
-    logManager.logMessage("N["
-    + Ogre::StringConverter::toString(i) + "]:  "
-    + Ogre::StringConverter::toString(mNormals[i]));
-    logManager.logMessage("");
+    ignmsg << "V["  << i << "]:  "  << mVertices[i]   << "\n";
+    ignmsg << "UV[" << i << "]: "   << mTexCoords[i]  << "\n"
+    ignmsg << "T["  << i << "]:  "  << mTangents[i]   << "\n";
+    ignmsg << "B["  << i << "]:  "  << mBitangents[i] << "\n";
+    ignmsg << "N["  << i << "]:  "  << mNormals[i]    << "\n";
   }
 #endif
 
-  // logManager.logMessage("Tangent space computed.");
+  // ignmsg << "OceanTile: done compute tangent space\n";
 }
-#endif
+
 //////////////////////////////////////////////////
 // Compute the tangent space vectors (Tanget, Bitangent, Normal) for one face
 //
@@ -358,17 +345,16 @@ void OceanTilePrivate::ComputeTangentSpace()
 // Bumpmapping with GLSL: http://fabiensanglard.net/bumpMapping/index.php
 // Lesson 8: Tangent Space: http://jerome.jouvie.free.fr/opengl-tutorials/Lesson8.php
 //
-#if 0
 void OceanTilePrivate::ComputeTBN(
-    const Ogre::Vector3& _p0, 
-    const Ogre::Vector3& _p1, 
-    const Ogre::Vector3& _p2, 
-    const Ogre::Vector2& _uv0, 
-    const Ogre::Vector2& _uv1, 
-    const Ogre::Vector2& _uv2, 
-    Ogre::Vector3& _tangent, 
-    Ogre::Vector3& _bitangent, 
-    Ogre::Vector3& _normal)
+    const math::Vector3d& _p0, 
+    const math::Vector3d& _p1, 
+    const math::Vector3d& _p2, 
+    const math::Vector2d& _uv0, 
+    const math::Vector2d& _uv1, 
+    const math::Vector2d& _uv2, 
+    math::Vector3d& _tangent, 
+    math::Vector3d& _bitangent, 
+    math::Vector3d& _normal)
 {
   // Correction to the TBN calculation when the v texture coordinate
   // is 0 at the top of a texture and 1 at the bottom. 
@@ -378,37 +364,36 @@ void OceanTilePrivate::ComputeTBN(
   auto duv1 = _uv1 - _uv0;
   auto duv2 = _uv2 - _uv0;
 
-  double f = 1.0f / (duv1.x * duv2.y - duv2.x * duv1.y) * vsgn;
+  double f = 1.0f / (duv1.X() * duv2.Y() - duv2.X() * duv1.Y()) * vsgn;
 
-  _tangent.x = f * (duv2.y * edge1.x - duv1.y * edge2.x) * vsgn;
-  _tangent.y = f * (duv2.y * edge1.y - duv1.y * edge2.y) * vsgn;
-  _tangent.z = f * (duv2.y * edge1.z - duv1.y * edge2.z) * vsgn;
-  _tangent.normalise();
+  _tangent.X() = f * (duv2.Y() * edge1.X() - duv1.Y() * edge2.X()) * vsgn;
+  _tangent.Y() = f * (duv2.Y() * edge1.Y() - duv1.Y() * edge2.Y()) * vsgn;
+  _tangent.Z() = f * (duv2.Y() * edge1.Z() - duv1.Y() * edge2.Z()) * vsgn;
+  _tangent.Normalize();
 
-  _bitangent.x = f * (-duv2.x * edge1.x + duv1.x * edge2.x);
-  _bitangent.y = f * (-duv2.x * edge1.y + duv1.x * edge2.y);
-  _bitangent.z = f * (-duv2.x * edge1.z + duv1.x * edge2.z);
-  _bitangent.normalise();  
+  _bitangent.X() = f * (-duv2.X() * edge1.X() + duv1.X() * edge2.X());
+  _bitangent.Y() = f * (-duv2.X() * edge1.Y() + duv1.X() * edge2.Y());
+  _bitangent.Z() = f * (-duv2.X() * edge1.Z() + duv1.X() * edge2.Z());
+  _bitangent.Normalize();  
 
-  _normal = _tangent.crossProduct(_bitangent);
-  _normal.normalise();  
+  _normal = _tangent.Cross(_bitangent);
+  _normal.Normalize();  
 }
-#endif
+
 //////////////////////////////////////////////////
 // Compute the tangent space for the entire mesh.
-#if 0
 void OceanTilePrivate::ComputeTBN(
-    const std::vector<Ogre::Vector3>& _vertices,
-    const std::vector<Ogre::Vector2>& _texCoords,
-    const std::vector<ignition::math::Vector3i>& _faces, 
-    std::vector<Ogre::Vector3>& _tangents,
-    std::vector<Ogre::Vector3>& _bitangents,
-    std::vector<Ogre::Vector3>& _normals)
+    const std::vector<math::Vector3d>& _vertices,
+    const std::vector<math::Vector2d>& _texCoords,
+    const std::vector<math::Vector3i>& _faces, 
+    std::vector<math::Vector3d>& _tangents,
+    std::vector<math::Vector3d>& _bitangents,
+    std::vector<math::Vector3d>& _normals)
 {
   // 0. Resize and zero outputs.
-  _tangents.assign(_vertices.size(), Ogre::Vector3::ZERO);
-  _bitangents.assign(_vertices.size(), Ogre::Vector3::ZERO);
-  _normals.assign(_vertices.size(), Ogre::Vector3::ZERO);
+  _tangents.assign(_vertices.size(), math::Vector3d::Zero);
+  _bitangents.assign(_vertices.size(), math::Vector3d::Zero);
+  _normals.assign(_vertices.size(), math::Vector3d::Zero);
 
   // 1. For each face calculate TBN and add to each vertex in the face.
   for (auto&& face : _faces)
@@ -429,7 +414,7 @@ void OceanTilePrivate::ComputeTBN(
     auto&& uv2 = _texCoords[idx2];
 
     // Compute tangent space.
-    Ogre::Vector3 T, B, N;
+    math::Vector3d T, B, N;
     ComputeTBN(p0, p1, p2, uv0, uv1, uv2, T, B, N);
 
     // Assign to vertices.
@@ -445,12 +430,12 @@ void OceanTilePrivate::ComputeTBN(
   // 2. Normalise each vertex's tangent space basis.
   for (size_t i=0; i<_vertices.size(); ++i)
   {
-    _tangents[i].normalise();
-    _bitangents[i].normalise();
-    _normals[i].normalise();
+    _tangents[i].Normalize();
+    _bitangents[i].Normalize();
+    _normals[i].Normalize();
   }
 }
-#endif
+
 //////////////////////////////////////////////////
 void OceanTilePrivate::Update(double _time)
 {
@@ -459,7 +444,7 @@ void OceanTilePrivate::Update(double _time)
   if (mHasVisuals)
   {
     // Uncomment to calculate the tangent space using finite differences
-    // ComputeTangentSpace();
+    ComputeTangentSpace();
     // UpdateMesh(mAboveOceanSubMesh, 0.0, false);
     // UpdateMesh(mBelowOceanSubMesh, -0.05, false);
   }
@@ -505,13 +490,13 @@ void OceanTilePrivate::UpdateVertices(double _time)
       double h  = mHeights[idx1];
       double sx = mDisplacementsX[idx1];
       double sy = mDisplacementsY[idx1];
-#if 0
+
       auto&& v0 = mVertices0[idx0];
       auto&& v  = mVertices[idx0];
-      v.x = v0.x + sx;
-      v.y = v0.y + sy;
-      v.z = v0.z + h;
-#endif
+      v.X() = v0.X() + sx;
+      v.Y() = v0.Y() + sy;
+      v.Z() = v0.Z() + h;
+
       // 2. Update tangent and bitangent vectors (not normalised).
       // @TODO Check sign for displacement terms
       double dhdx  = mDhdx[idx1]; 
@@ -519,17 +504,16 @@ void OceanTilePrivate::UpdateVertices(double _time)
       double dsxdx = mDxdx[idx1]; 
       double dsydy = mDydy[idx1]; 
       double dsxdy = mDxdy[idx1]; 
-#if 0
+
       auto&& t = mTangents[idx0];
-      t.x = dsxdx + 1.0;
-      t.y = dsxdy;
-      t.z = dhdx;
+      t.X() = dsxdx + 1.0;
+      t.Y() = dsxdy;
+      t.Z() = dhdx;
       
       auto&& b = mBitangents[idx0];
-      b.x = dsxdy;
-      b.y = dsydy + 1.0;
-      b.z = dhdy;
-#endif
+      b.X() = dsxdy;
+      b.Y() = dsydy + 1.0;
+      b.Z() = dhdy;
     }
   }
 
@@ -546,16 +530,16 @@ void OceanTilePrivate::UpdateVertices(double _time)
       double h  = mHeights[idx0];
       double sx = mDisplacementsX[idx0];
       double sy = mDisplacementsY[idx0];
-#if 0
+
       auto&& v0 = mVertices0[idx1];
       auto&& v  = mVertices[idx1];
-      v.x = v0.x + sx;
-      v.y = v0.y + sy;
-      v.z = v0.z + h;
+      v.X() = v0.X() + sx;
+      v.Y() = v0.Y() + sy;
+      v.Z() = v0.Z() + h;
 
       mTangents[idx1] = mTangents[idx0];
       mBitangents[idx1] = mBitangents[idx0];
-#endif
+
     }
     // Right column
     {
@@ -565,16 +549,15 @@ void OceanTilePrivate::UpdateVertices(double _time)
       double h  = mHeights[idx0];
       double sx = mDisplacementsX[idx0];
       double sy = mDisplacementsY[idx0];
-#if 0
+
       auto&& v0 = mVertices0[idx1];
       auto&& v  = mVertices[idx1];
-      v.x = v0.x + sx;
-      v.y = v0.y + sy;
-      v.z = v0.z + h;
+      v.X() = v0.X() + sx;
+      v.Y() = v0.Y() + sy;
+      v.Z() = v0.Z() + h;
 
       mTangents[idx1] = mTangents[idx0];
       mBitangents[idx1] = mBitangents[idx0];
-#endif
     }
   }
   {
@@ -585,16 +568,224 @@ void OceanTilePrivate::UpdateVertices(double _time)
     double h  = mHeights[idx0];
     double sx = mDisplacementsX[idx0];
     double sy = mDisplacementsY[idx0];
-#if 0
+
     auto&& v0 = mVertices0[idx1];
     auto&& v  = mVertices[idx1];
-    v.x = v0.x + sx;
-    v.y = v0.y + sy;
-    v.z = v0.z + h;
+    v.X() = v0.X() + sx;
+    v.Y() = v0.Y() + sy;
+    v.Z() = v0.Z() + h;
     mTangents[idx1] = mTangents[idx0];
     mBitangents[idx1] = mBitangents[idx0];
-#endif
   }
+}
+
+void OceanTilePrivate::CreateMesh(const std::string &_name, double _offsetZ,
+    bool _reverseOrientation)
+{
+  // Logging
+  ignmsg << "OceanTile: creating mesh\n";
+  common::Mesh *mesh = new common::Mesh();
+  mesh->SetName(_name);
+
+  ignmsg << "OceanTile: create submesh\n";
+  common::SubMesh *submesh = new common::SubMesh();
+  submesh->SetPrimitiveType(common::SubMesh::POINTS);
+
+  // // Create mesh
+  // // @NOTE  Cannot hold a reference to the mesh pointer in the class
+  // //        otherwise there will be a seg. fault on exit (ownership issue?).
+  // std::string group = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+  // Ogre::v1::MeshPtr mMesh = Ogre::v1::MeshManager::getSingleton().createManual(_name, group);
+
+  // ignmsg << "OceanTile: create submesh\n";
+  // // Create submesh
+  // Ogre::v1::SubMesh *subMesh = mMesh->createSubMesh();
+
+  ignmsg << "OceanTile: calculate vertex buf size\n";
+  // Vertices
+  const size_t nVertices = mVertices.size();
+  // const size_t posVertexBufferCount = (3 * 2) * nVertices;
+  // const size_t texVertexBufferCount = (3 * 2 + 2) * nVertices;
+
+  ignmsg << "OceanTile: calculate index buf size\n";
+  // Indices (orientation must be counter-clockwise for normals to be correct)
+  const size_t nFaces = mFaces.size();
+  // const size_t indexBufferCount = 3 * nFaces;
+
+  // // Hardware buffer manager
+  // auto& hardwareBufferManager = Ogre::v1::HardwareBufferManager::getSingleton();
+
+  // ignmsg << "OceanTile: create vertex data\n";
+  // // Create vertex data (also creates vertexDeclaration and vertexBufferBinding)
+  // Ogre::v1::VertexData *vertexData{nullptr};
+  // subMesh->vertexData[Ogre::VpNormal] = new Ogre::v1::VertexData();
+  // vertexData = subMesh->vertexData[Ogre::VpNormal];
+  // vertexData->vertexCount = nVertices;
+  // vertexData->vertexStart = 0;
+
+  // ignmsg << "OceanTile: create positions, normals\n";
+  // // Create vertex declaration: positions, normals
+  // unsigned int posVertexBufferIndex = 0;
+  // size_t offset = 0;
+  // vertexData->vertexDeclaration->addElement(
+  //     posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+
+  // vertexData->vertexDeclaration->addElement(
+  //     posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
+
+  // // Create vertex declaration: texture coordinates, tangents, bitangents
+  // unsigned int texVertexBufferIndex = 1;
+  // offset = 0;
+  // ignmsg << "OceanTile: create texture coords\n";
+  // // TexCoords: uv0
+  // vertexData->vertexDeclaration->addElement(
+  //     texVertexBufferIndex, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT2); 
+
+  // ignmsg << "OceanTile: create tangent coords\n";
+  // // Tangents: uv6
+  // vertexData->vertexDeclaration->addElement(
+  //     texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 6);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
+
+  // ignmsg << "OceanTile: create bitangent coords\n";
+  // // Bitangents: uv7
+  // vertexData->vertexDeclaration->addElement(
+  //     texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 7);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
+
+  // ignmsg << "OceanTile: allocate vertex buffers for positions\n";
+  // // Allocate vertex buffer: positions
+  // auto posVertexBuffer =
+  //     hardwareBufferManager.createVertexBuffer(
+  //         vertexData->vertexDeclaration->getVertexSize(posVertexBufferIndex),
+  //         vertexData->vertexCount,
+  //         Ogre::v1::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
+  //         true);
+
+  // ignmsg << "OceanTile: allocate vertex buffers for textures\n";
+  // // Allocate vertex buffer: textures
+  // auto texVertexBuffer =
+  //     hardwareBufferManager.createVertexBuffer(
+  //         vertexData->vertexDeclaration->getVertexSize(texVertexBufferIndex),
+  //         vertexData->vertexCount,
+  //         Ogre::v1::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
+  //         true);
+
+  // ignmsg << "OceanTile: set vertex buffers bindings\n";
+  // // Set vertex buffer bindings
+  // vertexData->vertexBufferBinding->setBinding(posVertexBufferIndex, posVertexBuffer);
+  // vertexData->vertexBufferBinding->setBinding(texVertexBufferIndex, texVertexBuffer);
+
+  // ignmsg << "OceanTile: lock buffers for write\n";
+  // // Lock vertex buffers for write
+  // float* gpuPosVertices = static_cast<float*>(
+  //     posVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
+  // float* gpuTexVertices = static_cast<float*>(
+  //     texVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
+
+  // ignmsg << "OceanTile: allocate index buffers\n";
+  // // Allocate index buffer of the requested number of vertices (ibufCount) 
+  // auto indexBuffer = 
+  //     hardwareBufferManager.createIndexBuffer(
+  //         Ogre::v1::HardwareIndexBuffer::IT_32BIT, 
+  //         indexBufferCount, 
+  //         Ogre::v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY,
+  //         false);
+
+  // ignmsg << "OceanTile: lock index buffers for write\n";
+  // // Lock index buffer for write
+  // uint32_t *gpuIndices = static_cast<uint32_t*>(
+  //     indexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));    
+
+  // ignmsg << "OceanTile: set submesh index parameters\n";
+  // // Set submesh index parameters
+  // subMesh->useSharedVertices = false;
+  // subMesh->indexData[Ogre::VpNormal]->indexBuffer = indexBuffer;
+  // subMesh->indexData[Ogre::VpNormal]->indexCount = indexBufferCount;
+  // subMesh->indexData[Ogre::VpNormal]->indexStart = 0;
+
+  ignmsg << "OceanTile: copy vertices to GPU\n";
+  // Copy position vertices to GPU
+  for (size_t i=0; i<nVertices; ++i)
+  {
+    // *gpuPosVertices++ = mVertices[i][0];
+    // *gpuPosVertices++ = mVertices[i][1];
+    // *gpuPosVertices++ = mVertices[i][2] + _offsetZ;
+    submesh->AddVertex(
+        mVertices[i][0],
+        mVertices[i][1],
+        mVertices[i][2] + _offsetZ);
+
+    // *gpuPosVertices++ = mNormals[i][0];
+    // *gpuPosVertices++ = mNormals[i][1];
+    // *gpuPosVertices++ = mNormals[i][2];
+
+    // uv0
+    // *gpuTexVertices++ = mTexCoords[i][0];
+    // *gpuTexVertices++ = mTexCoords[i][1];
+    submesh->AddTexCoord(
+        mTexCoords[i][0],
+        mTexCoords[i][1]);
+
+    // uv6
+    // *gpuTexVertices++ = mTangents[i][0];
+    // *gpuTexVertices++ = mTangents[i][1];
+    // *gpuTexVertices++ = mTangents[i][2];
+
+    // uv7
+    // *gpuTexVertices++ = mBitangents[i][0];
+    // *gpuTexVertices++ = mBitangents[i][1];
+    // *gpuTexVertices++ = mBitangents[i][2];
+  }
+
+  ignmsg << "OceanTile: copy indices to GPU\n";
+  // Copy indices to GPU
+  for (size_t i=0; i<nFaces; ++i)
+  {
+    // Reverse orientation on faces
+    if (_reverseOrientation)
+    {
+      // *gpuIndices++ = mFaces[i][0];
+      // *gpuIndices++ = mFaces[i][2];
+      // *gpuIndices++ = mFaces[i][1];
+      submesh->AddIndex(mFaces[i][0]);
+      submesh->AddIndex(mFaces[i][2]);
+      submesh->AddIndex(mFaces[i][1]);
+    }
+    else
+    {
+      // *gpuIndices++ = mFaces[i][0];
+      // *gpuIndices++ = mFaces[i][1];
+      // *gpuIndices++ = mFaces[i][2];
+      submesh->AddIndex(mFaces[i][0]);
+      submesh->AddIndex(mFaces[i][1]);
+      submesh->AddIndex(mFaces[i][2]);
+    }
+  }
+
+  // ignmsg << "OceanTile: unlock buffers\n";
+  // // Unlock buffers
+  // posVertexBuffer->unlock();
+  // texVertexBuffer->unlock();
+
+  // indexBuffer->unlock();
+
+  // ignmsg << "OceanTile: set aabb\n";
+  // // Set bounds (box and sphere)
+  // mMesh->_setBounds(Ogre::AxisAlignedBox(
+  //     -mTileSize, -mTileSize, -mTileSize,
+  //     mTileSize,  mTileSize,  mTileSize));
+  // mMesh->_setBoundingSphereRadius(Ogre::Math::Sqrt(3.0 * mTileSize * mTileSize));
+
+  ignmsg << "OceanTile: load mesh\n";
+  mesh->AddSubMesh(*submesh);
+  this->mesh = mesh;
+  common::MeshManager::Instance()->AddMesh(mesh);
+
+  ignmsg << "OceanTile: mesh created." << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -795,8 +986,7 @@ Ogre::v1::SubMesh* OceanTilePrivate::CreateMesh(const Ogre::String &_name, doubl
 void OceanTilePrivate::UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ, bool _reverseOrientation)
 {
   // Logging
-  // auto& logManager = Ogre::LogManager::getSingleton();
-  // logManager.logMessage("Updating OceanTile mesh...");
+  ignmsg << "OceanTile: update mesh" << std::endl;
 
   // Retrieve vertexData
   auto vertexData = _subMesh->vertexData[Ogre::VpNormal];
@@ -849,7 +1039,7 @@ void OceanTilePrivate::UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ, 
   // Load mesh
   // mMesh->load();
 
-  // logManager.logMessage("OceanTile mesh updated.");
+  ignmsg << "OceanTile: done update mesh" << std::endl;
 }
 #endif
 //////////////////////////////////////////////////
@@ -1001,19 +1191,17 @@ void OceanTilePrivate::DebugPrintVertexBuffers(Ogre::v1::SubMesh *_subMesh) cons
 }
 #endif
 //////////////////////////////////////////////////
-#if 0
-const std::vector<Ogre::Vector3>& OceanTilePrivate::Vertices() const
+const std::vector<math::Vector3d>& OceanTilePrivate::Vertices() const
 {
   return mVertices;
 }
-#endif
+
 //////////////////////////////////////////////////
-#if 0
-const std::vector<ignition::math::Vector3i>& OceanTilePrivate::Faces() const
+const std::vector<math::Vector3i>& OceanTilePrivate::Faces() const
 {
   return mFaces;
 }
-#endif
+
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 OceanTile::~OceanTile()
