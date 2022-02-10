@@ -15,8 +15,10 @@ gz_add_system(waves
     ../../Physics.cc
     ../../WaveParameters.cc
     ../../WaveSimulation.cc
+    ../../WaveSimulationFFTW.cc
     ../../WaveSimulationSinusoidal.cc
     ../../WaveSimulationTrochoid.cc
+    ../../WaveSpectrum.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
@@ -24,4 +26,5 @@ gz_add_system(waves
     ignition-rendering${IGN_RENDERING_VER}-ogre2
     ignition-gazebo${IGN_GAZEBO_VER}::ignition-gazebo${IGN_GAZEBO_VER}
     IgnOGRE2::IgnOGRE2
+    ${FFT_LIBRARIES}
 )

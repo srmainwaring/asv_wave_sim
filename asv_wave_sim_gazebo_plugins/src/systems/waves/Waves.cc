@@ -491,7 +491,7 @@ void WavesPrivate::OnUpdate()
     ignmsg << "Waves: creating Ocean Tile\n";
 
     // create ocean tile
-    int N = 64;
+    int N = 128;
     double L = 256.0;
     double u = 5.0;
 
