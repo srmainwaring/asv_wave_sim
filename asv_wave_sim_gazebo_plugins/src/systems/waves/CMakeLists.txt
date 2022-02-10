@@ -10,6 +10,13 @@ gz_add_system(waves
     Waves.cc
     OceanTile.cc
     Ogre2OceanTile.cc
+    ../../Geometry.cc
+    ../../PhysicalConstants.cc
+    ../../Physics.cc
+    ../../WaveParameters.cc
+    ../../WaveSimulation.cc
+    ../../WaveSimulationSinusoidal.cc
+    ../../WaveSimulationTrochoid.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}

@@ -1,6 +1,11 @@
 
 #include "OceanTile.hh"
 
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationSinusoidal.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveParameters.hh"
+
 #include <ignition/common.hh>
 #include <ignition/common/Mesh.hh>
 #include <ignition/common/MeshManager.hh>
@@ -10,6 +15,8 @@
 
 #include <cmath>
 #include <iostream>
+
+using namespace asv;
 
 namespace ignition
 {
@@ -49,7 +56,7 @@ public:
   // Ogre::v1::SubMesh*          mAboveOceanSubMesh;
   // Ogre::v1::SubMesh*          mBelowOceanSubMesh;
 
-  // std::unique_ptr<WaveSimulation> mWaveSim;
+  std::unique_ptr<WaveSimulation> mWaveSim;
   std::vector<double>         mHeights;
   std::vector<double>         mDhdx;
   std::vector<double>         mDhdy;
@@ -124,7 +131,6 @@ bool _hasVisuals) :
     mNumFaces(2 * _N * _N),
     mTileSize(_L),
     mSpacing(_L / static_cast<double>(_N)),
-    // mWaveSim(_N, _L),
     mHeights(_N * _N, 0.0),
     mDhdx(_N * _N, 0.0),
     mDhdy(_N * _N, 0.0),
@@ -140,34 +146,33 @@ bool _hasVisuals) :
   // 2 - WaveSimulationFFTW
   // 3 - WaveSimulationOpenCL
   //
-  const int wave_sim_type = 0;
+  const int wave_sim_type = 1;
   switch (wave_sim_type)
   {
-    // case 0:
-    // {
-    //   // Simple
-    //   double amplitude = 1.0;
-    //   double period = 10.0;
-    //   std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
-    //   waveSim->SetParameters(amplitude, period);
-    //   mWaveSim = std::move(waveSim);
-    //   break;
-    // }
-    // case 1:
-    // {
-    //   // Trochoid
-    //   std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
-    //   waveParams->SetNumber(3);
-    //   waveParams->SetAngle(0.6);
-    //   waveParams->SetScale(1.2);
-    //   waveParams->SetSteepness(1.0);
-    //   waveParams->SetAmplitude(1.0);
-    //   waveParams->SetPeriod(7.0);
-    //   waveParams->SetDirection(Vector2(1.0, 0.0));
-
-    //   mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
-    //   break;
-    // }
+    case 0:
+    {
+      // Simple
+      double amplitude = 3.0;
+      double period = 10.0;
+      std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
+      waveSim->SetParameters(amplitude, period);
+      mWaveSim = std::move(waveSim);
+      break;
+    }
+    case 1:
+    {
+      // Trochoid
+      std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
+      waveParams->SetNumber(3);
+      waveParams->SetAngle(0.6);
+      waveParams->SetScale(1.2);
+      waveParams->SetSteepness(1.0);
+      waveParams->SetAmplitude(5.0);
+      waveParams->SetPeriod(7.0);
+      waveParams->SetDirection(Vector2(1.0, 0.0));
+      mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
+      break;
+    }
     // case 2:
     // {
     //   // FFTW
@@ -188,7 +193,7 @@ bool _hasVisuals) :
 //////////////////////////////////////////////////
 void OceanTilePrivate::SetWindVelocity(double _ux, double _uy)
 {
-  // mWaveSim->SetWindVelocity(_ux, _uy);
+  mWaveSim->SetWindVelocity(_ux, _uy);
 }
 
 //////////////////////////////////////////////////
@@ -264,6 +269,10 @@ void OceanTilePrivate::Create()
   mTangents.assign(mVertices.size(), math::Vector3d::Zero);
   mBitangents.assign(mVertices.size(), math::Vector3d::Zero);
   mNormals.assign(mVertices.size(), math::Vector3d::Zero);
+
+  // \todo(srmainwaring): remove - this to test static model
+  UpdateVertices(5.0);
+
   if (mHasVisuals) 
   {
     ComputeNormals();
@@ -459,20 +468,20 @@ common::Mesh * OceanTilePrivate::Mesh()
 //////////////////////////////////////////////////
 void OceanTilePrivate::UpdateVertices(double _time)
 {
-  // mWaveSim->SetTime(_time);
+  mWaveSim->SetTime(_time);
 
   if (mHasVisuals)
   {
-    // mWaveSim->ComputeDisplacementsAndDerivatives(
-    //     mHeights, mDisplacementsX, mDisplacementsY,
-    //     mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
+    mWaveSim->ComputeDisplacementsAndDerivatives(
+        mHeights, mDisplacementsX, mDisplacementsY,
+        mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
   }
   else
   {
-    // mWaveSim->ComputeHeights(mHeights);
-    // mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
-    // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
-    // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
+    mWaveSim->ComputeHeights(mHeights);
+    mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
+    mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
+    mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
   }
 
   const size_t N = mResolution;

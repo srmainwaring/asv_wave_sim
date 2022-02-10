@@ -491,7 +491,7 @@ void WavesPrivate::OnUpdate()
     ignmsg << "Waves: creating Ocean Tile\n";
 
     // create ocean tile
-    int N = 2;
+    int N = 64;
     double L = 256.0;
     double u = 5.0;
 
@@ -504,11 +504,11 @@ void WavesPrivate::OnUpdate()
     common::Mesh *mesh = this->oceanTile->Mesh();
 
     //convert common::Mesh to rendering::Mesh
-    rendering::MeshPtr renderingMesh = this->scene->CreateMesh(mesh);
+    auto geometry = this->scene->CreateMesh(mesh);
 
     // create ocean tile visual
     auto visual = this->scene->CreateVisual("ocean-tile");
-    visual->AddGeometry(renderingMesh);
+    visual->AddGeometry(geometry);
     visual->SetLocalPosition(0.0, 0.0, 0.0);
     visual->SetLocalRotation(0.0, 0.0, 0.0);
     visual->SetLocalScale(1.0, 1.0, 1.0);
