@@ -52,8 +52,8 @@ public:
   std::vector<math::Vector3d> mBitangents;
   std::vector<math::Vector3d> mNormals;
 
-  std::string                 mAboveOceanMeshName = "AboveOceanTileMesh::::ORIGINAL";
-  std::string                 mBelowOceanMeshName = "BelowOceanTileMesh::::ORIGINAL";
+  std::string                 mAboveOceanMeshName = "AboveOceanTileMesh";
+  std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
   // Ogre::v1::SubMesh*          mAboveOceanSubMesh;
   // Ogre::v1::SubMesh*          mBelowOceanSubMesh;
 

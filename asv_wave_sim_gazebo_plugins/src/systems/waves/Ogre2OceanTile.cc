@@ -1,11 +1,19 @@
 
 #include "Ogre2OceanTile.hh"
 
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationSinusoidal.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveParameters.hh"
+
 #include <ignition/rendering.hh>
 #include <ignition/rendering/ogre2.hh>
 
 #include <cmath>
 #include <iostream>
+
+using namespace asv;
 
 namespace ignition
 {
@@ -45,7 +53,7 @@ public:
   Ogre::v1::SubMesh*          mAboveOceanSubMesh;
   Ogre::v1::SubMesh*          mBelowOceanSubMesh;
 
-  // std::unique_ptr<WaveSimulation> mWaveSim;
+  std::unique_ptr<WaveSimulation> mWaveSim;
   std::vector<double>         mHeights;
   std::vector<double>         mDhdx;
   std::vector<double>         mDhdy;
@@ -86,6 +94,7 @@ public:
   void UpdateVertices(double _time);
 
   Ogre::v1::SubMesh* CreateMesh(const Ogre::String &_name, double _offsetZ=0.0, bool _reverseOrientation=false);
+  Ogre::v1::SubMesh* CreateMesh2(const Ogre::String &_name, double _offsetZ=0.0, bool _reverseOrientation=false);
 
   void UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ=0.0, bool _reverseOrientation=false);
 
@@ -129,40 +138,40 @@ bool _hasVisuals) :
   // 2 - WaveSimulationFFTW
   // 3 - WaveSimulationOpenCL
   //
-  const int wave_sim_type = 0;
+  const int wave_sim_type = 1;
   switch (wave_sim_type)
   {
-    // case 0:
-    // {
-    //   // Simple
-    //   double amplitude = 1.0;
-    //   double period = 10.0;
-    //   std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
-    //   waveSim->SetParameters(amplitude, period);
-    //   mWaveSim = std::move(waveSim);
-    //   break;
-    // }
-    // case 1:
-    // {
-    //   // Trochoid
-    //   std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
-    //   waveParams->SetNumber(3);
-    //   waveParams->SetAngle(0.6);
-    //   waveParams->SetScale(1.2);
-    //   waveParams->SetSteepness(1.0);
-    //   waveParams->SetAmplitude(1.0);
-    //   waveParams->SetPeriod(7.0);
-    //   waveParams->SetDirection(Vector2(1.0, 0.0));
+    case 0:
+    {
+      // Simple
+      double amplitude = 3.0;
+      double period = 10.0;
+      std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
+      waveSim->SetParameters(amplitude, period);
+      mWaveSim = std::move(waveSim);
+      break;
+    }
+    case 1:
+    {
+      // Trochoid
+      std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
+      waveParams->SetNumber(3);
+      waveParams->SetAngle(0.6);
+      waveParams->SetScale(1.2);
+      waveParams->SetSteepness(1.0);
+      waveParams->SetAmplitude(3.0);
+      waveParams->SetPeriod(7.0);
+      waveParams->SetDirection(Vector2(1.0, 0.0));
 
-    //   mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
-    //   break;
-    // }
-    // case 2:
-    // {
-    //   // FFTW
-    //   mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
-    //   break;
-    // }
+      mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
+      break;
+    }
+    case 2:
+    {
+      // FFTW
+      mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
+      break;
+    }
     // case 3:
     // {
     //   // OpenCL
@@ -177,7 +186,7 @@ bool _hasVisuals) :
 //////////////////////////////////////////////////
 void Ogre2OceanTilePrivate::SetWindVelocity(double _ux, double _uy)
 {
-  // mWaveSim->SetWindVelocity(_ux, _uy);
+  mWaveSim->SetWindVelocity(_ux, _uy);
 }
 
 //////////////////////////////////////////////////
@@ -254,13 +263,16 @@ void Ogre2OceanTilePrivate::Create()
   mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
   mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
   mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
-  
+
+  // \todo(srmainwaring): remove - this to test static model
+  UpdateVertices(5.0);
+
   if (mHasVisuals) 
   {
     // ComputeNormals();
     ComputeTangentSpace();
-    mAboveOceanSubMesh = CreateMesh(mAboveOceanMeshName, 0.0, false);
-    mBelowOceanSubMesh = CreateMesh(mBelowOceanMeshName, -0.05, true);
+    mAboveOceanSubMesh = CreateMesh2(mAboveOceanMeshName, 0.0, false);
+    // mBelowOceanSubMesh = CreateMesh2(mBelowOceanMeshName, -0.05, true);
   }
 }
 
@@ -449,27 +461,27 @@ void Ogre2OceanTilePrivate::Update(double _time)
     // Uncomment to calculate the tangent space using finite differences
     ComputeTangentSpace();
     UpdateMesh(mAboveOceanSubMesh, 0.0, false);
-    UpdateMesh(mBelowOceanSubMesh, -0.05, false);
+    // UpdateMesh(mBelowOceanSubMesh, -0.05, false);
   }
 }
 
 //////////////////////////////////////////////////
 void Ogre2OceanTilePrivate::UpdateVertices(double _time)
 {
-  // mWaveSim->SetTime(_time);
+  mWaveSim->SetTime(_time);
 
   if (mHasVisuals)
   {
-    // mWaveSim->ComputeDisplacementsAndDerivatives(
-    //     mHeights, mDisplacementsX, mDisplacementsY,
-    //     mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
+    mWaveSim->ComputeDisplacementsAndDerivatives(
+        mHeights, mDisplacementsX, mDisplacementsY,
+        mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
   }
   else
   {
-    // mWaveSim->ComputeHeights(mHeights);
-    // mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
-    // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
-    // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
+    mWaveSim->ComputeHeights(mHeights);
+    mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
+    mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
+    mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
   }
 
   const size_t N = mResolution;
@@ -588,7 +600,7 @@ Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh(const Ogre::String &_name, 
   std::string group = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
   Ogre::v1::MeshPtr mMesh = Ogre::v1::MeshManager::getSingleton().createManual(_name, group);
 
-  std::string subMeshName = _name;
+  std::string subMeshName = "";
 
   ignmsg << "OceanTile: create submesh\n";
   // Create submesh
@@ -599,8 +611,8 @@ Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh(const Ogre::String &_name, 
   ignmsg << "OceanTile: calculate vertex buf size\n";
   // Vertices
   const size_t nVertices = mVertices.size();
-  const size_t posVertexBufferCount = (3 * 2) * nVertices;
-  const size_t texVertexBufferCount = (3 * 2 + 2) * nVertices;
+  // const size_t posVertexBufferCount = (3 * 2) * nVertices;
+  // const size_t texVertexBufferCount = (3 * 2 + 2) * nVertices;
 
   ignmsg << "OceanTile: calculate index buf size\n";
   // Indices (orientation must be counter-clockwise for normals to be correct)
@@ -791,11 +803,238 @@ Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh(const Ogre::String &_name, 
 }
 
 //////////////////////////////////////////////////
+// Follow: Ogre2MeshFactory::LoadImpl(const MeshDescriptor &_desc)
+Ogre::v1::SubMesh* Ogre2OceanTilePrivate::CreateMesh2(const Ogre::String &_name, double _offsetZ, bool _reverseOrientation)
+{
+  // Logging
+  ignmsg << "OceanTile: creating mesh\n";
+
+  // Create mesh
+  // @NOTE  Cannot hold a reference to the mesh pointer in the class
+  //        otherwise there will be a seg. fault on exit (ownership issue?).
+  std::string group = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+  Ogre::v1::MeshPtr mMesh = Ogre::v1::MeshManager::getSingleton().createManual(_name, group);
+
+  std::string subMeshName = "";
+
+  ignmsg << "OceanTile: create submesh\n";
+  // Create submesh
+  Ogre::v1::SubMesh *subMesh = mMesh->createSubMesh(subMeshName);
+  subMesh->useSharedVertices = false;
+  subMesh->operationType = Ogre::OT_TRIANGLE_LIST;
+
+  ignmsg << "OceanTile: calculate vertex buf size\n";
+  // Vertices
+  const size_t nVertices = mVertices.size();
+  // const size_t posVertexBufferCount = (3 * 2) * nVertices;
+  // const size_t texVertexBufferCount = (3 * 2 + 2) * nVertices;
+
+  ignmsg << "OceanTile: calculate index buf size\n";
+  // Indices (orientation must be counter-clockwise for normals to be correct)
+  const size_t nFaces = mFaces.size();
+  const size_t indexBufferCount = 3 * nFaces;
+
+  // Hardware buffer manager
+  auto& hardwareBufferManager = Ogre::v1::HardwareBufferManager::getSingleton();
+
+  ignmsg << "OceanTile: create vertex data\n";
+  // Create vertex data (also creates vertexDeclaration and vertexBufferBinding)
+  Ogre::v1::VertexData *vertexData{nullptr};
+  subMesh->vertexData[Ogre::VpNormal] = new Ogre::v1::VertexData();
+  vertexData = subMesh->vertexData[Ogre::VpNormal];
+  vertexData->vertexCount = nVertices;
+  vertexData->vertexStart = 0;
+
+  ignmsg << "OceanTile: create positions, normals\n";
+  // Create vertex declaration: positions, normals
+  unsigned int posVertexBufferIndex = 0;
+  size_t offset = 0;
+  vertexData->vertexDeclaration->addElement(
+      posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+  offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+
+  vertexData->vertexDeclaration->addElement(
+      posVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+  offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
+
+  // Create vertex declaration: texture coordinates, tangents, bitangents
+  //
+  // NOTE: Ignition uses a single vertex buffer for vertices and texture coordinates 
+  //       texVertexBufferIndex = 0 and the offset is not reset
+  //
+  // unsigned int texVertexBufferIndex = 1;
+  // offset = 0;
+  ignmsg << "OceanTile: create texture coords\n";
+  // TexCoords: uv0
+  vertexData->vertexDeclaration->addElement(
+      posVertexBufferIndex, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
+  offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT2); 
+
+  // vertexData->vertexDeclaration->addElement(
+  //     texVertexBufferIndex, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT2); 
+
+  // ignmsg << "OceanTile: create tangent coords\n";
+  // // Tangents: uv6
+  // vertexData->vertexDeclaration->addElement(
+  //     texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 6);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
+
+  // ignmsg << "OceanTile: create bitangent coords\n";
+  // // Bitangents: uv7
+  // vertexData->vertexDeclaration->addElement(
+  //     texVertexBufferIndex, offset, Ogre::VET_FLOAT3, Ogre::VES_TEXTURE_COORDINATES, 7);
+  // offset += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3); 
+
+  ignmsg << "OceanTile: allocate vertex buffers for positions\n";
+  // Allocate vertex buffer: positions
+  auto posVertexBuffer =
+      hardwareBufferManager.createVertexBuffer(
+          vertexData->vertexDeclaration->getVertexSize(posVertexBufferIndex),
+          vertexData->vertexCount,
+          Ogre::v1::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
+          // Ogre::v1::HardwareBuffer::HBU_STATIC,
+          true);
+
+  ignmsg << "OceanTile: allocate vertex buffers for textures\n";
+  // Allocate vertex buffer: textures
+  // auto texVertexBuffer =
+  //     hardwareBufferManager.createVertexBuffer(
+  //         vertexData->vertexDeclaration->getVertexSize(texVertexBufferIndex),
+  //         vertexData->vertexCount,
+  //         Ogre::v1::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
+  //         true);
+
+  ignmsg << "OceanTile: set vertex buffers bindings\n";
+  // Set vertex buffer bindings
+  vertexData->vertexBufferBinding->setBinding(posVertexBufferIndex, posVertexBuffer);
+  // vertexData->vertexBufferBinding->setBinding(texVertexBufferIndex, texVertexBuffer);
+
+  ignmsg << "OceanTile: lock buffers for write\n";
+  // Lock vertex buffers for write
+  float* gpuPosVertices = static_cast<float*>(
+      posVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
+  // float* gpuTexVertices = static_cast<float*>(
+  //     texVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
+
+  ignmsg << "OceanTile: allocate index buffers\n";
+  // Allocate index buffer of the requested number of vertices (ibufCount) 
+  //
+  // NOTE: Ignition sets useShadowBuffer=true (last argument)
+  //
+  auto indexBuffer = 
+      hardwareBufferManager.createIndexBuffer(
+          Ogre::v1::HardwareIndexBuffer::IT_32BIT, 
+          indexBufferCount, 
+          // Ogre::v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY,
+          Ogre::v1::HardwareBuffer::HBU_STATIC,
+          // false
+          true
+          );
+
+  ignmsg << "OceanTile: lock index buffers for write\n";
+  // Lock index buffer for write
+  uint32_t *gpuIndices = static_cast<uint32_t*>(
+      indexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));    
+
+  ignmsg << "OceanTile: set submesh index parameters\n";
+  // Set submesh index parameters
+  subMesh->useSharedVertices = false;
+  subMesh->indexData[Ogre::VpNormal]->indexBuffer = indexBuffer;
+  subMesh->indexData[Ogre::VpNormal]->indexCount = indexBufferCount;
+  subMesh->indexData[Ogre::VpNormal]->indexStart = 0;
+
+  ignmsg << "OceanTile: copy vertices to GPU\n";
+  // Copy position vertices to GPU
+  for (size_t i=0; i<nVertices; ++i)
+  {
+    *gpuPosVertices++ = mVertices[i][0];
+    *gpuPosVertices++ = mVertices[i][1];
+    *gpuPosVertices++ = mVertices[i][2] + _offsetZ;
+
+    *gpuPosVertices++ = mNormals[i][0];
+    *gpuPosVertices++ = mNormals[i][1];
+    *gpuPosVertices++ = mNormals[i][2];
+
+    // uv0
+    *gpuPosVertices++ = mTexCoords[i][0];
+    *gpuPosVertices++ = mTexCoords[i][1];
+
+    // *gpuTexVertices++ = mTexCoords[i][0];
+    // *gpuTexVertices++ = mTexCoords[i][1];
+
+    // uv6
+    // *gpuTexVertices++ = mTangents[i][0];
+    // *gpuTexVertices++ = mTangents[i][1];
+    // *gpuTexVertices++ = mTangents[i][2];
+
+    // uv7
+    // *gpuTexVertices++ = mBitangents[i][0];
+    // *gpuTexVertices++ = mBitangents[i][1];
+    // *gpuTexVertices++ = mBitangents[i][2];
+  }
+
+  ignmsg << "OceanTile: copy indices to GPU\n";
+  // Copy indices to GPU
+  for (size_t i=0; i<nFaces; ++i)
+  {
+    // Reverse orientation on faces
+    if (_reverseOrientation)
+    {
+      *gpuIndices++ = mFaces[i][0];
+      *gpuIndices++ = mFaces[i][2];
+      *gpuIndices++ = mFaces[i][1];
+    }
+    else
+    {
+      *gpuIndices++ = mFaces[i][0];
+      *gpuIndices++ = mFaces[i][1];
+      *gpuIndices++ = mFaces[i][2];
+    }
+  }
+
+  ignmsg << "OceanTile: unlock buffers\n";
+  // Unlock buffers
+  posVertexBuffer->unlock();
+  // texVertexBuffer->unlock();
+
+  indexBuffer->unlock();
+
+  //
+  // NOTE: Ignition sets a default material Default/White
+  //
+  ignmsg << "OceanTile: set default material\n";
+  subMesh->setMaterialName("Default/White");
+
+  ignmsg << "OceanTile: set shadow mapping buffers\n";
+  if (!mMesh->hasValidShadowMappingBuffers())
+  {
+    mMesh->prepareForShadowMapping(false);
+  }
+
+  ignmsg << "OceanTile: set aabb\n";
+  // Set bounds (box and sphere)
+  mMesh->_setBounds(Ogre::AxisAlignedBox(
+      -mTileSize, -mTileSize, -mTileSize,
+      mTileSize,  mTileSize,  mTileSize));
+  mMesh->_setBoundingSphereRadius(Ogre::Math::Sqrt(3.0 * mTileSize * mTileSize));
+
+  ignmsg << "OceanTile: load mesh\n";
+  // Load mesh
+  // \todo(srmainwaring) - causes segfault - commented in Ogre2MeshFactory (why?) 
+  // mMesh->load();
+
+  ignmsg << "OceanTile: mesh created." << std::endl;
+  return subMesh;
+}
+
+//////////////////////////////////////////////////
 void Ogre2OceanTilePrivate::UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ, bool _reverseOrientation)
 {
   // Logging
   // auto& logManager = Ogre::LogManager::getSingleton();
   // logManager.logMessage("Updating OceanTile mesh...");
+  // ignmsg << "OceanTile: update mesh\n";
 
   // Retrieve vertexData
   auto vertexData = _subMesh->vertexData[Ogre::VpNormal];
@@ -807,10 +1046,10 @@ void Ogre2OceanTilePrivate::UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offs
       posVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
 
   // Get texcoord vertex buffer and obtain lock for writing.
-  auto texElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_TEXTURE_COORDINATES, 0);
-  auto texVertexBuffer = vertexData->vertexBufferBinding->getBuffer(texElement->getSource());
-  float* gpuTexVertices = static_cast<float*>(
-      texVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
+  // auto texElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_TEXTURE_COORDINATES, 0);
+  // auto texVertexBuffer = vertexData->vertexBufferBinding->getBuffer(texElement->getSource());
+  // float* gpuTexVertices = static_cast<float*>(
+  //     texVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
 
   // Copy position vertices to GPU
   for (size_t i=0; i<mVertices.size(); ++i)
@@ -823,21 +1062,23 @@ void Ogre2OceanTilePrivate::UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offs
     *gpuPosVertices++ = mNormals[i][1];
     *gpuPosVertices++ = mNormals[i][2];
 
-    *gpuTexVertices++ = mTexCoords[i][0];
-    *gpuTexVertices++ = mTexCoords[i][1];
+    *gpuPosVertices++ = mTexCoords[i][0];
+    *gpuPosVertices++ = mTexCoords[i][1];
+    // *gpuTexVertices++ = mTexCoords[i][0];
+    // *gpuTexVertices++ = mTexCoords[i][1];
 
-    *gpuTexVertices++ = mTangents[i][0];
-    *gpuTexVertices++ = mTangents[i][1];
-    *gpuTexVertices++ = mTangents[i][2];
+    // *gpuTexVertices++ = mTangents[i][0];
+    // *gpuTexVertices++ = mTangents[i][1];
+    // *gpuTexVertices++ = mTangents[i][2];
 
-    *gpuTexVertices++ = mBitangents[i][0];
-    *gpuTexVertices++ = mBitangents[i][1];
-    *gpuTexVertices++ = mBitangents[i][2];
+    // *gpuTexVertices++ = mBitangents[i][0];
+    // *gpuTexVertices++ = mBitangents[i][1];
+    // *gpuTexVertices++ = mBitangents[i][2];
   }
 
   // Unlock buffers
   posVertexBuffer->unlock();
-  texVertexBuffer->unlock();
+  // texVertexBuffer->unlock();
 
   // Set bounds (box and sphere)
   // mMesh->_setBounds(Ogre::AxisAlignedBox(
@@ -849,6 +1090,7 @@ void Ogre2OceanTilePrivate::UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offs
   // mMesh->load();
 
   // logManager.logMessage("OceanTile mesh updated.");
+  // ignmsg << "OceanTile: done update mesh\n";
 }
 
 //////////////////////////////////////////////////

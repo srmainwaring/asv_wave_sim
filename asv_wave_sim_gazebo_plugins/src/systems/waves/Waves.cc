@@ -43,24 +43,25 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
   // behaviour that tries to load a common::Mesh which we
   // are not using.
 
+  //////////////////////////////////////////////////
   class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshExt :
       public Ogre2Mesh
   {
+    /// \brief Destructor
     public: virtual ~Ogre2MeshExt() {}
 
+    /// \brief Constructor
     protected: explicit Ogre2MeshExt() : Ogre2Mesh() {}
 
-    protected: void SetOgreItem(Ogre::Item *_ogreItem)
+    /// \brief Allow intercept of pre-render call for this mesh
+    public: virtual void PreRender() override
     {
-      this->ogreItem = _ogreItem;
+      Ogre2Mesh::PreRender();
     }
 
-    // Work-around the protected accessors and protected methods in Scene
+    /// \brief Work-around the protected accessors and protected methods in Scene
     public: void InitObject(Ogre2ScenePtr _scene, unsigned int _id, const std::string &_name)
     {
-      // would like to call these methods
-      // unsigned int objId = _scene->CreateObjectId();
-      // std::string objName = _scene->CreateObjectName(objId, "Mesh-" + meshName);
       this->id = _id;
       this->name = _name;
       this->scene = _scene;
@@ -70,29 +71,36 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       this->Init();
     }
 
+    /// \brief Used by friend class (Ogre2MeshFactoryExt)
+    protected: void SetOgreItem(Ogre::Item *_ogreItem)
+    {
+      this->ogreItem = _ogreItem;
+    }
+
     private: friend class Ogre2MeshFactoryExt;
   };
+
   typedef std::shared_ptr<Ogre2MeshExt> Ogre2MeshExtPtr;
 
+  //////////////////////////////////////////////////
   class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshFactoryExt :
       public Ogre2MeshFactory
   {
+    /// \brief Destructor
     public: virtual ~Ogre2MeshFactoryExt() {}
 
+    /// \brief Constructor - construct from an Ogre2ScenePtr
     public: explicit Ogre2MeshFactoryExt(Ogre2ScenePtr _scene) :
-        Ogre2MeshFactory(_scene) {}
+        Ogre2MeshFactory(_scene), ogre2Scene(_scene) {}
 
+    /// \brief Override - use an extension of Ogre2Mesh
     public: virtual Ogre2MeshPtr Create(const MeshDescriptor &_desc) override
     {
-      // Override dropping the attempt to load the common::Mesh
-
       // create ogre entity
       Ogre2MeshExtPtr mesh(new Ogre2MeshExt);
       MeshDescriptor normDesc = _desc;
-      
-      // Override MeshDescriptor behaviour as we're not using common::Mesh
-      // normDesc.Load();
-
+      // \todo do this? override MeshDescriptor behaviour as we're not using common::Mesh
+      normDesc.Load();
       mesh->SetOgreItem(this->OgreItem(normDesc));
 
       // check if invalid mesh
@@ -115,6 +123,61 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       return mesh;
     }
 
+    /// \brief Override \todo: may be able to use base class implementation...
+    protected: virtual Ogre::Item * OgreItem(const MeshDescriptor &_desc) override
+    {
+      if (!this->Load(_desc))
+      {
+        return nullptr;
+      }
+
+      std::string name = this->MeshName(_desc);
+      ignmsg << "Get Ogre::SceneManager\n";
+      Ogre::SceneManager *sceneManager = this->scene->OgreSceneManager();
+
+      ignmsg << "Check for v2 mesh\n";
+      // check if a v2 mesh already exists
+      Ogre::MeshPtr mesh =
+          Ogre::MeshManager::getSingleton().getByName(name);
+
+      // if not, it probably has not been imported from v1 yet
+      if (!mesh)
+      {
+        ignmsg << "Check for v1 mesh\n";
+        Ogre::v1::MeshPtr v1Mesh =
+            Ogre::v1::MeshManager::getSingleton().getByName(name);
+        if (!v1Mesh)
+        {
+          ignerr << "Did not find v1 mesh [" << name << "]\n";
+          return nullptr;
+        }
+
+        // examine v1 mesh properties
+        v1Mesh->load();
+        ignmsg << "v1 mesh: isLoaded: " << v1Mesh->isLoaded() << "\n";
+
+        ignmsg << "Creating v2 mesh\n";
+        // create v2 mesh from v1
+        mesh = Ogre::MeshManager::getSingleton().createManual(
+            name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+        ignmsg << "Importing v2 mesh\n";
+        mesh->importV1(v1Mesh.get(), false, true, true);
+        this->ogreMeshes.push_back(name);
+      }
+
+      return sceneManager->createItem(mesh, Ogre::SCENE_DYNAMIC);
+    }
+
+    /// \brief Override
+    protected: virtual bool LoadImpl(const MeshDescriptor &_desc) override
+    {
+      /// \todo: currently assume we've already loaded from the tile
+      /// but should handle better
+      return true;
+    }
+
+    /// \brief Override \todo: may be able to use base class implementation...
     public: virtual bool Validate(const MeshDescriptor &_desc) override
     {
       if (!_desc.mesh && _desc.meshName.empty())
@@ -125,10 +188,10 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 
       if (!_desc.mesh)
       {
+        ignerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
+        return false;
         // Override MeshDescriptor behaviour as we're not using common::Mesh
-        // ignerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
-        // return false;
-        return true;
+        // return true;
       }
 
       if (_desc.mesh->SubMeshCount() == 0)
@@ -139,7 +202,12 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 
       return true;
     }
+
+    /// \brief Pointer to the derived Ogre2Scene
+    private: rendering::Ogre2ScenePtr ogre2Scene;
+
   };
+
   typedef std::shared_ptr<Ogre2MeshFactoryExt> Ogre2MeshFactoryExtPtr;
 }
 }
@@ -183,8 +251,8 @@ class ignition::gazebo::systems::WavesPrivate
 
   /////////////////
   /// OceanTile (both common::Mesh and Ogre2 versions)
-  std::string mAboveOceanMeshName = "AboveOceanTileMesh";
-  std::string mBelowOceanMeshName = "BelowOceanTileMesh";
+  // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
+  // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
 
   // using custom rendering::Ogre2Mesh
   public: std::unique_ptr<rendering::Ogre2OceanTile> ogre2OceanTile;
@@ -351,116 +419,127 @@ void WavesPrivate::OnUpdate()
   double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
       this->currentSimTime).count()) * 1e-9;
 
-#if 0
+#if 1
   // Test attaching an Ogre2 mesh to the entity
   if (!this->ogre2OceanTile)
   {
     ignmsg << "Waves: creating Ogre2 Ocean Tile\n";
 
     // \todo(srmainwaring) synchronise visual with physics...
-    // int N = 128;
-    // double L = 256.0;
-    int N = 2;
+    int N = 128;
     double L = 256.0;
     double u = 5.0;
+
+    // create static ocean tile using common::mesh - this to populate
+    // an object in the MeshManager with the correct name
+    this->oceanTile.reset(new rendering::OceanTile(N, L));
+    this->oceanTile->SetWindVelocity(u, 0.0);
+    this->oceanTile->Create();
+    common::Mesh *mesh = this->oceanTile->Mesh();
+    ignmsg << "Waves: mesh name " << mesh->Name() << "\n";
+    ignmsg << "Waves: mesh resource path " << mesh->Path() << "\n";
 
     this->ogre2OceanTile.reset(new rendering::Ogre2OceanTile(N, L));
     this->ogre2OceanTile->SetWindVelocity(u, 0.0);
     this->ogre2OceanTile->Create();
-    this->ogre2OceanTile->Update(0.0);
+    // this->ogre2OceanTile->Update(0.0);
 
     // ogre2 specific
     rendering::Ogre2ScenePtr ogre2Scene =
         std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);    
 
-    auto ogre2MeshFactory = rendering::Ogre2MeshFactoryExtPtr(
+    auto meshFactory = rendering::Ogre2MeshFactoryExtPtr(
           new rendering::Ogre2MeshFactoryExt(ogre2Scene));
 
     rendering::MeshDescriptor meshDescriptor;
-    meshDescriptor.mesh = nullptr;
-    meshDescriptor.meshName = this->mAboveOceanMeshName;
+    meshDescriptor.mesh = mesh;
+    meshDescriptor.meshName = "AboveOceanTileMesh"; // mesh->Name();
 
-    // \todo: move to derived class Ogre2MeshFactoryExt and override
-    // Replace std::string Ogre2MeshFactory::MeshName(const MeshDescriptor &_desc);
-    auto MeshNameFunction = [&](const rendering::MeshDescriptor &_desc) -> std::string
+    /////////////////////////////////////////////
+    // BEGIN_LAMDAS
+    //
+    // Override functions from Scene, BaseScene, 
+    // and Ogre2Scene
+    //
+    /////////////////////////////////////////////
+
+    // bool Ogre2Scene::InitObject(Ogre2ObjectPtr _object, unsigned int _id,
+    //     const std::string &_name)
+    auto Ogre2Scene_InitObject = [&](
+        rendering::Ogre2ScenePtr _scene,
+        rendering::Ogre2ObjectPtr _object,
+        unsigned int _id,
+        const std::string &_name) -> bool
     {
-      std::stringstream ss;
-      ss << _desc.meshName << "::";
-      ss << _desc.subMeshName << "::";
-      ss << ((_desc.centerSubMesh) ? "CENTERED" : "ORIGINAL");
-      return ss.str();
+      // assign needed varibles
+      // _object->id = _id;
+      // _object->name = _name;
+      // _object->scene = this->SharedThis();
+
+      // // initialize object
+      // _object->Load();
+      // _object->Init();
+
+      rendering::Ogre2MeshExtPtr derived =
+          std::dynamic_pointer_cast<rendering::Ogre2MeshExt>(_object);
+
+      if (!derived)
+        return false;
+      else
+        derived->InitObject(_scene, _id, _name);
+  
+      return true;
     };
 
-    ignmsg << "Mesh name: " << MeshNameFunction(meshDescriptor) << "\n";
-
-    ignmsg << "Create Ogre::Item\n";
-
-    // \todo: move to derived class Ogre2MeshFactoryExt and override
-    // Replace Ogre::Item *Ogre2MeshFactory::OgreItem(const MeshDescriptor &_desc)
-    // Required to ensure Ogre v1 mesh is imported to Ogre v2
-    auto OgreItemFunction = [&](const rendering::MeshDescriptor &_desc) -> Ogre::Item *
+    // Ogre2Scene::CreateMeshImpl(unsigned int _id,
+    //     const std::string &_name, const MeshDescriptor &_desc) -> rendering::MeshPtr 
+    auto Ogre2Scene_CreateMeshImpl = [&](
+        rendering::Ogre2ScenePtr _scene,
+        unsigned int _id,
+        const std::string &_name,
+        const rendering::MeshDescriptor &_desc)
+        -> rendering::MeshPtr
     {
-      // if (!this->Load(_desc))
-      // {
-      //   return nullptr;
-      // }
+      // rendering::Ogre2MeshPtr mesh = this->meshFactory->Create(_desc);
+      rendering::Ogre2MeshPtr mesh = meshFactory->Create(_desc);
+      if (nullptr == mesh)
+        return nullptr;
+      mesh->SetDescriptor(_desc);
 
-      std::string name = MeshNameFunction(_desc);
-      ignmsg << "Get Ogre::SceneManager\n";
-      Ogre::SceneManager *sceneManager = ogre2Scene->OgreSceneManager();
-
-      ignmsg << "Check for v2 mesh\n";
-      // check if a v2 mesh already exists
-      Ogre::MeshPtr mesh =
-          Ogre::MeshManager::getSingleton().getByName(name);
-
-      // if not, it probably has not been imported from v1 yet
-      if (!mesh)
-      {
-        ignmsg << "Check for v1 mesh\n";
-        Ogre::v1::MeshPtr v1Mesh =
-            Ogre::v1::MeshManager::getSingleton().getByName(name);
-        if (!v1Mesh)
-          ignerr << "Did not find v1 mesh\n";
-          // return nullptr
-
-        // Examine v1 mesh properties
-        v1Mesh->load();
-        ignmsg << "v1 mesh: isLoaded:       " << v1Mesh->isLoaded() << "\n";
-
-        ignmsg << "Creating v2 mesh\n";
-        // create v2 mesh from v1
-        mesh = Ogre::MeshManager::getSingleton().createManual(
-            name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-        ignmsg << "Importing v2 mesh\n";
-        mesh->importV1(v1Mesh.get(), false, true, true);
-        // this->ogreMeshes.push_back(name);
-      }
-
-      return sceneManager->createItem(mesh, Ogre::SCENE_DYNAMIC);
+      // bool result = this->InitObject(mesh, _id, _name);
+      bool result = Ogre2Scene_InitObject(_scene, mesh, _id, _name);
+      return (result) ? mesh : nullptr;
     };
 
-    ignmsg << "Creating ogre2 item\n";
-    auto ogreItem = OgreItemFunction(meshDescriptor);
-    if (!ogreItem)
-      ignerr << "Failed to get ogre2 item for [" << MeshNameFunction(meshDescriptor) << "]\n";
+    // BaseScene::CreateMesh(const MeshDescriptor &_desc) -> rendering::MeshPtr 
+    auto BaseScene_CreateMesh = [&](
+        rendering::Ogre2ScenePtr _scene,
+        const rendering::MeshDescriptor &_desc)
+        -> rendering::MeshPtr 
+    {
+      std::string meshName = (_desc.mesh) ?
+          _desc.mesh->Name() : _desc.meshName;
 
-    ignmsg << "Creating ogre2 mesh\n";
-    auto ogre2Mesh = ogre2MeshFactory->Create(meshDescriptor);
-    if (!ogre2Mesh)
-      ignerr << "Failed create ogre2 mesh for [" << MeshNameFunction(meshDescriptor) << "]\n";
+      // \todo: implement equivalents
+      // unsigned int objId = this->CreateObjectId();
+      // std::string objName = this->CreateObjectName(objId, "Mesh-" + meshName);
+      unsigned int objId = 50000;
+      std::string objName = "Mesh-" + meshName;
+      // return this->CreateMeshImpl(objId, objName, _desc);
+      return Ogre2Scene_CreateMeshImpl(_scene, objId, objName, _desc);
+    };
 
-    // Equivalent to Ogre2Scene::InitObject 
-    unsigned int objId = 50000;
-    std::string objName = "ocean-tile";
-    rendering::Ogre2MeshExtPtr ogre2MeshExt =
-        std::dynamic_pointer_cast<rendering::Ogre2MeshExt>(ogre2Mesh);
-    ogre2MeshExt->InitObject(ogre2Scene, objId, objName);
+    /////////////////////////////////////////////
+    // END_LAMDAS
+    /////////////////////////////////////////////
+
+    // create the rendering mesh
+    rendering::MeshPtr renderingMesh = BaseScene_CreateMesh(
+        ogre2Scene, meshDescriptor);
 
     // attach mesh to visuals
     auto visual = this->scene->CreateVisual("ocean-tile");
-    visual->AddGeometry(ogre2MeshExt);
+    visual->AddGeometry(renderingMesh);
     visual->SetLocalPosition(0.0, 0.0, 0.0);
     visual->SetLocalRotation(0.0, 0.0, 0.0);
     visual->SetLocalScale(1.0, 1.0, 1.0);
@@ -468,8 +547,8 @@ void WavesPrivate::OnUpdate()
     visual->SetVisible(true);
 
     // add visual to parent
-    // auto parent = this->visual->Parent();
-    // parent->AddChild(visual);
+    auto parent = this->visual->Parent();
+    parent->AddChild(visual);
 
     // keep reference
     this->oceanVisual = visual;
@@ -496,9 +575,9 @@ void WavesPrivate::OnUpdate()
     this->oceanTile.reset(new rendering::OceanTile(N, L));
     this->oceanTile->SetWindVelocity(u, 0.0);
     this->oceanTile->Create();
-    this->oceanTile->Update(0.0);
+    // this->oceanTile->Update(0.0);
 
-    // create the common::Mesh
+    // get the common::Mesh
     common::Mesh *mesh = this->oceanTile->Mesh();
 
     //convert common::Mesh to rendering::Mesh
@@ -526,8 +605,8 @@ void WavesPrivate::OnUpdate()
     //   visual->SetMaterial(material);
 
     // add visual to parent
-    // auto parent = this->visual->Parent();
-    // parent->AddChild(visual);
+    auto parent = this->visual->Parent();
+    parent->AddChild(visual);
 
     // keep reference
     this->oceanVisual = visual;
@@ -537,7 +616,7 @@ void WavesPrivate::OnUpdate()
     return;
 
   // Update the tile
-  this->oceanTile->Update(simTime);
+  // this->oceanTile->Update(simTime);
 #endif
 
 }
