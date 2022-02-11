@@ -589,20 +589,20 @@ void WavesPrivate::OnUpdate()
     visual->SetLocalPosition(0.0, 0.0, 0.0);
     visual->SetLocalRotation(0.0, 0.0, 0.0);
     visual->SetLocalScale(1.0, 1.0, 1.0);
-    visual->SetMaterial("OceanBlue");
+    // visual->SetMaterial("OceanBlue");
     visual->SetVisible(true);
 
     // retrive the material from the visual's geometry (it's not set on the visual)
-    // ignmsg << "Waves: Visual Name:          " << this->visual->Name() << "\n";
-    // ignmsg << "Waves: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
-    // auto visualGeometry = this->visual->GeometryByIndex(0);
+    ignmsg << "Waves: Visual Name:          " << this->visual->Name() << "\n";
+    ignmsg << "Waves: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+    auto visualGeometry = this->visual->GeometryByIndex(0);
 
-    // auto material = visualGeometry->Material();
-    // // auto material = this->visual->Material();
-    // if (!material)
-    //   ignerr << "Waves: invalid material\n";
-    // else
-    //   visual->SetMaterial(material);
+    auto material = visualGeometry->Material();
+    // auto material = this->visual->Material();
+    if (!material)
+      ignerr << "Waves: invalid material\n";
+    else
+      visual->SetMaterial(material);
 
     // add visual to parent
     auto parent = this->visual->Parent();

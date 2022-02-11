@@ -142,13 +142,13 @@ bool _hasVisuals) :
   // 2 - WaveSimulationFFTW
   // 3 - WaveSimulationOpenCL
   //
-  const int wave_sim_type = 2;
+  const int wave_sim_type = 0;
   switch (wave_sim_type)
   {
     case 0:
     {
       // Simple
-      double amplitude = 3.0;
+      double amplitude = 0.0;
       double period = 10.0;
       std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
       waveSim->SetParameters(amplitude, period);

@@ -138,7 +138,7 @@ bool _hasVisuals) :
   // 2 - WaveSimulationFFTW
   // 3 - WaveSimulationOpenCL
   //
-  const int wave_sim_type = 1;
+  const int wave_sim_type = 2;
   switch (wave_sim_type)
   {
     case 0:
