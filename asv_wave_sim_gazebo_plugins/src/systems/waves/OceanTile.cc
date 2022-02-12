@@ -121,7 +121,7 @@ public:
   // void UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ=0.0, bool _reverseOrientation=false);
 
   const std::vector<math::Vector3d>& Vertices() const;
-  const std::vector<ignition::math::Vector3i>& Faces() const;
+  const std::vector<math::Vector3i>& Faces() const;
 };
 
 //////////////////////////////////////////////////
@@ -156,7 +156,7 @@ bool _hasVisuals) :
   // 2 - WaveSimulationFFTW
   // 3 - WaveSimulationOpenCL
   //
-  const int wave_sim_type = 0;
+  const int wave_sim_type = 2;
   switch (wave_sim_type)
   {
     case 0:
@@ -770,6 +770,26 @@ void OceanTile::Update(double _time)
 common::Mesh * OceanTile::Mesh()
 {
   return this->dataPtr->Mesh();
+}
+
+unsigned int OceanTile::VertexCount() const
+{
+  return this->dataPtr->mVertices.size();
+}
+
+unsigned int OceanTile::FaceCount() const
+{
+  return this->dataPtr->mFaces.size();
+}
+
+math::Vector3d OceanTile::Vertex(unsigned int _index) const
+{
+  return this->dataPtr->mVertices[_index];
+}
+
+math::Vector3i OceanTile::Face(unsigned int _index) const
+{
+  return this->dataPtr->mFaces[_index];
 }
 
 }

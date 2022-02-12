@@ -16,6 +16,7 @@
 #ifndef IGNITION_GAZEBO_SYSTEMS_OGRE2OCEANTILE_HH_
 #define IGNITION_GAZEBO_SYSTEMS_OGRE2OCEANTILE_HH_
 
+#include <ignition/math.hh>
 #include <ignition/rendering.hh>
 
 #include <memory>
@@ -43,6 +44,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
     private: std::unique_ptr<Ogre2OceanTilePrivate> dataPtr;
   };
 
+  typedef std::shared_ptr<Ogre2OceanTile> Ogre2OceanTilePtr;
 }
 }
 }

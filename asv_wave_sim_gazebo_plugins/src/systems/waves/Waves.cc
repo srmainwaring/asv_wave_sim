@@ -273,10 +273,10 @@ class ignition::gazebo::systems::WavesPrivate
   // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
 
   // using custom rendering::Ogre2Mesh
-  public: std::unique_ptr<rendering::Ogre2OceanTile> ogre2OceanTile;
+  public: rendering::Ogre2OceanTilePtr ogre2OceanTile;
 
   // using standard (static) common::Mesh
-  public: std::unique_ptr<rendering::OceanTile> oceanTile;
+  public: rendering::OceanTilePtr oceanTile;
 
   /// \brief Destructor
   public: ~WavesPrivate();
@@ -405,6 +405,9 @@ void WavesPrivate::OnUpdate()
     mat->SetReflectivity(0);
   }
 
+  double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
+      this->currentSimTime).count()) * 1e-9;
+
 #if 1
   // Test attaching another visual to the entity
   if (!this->oceanVisual)
@@ -422,17 +425,31 @@ void WavesPrivate::OnUpdate()
     // visual->SetLocalScale(100.0, 100.0, 100.0);
     // visual->SetMaterial("OceanBlue");
 
+    // create ocean tile
+    int N = 128;
+    double L = 256.0;
+    double u = 5.0;
 
-    rendering::Ogre2OceanVisualPtr visual =
+    this->oceanTile.reset(new rendering::OceanTile(N, L));
+    this->oceanTile->SetWindVelocity(u, 0.0);
+    this->oceanTile->Create();
+
+    // create visual
+    rendering::Ogre2OceanVisualPtr ogre2Visual =
         std::make_shared<rendering::Ogre2OceanVisual>(); 
 
     // Scene: initialisation work-around
     rendering::Ogre2ScenePtr ogre2Scene =
         std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
-    visual->InitObject(ogre2Scene, 50010, "ocean-visual");
-    visual->Load2();
+    ogre2Visual->InitObject(ogre2Scene, 50010, "ocean-visual");
+    // visual->LoadCube();
+    ogre2Visual->LoadOceanTile(this->oceanTile);
 
-    // Required?
+
+    rendering::VisualPtr visual = ogre2Visual;
+    visual->SetMaterial("OceanBlue");
+
+    // Required? These are used in ignition::gazebo::VisualizationCapabilities
     // ignition::gazebo::Entity entityId;
     // visual->SetUserData("gazebo-entity", static_cast<int>(entityId));
     // visual->SetUserData("pause-update", static_cast<int>(0));
@@ -447,10 +464,16 @@ void WavesPrivate::OnUpdate()
 
   if (!this->oceanVisual)
     return;
+
+  // Simple update (reload entire mesh...)
+  this->oceanTile->Update(simTime);
+  rendering::Ogre2OceanVisualPtr ogre2Visual =
+      std::dynamic_pointer_cast<rendering::Ogre2OceanVisual>(
+          this->oceanVisual); 
+  ogre2Visual->LoadOceanTile(this->oceanTile);
+
 #endif
 
-  double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
-      this->currentSimTime).count()) * 1e-9;
 
 #if 1
   // Test attaching an Ogre2 mesh to the entity

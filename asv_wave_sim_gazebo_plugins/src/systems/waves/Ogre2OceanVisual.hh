@@ -1,10 +1,12 @@
 #ifndef IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 #define IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 
-#include <memory>
+#include "OceanTile.hh"
 
 #include "ignition/rendering/base/BaseVisual.hh"
 #include "ignition/rendering/ogre2/Ogre2Visual.hh"
+
+#include <memory>
 
 namespace Ogre
 {
@@ -41,7 +43,10 @@ namespace ignition
       protected: virtual void Destroy() override;
 
       /// \brief Load the dynamic renderable
-      public: void Load2();
+      public: void LoadCube();
+
+      /// \brief Load the dynamic renderable
+      public: void LoadOceanTile(OceanTilePtr _oceanTile);
 
       // Documentation inherited.
       public: virtual MaterialPtr Material() const override;
