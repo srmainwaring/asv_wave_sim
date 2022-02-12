@@ -87,4 +87,5 @@ function(gz_add_system system_name)
   # endif()
 endfunction()
 
+add_subdirectory(dynamic)
 add_subdirectory(waves)
