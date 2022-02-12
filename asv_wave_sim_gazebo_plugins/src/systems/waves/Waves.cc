@@ -17,6 +17,7 @@
 
 #include "OceanTile.hh"
 #include "Ogre2OceanTile.hh"
+#include "Ogre2OceanVisual.hh"
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
@@ -51,6 +52,9 @@ namespace ignition
 namespace rendering
 {
 inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
+
+  // Types
+  typedef std::shared_ptr<Ogre2OceanVisual> Ogre2OceanVisualPtr;
 
   // Subclass from Ogre2Mesh and Ogre2MeshFactory to get
   // indirect access to protected members and override any
@@ -401,22 +405,37 @@ void WavesPrivate::OnUpdate()
     mat->SetReflectivity(0);
   }
 
-#if 0
+#if 1
   // Test attaching another visual to the entity
   if (!this->oceanVisual)
   {
     ignmsg << "Waves: creating ocean visual\n";
 
     // create plane
-    auto geometry = this->scene->CreatePlane();
+    // auto geometry = this->scene->CreatePlane();
 
-    // create visual
-    auto visual = this->scene->CreateVisual("ocean-tile");
-    visual->AddGeometry(geometry);
-    visual->SetLocalPosition(0.0, 0.0, 0.0);
-    visual->SetLocalRotation(0.0, 0.0, 0.0);
-    visual->SetLocalScale(100.0, 100.0, 100.0);
-    visual->SetMaterial("OceanBlue");
+    // // create visual
+    // auto visual = this->scene->CreateVisual("ocean-tile");
+    // visual->AddGeometry(geometry);
+    // visual->SetLocalPosition(0.0, 0.0, 0.0);
+    // visual->SetLocalRotation(0.0, 0.0, 0.0);
+    // visual->SetLocalScale(100.0, 100.0, 100.0);
+    // visual->SetMaterial("OceanBlue");
+
+
+    rendering::Ogre2OceanVisualPtr visual =
+        std::make_shared<rendering::Ogre2OceanVisual>(); 
+
+    // Scene: initialisation work-around
+    rendering::Ogre2ScenePtr ogre2Scene =
+        std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
+    visual->InitObject(ogre2Scene, 50010, "ocean-visual");
+    visual->Load2();
+
+    // Required?
+    // ignition::gazebo::Entity entityId;
+    // visual->SetUserData("gazebo-entity", static_cast<int>(entityId));
+    // visual->SetUserData("pause-update", static_cast<int>(0));
 
     // add visual to parent
     auto parent = this->visual->Parent();
@@ -435,7 +454,7 @@ void WavesPrivate::OnUpdate()
 
 #if 1
   // Test attaching an Ogre2 mesh to the entity
-  if (!this->ogre2OceanTile)
+  if (!this->ogre2OceanTile && false)
   {
     ignmsg << "Waves: creating Ogre2 Ocean Tile\n";
 
@@ -537,7 +556,7 @@ void WavesPrivate::OnUpdate()
       // \todo: implement equivalents
       // unsigned int objId = this->CreateObjectId();
       // std::string objName = this->CreateObjectName(objId, "Mesh-" + meshName);
-      unsigned int objId = 50000;
+      unsigned int objId = 50020;
       std::string objName = "Mesh-" + meshName;
       // return this->CreateMeshImpl(objId, objName, _desc);
       return Ogre2Scene_CreateMeshImpl(_scene, objId, objName, _desc);
@@ -577,7 +596,7 @@ void WavesPrivate::OnUpdate()
 #else
 
   // Test attaching a common::Mesh to the entity
-  if (!this->oceanTile)
+  if (!this->oceanTile && false)
   {
     ignmsg << "Waves: creating Ocean Tile\n";
 

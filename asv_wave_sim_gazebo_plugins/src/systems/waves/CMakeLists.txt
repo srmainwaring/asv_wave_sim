@@ -10,6 +10,7 @@ gz_add_system(waves
     Waves.cc
     OceanTile.cc
     Ogre2OceanTile.cc
+    Ogre2OceanVisual.cc
     ../../Geometry.cc
     ../../PhysicalConstants.cc
     ../../Physics.cc
