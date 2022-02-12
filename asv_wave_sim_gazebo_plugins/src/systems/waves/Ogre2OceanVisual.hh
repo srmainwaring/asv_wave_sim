@@ -48,6 +48,9 @@ namespace ignition
       /// \brief Load the dynamic renderable
       public: void LoadOceanTile(OceanTilePtr _oceanTile);
 
+      /// \brief Update the dynamic renderable
+      public: void UpdateOceanTile(OceanTilePtr _oceanTile);
+
       // Documentation inherited.
       public: virtual MaterialPtr Material() const override;
 

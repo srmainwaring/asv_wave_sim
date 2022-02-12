@@ -181,6 +181,21 @@ void Ogre2OceanVisual::LoadOceanTile(OceanTilePtr _oceanTile)
 }
 
 //////////////////////////////////////////////////
+void Ogre2OceanVisual::UpdateOceanTile(OceanTilePtr _oceanTile)
+{
+  // Update points for each face
+  for (auto i=0, v=0; i < _oceanTile->FaceCount(); ++i)
+  {
+    auto face = _oceanTile->Face(i);
+    this->dataPtr->tile->SetPoint(v++, _oceanTile->Vertex(face.X()));
+    this->dataPtr->tile->SetPoint(v++, _oceanTile->Vertex(face.Y()));
+    this->dataPtr->tile->SetPoint(v++, _oceanTile->Vertex(face.Z()));
+  }
+
+  this->dataPtr->tile->Update();
+}
+
+//////////////////////////////////////////////////
 void Ogre2OceanVisual::SetMaterial(MaterialPtr _material, bool _unique)
 {
   _material = (_unique) ? _material->Clone() : _material;
