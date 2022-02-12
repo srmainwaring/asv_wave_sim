@@ -1,4 +1,4 @@
-// Copyright (C) 2021  Rhys Mainwaring
+// Copyright (C) 2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
