@@ -658,7 +658,7 @@ common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _of
 void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
 {
   this->Update(_time);
-  
+
   // \todo: add checks
   // \todo: handle more than one submesh
   // Get the submesh
@@ -673,67 +673,6 @@ void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
   }
 }
 
-//////////////////////////////////////////////////
-#if 0
-void OceanTilePrivate::UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ, bool _reverseOrientation)
-{
-  // Logging
-  ignmsg << "OceanTile: update mesh" << std::endl;
-
-  // Retrieve vertexData
-  auto vertexData = _subMesh->vertexData[Ogre::VpNormal];
-  
-  // Get position vertex buffer and obtain lock for writing.
-  auto posElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_POSITION);
-  auto posVertexBuffer = vertexData->vertexBufferBinding->getBuffer(posElement->getSource());
-  float* gpuPosVertices = static_cast<float*>(
-      posVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
-
-  // Get texcoord vertex buffer and obtain lock for writing.
-  auto texElement = vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_TEXTURE_COORDINATES, 0);
-  auto texVertexBuffer = vertexData->vertexBufferBinding->getBuffer(texElement->getSource());
-  float* gpuTexVertices = static_cast<float*>(
-      texVertexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
-
-  // Copy position vertices to GPU
-  for (size_t i=0; i<mVertices.size(); ++i)
-  {
-    *gpuPosVertices++ = mVertices[i][0];
-    *gpuPosVertices++ = mVertices[i][1];
-    *gpuPosVertices++ = mVertices[i][2] + _offsetZ;
-
-    *gpuPosVertices++ = mNormals[i][0];
-    *gpuPosVertices++ = mNormals[i][1];
-    *gpuPosVertices++ = mNormals[i][2];
-
-    *gpuTexVertices++ = mTexCoords[i][0];
-    *gpuTexVertices++ = mTexCoords[i][1];
-
-    *gpuTexVertices++ = mTangents[i][0];
-    *gpuTexVertices++ = mTangents[i][1];
-    *gpuTexVertices++ = mTangents[i][2];
-
-    *gpuTexVertices++ = mBitangents[i][0];
-    *gpuTexVertices++ = mBitangents[i][1];
-    *gpuTexVertices++ = mBitangents[i][2];
-  }
-
-  // Unlock buffers
-  posVertexBuffer->unlock();
-  texVertexBuffer->unlock();
-
-  // Set bounds (box and sphere)
-  // mMesh->_setBounds(Ogre::AxisAlignedBox(
-  //   -0.5 * mTileSize, -0.5 * mTileSize, -0.5 * mTileSize,
-  //    0.5 * mTileSize,  0.5 * mTileSize,  0.5 * mTileSize));
-  // mMesh->_setBoundingSphereRadius(Ogre::Math::Sqrt(3.0 * 0.5 * 0.5 * mTileSize * mTileSize));
-
-  // Load mesh
-  // mMesh->load();
-
-  ignmsg << "OceanTile: done update mesh" << std::endl;
-}
-#endif
 //////////////////////////////////////////////////
 const std::vector<math::Vector3d>& OceanTilePrivate::Vertices() const
 {
