@@ -304,16 +304,13 @@ class ignition::gazebo::systems::DynamicGeometryPrivate
   public: std::mutex mutex;
 
   /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection{nullptr};
+  public: ignition::common::ConnectionPtr connection {nullptr};
 
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
 
-  /// \brief Pointer to visual
-  public: rendering::VisualPtr visual;
-
-  /// \brief Pointer to dynamic visual
-  public: rendering::VisualPtr dynamicVisual;
+  /// \brief Set true when the scene is initialised
+  public: bool isSceneInitialised {false};
 
   /// \brief Pointer to scene
   public: rendering::ScenePtr scene;
@@ -333,7 +330,7 @@ class ignition::gazebo::systems::DynamicGeometryPrivate
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
 
-  /////////////////
+  ///////////////// OGRE SAMPLE
   // From ogre-next/Samples/2.0/ApiUsage/DynamicGeometry/DynamicGeometryGameState.h/cpp
   Ogre::MeshPtr               mStaticMesh;
   Ogre::MeshPtr               mPartialMesh;
@@ -364,7 +361,7 @@ class ignition::gazebo::systems::DynamicGeometryPrivate
   void CreateScene01(void);
   
   void DestroyScene();
-  /////////////////
+  ///////////////// OGRE SAMPLE
 };
 
 /////////////////////////////////////////////////
@@ -444,147 +441,18 @@ void DynamicGeometryPrivate::OnUpdate()
   if (!this->scene)
     return;
 
-  if (!this->visual)
+  // Ogre2 DynamicGeometry sample
+  if (!this->isSceneInitialised)
   {
-    ignmsg << "DynamicGeometry: searching for visual\n";
+    ignmsg << "DynamicGeometry: creating scene\n";
 
-    // this does a breadth first search for visual with the entity id
-    // \todo(anyone) provide a helper function in RenderUtil to search for
-    // visual by entity id?
-    auto rootVis = scene->RootVisual();
-    std::list<rendering::NodePtr> nodes;
-    nodes.push_back(rootVis);
-    while (!nodes.empty())
-    {
-      auto n = nodes.front();
-      nodes.pop_front();
-      if (n && n->HasUserData("gazebo-entity"))
-      {
-        // RenderUtil stores gazebo-entity user data as int
-        // \todo(anyone) Change this to uint64_t in Ignition H?
-        auto variant = n->UserData("gazebo-entity");
-        const int *value = std::get_if<int>(&variant);
-        if (value && *value == static_cast<int>(this->entity))
-        {
-          this->visual = std::dynamic_pointer_cast<rendering::Visual>(n);
-          break;
-        }
-      }
-      for (unsigned int i = 0; i < n->ChildCount(); ++i)
-        nodes.push_back(n->ChildByIndex(i));
-    }
-  }
-
-  if (!this->visual)
-    return;
-
-  // Test attaching an Ogre2 mesh to the entity
-  if (!this->dynamicVisual)
-  {
-    ignmsg << "DynamicGeometry: creating Ogre2 Ocean Tile\n";
-
-    // scene
-    rendering::Ogre2ScenePtr ogre2Scene =
-        std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);    
-
-    auto meshFactory = rendering::Ogre2MeshFactoryExtPtr(
-          new rendering::Ogre2MeshFactoryExt(ogre2Scene));
-
-    rendering::MeshDescriptor meshDescriptor;
-    meshDescriptor.mesh = nullptr;
-    meshDescriptor.meshName = "dynamic-mesh";
-
-    /////////////////////////////////////////////
-    // BEGIN_LAMDAS
-    //
-    // Override functions from Scene, BaseScene, 
-    // and Ogre2Scene
-    //
-    /////////////////////////////////////////////
-
-    // bool Ogre2Scene::InitObject(Ogre2ObjectPtr _object, unsigned int _id,
-    //     const std::string &_name)
-    auto Ogre2Scene_InitObject = [&](
-        rendering::Ogre2ScenePtr _scene,
-        rendering::Ogre2ObjectPtr _object,
-        unsigned int _id,
-        const std::string &_name) -> bool
-    {
-      rendering::Ogre2MeshExtPtr derived =
-          std::dynamic_pointer_cast<rendering::Ogre2MeshExt>(_object);
-
-      if (!derived)
-        return false;
-      else
-        derived->InitObject(_scene, _id, _name);
-  
-      return true;
-    };
-
-    // Ogre2Scene::CreateMeshImpl(unsigned int _id,
-    //     const std::string &_name, const MeshDescriptor &_desc) -> rendering::MeshPtr 
-    auto Ogre2Scene_CreateMeshImpl = [&](
-        rendering::Ogre2ScenePtr _scene,
-        unsigned int _id,
-        const std::string &_name,
-        const rendering::MeshDescriptor &_desc)
-        -> rendering::MeshPtr
-    {
-      rendering::Ogre2MeshPtr mesh = meshFactory->Create(_desc);
-      if (nullptr == mesh)
-        return nullptr;
-      mesh->SetDescriptor(_desc);
-
-      bool result = Ogre2Scene_InitObject(_scene, mesh, _id, _name);
-      return (result) ? mesh : nullptr;
-    };
-
-    // BaseScene::CreateMesh(const MeshDescriptor &_desc) -> rendering::MeshPtr 
-    auto BaseScene_CreateMesh = [&](
-        rendering::Ogre2ScenePtr _scene,
-        const rendering::MeshDescriptor &_desc)
-        -> rendering::MeshPtr 
-    {
-      std::string meshName = (_desc.mesh) ?
-          _desc.mesh->Name() : _desc.meshName;
-
-      // \todo: implement equivalents
-      // unsigned int objId = this->CreateObjectId();
-      // std::string objName = this->CreateObjectName(objId, "Mesh-" + meshName);
-      unsigned int objId = 50000;
-      std::string objName = "Mesh-" + meshName;
-      return Ogre2Scene_CreateMeshImpl(_scene, objId, objName, _desc);
-    };
-
-    /////////////////////////////////////////////
-    // END_LAMDAS
-    /////////////////////////////////////////////
-
-    // create the rendering mesh
-    rendering::MeshPtr renderingMesh = BaseScene_CreateMesh(
-        ogre2Scene, meshDescriptor);
-
-    // attach mesh to visuals
-    auto visual = this->scene->CreateVisual("dynamic-geometry");
-    visual->AddGeometry(renderingMesh);
-    visual->SetLocalPosition(0.0, 0.0, 0.0);
-    visual->SetLocalRotation(0.0, 0.0, 0.0);
-    visual->SetLocalScale(1.0, 1.0, 1.0);
-    visual->SetMaterial("Default/White");
-    visual->SetVisible(true);
-
-    // add visual to parent
-    auto parent = this->visual->Parent();
-    parent->AddChild(visual);
-
-    // keep reference
-    this->dynamicVisual = visual;
-
-    // Ogre2 Sample Dynamic Geometry
+    // create the sample scene
     this->CreateScene01();
+
+    this->isSceneInitialised = true;
   }
 
-  if (!this->dynamicVisual)
+  if (!this->isSceneInitialised)
     return;
 
   float simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
