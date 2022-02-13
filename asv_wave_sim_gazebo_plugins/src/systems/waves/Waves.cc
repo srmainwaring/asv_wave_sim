@@ -278,6 +278,9 @@ class ignition::gazebo::systems::WavesPrivate
   // using standard (static) common::Mesh
   public: rendering::OceanTilePtr oceanTile;
 
+  /// \brief Used in DynamicMesh example
+  public: common::MeshPtr         oceanTileMesh;
+
   /// \brief Destructor
   public: ~WavesPrivate();
 
@@ -433,7 +436,7 @@ void WavesPrivate::OnUpdate()
   double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
       this->currentSimTime).count()) * 1e-9;
 
-  OceanVisualMethod method = OceanVisualMethod::OGRE1_MESH;
+  OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY;
   switch (method)
   {
   case OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY:
@@ -450,7 +453,9 @@ void WavesPrivate::OnUpdate()
 
       this->oceanTile.reset(new rendering::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
-      this->oceanTile->Create();
+
+      // do not pass to common::MeshManager as we are going to modify
+      this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
 
       // create visual
       rendering::Ogre2OceanVisualPtr ogre2Visual =
@@ -461,7 +466,8 @@ void WavesPrivate::OnUpdate()
           std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
       ogre2Visual->InitObject(ogre2Scene, 50010, "ocean-visual");
       // visual->LoadCube();
-      ogre2Visual->LoadOceanTile(this->oceanTile);
+      // ogre2Visual->LoadOceanTile(this->oceanTile);
+      ogre2Visual->LoadMesh(this->oceanTileMesh);
 
 
       rendering::VisualPtr visual = ogre2Visual;
@@ -494,8 +500,9 @@ void WavesPrivate::OnUpdate()
     // update the dynamic renderable (CPU => GPU)
     rendering::Ogre2OceanVisualPtr ogre2Visual =
         std::dynamic_pointer_cast<rendering::Ogre2OceanVisual>(
-            this->oceanVisual); 
-    ogre2Visual->UpdateOceanTile(this->oceanTile);
+            this->oceanVisual);
+    // ogre2Visual->UpdateOceanTile(this->oceanTile);
+    ogre2Visual->UpdateMesh(this->oceanTileMesh);
     break;
   }
   case OceanVisualMethod::OGRE1_MESH:
@@ -514,8 +521,10 @@ void WavesPrivate::OnUpdate()
       // an object in the MeshManager with the correct name
       this->oceanTile.reset(new rendering::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
-      this->oceanTile->Create();
-      common::Mesh *mesh = this->oceanTile->Mesh();
+      std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
+      auto mesh = newMesh.get();
+      common::MeshManager::Instance()->AddMesh(newMesh.release());
+
       ignmsg << "Waves: mesh name " << mesh->Name() << "\n";
       ignmsg << "Waves: mesh resource path " << mesh->Path() << "\n";
 
@@ -655,11 +664,10 @@ void WavesPrivate::OnUpdate()
 
       this->oceanTile.reset(new rendering::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
-      this->oceanTile->Create();
+      std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
+      auto mesh = newMesh.get();
+      common::MeshManager::Instance()->AddMesh(newMesh.release());
       // this->oceanTile->Update(0.0);
-
-      // get the common::Mesh
-      common::Mesh *mesh = this->oceanTile->Mesh();
 
       //convert common::Mesh to rendering::Mesh
       auto geometry = this->scene->CreateMesh(mesh);

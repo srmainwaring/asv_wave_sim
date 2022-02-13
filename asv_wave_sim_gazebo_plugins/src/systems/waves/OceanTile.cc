@@ -23,7 +23,6 @@
 
 #include <ignition/common.hh>
 #include <ignition/common/Mesh.hh>
-#include <ignition/common/MeshManager.hh>
 #include <ignition/common/SubMesh.hh>
 
 #include <ignition/rendering.hh>
@@ -68,8 +67,6 @@ public:
 
   std::string                 mAboveOceanMeshName = "AboveOceanTileMesh";
   std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
-  // Ogre::v1::SubMesh*          mAboveOceanSubMesh;
-  // Ogre::v1::SubMesh*          mBelowOceanSubMesh;
 
   std::unique_ptr<WaveSimulation> mWaveSim;
   std::vector<double>         mHeights;
@@ -82,9 +79,7 @@ public:
   std::vector<double>         mDydy;
   std::vector<double>         mDxdy;
 
-  common::Mesh *              mesh {nullptr};
-
-  void Create();
+  common::Mesh * CreateMesh();
 
   void ComputeNormals();
 
@@ -111,12 +106,12 @@ public:
 
   void Update(double _time);
 
-  common::Mesh * Mesh();
-
   void UpdateVertices(double _time);
 
-  void CreateMesh(const std::string &_name, double _offsetZ,
+  common::Mesh * CreateMesh(const std::string &_name, double _offsetZ,
       bool _reverseOrientation);
+
+  void UpdateMesh(double _time, common::Mesh *_mesh);
 
   // void UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ=0.0, bool _reverseOrientation=false);
 
@@ -217,7 +212,7 @@ void OceanTilePrivate::SetWindVelocity(double _ux, double _uy)
 // (u, v) = (1, 1) at the bottom right 
 // The tangent space basis calculation is adjusted to 
 // conform with this convention.
-void OceanTilePrivate::Create()
+common::Mesh * OceanTilePrivate::CreateMesh()
 {
   ignmsg << "OceanTile: create tile\n";
   ignmsg << "Resolution:    " << mResolution  << "\n";
@@ -287,11 +282,13 @@ void OceanTilePrivate::Create()
   {
     ComputeNormals();
     ComputeTangentSpace();
-    CreateMesh(this->mAboveOceanMeshName, 0.0, false);
 #if 0
-    mBelowOceanSubMesh = CreateMesh(mBelowOceanMeshName, -0.05, true);
+    CreateMesh(this->mAboveOceanMeshName, 0.0, false);
+    CreateMesh(this->mBelowOceanMeshName, -0.05, true);
 #endif
   }
+
+  return CreateMesh(this->mAboveOceanMeshName, 0.0, false);
 }
 
 //////////////////////////////////////////////////
@@ -470,12 +467,6 @@ void OceanTilePrivate::Update(double _time)
 }
 
 //////////////////////////////////////////////////
-common::Mesh * OceanTilePrivate::Mesh()
-{
-  return this->mesh;
-}
-
-//////////////////////////////////////////////////
 void OceanTilePrivate::UpdateVertices(double _time)
 {
   mWaveSim->SetTime(_time);
@@ -599,12 +590,12 @@ void OceanTilePrivate::UpdateVertices(double _time)
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::CreateMesh(const std::string &_name, double _offsetZ,
+common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _offsetZ,
     bool _reverseOrientation)
 {
   // Logging
   ignmsg << "OceanTile: creating mesh\n";
-  common::Mesh *mesh = new common::Mesh();
+  std::unique_ptr<common::Mesh> mesh = std::make_unique<common::Mesh>();
   mesh->SetName(_name);
 
   ignmsg << "OceanTile: create submesh\n";
@@ -658,10 +649,26 @@ void OceanTilePrivate::CreateMesh(const std::string &_name, double _offsetZ,
   }
 
   mesh->AddSubMesh(*submesh);
-  this->mesh = mesh;
-  common::MeshManager::Instance()->AddMesh(mesh);
 
   ignmsg << "OceanTile: mesh created." << std::endl;
+  return mesh.release();
+}
+
+//////////////////////////////////////////////////
+void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
+{
+  // \todo: add checks
+  // \todo: handle more than one submesh
+  // Get the submesh
+  auto subMesh = _mesh->SubMeshByIndex(0);
+
+  // Update positions, normals, texture coords etc.
+  for (size_t i=0; i<mVertices.size(); ++i)
+  {
+    subMesh.lock()->SetVertex(i, mVertices[i]);
+    subMesh.lock()->SetNormal(i, mNormals[i]);
+    subMesh.lock()->SetTexCoord(i, mTexCoords[i]);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -756,9 +763,9 @@ void OceanTile::SetWindVelocity(double _ux, double _uy)
 }
 
 //////////////////////////////////////////////////
-void OceanTile::Create()
+common::Mesh* OceanTile::CreateMesh()
 {
-  this->dataPtr->Create();
+  return this->dataPtr->CreateMesh();
 }
 
 //////////////////////////////////////////////////
@@ -768,9 +775,9 @@ void OceanTile::Update(double _time)
 }
 
 //////////////////////////////////////////////////
-common::Mesh * OceanTile::Mesh()
+void OceanTile::UpdateMesh(double _time, common::Mesh *_mesh)
 {
-  return this->dataPtr->Mesh();
+  this->dataPtr->UpdateMesh(_time, _mesh);
 }
 
 //////////////////////////////////////////////////

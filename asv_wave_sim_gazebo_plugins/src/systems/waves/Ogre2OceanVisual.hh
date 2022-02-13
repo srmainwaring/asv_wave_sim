@@ -42,14 +42,20 @@ namespace ignition
       // Documentation inherited.
       protected: virtual void Destroy() override;
 
-      /// \brief Load the dynamic geometry
+      /// \brief Load a dynamic cube (example)
       public: void LoadCube();
 
-      /// \brief Load the dynamic geometry
+      /// \brief Load from an ocean tile
       public: void LoadOceanTile(OceanTilePtr _oceanTile);
 
-      /// \brief Update the dynamic geometry
+      /// \brief Update from an ocean tile
       public: void UpdateOceanTile(OceanTilePtr _oceanTile);
+
+      /// \brief Load from a mesh
+      public: void LoadMesh(common::MeshPtr _mesh);
+
+      /// \brief Update from a mesh
+      public: void UpdateMesh(common::MeshPtr _mesh);
 
       // Documentation inherited.
       public: virtual MaterialPtr Material() const override;

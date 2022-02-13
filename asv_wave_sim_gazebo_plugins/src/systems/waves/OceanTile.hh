@@ -37,11 +37,13 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 
     public: void SetWindVelocity(double _ux, double _uy);
 
-    public: void Create();
+    // Returns a new common::Mesh. The caller must take ownership.
+    public: common::Mesh* CreateMesh();
 
     public: void Update(double _time);
 
-    public: common::Mesh * Mesh();
+    public: void UpdateMesh(double _time, common::Mesh *_mesh);
+
 
     ////////////////////////////////////////
     // Access to vertices, texture coordinates and faces

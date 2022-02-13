@@ -20,7 +20,7 @@ class ignition::rendering::Ogre2OceanVisualPrivate
   public: Ogre2MaterialPtr material = nullptr;
 
   /// \brief Ogre renderable used to render the ocean tile.
-  public: std::shared_ptr<Ogre2DynamicMesh> tile = nullptr;
+  public: std::shared_ptr<Ogre2DynamicMesh> mesh = nullptr;
 };
 
 //////////////////////////////////////////////////
@@ -48,10 +48,10 @@ void Ogre2OceanVisual::Init()
 //////////////////////////////////////////////////
 void Ogre2OceanVisual::Destroy()
 {
-  if (this->dataPtr->tile)
+  if (this->dataPtr->mesh)
   {
-    this->dataPtr->tile->Destroy();
-    this->dataPtr->tile.reset();
+    this->dataPtr->mesh->Destroy();
+    this->dataPtr->mesh.reset();
   }
 
   if (this->dataPtr->material && this->Scene())
@@ -64,18 +64,18 @@ void Ogre2OceanVisual::Destroy()
 //////////////////////////////////////////////////
 void Ogre2OceanVisual::LoadCube()
 {
-  if (!this->dataPtr->tile)
+  if (!this->dataPtr->mesh)
   {
-    this->dataPtr->tile.reset(
+    this->dataPtr->mesh.reset(
       new Ogre2DynamicMesh(this->Scene()));
-    this->ogreNode->attachObject(this->dataPtr->tile->OgreObject());
+    this->ogreNode->attachObject(this->dataPtr->mesh->OgreObject());
   }
 
   // Clear any previous data from the grid and update
-  this->dataPtr->tile->Clear();
-  this->dataPtr->tile->Update();
+  this->dataPtr->mesh->Clear();
+  this->dataPtr->mesh->Update();
 
-  this->dataPtr->tile->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
+  this->dataPtr->mesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
   if (this->dataPtr->material == nullptr)
   {
     MaterialPtr defaultMat =
@@ -96,71 +96,71 @@ void Ogre2OceanVisual::LoadCube()
   ignition::math::Vector3d p7(-1,  1, -1);
 
   // front face
-  this->dataPtr->tile->AddPoint(p0);
-  this->dataPtr->tile->AddPoint(p1);
-  this->dataPtr->tile->AddPoint(p2);
-  this->dataPtr->tile->AddPoint(p2);
-  this->dataPtr->tile->AddPoint(p3);
-  this->dataPtr->tile->AddPoint(p0);
+  this->dataPtr->mesh->AddPoint(p0);
+  this->dataPtr->mesh->AddPoint(p1);
+  this->dataPtr->mesh->AddPoint(p2);
+  this->dataPtr->mesh->AddPoint(p2);
+  this->dataPtr->mesh->AddPoint(p3);
+  this->dataPtr->mesh->AddPoint(p0);
 
   // back face
-  this->dataPtr->tile->AddPoint(p6);
-  this->dataPtr->tile->AddPoint(p5);
-  this->dataPtr->tile->AddPoint(p4);
-  this->dataPtr->tile->AddPoint(p4);
-  this->dataPtr->tile->AddPoint(p7);
-  this->dataPtr->tile->AddPoint(p6);
+  this->dataPtr->mesh->AddPoint(p6);
+  this->dataPtr->mesh->AddPoint(p5);
+  this->dataPtr->mesh->AddPoint(p4);
+  this->dataPtr->mesh->AddPoint(p4);
+  this->dataPtr->mesh->AddPoint(p7);
+  this->dataPtr->mesh->AddPoint(p6);
 
   // top face
-  this->dataPtr->tile->AddPoint(p3);
-  this->dataPtr->tile->AddPoint(p2);
-  this->dataPtr->tile->AddPoint(p6);
-  this->dataPtr->tile->AddPoint(p6);
-  this->dataPtr->tile->AddPoint(p7);
-  this->dataPtr->tile->AddPoint(p3);
+  this->dataPtr->mesh->AddPoint(p3);
+  this->dataPtr->mesh->AddPoint(p2);
+  this->dataPtr->mesh->AddPoint(p6);
+  this->dataPtr->mesh->AddPoint(p6);
+  this->dataPtr->mesh->AddPoint(p7);
+  this->dataPtr->mesh->AddPoint(p3);
 
   // bottom face
-  this->dataPtr->tile->AddPoint(p5);
-  this->dataPtr->tile->AddPoint(p1);
-  this->dataPtr->tile->AddPoint(p0);
-  this->dataPtr->tile->AddPoint(p0);
-  this->dataPtr->tile->AddPoint(p4);
-  this->dataPtr->tile->AddPoint(p5);
+  this->dataPtr->mesh->AddPoint(p5);
+  this->dataPtr->mesh->AddPoint(p1);
+  this->dataPtr->mesh->AddPoint(p0);
+  this->dataPtr->mesh->AddPoint(p0);
+  this->dataPtr->mesh->AddPoint(p4);
+  this->dataPtr->mesh->AddPoint(p5);
 
   // left face
-  this->dataPtr->tile->AddPoint(p4);
-  this->dataPtr->tile->AddPoint(p0);
-  this->dataPtr->tile->AddPoint(p3);
-  this->dataPtr->tile->AddPoint(p3);
-  this->dataPtr->tile->AddPoint(p7);
-  this->dataPtr->tile->AddPoint(p4);
+  this->dataPtr->mesh->AddPoint(p4);
+  this->dataPtr->mesh->AddPoint(p0);
+  this->dataPtr->mesh->AddPoint(p3);
+  this->dataPtr->mesh->AddPoint(p3);
+  this->dataPtr->mesh->AddPoint(p7);
+  this->dataPtr->mesh->AddPoint(p4);
 
   // right face
-  this->dataPtr->tile->AddPoint(p6);
-  this->dataPtr->tile->AddPoint(p2);
-  this->dataPtr->tile->AddPoint(p1);
-  this->dataPtr->tile->AddPoint(p1);
-  this->dataPtr->tile->AddPoint(p5);
-  this->dataPtr->tile->AddPoint(p6);
+  this->dataPtr->mesh->AddPoint(p6);
+  this->dataPtr->mesh->AddPoint(p2);
+  this->dataPtr->mesh->AddPoint(p1);
+  this->dataPtr->mesh->AddPoint(p1);
+  this->dataPtr->mesh->AddPoint(p5);
+  this->dataPtr->mesh->AddPoint(p6);
 
-  this->dataPtr->tile->Update();
+  this->dataPtr->mesh->Update();
 }
 
 //////////////////////////////////////////////////
 void Ogre2OceanVisual::LoadOceanTile(OceanTilePtr _oceanTile)
 {
-  if (!this->dataPtr->tile)
+  if (!this->dataPtr->mesh)
   {
-    this->dataPtr->tile.reset(
+    this->dataPtr->mesh.reset(
       new Ogre2DynamicMesh(this->Scene()));
-    this->ogreNode->attachObject(this->dataPtr->tile->OgreObject());
+    this->ogreNode->attachObject(this->dataPtr->mesh->OgreObject());
   }
 
   // Clear any previous data from the grid and update
-  this->dataPtr->tile->Clear();
-  this->dataPtr->tile->Update();
+  this->dataPtr->mesh->Clear();
+  this->dataPtr->mesh->Update();
 
-  this->dataPtr->tile->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
+  this->dataPtr->mesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
   if (this->dataPtr->material == nullptr)
   {
     MaterialPtr defaultMat =
@@ -173,17 +173,17 @@ void Ogre2OceanVisual::LoadOceanTile(OceanTilePtr _oceanTile)
   {
     auto face = _oceanTile->Face(i);
     // positions
-    this->dataPtr->tile->AddPoint(_oceanTile->Vertex(face.X()));
-    this->dataPtr->tile->AddPoint(_oceanTile->Vertex(face.Y()));
-    this->dataPtr->tile->AddPoint(_oceanTile->Vertex(face.Z()));
+    this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.X()));
+    this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.Y()));
+    this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.Z()));
 
     // uv0s
-    this->dataPtr->tile->SetUV0(v+0, _oceanTile->UV0(face.X()));
-    this->dataPtr->tile->SetUV0(v+1, _oceanTile->UV0(face.Y()));
-    this->dataPtr->tile->SetUV0(v+2, _oceanTile->UV0(face.Z()));
+    this->dataPtr->mesh->SetUV0(v+0, _oceanTile->UV0(face.X()));
+    this->dataPtr->mesh->SetUV0(v+1, _oceanTile->UV0(face.Y()));
+    this->dataPtr->mesh->SetUV0(v+2, _oceanTile->UV0(face.Z()));
   }
 
-  this->dataPtr->tile->Update();
+  this->dataPtr->mesh->Update();
 }
 
 //////////////////////////////////////////////////
@@ -194,16 +194,76 @@ void Ogre2OceanVisual::UpdateOceanTile(OceanTilePtr _oceanTile)
   {
     auto face = _oceanTile->Face(i);
     // positions
-    this->dataPtr->tile->SetPoint(v+0, _oceanTile->Vertex(face.X()));
-    this->dataPtr->tile->SetPoint(v+1, _oceanTile->Vertex(face.Y()));
-    this->dataPtr->tile->SetPoint(v+2, _oceanTile->Vertex(face.Z()));
+    this->dataPtr->mesh->SetPoint(v+0, _oceanTile->Vertex(face.X()));
+    this->dataPtr->mesh->SetPoint(v+1, _oceanTile->Vertex(face.Y()));
+    this->dataPtr->mesh->SetPoint(v+2, _oceanTile->Vertex(face.Z()));
     // uv0s
-    this->dataPtr->tile->SetUV0(v+0, _oceanTile->UV0(face.X()));
-    this->dataPtr->tile->SetUV0(v+1, _oceanTile->UV0(face.Y()));
-    this->dataPtr->tile->SetUV0(v+2, _oceanTile->UV0(face.Z()));
+    this->dataPtr->mesh->SetUV0(v+0, _oceanTile->UV0(face.X()));
+    this->dataPtr->mesh->SetUV0(v+1, _oceanTile->UV0(face.Y()));
+    this->dataPtr->mesh->SetUV0(v+2, _oceanTile->UV0(face.Z()));
   }
 
-  this->dataPtr->tile->Update();
+  this->dataPtr->mesh->Update();
+}
+
+//////////////////////////////////////////////////
+void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
+{
+  if (!this->dataPtr->mesh)
+  {
+    this->dataPtr->mesh.reset(
+      new Ogre2DynamicMesh(this->Scene()));
+    this->ogreNode->attachObject(this->dataPtr->mesh->OgreObject());
+  }
+
+  // Clear any previous data from the grid and update
+  this->dataPtr->mesh->Clear();
+  this->dataPtr->mesh->Update();
+
+  this->dataPtr->mesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
+  if (this->dataPtr->material == nullptr)
+  {
+    MaterialPtr defaultMat =
+        this->Scene()->Material("Default/TransBlue")->Clone();
+    this->SetMaterial(defaultMat, false);
+  }
+
+  // Add points and texture coordinates for each face
+  // for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
+  // {
+  //   auto face = _oceanTile->Face(i);
+  //   // positions
+  //   this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.X()));
+  //   this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.Y()));
+  //   this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.Z()));
+
+  //   // uv0s
+  //   this->dataPtr->mesh->SetUV0(v+0, _oceanTile->UV0(face.X()));
+  //   this->dataPtr->mesh->SetUV0(v+1, _oceanTile->UV0(face.Y()));
+  //   this->dataPtr->mesh->SetUV0(v+2, _oceanTile->UV0(face.Z()));
+  // }
+
+  this->dataPtr->mesh->Update();
+}
+
+//////////////////////////////////////////////////
+void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
+{
+  // Update positions and texture coordinates for each face
+  // for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
+  // {
+  //   auto face = _oceanTile->Face(i);
+  //   // positions
+  //   this->dataPtr->mesh->SetPoint(v+0, _oceanTile->Vertex(face.X()));
+  //   this->dataPtr->mesh->SetPoint(v+1, _oceanTile->Vertex(face.Y()));
+  //   this->dataPtr->mesh->SetPoint(v+2, _oceanTile->Vertex(face.Z()));
+  //   // uv0s
+  //   this->dataPtr->mesh->SetUV0(v+0, _oceanTile->UV0(face.X()));
+  //   this->dataPtr->mesh->SetUV0(v+1, _oceanTile->UV0(face.Y()));
+  //   this->dataPtr->mesh->SetUV0(v+2, _oceanTile->UV0(face.Z()));
+  // }
+
+  this->dataPtr->mesh->Update();
 }
 
 //////////////////////////////////////////////////
@@ -222,7 +282,7 @@ void Ogre2OceanVisual::SetMaterial(MaterialPtr _material, bool _unique)
     return;
   }
 
-  this->dataPtr->tile->SetMaterial(_material, false);
+  this->dataPtr->mesh->SetMaterial(_material, false);
   this->SetMaterialImpl(derived);
 }
 
