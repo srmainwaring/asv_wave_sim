@@ -239,9 +239,11 @@ void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
   {
     auto index = subMesh.lock()->Index(i);
     auto vertex = subMesh.lock()->Vertex(index);
+    auto normal = subMesh.lock()->Normal(index);
     auto uv0 = subMesh.lock()->TexCoord(index);
 
     this->dataPtr->mesh->AddPoint(vertex);
+    this->dataPtr->mesh->SetNormal(i, normal);
     this->dataPtr->mesh->SetUV0(i, uv0);
   }
 
@@ -260,9 +262,11 @@ void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
   {
     auto index = subMesh.lock()->Index(i);
     auto vertex = subMesh.lock()->Vertex(index);
+    auto normal = subMesh.lock()->Normal(index);
     auto uv0 = subMesh.lock()->TexCoord(index);
 
     this->dataPtr->mesh->SetPoint(i, vertex);
+    this->dataPtr->mesh->SetNormal(i, normal);
     this->dataPtr->mesh->SetUV0(i, uv0);
   }
 

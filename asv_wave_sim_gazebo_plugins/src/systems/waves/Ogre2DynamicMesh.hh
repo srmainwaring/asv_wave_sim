@@ -112,7 +112,13 @@ namespace ignition
 
       /// \brief Change the texture coordinate  of an existing point in the point list
       /// \param[in] _index Index of the point to set
-      /// \param[in] _uv0 texture coordinate to set for the point
+      /// \param[in] _normal Normal of the point
+      public: void SetNormal(unsigned int _index,
+                            const ignition::math::Vector3d &_normal);
+
+      /// \brief Change the texture coordinate  of an existing point in the point list
+      /// \param[in] _index Index of the point to set
+      /// \param[in] _uv0 Texture coordinate of the point
       public: void SetUV0(unsigned int _index,
                             const ignition::math::Vector2d &_uv0);
 

@@ -60,6 +60,9 @@ class ignition::rendering::Ogre2DynamicMeshPrivate
   /// \brief List of vertices for the mesh
   public: std::vector<ignition::math::Vector3d> vertices;
 
+  /// \brief List of normals for the mesh
+  public: std::vector<ignition::math::Vector3d> normals;
+
   /// \brief List of uv0 coordinates for the mesh
   public: std::vector<ignition::math::Vector2d> uv0s;
 
@@ -316,15 +319,24 @@ void Ogre2DynamicMesh::UpdateBuffer()
       this->dataPtr->vertexBuffer->map(
       0, this->dataPtr->vertexBuffer->getNumElements()));
 
-  // fill vertices and texture coords
+  // fill positions, normals and texture coords
   for (unsigned int i = 0; i < vertexCount; ++i)
   {
     unsigned int idx = i*stride;
+
+    // position
     Ogre::Vector3 v = Ogre2Conversions::Convert(this->dataPtr->vertices[i]);
-    vertices[idx] = v.x;
+    vertices[idx+0] = v.x;
     vertices[idx+1] = v.y;
     vertices[idx+2] = v.z;
 
+    // normal
+    Ogre::Vector3 n = Ogre2Conversions::Convert(this->dataPtr->normals[i]);
+    vertices[idx+3] = n.x;
+    vertices[idx+4] = n.y;
+    vertices[idx+5] = n.z;
+
+    // uv0
     Ogre::Vector2 uv0(this->dataPtr->uv0s[i].X(), this->dataPtr->uv0s[i].Y());
     vertices[idx+6] = uv0.x;
     vertices[idx+7] = uv0.y;
@@ -337,33 +349,37 @@ void Ogre2DynamicMesh::UpdateBuffer()
   if (vertexCount > 0 && vertexCount < this->dataPtr->vertexBufferCapacity)
   {
     math::Vector3d lastVertex = this->dataPtr->vertices[vertexCount-1];
+    math::Vector3d lastNormal = this->dataPtr->normals[vertexCount-1];
+    math::Vector2d lastUv0 = this->dataPtr->uv0s[vertexCount-1];
     for (unsigned int i = vertexCount; i < this->dataPtr->vertexBufferCapacity;
         ++i)
     {
       unsigned int idx = i * stride;
       // vertex
-      vertices[idx] = lastVertex.X();
+      vertices[idx+0] = lastVertex.X();
       vertices[idx+1] = lastVertex.Y();
       vertices[idx+2] = lastVertex.Z();
 
       // normal
-      vertices[idx+3] = 0;
-      vertices[idx+4] = 0;
-      vertices[idx+5] = 1;
+      vertices[idx+3] = lastNormal.X();
+      vertices[idx+4] = lastNormal.Y();
+      vertices[idx+5] = lastNormal.Z();
 
       // uv0
-      vertices[idx+6] = 0;
-      vertices[idx+7] = 0;
+      vertices[idx+6] = lastUv0.X();
+      vertices[idx+7] = lastUv0.Y();
     }
   }
 
+  // \todo add condition to check if normals are to be set or generated, ditto colors
+
   // fill normals
-  this->GenerateNormals(this->dataPtr->operationType, this->dataPtr->vertices,
-      vertices);
+  // this->GenerateNormals(this->dataPtr->operationType, this->dataPtr->vertices,
+  //     vertices);
 
   // fill colors for points
-  this->GenerateColors(this->dataPtr->operationType, this->dataPtr->vertices,
-      vertices);
+  // this->GenerateColors(this->dataPtr->operationType, this->dataPtr->vertices,
+  //     vertices);
 
   // unmap buffer
   this->dataPtr->vertexBuffer->unmap(Ogre::UO_KEEP_PERSISTENT);
@@ -486,6 +502,7 @@ void Ogre2DynamicMesh::AddPoint(const ignition::math::Vector3d &_pt,
   // https://forums.ogre3d.org/viewtopic.php?t=93627#p539276
   this->dataPtr->colors.push_back(_color);
 
+  this->dataPtr->normals.push_back(ignition::math::Vector3d::Zero);
   this->dataPtr->uv0s.push_back(ignition::math::Vector2d::Zero);
 
   this->dataPtr->dirty = true;
@@ -536,6 +553,22 @@ void Ogre2DynamicMesh::SetColor(unsigned int _index,
 }
 
 /////////////////////////////////////////////////
+void Ogre2DynamicMesh::SetNormal(unsigned int _index,
+                              const ignition::math::Vector3d &_normal)
+{
+  if (_index >= this->dataPtr->normals.size())
+  {
+    ignerr << "Point normal index[" << _index << "] is out of bounds[0-"
+           << this->dataPtr->normals.size()-1 << "]\n";
+    return;
+  }
+
+  this->dataPtr->normals[_index] = _normal;
+
+  this->dataPtr->dirty = true;
+}
+
+/////////////////////////////////////////////////
 void Ogre2DynamicMesh::SetUV0(unsigned int _index,
                               const ignition::math::Vector2d &_uv0)
 {
@@ -581,6 +614,7 @@ void Ogre2DynamicMesh::Clear()
     return;
 
   this->dataPtr->vertices.clear();
+  this->dataPtr->normals.clear();
   this->dataPtr->colors.clear();
   this->dataPtr->uv0s.clear();
   this->dataPtr->dirty = true;
