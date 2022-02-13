@@ -42,13 +42,13 @@ namespace ignition
       // Documentation inherited.
       protected: virtual void Destroy() override;
 
-      /// \brief Load the dynamic renderable
+      /// \brief Load the dynamic geometry
       public: void LoadCube();
 
-      /// \brief Load the dynamic renderable
+      /// \brief Load the dynamic geometry
       public: void LoadOceanTile(OceanTilePtr _oceanTile);
 
-      /// \brief Update the dynamic renderable
+      /// \brief Update the dynamic geometry
       public: void UpdateOceanTile(OceanTilePtr _oceanTile);
 
       // Documentation inherited.

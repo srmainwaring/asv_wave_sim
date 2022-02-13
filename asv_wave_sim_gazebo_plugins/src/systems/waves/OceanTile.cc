@@ -767,26 +767,37 @@ void OceanTile::Update(double _time)
   this->dataPtr->Update(_time);
 }
 
+//////////////////////////////////////////////////
 common::Mesh * OceanTile::Mesh()
 {
   return this->dataPtr->Mesh();
 }
 
+//////////////////////////////////////////////////
 unsigned int OceanTile::VertexCount() const
 {
   return this->dataPtr->mVertices.size();
 }
 
-unsigned int OceanTile::FaceCount() const
-{
-  return this->dataPtr->mFaces.size();
-}
-
+//////////////////////////////////////////////////
 math::Vector3d OceanTile::Vertex(unsigned int _index) const
 {
   return this->dataPtr->mVertices[_index];
 }
 
+//////////////////////////////////////////////////
+math::Vector2d OceanTile::UV0(unsigned int _index) const
+{
+  return this->dataPtr->mTexCoords[_index];
+}
+
+//////////////////////////////////////////////////
+unsigned int OceanTile::FaceCount() const
+{
+  return this->dataPtr->mFaces.size();
+}
+
+//////////////////////////////////////////////////
 math::Vector3i OceanTile::Face(unsigned int _index) const
 {
   return this->dataPtr->mFaces[_index];

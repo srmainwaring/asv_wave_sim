@@ -1,7 +1,7 @@
 #include "Ogre2OceanVisual.hh"
+#include "Ogre2DynamicMesh.hh"
 
 #include <ignition/rendering/ogre2/Ogre2Material.hh>
-#include <ignition/rendering/ogre2/Ogre2DynamicRenderable.hh>
 
 #ifdef _MSC_VER
   #pragma warning(push, 0)
@@ -20,7 +20,7 @@ class ignition::rendering::Ogre2OceanVisualPrivate
   public: Ogre2MaterialPtr material = nullptr;
 
   /// \brief Ogre renderable used to render the ocean tile.
-  public: std::shared_ptr<Ogre2DynamicRenderable> tile = nullptr;
+  public: std::shared_ptr<Ogre2DynamicMesh> tile = nullptr;
 };
 
 //////////////////////////////////////////////////
@@ -67,7 +67,7 @@ void Ogre2OceanVisual::LoadCube()
   if (!this->dataPtr->tile)
   {
     this->dataPtr->tile.reset(
-      new Ogre2DynamicRenderable(this->Scene()));
+      new Ogre2DynamicMesh(this->Scene()));
     this->ogreNode->attachObject(this->dataPtr->tile->OgreObject());
   }
 
@@ -83,7 +83,7 @@ void Ogre2OceanVisual::LoadCube()
     this->SetMaterial(defaultMat, false);
   }
 
-  // Position indicator - with dynamic renderable
+  // Position indicator - with dynamic geometry
   // must specify vertices for each face and get
   // the orientation correct.
   ignition::math::Vector3d p0(-1, -1,  1);
@@ -152,7 +152,7 @@ void Ogre2OceanVisual::LoadOceanTile(OceanTilePtr _oceanTile)
   if (!this->dataPtr->tile)
   {
     this->dataPtr->tile.reset(
-      new Ogre2DynamicRenderable(this->Scene()));
+      new Ogre2DynamicMesh(this->Scene()));
     this->ogreNode->attachObject(this->dataPtr->tile->OgreObject());
   }
 
@@ -168,13 +168,19 @@ void Ogre2OceanVisual::LoadOceanTile(OceanTilePtr _oceanTile)
     this->SetMaterial(defaultMat, false);
   }
 
-  // Add points for each face
-  for (auto i=0; i < _oceanTile->FaceCount(); ++i)
+  // Add points and texture coordinates for each face
+  for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
   {
     auto face = _oceanTile->Face(i);
+    // positions
     this->dataPtr->tile->AddPoint(_oceanTile->Vertex(face.X()));
     this->dataPtr->tile->AddPoint(_oceanTile->Vertex(face.Y()));
     this->dataPtr->tile->AddPoint(_oceanTile->Vertex(face.Z()));
+
+    // uv0s
+    this->dataPtr->tile->SetUV0(v+0, _oceanTile->UV0(face.X()));
+    this->dataPtr->tile->SetUV0(v+1, _oceanTile->UV0(face.Y()));
+    this->dataPtr->tile->SetUV0(v+2, _oceanTile->UV0(face.Z()));
   }
 
   this->dataPtr->tile->Update();
@@ -183,13 +189,18 @@ void Ogre2OceanVisual::LoadOceanTile(OceanTilePtr _oceanTile)
 //////////////////////////////////////////////////
 void Ogre2OceanVisual::UpdateOceanTile(OceanTilePtr _oceanTile)
 {
-  // Update points for each face
-  for (auto i=0, v=0; i < _oceanTile->FaceCount(); ++i)
+  // Update positions and texture coordinates for each face
+  for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
   {
     auto face = _oceanTile->Face(i);
-    this->dataPtr->tile->SetPoint(v++, _oceanTile->Vertex(face.X()));
-    this->dataPtr->tile->SetPoint(v++, _oceanTile->Vertex(face.Y()));
-    this->dataPtr->tile->SetPoint(v++, _oceanTile->Vertex(face.Z()));
+    // positions
+    this->dataPtr->tile->SetPoint(v+0, _oceanTile->Vertex(face.X()));
+    this->dataPtr->tile->SetPoint(v+1, _oceanTile->Vertex(face.Y()));
+    this->dataPtr->tile->SetPoint(v+2, _oceanTile->Vertex(face.Z()));
+    // uv0s
+    this->dataPtr->tile->SetUV0(v+0, _oceanTile->UV0(face.X()));
+    this->dataPtr->tile->SetUV0(v+1, _oceanTile->UV0(face.Y()));
+    this->dataPtr->tile->SetUV0(v+2, _oceanTile->UV0(face.Z()));
   }
 
   this->dataPtr->tile->Update();

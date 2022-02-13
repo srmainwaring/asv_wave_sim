@@ -44,10 +44,12 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
     public: common::Mesh * Mesh();
 
     ////////////////////////////////////////
-    // Access to vertices and faces
+    // Access to vertices, texture coordinates and faces
     public: unsigned int VertexCount() const;
-    public: unsigned int FaceCount() const;
     public: math::Vector3d Vertex(unsigned int _index) const;
+    public: math::Vector2d UV0(unsigned int _index) const;
+
+    public: unsigned int FaceCount() const;
     public: math::Vector3i Face(unsigned int _index) const;
 
     private: std::unique_ptr<OceanTilePrivate> dataPtr;

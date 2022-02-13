@@ -9,6 +9,7 @@ gz_add_system(waves
   SOURCES
     Waves.cc
     OceanTile.cc
+    Ogre2DynamicMesh.cc
     Ogre2OceanTile.cc
     Ogre2OceanVisual.cc
     ../../Geometry.cc
