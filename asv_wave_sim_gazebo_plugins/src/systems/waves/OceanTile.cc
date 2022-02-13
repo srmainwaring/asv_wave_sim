@@ -657,6 +657,8 @@ common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _of
 //////////////////////////////////////////////////
 void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
 {
+  this->Update(_time);
+  
   // \todo: add checks
   // \todo: handle more than one submesh
   // Get the submesh

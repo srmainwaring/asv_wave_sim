@@ -1,6 +1,8 @@
 #include "Ogre2OceanVisual.hh"
 #include "Ogre2DynamicMesh.hh"
 
+#include <ignition/common.hh>
+#include <ignition/common/SubMesh.hh>
 #include <ignition/rendering/ogre2/Ogre2Material.hh>
 
 #ifdef _MSC_VER
@@ -228,20 +230,20 @@ void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
     this->SetMaterial(defaultMat, false);
   }
 
-  // Add points and texture coordinates for each face
-  // for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
-  // {
-  //   auto face = _oceanTile->Face(i);
-  //   // positions
-  //   this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.X()));
-  //   this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.Y()));
-  //   this->dataPtr->mesh->AddPoint(_oceanTile->Vertex(face.Z()));
+  // \todo add checks
+  // \todo: handle more than one submesh
+  auto subMesh = _mesh->SubMeshByIndex(0);
 
-  //   // uv0s
-  //   this->dataPtr->mesh->SetUV0(v+0, _oceanTile->UV0(face.X()));
-  //   this->dataPtr->mesh->SetUV0(v+1, _oceanTile->UV0(face.Y()));
-  //   this->dataPtr->mesh->SetUV0(v+2, _oceanTile->UV0(face.Z()));
-  // }
+  // Loop over all indices
+  for (auto i=0; i < subMesh.lock()->IndexCount(); ++i)
+  {
+    auto index = subMesh.lock()->Index(i);
+    auto vertex = subMesh.lock()->Vertex(index);
+    auto uv0 = subMesh.lock()->TexCoord(index);
+
+    this->dataPtr->mesh->AddPoint(vertex);
+    this->dataPtr->mesh->SetUV0(i, uv0);
+  }
 
   this->dataPtr->mesh->Update();
 }
@@ -249,19 +251,20 @@ void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
 //////////////////////////////////////////////////
 void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
 {
-  // Update positions and texture coordinates for each face
-  // for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
-  // {
-  //   auto face = _oceanTile->Face(i);
-  //   // positions
-  //   this->dataPtr->mesh->SetPoint(v+0, _oceanTile->Vertex(face.X()));
-  //   this->dataPtr->mesh->SetPoint(v+1, _oceanTile->Vertex(face.Y()));
-  //   this->dataPtr->mesh->SetPoint(v+2, _oceanTile->Vertex(face.Z()));
-  //   // uv0s
-  //   this->dataPtr->mesh->SetUV0(v+0, _oceanTile->UV0(face.X()));
-  //   this->dataPtr->mesh->SetUV0(v+1, _oceanTile->UV0(face.Y()));
-  //   this->dataPtr->mesh->SetUV0(v+2, _oceanTile->UV0(face.Z()));
-  // }
+  // \todo add checks
+  // \todo: handle more than one submesh
+  auto subMesh = _mesh->SubMeshByIndex(0);
+
+  // Loop over all indices
+  for (auto i=0; i < subMesh.lock()->IndexCount(); ++i)
+  {
+    auto index = subMesh.lock()->Index(i);
+    auto vertex = subMesh.lock()->Vertex(index);
+    auto uv0 = subMesh.lock()->TexCoord(index);
+
+    this->dataPtr->mesh->SetPoint(i, vertex);
+    this->dataPtr->mesh->SetUV0(i, uv0);
+  }
 
   this->dataPtr->mesh->Update();
 }

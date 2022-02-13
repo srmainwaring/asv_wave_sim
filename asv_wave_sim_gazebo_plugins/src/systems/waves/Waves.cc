@@ -495,7 +495,7 @@ void WavesPrivate::OnUpdate()
 
     // Simple update (reload entire mesh...)
     // update the tile (recalculates vertices)
-    this->oceanTile->Update(simTime);
+    this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
 
     // update the dynamic renderable (CPU => GPU)
     rendering::Ogre2OceanVisualPtr ogre2Visual =
