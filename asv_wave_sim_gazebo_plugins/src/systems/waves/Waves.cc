@@ -254,6 +254,7 @@ class ignition::gazebo::systems::WavesPrivate
 
   /// \brief Pointer to ocean visual
   public: rendering::VisualPtr oceanVisual;
+  public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
 
   /// \brief Material used by this visual
   public: rendering::MaterialPtr material;
@@ -442,7 +443,7 @@ void WavesPrivate::OnUpdate()
   case OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY:
   {
     // Test attaching another visual to the entity
-    if (!this->oceanVisual)
+    if (this->oceanVisuals.empty())
     {
       ignmsg << "Waves: creating dynamic geometry ocean visual\n";
 
@@ -454,46 +455,61 @@ void WavesPrivate::OnUpdate()
       this->oceanTile.reset(new rendering::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
 
-      // do not pass to common::MeshManager as we are going to modify
+      // create mesh - do not store in MeshManager as it will be modified
       this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
 
-      // create visual
-      rendering::Ogre2OceanVisualPtr ogre2Visual =
-          std::make_shared<rendering::Ogre2OceanVisual>(); 
-
-      // Scene: initialisation work-around
+      // scene: use in object initialisation work-around
       rendering::Ogre2ScenePtr ogre2Scene =
           std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
-      ogre2Visual->InitObject(ogre2Scene, 50010, "ocean-visual");
-      // visual->LoadCube();
-      // ogre2Visual->LoadOceanTile(this->oceanTile);
-      ogre2Visual->LoadMesh(this->oceanTileMesh);
 
+      // NOTE: this approach is not feasible - multiple copies of the mesh
+      // rather than multiple visuals referencing one mesh and relocating it...
 
-      rendering::VisualPtr visual = ogre2Visual;
-      visual->SetLocalPosition(0.0, 0.0, 0.0);
-      visual->SetLocalRotation(0.0, 0.0, 0.0);
-      visual->SetLocalScale(1.0, 1.0, 1.0);
-      visual->SetMaterial("OceanBlue");
-      visual->SetVisible(true);
+      // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
+      const int nX = 3;
+      const int nY = 3;
+      unsigned int id = 50000;
+      // for (int iy=-nY; iy<=nY; ++iy)
+      int iy = 0;
+      {
+        // for (int ix=-nX; ix<=nX; ++ix)
+        int ix = 0;
+        {
+          /// \todo: include the current entity position 
+          ignition::math::Vector3d position(
+            /* this->Position() + */ ix * L,
+            /* this->Position() + */ iy * L,
+            /* this->Position() + */ 0.0
+          );
 
-      // Required? These are used in ignition::gazebo::VisualizationCapabilities
-      // ignition::gazebo::Entity entityId;
-      // visual->SetUserData("gazebo-entity", static_cast<int>(entityId));
-      // visual->SetUserData("pause-update", static_cast<int>(0));
+          // create visual
+          rendering::Ogre2OceanVisualPtr ogreVisual =
+              std::make_shared<rendering::Ogre2OceanVisual>(); 
 
-      // add visual to parent
-      auto parent = this->visual->Parent();
-      parent->AddChild(visual);
+          unsigned int objId = id++;
+          std::stringstream ss;
+          ss << "OceanVisual(" << objId << ")";
+          std::string objName = ss.str();
 
-      // keep reference
-      this->oceanVisual = visual;
+          ogreVisual->InitObject(ogre2Scene, objId, objName);
+          ogreVisual->LoadMesh(this->oceanTileMesh);
+
+          rendering::VisualPtr visual = ogreVisual;
+          visual->SetLocalPosition(position);
+          visual->SetMaterial("OceanBlue");
+
+          // add visual to parent
+          // auto parent = this->visual->Parent();
+          // parent->AddChild(visual);
+
+          oceanVisuals.push_back(ogreVisual);
+        }
+      }
     }
 
-    if (!this->oceanVisual)
+    if (this->oceanVisuals.empty())
       return;
 
-    // Simple update (reload entire mesh...)
     // update the tile (recalculates vertices)
     this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
 
@@ -501,8 +517,10 @@ void WavesPrivate::OnUpdate()
     rendering::Ogre2OceanVisualPtr ogre2Visual =
         std::dynamic_pointer_cast<rendering::Ogre2OceanVisual>(
             this->oceanVisual);
-    // ogre2Visual->UpdateOceanTile(this->oceanTile);
-    ogre2Visual->UpdateMesh(this->oceanTileMesh);
+    for (auto& visual : this->oceanVisuals)
+    {
+      visual->UpdateMesh(this->oceanTileMesh);
+    }
     break;
   }
   case OceanVisualMethod::OGRE1_MESH:
