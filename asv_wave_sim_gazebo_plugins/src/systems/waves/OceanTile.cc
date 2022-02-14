@@ -17,7 +17,7 @@
 
 #include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
 #include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
-#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationSinusoidal.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationSinusoid.hh"
 #include "../../../include/asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
 #include "../../../include/asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 
@@ -159,8 +159,9 @@ bool _hasVisuals) :
       // Simple
       double amplitude = 0.0;
       double period = 10.0;
-      std::unique_ptr<WaveSimulationSinusoidal> waveSim(new WaveSimulationSinusoidal(_N, _L));
-      waveSim->SetParameters(amplitude, period);
+      std::unique_ptr<WaveSimulationSinusoid> waveSim(new WaveSimulationSinusoid(_N, _L));
+      waveSim->SetAmplitude(amplitude);
+      waveSim->SetPeriod(period);
       mWaveSim = std::move(waveSim);
       break;
     }

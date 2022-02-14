@@ -167,8 +167,10 @@ namespace asv
   
   
     // @TODO: relocate 
+  #if 0
+    /// \todo(srmainwaring): port to ignition 
     void OnWaveWindMsg(ConstParam_VPtr &_msg);
-
+  #endif
   };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@ gz_add_system(waves
     ../../WaveParameters.cc
     ../../WaveSimulation.cc
     ../../WaveSimulationFFTW.cc
-    ../../WaveSimulationSinusoidal.cc
+    ../../WaveSimulationSinusoid.cc
     ../../WaveSimulationTrochoid.cc
     ../../WaveSpectrum.cc
   PUBLIC_LINK_LIBS

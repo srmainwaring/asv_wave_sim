@@ -39,6 +39,11 @@ ign_find_package(ignition-msgs9 REQUIRED)
 set(IGN_MSGS_VER ${ignition-msgs9_VERSION_MAJOR})
 
 #--------------------------------------
+# Find ignition-transport
+ign_find_package(ignition-transport12 REQUIRED)
+set(IGN_TRANSPORT_VER ${ignition-transport12_VERSION_MAJOR})
+
+#--------------------------------------
 # Find ignition-plugin
 ign_find_package(ignition-plugin1 REQUIRED COMPONENTS loader register)
 set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
@@ -224,6 +229,7 @@ target_link_libraries(Hydrodynamics
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
   ignition-common${IGN_COMMON_VER}::graphics
   ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+  ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
   ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
   ignition-rendering${IGN_RENDERING_VER}-ogre # the engine-plugin
   sdformat${SDF_VER}::sdformat${SDF_VER}

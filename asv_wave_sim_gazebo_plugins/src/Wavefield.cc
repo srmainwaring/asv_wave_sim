@@ -23,7 +23,7 @@
 #include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
 
 // @TODO: relocate (transport / messages etc) 
-#include <gazebo/common/common.hh>
+// #include <gazebo/common/common.hh>
 #include "asv_wave_sim_gazebo_plugins/Utilities.hh"
 #include <thread>
 // @TODO: relocate (transport / messages etc) 
@@ -31,6 +31,7 @@
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
+#include <ignition/transport.hh>
 
 #include <array>
 #include <cmath>
@@ -296,8 +297,8 @@ namespace asv
 
     // @TODO: relocate
     public: std::recursive_mutex mutex;
-    public: gazebo::transport::NodePtr node;
-    public: gazebo::transport::SubscriberPtr waveWindSub;
+    // public: ignition::transport::Node node;
+    // public: ignition::transport::SubscriberPtr waveWindSub;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -306,8 +307,8 @@ namespace asv
   WavefieldOceanTile::~WavefieldOceanTile()
   {
     // @TODO: relocate
-    this->data->waveWindSub.reset();
-    this->data->node.reset();
+    // this->data->waveWindSub.reset();
+    // this->data->node.reset();
   }
 
   WavefieldOceanTile::WavefieldOceanTile(
@@ -317,10 +318,10 @@ namespace asv
     ignmsg << "Constructing WavefieldOceanTile..." <<  std::endl;
 
       // TODO: relocate
-      this->data->node = gazebo::transport::NodePtr(new gazebo::transport::Node());
-      this->data->node->Init();
-      this->data->waveWindSub = this->data->node->Subscribe(
-        "~/wave/wind", &WavefieldOceanTile::OnWaveWindMsg, this);
+      /// \todo(srmainwaring): port to ignition
+      // this->data->node;
+      // this->data->waveWindSub = this->data->node.Subscribe(
+      //   "~/wave/wind", &WavefieldOceanTile::OnWaveWindMsg, this);
 
     int N = 128;
     int NPlus1 = N + 1;
@@ -420,6 +421,8 @@ namespace asv
     this->data->triangulatedGrid->UpdatePoints(vertices);
   }
 
+#if 0
+  /// \todo(srmainwaring): port to ignition 
   void WavefieldOceanTile::OnWaveWindMsg(ConstParam_VPtr &_msg)
   {
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
@@ -447,6 +450,7 @@ namespace asv
     // Update simulation
     this->data->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
   }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////  
 

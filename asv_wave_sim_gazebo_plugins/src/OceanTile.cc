@@ -173,7 +173,7 @@ namespace asv
         }
 
         // Texture Coordinates
-        gzmsg << "mVertices.size(): " << mVertices.size() << std::endl;
+        ignmsg << "mVertices.size(): " << mVertices.size() << std::endl;
         mTangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
         mBitangents.assign(mVertices.size(), Ogre::Vector3::ZERO);
         mNormals.assign(mVertices.size(), Ogre::Vector3::ZERO);
