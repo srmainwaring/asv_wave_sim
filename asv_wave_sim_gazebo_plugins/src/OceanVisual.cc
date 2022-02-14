@@ -143,14 +143,6 @@ namespace asv
       // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
       const int nX = 3;
       const int nY = 3;
-      // Mesh Visual: Above
-      {
-        this->data->aboveOceanVisual.reset(new rendering::Visual(aboveOceanVisualName, shared_from_this()));
-        this->data->aboveOceanVisual->Load();
-        ignition::rendering::AttachMesh(*this->data->aboveOceanVisual, this->data->aboveOceanMeshName);
-        this->data->aboveOceanVisual->SetPosition(this->Position());
-        this->data->aboveOceanVisual->SetType(rendering::Visual::VT_VISUAL);
-
       for (int iy=-nY; iy<=nY; ++iy)
       {
         for (int ix=-nX; ix<=nX; ++ix)
@@ -199,7 +191,6 @@ namespace asv
         }
       }
 
-
 #if DEBUG
       for (auto visual : this->data->aboveOceanVisuals)
       {
@@ -222,19 +213,28 @@ namespace asv
           gzmsg << "ShaderType: "           << visual->GetShaderType() << std::endl;
           gzmsg << "AttachedObjectCount: "  << visual->GetAttachedObjectCount() << std::endl;
       }
-      // Mesh Visual: Below
-      {
-        this->data->belowOceanVisual.reset(new rendering::Visual(belowOceanVisualName, shared_from_this()));
-        this->data->belowOceanVisual->Load();
-        ignition::rendering::AttachMesh(*this->data->belowOceanVisual, this->data->belowOceanMeshName);
-        this->data->belowOceanVisual->SetPosition(this->Position());
-        this->data->belowOceanVisual->SetType(rendering::Visual::VT_VISUAL);
+ #endif
+      // // Mesh Visual: Above
+      // {
+      //   this->data->aboveOceanVisual.reset(new rendering::Visual(aboveOceanVisualName, shared_from_this()));
+      //   this->data->aboveOceanVisual->Load();
+      //   ignition::rendering::AttachMesh(*this->data->aboveOceanVisual, this->data->aboveOceanMeshName);
+      //   this->data->aboveOceanVisual->SetPosition(this->Position());
+      //   this->data->aboveOceanVisual->SetType(rendering::Visual::VT_VISUAL);
+      // }
+      // // Mesh Visual: Below
+      // {
+      //   this->data->belowOceanVisual.reset(new rendering::Visual(belowOceanVisualName, shared_from_this()));
+      //   this->data->belowOceanVisual->Load();
+      //   ignition::rendering::AttachMesh(*this->data->belowOceanVisual, this->data->belowOceanMeshName);
+      //   this->data->belowOceanVisual->SetPosition(this->Position());
+      //   this->data->belowOceanVisual->SetType(rendering::Visual::VT_VISUAL);
 
-        // Set the material from the parent visual
-        auto materialName = this->GetMaterialName();
-        // std::string materialName("Gazebo/Orange");
-        this->data->belowOceanVisual->SetMaterial(materialName);
-      }
+      //   // Set the material from the parent visual
+      //   auto materialName = this->GetMaterialName();
+      //   // std::string materialName("Gazebo/Orange");
+      //   this->data->belowOceanVisual->SetMaterial(materialName);
+      // }
 
       this->SetVisibilityFlags(GZ_VISIBILITY_ALL);    
       this->data->isInitialised = true;
