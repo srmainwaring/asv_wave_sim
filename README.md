@@ -244,6 +244,17 @@ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCM
 
 ### ignition environment variables
 
+Supposing that the colcon workspace directory containing the `src` folder is `$HOME/wave_sim_ws`,
+then the following environment variables should be set to enable Gazebo to locate the plugins
+and models:
 
+```bash
+export IGN_GAZEBO_RESOURCE_PATH=${IGN_GAZEBO_RESOURCE_PATH}:\
+$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/models:\
+$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/world_models:\
+$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/worlds
 
+export IGN_GAZEBO_SYSTEM_PLUGIN_PATH=${IGN_GAZEBO_SYSTEM_PLUGIN_PATH}:\
+$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo_plugins/build/lib
+```
 
