@@ -33,7 +33,13 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
   {
     public: virtual ~OceanTile();
 
-    public: OceanTile(size_t _N, double _L, bool _hasVisuals=true);
+    public: OceanTile(unsigned int _N, double _L, bool _hasVisuals=true);
+
+    /// \brief The tile size (or length) L. 
+    double TileSize() const;
+
+    /// \brief The tile resolution (N). The tile contains (N + 1)**2 vertices. 
+    unsigned int Resolution() const;
 
     public: void SetWindVelocity(double _ux, double _uy);
 

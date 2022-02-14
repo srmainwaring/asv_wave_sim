@@ -44,7 +44,7 @@ class OceanTilePrivate
 public:
   ~OceanTilePrivate();
 
-  OceanTilePrivate(size_t _N, double _L, bool _hasVisuals=true);
+  OceanTilePrivate(unsigned int _N, double _L, bool _hasVisuals=true);
   
   void SetWindVelocity(double _ux, double _uy);
 
@@ -106,6 +106,8 @@ public:
 
   void Update(double _time);
 
+  void UpdateVertex(size_t idx0, size_t idx1);
+
   void UpdateVertices(double _time);
 
   common::Mesh * CreateMesh(const std::string &_name, double _offsetZ,
@@ -113,10 +115,6 @@ public:
 
   void UpdateMesh(double _time, common::Mesh *_mesh);
 
-  // void UpdateMesh(Ogre::v1::SubMesh *_subMesh, double _offsetZ=0.0, bool _reverseOrientation=false);
-
-  const std::vector<math::Vector3d>& Vertices() const;
-  const std::vector<math::Vector3i>& Faces() const;
 };
 
 //////////////////////////////////////////////////
@@ -126,7 +124,7 @@ OceanTilePrivate::~OceanTilePrivate()
 
 //////////////////////////////////////////////////
 OceanTilePrivate::OceanTilePrivate(
-size_t _N,
+unsigned int _N,
 double _L,
 bool _hasVisuals) :
     mHasVisuals(_hasVisuals),
@@ -146,7 +144,7 @@ bool _hasVisuals) :
     mDxdy(_N * _N, 0.0)
 {
   // Different types of wave simulator are supported...
-  // 0 - WaveSimulationSinusoidal
+  // 0 - WaveSimulationSinusoid
   // 1 - WaveSimulationTrochoid
   // 2 - WaveSimulationFFTW
   // 3 - WaveSimulationOpenCL
@@ -157,9 +155,12 @@ bool _hasVisuals) :
     case 0:
     {
       // Simple
-      double amplitude = 0.0;
+      double dir_x = 1.0;
+      double dir_y = 0.0;
+      double amplitude = 3.0;
       double period = 10.0;
       std::unique_ptr<WaveSimulationSinusoid> waveSim(new WaveSimulationSinusoid(_N, _L));
+      waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);
       mWaveSim = std::move(waveSim);
@@ -230,8 +231,12 @@ common::Mesh * OceanTilePrivate::CreateMesh()
   const double Ly = this->mTileSize;
   const double lx = this->mSpacing;
   const double ly = this->mSpacing;
-  const double xTex = 1.0 * lx;
-  const double yTex = 1.0 * ly;
+  // Here we are actually mapping (u, v) to each quad in the tile (not the entire tile). 
+  // const double xTex = 1.0 * lx;
+  // const double yTex = 1.0 * ly;
+  double texScale = Lx;
+  const double xTex = texScale / mResolution;
+  const double yTex = texScale / mResolution;
 
   ignmsg << "OceanTile: calculating vertices\n";
   // Vertices - (N+1) vertices in each row / column
@@ -468,6 +473,43 @@ void OceanTilePrivate::Update(double _time)
 }
 
 //////////////////////////////////////////////////
+/// \brief Update a vertex and it's tangent space.
+///
+/// \param idx0 is the index for the (N + 1) x (N + 1) mesh vertices, including skirt
+/// \param idx1 is the index for the N x N simulated vertices
+void OceanTilePrivate::UpdateVertex(size_t idx0, size_t idx1)
+{
+  // 1. Update vertex
+  double h  = mHeights[idx1];
+  double sx = mDisplacementsX[idx1];
+  double sy = mDisplacementsY[idx1];
+
+  auto&& v0 = mVertices0[idx0];
+  auto&& v  = mVertices[idx0];
+  v.X() = v0.X() + sx;
+  v.Y() = v0.Y() + sy;
+  v.Z() = v0.Z() + h;
+
+  // 2. Update tangent and bitangent vectors (not normalised).
+  // @TODO Check sign for displacement terms
+  double dhdx  = mDhdx[idx1]; 
+  double dhdy  = mDhdy[idx1]; 
+  double dsxdx = mDxdx[idx1]; 
+  double dsydy = mDydy[idx1]; 
+  double dsxdy = mDxdy[idx1]; 
+
+  auto&& t = mTangents[idx0];
+  t.X() = dsxdx + 1.0;
+  t.Y() = dsxdy;
+  t.Z() = dhdx;      
+  
+  auto&& b = mBitangents[idx0];
+  b.X() = dsxdy;
+  b.Y() = dsydy + 1.0;
+  b.Z() = dhdy;
+}
+
+//////////////////////////////////////////////////
 void OceanTilePrivate::UpdateVertices(double _time)
 {
   mWaveSim->SetTime(_time);
@@ -477,116 +519,50 @@ void OceanTilePrivate::UpdateVertices(double _time)
     mWaveSim->ComputeDisplacementsAndDerivatives(
         mHeights, mDisplacementsX, mDisplacementsY,
         mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
-  }
+    }
   else
   {
     mWaveSim->ComputeHeights(mHeights);
     mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
-    mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
-    mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
+    // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
+    // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
   }
 
   const size_t N = mResolution;
-  const size_t NPlus1 = N + 1;
+  const size_t NPlus1  = N + 1;
   const size_t NMinus1 = N - 1;
 
   for (size_t iy=0; iy<N; ++iy)
   {
     for (size_t ix=0; ix<N; ++ix)
     {
-      // 1. Update vertices
-      size_t idx0 =  iy * NPlus1 + ix;
-      size_t idx1 =  iy * N + ix;
-
-      double h  = mHeights[idx1];
-      double sx = mDisplacementsX[idx1];
-      double sy = mDisplacementsY[idx1];
-
-      auto&& v0 = mVertices0[idx0];
-      auto&& v  = mVertices[idx0];
-      v.X() = v0.X() + sx;
-      v.Y() = v0.Y() + sy;
-      v.Z() = v0.Z() + h;
-
-      // 2. Update tangent and bitangent vectors (not normalised).
-      // @TODO Check sign for displacement terms
-      double dhdx  = mDhdx[idx1]; 
-      double dhdy  = mDhdy[idx1]; 
-      double dsxdx = mDxdx[idx1]; 
-      double dsydy = mDydy[idx1]; 
-      double dsxdy = mDxdy[idx1]; 
-
-      auto&& t = mTangents[idx0];
-      t.X() = dsxdx + 1.0;
-      t.Y() = dsxdy;
-      t.Z() = dhdx;
-      
-      auto&& b = mBitangents[idx0];
-      b.X() = dsxdy;
-      b.Y() = dsydy + 1.0;
-      b.Z() = dhdy;
+      size_t idx0 = iy * NPlus1 + ix;
+      size_t idx1 = iy * N + ix;
+      UpdateVertex(idx0, idx1);
     }
   }
 
-  // Set skirt values:
-  // Apply shifts from row / column adjoining skirt to the skirt vertices.
-  // Assume the tangent space vectors for the skirt match the adjoining row / column. 
+  // Set skirt values assuming periodic boundary conditions:
   for (size_t i=0; i<N; ++i)
   {
-    // Top row
+    // Top row (iy = N) periodic with bottom row (iy = 0)
     {
-      size_t idx0 =  NMinus1 * N + i;
-      size_t idx1 =  N * NPlus1 + i;
-
-      double h  = mHeights[idx0];
-      double sx = mDisplacementsX[idx0];
-      double sy = mDisplacementsY[idx0];
-
-      auto&& v0 = mVertices0[idx1];
-      auto&& v  = mVertices[idx1];
-      v.X() = v0.X() + sx;
-      v.Y() = v0.Y() + sy;
-      v.Z() = v0.Z() + h;
-
-      mTangents[idx1] = mTangents[idx0];
-      mBitangents[idx1] = mBitangents[idx0];
-
+      size_t idx0 = N * NPlus1 + i;
+      size_t idx1 = i;
+      UpdateVertex(idx0, idx1);
     }
-    // Right column
+    // Right column (ix = N) periodic with left column (ix = 0)
     {
-      size_t idx0 =  i * N + NMinus1;
-      size_t idx1 =  i * NPlus1 + N;
-
-      double h  = mHeights[idx0];
-      double sx = mDisplacementsX[idx0];
-      double sy = mDisplacementsY[idx0];
-
-      auto&& v0 = mVertices0[idx1];
-      auto&& v  = mVertices[idx1];
-      v.X() = v0.X() + sx;
-      v.Y() = v0.Y() + sy;
-      v.Z() = v0.Z() + h;
-
-      mTangents[idx1] = mTangents[idx0];
-      mBitangents[idx1] = mBitangents[idx0];
+      size_t idx0 = i * NPlus1 + N;
+      size_t idx1 = i * N;
+      UpdateVertex(idx0, idx1);
     }
   }
   {
-    // Top right corner.
-    size_t idx0 =  NMinus1 * N + NMinus1;
-    size_t idx1 =  N * NPlus1 + N;
-
-    double h  = mHeights[idx0];
-    double sx = mDisplacementsX[idx0];
-    double sy = mDisplacementsY[idx0];
-
-    auto&& v0 = mVertices0[idx1];
-    auto&& v  = mVertices[idx1];
-    v.X() = v0.X() + sx;
-    v.Y() = v0.Y() + sy;
-    v.Z() = v0.Z() + h;
-    mTangents[idx1] = mTangents[idx0];
-    mBitangents[idx1] = mBitangents[idx0];
+    // Top right corner period with bottom right corner.
+    size_t idx0 = NPlus1 * NPlus1 - 1;
+    size_t idx1 = 0;
+    UpdateVertex(idx0, idx1);
   }
 }
 
@@ -675,25 +651,13 @@ void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
 }
 
 //////////////////////////////////////////////////
-const std::vector<math::Vector3d>& OceanTilePrivate::Vertices() const
-{
-  return mVertices;
-}
-
-//////////////////////////////////////////////////
-const std::vector<math::Vector3i>& OceanTilePrivate::Faces() const
-{
-  return mFaces;
-}
-
-//////////////////////////////////////////////////
 //////////////////////////////////////////////////
 OceanTile::~OceanTile()
 {
 }
 
 //////////////////////////////////////////////////
-OceanTile::OceanTile(size_t _N, double _L, bool _hasVisuals) :
+OceanTile::OceanTile(unsigned int _N, double _L, bool _hasVisuals) :
     dataPtr(std::make_unique<OceanTilePrivate>(_N, _L, _hasVisuals))
 {
 }
@@ -702,6 +666,18 @@ OceanTile::OceanTile(size_t _N, double _L, bool _hasVisuals) :
 void OceanTile::SetWindVelocity(double _ux, double _uy)
 {
   this->dataPtr->SetWindVelocity(_ux, _uy);
+}
+
+//////////////////////////////////////////////////
+double OceanTile::TileSize() const
+{
+  return this->dataPtr->mTileSize;
+}
+
+//////////////////////////////////////////////////
+unsigned int OceanTile::Resolution() const
+{
+  return this->dataPtr->mResolution;
 }
 
 //////////////////////////////////////////////////
