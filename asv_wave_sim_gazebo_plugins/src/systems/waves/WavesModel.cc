@@ -17,6 +17,9 @@
 
 #include "OceanTile.hh"
 
+// #include "../../../include/asv_wave_sim_gazebo_plugins/WaveParameters.hh"
+// #include "../../../include/asv_wave_sim_gazebo_plugins/Wavefield.hh"
+
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
 
@@ -32,12 +35,51 @@
 #include <vector>
 #include <string>
 
+// using namespace asv;
+
 using namespace ignition;
 using namespace gazebo;
 using namespace systems;
 
+// Modelled on the Wind system, but applied at the model level rather than the world 
 class ignition::gazebo::systems::WavesModelPrivate
 {
+  /// \brief Initialize the system.
+  /// \param[in] _ecm Mutable reference to the EntityComponentManager.
+  /// \param[in] _sdf Pointer to sdf::Element that contains configuration
+  /// parameters for the system.
+  public: void Load(EntityComponentManager &_ecm,
+                    const std::shared_ptr<const sdf::Element> &_sdf);
+
+  /// \brief Calculate and update the waves component.
+  /// \param[in] _info Simulation update info.
+  /// \param[in] _ecm Mutable reference to the EntityComponentManager.
+  public: void UpdateWaves(const UpdateInfo &_info,
+                           EntityComponentManager &_ecm);
+
+
+  /// \brief Model entity to which this system is attached
+  public: Entity modelEntity = kNullEntity;
+
+  /// \brief Wavefield entity on which this system operates (one per model)
+  public: Entity wavefieldEntity = kNullEntity;
+
+  ////////// FROM WavefieldEntity
+
+ /// \brief The size of the wavefield
+  public: math::Vector2d size;
+
+  /// \brief The number of grid cells in the wavefield
+  public: math::Vector2i cellCount;
+
+  /// \brief The wave parameters.
+  // public: std::shared_ptr<WaveParameters> waveParams;
+
+  /// \brief The wavefield.
+  // public: std::shared_ptr<Wavefield> wavefield;
+
+
+
   /// \brief Path to the model
   public: std::string modelPath;
 
@@ -47,8 +89,6 @@ class ignition::gazebo::systems::WavesModelPrivate
   /// \brief Connection to pre-render event callback
   public: ignition::common::ConnectionPtr connection {nullptr};
 
-  /// \brief Entity id of the visual
-  public: Entity entity = kNullEntity;
 
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
@@ -112,13 +152,74 @@ void WavesModel::PreUpdate(
 }
 
 //////////////////////////////////////////////////
+//////////////////////////////////////////////////
 WavesModelPrivate::~WavesModelPrivate()
 {
 };
 
+/////////////////////////////////////////////////
+void WavesModelPrivate::Load(EntityComponentManager &_ecm,
+    const std::shared_ptr<const sdf::Element> &_sdf)
+{
+#if 0
+  Base::Load(_sdf);
+
+  // Wavefield Parameters
+  this->data->size      = Utilities::SdfParamVector2(*_sdf, "size",       Vector2(1000, 1000));
+  this->data->cellCount = Utilities::SdfParamVector2(*_sdf, "cell_count", Vector2(50, 50));
+
+  // Wave Parameters
+  this->data->waveParams.reset(new WaveParameters());
+  if (_sdf->HasElement("wave"))
+  {
+    sdf::ElementPtr sdfWave = _sdf->GetElement("wave");
+    this->data->waveParams->SetFromSDF(*sdfWave);
+  }
+
+  // @DEBUG_INFO
+  // ignmsg << "WavefieldEntity..." <<  std::endl;
+  // this->data->waveParams->DebugPrint();
+#endif
+}
+
+/////////////////////////////////////////////////
+void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
+    EntityComponentManager &_ecm)
+{
+#if 0
+  // Update the mesh
+  double simTime = this->GetWorld()->SimTime().Double();
+  this->data->wavefield->Update(simTime);
+#endif
+}
+
+/////////////////////////////////////////////////
 void WavesModelPrivate::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->mutex);
+
+  // initialise on first pass...
+#if 0  
+    // Wavefield  
+    std::string meshName = "_WAVEFIELD";
+    std::string meshPath = "";
+
+    double simTime = this->GetWorld()->SimTime().Double();
+
+// @TODO SWITCH WAVE SIMULATION TYPE
+#if 0
+    this->data->wavefield.reset(new WavefieldGerstner(
+      meshName,
+      { this->data->size[0], this->data->size[1] },
+      { static_cast<size_t>(this->data->cellCount[0]), static_cast<size_t>(this->data->cellCount[1]) }
+    ));
+#else
+    this->data->wavefield.reset(new WavefieldOceanTile(meshName));
+
+    this->data->wavefield->SetParameters(this->data->waveParams);
+    this->data->wavefield->Update(simTime);
+#endif
+#endif
 }
 
 //////////////////////////////////////////////////

@@ -110,8 +110,8 @@ namespace asv
 
     this->data->wavefield->SetParameters(this->data->waveParams);
     this->data->wavefield->Update(simTime);
-  }
 #endif
+  }
 
   void WavefieldEntity::Reset()
   {
