@@ -88,4 +88,5 @@ function(gz_add_system system_name)
 endfunction()
 
 add_subdirectory(dynamic)
+add_subdirectory(hydrodynamics)
 add_subdirectory(waves)
