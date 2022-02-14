@@ -30,3 +30,24 @@ gz_add_system(waves
     IgnOGRE2::IgnOGRE2
     ${FFT_LIBRARIES}
 )
+
+
+gz_add_system(waves-model
+  SOURCES
+    WavesModel.cc
+    OceanTile.cc
+    ../../Geometry.cc
+    ../../PhysicalConstants.cc
+    ../../Physics.cc
+    ../../WaveParameters.cc
+    ../../WaveSimulation.cc
+    ../../WaveSimulationFFTW.cc
+    ../../WaveSimulationSinusoid.cc
+    ../../WaveSimulationTrochoid.cc
+    ../../WaveSpectrum.cc
+  PUBLIC_LINK_LIBS
+    ${rendering_target}
+    ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+    ignition-gazebo${IGN_GAZEBO_VER}::ignition-gazebo${IGN_GAZEBO_VER}
+    ${FFT_LIBRARIES}
+)
