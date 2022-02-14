@@ -25,8 +25,6 @@
 #include <ignition/common/Mesh.hh>
 #include <ignition/common/SubMesh.hh>
 
-#include <ignition/rendering.hh>
-
 #include <cmath>
 #include <iostream>
 

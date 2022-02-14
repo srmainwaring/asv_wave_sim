@@ -16,8 +16,9 @@
 #ifndef IGNITION_GAZEBO_SYSTEMS_OCEANTILE_HH_
 #define IGNITION_GAZEBO_SYSTEMS_OCEANTILE_HH_
 
+#include <ignition/math.hh>
 #include <ignition/common.hh>
-#include <ignition/rendering.hh>
+#include <ignition/common/Mesh.hh>
 
 #include <memory>
 
