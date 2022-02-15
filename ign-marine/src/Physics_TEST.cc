@@ -23,6 +23,9 @@
 #include "ignition/marine/WavefieldSampler.hh"
 #include "ignition/marine/WaveParameters.hh"
 
+#include <ignition/common.hh>
+#include <ignition/common/Util.hh>
+#include <ignition/common/MeshManager.hh>
 #include <ignition/math/Vector3.hh>
 
 #include <gtest/gtest.h>
@@ -149,7 +152,7 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
     ignition::math::Vector2d(1, 1));
   std::shared_ptr<Mesh> linkMesh = std::make_shared<Mesh>();
   MeshTools::MakeSurfaceMesh(
-    *ignition::common::MeshManager::Instance()->GetMesh(linkMeshName),
+    *ignition::common::MeshManager::Instance()->MeshByName(linkMeshName),
     *linkMesh);
 
   // Wavefield and water patch 2x2  
@@ -187,7 +190,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
     ignition::math::Vector2d(1, 1));
   std::shared_ptr<Mesh> linkMesh = std::make_shared<Mesh>();
   MeshTools::MakeSurfaceMesh(
-    *ignition::common::MeshManager::Instance()->GetMesh(linkMeshName),
+    *ignition::common::MeshManager::Instance()->MeshByName(linkMeshName),
     *linkMesh);
 
   // Wavefield and water patch 4x4

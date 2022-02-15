@@ -225,7 +225,7 @@ namespace asv
         const std::vector<double>& _omega,
         const std::vector<double>& _phi,
         const std::vector<double>& _q,
-        const std::vector<Vector2>& _dir) :
+        const std::vector<ignition::math::Vector2d>& _dir) :
         a(_a), k(_k), omega(_omega), phi(_phi), q(_q), dir(_dir) {}
 
       const std::vector<double>& a;
@@ -233,7 +233,7 @@ namespace asv
       const std::vector<double>& omega;
       const std::vector<double>& phi;
       const std::vector<double>& q;
-      const std::vector<Vector2>& dir;
+      const std::vector<ignition::math::Vector2d>& dir;
     };
 
     // Compute the target function and Jacobian. Also calculate pz,
@@ -250,8 +250,8 @@ namespace asv
       const size_t n = wp.a.size();
       for (auto&& i=0; i<n; ++i)
       {
-        const double dx = wp.dir[i].x();
-        const double dy = wp.dir[i].y();
+        const double dx = wp.dir[i].X();
+        const double dy = wp.dir[i].Y();
         const double q = wp.q[i];
         const double a = wp.a[i];
         const double k = wp.k[i];

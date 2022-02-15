@@ -20,8 +20,9 @@
 #include "ignition/marine/Wavefield.hh"
 #include "ignition/marine/WaveParameters.hh"
 
-#include <gazebo/common/Assert.hh>
-#include <gazebo/common/common.hh>
+#include <ignition/common.hh>
+#include <ignition/common/Util.hh>
+#include <ignition/common/MeshManager.hh>
 #include <ignition/math/Vector3.hh>
 #include <ignition/math/Triangle.hh>
 
@@ -70,11 +71,12 @@ namespace {
       radius,                   // radius
       32,                       // rings
       32);                      // segments
-    GZ_ASSERT(ignition::common::MeshManager::Instance()->HasMesh(meshName),
+    IGN_ASSERT(ignition::common::MeshManager::Instance()->HasMesh(meshName),
       "Failed to create Mesh for Cylinder");
 
-    const ignition::common::Mesh* source = ignition::common::MeshManager::Instance()->GetMesh(meshName);
-    GZ_ASSERT(source != nullptr, "Invalid Sphere Mesh");
+    const ignition::common::Mesh* source =
+        ignition::common::MeshManager::Instance()->MeshByName(meshName);
+    IGN_ASSERT(source != nullptr, "Invalid Sphere Mesh");
     // std::cout << "Mesh:       " << source->GetName() << std::endl;
     // std::cout << "Vertex:     " << source->GetVertexCount() << std::endl;
 

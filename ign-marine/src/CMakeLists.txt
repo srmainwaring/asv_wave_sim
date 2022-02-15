@@ -56,6 +56,7 @@ set (sources
   TriangulatedGrid.cc
   Utilities.cc
   Wavefield.cc
+  WavefieldSampler.cc
   WaveParameters.cc
   WaveSimulation.cc
   WaveSimulationFFTW.cc
@@ -69,15 +70,15 @@ set (sources
 set (gtest_sources
   ${gtest_sources}
   Algorithm_TEST.cc
-  # CGAL_TEST.cc
-  # Geometry_TEST.cc
-  # Grid_TEST.cc
+  CGAL_TEST.cc
+  Geometry_TEST.cc
+  Grid_TEST.cc
   # GzPhysics_TEST.cc
-  # MeshTools_TEST.cc
-  # Physics_TEST.cc
-  # TriangulatedGrid_TEST.cc
-  # Wavefield_TEST.cc
-  # WaveSimulation_TEST.cc
+  MeshTools_TEST.cc
+  Physics_TEST.cc
+  TriangulatedGrid_TEST.cc
+  Wavefield_TEST.cc
+  WaveSimulation_TEST.cc
 )
 
 # Tests that require a valid display
@@ -115,9 +116,11 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
   # ignition-plugin${IGN_PLUGIN_VER}::core
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-common${IGN_COMMON_VER}::graphics
   ignition-common${IGN_COMMON_VER}::profiler
   ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
   sdformat${SDF_VER}::sdformat${SDF_VER}
+  ${TBB_LIBRARIES}
   # protobuf::libprotobuf
   # PRIVATE
   # ignition-plugin${IGN_PLUGIN_VER}::loader
@@ -130,6 +133,7 @@ endif()
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 # add_dependencies(${PROJECT_LIBRARY_TARGET_NAME}

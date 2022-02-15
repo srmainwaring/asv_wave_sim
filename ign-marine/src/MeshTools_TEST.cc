@@ -24,6 +24,10 @@
 #include <CGAL/Timer.h>
 
 #include <ignition/common.hh>
+#include <ignition/common/Util.hh>
+#include <ignition/common/MeshManager.hh>
+#include <ignition/common/Mesh.hh>
+#include <ignition/common/SubMesh.hh>
 
 #include <iostream>
 #include <string>
@@ -50,7 +54,7 @@ void TestFillArraysUnitBox()
   std::vector<float> vertices;
   std::vector<int> indices;
   MeshTools::FillArrays(
-    *ignition::common::MeshManager::Instance()->GetMesh(meshName),
+    *ignition::common::MeshManager::Instance()->MeshByName(meshName),
     vertices, indices);
 
   // std::cout << "Vertices..." << std::endl;
@@ -83,7 +87,7 @@ void TestMakeSurfaceMeshUnitBox()
   
   Mesh mesh;
   MeshTools::MakeSurfaceMesh(
-    *ignition::common::MeshManager::Instance()->GetMesh(meshName),
+    *ignition::common::MeshManager::Instance()->MeshByName(meshName),
     mesh);
 
   // std::cout << "Vertices " << std::endl;
@@ -109,7 +113,7 @@ void TestExportWaveMesh()
   waveParams->SetNumber(1);
   waveParams->SetAmplitude(2.0);
   waveParams->SetPeriod(10.0);
-  waveParams->SetDirection(Vector2(1.0, 1.0));
+  waveParams->SetDirection(ignition::math::Vector2d(1.0, 1.0));
 
   // Wavefield
   WavefieldTrochoid wavefield("__WAVEFIELD__");
@@ -153,7 +157,7 @@ void TestExportWaveMesh()
     // @TODO - calculate texture coordinates
   }
 
-  gzMesh->AddSubMesh(gzSubMesh.release());
+  gzMesh->AddSubMesh(*gzSubMesh);
   
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;
@@ -211,7 +215,7 @@ void TestExportGridMesh()
     // @TODO - calculate texture coordinates
   }
 
-  gzMesh->AddSubMesh(gzSubMesh.release());
+  gzMesh->AddSubMesh(*gzSubMesh);
   
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;

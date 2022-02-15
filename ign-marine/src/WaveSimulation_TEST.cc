@@ -104,7 +104,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   waveParams->SetSteepness(1.0);
   waveParams->SetAmplitude(1.0);
   waveParams->SetPeriod(8.0);
-  waveParams->SetDirection(Vector2(1.0, 0.0));
+  waveParams->SetDirection(ignition::math::Vector2d(1.0, 0.0));
   
   waveSim->SetTime(0.0);
   waveSim->ComputeHeights(h);
