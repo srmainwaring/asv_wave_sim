@@ -60,7 +60,7 @@ TEST(Grid, Constructor)
   // std::cout << "Faces " << std::endl;
   // for(auto&& face : mesh->faces())
   // {
-  //   Triangle tri = asv::Geometry::MakeTriangle(*mesh, face);
+  //   Triangle tri = marine::Geometry::MakeTriangle(*mesh, face);
   //   std::cout << face << ": " << tri << std::endl;
   // }
 

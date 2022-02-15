@@ -61,7 +61,7 @@ namespace marine
     public: physics::ModelPtr model;
 
     /// \brief WavefieldEntity pointer.
-    public: boost::shared_ptr<::asv::WavefieldEntity> wavefieldEntity;
+    public: boost::shared_ptr<WavefieldEntity> wavefieldEntity;
 
     /// \brief Wavefield Marker
     public: ignition::msgs::Marker wavefieldMsg;
@@ -167,7 +167,7 @@ namespace marine
     }
 
     // Wavefield
-    this->data->wavefieldEntity.reset(new ::asv::WavefieldEntity(this->data->model));
+    this->data->wavefieldEntity.reset(new WavefieldEntity(this->data->model));
     this->data->wavefieldEntity->Load(_sdf);
     this->data->wavefieldEntity->Init();
 

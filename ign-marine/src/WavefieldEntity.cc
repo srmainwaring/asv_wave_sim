@@ -47,7 +47,7 @@ namespace marine
     public: Vector2 cellCount;
 
     /// \brief The wave parameters.
-    public: std::shared_ptr<asv::WaveParameters> waveParams;
+    public: std::shared_ptr<WaveParameters> waveParams;
 
     /// \brief The wavefield.
     public: std::shared_ptr<Wavefield> wavefield;

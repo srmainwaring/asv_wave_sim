@@ -39,7 +39,9 @@
 
 using namespace gazebo;
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   GZ_REGISTER_MODEL_PLUGIN(HydrodynamicsPlugin)
@@ -923,4 +925,5 @@ namespace asv
     hydroParams.DebugPrint();
   }
 
-} // namespace gazebo
+}
+}

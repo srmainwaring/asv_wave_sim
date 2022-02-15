@@ -38,8 +38,6 @@
 #include <vector>
 #include <string>
 
-// using namespace asv;
-
 using namespace ignition;
 using namespace gazebo;
 using namespace systems;
