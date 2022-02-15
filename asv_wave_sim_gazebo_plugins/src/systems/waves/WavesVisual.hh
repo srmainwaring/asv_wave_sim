@@ -1,8 +1,8 @@
 
 
 
-#ifndef IGNITION_GAZEBO_SYSTEMS_WAVES_HH_
-#define IGNITION_GAZEBO_SYSTEMS_WAVES_HH_
+#ifndef IGNITION_GAZEBO_SYSTEMS_WAVESVISUAL_HH_
+#define IGNITION_GAZEBO_SYSTEMS_WAVESVISUAL_HH_
 
 #include <memory>
 
@@ -17,19 +17,19 @@ inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
 namespace systems
 {
   // Forward declaration
-  class WavesPrivate;
+  class WavesVisualPrivate;
 
   /// \brief A plugin for surface waves
-  class Waves
+  class WavesVisual
       : public System,
         public ISystemConfigure,
         public ISystemPreUpdate
   {
     /// \brief Constructor
-    public: Waves();
+    public: WavesVisual();
 
     /// \brief Destructor
-    public: ~Waves() override;
+    public: ~WavesVisual() override;
 
     // Documentation inherited
     public: void Configure(const Entity &_entity,
@@ -43,7 +43,7 @@ namespace systems
                 ignition::gazebo::EntityComponentManager &_ecm) override;
 
     /// \brief Private data pointer
-    private: std::unique_ptr<WavesPrivate> dataPtr;
+    private: std::unique_ptr<WavesVisualPrivate> dataPtr;
   };
   }
 }

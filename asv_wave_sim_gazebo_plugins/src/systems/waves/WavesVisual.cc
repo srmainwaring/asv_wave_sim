@@ -235,7 +235,7 @@ using namespace ignition;
 using namespace gazebo;
 using namespace systems;
 
-class ignition::gazebo::systems::WavesPrivate
+class ignition::gazebo::systems::WavesVisualPrivate
 {
   /// \brief Path to the model
   public: std::string modelPath;
@@ -283,32 +283,32 @@ class ignition::gazebo::systems::WavesPrivate
   public: common::MeshPtr         oceanTileMesh;
 
   /// \brief Destructor
-  public: ~WavesPrivate();
+  public: ~WavesVisualPrivate();
 
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
 };
 
 /////////////////////////////////////////////////
-Waves::Waves()
-    : System(), dataPtr(std::make_unique<WavesPrivate>())
+WavesVisual::WavesVisual()
+    : System(), dataPtr(std::make_unique<WavesVisualPrivate>())
 {
 }
 
 /////////////////////////////////////////////////
-Waves::~Waves()
+WavesVisual::~WavesVisual()
 {
 }
 
 /////////////////////////////////////////////////
-void Waves::Configure(const Entity &_entity,
+void WavesVisual::Configure(const Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     EntityComponentManager &_ecm,
     EventManager &_eventMgr)
 {
-  IGN_PROFILE("Waves::Configure");
+  IGN_PROFILE("WavesVisual::Configure");
 
-  ignmsg << "Waves: configuring\n";
+  ignmsg << "WavesVisual: configuring\n";
 
   // Ugly, but needed because the sdf::Element::GetElement is not a const
   // function and _sdf is a const shared pointer to a const sdf::Element.
@@ -324,21 +324,21 @@ void Waves::Configure(const Entity &_entity,
   // rendering operations in that thread
   this->dataPtr->connection =
       _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
-      std::bind(&WavesPrivate::OnUpdate, this->dataPtr.get()));
+      std::bind(&WavesVisualPrivate::OnUpdate, this->dataPtr.get()));
 }
 
 //////////////////////////////////////////////////
-void Waves::PreUpdate(
+void WavesVisual::PreUpdate(
   const ignition::gazebo::UpdateInfo &_info,
   ignition::gazebo::EntityComponentManager &)
 {
-  IGN_PROFILE("Waves::PreUpdate");
+  IGN_PROFILE("WavesVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
 }
 
 //////////////////////////////////////////////////
-WavesPrivate::~WavesPrivate()
+WavesVisualPrivate::~WavesVisualPrivate()
 {
   if (this->oceanVisual != nullptr)
   {
@@ -373,7 +373,7 @@ enum class OceanVisualMethod : uint16_t
   OCEAN_VISUAL_METHOD_END
 };
 
-void WavesPrivate::OnUpdate()
+void WavesVisualPrivate::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->mutex);
   if (this->visualName.empty())
@@ -381,7 +381,7 @@ void WavesPrivate::OnUpdate()
 
   if (!this->scene)
   {
-    ignmsg << "Waves: retrieving scene from render engine\n";
+    ignmsg << "WavesVisual: retrieving scene from render engine\n";
     this->scene = rendering::sceneFromFirstRenderEngine();
   }
 
@@ -390,7 +390,7 @@ void WavesPrivate::OnUpdate()
 
   if (!this->visual)
   {
-    ignmsg << "Waves: searching for visual\n";
+    ignmsg << "WavesVisual: searching for visual\n";
 
     // this does a breadth first search for visual with the entity id
     // \todo(anyone) provide a helper function in RenderUtil to search for
@@ -424,7 +424,7 @@ void WavesPrivate::OnUpdate()
 
   if (!this->scene->MaterialRegistered("OceanBlue"))
   {
-    ignmsg << "Waves: creating material `OceanBlue`\n";
+    ignmsg << "WavesVisual: creating material `OceanBlue`\n";
 
     auto mat = this->scene->CreateMaterial("OceanBlue");
     mat->SetAmbient(0.0, 0.0, 0.3);
@@ -445,7 +445,7 @@ void WavesPrivate::OnUpdate()
     // Test attaching another visual to the entity
     if (this->oceanVisuals.empty())
     {
-      ignmsg << "Waves: creating dynamic geometry ocean visual\n";
+      ignmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
 
       // create ocean tile
       int N = 128;
@@ -528,7 +528,7 @@ void WavesPrivate::OnUpdate()
     // Test attaching an Ogre2 mesh to the entity (import from Ogre::v1::Mesh)
     if (!this->ogre2OceanTile)
     {
-      ignmsg << "Waves: creating Ogre::v1::Mesh ocean visual\n";
+      ignmsg << "WavesVisual: creating Ogre::v1::Mesh ocean visual\n";
 
       // \todo(srmainwaring) synchronise visual with physics...
       int N = 128;
@@ -543,8 +543,8 @@ void WavesPrivate::OnUpdate()
       auto mesh = newMesh.get();
       common::MeshManager::Instance()->AddMesh(newMesh.release());
 
-      ignmsg << "Waves: mesh name " << mesh->Name() << "\n";
-      ignmsg << "Waves: mesh resource path " << mesh->Path() << "\n";
+      ignmsg << "WavesVisual: mesh name " << mesh->Name() << "\n";
+      ignmsg << "WavesVisual: mesh resource path " << mesh->Path() << "\n";
 
       this->ogre2OceanTile.reset(new rendering::Ogre2OceanTile(N, L));
       this->ogre2OceanTile->SetWindVelocity(u, 0.0);
@@ -673,7 +673,7 @@ void WavesPrivate::OnUpdate()
     // Test attaching a common::Mesh to the entity
     if (!this->oceanTile)
     {
-      ignmsg << "Waves: creating Ogre::Mesh ocean visual\n";
+      ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
 
       // create ocean tile
       int N = 128;
@@ -700,14 +700,14 @@ void WavesPrivate::OnUpdate()
       visual->SetVisible(true);
 
       // // retrive the material from the visual's geometry (it's not set on the visual)
-      // ignmsg << "Waves: Visual Name:          " << this->visual->Name() << "\n";
-      // ignmsg << "Waves: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+      // ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
+      // ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
       // auto visualGeometry = this->visual->GeometryByIndex(0);
 
       // auto material = visualGeometry->Material();
       // // auto material = this->visual->Material();
       // if (!material)
-      //   ignerr << "Waves: invalid material\n";
+      //   ignerr << "WavesVisual: invalid material\n";
       // else
       //   visual->SetMaterial(material);
 
@@ -731,7 +731,7 @@ void WavesPrivate::OnUpdate()
     // Test attaching another visual to the entity
     if (!this->oceanVisual)
     {
-      ignmsg << "Waves: creating default ocean visual\n";
+      ignmsg << "WavesVisual: creating default ocean visual\n";
 
       // create plane
       auto geometry = this->scene->CreatePlane();
@@ -750,10 +750,10 @@ void WavesPrivate::OnUpdate()
 }
 
 //////////////////////////////////////////////////
-IGNITION_ADD_PLUGIN(Waves,
+IGNITION_ADD_PLUGIN(WavesVisual,
                     ignition::gazebo::System,
-                    Waves::ISystemConfigure,
-                    Waves::ISystemPreUpdate)
+                    WavesVisual::ISystemConfigure,
+                    WavesVisual::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(Waves,
+IGNITION_ADD_PLUGIN_ALIAS(WavesVisual,
   "ignition::gazebo::systems::WavesVisual")
