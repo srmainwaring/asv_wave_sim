@@ -57,7 +57,7 @@ namespace asv {
     void DebugPrintMesh() const;
     void DebugPrintTriangulation() const;
     void UpdatePoints(const std::vector<Point3>& points);
-    void UpdatePoints(const std::vector<Ogre::Vector3>& from);
+    // void UpdatePoints(const std::vector<Ogre::Vector3>& from);
     void UpdatePoints(const Mesh& from);
 
     // Type definitions - use a consistent Kernel
@@ -485,6 +485,7 @@ namespace asv {
     }
   }
 
+#if 0
   void TriangulatedGrid::Private::UpdatePoints(const std::vector<Ogre::Vector3>& from) {
     // Mesh points
     auto it_to = points_.begin();
@@ -499,6 +500,7 @@ namespace asv {
       v->set_point(points_[idx]);
     }
   }
+#endif
 
   void TriangulatedGrid::Private::UpdatePoints(const Mesh& from) {
     // Mesh points
@@ -590,9 +592,11 @@ namespace asv {
     impl_->UpdatePoints(from);
   }
 
+#if 0
   void TriangulatedGrid::UpdatePoints(const std::vector<Ogre::Vector3>& from) {
     impl_->UpdatePoints(from);
   }
+#endif
 
   void TriangulatedGrid::UpdatePoints(const Mesh& from) {
     impl_->UpdatePoints(from);

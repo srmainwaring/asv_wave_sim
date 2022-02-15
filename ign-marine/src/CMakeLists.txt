@@ -45,10 +45,16 @@ add_subdirectory(systems)
 # )
 
 set (sources
+  Algorithm.cc
+  Convert.cc
   Geometry.cc
+  Grid.cc
+  MeshTools.cc
   OceanTile.cc
   PhysicalConstants.cc
   Physics.cc
+  TriangulatedGrid.cc
+  Utilities.cc
   WaveParameters.cc
   WaveSimulation.cc
   WaveSimulationFFTW.cc
@@ -62,6 +68,15 @@ set (sources
 set (gtest_sources
   ${gtest_sources}
   Algorithm_TEST.cc
+  # CGAL_TEST.cc
+  # Geometry_TEST.cc
+  # Grid_TEST.cc
+  # GzPhysics_TEST.cc
+  # MeshTools_TEST.cc
+  # Physics_TEST.cc
+  # TriangulatedGrid_TEST.cc
+  # Wavefield_TEST.cc
+  # WaveSimulation_TEST.cc
 )
 
 # Tests that require a valid display
