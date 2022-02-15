@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/Convert.hh"
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
+#include "ignition/marine/Convert.hh"
+#include "ignition/marine/CGALTypes.hh"
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>

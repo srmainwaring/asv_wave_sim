@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "ignition/marine/CGALTypes.hh"
+#include "ignition/marine/Wavefield.hh"
 
 #include <Eigen/Dense>
 

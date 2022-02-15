@@ -13,17 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
-#include "asv_wave_sim_gazebo_plugins/Grid.hh"
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoid.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSpectrum.hh"
+#include "ignition/marine/OceanTile.hh"
+#include "ignition/marine/Grid.hh"
+#include "ignition/marine/Wavefield.hh"
+#include "ignition/marine/WavefieldSampler.hh"
+#include "ignition/marine/WaveParameters.hh"
+#include "ignition/marine/WaveSimulation.hh"
+#include "ignition/marine/WaveSimulationFFTW.hh"
+#include "ignition/marine/WaveSimulationOpenCL.hh"
+#include "ignition/marine/WaveSimulationSinusoid.hh"
+#include "ignition/marine/WaveSimulationTrochoid.hh"
+#include "ignition/marine/WaveSpectrum.hh"
 
 #include <gtest/gtest.h>
 

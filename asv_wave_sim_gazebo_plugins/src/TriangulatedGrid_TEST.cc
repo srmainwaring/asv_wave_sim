@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
+#include "ignition/marine/TriangulatedGrid.hh"
 
 #include <gtest/gtest.h>
 

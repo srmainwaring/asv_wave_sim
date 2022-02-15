@@ -1,8 +1,8 @@
-#include "asv_wave_sim_gazebo_plugins/OceanVisual.hh"
-#include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
-#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
+#include "ignition/marine/OceanVisual.hh"
+#include "ignition/marine/OceanTile.hh"
+#include "ignition/marine/Utilities.hh"
 
-#include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
+#include "ignition/marine/Gazebo.hh"
 
 #include <ignition/common.hh>
 #include <ignition/common/MeshManager.hh>

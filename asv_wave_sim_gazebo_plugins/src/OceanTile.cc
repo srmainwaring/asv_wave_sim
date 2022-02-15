@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/OceanTile.hh"
+#include "ignition/marine/OceanTile.hh"
 
-#include "asv_wave_sim_gazebo_plugins/WaveSimulation.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationFFTW.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoid.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationTrochoid.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
+#include "ignition/marine/WaveSimulation.hh"
+#include "ignition/marine/WaveSimulationFFTW.hh"
+#include "ignition/marine/WaveSimulationSinusoid.hh"
+#include "ignition/marine/WaveSimulationTrochoid.hh"
+#include "ignition/marine/WaveParameters.hh"
 
 #include <ignition/common.hh>
 #include <ignition/common/Mesh.hh>

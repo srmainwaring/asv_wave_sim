@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/Geometry.hh"
-#include "asv_wave_sim_gazebo_plugins/Grid.hh"
-#include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
-#include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
+#include "ignition/marine/Geometry.hh"
+#include "ignition/marine/Grid.hh"
+#include "ignition/marine/MeshTools.hh"
+#include "ignition/marine/TriangulatedGrid.hh"
+#include "ignition/marine/Wavefield.hh"
+#include "ignition/marine/WaveParameters.hh"
 
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/common.hh>

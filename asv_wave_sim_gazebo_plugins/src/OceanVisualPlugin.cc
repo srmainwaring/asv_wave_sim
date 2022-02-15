@@ -1,5 +1,5 @@
-#include "asv_wave_sim_gazebo_plugins/OceanVisualPlugin.hh"
-#include "asv_wave_sim_gazebo_plugins/OceanVisual.hh"
+#include "ignition/marine/OceanVisualPlugin.hh"
+#include "ignition/marine/OceanVisual.hh"
 
 #include <ignition/common.hh>
 #include <ignition/rendering/Visual.hh>

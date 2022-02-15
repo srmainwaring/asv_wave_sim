@@ -15,9 +15,9 @@
 
 #include "WavesVisual.hh"
 
-// #include "OceanTile.hh"
-#include "../../../include/asv_wave_sim_gazebo_plugins/OceanTile.hh"
 #include "Ogre2OceanVisual.hh"
+
+#include "ignition/marine/OceanTile.hh"
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>

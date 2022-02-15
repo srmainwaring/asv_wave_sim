@@ -15,7 +15,7 @@
  *
 */
 
-#include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
+#include "ignition/marine/Gazebo.hh"
 
 #include <ignition/common.hh>
 #include <ignition/rendering.hh>

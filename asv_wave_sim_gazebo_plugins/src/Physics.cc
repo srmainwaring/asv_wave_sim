@@ -13,15 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/Physics.hh"
-#include "asv_wave_sim_gazebo_plugins/Algorithm.hh"
-#include "asv_wave_sim_gazebo_plugins/Convert.hh"
-#include "asv_wave_sim_gazebo_plugins/Geometry.hh"
-#include "asv_wave_sim_gazebo_plugins/Grid.hh"
-#include "asv_wave_sim_gazebo_plugins/PhysicalConstants.hh"
-#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WavefieldSampler.hh"
+#include "ignition/marine/Physics.hh"
+#include "ignition/marine/Algorithm.hh"
+#include "ignition/marine/Convert.hh"
+#include "ignition/marine/Geometry.hh"
+#include "ignition/marine/Grid.hh"
+#include "ignition/marine/PhysicalConstants.hh"
+#include "ignition/marine/Utilities.hh"
+#include "ignition/marine/Wavefield.hh"
+#include "ignition/marine/WavefieldSampler.hh"
 
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>

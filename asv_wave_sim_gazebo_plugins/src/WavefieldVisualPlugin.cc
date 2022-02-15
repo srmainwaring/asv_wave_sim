@@ -13,14 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/WavefieldVisualPlugin.hh"
+#include "ignition/marine/WavefieldVisualPlugin.hh"
 
-#include "asv_wave_sim_gazebo_plugins/Convert.hh"
-#include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
-#include "asv_wave_sim_gazebo_plugins/Grid.hh"
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveParameters.hh"
-#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
+#include "ignition/marine/Convert.hh"
+#include "ignition/marine/Gazebo.hh"
+#include "ignition/marine/Grid.hh"
+#include "ignition/marine/Wavefield.hh"
+#include "ignition/marine/WaveParameters.hh"
+#include "ignition/marine/Utilities.hh"
 
 #include <ignition/common/Event.hh>
 #include <ignition/common/Plugin.hh>

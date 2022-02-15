@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationOpenCL.hh"
-#include "asv_wave_sim_gazebo_plugins/WaveSpectrum.hh"
+#include "ignition/marine/WaveSimulationOpenCL.hh"
+#include "ignition/marine/WaveSpectrum.hh"
 
 #include <clFFT.h>
 

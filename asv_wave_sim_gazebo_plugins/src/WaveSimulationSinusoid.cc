@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/WaveSimulationSinusoid.hh"
-#include "asv_wave_sim_gazebo_plugins/Physics.hh"
+#include "ignition/marine/WaveSimulationSinusoid.hh"
+#include "ignition/marine/Physics.hh"
 
 #include <vector>
 

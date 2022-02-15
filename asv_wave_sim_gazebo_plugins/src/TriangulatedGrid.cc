@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/TriangulatedGrid.hh"
-#include "asv_wave_sim_gazebo_plugins/Geometry.hh"
+#include "ignition/marine/TriangulatedGrid.hh"
+#include "ignition/marine/Geometry.hh"
 
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

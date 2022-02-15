@@ -15,8 +15,7 @@
 
 #include "WavesModel.hh"
 
-// #include "OceanTile.hh"
-#include "../../../include/asv_wave_sim_gazebo_plugins/OceanTile.hh"
+#include "ignition/marine/OceanTile.hh"
 
 // #include "../../../include/asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 // #include "../../../include/asv_wave_sim_gazebo_plugins/Wavefield.hh"

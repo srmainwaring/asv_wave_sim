@@ -1,4 +1,4 @@
-#include "asv_wave_sim_gazebo_plugins/WaveSpectrum.hh"
+#include "ignition/marine/WaveSpectrum.hh"
 
 #include <cmath>
 

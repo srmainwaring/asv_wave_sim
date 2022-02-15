@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/Geometry.hh"
-#include "asv_wave_sim_gazebo_plugins/Grid.hh"
-#include "asv_wave_sim_gazebo_plugins/MeshTools.hh"
+#include "ignition/marine/Geometry.hh"
+#include "ignition/marine/Grid.hh"
+#include "ignition/marine/MeshTools.hh"
 
 #include <gtest/gtest.h>
 
