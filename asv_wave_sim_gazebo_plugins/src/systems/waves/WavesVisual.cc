@@ -16,7 +16,6 @@
 #include "WavesVisual.hh"
 
 #include "OceanTile.hh"
-#include "Ogre2OceanTile.hh"
 #include "Ogre2OceanVisual.hh"
 
 #include <ignition/common/Profiler.hh>
@@ -269,12 +268,9 @@ class ignition::gazebo::systems::WavesVisualPrivate
   public: std::chrono::steady_clock::duration currentSimTime;
 
   /////////////////
-  /// OceanTile (both common::Mesh and Ogre2 versions)
+  /// OceanTile
   // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
   // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
-
-  // using custom rendering::Ogre2Mesh
-  public: rendering::Ogre2OceanTilePtr ogre2OceanTile;
 
   // using standard (static) common::Mesh
   public: rendering::OceanTilePtr oceanTile;
@@ -357,9 +353,6 @@ enum class OceanVisualMethod : uint16_t
 
   /// \brief Unknown graphics interface
   UNKNOWN = OCEAN_VISUAL_METHOD_BEGIN,
-
-  /// \brief Ogre::v1::Mesh
-  OGRE1_MESH = 1,
 
   /// \brief Ogre::Mesh (v2)
   OGRE2_MESH = 2,
@@ -521,151 +514,6 @@ void WavesVisualPrivate::OnUpdate()
     {
       visual->UpdateMesh(this->oceanTileMesh);
     }
-    break;
-  }
-  case OceanVisualMethod::OGRE1_MESH:
-  {
-    // Test attaching an Ogre2 mesh to the entity (import from Ogre::v1::Mesh)
-    if (!this->ogre2OceanTile)
-    {
-      ignmsg << "WavesVisual: creating Ogre::v1::Mesh ocean visual\n";
-
-      // \todo(srmainwaring) synchronise visual with physics...
-      int N = 128;
-      double L = 256.0;
-      double u = 5.0;
-
-      // create static ocean tile using common::mesh - this to populate
-      // an object in the MeshManager with the correct name
-      this->oceanTile.reset(new rendering::OceanTile(N, L));
-      this->oceanTile->SetWindVelocity(u, 0.0);
-      std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
-      auto mesh = newMesh.get();
-      common::MeshManager::Instance()->AddMesh(newMesh.release());
-
-      ignmsg << "WavesVisual: mesh name " << mesh->Name() << "\n";
-      ignmsg << "WavesVisual: mesh resource path " << mesh->Path() << "\n";
-
-      this->ogre2OceanTile.reset(new rendering::Ogre2OceanTile(N, L));
-      this->ogre2OceanTile->SetWindVelocity(u, 0.0);
-      this->ogre2OceanTile->Create();
-      // this->ogre2OceanTile->Update(0.0);
-
-      // ogre2 specific
-      rendering::Ogre2ScenePtr ogre2Scene =
-          std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);    
-
-      auto meshFactory = rendering::Ogre2MeshFactoryExtPtr(
-            new rendering::Ogre2MeshFactoryExt(ogre2Scene));
-
-      rendering::MeshDescriptor meshDescriptor;
-      meshDescriptor.mesh = mesh;
-      meshDescriptor.meshName = "AboveOceanTileMesh"; // mesh->Name();
-
-      /////////////////////////////////////////////
-      // BEGIN_LAMDAS
-      //
-      // Override functions from Scene, BaseScene, 
-      // and Ogre2Scene
-      //
-      /////////////////////////////////////////////
-
-      // bool Ogre2Scene::InitObject(Ogre2ObjectPtr _object, unsigned int _id,
-      //     const std::string &_name)
-      auto Ogre2Scene_InitObject = [&](
-          rendering::Ogre2ScenePtr _scene,
-          rendering::Ogre2ObjectPtr _object,
-          unsigned int _id,
-          const std::string &_name) -> bool
-      {
-        // assign needed varibles
-        // _object->id = _id;
-        // _object->name = _name;
-        // _object->scene = this->SharedThis();
-
-        // // initialize object
-        // _object->Load();
-        // _object->Init();
-
-        rendering::Ogre2MeshExtPtr derived =
-            std::dynamic_pointer_cast<rendering::Ogre2MeshExt>(_object);
-
-        if (!derived)
-          return false;
-        else
-          derived->InitObject(_scene, _id, _name);
-    
-        return true;
-      };
-
-      // Ogre2Scene::CreateMeshImpl(unsigned int _id,
-      //     const std::string &_name, const MeshDescriptor &_desc) -> rendering::MeshPtr 
-      auto Ogre2Scene_CreateMeshImpl = [&](
-          rendering::Ogre2ScenePtr _scene,
-          unsigned int _id,
-          const std::string &_name,
-          const rendering::MeshDescriptor &_desc)
-          -> rendering::MeshPtr
-      {
-        // rendering::Ogre2MeshPtr mesh = this->meshFactory->Create(_desc);
-        rendering::Ogre2MeshPtr mesh = meshFactory->Create(_desc);
-        if (nullptr == mesh)
-          return nullptr;
-        mesh->SetDescriptor(_desc);
-
-        // bool result = this->InitObject(mesh, _id, _name);
-        bool result = Ogre2Scene_InitObject(_scene, mesh, _id, _name);
-        return (result) ? mesh : nullptr;
-      };
-
-      // BaseScene::CreateMesh(const MeshDescriptor &_desc) -> rendering::MeshPtr 
-      auto BaseScene_CreateMesh = [&](
-          rendering::Ogre2ScenePtr _scene,
-          const rendering::MeshDescriptor &_desc)
-          -> rendering::MeshPtr 
-      {
-        std::string meshName = (_desc.mesh) ?
-            _desc.mesh->Name() : _desc.meshName;
-
-        // \todo: implement equivalents
-        // unsigned int objId = this->CreateObjectId();
-        // std::string objName = this->CreateObjectName(objId, "Mesh-" + meshName);
-        unsigned int objId = 50020;
-        std::string objName = "Mesh-" + meshName;
-        // return this->CreateMeshImpl(objId, objName, _desc);
-        return Ogre2Scene_CreateMeshImpl(_scene, objId, objName, _desc);
-      };
-
-      /////////////////////////////////////////////
-      // END_LAMDAS
-      /////////////////////////////////////////////
-
-      // create the rendering mesh
-      rendering::MeshPtr renderingMesh = BaseScene_CreateMesh(
-          ogre2Scene, meshDescriptor);
-
-      // attach mesh to visuals
-      auto visual = this->scene->CreateVisual("ocean-tile");
-      visual->AddGeometry(renderingMesh);
-      visual->SetLocalPosition(0.0, 0.0, 0.0);
-      visual->SetLocalRotation(0.0, 0.0, 0.0);
-      visual->SetLocalScale(1.0, 1.0, 1.0);
-      visual->SetMaterial("OceanBlue");
-      visual->SetVisible(true);
-
-      // add visual to parent
-      auto parent = this->visual->Parent();
-      parent->AddChild(visual);
-
-      // keep reference
-      this->oceanVisual = visual;
-    }
-
-    if (!this->ogre2OceanTile)
-      return;
-
-    // Update the tile
-    this->ogre2OceanTile->Update(simTime);
     break;
   }
   case OceanVisualMethod::OGRE2_MESH:

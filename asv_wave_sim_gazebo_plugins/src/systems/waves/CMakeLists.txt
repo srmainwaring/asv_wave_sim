@@ -9,7 +9,6 @@ gz_add_system(waves-visual
     WavesVisual.cc
     OceanTile.cc
     Ogre2DynamicMesh.cc
-    Ogre2OceanTile.cc
     Ogre2OceanVisual.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
