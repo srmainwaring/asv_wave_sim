@@ -16,10 +16,9 @@
 #include "WavesModel.hh"
 
 #include "ignition/marine/OceanTile.hh"
-
 #include "ignition/marine/Utilities.hh"
-#include "ignition/marine/WaveParameters.hh"
 #include "ignition/marine/Wavefield.hh"
+#include "ignition/marine/WaveParameters.hh"
 
 #include "ignition/marine/components/Wavefield.hh"
 
@@ -115,7 +114,7 @@ void WavesModel::Configure(const Entity &_entity,
 {
   IGN_PROFILE("WavesModel::Configure");
 
-  ignmsg << "WavesModel: configure\n";
+  ignmsg << "WavesModel: configuring\n";
 
   this->dataPtr->model = Model(_entity);
   if (!this->dataPtr->model.Valid(_ecm))
@@ -186,13 +185,8 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
     this->waveParams->SetFromSDF(*sdfWave);
   }
 
-  /// DEBUG_INFO
-  igndbg << "WavesModel" <<  std::endl;
-  this->waveParams->DebugPrint();
-
   // Wavefield  
-  std::string meshName = "_WAVEFIELD";
-  std::string meshPath = "";
+  std::string meshName = "WAVEFIELD";
 
   // double simTime = this->GetWorld()->SimTime().Double();
 
@@ -203,9 +197,28 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
   // Create a new entity and register a wavefield component with it.
   this->wavefieldEntity = _ecm.CreateEntity();
 
+  _ecm.CreateComponent(this->wavefieldEntity,
+      components::Name(meshName));
+
   auto comp = _ecm.CreateComponent(this->wavefieldEntity,
       marine::components::Wavefield());
   comp->Data() = this->wavefield;
+
+  ignmsg << "WavesModel: created wavefield in entity ["
+      << this->wavefieldEntity << "]\n";
+
+  // fetch the wavefield back to check...
+  auto wfComp = _ecm.Component<marine::components::Wavefield>(this->wavefieldEntity);
+  if (!wfComp)
+  {
+    ignwarn << "WavesModel: could not find wavefield in entity ["
+        << this->wavefieldEntity << "]\n";
+  }
+  else
+  {
+    ignmsg << "WavesModel: found wavefield with params" <<  std::endl;
+    this->waveParams->DebugPrint();
+  }
 
   this->validConfig = true;
 }

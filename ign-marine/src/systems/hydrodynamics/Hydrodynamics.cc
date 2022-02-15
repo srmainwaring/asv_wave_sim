@@ -15,11 +15,16 @@
 
 #include "Hydrodynamics.hh"
 
+#include "ignition/marine/Wavefield.hh"
+#include "ignition/marine/components/Wavefield.hh"
+
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
 
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/components/SourceFilePath.hh>
+
+#include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/Util.hh>
 
 #include <sdf/Element.hh>
@@ -36,31 +41,44 @@ using namespace systems;
 
 class ignition::gazebo::systems::HydrodynamicsPrivate
 {
-  /// \brief Path to the model
-  public: std::string modelPath;
-
-  /// \brief Mutex to protect sim time updates.
-  public: std::mutex mutex;
-
-  /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection {nullptr};
-
-  /// \brief Entity id of the visual
-  public: Entity entity = kNullEntity;
-
-  /// \brief Current sim time
-  public: std::chrono::steady_clock::duration currentSimTime;
-
   /// \brief Destructor
   public: ~HydrodynamicsPrivate();
 
-  /// \brief All rendering operations must happen within this call
-  public: void OnUpdate();
+  /// \brief Initialize the system.
+  /// \param[in] _ecm Mutable reference to the EntityComponentManager.
+  /// \param[in] _sdf Pointer to sdf::Element that contains configuration
+  /// parameters for the system.
+  public: void Load(EntityComponentManager &_ecm);
+
+  /// \brief Calculate and update the hydrodynamics for the link.
+  /// \param[in] _info Simulation update info.
+  /// \param[in] _ecm Mutable reference to the EntityComponentManager.
+  public: void UpdateHydrodynamics(const UpdateInfo &_info,
+                    EntityComponentManager &_ecm);
+
+  /// \brief Model interface
+  public: Model model{kNullEntity};
+
+  /// \brief Copy of the sdf configuration used for this plugin
+  public: sdf::ElementPtr sdf;
+
+  /// \brief Initialization flag
+  public: bool initialized{false};
+
+  /// \brief Set during Load to true if the configuration for the system is
+  /// valid and the post-update can run
+  public: bool validConfig{false};
+
+  /// \brief The wavefield entity for this system
+  public: Entity wavefieldEntity{kNullEntity};
+
+  /// \brief The wavefield.
+  public: marine::WavefieldPtr wavefield;
 };
 
 /////////////////////////////////////////////////
-Hydrodynamics::Hydrodynamics()
-    : System(), dataPtr(std::make_unique<HydrodynamicsPrivate>())
+Hydrodynamics::Hydrodynamics() : System(),
+    dataPtr(std::make_unique<HydrodynamicsPrivate>())
 {
 }
 
@@ -79,25 +97,46 @@ void Hydrodynamics::Configure(const Entity &_entity,
 
   ignmsg << "Hydrodynamics: configuring\n";
 
-  // Ugly, but needed because the sdf::Element::GetElement is not a const
-  // function and _sdf is a const shared pointer to a const sdf::Element.
-  auto sdf = const_cast<sdf::Element *>(_sdf.get());
-
-  // capture entity 
-  // this->dataPtr->entity = _entity;
-  // auto nameComp = _ecm.Component<components::Name>(_entity);
-  // this->dataPtr->visualName = nameComp->Data();
-
+  this->dataPtr->model = Model(_entity);
+  if (!this->dataPtr->model.Valid(_ecm))
+  {
+    ignerr << "The Hydrodynamics system should be attached to a model entity. "
+           << "Failed to initialize." << std::endl;
+    return;
+  }
+  this->dataPtr->sdf = _sdf->Clone();
 }
 
 //////////////////////////////////////////////////
 void Hydrodynamics::PreUpdate(
   const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &)
+  ignition::gazebo::EntityComponentManager &_ecm)
 {
   IGN_PROFILE("Hydrodynamics::PreUpdate");
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->currentSimTime = _info.simTime;
+
+  /// \todo(anyone) support reset / rewind
+  if (_info.dt < std::chrono::steady_clock::duration::zero())
+  {
+    ignwarn << "Detected jump back in time ["
+        << std::chrono::duration_cast<std::chrono::seconds>(_info.dt).count()
+        << "s]. System may not work properly." << std::endl;
+  }
+
+  if (!this->dataPtr->initialized)
+  {
+    // We call Load here instead of Configure because we can't be guaranteed
+    // that all entities have been created when Configure is called
+    this->dataPtr->Load(_ecm);
+    this->dataPtr->initialized = true;
+  }
+
+  if (_info.paused)
+    return;
+
+  if (this->dataPtr->initialized && this->dataPtr->validConfig)
+  {
+    this->dataPtr->UpdateHydrodynamics(_info, _ecm);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -106,9 +145,45 @@ HydrodynamicsPrivate::~HydrodynamicsPrivate()
 {
 };
 
-void HydrodynamicsPrivate::OnUpdate()
+/////////////////////////////////////////////////
+void HydrodynamicsPrivate::Load(EntityComponentManager &_ecm)
 {
-  std::lock_guard<std::mutex> lock(this->mutex);
+  // Create a new entity and register a wavefield component with it.
+  this->wavefieldEntity = _ecm.EntityByComponents(components::Name("WAVEFIELD"));
+  // this->wavefieldEntity = _ecm.EntityByComponents(marine::components::Wavefield());
+  if (this->wavefieldEntity == kNullEntity)  
+  {
+    ignwarn << "No wavefield found, no hydrodynamics forces will be calculated\n";
+    return;
+  }
+
+  auto comp = _ecm.Component<marine::components::Wavefield>(this->wavefieldEntity);
+  if (comp)
+  {
+    this->wavefield = comp->Data();
+  }
+
+  if (!this->wavefield)
+  {
+    ignwarn << "Invalid wavefield, no hydrodynamics forces will be calculated\n";
+    return;
+  }
+
+  this->validConfig = true;
+}
+
+/////////////////////////////////////////////////
+void HydrodynamicsPrivate::UpdateHydrodynamics(const UpdateInfo &_info,
+    EntityComponentManager &_ecm)
+{
+  double simTime = std::chrono::duration<double>(_info.simTime).count();
+
+  // get the wave height at the origin
+  marine::Point3 point(0.0, 0.0, 0.0);
+  double waveHeight{0.0};
+  this->wavefield->Height(point, waveHeight);
+
+  ignmsg << "[" << simTime << "] : " << waveHeight << "\n";  
 }
 
 //////////////////////////////////////////////////
