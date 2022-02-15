@@ -45,8 +45,8 @@ add_subdirectory(systems)
 # )
 
 set (sources
-  # WavesLib.cc
   Geometry.cc
+  OceanTile.cc
   PhysicalConstants.cc
   Physics.cc
   WaveParameters.cc

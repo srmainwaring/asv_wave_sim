@@ -1,7 +1,8 @@
 #ifndef IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 #define IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 
-#include "OceanTile.hh"
+// #include "OceanTile.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/OceanTile.hh"
 
 #include "ignition/rendering/base/BaseVisual.hh"
 #include "ignition/rendering/ogre2/Ogre2Visual.hh"
@@ -46,10 +47,10 @@ namespace ignition
       public: void LoadCube();
 
       /// \brief Load from an ocean tile
-      public: void LoadOceanTile(OceanTilePtr _oceanTile);
+      public: void LoadOceanTile(common::OceanTilePtr _oceanTile);
 
       /// \brief Update from an ocean tile
-      public: void UpdateOceanTile(OceanTilePtr _oceanTile);
+      public: void UpdateOceanTile(common::OceanTilePtr _oceanTile);
 
       /// \brief Load from a mesh
       public: void LoadMesh(common::MeshPtr _mesh);

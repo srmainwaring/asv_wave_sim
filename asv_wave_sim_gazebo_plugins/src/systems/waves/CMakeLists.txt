@@ -7,7 +7,6 @@ link_directories(${IGNITION-RENDERING_LIBRARY_DIRS})
 gz_add_system(waves-visual
   SOURCES
     WavesVisual.cc
-    OceanTile.cc
     Ogre2DynamicMesh.cc
     Ogre2OceanVisual.cc
   PUBLIC_LINK_LIBS
@@ -24,7 +23,6 @@ gz_add_system(waves-visual
 gz_add_system(waves-model
   SOURCES
     WavesModel.cc
-    OceanTile.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}

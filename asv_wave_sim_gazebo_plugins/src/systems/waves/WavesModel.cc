@@ -15,7 +15,8 @@
 
 #include "WavesModel.hh"
 
-#include "OceanTile.hh"
+// #include "OceanTile.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/OceanTile.hh"
 
 // #include "../../../include/asv_wave_sim_gazebo_plugins/WaveParameters.hh"
 // #include "../../../include/asv_wave_sim_gazebo_plugins/Wavefield.hh"
@@ -96,8 +97,7 @@ class ignition::gazebo::systems::WavesModelPrivate
   /////////////////
   // OceanTile
 
-  // using standard (static) common::Mesh
-  public: rendering::OceanTilePtr oceanTile;
+  public: common::OceanTilePtr oceanTile;
 
   /// \brief Used in DynamicMesh example
   public: common::MeshPtr         oceanTileMesh;

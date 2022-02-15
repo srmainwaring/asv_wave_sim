@@ -15,7 +15,8 @@
 
 #include "WavesVisual.hh"
 
-#include "OceanTile.hh"
+// #include "OceanTile.hh"
+#include "../../../include/asv_wave_sim_gazebo_plugins/OceanTile.hh"
 #include "Ogre2OceanVisual.hh"
 
 #include <ignition/common/Profiler.hh>
@@ -272,8 +273,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
   // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
 
-  // using standard (static) common::Mesh
-  public: rendering::OceanTilePtr oceanTile;
+  public: common::OceanTilePtr oceanTile;
 
   /// \brief Used in DynamicMesh example
   public: common::MeshPtr         oceanTileMesh;
@@ -445,7 +445,7 @@ void WavesVisualPrivate::OnUpdate()
       double L = 256.0;
       double u = 5.0;
 
-      this->oceanTile.reset(new rendering::OceanTile(N, L));
+      this->oceanTile.reset(new common::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
 
       // create mesh - do not store in MeshManager as it will be modified
@@ -528,7 +528,7 @@ void WavesVisualPrivate::OnUpdate()
       double L = 256.0;
       double u = 5.0;
 
-      this->oceanTile.reset(new rendering::OceanTile(N, L));
+      this->oceanTile.reset(new common::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
       std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
       auto mesh = newMesh.get();
