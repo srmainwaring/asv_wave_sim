@@ -255,7 +255,7 @@ $HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/world_models:\
 $HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/worlds
 
 export IGN_GAZEBO_SYSTEM_PLUGIN_PATH=${IGN_GAZEBO_SYSTEM_PLUGIN_PATH}:\
-$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo_plugins/build/lib
+$HOME/wave_sim_ws/src/asv_wave_sim/ign-marine/build/lib
 ```
 
 ### CGAL library usage
