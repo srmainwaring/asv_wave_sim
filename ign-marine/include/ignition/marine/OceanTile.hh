@@ -42,6 +42,8 @@ namespace common
 
     public: void SetWindVelocity(double _ux, double _uy);
 
+    public: void Create();
+
     // Returns a new common::Mesh. The caller must take ownership.
     public: common::Mesh* CreateMesh();
 
@@ -58,6 +60,8 @@ namespace common
 
     public: unsigned int FaceCount() const;
     public: math::Vector3i Face(unsigned int _index) const;
+
+    public: const std::vector<math::Vector3d>& Vertices() const;
 
     private: std::unique_ptr<OceanTilePrivate> dataPtr;
   };

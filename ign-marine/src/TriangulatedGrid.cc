@@ -57,6 +57,8 @@ namespace asv {
     void DebugPrintMesh() const;
     void DebugPrintTriangulation() const;
     void UpdatePoints(const std::vector<Point3>& points);
+    void UpdatePoints(const std::vector<ignition::math::Vector3d>& from);
+
     // void UpdatePoints(const std::vector<Ogre::Vector3>& from);
     void UpdatePoints(const Mesh& from);
 
@@ -485,6 +487,21 @@ namespace asv {
     }
   }
 
+  void TriangulatedGrid::Private::UpdatePoints(const std::vector<ignition::math::Vector3d>& from) {
+    // Mesh points
+    auto it_to = points_.begin();
+    auto it_from = from.begin();
+    for ( ; it_to != points_.end() && it_from != from.end(); ++it_to, ++it_from) {
+      *it_to = Point3(it_from->X(), it_from->Y(), it_from->Z());
+    }
+
+    // Triangulation points
+    for (auto v = tri_.finite_vertices_begin(); v != tri_.finite_vertices_end(); ++v) {
+      int64_t idx = v->info();      
+      v->set_point(points_[idx]);
+    }
+  }
+
 #if 0
   void TriangulatedGrid::Private::UpdatePoints(const std::vector<Ogre::Vector3>& from) {
     // Mesh points
@@ -589,6 +606,10 @@ namespace asv {
   }
 
   void TriangulatedGrid::UpdatePoints(const std::vector<Point3>& from) {
+    impl_->UpdatePoints(from);
+  }
+
+  void TriangulatedGrid::UpdatePoints(const std::vector<ignition::math::Vector3d>& from) {
     impl_->UpdatePoints(from);
   }
 

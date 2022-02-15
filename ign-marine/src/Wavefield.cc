@@ -49,14 +49,14 @@ namespace asv
   }
 
 ///////////////////////////////////////////////////////////////////////////////
-// WavefieldGerstnerPrivate
+// WavefieldTrochoidPrivate
 
   /// \internal
   /// \brief Private data for the Wavefield.
-  class WavefieldGerstnerPrivate
+  class WavefieldTrochoidPrivate
   {
     /// \brief Constructor.
-    public: WavefieldGerstnerPrivate() :
+    public: WavefieldTrochoidPrivate() :
       params(new WaveParameters()),
       size({ 1000, 1000 }),
       cellCount({ 50, 50 })
@@ -67,7 +67,7 @@ namespace asv
     ///
     /// \brief param[in] _size      The dimensions of the wave field [m].
     /// \brief param[in] _cellCount The number of cells in each direction.
-    public: WavefieldGerstnerPrivate(
+    public: WavefieldTrochoidPrivate(
       const std::array<double, 2>& _size,
       const std::array<size_t, 2>& _cellCount 
     ) :
@@ -97,15 +97,15 @@ namespace asv
   };
 
 ///////////////////////////////////////////////////////////////////////////////
-// WavefieldGerstner
+// WavefieldTrochoid
 
-  WavefieldGerstner::~WavefieldGerstner()
+  WavefieldTrochoid::~WavefieldTrochoid()
   {
   }
 
-  WavefieldGerstner::WavefieldGerstner(
+  WavefieldTrochoid::WavefieldTrochoid(
     const std::string& _name) :
-    data(new WavefieldGerstnerPrivate())
+    data(new WavefieldTrochoidPrivate())
   {
     // Grid
     this->data->initialGrid.reset(new Grid(
@@ -122,11 +122,11 @@ namespace asv
     this->Update(0.0);
   }
 
-  WavefieldGerstner::WavefieldGerstner(
+  WavefieldTrochoid::WavefieldTrochoid(
     const std::string& _name,
     const std::array<double, 2>& _size,
     const std::array<size_t, 2>& _cellCount) : 
-    data(new WavefieldGerstnerPrivate(_size, _cellCount))
+    data(new WavefieldTrochoidPrivate(_size, _cellCount))
   {
     // Grid
     this->data->initialGrid.reset(new Grid(
@@ -144,33 +144,33 @@ namespace asv
     this->Update(0.0);
   }
 
-  std::shared_ptr<const Mesh> WavefieldGerstner::GetMesh() const
+  std::shared_ptr<const Mesh> WavefieldTrochoid::GetMesh() const
   {
     return this->data->grid->GetMesh();
   }
 
-  std::shared_ptr<const Grid> WavefieldGerstner::GetGrid() const
+  std::shared_ptr<const Grid> WavefieldTrochoid::GetGrid() const
   {
     return this->data->grid;
   }
 
-  bool WavefieldGerstner::Height(const Point3& point, double& height) const
+  bool WavefieldTrochoid::Height(const Point3& point, double& height) const
   {
     return this->data->triangulatedGrid->Height(point, height);    
   }
 
-  std::shared_ptr<const WaveParameters> WavefieldGerstner::GetParameters() const
+  std::shared_ptr<const WaveParameters> WavefieldTrochoid::GetParameters() const
   {
     return this->data->params;
   }
 
-  void WavefieldGerstner::SetParameters(std::shared_ptr<WaveParameters> _params) const
+  void WavefieldTrochoid::SetParameters(std::shared_ptr<WaveParameters> _params) const
   {
     // GZ_ASSERT(_params != nullptr, "Invalid parameter _params");
     this->data->params = _params;    
   }
 
-  void WavefieldGerstner::Update(double _time)
+  void WavefieldTrochoid::Update(double _time)
   {
     this->UpdateGerstnerWave(_time);
 
@@ -179,7 +179,7 @@ namespace asv
     this->data->triangulatedGrid->UpdatePoints(mesh);
   }
 
-  void WavefieldGerstner::UpdateGerstnerWave(double _time)
+  void WavefieldTrochoid::UpdateGerstnerWave(double _time)
   {
     // Single wave params
     // auto amplitude  = this->data->params->Amplitude();
@@ -220,7 +220,7 @@ namespace asv
       const auto& wavenumber_i = wavenumber[i];
       const auto& omega_i = omega[i];
       const auto& phase_i = phase[i];
-      const auto& direction_i = direction[i];
+      const auto& direction_i = Vector2(direction[i].X(), direction[i].Y());
       const auto& q_i = q[i];
 
       for (
@@ -287,7 +287,7 @@ namespace asv
     public: std::shared_ptr<WaveParameters> params;
 
     /// \brief Ocean tile
-    public: std::unique_ptr<OceanTile> oceanTile;
+    public: std::unique_ptr<ignition::common::OceanTile> oceanTile;
 
     /// \brief The current position of the wave field.
     public: std::shared_ptr<Grid> grid;
@@ -334,7 +334,7 @@ namespace asv
 
     // OceanTile
     ignmsg << "Creating OceanTile." <<  std::endl;
-    this->data->oceanTile.reset(new OceanTile(N, L, false));
+    this->data->oceanTile.reset(new ignition::common::OceanTile(N, L, false));
     this->data->oceanTile->SetWindVelocity(u, 0.0);
     this->data->oceanTile->Create();
     this->data->oceanTile->Update(0.0);
@@ -414,7 +414,7 @@ namespace asv
       auto& vtx0 = *it.first;
       auto& vtx1 = *it.second;
       // Visual and physics out of phase? x-y transposed?
-      mesh.point(vtx1) = Point3(vtx0.x, vtx0.y, vtx0.z);
+      mesh.point(vtx1) = Point3(vtx0.X(), vtx0.Y(), vtx0.Z());
     }
 
     // Update the point locator.

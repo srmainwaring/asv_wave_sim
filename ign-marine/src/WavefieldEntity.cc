@@ -100,7 +100,7 @@ namespace asv
 
 // @TODO SWITCH WAVE SIMULATION TYPE
 #if 0
-    this->data->wavefield.reset(new WavefieldGerstner(
+    this->data->wavefield.reset(new WavefieldTrochoid(
       meshName,
       { this->data->size[0], this->data->size[1] },
       { static_cast<size_t>(this->data->cellCount[0]), static_cast<size_t>(this->data->cellCount[1]) }

@@ -74,6 +74,8 @@ public:
   std::vector<double>         mDydy;
   std::vector<double>         mDxdy;
 
+  void Create();
+
   /// \brief Create a new Mesh. The caller must take ownership.
   //
   // See:
@@ -129,7 +131,7 @@ public:
   /// \param idx0 is the index for the (N + 1) x (N + 1) mesh vertices, including skirt
   /// \param idx1 is the index for the N x N simulated vertices
   void UpdateVertex(size_t idx0, size_t idx1);
-
+  void UpdateVertexAndTangents(size_t idx0, size_t idx1);
   void UpdateVertices(double _time);
 
   common::Mesh * CreateMesh(const std::string &_name, double _offsetZ,
@@ -198,7 +200,7 @@ bool _hasVisuals) :
       waveParams->SetSteepness(1.0);
       waveParams->SetAmplitude(3.0);
       waveParams->SetPeriod(7.0);
-      waveParams->SetDirection(Vector2(1.0, 0.0));
+      waveParams->SetDirection(math::Vector2d(1.0, 0.0));
       mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
       break;
     }
@@ -226,7 +228,7 @@ void OceanTilePrivate::SetWindVelocity(double _ux, double _uy)
 }
 
 //////////////////////////////////////////////////
-common::Mesh * OceanTilePrivate::CreateMesh()
+void OceanTilePrivate::Create()
 {
   ignmsg << "OceanTile: create tile\n";
   ignmsg << "Resolution:    " << mResolution  << "\n";
@@ -305,7 +307,12 @@ common::Mesh * OceanTilePrivate::CreateMesh()
     CreateMesh(this->mBelowOceanMeshName, -0.05, true);
 #endif
   }
+}
 
+//////////////////////////////////////////////////
+common::Mesh * OceanTilePrivate::CreateMesh()
+{
+  this->Create();
   return CreateMesh(this->mAboveOceanMeshName, 0.0, false);
 }
 
@@ -485,6 +492,21 @@ void OceanTilePrivate::UpdateVertex(size_t idx0, size_t idx1)
   v.X() = v0.X() + sx;
   v.Y() = v0.Y() + sy;
   v.Z() = v0.Z() + h;
+}
+
+//////////////////////////////////////////////////
+void OceanTilePrivate::UpdateVertexAndTangents(size_t idx0, size_t idx1)
+{
+  // 1. Update vertex
+  double h  = mHeights[idx1];
+  double sx = mDisplacementsX[idx1];
+  double sy = mDisplacementsY[idx1];
+
+  auto&& v0 = mVertices0[idx0];
+  auto&& v  = mVertices[idx0];
+  v.X() = v0.X() + sx;
+  v.Y() = v0.Y() + sy;
+  v.Z() = v0.Z() + h;
 
   // 2. Update tangent and bitangent vectors (not normalised).
   // @TODO Check sign for displacement terms
@@ -515,50 +537,85 @@ void OceanTilePrivate::UpdateVertices(double _time)
     mWaveSim->ComputeDisplacementsAndDerivatives(
         mHeights, mDisplacementsX, mDisplacementsY,
         mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
+  
+    const size_t N = mResolution;
+    const size_t NPlus1  = N + 1;
+    const size_t NMinus1 = N - 1;
+
+    for (size_t iy=0; iy<N; ++iy)
+    {
+      for (size_t ix=0; ix<N; ++ix)
+      {
+        size_t idx0 = iy * NPlus1 + ix;
+        size_t idx1 = iy * N + ix;
+        UpdateVertexAndTangents(idx0, idx1);
+      }
     }
+
+    // Set skirt values assuming periodic boundary conditions:
+    for (size_t i=0; i<N; ++i)
+    {
+      // Top row (iy = N) periodic with bottom row (iy = 0)
+      {
+        size_t idx0 = N * NPlus1 + i;
+        size_t idx1 = i;
+        UpdateVertexAndTangents(idx0, idx1);
+      }
+      // Right column (ix = N) periodic with left column (ix = 0)
+      {
+        size_t idx0 = i * NPlus1 + N;
+        size_t idx1 = i * N;
+        UpdateVertexAndTangents(idx0, idx1);
+      }
+    }
+    {
+      // Top right corner period with bottom right corner.
+      size_t idx0 = NPlus1 * NPlus1 - 1;
+      size_t idx1 = 0;
+      UpdateVertexAndTangents(idx0, idx1);
+    }  
+  }
   else
   {
     mWaveSim->ComputeHeights(mHeights);
     mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
-    // mWaveSim->ComputeHeightDerivatives(mDhdx, mDhdy);
-    // mWaveSim->ComputeDisplacementDerivatives(mDxdx, mDydy, mDxdy);
-  }
 
-  const size_t N = mResolution;
-  const size_t NPlus1  = N + 1;
-  const size_t NMinus1 = N - 1;
+    const size_t N = mResolution;
+    const size_t NPlus1  = N + 1;
+    const size_t NMinus1 = N - 1;
 
-  for (size_t iy=0; iy<N; ++iy)
-  {
-    for (size_t ix=0; ix<N; ++ix)
+    for (size_t iy=0; iy<N; ++iy)
     {
-      size_t idx0 = iy * NPlus1 + ix;
-      size_t idx1 = iy * N + ix;
+      for (size_t ix=0; ix<N; ++ix)
+      {
+        size_t idx0 = iy * NPlus1 + ix;
+        size_t idx1 = iy * N + ix;
+        UpdateVertex(idx0, idx1);
+      }
+    }
+
+    // Set skirt values assuming periodic boundary conditions:
+    for (size_t i=0; i<N; ++i)
+    {
+      // Top row (iy = N) periodic with bottom row (iy = 0)
+      {
+        size_t idx0 = N * NPlus1 + i;
+        size_t idx1 = i;
+        UpdateVertex(idx0, idx1);
+      }
+      // Right column (ix = N) periodic with left column (ix = 0)
+      {
+        size_t idx0 = i * NPlus1 + N;
+        size_t idx1 = i * N;
+        UpdateVertex(idx0, idx1);
+      }
+    }
+    {
+      // Top right corner period with bottom right corner.
+      size_t idx0 = NPlus1 * NPlus1 - 1;
+      size_t idx1 = 0;
       UpdateVertex(idx0, idx1);
     }
-  }
-
-  // Set skirt values assuming periodic boundary conditions:
-  for (size_t i=0; i<N; ++i)
-  {
-    // Top row (iy = N) periodic with bottom row (iy = 0)
-    {
-      size_t idx0 = N * NPlus1 + i;
-      size_t idx1 = i;
-      UpdateVertex(idx0, idx1);
-    }
-    // Right column (ix = N) periodic with left column (ix = 0)
-    {
-      size_t idx0 = i * NPlus1 + N;
-      size_t idx1 = i * N;
-      UpdateVertex(idx0, idx1);
-    }
-  }
-  {
-    // Top right corner period with bottom right corner.
-    size_t idx0 = NPlus1 * NPlus1 - 1;
-    size_t idx1 = 0;
-    UpdateVertex(idx0, idx1);
   }
 }
 
@@ -677,6 +734,12 @@ unsigned int OceanTile::Resolution() const
 }
 
 //////////////////////////////////////////////////
+void OceanTile::Create()
+{
+  return this->dataPtr->Create();
+}
+
+//////////////////////////////////////////////////
 common::Mesh* OceanTile::CreateMesh()
 {
   return this->dataPtr->CreateMesh();
@@ -722,6 +785,12 @@ unsigned int OceanTile::FaceCount() const
 math::Vector3i OceanTile::Face(unsigned int _index) const
 {
   return this->dataPtr->mFaces[_index];
+}
+
+//////////////////////////////////////////////////
+const std::vector<math::Vector3d>& OceanTile::Vertices() const
+{
+  return this->dataPtr->mVertices;
 }
 
 }

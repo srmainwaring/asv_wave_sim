@@ -55,6 +55,7 @@ set (sources
   Physics.cc
   TriangulatedGrid.cc
   Utilities.cc
+  Wavefield.cc
   WaveParameters.cc
   WaveSimulation.cc
   WaveSimulationFFTW.cc
@@ -115,9 +116,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   # ignition-plugin${IGN_PLUGIN_VER}::core
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
   ignition-common${IGN_COMMON_VER}::profiler
-  # ignition-fuel_tools${IGN_FUEL_TOOLS_VER}::ignition-fuel_tools${IGN_FUEL_TOOLS_VER}
-  # ignition-gui${IGN_GUI_VER}::ignition-gui${IGN_GUI_VER}
-  # ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+  ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
   sdformat${SDF_VER}::sdformat${SDF_VER}
   # protobuf::libprotobuf
   # PRIVATE

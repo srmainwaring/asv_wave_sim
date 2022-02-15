@@ -17,14 +17,17 @@
 
 #include "ignition/marine/OceanTile.hh"
 
-// #include "../../../include/asv_wave_sim_gazebo_plugins/WaveParameters.hh"
-// #include "../../../include/asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "ignition/marine/Utilities.hh"
+#include "ignition/marine/WaveParameters.hh"
+#include "ignition/marine/Wavefield.hh"
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
 
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/components/SourceFilePath.hh>
+
+#include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/Util.hh>
 
 #include <sdf/Element.hh>
@@ -41,76 +44,58 @@ using namespace ignition;
 using namespace gazebo;
 using namespace systems;
 
-// Modelled on the Wind system, but applied at the model level rather than the world 
+/// \brief Modelled on the Wind and LiftDrags systems.
+/// Applies at the model level rather than the world 
 class ignition::gazebo::systems::WavesModelPrivate
 {
+  /// \brief Destructor
+  public: ~WavesModelPrivate();
+
   /// \brief Initialize the system.
   /// \param[in] _ecm Mutable reference to the EntityComponentManager.
   /// \param[in] _sdf Pointer to sdf::Element that contains configuration
   /// parameters for the system.
-  public: void Load(EntityComponentManager &_ecm,
-                    const std::shared_ptr<const sdf::Element> &_sdf);
+  public: void Load(EntityComponentManager &_ecm);
 
   /// \brief Calculate and update the waves component.
   /// \param[in] _info Simulation update info.
   /// \param[in] _ecm Mutable reference to the EntityComponentManager.
   public: void UpdateWaves(const UpdateInfo &_info,
-                           EntityComponentManager &_ecm);
+                    EntityComponentManager &_ecm);
 
+  /// \brief Model interface
+  public: Model model{kNullEntity};
 
-  /// \brief Model entity to which this system is attached
-  public: Entity modelEntity = kNullEntity;
+  /// \brief Copy of the sdf configuration used for this plugin
+  public: sdf::ElementPtr sdf;
 
-  /// \brief Wavefield entity on which this system operates (one per model)
-  public: Entity wavefieldEntity = kNullEntity;
+  /// \brief Initialization flag
+  public: bool initialized{false};
 
-  ////////// FROM WavefieldEntity
+  /// \brief Set during Load to true if the configuration for the system is
+  /// valid and the post-update can run
+  public: bool validConfig{false};
 
- /// \brief The size of the wavefield
+  ////////// BEGIN FROM WavefieldEntity
+
+  /// \brief The size of the wavefield
   public: math::Vector2d size;
 
   /// \brief The number of grid cells in the wavefield
   public: math::Vector2i cellCount;
 
   /// \brief The wave parameters.
-  // public: std::shared_ptr<WaveParameters> waveParams;
+  public: std::shared_ptr<asv::WaveParameters> waveParams;
 
   /// \brief The wavefield.
-  // public: std::shared_ptr<Wavefield> wavefield;
+  public: std::shared_ptr<asv::Wavefield> wavefield;
 
-
-
-  /// \brief Path to the model
-  public: std::string modelPath;
-
-  /// \brief Mutex to protect sim time updates.
-  public: std::mutex mutex;
-
-  /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection {nullptr};
-
-
-  /// \brief Current sim time
-  public: std::chrono::steady_clock::duration currentSimTime;
-
-  /////////////////
-  // OceanTile
-
-  public: common::OceanTilePtr oceanTile;
-
-  /// \brief Used in DynamicMesh example
-  public: common::MeshPtr         oceanTileMesh;
-
-  /// \brief Destructor
-  public: ~WavesModelPrivate();
-
-  /// \brief All rendering operations must happen within this call
-  public: void OnUpdate();
+  ////////// END FROM WavefieldEntity
 };
 
 /////////////////////////////////////////////////
-WavesModel::WavesModel()
-    : System(), dataPtr(std::make_unique<WavesModelPrivate>())
+WavesModel::WavesModel() : System(),
+    dataPtr(std::make_unique<WavesModelPrivate>())
 {
 }
 
@@ -127,27 +112,51 @@ void WavesModel::Configure(const Entity &_entity,
 {
   IGN_PROFILE("WavesModel::Configure");
 
-  ignmsg << "WavesModel: configuring\n";
+  ignmsg << "WavesModel: configure\n";
 
-  // Ugly, but needed because the sdf::Element::GetElement is not a const
-  // function and _sdf is a const shared pointer to a const sdf::Element.
-  auto sdf = const_cast<sdf::Element *>(_sdf.get());
-
-  // capture entity 
-  // this->dataPtr->entity = _entity;
-  // auto nameComp = _ecm.Component<components::Name>(_entity);
-  // this->dataPtr->visualName = nameComp->Data();
-
+  this->dataPtr->model = Model(_entity);
+  if (!this->dataPtr->model.Valid(_ecm))
+  {
+    ignerr << "The WavesModel system should be attached to a model entity. "
+           << "Failed to initialize." << std::endl;
+    return;
+  }
+  this->dataPtr->sdf = _sdf->Clone();
 }
 
 //////////////////////////////////////////////////
 void WavesModel::PreUpdate(
   const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &)
+  ignition::gazebo::EntityComponentManager &_ecm)
 {
   IGN_PROFILE("WavesModel::PreUpdate");
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->currentSimTime = _info.simTime;
+
+  // std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+  // this->dataPtr->currentSimTime = _info.simTime;
+
+  /// \todo(anyone) support reset / rewind
+  if (_info.dt < std::chrono::steady_clock::duration::zero())
+  {
+    ignwarn << "Detected jump back in time ["
+        << std::chrono::duration_cast<std::chrono::seconds>(_info.dt).count()
+        << "s]. System may not work properly." << std::endl;
+  }
+
+  if (!this->dataPtr->initialized)
+  {
+    // We call Load here instead of Configure because we can't be guaranteed
+    // that all entities have been created when Configure is called
+    this->dataPtr->Load(_ecm);
+    this->dataPtr->initialized = true;
+  }
+
+  if (_info.paused)
+    return;
+
+  if (this->dataPtr->initialized && this->dataPtr->validConfig)
+  {
+    this->dataPtr->UpdateWaves(_info, _ecm);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -157,68 +166,46 @@ WavesModelPrivate::~WavesModelPrivate()
 };
 
 /////////////////////////////////////////////////
-void WavesModelPrivate::Load(EntityComponentManager &_ecm,
-    const std::shared_ptr<const sdf::Element> &_sdf)
+void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 {
-#if 0
-  Base::Load(_sdf);
-
   // Wavefield Parameters
-  this->data->size      = Utilities::SdfParamVector2(*_sdf, "size",       Vector2(1000, 1000));
-  this->data->cellCount = Utilities::SdfParamVector2(*_sdf, "cell_count", Vector2(50, 50));
+  this->size = asv::Utilities::SdfParamVector2d(
+      *this->sdf, "size", math::Vector2d(256.0, 256.0));
+  
+  this->cellCount = asv::Utilities::SdfParamVector2i(
+      *this->sdf, "cell_count", math::Vector2i(128, 128));
 
   // Wave Parameters
-  this->data->waveParams.reset(new WaveParameters());
-  if (_sdf->HasElement("wave"))
+  this->waveParams.reset(new asv::WaveParameters());
+  if (this->sdf->HasElement("wave"))
   {
-    sdf::ElementPtr sdfWave = _sdf->GetElement("wave");
-    this->data->waveParams->SetFromSDF(*sdfWave);
+    sdf::ElementPtr sdfWave = this->sdf->GetElement("wave");
+    this->waveParams->SetFromSDF(*sdfWave);
   }
 
-  // @DEBUG_INFO
-  // ignmsg << "WavefieldEntity..." <<  std::endl;
-  // this->data->waveParams->DebugPrint();
-#endif
+  /// DEBUG_INFO
+  igndbg << "WavesModel" <<  std::endl;
+  this->waveParams->DebugPrint();
+
+  // Wavefield  
+  std::string meshName = "_WAVEFIELD";
+  std::string meshPath = "";
+
+  // double simTime = this->GetWorld()->SimTime().Double();
+
+  this->wavefield.reset(new asv::WavefieldOceanTile(meshName));
+  this->wavefield->SetParameters(this->waveParams);
+  // this->wavefield->Update(simTime);
+
+  this->validConfig = true;
 }
 
 /////////////////////////////////////////////////
 void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
-#if 0
-  // Update the mesh
-  double simTime = this->GetWorld()->SimTime().Double();
-  this->data->wavefield->Update(simTime);
-#endif
-}
-
-/////////////////////////////////////////////////
-void WavesModelPrivate::OnUpdate()
-{
-  std::lock_guard<std::mutex> lock(this->mutex);
-
-  // initialise on first pass...
-#if 0  
-    // Wavefield  
-    std::string meshName = "_WAVEFIELD";
-    std::string meshPath = "";
-
-    double simTime = this->GetWorld()->SimTime().Double();
-
-// @TODO SWITCH WAVE SIMULATION TYPE
-#if 0
-    this->data->wavefield.reset(new WavefieldGerstner(
-      meshName,
-      { this->data->size[0], this->data->size[1] },
-      { static_cast<size_t>(this->data->cellCount[0]), static_cast<size_t>(this->data->cellCount[1]) }
-    ));
-#else
-    this->data->wavefield.reset(new WavefieldOceanTile(meshName));
-
-    this->data->wavefield->SetParameters(this->data->waveParams);
-    this->data->wavefield->Update(simTime);
-#endif
-#endif
+  double simTime = std::chrono::duration<double>(_info.simTime).count();
+  this->wavefield->Update(simTime);
 }
 
 //////////////////////////////////////////////////

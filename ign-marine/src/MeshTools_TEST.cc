@@ -112,7 +112,7 @@ void TestExportWaveMesh()
   waveParams->SetDirection(Vector2(1.0, 1.0));
 
   // Wavefield
-  WavefieldGerstner wavefield("__WAVEFIELD__");
+  WavefieldTrochoid wavefield("__WAVEFIELD__");
   wavefield.SetParameters(waveParams);
   wavefield.Update(0);
 

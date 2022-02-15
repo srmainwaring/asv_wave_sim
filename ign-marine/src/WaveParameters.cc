@@ -14,7 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "ignition/marine/WaveParameters.hh"
-#include "ignition/marine/CGALTypes.hh"
 #include "ignition/marine/Convert.hh"
 #include "ignition/marine/Geometry.hh"
 #include "ignition/marine/Grid.hh"
@@ -91,7 +90,7 @@ namespace asv
     public: double phase;
 
     /// \brief The mean wave direction.
-    public: Vector2 direction;
+    public: ignition::math::Vector2d direction;
 
     /// \brief The mean wave angular frequency (derived).    
     public: double angularFrequency;
@@ -118,13 +117,13 @@ namespace asv
     public: std::vector<double> wavenumbers;
 
     /// \brief The component wave dirctions (derived).
-    public: std::vector<Vector2> directions;
+    public: std::vector<ignition::math::Vector2d> directions;
 
     /// \brief Recalculate all derived quantities from inputs.
     public: void Recalculate()
     {
       // Normalize direction
-      this->direction = Geometry::Normalize(this->direction);
+      this->direction.Normalize();
 
       // Derived mean values
       this->angularFrequency = 2.0 * M_PI / this->period;
@@ -162,11 +161,16 @@ namespace asv
         // Direction
         const double c = std::cos(n * this->angle);
         const double s = std::sin(n * this->angle);
-        const TransformMatrix T(
-          c, -s,
-          s,  c
-        );
-        const Vector2 d = T(this->direction);
+        // const TransformMatrix T(
+        //   c, -s,
+        //   s,  c
+        // );
+        // const Vector2 d = T(this->direction);
+
+        double x = c * this->direction.X() - s * this->direction.Y();
+        double y = s * this->direction.X() + c * this->direction.Y();
+        ignition::math::Vector2d d(x, y);
+
         directions.push_back(d);
       }
     }
@@ -232,8 +236,8 @@ namespace asv
       const auto& direction = this->data->direction;
       auto nextParam = _msg.add_param();
       (*nextParam->mutable_params())["direction"].set_type(ignition::msgs::Any::VECTOR3D);
-      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_x(direction.x());
-      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_y(direction.y());
+      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_x(direction.X());
+      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_y(direction.Y());
       (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_z(0);
     }
   }
@@ -244,7 +248,7 @@ namespace asv
     this->data->amplitude = Utilities::MsgParamDouble(_msg,   "amplitude",  this->data->amplitude);
     this->data->period    = Utilities::MsgParamDouble(_msg,   "period",     this->data->period);
     this->data->phase     = Utilities::MsgParamDouble(_msg,   "phase",      this->data->phase);
-    this->data->direction = Utilities::MsgParamVector2(_msg,  "direction",  this->data->direction);
+    this->data->direction = Utilities::MsgParamVector2d(_msg, "direction",  this->data->direction);
     this->data->scale     = Utilities::MsgParamDouble(_msg,   "scale",      this->data->scale);
     this->data->angle     = Utilities::MsgParamDouble(_msg,   "angle",      this->data->angle);
     this->data->steepness = Utilities::MsgParamDouble(_msg,   "steepness",  this->data->steepness);
@@ -258,7 +262,7 @@ namespace asv
     this->data->amplitude = Utilities::SdfParamDouble(_sdf,   "amplitude",  this->data->amplitude);
     this->data->period    = Utilities::SdfParamDouble(_sdf,   "period",     this->data->period);
     this->data->phase     = Utilities::SdfParamDouble(_sdf,   "phase",      this->data->phase);
-    this->data->direction = Utilities::SdfParamVector2(_sdf,  "direction",  this->data->direction);
+    this->data->direction = Utilities::SdfParamVector2d(_sdf, "direction",  this->data->direction);
     this->data->scale     = Utilities::SdfParamDouble(_sdf,   "scale",      this->data->scale);
     this->data->angle     = Utilities::SdfParamDouble(_sdf,   "angle",      this->data->angle);
     this->data->steepness = Utilities::SdfParamDouble(_sdf,   "steepness",  this->data->steepness);
@@ -316,7 +320,7 @@ namespace asv
     return this->data->wavenumber;
   }    
 
-  Vector2 WaveParameters::Direction() const
+  ignition::math::Vector2d WaveParameters::Direction() const
   {
     return this->data->direction;
   }
@@ -363,7 +367,7 @@ namespace asv
     this->data->Recalculate();
   }
   
-  void WaveParameters::SetDirection(const Vector2& _direction)
+  void WaveParameters::SetDirection(const ignition::math::Vector2d& _direction)
   {
     this->data->direction = _direction;
     this->data->Recalculate();
@@ -394,7 +398,7 @@ namespace asv
     return this->data->wavenumbers;
   }
 
-  const std::vector<Vector2>& WaveParameters::Direction_V() const
+  const std::vector<ignition::math::Vector2d>& WaveParameters::Direction_V() const
   {
     return this->data->directions;
   }

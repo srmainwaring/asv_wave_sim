@@ -480,7 +480,7 @@ TEST(CGAL, SurfaceMeshWavefield) {
   params->SetPhase(0.0);
 
   // Wavefield
-  asv::WavefieldGerstner wavefield("TestSurfaceMeshWavefield"); 
+  asv::WavefieldTrochoid wavefield("TestSurfaceMeshWavefield"); 
   wavefield.SetParameters(params);
 
   // Evolve to t=10 with 1000 updates

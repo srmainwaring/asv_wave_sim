@@ -237,9 +237,6 @@ using namespace systems;
 
 class ignition::gazebo::systems::WavesVisualPrivate
 {
-  /// \brief Path to the model
-  public: std::string modelPath;
-
   /// \brief Mutex to protect sim time updates.
   public: std::mutex mutex;
 

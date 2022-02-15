@@ -154,7 +154,7 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
 
   // Wavefield and water patch 2x2  
   std::shared_ptr<const Wavefield> wavefield(
-    new  WavefieldGerstner("wavefield", { 2, 2 }, { 2, 2 }));
+    new  WavefieldTrochoid("wavefield", { 2, 2 }, { 2, 2 }));
   std::shared_ptr<Grid> patch(
     new  Grid({ 2, 2 }, { 2, 2 }));
   std::shared_ptr<const WavefieldSampler> wavefieldSampler(
@@ -192,7 +192,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
 
   // Wavefield and water patch 4x4
   std::shared_ptr<const Wavefield> wavefield(
-    new  WavefieldGerstner("wavefield", { 20, 20 }, { 4, 4 }));
+    new  WavefieldTrochoid("wavefield", { 20, 20 }, { 4, 4 }));
   std::shared_ptr<Grid> patch(
     new  Grid({ 20, 20 }, { 4, 4 }));
   std::shared_ptr<const WavefieldSampler> wavefieldSampler(

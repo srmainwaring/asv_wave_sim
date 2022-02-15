@@ -60,6 +60,7 @@ namespace asv {
     void DebugPrintMesh() const;
     void DebugPrintTriangulation() const;
     void UpdatePoints(const std::vector<Point3>& from);
+    void UpdatePoints(const std::vector<ignition::math::Vector3d>& from);
     // void UpdatePoints(const std::vector<Ogre::Vector3>& from);
     void UpdatePoints(const Mesh& from);
 

@@ -66,24 +66,24 @@ namespace asv
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A class to manage a wave field.
-  class WavefieldGerstnerPrivate;
+  class WavefieldTrochoidPrivate;
 
-  class WavefieldGerstner : public Wavefield
+  class WavefieldTrochoid : public Wavefield
   {
     /// Destructor.
-    public: ~WavefieldGerstner() override;
+    public: ~WavefieldTrochoid() override;
 
     /// Constructor.
     ///
     /// \param[in] _name    The name for the wave field mesh.
-    public: WavefieldGerstner(const std::string& _name);
+    public: WavefieldTrochoid(const std::string& _name);
 
     /// Constructor.
     ///
     /// \param[in] _name      The name for the wave field mesh.
     /// \param[in] _size      A two component array defining the size of the wavefield [m].
     /// \param[in] _cellCount A two component array defining the number of cells in each direction.
-    public: WavefieldGerstner(
+    public: WavefieldTrochoid(
       const std::string& _name,
       const std::array<double, 2>& _size,
       const std::array<size_t, 2>& _cellCount);
@@ -121,7 +121,7 @@ namespace asv
 
     /// \internal
     /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldGerstnerPrivate> data;
+    private: std::shared_ptr<WavefieldTrochoidPrivate> data;
   };
 
 

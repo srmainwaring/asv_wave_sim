@@ -15,7 +15,6 @@
 
 #include "ignition/marine/WaveSimulationTrochoid.hh"
 
-#include "ignition/marine/CGALTypes.hh"
 #include "ignition/marine/Wavefield.hh"
 #include "ignition/marine/WaveParameters.hh"
 
@@ -136,12 +135,12 @@ namespace asv
           double vy = iy * this->L / this->N - this->L / 2.0;
 
           // Multiple waves
-          double ddotx = direction_i.x() * vx + direction_i.y() * vy;
+          double ddotx = direction_i.X() * vx + direction_i.Y() * vy;
           double angle  = ddotx * wavenumber_i - omega_i * time + phase_i;
           // double s = std::sin(angle);
           double c = std::cos(angle);
-          // double sx = - direction_i.x() * q_i * amplitude_i * s;
-          // double sy = - direction_i.y() * q_i * amplitude_i * s;
+          // double sx = - direction_i.X() * q_i * amplitude_i * s;
+          // double sy = - direction_i.Y() * q_i * amplitude_i * s;
           double h = amplitude_i * c;
 
           _heights[idx] += h;
@@ -204,12 +203,12 @@ namespace asv
           double vy = iy * this->L / this->N - this->L / 2.0;
 
           // Multiple waves
-          double ddotx = direction_i.x() * vx + direction_i.y() * vy;
+          double ddotx = direction_i.X() * vx + direction_i.Y() * vy;
           double angle  = ddotx * wavenumber_i - omega_i * time + phase_i;
           double s = std::sin(angle);
           // double c = std::cos(angle);
-          double sx = - direction_i.x() * q_i * amplitude_i * s;
-          double sy = - direction_i.y() * q_i * amplitude_i * s;
+          double sx = - direction_i.X() * q_i * amplitude_i * s;
+          double sy = - direction_i.Y() * q_i * amplitude_i * s;
           // double h = amplitude_i * c;
 
           _sx[idx] += sx;
