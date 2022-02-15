@@ -59,10 +59,10 @@ set (sources
 #   ${PROTO_PRIVATE_SRC}
 )
 
-# set (gtest_sources
-#   ${gtest_sources}
-#   Barrier_TEST.cc
-# )
+set (gtest_sources
+  ${gtest_sources}
+  Algorithm_TEST.cc
+)
 
 # Tests that require a valid display
 # set(tests_needing_display
@@ -113,10 +113,10 @@ if (UNIX AND NOT APPLE)
     PRIVATE stdc++fs)
 endif()
 
-# target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
-#   PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-# )
+target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
 
 # add_dependencies(${PROJECT_LIBRARY_TARGET_NAME}
 #   ignition-gazebo_private_msgs
@@ -126,17 +126,17 @@ endif()
 #   ${CMAKE_INSTALL_PREFIX}/${IGN_LIB_INSTALL_DIR}/ign-${IGN_DESIGNATION}-${PROJECT_VERSION_MAJOR}/plugins
 # )
 
-# include_directories(${PROJECT_SOURCE_DIR}/test)
+include_directories(${PROJECT_SOURCE_DIR}/test)
 
 # Build the unit tests
-# ign_build_tests(TYPE UNIT
-#   SOURCES
-#     ${gtest_sources}
-#   LIB_DEPS
-#     ${PROJECT_LIBRARY_TARGET_NAME}
-#     ${EXTRA_TEST_LIB_DEPS}
-#     ignition-gazebo${PROJECT_VERSION_MAJOR}
-# )
+ign_build_tests(TYPE UNIT
+  SOURCES
+    ${gtest_sources}
+  LIB_DEPS
+    ${PROJECT_LIBRARY_TARGET_NAME}
+    # ${EXTRA_TEST_LIB_DEPS}
+    # ignition-gazebo${PROJECT_VERSION_MAJOR}
+)
 
 # Command line tests need extra settings
 # foreach(CMD_TEST

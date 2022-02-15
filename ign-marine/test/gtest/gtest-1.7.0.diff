@@ -1,0 +1,54 @@
+diff -r 52c510310533 test/gtest/include/gtest/gtest-printers.h
+--- a/test/gtest/include/gtest/gtest-printers.h	Thu Nov 09 00:17:56 2017 -0800
++++ b/test/gtest/include/gtest/gtest-printers.h	Fri Nov 10 12:26:21 2017 -0800
+@@ -94,7 +94,9 @@
+ 
+ #ifndef GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
+ #define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
++#ifndef _WIN32
+ #pragma GCC system_header
++#endif
+ 
+ #include <ostream>  // NOLINT
+ #include <sstream>
+diff -r 52c510310533 test/gtest/include/gtest/gtest-typed-test.h
+--- a/test/gtest/include/gtest/gtest-typed-test.h	Thu Nov 09 00:17:56 2017 -0800
++++ b/test/gtest/include/gtest/gtest-typed-test.h	Fri Nov 10 12:26:21 2017 -0800
+@@ -31,7 +31,10 @@
+ 
+ #ifndef GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
+ #define GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
++
++#ifndef _WIN32
+ #pragma GCC system_header
++#endif
+ 
+ // This header implements typed tests and type-parameterized tests.
+ 
+diff -r 52c510310533 test/gtest/include/gtest/internal/gtest-port.h
+--- a/test/gtest/include/gtest/internal/gtest-port.h	Thu Nov 09 00:17:56 2017 -0800
++++ b/test/gtest/include/gtest/internal/gtest-port.h	Fri Nov 10 12:26:21 2017 -0800
+@@ -39,7 +39,9 @@
+ 
+ #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
+ #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
++#ifndef _WIN32
+ #pragma GCC system_header
++#endif
+ 
+ // The user can define the following macros in the build script to
+ // control Google Test's behavior.  If the user doesn't define a macro
+diff -r 52c510310533 test/gtest/src/gtest.cc
+--- a/test/gtest/src/gtest.cc	Thu Nov 09 00:17:56 2017 -0800
++++ b/test/gtest/src/gtest.cc	Fri Nov 10 12:26:21 2017 -0800
+@@ -33,7 +33,10 @@
+ 
+ #include "gtest/gtest.h"
+ #include "gtest/gtest-spi.h"
++
++#ifndef _WIN32
+ #pragma GCC system_header
++#endif
+ 
+ #include <ctype.h>
+ #include <math.h>
