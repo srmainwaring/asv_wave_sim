@@ -258,3 +258,21 @@ export IGN_GAZEBO_SYSTEM_PLUGIN_PATH=${IGN_GAZEBO_SYSTEM_PLUGIN_PATH}:\
 $HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo_plugins/build/lib
 ```
 
+### CGAL library usage
+
+The CGAL library is used for the following calculations:
+
+`Algorithm`
+- not used
+
+`Convert`
+- types: Point3, Vector2, Vector3
+- functions: ignition::math <=> CGAL
+
+`Geometry`
+- types: Triangle, Point3, Vector2, Vector3, Direction3, Mesh, AABBTree
+- functions:  
+- 
+
+
+

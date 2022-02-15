@@ -1,7 +1,6 @@
 
 set(IGNITION-RENDERING_LIBRARY_DIRS
   ${IGNITION-RENDERING_INCLUDE_DIRS}/../../../lib/ign-rendering-${IGN_RENDERING_VER}/engine-plugins)
-# message("IGNITION-RENDERING_LIBRARY_DIRS: ${IGNITION-RENDERING_LIBRARY_DIRS}")
 
 link_directories(${IGNITION-RENDERING_LIBRARY_DIRS})
 
@@ -12,15 +11,6 @@ gz_add_system(waves
     Ogre2DynamicMesh.cc
     Ogre2OceanTile.cc
     Ogre2OceanVisual.cc
-    ../../Geometry.cc
-    ../../PhysicalConstants.cc
-    ../../Physics.cc
-    ../../WaveParameters.cc
-    ../../WaveSimulation.cc
-    ../../WaveSimulationFFTW.cc
-    ../../WaveSimulationSinusoid.cc
-    ../../WaveSimulationTrochoid.cc
-    ../../WaveSpectrum.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
@@ -36,8 +26,6 @@ gz_add_system(waves-model
   SOURCES
     WavesModel.cc
     OceanTile.cc
-    # ../../Wavefield.cc
-    # ../../WaveParameters.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
     ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}

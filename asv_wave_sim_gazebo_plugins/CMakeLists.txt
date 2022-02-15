@@ -182,64 +182,64 @@ ign_create_packages()
 # Libraries...
 
 # Hydrodynamics
-add_library(Hydrodynamics
-  SHARED
-    src/Algorithm.cc
-    src/Convert.cc
-    src/Gazebo.cc
-    src/Geometry.cc
-    src/Grid.cc
-    src/MeshTools.cc
-    src/OceanTile.cc
-    src/PhysicalConstants.cc
-    src/Physics.cc
-    src/TriangulatedGrid.cc
-    src/Utilities.cc
-    src/Wavefield.cc
-    src/WavefieldEntity.cc
-    src/WavefieldSampler.cc
-    src/WaveParameters.cc
-    src/WaveSimulation.cc
-    src/WaveSimulationFFTW.cc
-    src/WaveSimulationOpenCL.cc
-    src/WaveSimulationSinusoid.cc
-    src/WaveSimulationTrochoid.cc
-    src/WaveSpectrum.cc
-)
+# add_library(Hydrodynamics
+#   SHARED
+#     src/Algorithm.cc
+#     src/Convert.cc
+#     src/Gazebo.cc
+#     src/Geometry.cc
+#     src/Grid.cc
+#     src/MeshTools.cc
+#     src/OceanTile.cc
+#     src/PhysicalConstants.cc
+#     src/Physics.cc
+#     src/TriangulatedGrid.cc
+#     src/Utilities.cc
+#     src/Wavefield.cc
+#     src/WavefieldEntity.cc
+#     src/WavefieldSampler.cc
+#     src/WaveParameters.cc
+#     src/WaveSimulation.cc
+#     src/WaveSimulationFFTW.cc
+#     src/WaveSimulationOpenCL.cc
+#     src/WaveSimulationSinusoid.cc
+#     src/WaveSimulationTrochoid.cc
+#     src/WaveSpectrum.cc
+# )
 
-target_include_directories(Hydrodynamics
-  PRIVATE
-    include
-    ${EIGEN3_INCLUDE_DIR}
-)
+# target_include_directories(Hydrodynamics
+#   PRIVATE
+#     include
+#     ${EIGEN3_INCLUDE_DIR}
+# )
 
 # TODO  A hacky way to link against the engine-plugin
 #       Need a better way to do this with support of the Ignition infrastructure...
 # 
-set(IGNITION-RENDERING_LIBRARY_DIRS ${IGNITION-RENDERING_INCLUDE_DIRS}/../../../lib/ign-rendering-${IGN_RENDERING_VER}/engine-plugins)
-message("IGNITION-RENDERING_LIBRARY_DIRS: ${IGNITION-RENDERING_LIBRARY_DIRS}")
+# set(IGNITION-RENDERING_LIBRARY_DIRS ${IGNITION-RENDERING_INCLUDE_DIRS}/../../../lib/ign-rendering-${IGN_RENDERING_VER}/engine-plugins)
+# message("IGNITION-RENDERING_LIBRARY_DIRS: ${IGNITION-RENDERING_LIBRARY_DIRS}")
 
-target_link_directories(Hydrodynamics
-  PRIVATE
-    ${IGNITION-RENDERING_LIBRARY_DIRS}
-)
+# target_link_directories(Hydrodynamics
+#   PRIVATE
+#     ${IGNITION-RENDERING_LIBRARY_DIRS}
+# )
 
-target_link_libraries(Hydrodynamics
-  ignition-math${IGN_MATH_VER}::ignition-math${IGN_MATH_VER}
-  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-  ignition-common${IGN_COMMON_VER}::graphics
-  ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
-  ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-  ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
-  ignition-rendering${IGN_RENDERING_VER}-ogre # the engine-plugin
-  sdformat${SDF_VER}::sdformat${SDF_VER}
-  ${Boost_LIBRARIES}
-  ${CLFFT_LIBRARIES}
-  ${FFT_LIBRARIES}
-  ${OpenCL_LIBRARIES}
-  ${TBB_LIBRARIES}
-  IgnOGRE::IgnOGRE
-)
+# target_link_libraries(Hydrodynamics
+#   ignition-math${IGN_MATH_VER}::ignition-math${IGN_MATH_VER}
+#   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+#   ignition-common${IGN_COMMON_VER}::graphics
+#   ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+#   ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+#   ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+#   ignition-rendering${IGN_RENDERING_VER}-ogre # the engine-plugin
+#   sdformat${SDF_VER}::sdformat${SDF_VER}
+#   ${Boost_LIBRARIES}
+#   ${CLFFT_LIBRARIES}
+#   ${FFT_LIBRARIES}
+#   ${OpenCL_LIBRARIES}
+#   ${TBB_LIBRARIES}
+#   IgnOGRE::IgnOGRE
+# )
 
 # target_compile_options(Hydrodynamics PRIVATE "-Wno-unknown-pragmas")
 

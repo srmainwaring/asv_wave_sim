@@ -45,56 +45,23 @@ add_subdirectory(systems)
 # )
 
 set (sources
-  WavesLib.cc
-#   Barrier.cc
-#   BaseView.cc
-#   Conversions.cc
-#   EntityComponentManager.cc
-#   LevelManager.cc
-#   Link.cc
-#   Model.cc
-#   Primitives.cc
-#   SdfEntityCreator.cc
-#   SdfGenerator.cc
-#   Server.cc
-#   ServerConfig.cc
-#   ServerPrivate.cc
-#   SimulationRunner.cc
-#   SystemLoader.cc
-#   TestFixture.cc
-#   Util.cc
-#   World.cc
-#   cmd/ModelCommandAPI.cc
+  # WavesLib.cc
+  Geometry.cc
+  PhysicalConstants.cc
+  Physics.cc
+  WaveParameters.cc
+  WaveSimulation.cc
+  WaveSimulationFFTW.cc
+  WaveSimulationOpenCL.cc
+  WaveSimulationSinusoid.cc
+  WaveSimulationTrochoid.cc
+  WaveSpectrum.cc
 #   ${PROTO_PRIVATE_SRC}
-#   ${network_sources}
 )
 
 # set (gtest_sources
 #   ${gtest_sources}
 #   Barrier_TEST.cc
-#   BaseView_TEST.cc
-#   ComponentFactory_TEST.cc
-#   Component_TEST.cc
-#   Conversions_TEST.cc
-#   EntityComponentManager_TEST.cc
-#   EventManager_TEST.cc
-#   Link_TEST.cc
-#   Model_TEST.cc
-#   Primitives_TEST.cc
-#   SdfEntityCreator_TEST.cc
-#   SdfGenerator_TEST.cc
-#   ServerConfig_TEST.cc
-#   Server_TEST.cc
-#   SimulationRunner_TEST.cc
-#   SystemLoader_TEST.cc
-#   System_TEST.cc
-#   TestFixture_TEST.cc
-#   Util_TEST.cc
-#   World_TEST.cc
-#   ign_TEST.cc
-#   network/NetworkConfig_TEST.cc
-#   network/PeerTracker_TEST.cc
-#   network/NetworkManager_TEST.cc
 # )
 
 # Tests that require a valid display
@@ -126,29 +93,30 @@ set (sources
 
 # Create the library target
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 17)
-# target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
-#   PUBLIC
-#   ignition-math${IGN_MATH_VER}
-#   ignition-plugin${IGN_PLUGIN_VER}::core
-#   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-#   ignition-common${IGN_COMMON_VER}::profiler
-#   ignition-fuel_tools${IGN_FUEL_TOOLS_VER}::ignition-fuel_tools${IGN_FUEL_TOOLS_VER}
-#   ignition-gui${IGN_GUI_VER}::ignition-gui${IGN_GUI_VER}
-#   ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
-#   sdformat${SDF_VER}::sdformat${SDF_VER}
-#   protobuf::libprotobuf
-#   PRIVATE
-#   ignition-plugin${IGN_PLUGIN_VER}::loader
-# )
-# if (UNIX AND NOT APPLE)
-#   target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
-#     PRIVATE stdc++fs)
-# endif()
-
-target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
+target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  ignition-math${IGN_MATH_VER}
+  ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
+  # ignition-plugin${IGN_PLUGIN_VER}::core
+  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-common${IGN_COMMON_VER}::profiler
+  # ignition-fuel_tools${IGN_FUEL_TOOLS_VER}::ignition-fuel_tools${IGN_FUEL_TOOLS_VER}
+  # ignition-gui${IGN_GUI_VER}::ignition-gui${IGN_GUI_VER}
+  # ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+  sdformat${SDF_VER}::sdformat${SDF_VER}
+  # protobuf::libprotobuf
+  # PRIVATE
+  # ignition-plugin${IGN_PLUGIN_VER}::loader
 )
+if (UNIX AND NOT APPLE)
+  target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
+    PRIVATE stdc++fs)
+endif()
+
+# target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
+#   PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+# )
 
 # add_dependencies(${PROJECT_LIBRARY_TARGET_NAME}
 #   ignition-gazebo_private_msgs
