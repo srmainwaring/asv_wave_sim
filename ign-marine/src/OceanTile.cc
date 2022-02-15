@@ -28,11 +28,9 @@
 #include <cmath>
 #include <iostream>
 
-using namespace asv;
-
 namespace ignition
 {
-namespace common
+namespace marine
 {
 class OceanTilePrivate
 {

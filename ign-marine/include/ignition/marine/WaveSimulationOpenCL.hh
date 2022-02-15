@@ -21,7 +21,9 @@
 #include <memory>
 #include <vector>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   class WaveSimulationOpenCLImpl;
@@ -65,6 +67,7 @@ namespace asv
     private: std::unique_ptr<WaveSimulationOpenCLImpl> impl;
   };
 
+}
 }
 
 #endif

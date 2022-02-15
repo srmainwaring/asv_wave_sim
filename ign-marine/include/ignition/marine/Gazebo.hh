@@ -33,7 +33,7 @@
 
 namespace ignition
 {
-  namespace rendering
+  namespace marine
   {
     void ToOgreVector3(
       const std::vector<double>& _v,
@@ -91,10 +91,7 @@ namespace ignition
       const std::string &_subMesh="",
       bool _centerSubmesh=false);
 
-
-
-  }; // namespace rendering
-
-} // namespace gazebo
+  }
+}
 
 #endif

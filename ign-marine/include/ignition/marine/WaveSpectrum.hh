@@ -16,7 +16,9 @@
 #ifndef IGNITION_MARINE_WAVESPECTRUM_HH_
 #define IGNITION_MARINE_WAVESPECTRUM_HH_
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   class WaveSpectrum
@@ -46,6 +48,7 @@ namespace asv
     private: double u;
   };
 
+}
 }
 
 #endif

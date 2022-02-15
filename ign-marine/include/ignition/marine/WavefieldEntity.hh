@@ -23,7 +23,9 @@
 // #include <ignition/physics/Base.hh>
 #include <memory>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,6 +76,7 @@ namespace asv
   };
 #endif
 
-} // namespace asv
+}
+}
 
 #endif

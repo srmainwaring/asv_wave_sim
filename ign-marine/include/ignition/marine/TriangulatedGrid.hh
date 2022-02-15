@@ -21,12 +21,14 @@
 #include "ignition/marine/CGALTypes.hh"
 
 #include <ignition/math.hh>
-// #include <ignition/rendering/ogre.hh>
 
 #include <memory>
 #include <vector>
 
-namespace asv {
+namespace ignition
+{
+namespace marine
+{
 
 ///////////////////////////////////////////////////////////////////////////////
 // TriangulatedGrid
@@ -71,6 +73,7 @@ namespace asv {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // namespace asv
+}
+}
 
 #endif

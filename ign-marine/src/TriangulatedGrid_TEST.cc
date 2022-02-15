@@ -29,7 +29,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests
 
-using namespace asv;
+using namespace ignition;
+using namespace marine;
 
 TEST(TriangulatedGrid, Create) {
   // Create

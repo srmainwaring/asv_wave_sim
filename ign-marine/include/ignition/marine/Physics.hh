@@ -51,7 +51,9 @@
 #include <memory>
 #include <vector>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   // class Grid;
@@ -395,6 +397,7 @@ namespace asv
     private: std::shared_ptr<HydrodynamicsPrivate> data;
   };
 
-} // namespace asv
+}
+}
 
 #endif

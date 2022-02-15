@@ -20,7 +20,6 @@
 #include "ignition/marine/Utilities.hh"
 
 #include <ignition/common.hh>
-// #include <ignition/physics.hh>
 
 #include <iostream>
 #include <string>
@@ -28,7 +27,9 @@
 using namespace ignition;
 using namespace common;
 
-namespace asv 
+namespace ignition
+{
+namespace marine
 {
 
 #if 0
@@ -137,5 +138,5 @@ namespace asv
   }
 #endif
 
-} // namespace asv
-
+}
+}

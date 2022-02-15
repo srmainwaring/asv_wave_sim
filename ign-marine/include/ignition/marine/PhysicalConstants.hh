@@ -20,7 +20,9 @@
 #ifndef IGNITION_MARINE_PHYSICALCONSTANTS_HH_
 #define IGNITION_MARINE_PHYSICALCONSTANTS_HH_
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,6 +55,7 @@ namespace asv
     public: static double WaterKinematicViscosity();
   };
 
-} // namespace asv
+}
+}
 
 #endif

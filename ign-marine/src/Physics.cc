@@ -40,8 +40,11 @@
 #include <limits>
 #include <string>
 
-namespace asv 
+namespace ignition
 {
+namespace marine
+{
+
 ///////////////////////////////////////////////////////////////////////////////    
 // Utilities
   void DebugPrint(const Triangle& triangle)
@@ -1207,6 +1210,5 @@ namespace asv
     // }
   }
 
-
-} // namespace asv
-
+}
+}

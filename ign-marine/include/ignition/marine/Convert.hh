@@ -24,7 +24,9 @@
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,6 +63,7 @@ namespace asv
   Vector3 ToVector3(const ignition::math::Vector3d& _vector);
 
 ///////////////////////////////////////////////////////////////////////////////
-} // namespace asv
+}
+} 
 
 #endif

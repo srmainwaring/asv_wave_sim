@@ -85,10 +85,10 @@ class ignition::gazebo::systems::WavesModelPrivate
   public: math::Vector2i cellCount;
 
   /// \brief The wave parameters.
-  public: std::shared_ptr<asv::WaveParameters> waveParams;
+  public: std::shared_ptr<marine::WaveParameters> waveParams;
 
   /// \brief The wavefield.
-  public: std::shared_ptr<asv::Wavefield> wavefield;
+  public: std::shared_ptr<marine::Wavefield> wavefield;
 
   ////////// END FROM WavefieldEntity
 };
@@ -169,14 +169,14 @@ WavesModelPrivate::~WavesModelPrivate()
 void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 {
   // Wavefield Parameters
-  this->size = asv::Utilities::SdfParamVector2d(
+  this->size = marine::Utilities::SdfParamVector2d(
       *this->sdf, "size", math::Vector2d(256.0, 256.0));
   
-  this->cellCount = asv::Utilities::SdfParamVector2i(
+  this->cellCount = marine::Utilities::SdfParamVector2i(
       *this->sdf, "cell_count", math::Vector2i(128, 128));
 
   // Wave Parameters
-  this->waveParams.reset(new asv::WaveParameters());
+  this->waveParams.reset(new marine::WaveParameters());
   if (this->sdf->HasElement("wave"))
   {
     sdf::ElementPtr sdfWave = this->sdf->GetElement("wave");
@@ -193,7 +193,7 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 
   // double simTime = this->GetWorld()->SimTime().Double();
 
-  this->wavefield.reset(new asv::WavefieldOceanTile(meshName));
+  this->wavefield.reset(new marine::WavefieldOceanTile(meshName));
   this->wavefield->SetParameters(this->waveParams);
   // this->wavefield->Update(simTime);
 

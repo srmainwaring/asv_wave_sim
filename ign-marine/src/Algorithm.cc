@@ -15,8 +15,4 @@
 
 #include "ignition/marine/Algorithm.hh"
 
-namespace asv 
-{
-
-} // namespace asv
 

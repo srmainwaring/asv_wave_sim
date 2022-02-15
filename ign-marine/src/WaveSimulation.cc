@@ -15,7 +15,9 @@
 
 #include "ignition/marine/WaveSimulation.hh"
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   WaveSimulation::~WaveSimulation()
@@ -26,4 +28,5 @@ namespace asv
   {
   }
 
+}
 }

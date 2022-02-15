@@ -27,7 +27,7 @@
 
 namespace ignition
 {
-  namespace rendering
+  namespace marine
   {
     void ToOgreVector3(
       const std::vector<double>& _v,
@@ -600,7 +600,7 @@ namespace ignition
     }
 
 
-  } // namespace rendering
-} // namespace gazebo
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////

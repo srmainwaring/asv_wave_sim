@@ -21,7 +21,9 @@
 #include <memory>
 #include <vector>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   class WaveParameters;
@@ -69,6 +71,7 @@ namespace asv
     private: std::unique_ptr<WaveSimulationTrochoidImpl> impl;
   };
 
+}
 }
 
 #endif

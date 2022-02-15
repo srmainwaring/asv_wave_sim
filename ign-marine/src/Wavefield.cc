@@ -22,11 +22,8 @@
 #include "ignition/marine/OceanTile.hh"
 #include "ignition/marine/TriangulatedGrid.hh"
 
-// @TODO: relocate (transport / messages etc) 
-// #include <gazebo/common/common.hh>
 #include "ignition/marine/Utilities.hh"
 #include <thread>
-// @TODO: relocate (transport / messages etc) 
 
 
 #include <ignition/math/Vector2.hh>
@@ -38,7 +35,9 @@
 #include <iostream>
 #include <string>
 
-namespace asv 
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,7 +286,7 @@ namespace asv
     public: std::shared_ptr<WaveParameters> params;
 
     /// \brief Ocean tile
-    public: std::unique_ptr<ignition::common::OceanTile> oceanTile;
+    public: std::unique_ptr<OceanTile> oceanTile;
 
     /// \brief The current position of the wave field.
     public: std::shared_ptr<Grid> grid;
@@ -334,7 +333,7 @@ namespace asv
 
     // OceanTile
     ignmsg << "Creating OceanTile." <<  std::endl;
-    this->data->oceanTile.reset(new ignition::common::OceanTile(N, L, false));
+    this->data->oceanTile.reset(new OceanTile(N, L, false));
     this->data->oceanTile->SetWindVelocity(u, 0.0);
     this->data->oceanTile->Create();
     this->data->oceanTile->Update(0.0);
@@ -454,4 +453,5 @@ namespace asv
 
 ///////////////////////////////////////////////////////////////////////////////  
 
-} // namespace asv
+}
+}

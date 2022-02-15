@@ -30,7 +30,9 @@
 #include <limits>
 #include <string>
 
-namespace asv 
+namespace ignition
+{
+namespace marine
 {
   // Typedefs
   typedef boost::optional<AABBTree::Intersection_and_primitive_id<Ray>::Type> RayIntersection;
@@ -334,5 +336,5 @@ namespace asv
     return false;
   }
 
-} // namespace asv
-
+}
+}

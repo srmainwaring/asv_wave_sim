@@ -26,7 +26,9 @@
 
 #include <string>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,6 +164,7 @@ namespace asv
       const std::string &_paramName, const ignition::math::Vector3d _defaultVal);
   };
 
-} // namespace asv
+}
+}
 
 #endif

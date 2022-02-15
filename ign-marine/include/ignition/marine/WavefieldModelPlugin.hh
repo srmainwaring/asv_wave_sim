@@ -19,14 +19,14 @@
 #ifndef IGNITION_MARINE_WAVEFIELDMODELPLUGIN_HH_
 #define IGNITION_MARINE_WAVEFIELDMODELPLUGIN_HH_
 
-// #include <gazebo/gazebo.hh>
-// #include <ignition/common/Plugin.hh>
 #include <ignition/physics.hh>
 #include <ignition/msgs.hh>
 
 #include <memory>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,6 +167,7 @@ namespace asv
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldModelPluginPrivate> data;
   };
-} // namespace asv
+}
+}
 
 #endif

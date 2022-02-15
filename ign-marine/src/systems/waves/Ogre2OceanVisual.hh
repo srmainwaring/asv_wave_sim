@@ -61,10 +61,10 @@ namespace ignition
       public: void LoadCube();
 
       /// \brief Load from an ocean tile
-      public: void LoadOceanTile(common::OceanTilePtr _oceanTile);
+      public: void LoadOceanTile(marine::OceanTilePtr _oceanTile);
 
       /// \brief Update from an ocean tile
-      public: void UpdateOceanTile(common::OceanTilePtr _oceanTile);
+      public: void UpdateOceanTile(marine::OceanTilePtr _oceanTile);
 
       /// \brief Load from a mesh
       public: void LoadMesh(common::MeshPtr _mesh);

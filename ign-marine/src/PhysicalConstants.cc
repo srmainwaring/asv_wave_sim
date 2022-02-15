@@ -15,7 +15,9 @@
 
 #include "ignition/marine/PhysicalConstants.hh"
 
-namespace asv 
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////    
@@ -41,5 +43,5 @@ namespace asv
     return 1.0533E-6;
   }
 
-} // namespace asv
-
+}
+}

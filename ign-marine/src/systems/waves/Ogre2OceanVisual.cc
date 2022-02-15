@@ -164,7 +164,7 @@ void Ogre2OceanVisual::LoadCube()
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanVisual::LoadOceanTile(common::OceanTilePtr _oceanTile)
+void Ogre2OceanVisual::LoadOceanTile(marine::OceanTilePtr _oceanTile)
 {
   if (!this->dataPtr->mesh)
   {
@@ -204,7 +204,7 @@ void Ogre2OceanVisual::LoadOceanTile(common::OceanTilePtr _oceanTile)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanVisual::UpdateOceanTile(common::OceanTilePtr _oceanTile)
+void Ogre2OceanVisual::UpdateOceanTile(marine::OceanTilePtr _oceanTile)
 {
   // Update positions and texture coordinates for each face
   for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)

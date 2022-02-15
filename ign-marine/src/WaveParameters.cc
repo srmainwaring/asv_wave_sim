@@ -31,7 +31,9 @@
 #include <cmath>
 #include <string>
 
-namespace asv 
+namespace ignition
+{
+namespace marine
 {
   typedef CGAL::Aff_transformation_2<Kernel> TransformMatrix;
 
@@ -420,4 +422,5 @@ namespace asv
     }
   }
 
-} // namespace asv
+}
+}

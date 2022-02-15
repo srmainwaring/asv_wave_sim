@@ -10,9 +10,9 @@
 #include <thread>
 #include <vector>
 
-using namespace gazebo;
-
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   GZ_REGISTER_VISUAL_PLUGIN(OceanVisualPlugin)
 
@@ -117,4 +117,5 @@ namespace asv
     std::lock_guard<std::mutex> lock(this->data->mutex);
   }
 
-} // namespace asv
+}
+}

@@ -61,7 +61,7 @@ namespace {
   typedef Mesh::Face_index Face_descriptor;
   typedef Mesh::Halfedge_index Halfedge_descriptor;  
 
-  std::shared_ptr<asv::Mesh> CreateSphere(
+  std::shared_ptr<ignition::marine::Mesh> CreateSphere(
     const std::string& meshName,
     double radius
   )
@@ -80,8 +80,8 @@ namespace {
     // std::cout << "Mesh:       " << source->GetName() << std::endl;
     // std::cout << "Vertex:     " << source->GetVertexCount() << std::endl;
 
-    std::shared_ptr<asv::Mesh> target = std::make_shared<asv::Mesh>();
-    asv::MeshTools::MakeSurfaceMesh(*source, *target);
+    std::shared_ptr<ignition::marine::Mesh> target = std::make_shared<ignition::marine::Mesh>();
+    ignition::marine::MeshTools::MakeSurfaceMesh(*source, *target);
     return target;
   }
 
@@ -285,7 +285,7 @@ TEST(CGAL, SurfaceMeshGridCell) {
     for(auto&& face : mesh.faces()) {
       // std::cout << face << std::endl;
 
-      Triangle tri = asv::Geometry::MakeTriangle(mesh, face);
+      Triangle tri = ignition::marine::Geometry::MakeTriangle(mesh, face);
       // std::cout << tri << std::endl;
     }
   }
@@ -343,7 +343,7 @@ TEST(CGAL, SurfaceMeshGrid) {
   typedef CGAL::Timer Timer;
 
   // Create Grid
-  asv::Grid grid({ 100, 100 }, { 4, 4 });
+  ignition::marine::Grid grid({ 100, 100 }, { 4, 4 });
 
   // Convert to SurfaceMesh
   const Mesh& mesh = *grid.GetMesh();
@@ -361,7 +361,7 @@ TEST(CGAL, SurfaceMeshGrid) {
   //   for(auto&& face : mesh.faces()) {
   //     std::cout << face << std::endl;
 
-  //     Triangle tri = asv::Geometry::MakeTriangle(mesh, face);
+  //     Triangle tri = ignition::marine::Geometry::MakeTriangle(mesh, face);
   //     std::cout << tri << std::endl;
   //   }
   // }
@@ -371,7 +371,7 @@ TEST(CGAL, SurfaceMeshGrid) {
     // std::cout << "AABB Tree " << std::endl;
 
     // Create a sphere
-    std::shared_ptr<asv::Mesh> sphere = CreateSphere(
+    std::shared_ptr<ignition::marine::Mesh> sphere = CreateSphere(
       "TestSurfaceMeshGridCellSphere", 5.25);
 
     Timer t;
@@ -426,7 +426,7 @@ TEST(CGAL, SurfaceMeshModifyGrid) {
   typedef CGAL::Timer Timer;
 
   // Create Grid
-  asv::Grid grid({ 100, 100 }, { 4, 4 });
+  ignition::marine::Grid grid({ 100, 100 }, { 4, 4 });
 
   // Convert to SurfaceMesh
   Mesh& mesh = const_cast<Mesh&>(*grid.GetMesh());
@@ -445,7 +445,7 @@ TEST(CGAL, SurfaceMeshModifyGrid) {
     for(auto&& face : mesh.faces()) {
       // std::cout << face << std::endl;
 
-      Triangle tri = asv::Geometry::MakeTriangle(mesh, face);
+      Triangle tri = ignition::marine::Geometry::MakeTriangle(mesh, face);
       // std::cout << tri << std::endl;
     }
   }
@@ -475,14 +475,14 @@ TEST(CGAL, SurfaceMeshWavefield) {
   typedef CGAL::Timer Timer;
 
   // Wavefield Parameters
-  std::shared_ptr<asv::WaveParameters> params(new asv::WaveParameters());
+  std::shared_ptr<ignition::marine::WaveParameters> params(new ignition::marine::WaveParameters());
   params->SetNumber(1);
   params->SetAmplitude(3.0);
   params->SetPeriod(10.0);
   params->SetPhase(0.0);
 
   // Wavefield
-  asv::WavefieldTrochoid wavefield("TestSurfaceMeshWavefield"); 
+  ignition::marine::WavefieldTrochoid wavefield("TestSurfaceMeshWavefield"); 
   wavefield.SetParameters(params);
 
   // Evolve to t=10 with 1000 updates
@@ -499,7 +499,7 @@ TEST(CGAL, SurfaceMeshWavefield) {
   // { 
   //   std::cout << "Faces" << std::endl;
   //   for(auto&& face : mesh->faces()) {
-  //     Triangle tri = asv::Geometry::MakeTriangle(*mesh, face);
+  //     Triangle tri = ignition::marine::Geometry::MakeTriangle(*mesh, face);
   //     std::cout << face << ": " << tri << std::endl;
   //   }
   // }
@@ -1034,7 +1034,7 @@ TEST(CGAL, CreateTriangulationN) {
 TEST(CGAL, CreateTriangulationHierarchyN) {
   int N = 4;
   double L = 4.0;
-  asv::TriangulatedGrid tri_grid(N, L);
+  ignition::marine::TriangulatedGrid tri_grid(N, L);
   tri_grid.CreateMesh();
   tri_grid.CreateTriangulation();
 

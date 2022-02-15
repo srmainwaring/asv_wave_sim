@@ -16,9 +16,9 @@
 #include <thread>
 #include <vector>
 
-using namespace gazebo;
-
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -314,4 +314,5 @@ namespace asv
     this->data->paused = _msg->paused();
   }
 
-} // namespace asv
+}
+}

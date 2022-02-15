@@ -27,6 +27,7 @@
 #include <thread>
 
 using namespace ignition;
+using namespace marine;
 using namespace math;
 using namespace gazebo;
 using namespace physics;

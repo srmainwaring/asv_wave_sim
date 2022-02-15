@@ -2,7 +2,9 @@
 
 #include <cmath>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   const double GRAVITY = 9.8;
@@ -87,4 +89,5 @@ namespace asv
     }
   }
 
+}
 }

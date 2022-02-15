@@ -18,7 +18,9 @@
 
 #include <vector>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   class WaveSimulation
@@ -58,6 +60,7 @@ namespace asv
       std::vector<double>& _dsxdy) = 0;
   };
 
+}
 }
 
 #endif

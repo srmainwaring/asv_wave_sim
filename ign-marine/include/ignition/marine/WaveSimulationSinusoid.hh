@@ -21,7 +21,9 @@
 #include <memory>
 #include <vector>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   /// L is the length of each side of a square tile.
   ///
@@ -83,6 +85,7 @@ namespace asv
     private: std::unique_ptr<Impl> impl;
   };
 
+}
 }
 
 #endif

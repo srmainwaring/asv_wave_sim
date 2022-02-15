@@ -27,7 +27,9 @@
 
 #include <memory>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,6 +59,7 @@ namespace asv
     );
   };
 
-} // namespace asv
+}
+}
 
 #endif

@@ -24,7 +24,6 @@
 
 #include <ignition/common/Event.hh>
 #include <ignition/common/Plugin.hh>
-// #include "ignition/rendering/ogre_gazebo.h"
 #include <ignition/rendering.hh>
 #include <ignition/rendering/RenderTypes.hh>
 #include <ignition/rendering/Scene.hh>
@@ -38,7 +37,9 @@
 
 using namespace gazebo;
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   GZ_REGISTER_VISUAL_PLUGIN(WavefieldVisualPlugin)
@@ -438,4 +439,5 @@ namespace asv
 #endif
   }
 
-} // namespace asv
+}
+}

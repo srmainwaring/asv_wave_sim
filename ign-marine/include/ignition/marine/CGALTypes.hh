@@ -27,7 +27,9 @@
 
 #include <memory>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 ///////////////////////////////////////////////////////////////////////////////
 // CGAL Typedefs
@@ -54,6 +56,7 @@ namespace asv
   typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
   typedef CGAL::AABB_tree<Traits> AABBTree;
 
-} // namespace asv
+}
+}
 
 #endif

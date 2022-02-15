@@ -24,7 +24,9 @@
 #include <numeric>
 #include <vector>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   /// \brief A small collection of static template methods for sorting arrays and vectors.
   namespace algorithm
@@ -76,7 +78,8 @@ namespace asv
       return idx;
     }
 
-  } // namespace algorithm 
-} // namespace asv
+  } 
+}
+}
 
 #endif

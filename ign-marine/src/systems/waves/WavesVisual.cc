@@ -270,10 +270,10 @@ class ignition::gazebo::systems::WavesVisualPrivate
   // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
   // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
 
-  public: common::OceanTilePtr oceanTile;
+  public: marine::OceanTilePtr oceanTile;
 
   /// \brief Used in DynamicMesh example
-  public: common::MeshPtr         oceanTileMesh;
+  public: common::MeshPtr oceanTileMesh;
 
   /// \brief Destructor
   public: ~WavesVisualPrivate();
@@ -442,7 +442,7 @@ void WavesVisualPrivate::OnUpdate()
       double L = 256.0;
       double u = 5.0;
 
-      this->oceanTile.reset(new common::OceanTile(N, L));
+      this->oceanTile.reset(new marine::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
 
       // create mesh - do not store in MeshManager as it will be modified
@@ -525,7 +525,7 @@ void WavesVisualPrivate::OnUpdate()
       double L = 256.0;
       double u = 5.0;
 
-      this->oceanTile.reset(new common::OceanTile(N, L));
+      this->oceanTile.reset(new marine::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
       std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
       auto mesh = newMesh.get();

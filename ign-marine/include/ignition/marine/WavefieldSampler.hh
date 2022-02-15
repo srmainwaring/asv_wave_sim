@@ -27,8 +27,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Forward Declarations
 
-namespace asv
+namespace ignition
 {
+namespace marine
+{
+
   class Grid;
   class Wavefield;
   class WaveParameters;
@@ -104,6 +107,7 @@ namespace asv
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // namespace asv
+}
+}
 
 #endif

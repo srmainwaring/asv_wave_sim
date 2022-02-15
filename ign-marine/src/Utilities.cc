@@ -24,7 +24,9 @@
 #include <iostream>
 #include <string>
 
-namespace asv 
+namespace ignition
+{
+namespace marine
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,4 +251,5 @@ ignition::math::Vector3d Utilities::MsgParamVector3d(const ignition::msgs::Param
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // namespace asv
+}
+}

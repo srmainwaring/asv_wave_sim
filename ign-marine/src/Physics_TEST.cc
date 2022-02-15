@@ -35,7 +35,8 @@
 #include <string>
 #include <thread>
 
-using namespace asv;
+using namespace ignition;
+using namespace marine;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests

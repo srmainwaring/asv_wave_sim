@@ -24,7 +24,9 @@
 #include <ignition/physics.hh>
 #include <memory>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   /// \internal
   /// \brief Class to hold private data for HydrodynamicsPlugin.
@@ -192,6 +194,7 @@ namespace asv
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<HydrodynamicsPluginPrivate> data;
   };
-} // namespace asv
+}
+}
 
 #endif

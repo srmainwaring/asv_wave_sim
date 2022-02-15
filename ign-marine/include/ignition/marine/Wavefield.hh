@@ -26,7 +26,9 @@
 
 #include <memory>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   class Grid;
 
@@ -175,6 +177,7 @@ namespace asv
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // namespace asv
+}
+}
 
 #endif

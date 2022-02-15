@@ -25,7 +25,9 @@
 
 #include <memory>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
   
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,6 +160,7 @@ namespace asv
     private: std::shared_ptr<WavefieldVisualPluginPrivate> data;
   };
 
-} // namespace asv
+}
+}
 
 #endif

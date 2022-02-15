@@ -18,7 +18,9 @@
 
 #include <vector>
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -340,4 +342,5 @@ namespace asv
     impl->ComputeDisplacementsAndDerivatives(_h, _dhdx, _dhdy, _sx, _sy, _dsxdx, _dsydy, _dsxdy);    
   }
 
+}
 }

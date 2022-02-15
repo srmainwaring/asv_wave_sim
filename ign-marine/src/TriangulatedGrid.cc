@@ -31,7 +31,10 @@
 #include <CGAL/algorithm.h>
 #include <CGAL/point_generators_2.h>
 
-namespace asv {
+namespace ignition
+{
+namespace marine
+{
 
 ///////////////////////////////////////////////////////////////////////////////
 // TriangulatedGrid::Private
@@ -63,7 +66,7 @@ namespace asv {
     void UpdatePoints(const Mesh& from);
 
     // Type definitions - use a consistent Kernel
-    typedef asv::Kernel                                                 Kernel;
+    // typedef Kernel                                                      Kernel;
     // typedef CGAL::Simple_cartesian<double>                              Kernel;
     // typedef CGAL::Exact_predicates_inexact_constructions_kernel         Kernel;
     typedef CGAL::Projection_traits_xy_3<Kernel>                        Gt;
@@ -625,4 +628,5 @@ namespace asv {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // namespace asv
+}
+}

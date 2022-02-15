@@ -22,7 +22,6 @@
 #include "ignition/marine/WaveParameters.hh"
 #include "ignition/marine/Utilities.hh"
 
-// #include <ignition/common/Assert.hh>
 #include <ignition/common.hh>
 #include <ignition/physics.hh>
 
@@ -41,7 +40,9 @@
 
 using namespace gazebo;
 
-namespace asv
+namespace ignition
+{
+namespace marine
 {
 
   GZ_REGISTER_MODEL_PLUGIN(WavefieldModelPlugin)
@@ -342,4 +343,5 @@ namespace asv
     ignNode.Request(topicName, wavefieldMsg);
   }
 
-} // namespace gazebo
+}
+}

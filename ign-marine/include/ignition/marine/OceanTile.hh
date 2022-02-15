@@ -24,7 +24,7 @@
 
 namespace ignition
 {
-namespace common
+namespace marine
 {
   class OceanTilePrivate;
 
