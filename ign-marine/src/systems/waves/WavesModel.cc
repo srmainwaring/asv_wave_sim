@@ -21,6 +21,8 @@
 #include "ignition/marine/WaveParameters.hh"
 #include "ignition/marine/Wavefield.hh"
 
+#include "ignition/marine/components/Wavefield.hh"
+
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
 
@@ -74,6 +76,9 @@ class ignition::gazebo::systems::WavesModelPrivate
   /// valid and the post-update can run
   public: bool validConfig{false};
 
+  /// \brief The wavefield entity for this system
+  public: Entity wavefieldEntity{kNullEntity};
+
   ////////// BEGIN FROM WavefieldEntity
 
   /// \brief The size of the wavefield
@@ -83,10 +88,10 @@ class ignition::gazebo::systems::WavesModelPrivate
   public: math::Vector2i cellCount;
 
   /// \brief The wave parameters.
-  public: std::shared_ptr<marine::WaveParameters> waveParams;
+  public: marine::WaveParametersPtr waveParams;
 
   /// \brief The wavefield.
-  public: std::shared_ptr<marine::Wavefield> wavefield;
+  public: marine::WavefieldPtr wavefield;
 
   ////////// END FROM WavefieldEntity
 };
@@ -194,6 +199,13 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
   this->wavefield.reset(new marine::WavefieldOceanTile(meshName));
   this->wavefield->SetParameters(this->waveParams);
   // this->wavefield->Update(simTime);
+
+  // Create a new entity and register a wavefield component with it.
+  this->wavefieldEntity = _ecm.CreateEntity();
+
+  auto comp = _ecm.CreateComponent(this->wavefieldEntity,
+      marine::components::Wavefield());
+  comp->Data() = this->wavefield;
 
   this->validConfig = true;
 }

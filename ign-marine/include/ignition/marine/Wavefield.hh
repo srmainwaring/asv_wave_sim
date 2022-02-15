@@ -44,27 +44,29 @@ namespace marine
     public: virtual ~Wavefield();
 
     /// \brief Access the wave field mesh.
-    public: virtual std::shared_ptr<const Mesh> GetMesh() const = 0;
+    public: virtual std::shared_ptr<const Mesh> GetMesh() const { return nullptr; } //= 0;
 
     /// \brief Access the wave field grid.
-    public: virtual std::shared_ptr<const Grid> GetGrid() const = 0;
+    public: virtual std::shared_ptr<const Grid> GetGrid() const { return nullptr; } //= 0;
 
     // Compute the height at a point.
-    public: virtual bool Height(const Point3& point, double& height) const = 0;
+    public: virtual bool Height(const Point3& point, double& height) const { return false; } //= 0;
 
     /// \brief Get the wave parameters.
-    public: virtual std::shared_ptr<const WaveParameters> GetParameters() const = 0;
+    public: virtual std::shared_ptr<const WaveParameters> GetParameters() const { return nullptr; } //= 0;
 
     /// \brief Set the wave parameters.
     ///
     /// \param[in] _params    The new wave parameters.
-    public: virtual void SetParameters(std::shared_ptr<WaveParameters> _params) const = 0;
+    public: virtual void SetParameters(std::shared_ptr<WaveParameters> _params) const {} //= 0;
 
     /// \brief Update (recalculate) the wave field for the given time.
     ///
     /// \param[in] _time    The time parameter for the wave evolution.
-    public: virtual void Update(double _time) = 0;
+    public: virtual void Update(double _time) {} //= 0;
   };
+
+  typedef std::shared_ptr<Wavefield> WavefieldPtr; 
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A class to manage a wave field.
@@ -125,7 +127,6 @@ namespace marine
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldTrochoidPrivate> data;
   };
-
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A class to manage a wave field.

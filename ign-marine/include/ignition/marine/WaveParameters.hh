@@ -166,6 +166,8 @@ namespace marine
     private: std::shared_ptr<WaveParametersPrivate> data;
   };
 
+  typedef std::shared_ptr<WaveParameters> WaveParametersPtr; 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
