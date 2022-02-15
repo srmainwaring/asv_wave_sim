@@ -42,8 +42,8 @@
         </material> -->
 
         <plugin
-            filename="ignition-marine1-waves-system"
-            name="ignition::gazebo::systems::Waves">
+            filename="ignition-marine1-waves-visual-system"
+            name="ignition::gazebo::systems::WavesVisual">
         <!-- </plugin>
 
         <plugin

@@ -4,9 +4,9 @@ set(IGNITION-RENDERING_LIBRARY_DIRS
 
 link_directories(${IGNITION-RENDERING_LIBRARY_DIRS})
 
-gz_add_system(waves
+gz_add_system(waves-visual
   SOURCES
-    Waves.cc
+    WavesVisual.cc
     OceanTile.cc
     Ogre2DynamicMesh.cc
     Ogre2OceanTile.cc

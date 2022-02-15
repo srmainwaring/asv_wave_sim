@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "Waves.hh"
+#include "WavesVisual.hh"
 
 #include "OceanTile.hh"
 #include "Ogre2OceanTile.hh"
@@ -756,4 +756,4 @@ IGNITION_ADD_PLUGIN(Waves,
                     Waves::ISystemPreUpdate)
 
 IGNITION_ADD_PLUGIN_ALIAS(Waves,
-  "ignition::gazebo::systems::Waves")
+  "ignition::gazebo::systems::WavesVisual")
