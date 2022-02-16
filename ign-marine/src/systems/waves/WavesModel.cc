@@ -26,7 +26,6 @@
 #include <ignition/plugin/Register.hh>
 
 #include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/SourceFilePath.hh>
 
 #include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/Util.hh>

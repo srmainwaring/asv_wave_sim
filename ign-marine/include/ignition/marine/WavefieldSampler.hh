@@ -105,6 +105,8 @@ namespace marine
     private: std::shared_ptr<WavefieldSamplerPrivate> data;
   };
 
+  typedef std::shared_ptr<WavefieldSampler> WavefieldSamplerPtr;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

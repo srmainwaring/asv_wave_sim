@@ -268,6 +268,8 @@ namespace marine
     private: std::shared_ptr<HydrodynamicsParametersPrivate> data;
   };
 
+  typedef std::shared_ptr<HydrodynamicsParameters> HydrodynamicsParametersPtr;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Hydrodynamics
 
@@ -396,6 +398,8 @@ namespace marine
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<HydrodynamicsPrivate> data;
   };
+
+  typedef std::shared_ptr<Hydrodynamics> HydrodynamicsPtr;
 
 }
 }
