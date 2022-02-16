@@ -546,7 +546,7 @@ void HydrodynamicsPrivate::Init(EntityComponentManager &_ecm)
 /////////////////////////////////////////////////
 bool HydrodynamicsPrivate::InitWavefield(EntityComponentManager &_ecm)
 {
-  /// \todo(srmainwaring): remove hardcoded name
+  /// \todo - remove hardcoded name
   // Retrieve the wavefield entiry using the Name component
   this->wavefieldEntity = _ecm.EntityByComponents(components::Name("WAVEFIELD"));
   // this->wavefieldEntity = _ecm.EntityByComponents(marine::components::Wavefield());
@@ -611,41 +611,50 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // Wavefield and Link
     hd->link = gazebo::Link(links[i]);
 
-    /// \todo(srmainwaring) - check that the link has valid pose
+    /// \todo check that the link has valid pose
     /// information attached...
 
     // The link pose is required for the water patch, the CoM pose for dynamics.
     math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
 
-    /// \todo(srmainwaring) subtle difference here - inertial pose includes
+    /// \todo subtle difference here - inertial pose includes
     /// any rotation of the inertial matrix where CoG pose does not.
     // math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
     math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
 
-#if 0
     // Water patch grid
-    auto boundingBox = hd->link->CollisionBoundingBox();
-    double patchSize = 2.2 * boundingBox.Size().Length();
+    /// \todo fix hardcoded patch size. CollisionBoundingBox is not currently available 
+    // auto boundingBox = hd->link->CollisionBoundingBox();
+    // double patchSize = 2.2 * boundingBox.Size().Length();
+    double patchSize = 10.0;
     ignmsg << "Water patch size: " << patchSize << std::endl;
-    std::shared_ptr<Grid> initWaterPatch(new Grid({patchSize, patchSize}, { 4, 4 }));
+    std::shared_ptr<marine::Grid> initWaterPatch(
+        new marine::Grid({patchSize, patchSize}, { 4, 4 }));
 
     // WavefieldSampler - this is updated by the pose of the link (not the CoM).
-    hd->wavefieldSampler.reset(new WavefieldSampler(
-      this->wavefield, initWaterPatch));
+    /// \todo add checks that the wavefield weak_ptr is valid
+    hd->wavefieldSampler.reset(new marine::WavefieldSampler(
+        this->wavefield.lock(), initWaterPatch));
     hd->wavefieldSampler->ApplyPose(linkPose);
     hd->wavefieldSampler->UpdatePatch();
 
     // RigidBody - the pose of the CoM is required for the dynamics. 
-    cgal::Vector3 linVelocity = ToVector3(hd->link->WorldLinearVel());
-    cgal::Vector3 angVelocity = ToVector3(hd->link->WorldAngularVel());
-    cgal::Vector3 linVelocityCoM = ToVector3(hd->link->WorldCoGLinearVel());
+    cgal::Vector3 linVelocity = marine::ToVector3(
+        hd->link.WorldLinearVelocity(_ecm).value());
+    cgal::Vector3 angVelocity = marine::ToVector3(
+        hd->link.WorldAngularVelocity(_ecm).value());
+    /// \todo WorldCoGPose is currently not available
+    // cgal::Vector3 linVelocityCoM = marine::ToVector3(
+    //     hd->link.WorldCoGLinearVelocity(_ecm).value());
+    cgal::Vector3 linVelocityCoM = linVelocity;
 
     for (size_t j=0; j<meshCount; ++j)
     {
       // Mesh (SurfaceMesh copy performs a deep copy of all properties)
       std::shared_ptr<cgal::Mesh> initLinkMesh = meshes[i][j];
-      std::shared_ptr<cgal::Mesh> linkMesh = std::make_shared<Mesh>(*initLinkMesh);
-      GZ_ASSERT(linkMesh != nullptr, "Invalid Mesh returned from CopyMesh");
+      std::shared_ptr<cgal::Mesh> linkMesh =
+          std::make_shared<cgal::Mesh>(*initLinkMesh);
+      IGN_ASSERT(linkMesh != nullptr, "Invalid Mesh returned from CopyMesh");
 
       // Mesh
       hd->initLinkMeshes[j] = initLinkMesh;
@@ -656,14 +665,13 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 
       // Initialise Hydrodynamics
       hd->hydrodynamics[j].reset(
-        new Hydrodynamics(
-          this->data->hydroParams,
+        new marine::Hydrodynamics(
+          this->hydroParams,
           hd->linkMeshes[j],
           hd->wavefieldSampler));
       hd->hydrodynamics[j]->Update(
         hd->wavefieldSampler, linkCoMPose, linVelocity, angVelocity);
     }
-#endif
   }
 
   return true;
@@ -697,9 +705,7 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
   {
     // The link pose is required for the water patch, the CoM pose for dynamics.
     math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
-
-    /// \todo - WorldCoGPose is currently not available
-
+    /// \todo WorldCoGPose is currently not available
     // math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
     math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
 
@@ -708,17 +714,15 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     hd->wavefieldSampler->UpdatePatch();
     // auto waterPatch = hd->wavefieldSampler->GetWaterPatch();
 
-    /// \todo - check the components are available and valid
-
     // RigidBody - the pose of the CoM is required for the dynamics. 
+    /// \todo check the components are available and valid
     cgal::Vector3 linVelocity = marine::ToVector3(
         hd->link.WorldLinearVelocity(_ecm).value());
     cgal::Vector3 angVelocity = marine::ToVector3(
         hd->link.WorldAngularVelocity(_ecm).value());
-    
-    /// \todo - WorldCoGLinearVel is currently not available
-
-    //cgal::Vector3 linVelocityCoM = ToVector3(hd->link.WorldCoGLinearVel(_ecm).value());
+    /// \todo WorldCoGLinearVel is currently not available
+    // cgal::Vector3 linVelocityCoM = marine::ToVector3(
+    //     hd->link.WorldCoGLinearVel(_ecm).value());
     cgal::Vector3 linVelocityCoM = linVelocity;
 
     // Meshes
