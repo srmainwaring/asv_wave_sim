@@ -28,7 +28,14 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
 
+#include <ignition/gazebo/components/AngularVelocity.hh>
+#include <ignition/gazebo/components/Collision.hh>
+#include <ignition/gazebo/components/Inertial.hh>
+#include <ignition/gazebo/components/LinearVelocity.hh>
+#include <ignition/gazebo/components/Link.hh>
+#include <ignition/gazebo/components/Model.hh>
 #include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/components/Pose.hh>
 
 #include <ignition/gazebo/Link.hh>
 #include <ignition/gazebo/Model.hh>
@@ -68,15 +75,20 @@ namespace systems
     // Model
     std::string modelName(_model.Name(_ecm));
 
-#if 0
     // Links
-    for (auto&& link : _model->GetLinks())
+    for (auto& entity : _model.Links(_ecm))
     {
-      GZ_ASSERT(link != nullptr, "Link must be valid");
-      _links.push_back(link);
-      std::string linkName(link->GetName());
+      _links.push_back(entity);
+      gazebo::Link link(entity);
+
+      /// \todo check link has valid name component
+      std::string linkName(link.Name(_ecm).value());
       std::vector<std::shared_ptr<cgal::Mesh>> linkMeshes;
+
+      ignmsg << "Hydrodynamics: create collision mesh for link ["
+          << linkName << "]\n";
       
+#if 0
       // Collisions
       for (auto&& collision : link->GetCollisions())
       {
@@ -214,13 +226,14 @@ namespace systems
         }
 
       }
+#endif
 
       // Add meshes for this link
       _meshes.push_back(linkMeshes);
     }
-#endif
   } 
 
+  /////////////////////////////////////////////////
   /// \brief Transform a meshes vertex points in the world frame according to a Pose.
   ///
   /// \param[in] _pose    A pose defining a translation and rotation in the world frame.
@@ -249,40 +262,56 @@ namespace systems
     }
   }
 
-  // NOT REQUIRED: we are using the ECM instead.
-  //
-  // /// \brief Retrive a pointer to a wavefield from the Wavefield plugin.
-  // ///
-  // /// \param _world           A pointer to the world containing the wave field.
-  // /// \param _waveModelName   The name of the wavefield model containing the wave field. 
-  // /// \return A valid wavefield if found and nullptr if not.
-  // std::shared_ptr<const Wavefield> GetWavefield(
-  //   physics::WorldPtr _world,
-  //   const std::string& _waveModelName)
-  // {
-  //   GZ_ASSERT(_world != nullptr, "World is null");
-  // 
-  //   physics::ModelPtr wavefieldModel = _world->ModelByName(_waveModelName);    
-  //   if(wavefieldModel == nullptr)
-  //   {
-  //     ignerr << "No Wavefield Model found with name '" << _waveModelName << "'." << std::endl;
-  //     return nullptr;
-  //   }
-  //
-  //   std::string wavefieldEntityName(WavefieldEntity::MakeName(_waveModelName));
-  // 
-  //   physics::BasePtr base = wavefieldModel->GetChild(wavefieldEntityName);
-  //   boost::shared_ptr<WavefieldEntity> wavefieldEntity 
-  //     = boost::dynamic_pointer_cast<WavefieldEntity>(base);
-  //   if (wavefieldEntity == nullptr)
-  //   {
-  //     ignerr << "Wavefield Entity is null: " << wavefieldEntityName << std::endl;
-  //     return nullptr;
-  //   }    
-  //   GZ_ASSERT(wavefieldEntity->GetWavefield() != nullptr, "Wavefield is null.");
-  // 
-  //   return wavefieldEntity->GetWavefield();
-  // }
+  /////////////////////////////////////////////////
+  // NOT REQUIRED: component additions are carried out
+  //               in Link::EnableVelocityChecks()
+
+#if 0
+  /////////////////////////////////////////////////
+  void AddWorldPose(const Entity &_entity, EntityComponentManager &_ecm)
+  {
+    if (!_ecm.Component<components::WorldPose>(_entity))
+    {
+      _ecm.CreateComponent(_entity, components::WorldPose());
+    }
+  }
+
+  /////////////////////////////////////////////////
+  void AddInertial(const Entity &_entity, EntityComponentManager &_ecm)
+  {
+    if (!_ecm.Component<components::Inertial>(_entity))
+    {
+      _ecm.CreateComponent(_entity, components::Inertial());
+    }
+  }
+
+  /////////////////////////////////////////////////
+  void AddCollision(const Entity &_entity, EntityComponentManager &_ecm)
+  {
+    if (!_ecm.Component<components::Collision>(_entity))
+    {
+      _ecm.CreateComponent(_entity, components::Collision());
+    }
+  }
+
+  /////////////////////////////////////////////////
+  void AddWorldLinearVelocity(const Entity &_entity, EntityComponentManager &_ecm)
+  {
+    if (!_ecm.Component<components::WorldLinearVelocity>(_entity))
+    {
+      _ecm.CreateComponent(_entity, components::WorldLinearVelocity());
+    }
+  }
+
+  /////////////////////////////////////////////////
+  void AddWorldAngularVelocity(const Entity &_entity, EntityComponentManager &_ecm)
+  {
+    if (!_ecm.Component<components::WorldAngularVelocity>(_entity))
+    {
+      _ecm.CreateComponent(_entity, components::WorldAngularVelocity());
+    }
+  }
+#endif
 
   /////////////////////////////////////////////////
   // HydrodynamicsLinkData
@@ -576,16 +605,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 {
   ignmsg << "Hydrodynamics: initialise physics\n";
 
-  // NOT REQUIRED: we are using the ECM instead.
-  //
-  // // Wavefield
-  // this->data->wavefield = GetWavefield(
-  //   this->data->world, this->data->waveModelName);
-  // if (this->data->wavefield == nullptr) 
-  // {
-  //   ignerr << "Wavefield is NULL" << std::endl;
-  //   return;
-  // }
+  /// \todo add checks for a valid wavefield and lock the waek_ptr
 
   std::string modelName(this->model.Name(_ecm));
 
@@ -610,13 +630,20 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 
     // Wavefield and Link
     hd->link = gazebo::Link(links[i]);
+    hd->link.EnableVelocityChecks(_ecm);
 
-    /// \todo check that the link has valid pose
-    /// information attached...
+    ignmsg << "Hydrodynamics: initialising link ["
+        << hd->link.Name(_ecm).value() << "]\n";
+    ignmsg << "Hydrodynamics: link has ["
+        << meshCount << "] collision meshes\n";
 
+    /// \todo check that the link has valid pose components
+
+    ignmsg << "Hydrodynamics: getting link world pose\n";
     // The link pose is required for the water patch, the CoM pose for dynamics.
     math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
 
+    ignmsg << "Hydrodynamics: getting link world CoM pose\n";
     /// \todo subtle difference here - inertial pose includes
     /// any rotation of the inertial matrix where CoG pose does not.
     // math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
@@ -627,7 +654,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // auto boundingBox = hd->link->CollisionBoundingBox();
     // double patchSize = 2.2 * boundingBox.Size().Length();
     double patchSize = 10.0;
-    ignmsg << "Water patch size: " << patchSize << std::endl;
+    ignmsg << "Hydrodynamics: set water patch size: "
+        << patchSize << std::endl;
     std::shared_ptr<marine::Grid> initWaterPatch(
         new marine::Grid({patchSize, patchSize}, { 4, 4 }));
 
@@ -674,6 +702,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     }
   }
 
+  ignmsg << "Hydrodynamics: done initialise physics\n";
   return true;
 }
 
@@ -700,6 +729,8 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
   // ignmsg << "[" << simTime << "] : " << waveHeight << "\n";  
 
   ////////// END TESTING
+
+  /// \todo add checks for a valid wavefield and lock the waek_ptr
 
   for (auto&& hd : this->hydroData)
   {
