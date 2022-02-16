@@ -25,7 +25,9 @@
 
 #include "ignition/marine/components/Wavefield.hh"
 
+#include <ignition/common/MeshManager.hh>
 #include <ignition/common/Profiler.hh>
+
 #include <ignition/plugin/Register.hh>
 
 #include <ignition/gazebo/components/AngularVelocity.hh>
@@ -35,6 +37,7 @@
 #include <ignition/gazebo/components/Link.hh>
 #include <ignition/gazebo/components/Model.hh>
 #include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/components/ParentEntity.hh>
 #include <ignition/gazebo/components/Pose.hh>
 
 #include <ignition/gazebo/Link.hh>
@@ -53,6 +56,99 @@ namespace ignition
 {
 namespace gazebo
 {
+  /////////////////////////////////////////////////
+  // Collision (similar to gazebo::Link and gazebo::Model interfaces)
+ 
+  class CollisionPrivate
+  {
+    /// \brief Id of link entity.
+    public: Entity id{kNullEntity};
+  };
+
+  class Collision
+  {
+    /// \brief Destructor
+    public: ~Collision() = default;
+
+    /// \brief Constructor
+    /// \param[in] _entity Link entity
+    public: explicit Collision(gazebo::Entity _entity = kNullEntity)
+      : dataPtr(std::make_unique<CollisionPrivate>())
+    {
+      this->dataPtr->id = _entity;
+    }
+
+    /// \brief Copy constructor
+    /// \param[in] _link Collision to copy.
+    public: Collision(const Collision &_collision)
+      : dataPtr(std::make_unique<CollisionPrivate>(*_collision.dataPtr))
+    {
+    }
+
+    /// \brief Move constructor
+    /// \param[in] _collision Collision to move.
+    public: Collision(Collision &&_collision) noexcept = default;
+
+    /// \brief Move assignment operator.
+    /// \param[in] _collision Collision component to move.
+    /// \return Reference to this.
+    public: Collision &operator=(Collision &&_collision) noexcept = default;
+
+    /// \brief Copy assignment operator.
+    /// \param[in] _collision Collision to copy.
+    /// \return Reference to this.
+    public: Collision &operator=(const Collision &_collision)
+    {
+      *this->dataPtr = (*_collision.dataPtr);
+      return *this;
+    }
+
+    /// \brief Get the entity which this Collision is related to.
+    /// \return Collision entity.
+    public: gazebo::Entity Entity() const
+    {
+      return this->dataPtr->id;
+    }
+
+    /// \brief Check whether this link correctly refers to an entity that
+    /// has a components::Collision.
+    /// \param[in] _ecm Entity-component manager.
+    /// \return True if it's a valid link in the manager.
+    public: bool Valid(const EntityComponentManager &_ecm) const
+    {
+      return nullptr != _ecm.Component<components::Collision>(
+          this->dataPtr->id);
+    }
+
+    /// \brief Get the link's unscoped name.
+    /// \param[in] _ecm Entity-component manager.
+    /// \return Collision's name or nullopt if the entity does not have a
+    /// components::Name component
+    public: std::optional<std::string> Name(
+        const EntityComponentManager &_ecm) const
+    {
+      return _ecm.ComponentData<components::Name>(this->dataPtr->id);
+    }
+
+    /// \brief Get the parent link
+    /// \param[in] _ecm Entity-component manager.
+    /// \return Parent Model or nullopt if the entity does not have a
+    /// components::ParentEntity component.
+    public: std::optional<Model> ParentLink(
+        const EntityComponentManager &_ecm) const
+    {
+      auto parent = _ecm.Component<components::ParentEntity>(this->dataPtr->id);
+
+      if (!parent)
+        return std::nullopt;
+
+      return std::optional<Model>(parent->Data());
+    }
+
+    /// \brief Pointer to private data.
+    private: std::unique_ptr<CollisionPrivate> dataPtr;
+  };
+
 namespace systems
 {
   /////////////////////////////////////////////////
@@ -76,10 +172,11 @@ namespace systems
     std::string modelName(_model.Name(_ecm));
 
     // Links
-    for (auto& entity : _model.Links(_ecm))
+    for (auto& linkEntity : _model.Links(_ecm))
     {
-      _links.push_back(entity);
-      gazebo::Link link(entity);
+      IGN_ASSERT(linkEntity != kNullEntity, "Link must be valid");
+      _links.push_back(linkEntity);
+      gazebo::Link link(linkEntity);
 
       /// \todo check link has valid name component
       std::string linkName(link.Name(_ecm).value());
@@ -88,145 +185,175 @@ namespace systems
       ignmsg << "Hydrodynamics: create collision mesh for link ["
           << linkName << "]\n";
       
-#if 0
       // Collisions
-      for (auto&& collision : link->GetCollisions())
+      for (auto& collisionEntity : link.Collisions(_ecm))
       {
-        GZ_ASSERT(collision != nullptr, "Collision must be valid");
-        std::string collisionName(collision->GetName());
+        IGN_ASSERT(collisionEntity != kNullEntity, "Collision must be valid");
   
-        // Shape
-        physics::ShapePtr shape = collision->GetShape();
-        GZ_ASSERT(shape != nullptr, "Shape must be valid");
-        ignmsg << "Shape:      " << shape->TypeStr() << std::endl;
-        ignmsg << "Scale:      " << shape->Scale() << std::endl;
-        ignmsg << "Type:       " << std::hex << shape->GetType() << std::dec << std::endl;
+        gazebo::Collision collision(collisionEntity); 
+        std::string collisionName(collision.Name(_ecm).value());
+        ignmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
 
-        if (shape->HasType(physics::Base::EntityType::BOX_SHAPE))
+        const components::CollisionElement *coll =
+          _ecm.Component<components::CollisionElement>(collisionEntity);
+
+        if (!coll)
         {
-          // BoxShape
-          ignmsg << "Type:       " << "BOX_SHAPE" << std::endl;
-          physics::BoxShapePtr box = boost::dynamic_pointer_cast<physics::BoxShape>(shape);
-          GZ_ASSERT(box != nullptr, "Failed to cast Shape to BoxShape");
-          ignmsg << "Size:       " << box->Size() << std::endl;
-
-          // Mesh
-          std::string meshName = std::string(modelName)
-            .append(".").append(linkName)
-            .append(".").append(collisionName)
-            .append(".box");
-          common::MeshManager::Instance()->CreateBox(
-            meshName,
-            box->Size(),
-            math::Vector2d(1, 1));          
-          GZ_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
-            "Failed to create Mesh for BoxShape");
-
-          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
-          MeshTools::MakeSurfaceMesh(
-            *common::MeshManager::Instance()->GetMesh(meshName), *mesh);
-          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-          linkMeshes.push_back(mesh);
-          
-          // ignmsg << "Mesh:       " << mesh->GetName() << std::endl;
-          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
-        }
-      
-        if (shape->HasType(physics::Base::EntityType::CYLINDER_SHAPE))
-        {
-          // CylinderShape
-          ignmsg << "Type:       " << "CYLINDER_SHAPE" << std::endl;
-          physics::CylinderShapePtr cylinder = boost::dynamic_pointer_cast<physics::CylinderShape>(shape);
-          GZ_ASSERT(cylinder != nullptr, "Failed to cast Shape to CylinderShape");
-          ignmsg << "Radius:     " << cylinder->GetRadius() << std::endl;
-          ignmsg << "Length:     " << cylinder->GetLength() << std::endl;
-
-          // Mesh
-          std::string meshName = std::string(modelName)
-            .append("::").append(linkName)
-            .append("::").append(collisionName)
-            .append("::cylinder");
-          common::MeshManager::Instance()->CreateCylinder(
-            meshName,
-            cylinder->GetRadius(),  // radius
-            cylinder->GetLength(),  // length,
-            1,                      // rings
-            32);                    // segments
-          GZ_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
-            "Failed to create Mesh for Cylinder");
-
-          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
-          MeshTools::MakeSurfaceMesh(
-            *common::MeshManager::Instance()->GetMesh(meshName), *mesh);
-          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-          linkMeshes.push_back(mesh);
-
-          ignmsg << "Mesh:       " << meshName << std::endl;
-          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
-        }      
-
-        if (shape->HasType(physics::Base::EntityType::SPHERE_SHAPE))
-        {
-          // SphereShape
-          ignmsg << "Type:       " << "SPHERE_SHAPE" << std::endl;
-          physics::SphereShapePtr sphere = boost::dynamic_pointer_cast<physics::SphereShape>(shape);
-          GZ_ASSERT(sphere != nullptr, "Failed to cast Shape to SphereShape");
-          ignmsg << "Radius:     " << sphere->GetRadius() << std::endl;
-
-          // Mesh
-          std::string meshName = std::string(modelName)
-            .append(".").append(linkName)
-            .append(".").append(collisionName)
-            .append(".cylinder");
-          common::MeshManager::Instance()->CreateSphere(
-            meshName,
-            sphere->GetRadius(),    // radius
-            8,                      // rings
-            8);                     // segments
-          GZ_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
-            "Failed to create Mesh for Cylinder");
-
-          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
-          MeshTools::MakeSurfaceMesh(
-            *common::MeshManager::Instance()->GetMesh(meshName), *mesh);
-          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-          linkMeshes.push_back(mesh);
-
-          ignmsg << "Mesh:       " << meshName << std::endl;
-          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          ignerr << "Invalid collision pointer. This shouldn't happen\n";
+          continue;
         }
 
-        if (shape->HasType(physics::Base::EntityType::MESH_SHAPE))
+        double volume = 0;
+        switch (coll->Data().Geom()->Type())
         {
-          // MeshShape
-          ignmsg << "Type:       " << "MESH_SHAPE" << std::endl;
-          physics::MeshShapePtr meshShape = boost::dynamic_pointer_cast<physics::MeshShape>(shape);
-          GZ_ASSERT(meshShape != nullptr, "Failed to cast Shape to MeshShape");
-
-          std::string meshUri = meshShape->GetMeshURI();
-          std::string meshStr = common::find_file(meshUri);
-          ignmsg << "MeshURI:    " << meshUri << std::endl;
-          ignmsg << "MeshStr:    " << meshStr << std::endl;
-
-          // Mesh
-          if (!common::MeshManager::Instance()->HasMesh(meshStr))
+          case sdf::GeometryType::BOX:
           {
-            ignerr << "Mesh: " << meshStr << " was not loaded"<< std::endl;
-            return;
-          } 
+            // Get shape from the collision component
+            auto& box = coll->Data().Geom()->BoxShape()->Shape();
 
-          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
-          MeshTools::MakeSurfaceMesh(
-            *common::MeshManager::Instance()->GetMesh(meshStr), *mesh);
-          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-          linkMeshes.push_back(mesh);
+            // Create the ignition mesh
+            std::string meshName = std::string(modelName)
+                .append(".").append(linkName)
+                .append(".").append(collisionName)
+                .append(".box");
+            common::MeshManager::Instance()->CreateBox(
+                meshName,
+                box.Size(),
+                math::Vector2d(1, 1));          
+            IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
+                "Failed to create Mesh for Box");
 
-          ignmsg << "Mesh:       " << meshStr << std::endl;
-          ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            // Create the CGAL surface mesh
+            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+            marine::MeshTools::MakeSurfaceMesh(
+                *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            linkMeshes.push_back(mesh);
+
+            ignmsg << "Type:       " << "BOX" << std::endl;
+            ignmsg << "Size:       " << box.Size() << std::endl;
+            ignmsg << "MeshName:   " << meshName << std::endl;            
+            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            break;
+          }
+          case sdf::GeometryType::SPHERE:
+          {
+            // Get shape from the collision component
+            auto& sphere = coll->Data().Geom()->SphereShape()->Shape();
+
+            // Create the ignition mesh
+            std::string meshName = std::string(modelName)
+                .append(".").append(linkName)
+                .append(".").append(collisionName)
+                .append(".sphere");
+            common::MeshManager::Instance()->CreateSphere(
+                meshName,
+                sphere.Radius(),        // radius
+                8,                      // rings
+                8);                     // segments
+            IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
+                "Failed to create Mesh for Sphere");
+
+            // Create the CGAL surface mesh
+            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+            marine::MeshTools::MakeSurfaceMesh(
+                *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            linkMeshes.push_back(mesh);
+
+            ignmsg << "Type:       " << "SPHERE" << std::endl;
+            ignmsg << "Radius:     " << sphere.Radius() << std::endl;
+            ignmsg << "MeshName:   " << meshName << std::endl;            
+            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            break;
+          }
+          case sdf::GeometryType::CYLINDER:
+          {
+            auto& cylinder = coll->Data().Geom()->CylinderShape()->Shape();
+
+            // Create the ignition mesh
+            std::string meshName = std::string(modelName)
+                .append(".").append(linkName)
+                .append(".").append(collisionName)
+                .append(".cylinder");
+            common::MeshManager::Instance()->CreateCylinder(
+                meshName,
+                cylinder.Radius(),      // radius
+                cylinder.Length(),      // length,
+                1,                      // rings
+                32);                    // segments
+            IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
+                "Failed to create Mesh for Cylinder");
+
+            // Create the CGAL surface mesh
+            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+            marine::MeshTools::MakeSurfaceMesh(
+                *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            linkMeshes.push_back(mesh);
+
+            ignmsg << "Type:       " << "CYLINDER" << std::endl;
+            ignmsg << "Radius:     " << cylinder.Radius() << std::endl;
+            ignmsg << "Length:     " << cylinder.Length() << std::endl;
+            ignmsg << "MeshName:   " << meshName << std::endl;            
+            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            break;
+          }
+          case sdf::GeometryType::PLANE:
+          {
+            // Ignore plane shapes.
+            break;
+          }
+          case sdf::GeometryType::MESH:
+          {
+            // auto& meshShape = coll->Data().Geom()->MeshShape();
+            std::string uri = coll->Data().Geom()->MeshShape()->Uri();
+            std::string filePath = coll->Data().Geom()->MeshShape()->FilePath();
+
+            std::string file = asFullPath(uri, filePath);
+            // if (common::MeshManager::Instance()->IsValidFilename(file))
+            // {
+            //   const common::Mesh *mesh =
+            //     common::MeshManager::Instance()->Load(file);
+            //   if (mesh)
+            //     volume = mesh->Volume();
+            //   else
+            //     ignerr << "Unable to load mesh[" << file << "]\n";
+            // }
+            // else
+            // {
+            //   ignerr << "Invalid mesh filename[" << file << "]\n";
+            // }
+
+            // Mesh
+            if (!common::MeshManager::Instance()->IsValidFilename(file))
+            {
+              ignerr << "Mesh: " << file << " was not loaded"<< std::endl;
+              return;
+            } 
+
+            // Create the CGAL surface mesh
+            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+            marine::MeshTools::MakeSurfaceMesh(
+                *common::MeshManager::Instance()->Load(file), *mesh);
+            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            linkMeshes.push_back(mesh);
+
+            ignmsg << "Type:       " << "MESH" << std::endl;
+            ignmsg << "Uri:        " << uri << std::endl;
+            ignmsg << "FilePath:   " << filePath << std::endl;
+            ignmsg << "MeshFile:   " << file << std::endl;
+            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            break;
+          }
+          default:
+          {
+            ignerr << "Unsupported collision geometry["
+              << static_cast<int>(coll->Data().Geom()->Type()) << "]\n";
+            break;
+          }
         }
-
       }
-#endif
 
       // Add meshes for this link
       _meshes.push_back(linkMeshes);
@@ -324,9 +451,9 @@ namespace systems
     /// \brief Destructor.
     public: virtual ~HydrodynamicsLinkData()
     {
-      for (auto&& ptr : this->hydrodynamics)
+      for (auto& ptr : this->hydrodynamics)
         ptr.reset();
-      for (auto&& ptr : this->initLinkMeshes)
+      for (auto& ptr : this->initLinkMeshes)
         ptr.reset();
       this->wavefieldSampler.reset();
     }
@@ -653,7 +780,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     /// \todo fix hardcoded patch size. CollisionBoundingBox is not currently available 
     // auto boundingBox = hd->link->CollisionBoundingBox();
     // double patchSize = 2.2 * boundingBox.Size().Length();
-    double patchSize = 10.0;
+    double patchSize = 20.0;
     ignmsg << "Hydrodynamics: set water patch size: "
         << patchSize << std::endl;
     std::shared_ptr<marine::Grid> initWaterPatch(
@@ -732,7 +859,7 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
 
   /// \todo add checks for a valid wavefield and lock the waek_ptr
 
-  for (auto&& hd : this->hydroData)
+  for (auto& hd : this->hydroData)
   {
     // The link pose is required for the water patch, the CoM pose for dynamics.
     math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
