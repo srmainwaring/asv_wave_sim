@@ -221,7 +221,6 @@ namespace systems
 #endif
   } 
 
-#if 0
   /// \brief Transform a meshes vertex points in the world frame according to a Pose.
   ///
   /// \param[in] _pose    A pose defining a translation and rotation in the world frame.
@@ -249,7 +248,6 @@ namespace systems
       p1 = cgal::Point3(ignP1.X(), ignP1.Y(), ignP1.Z());
     }
   }
-#endif
 
   // NOT REQUIRED: we are using the ECM instead.
   //
@@ -684,33 +682,24 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
   ////////// BEGIN TESTING
-  double simTime = std::chrono::duration<double>(_info.simTime).count();
 
   // Get the wave height at the origin
+  double simTime = std::chrono::duration<double>(_info.simTime).count();
   cgal::Point3 point(0.0, 0.0, 0.0);
   double waveHeight{0.0};
   this->wavefield.lock()->Height(point, waveHeight);
 
   // ignmsg << "[" << simTime << "] : " << waveHeight << "\n";  
-  ////////// END TESTING
 
-  // NOT REQUIRED: we are using the ECM instead.
-  // 
-  // // Update wavefield 
-  // this->data->wavefield = GetWavefield(
-  //   this->data->world, this->data->waveModelName);
-  // if (this->data->wavefield == nullptr) 
-  // {
-  //   ignerr << "Wavefield is NULL" << std::endl;
-  //   return;
-  // }
+  ////////// END TESTING
 
   for (auto&& hd : this->hydroData)
   {
-    // GZ_ASSERT(hd->link != nullptr, "Link is NULL");
-
     // The link pose is required for the water patch, the CoM pose for dynamics.
     math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+
+    /// \todo - WorldCoGPose is currently not available
+
     // math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
     math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
 
@@ -719,14 +708,19 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     hd->wavefieldSampler->UpdatePatch();
     // auto waterPatch = hd->wavefieldSampler->GetWaterPatch();
 
-    // RigidBody - the pose of the CoM is required for the dynamics. 
-    // cgal::Vector3 linVelocity = ToVector3(hd->link.WorldLinearVel(_ecm).value());
-    // cgal::Vector3 angVelocity = ToVector3(hd->link.WorldAngularVel(_ecm).value());
-    /// \todo - currently not available
-    //cgal::Vector3 linVelocityCoM = ToVector3(hd->link.WorldCoGLinearVel(_ecm).value());
-    // cgal::Vector3 linVelocityCoM = linVelocity;
+    /// \todo - check the components are available and valid
 
-#if 0
+    // RigidBody - the pose of the CoM is required for the dynamics. 
+    cgal::Vector3 linVelocity = marine::ToVector3(
+        hd->link.WorldLinearVelocity(_ecm).value());
+    cgal::Vector3 angVelocity = marine::ToVector3(
+        hd->link.WorldAngularVelocity(_ecm).value());
+    
+    /// \todo - WorldCoGLinearVel is currently not available
+
+    //cgal::Vector3 linVelocityCoM = ToVector3(hd->link.WorldCoGLinearVel(_ecm).value());
+    cgal::Vector3 linVelocityCoM = linVelocity;
+
     // Meshes
     size_t nSubTri = 0;
     for (size_t j=0; j<hd->linkMeshes.size(); ++j)
@@ -739,24 +733,23 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
         hd->wavefieldSampler, linkCoMPose, linVelocity, angVelocity);
 
       // Apply forces to the Link
-      auto force = ToIgn(hd->hydrodynamics[j]->Force());
+      auto force = marine::ToIgn(hd->hydrodynamics[j]->Force());
       if (force.IsFinite()) 
       {
-        hd->link->AddForce(force);
+        hd->link.AddWorldForce(_ecm, force);
       }
 
       // Apply torques to the link
-      auto torque = ToIgn(hd->hydrodynamics[j]->Torque());
+      auto torque = marine::ToIgn(hd->hydrodynamics[j]->Torque());
       if (torque.IsFinite()) 
       {
-        hd->link->AddTorque(torque);
+        hd->link.AddWorldWrench(_ecm, math::Vector3d::Zero, torque);
       }
 
       // Info for Markers
       nSubTri += hd->hydrodynamics[j]->GetSubmergedTriangles().size();
 
-
-      // @DEBUG_INFO
+      // DEBUG_INFO
       // ignmsg << "Link:         " << hd->link->GetName() << std::endl;
       // ignmsg << "Position:     " << linkPose.Pos() << std::endl;
       // ignmsg << "Rotation:     " << linkPose.Rot().Euler() << std::endl;
@@ -764,7 +757,6 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       // ignmsg << "Force:        " << force << std::endl;
       // ignmsg << "Torque:       " << torque << std::endl;
     }
-#endif
   }
 }
 
