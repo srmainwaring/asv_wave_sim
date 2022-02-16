@@ -174,8 +174,23 @@
     </include>
 
     <include>
+      <pose>5 0 0 0 0 0</pose>
+      <uri>model://wam-v</uri>
+    </include>
+
+    <!-- <include>
+      <pose>5 0 1.6 0 0 0</pose>
+      <uri>model://alti_transition_quad</uri>
+    </include> -->
+
+    <!-- <include>
       <pose>5 0 0 0 0 1.51</pose>
       <uri>model://shipping_container</uri>
+    </include> -->
+
+    <include>
+      <pose>15 0 0 0 0 1.51</pose>
+      <uri>model://barrage</uri>
     </include>
 
     <!-- <model name="camera">

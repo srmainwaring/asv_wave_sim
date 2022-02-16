@@ -5,7 +5,7 @@
         filename="ignition-marine1-hydrodynamics-system"
         name="ignition::gazebo::systems::Hydrodynamics">
     </plugin>
-    <link name="link">
+    <link name="base_link">
       <visual name="visual">
         <geometry>
           <sphere>

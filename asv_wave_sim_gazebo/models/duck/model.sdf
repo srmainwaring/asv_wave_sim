@@ -7,7 +7,7 @@
         name="ignition::gazebo::systems::Hydrodynamics">
     </plugin>
     <link name="base_link">
-      <visual name="base_visual">
+      <visual name="visual">
         <pose>0 0 0 1.5708 0 0</pose>
         <geometry>
           <mesh>
@@ -15,7 +15,7 @@
           </mesh>
         </geometry>
       </visual>
-      <collision name="base_collision">
+      <collision name="collision">
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
