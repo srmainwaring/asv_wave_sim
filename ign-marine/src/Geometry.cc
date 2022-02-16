@@ -35,63 +35,63 @@ namespace ignition
 namespace marine
 {
   // Typedefs
-  typedef boost::optional<AABBTree::Intersection_and_primitive_id<Ray>::Type> RayIntersection;
+  typedef boost::optional<cgal::AABBTree::Intersection_and_primitive_id<cgal::Ray>::Type> RayIntersection;
 
   double Geometry::TriangleArea(
-    const Point3& _p0,
-    const Point3& _p1,
-    const Point3& _p2
+    const cgal::Point3& _p0,
+    const cgal::Point3& _p1,
+    const cgal::Point3& _p2
   )
   {
-    Vector3 e1 = _p1 - _p0;
-    Vector3 e2 = _p2 - _p0;
+    cgal::Vector3 e1 = _p1 - _p0;
+    cgal::Vector3 e2 = _p2 - _p0;
     return 0.5 * std::sqrt(CGAL::cross_product(e1, e2).squared_length());
   }
 
   double Geometry::TriangleArea(
-    const Triangle& _tri
+    const cgal::Triangle& _tri
   )
   {
     return TriangleArea(_tri[0], _tri[1], _tri[2]);
   }
 
-  Point3 Geometry::TriangleCentroid(
-    const Point3& _p0,
-    const Point3& _p1,
-    const Point3& _p2
+  cgal::Point3 Geometry::TriangleCentroid(
+    const cgal::Point3& _p0,
+    const cgal::Point3& _p1,
+    const cgal::Point3& _p2
   )
   {
     return CGAL::centroid(_p0, _p1, _p2);
   }
 
-  Point3 Geometry::TriangleCentroid(
-    const Triangle& _tri
+  cgal::Point3 Geometry::TriangleCentroid(
+    const cgal::Triangle& _tri
   )
   {
     return CGAL::centroid(_tri[0], _tri[1], _tri[2]);
   }
 
-  Point3 Geometry::MidPoint(
-    const Point3& _p0,
-    const Point3& _p1
+  cgal::Point3 Geometry::MidPoint(
+    const cgal::Point3& _p0,
+    const cgal::Point3& _p1
   )
   {
     return CGAL::midpoint(_p0, _p1);
   }
 
-  Point3 Geometry::Normalize(const Point3& _p)
+  cgal::Point3 Geometry::Normalize(const cgal::Point3& _p)
   {
     if (_p == CGAL::ORIGIN)
       return _p;
     else
     {
-      Vector3 v = _p - CGAL::ORIGIN;
+      cgal::Vector3 v = _p - CGAL::ORIGIN;
       double norm = std::sqrt(v.squared_length());
-      return Point3(_p.x()/norm, _p.y()/norm, _p.z()/norm);
+      return cgal::Point3(_p.x()/norm, _p.y()/norm, _p.z()/norm);
     }
   }
 
-  Vector2 Geometry::Normalize(const Vector2& _v)
+  cgal::Vector2 Geometry::Normalize(const cgal::Vector2& _v)
   {
     if (_v == CGAL::NULL_VECTOR)
       return _v;
@@ -99,7 +99,7 @@ namespace marine
       return _v/std::sqrt(_v.squared_length()); 
   }
 
-  Vector3 Geometry::Normalize(const Vector3& _v)
+  cgal::Vector3 Geometry::Normalize(const cgal::Vector3& _v)
   {
     if (_v == CGAL::NULL_VECTOR)
       return _v;
@@ -107,10 +107,10 @@ namespace marine
       return _v/std::sqrt(_v.squared_length()); 
   }
 
-  Vector3 Geometry::Normal(
-    const Point3& _p0,
-    const Point3& _p1,
-    const Point3& _p2
+  cgal::Vector3 Geometry::Normal(
+    const cgal::Point3& _p0,
+    const cgal::Point3& _p1,
+    const cgal::Point3& _p2
   )
   {
     auto n = CGAL::normal(_p0, _p1, _p2);
@@ -120,8 +120,8 @@ namespace marine
       return n/std::sqrt(n.squared_length()); 
   }
 
-  Vector3 Geometry::Normal(
-    const Triangle& _tri
+  cgal::Vector3 Geometry::Normal(
+    const cgal::Triangle& _tri
   )
   {
     auto n = CGAL::normal(_tri[0], _tri[1], _tri[2]);
@@ -131,14 +131,14 @@ namespace marine
       return n/std::sqrt(n.squared_length()); 
   }
 
-  Vector3 Geometry::Normal(const Mesh& _mesh, FaceIndex _face)
+  cgal::Vector3 Geometry::Normal(const cgal::Mesh& _mesh, cgal::FaceIndex _face)
   {
-    HalfedgeIndex hf = _mesh.halfedge(_face);
-    const Point3& p0 = _mesh.point(_mesh.target(hf));
+    cgal::HalfedgeIndex hf = _mesh.halfedge(_face);
+    const cgal::Point3& p0 = _mesh.point(_mesh.target(hf));
     hf = _mesh.next(hf);
-    const Point3& p1= _mesh.point(_mesh.target(hf));
+    const cgal::Point3& p1= _mesh.point(_mesh.target(hf));
     hf = _mesh.next(hf);
-    const Point3& p2 = _mesh.point(_mesh.target(hf));
+    const cgal::Point3& p2 = _mesh.point(_mesh.target(hf));
     hf = _mesh.next(hf);
 
     auto n = CGAL::normal(p0, p1, p2);
@@ -149,10 +149,10 @@ namespace marine
       return n/std::sqrt(n.squared_length()); 
   }
 
-  Point3 Geometry::HorizontalIntercept(
-    const Point3& _high,
-    const Point3& _mid,
-    const Point3& _low
+  cgal::Point3 Geometry::HorizontalIntercept(
+    const cgal::Point3& _high,
+    const cgal::Point3& _mid,
+    const cgal::Point3& _low
   )
   {
     // If _high.Z() = _low().Z() then _high.Z() = _low.Z() = _mid.Z()
@@ -164,7 +164,7 @@ namespace marine
     {
       t = (_mid.z() - _low.z()) / div;
     }
-    return Point3(
+    return cgal::Point3(
       _low.x() + t * (_high.x() - _low.x()),
       _low.y() + t * (_high.y() - _low.y()),
       _mid.z()
@@ -172,29 +172,29 @@ namespace marine
   }
 
   bool Geometry::RayIntersectsTriangle(
-    const Point3& _origin,
-    const Direction3& _direction,
-    const Triangle& _tri,
-    Point3& _intersection
+    const cgal::Point3& _origin,
+    const cgal::Direction3& _direction,
+    const cgal::Triangle& _tri,
+    cgal::Point3& _intersection
   )
   {    
-    const Point3& p0 = _tri[0];
-    const Point3& p1 = _tri[1];  
-    const Point3& p2 = _tri[2];
-    Vector3 _ray(_direction.vector());
-    Vector3 e1 = p1 - p0;
-    Vector3 e2 = p2 - p0;
-    Vector3 h = CGAL::cross_product(_ray, e2);
+    const cgal::Point3& p0 = _tri[0];
+    const cgal::Point3& p1 = _tri[1];  
+    const cgal::Point3& p2 = _tri[2];
+    cgal::Vector3 _ray(_direction.vector());
+    cgal::Vector3 e1 = p1 - p0;
+    cgal::Vector3 e2 = p2 - p0;
+    cgal::Vector3 h = CGAL::cross_product(_ray, e2);
     double a = CGAL::scalar_product(e1, h);
     if (a > -std::numeric_limits<double>::epsilon()
       && a < std::numeric_limits<double>::epsilon())
         return false;    // This ray is parallel to this triangle.
     double f = 1.0 / a;
-    Vector3 s = _origin - p0;
+    cgal::Vector3 s = _origin - p0;
     double u = f * CGAL::scalar_product(s, h);
     if (u < 0.0 || u > 1.0)
         return false;
-    Vector3 q = CGAL::cross_product(s, e1);
+    cgal::Vector3 q = CGAL::cross_product(s, e1);
     double v = f * CGAL::scalar_product(_ray, q);
     if (v < 0.0 || u + v > 1.0)
         return false;
@@ -214,10 +214,10 @@ namespace marine
   }
 
   bool Geometry::LineIntersectsTriangle(
-    const Point3& _origin,
-    const Direction3& _direction,
-    const Triangle& _tri,
-    Point3& _intersection
+    const cgal::Point3& _origin,
+    const cgal::Direction3& _direction,
+    const cgal::Triangle& _tri,
+    cgal::Point3& _intersection
   )
   {
     return LineIntersectsTriangle(
@@ -225,28 +225,28 @@ namespace marine
   }
 
   bool Geometry::LineIntersectsTriangle(
-    const Point3& _origin,
-    const Direction3& _direction,
-    const Point3& _p0,
-    const Point3& _p1,  
-    const Point3& _p2,
-    Point3& _intersection
+    const cgal::Point3& _origin,
+    const cgal::Direction3& _direction,
+    const cgal::Point3& _p0,
+    const cgal::Point3& _p1,  
+    const cgal::Point3& _p2,
+    cgal::Point3& _intersection
   )
   {
-    Vector3 _ray(_direction.vector());
-    Vector3 e1 = _p1 - _p0;
-    Vector3 e2 = _p2 - _p0;
-    Vector3 h = CGAL::cross_product(_ray, e2);
+    cgal::Vector3 _ray(_direction.vector());
+    cgal::Vector3 e1 = _p1 - _p0;
+    cgal::Vector3 e2 = _p2 - _p0;
+    cgal::Vector3 h = CGAL::cross_product(_ray, e2);
     double a = CGAL::scalar_product(e1, h);
     if (a > -std::numeric_limits<double>::epsilon()
       && a < std::numeric_limits<double>::epsilon())
         return false;    // This ray is parallel to this triangle.
     double f = 1.0 / a;
-    Vector3 s = _origin - _p0;
+    cgal::Vector3 s = _origin - _p0;
     double u = f * CGAL::scalar_product(s, h);
     if (u < 0.0 || u > 1.0)
         return false;
-    Vector3 q = CGAL::cross_product(s, e1);
+    cgal::Vector3 q = CGAL::cross_product(s, e1);
     double v = f * CGAL::scalar_product(_ray, q);
     if (v < 0.0 || u + v > 1.0)
         return false;
@@ -256,39 +256,39 @@ namespace marine
     return true;
   }
 
-  Triangle Geometry::MakeTriangle(const Mesh& _mesh, FaceIndex _face)
+  cgal::Triangle Geometry::MakeTriangle(const cgal::Mesh& _mesh, cgal::FaceIndex _face)
   {
-    HalfedgeIndex hf = _mesh.halfedge(_face);
-    const Point3& p0 = _mesh.point(_mesh.target(hf));
+    cgal::HalfedgeIndex hf = _mesh.halfedge(_face);
+    const cgal::Point3& p0 = _mesh.point(_mesh.target(hf));
     hf = _mesh.next(hf);
-    const Point3& p1 = _mesh.point(_mesh.target(hf));
+    const cgal::Point3& p1 = _mesh.point(_mesh.target(hf));
     hf = _mesh.next(hf);
-    const Point3& p2 = _mesh.point(_mesh.target(hf));
+    const cgal::Point3& p2 = _mesh.point(_mesh.target(hf));
     hf = _mesh.next(hf);
-    return Triangle(p0, p1, p2);
+    return cgal::Triangle(p0, p1, p2);
   }
 
-  std::shared_ptr<AABBTree> Geometry::MakeAABBTree(const Mesh& _mesh)
+  std::shared_ptr<cgal::AABBTree> Geometry::MakeAABBTree(const cgal::Mesh& _mesh)
   {
-    std::shared_ptr<AABBTree> tree(
-      new AABBTree(faces(_mesh).first, faces(_mesh).second, _mesh));
+    std::shared_ptr<cgal::AABBTree> tree(
+      new cgal::AABBTree(faces(_mesh).first, faces(_mesh).second, _mesh));
     tree->build();
     return tree;
   }
 
   bool Geometry::SearchMesh(
-    const Mesh& _mesh,
-    const Point3& _origin,
-    const Direction3& _direction,
-    Point3& _intersection
+    const cgal::Mesh& _mesh,
+    const cgal::Point3& _origin,
+    const cgal::Direction3& _direction,
+    cgal::Point3& _intersection
   )
   {
     // AABB Tree
-    AABBTree tree(faces(_mesh).first, faces(_mesh).second, _mesh);
+    cgal::AABBTree tree(faces(_mesh).first, faces(_mesh).second, _mesh);
     tree.build();
     
     // Query
-    Ray query(_origin, _direction);
+    cgal::Ray query(_origin, _direction);
     RayIntersection intersection = tree.first_intersection(query);
 
     // Search both directions
@@ -298,9 +298,9 @@ namespace marine
     // Retrieve intersection point
     if (intersection)
     {
-      if (boost::get<Point3>(&(intersection->first)))
+      if (boost::get<cgal::Point3>(&(intersection->first)))
       {
-        const Point3* p =  boost::get<Point3>(&(intersection->first));
+        const cgal::Point3* p =  boost::get<cgal::Point3>(&(intersection->first));
         _intersection = *p;
         return true;
       }
@@ -309,14 +309,14 @@ namespace marine
   }
 
   bool Geometry::SearchMesh(
-    const AABBTree& _tree,
-    const Point3& _origin,
-    const Direction3& _direction,
-    Point3& _intersection
+    const cgal::AABBTree& _tree,
+    const cgal::Point3& _origin,
+    const cgal::Direction3& _direction,
+    cgal::Point3& _intersection
   )
   {
     // Query
-    Ray query(_origin, _direction);
+    cgal::Ray query(_origin, _direction);
     RayIntersection intersection = _tree.first_intersection(query);
 
     // Search both directions
@@ -326,9 +326,9 @@ namespace marine
     // Retrieve intersection point
     if (intersection)
     {
-      if (boost::get<Point3>(&(intersection->first)))
+      if (boost::get<cgal::Point3>(&(intersection->first)))
       {
-        const Point3* p =  boost::get<Point3>(&(intersection->first));
+        const cgal::Point3* p =  boost::get<cgal::Point3>(&(intersection->first));
         _intersection = *p;
         return true;
       }

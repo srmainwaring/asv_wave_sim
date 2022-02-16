@@ -35,7 +35,7 @@ namespace ignition
 {
 namespace marine
 {
-  typedef CGAL::Aff_transformation_2<Kernel> TransformMatrix;
+  // typedef CGAL::Aff_transformation_2<cgal::Kernel> TransformMatrix;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Utilities

@@ -49,7 +49,7 @@ TEST(TriangulatedGrid, Create) {
   // tri_grid->DebugPrintMesh();
   // tri_grid->DebugPrintTriangulation();
   EXPECT_TRUE(tri_grid->IsValid());
-  EXPECT_EQ(tri_grid->Origin(), Point3(10.0, 0.0, 0.0));
+  EXPECT_EQ(tri_grid->Origin(), cgal::Point3(10.0, 0.0, 0.0));
 }
 
 TEST(TriangulatedGrid, Height) {
@@ -61,7 +61,7 @@ TEST(TriangulatedGrid, Height) {
     = std::move(TriangulatedGrid::Create(n, length));
   EXPECT_TRUE(source->IsValid());
 
-  Point3 query(-5.0, -5.0, 0.0);
+  cgal::Point3 query(-5.0, -5.0, 0.0);
   double height;
   bool found = source->Height(query, height);
   EXPECT_TRUE(found);
@@ -73,8 +73,8 @@ TEST(TriangulatedGrid, Height) {
     for (int ix=0; ix<nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
-      const Point3& p = points[idx];
-      points[idx] = Point3(p.x(), p.y(), value);
+      const cgal::Point3& p = points[idx];
+      points[idx] = cgal::Point3(p.x(), p.y(), value);
     }
   }
   source->UpdatePoints(points);
@@ -99,8 +99,8 @@ TEST(TriangulatedGrid, Interpolate) {
     for (int ix=0; ix<nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
-      const Point3& p = points[idx];
-      points[idx] = Point3(p.x(), p.y(), value);
+      const cgal::Point3& p = points[idx];
+      points[idx] = cgal::Point3(p.x(), p.y(), value);
     }
   }
   source->UpdatePoints(points);

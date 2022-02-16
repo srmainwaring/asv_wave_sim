@@ -30,6 +30,7 @@
 
 #include <ignition/gazebo/components/Name.hh>
 
+#include <ignition/gazebo/Link.hh>
 #include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/Util.hh>
 
@@ -47,7 +48,6 @@ namespace gazebo
 {
 namespace systems
 {
-#if 0
   /////////////////////////////////////////////////
   // Utilties
   
@@ -58,23 +58,24 @@ namespace systems
   /// \param[out] _links    A vector holding a copy of pointers to the the model's links. 
   /// \param[out] _meshes   A vector of vectors containing a surface mesh for each collision in a link.
   void CreateCollisionMeshes(
-    physics::ModelPtr _model,
-    std::vector<physics::LinkPtr>& _links,
-    std::vector<std::vector<std::shared_ptr<Mesh>>>& _meshes)
+    EntityComponentManager &_ecm,
+    gazebo::Model _model,
+    std::vector<gazebo::Entity>& _links,
+    std::vector<std::vector<cgal::MeshPtr>>& _meshes)
   {
     // There will be more than one mesh per link if the link contains mutiple collisions.
 
     // Model
-    GZ_ASSERT(_model != nullptr, "Invalid parameter _model");
-    std::string modelName(_model->GetName());
+    std::string modelName(_model.Name(_ecm));
 
+#if 0
     // Links
     for (auto&& link : _model->GetLinks())
     {
       GZ_ASSERT(link != nullptr, "Link must be valid");
       _links.push_back(link);
       std::string linkName(link->GetName());
-      std::vector<std::shared_ptr<Mesh>> linkMeshes;
+      std::vector<std::shared_ptr<cgal::Mesh>> linkMeshes;
       
       // Collisions
       for (auto&& collision : link->GetCollisions())
@@ -105,11 +106,11 @@ namespace systems
           common::MeshManager::Instance()->CreateBox(
             meshName,
             box->Size(),
-            ignition::math::Vector2d(1, 1));          
+            math::Vector2d(1, 1));          
           GZ_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
             "Failed to create Mesh for BoxShape");
 
-          std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
           MeshTools::MakeSurfaceMesh(
             *common::MeshManager::Instance()->GetMesh(meshName), *mesh);
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
@@ -142,7 +143,7 @@ namespace systems
           GZ_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
             "Failed to create Mesh for Cylinder");
 
-          std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
           MeshTools::MakeSurfaceMesh(
             *common::MeshManager::Instance()->GetMesh(meshName), *mesh);
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
@@ -173,7 +174,7 @@ namespace systems
           GZ_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
             "Failed to create Mesh for Cylinder");
 
-          std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
           MeshTools::MakeSurfaceMesh(
             *common::MeshManager::Instance()->GetMesh(meshName), *mesh);
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
@@ -202,7 +203,7 @@ namespace systems
             return;
           } 
 
-          std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<Mesh>();
           MeshTools::MakeSurfaceMesh(
             *common::MeshManager::Instance()->GetMesh(meshStr), *mesh);
           GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
@@ -217,17 +218,19 @@ namespace systems
       // Add meshes for this link
       _meshes.push_back(linkMeshes);
     }
+#endif
   } 
 
+#if 0
   /// \brief Transform a meshes vertex points in the world frame according to a Pose.
   ///
   /// \param[in] _pose    A pose defining a translation and rotation in the world frame.
   /// \param[in] _source  The original mesh to transform.
   /// \param[out] _target The transformed mesh.
   void ApplyPose(
-    const ignition::math::Pose3d& _pose,
-    const Mesh& _source,
-    Mesh& _target)
+    const math::Pose3d& _pose,
+    const cgal::Mesh& _source,
+    cgal::Mesh& _target)
   {
     for (
       auto&& it = std::make_pair(std::begin(_source.vertices()), std::begin(_target.vertices()));
@@ -236,16 +239,17 @@ namespace systems
     {
       auto& v0 = *it.first;
       auto& v1 = *it.second;
-      const Point3& p0 = _source.point(v0);
+      const cgal::Point3& p0 = _source.point(v0);
 
       // Affine transformation
-      ignition::math::Vector3d ignP0(p0.x(), p0.y(), p0.z());
-      ignition::math::Vector3d ignP1 = _pose.Rot().RotateVector(ignP0) + _pose.Pos();
+      math::Vector3d ignP0(p0.x(), p0.y(), p0.z());
+      math::Vector3d ignP1 = _pose.Rot().RotateVector(ignP0) + _pose.Pos();
 
-      Point3& p1 = _target.point(v1);
-      p1 = Point3(ignP1.X(), ignP1.Y(), ignP1.Z());
+      cgal::Point3& p1 = _target.point(v1);
+      p1 = cgal::Point3(ignP1.X(), ignP1.Y(), ignP1.Z());
     }
   }
+#endif
 
   // NOT REQUIRED: we are using the ECM instead.
   //
@@ -281,7 +285,6 @@ namespace systems
   // 
   //   return wavefieldEntity->GetWavefield();
   // }
-#endif
 
   /////////////////////////////////////////////////
   // HydrodynamicsLinkData
@@ -301,29 +304,30 @@ namespace systems
       this->wavefieldSampler.reset();
     }
 
-    /// \brief A Link pointer.
-    // public: physics::LinkPtr link;
+    /// \brief A Link entity.
+    // public: gazebo::Entity link;
+    public: gazebo::Link link{kNullEntity};
 
     /// \brief The wavefield sampler for this link.
     public: marine::WavefieldSamplerPtr wavefieldSampler;
     
     /// \brief The initial meshes for this link.
-    public: std::vector<std::shared_ptr<marine::Mesh>> initLinkMeshes;
+    public: std::vector<cgal::MeshPtr> initLinkMeshes;
 
     /// \brief The transformed meshes for this link.
-    public: std::vector<std::shared_ptr<marine::Mesh>> linkMeshes;
+    public: std::vector<cgal::MeshPtr> linkMeshes;
 
     /// \brief Objects to compute the hydrodynamics forces for each link mesh.
     public: std::vector<marine::HydrodynamicsPtr> hydrodynamics;
 
     /// \brief Marker messages for the water patch.
-    // public: ignition::msgs::Marker waterPatchMsg;
+    // public: msgs::Marker waterPatchMsg;
 
     /// \brief Marker messages for the waterline.
-    // public: std::vector<ignition::msgs::Marker> waterlineMsgs;
+    // public: std::vector<msgs::Marker> waterlineMsgs;
 
     /// \brief Marker messages for the underwater portion of the mesh.
-    // public: std::vector<ignition::msgs::Marker> underwaterSurfaceMsgs;
+    // public: std::vector<msgs::Marker> underwaterSurfaceMsgs;
   };
 
   typedef std::shared_ptr<HydrodynamicsLinkData> HydrodynamicsLinkDataPtr;
@@ -365,7 +369,7 @@ class ignition::gazebo::systems::HydrodynamicsPrivate
                               EntityComponentManager &_ecm);
 
   /// \brief Model interface
-  public: Model model{kNullEntity};
+  public: gazebo::Model model{kNullEntity};
 
   /// \brief Copy of the sdf configuration used for this plugin
   public: sdf::ElementPtr sdf;
@@ -381,7 +385,7 @@ class ignition::gazebo::systems::HydrodynamicsPrivate
   public: Entity wavefieldEntity{kNullEntity};
 
   /// \brief The wavefield.
-  public: marine::WavefieldPtr wavefield;
+  public: marine::WavefieldWeakPtr wavefield;
 
   ////////// BEGIN HYDRODYNAMICS PLUGIN
 
@@ -413,7 +417,7 @@ class ignition::gazebo::systems::HydrodynamicsPrivate
   // public: event::ConnectionPtr updateConnection;
 
   // /// \brief Ignition transport node for igntopic "/marker".
-  // public: ignition::transport::Node ignNode;
+  // public: transport::Node ignNode;
 
   // /// \brief Gazebo transport node.
   // public: transport::NodePtr gzNode;
@@ -560,7 +564,7 @@ bool HydrodynamicsPrivate::InitWavefield(EntityComponentManager &_ecm)
     this->wavefield = comp->Data();
   }
 
-  if (!this->wavefield)
+  if (!this->wavefield.lock())
   {
     ignwarn << "Invalid wavefield, no hydrodynamic forces will be calculated\n";
     return false;
@@ -572,6 +576,8 @@ bool HydrodynamicsPrivate::InitWavefield(EntityComponentManager &_ecm)
 /////////////////////////////////////////////////
 bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 {
+  ignmsg << "Hydrodynamics: initialise physics\n";
+
   // NOT REQUIRED: we are using the ECM instead.
   //
   // // Wavefield
@@ -583,35 +589,42 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
   //   return;
   // }
 
-#if 0
-  std::string modelName(this->data->model->GetName());
+  std::string modelName(this->model.Name(_ecm));
 
   // Populate link meshes
-  std::vector<physics::LinkPtr> links;
-  std::vector<std::vector<std::shared_ptr<Mesh>>> meshes;
-  CreateCollisionMeshes(this->data->model, links, meshes);
-  ignmsg << "links:  " << links.size() << std::endl;
-  ignmsg << "meshes: " << meshes.size() << std::endl;
+  std::vector<gazebo::Entity> links;
+  std::vector<std::vector<cgal::MeshPtr>> meshes;
+  CreateCollisionMeshes(_ecm, this->model, links, meshes);
+  ignmsg << "Hydrodynamics: links:  " << links.size() << std::endl;
+  ignmsg << "Hydrodynamics: meshes: " << meshes.size() << std::endl;
 
   for (size_t i=0; i<links.size(); ++i)
   {
     // Create storage
     size_t meshCount = meshes[i].size();
     std::shared_ptr<HydrodynamicsLinkData> hd(new HydrodynamicsLinkData);
-    this->data->hydroData.push_back(hd);
+    this->hydroData.push_back(hd);
     hd->initLinkMeshes.resize(meshCount);
     hd->linkMeshes.resize(meshCount);
     hd->hydrodynamics.resize(meshCount);
-    hd->waterlineMsgs.resize(meshCount);
-    hd->underwaterSurfaceMsgs.resize(meshCount);
+    // hd->waterlineMsgs.resize(meshCount);
+    // hd->underwaterSurfaceMsgs.resize(meshCount);
 
     // Wavefield and Link
-    hd->link = links[i];
+    hd->link = gazebo::Link(links[i]);
+
+    /// \todo(srmainwaring) - check that the link has valid pose
+    /// information attached...
 
     // The link pose is required for the water patch, the CoM pose for dynamics.
-    ignition::math::Pose3d linkPose = hd->link->WorldPose();
-    ignition::math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
+    math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
 
+    /// \todo(srmainwaring) subtle difference here - inertial pose includes
+    /// any rotation of the inertial matrix where CoG pose does not.
+    // math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
+    math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
+
+#if 0
     // Water patch grid
     auto boundingBox = hd->link->CollisionBoundingBox();
     double patchSize = 2.2 * boundingBox.Size().Length();
@@ -620,20 +633,20 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 
     // WavefieldSampler - this is updated by the pose of the link (not the CoM).
     hd->wavefieldSampler.reset(new WavefieldSampler(
-      this->data->wavefield, initWaterPatch));
+      this->wavefield, initWaterPatch));
     hd->wavefieldSampler->ApplyPose(linkPose);
     hd->wavefieldSampler->UpdatePatch();
 
     // RigidBody - the pose of the CoM is required for the dynamics. 
-    Vector3 linVelocity = ToVector3(hd->link->WorldLinearVel());
-    Vector3 angVelocity = ToVector3(hd->link->WorldAngularVel());
-    Vector3 linVelocityCoM = ToVector3(hd->link->WorldCoGLinearVel());
+    cgal::Vector3 linVelocity = ToVector3(hd->link->WorldLinearVel());
+    cgal::Vector3 angVelocity = ToVector3(hd->link->WorldAngularVel());
+    cgal::Vector3 linVelocityCoM = ToVector3(hd->link->WorldCoGLinearVel());
 
     for (size_t j=0; j<meshCount; ++j)
     {
       // Mesh (SurfaceMesh copy performs a deep copy of all properties)
-      std::shared_ptr<Mesh> initLinkMesh = meshes[i][j];
-      std::shared_ptr<Mesh> linkMesh = std::make_shared<Mesh>(*initLinkMesh);
+      std::shared_ptr<cgal::Mesh> initLinkMesh = meshes[i][j];
+      std::shared_ptr<cgal::Mesh> linkMesh = std::make_shared<Mesh>(*initLinkMesh);
       GZ_ASSERT(linkMesh != nullptr, "Invalid Mesh returned from CopyMesh");
 
       // Mesh
@@ -652,8 +665,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       hd->hydrodynamics[j]->Update(
         hd->wavefieldSampler, linkCoMPose, linVelocity, angVelocity);
     }
-  }
 #endif
+  }
 
   return true;
 }
@@ -674,11 +687,11 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
   double simTime = std::chrono::duration<double>(_info.simTime).count();
 
   // Get the wave height at the origin
-  marine::Point3 point(0.0, 0.0, 0.0);
+  cgal::Point3 point(0.0, 0.0, 0.0);
   double waveHeight{0.0};
-  this->wavefield->Height(point, waveHeight);
+  this->wavefield.lock()->Height(point, waveHeight);
 
-  ignmsg << "[" << simTime << "] : " << waveHeight << "\n";  
+  // ignmsg << "[" << simTime << "] : " << waveHeight << "\n";  
   ////////// END TESTING
 
   // NOT REQUIRED: we are using the ECM instead.
@@ -692,14 +705,14 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
   //   return;
   // }
 
-#if 0
-  for (auto&& hd : this->data->hydroData)
+  for (auto&& hd : this->hydroData)
   {
-    GZ_ASSERT(hd->link != nullptr, "Link is NULL");
+    // GZ_ASSERT(hd->link != nullptr, "Link is NULL");
 
     // The link pose is required for the water patch, the CoM pose for dynamics.
-    ignition::math::Pose3d linkPose = hd->link->WorldPose();
-    ignition::math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
+    math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+    // math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
+    math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
 
     // Update water patch
     hd->wavefieldSampler->ApplyPose(linkPose);
@@ -707,10 +720,13 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     // auto waterPatch = hd->wavefieldSampler->GetWaterPatch();
 
     // RigidBody - the pose of the CoM is required for the dynamics. 
-    Vector3 linVelocity = ToVector3(hd->link->WorldLinearVel());
-    Vector3 angVelocity = ToVector3(hd->link->WorldAngularVel());
-    Vector3 linVelocityCoM = ToVector3(hd->link->WorldCoGLinearVel());
+    // cgal::Vector3 linVelocity = ToVector3(hd->link.WorldLinearVel(_ecm).value());
+    // cgal::Vector3 angVelocity = ToVector3(hd->link.WorldAngularVel(_ecm).value());
+    /// \todo - currently not available
+    //cgal::Vector3 linVelocityCoM = ToVector3(hd->link.WorldCoGLinearVel(_ecm).value());
+    // cgal::Vector3 linVelocityCoM = linVelocity;
 
+#if 0
     // Meshes
     size_t nSubTri = 0;
     for (size_t j=0; j<hd->linkMeshes.size(); ++j)
@@ -739,6 +755,7 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       // Info for Markers
       nSubTri += hd->hydrodynamics[j]->GetSubmergedTriangles().size();
 
+
       // @DEBUG_INFO
       // ignmsg << "Link:         " << hd->link->GetName() << std::endl;
       // ignmsg << "Position:     " << linkPose.Pos() << std::endl;
@@ -747,8 +764,8 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       // ignmsg << "Force:        " << force << std::endl;
       // ignmsg << "Torque:       " << torque << std::endl;
     }
-  }
 #endif
+  }
 }
 
 //////////////////////////////////////////////////

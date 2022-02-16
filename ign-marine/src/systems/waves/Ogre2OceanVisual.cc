@@ -103,14 +103,14 @@ void Ogre2OceanVisual::LoadCube()
   // Position indicator - with dynamic geometry
   // must specify vertices for each face and get
   // the orientation correct.
-  ignition::math::Vector3d p0(-1, -1,  1);
-  ignition::math::Vector3d p1( 1, -1,  1);
-  ignition::math::Vector3d p2( 1,  1,  1);
-  ignition::math::Vector3d p3(-1,  1,  1);
-  ignition::math::Vector3d p4(-1, -1, -1);
-  ignition::math::Vector3d p5( 1, -1, -1);
-  ignition::math::Vector3d p6( 1,  1, -1);
-  ignition::math::Vector3d p7(-1,  1, -1);
+  math::Vector3d p0(-1, -1,  1);
+  math::Vector3d p1( 1, -1,  1);
+  math::Vector3d p2( 1,  1,  1);
+  math::Vector3d p3(-1,  1,  1);
+  math::Vector3d p4(-1, -1, -1);
+  math::Vector3d p5( 1, -1, -1);
+  math::Vector3d p6( 1,  1, -1);
+  math::Vector3d p7(-1,  1, -1);
 
   // front face
   this->dataPtr->mesh->AddPoint(p0);

@@ -40,11 +40,11 @@ namespace ignition
       Ogre::Vector3& _vout);
 
     void ToOgreVector3(
-      const ignition::math::Vector3d& _v,
+      const math::Vector3d& _v,
       Ogre::Vector3& _vout);
 
     void ToOgreVector3(
-      const std::vector<ignition::math::Vector3d>& _v,
+      const std::vector<math::Vector3d>& _v,
       Ogre::Vector3& _vout0,
       Ogre::Vector3& _vout1,
       Ogre::Vector3& _vout2);
@@ -87,7 +87,7 @@ namespace ignition
     /// \param[in] _subMesh Name of the mesh within _meshName to insert.
     /// \param[in] _centerSubmesh True to center the submesh.
     void InsertMesh(
-      const ignition::common::Mesh *_mesh,
+      const common::Mesh *_mesh,
       const std::string &_subMesh="",
       bool _centerSubmesh=false);
 

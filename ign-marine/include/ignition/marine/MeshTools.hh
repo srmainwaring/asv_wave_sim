@@ -44,7 +44,7 @@ namespace marine
     /// \param[out] _vertices   The vector of vertices to populate.
     /// \param[out] _indices    The vector of indices to populate.
     public: static void FillArrays(
-      const ignition::common::Mesh& _source,
+      const common::Mesh& _source,
       std::vector<float>& _vertices,
       std::vector<int>& _indices
     );
@@ -54,8 +54,8 @@ namespace marine
     /// \param[in] _source      The source mesh (a Gazebo Mesh).
     /// \param[out] _target     The target mesg (a CGAL SurfaceMesh).
     public: static void MakeSurfaceMesh(
-      const ignition::common::Mesh& _source,
-      Mesh& _target
+      const common::Mesh& _source,
+      cgal::Mesh& _target
     );
   };
 

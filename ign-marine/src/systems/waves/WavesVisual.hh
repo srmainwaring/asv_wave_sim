@@ -51,8 +51,8 @@ namespace systems
 
     /// Documentation inherited
     public: void PreUpdate(
-                const ignition::gazebo::UpdateInfo &_info,
-                ignition::gazebo::EntityComponentManager &_ecm) override;
+                const UpdateInfo &_info,
+                EntityComponentManager &_ecm) override;
 
     /// \brief Private data pointer
     private: std::unique_ptr<WavesVisualPrivate> dataPtr;

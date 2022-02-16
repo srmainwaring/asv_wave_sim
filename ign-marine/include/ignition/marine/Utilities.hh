@@ -79,8 +79,8 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in SDF.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static ignition::math::Vector2d SdfParamVector2d(const sdf::Element& _sdf,
-      const std::string &_paramName, const ignition::math::Vector2d _defaultVal);
+    public: static math::Vector2d SdfParamVector2d(const sdf::Element& _sdf,
+      const std::string &_paramName, const math::Vector2d _defaultVal);
 
     /// \brief Extract a named Vector2i parameter from an SDF element.
     ///
@@ -88,8 +88,8 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in SDF.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static ignition::math::Vector2i SdfParamVector2i(const sdf::Element& _sdf,
-      const std::string &_paramName, const ignition::math::Vector2i _defaultVal);
+    public: static math::Vector2i SdfParamVector2i(const sdf::Element& _sdf,
+      const std::string &_paramName, const math::Vector2i _defaultVal);
 
     /// \brief Extract a named Vector3d parameter from an SDF element.
     ///
@@ -97,8 +97,8 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in SDF.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static ignition::math::Vector3d SdfParamVector3d(const sdf::Element& _sdf,
-      const std::string &_paramName, const ignition::math::Vector3d _defaultVal);
+    public: static math::Vector3d SdfParamVector3d(const sdf::Element& _sdf,
+      const std::string &_paramName, const math::Vector3d _defaultVal);
 
     /// \brief Extract a named bool parameter from a Param_V message.
     ///
@@ -106,7 +106,7 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static bool MsgParamBool(const ignition::msgs::Param_V& _msg,
+    public: static bool MsgParamBool(const msgs::Param_V& _msg,
       const std::string &_paramName, const bool _defaultVal);
 
     /// \brief Extract a named size_t parameter from a Param_V message.
@@ -115,7 +115,7 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static size_t MsgParamSizeT(const ignition::msgs::Param_V& _msg,
+    public: static size_t MsgParamSizeT(const msgs::Param_V& _msg,
       const std::string &_paramName, const size_t _defaultVal);
 
     /// \brief Extract a named double parameter from a Param_V message.
@@ -124,7 +124,7 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static double MsgParamDouble(const ignition::msgs::Param_V& _msg,
+    public: static double MsgParamDouble(const msgs::Param_V& _msg,
       const std::string &_paramName, const double _defaultVal);
 
     /// \brief Extract a named std::string parameter from a Param_V message.
@@ -133,7 +133,7 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static std::string MsgParamString(const ignition::msgs::Param_V& _msg,
+    public: static std::string MsgParamString(const msgs::Param_V& _msg,
       const std::string &_paramName, const std::string _defaultVal);
 
     /// \brief Extract a named Vector2i parameter from a Param_V message.
@@ -142,8 +142,8 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static ignition::math::Vector2i MsgParamVector2i(const ignition::msgs::Param_V& _msg,
-      const std::string &_paramName, const ignition::math::Vector2i _defaultVal);
+    public: static math::Vector2i MsgParamVector2i(const msgs::Param_V& _msg,
+      const std::string &_paramName, const math::Vector2i _defaultVal);
 
     /// \brief Extract a named Vector2d parameter from a Param_V message.
     ///
@@ -151,8 +151,8 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static ignition::math::Vector2d MsgParamVector2d(const ignition::msgs::Param_V& _msg,
-      const std::string &_paramName, const ignition::math::Vector2d _defaultVal);
+    public: static math::Vector2d MsgParamVector2d(const msgs::Param_V& _msg,
+      const std::string &_paramName, const math::Vector2d _defaultVal);
 
     /// \brief Extract a named Vector3d parameter from a Param_V message.
     ///
@@ -160,8 +160,8 @@ namespace marine
     /// \param[in] _paramName   The parameter name as it appears in message.
     /// \param[in] _defaultVal  A default value for the parameter.
     /// \return                 The parameter value (or default value if not found).
-    public: static ignition::math::Vector3d MsgParamVector3d(const ignition::msgs::Param_V& _msg,
-      const std::string &_paramName, const ignition::math::Vector3d _defaultVal);
+    public: static math::Vector3d MsgParamVector3d(const msgs::Param_V& _msg,
+      const std::string &_paramName, const math::Vector3d _defaultVal);
   };
 
 }

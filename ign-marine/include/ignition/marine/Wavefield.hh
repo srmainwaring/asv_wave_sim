@@ -44,13 +44,13 @@ namespace marine
     public: virtual ~Wavefield();
 
     /// \brief Access the wave field mesh.
-    public: virtual std::shared_ptr<const Mesh> GetMesh() const { return nullptr; } //= 0;
+    public: virtual std::shared_ptr<const cgal::Mesh> GetMesh() const { return nullptr; } //= 0;
 
     /// \brief Access the wave field grid.
     public: virtual std::shared_ptr<const Grid> GetGrid() const { return nullptr; } //= 0;
 
     // Compute the height at a point.
-    public: virtual bool Height(const Point3& point, double& height) const { return false; } //= 0;
+    public: virtual bool Height(const cgal::Point3& point, double& height) const { return false; } //= 0;
 
     /// \brief Get the wave parameters.
     public: virtual std::shared_ptr<const WaveParameters> GetParameters() const { return nullptr; } //= 0;
@@ -67,6 +67,7 @@ namespace marine
   };
 
   typedef std::shared_ptr<Wavefield> WavefieldPtr; 
+  typedef std::weak_ptr<Wavefield> WavefieldWeakPtr; 
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A class to manage a wave field.
@@ -93,16 +94,16 @@ namespace marine
       const std::array<size_t, 2>& _cellCount);
 
     /// \brief Access the wave field mesh.
-    public: std::shared_ptr<const Mesh> GetMesh() const override;
+    public: std::shared_ptr<const cgal::Mesh> GetMesh() const override;
 
     /// \brief Access the wave field grid.
     public: std::shared_ptr<const Grid> GetGrid() const override;
 
     // Compute the height at a point.
-    public: bool Height(const Point3& point, double& height) const override;
+    public: bool Height(const cgal::Point3& point, double& height) const override;
 
     /// \brief Access the wave field mesh as a Gazebo Mesh.
-    // public: std::shared_ptr<const gazebo::common::Mesh> GetGzMesh() const;
+    // public: std::shared_ptr<const common::Mesh> GetGzMesh() const;
 
     /// \brief Get the wave parameters.
     public: std::shared_ptr<const WaveParameters> GetParameters() const override;
@@ -143,13 +144,13 @@ namespace marine
     public: WavefieldOceanTile(const std::string& _name);
 
     /// \brief Access the wave field mesh.
-    public: std::shared_ptr<const Mesh> GetMesh() const override;
+    public: std::shared_ptr<const cgal::Mesh> GetMesh() const override;
 
     /// \brief Access the wave field grid.
     public: std::shared_ptr<const Grid> GetGrid() const override;
 
     // Compute the height at a point.
-    public: bool Height(const Point3& point, double& height) const override;
+    public: bool Height(const cgal::Point3& point, double& height) const override;
 
     /// \brief Get the wave parameters.
     public: std::shared_ptr<const WaveParameters> GetParameters() const override;

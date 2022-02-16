@@ -322,8 +322,8 @@ void WavesVisual::Configure(const Entity &_entity,
 
 //////////////////////////////////////////////////
 void WavesVisual::PreUpdate(
-  const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &)
+  const UpdateInfo &_info,
+  EntityComponentManager &)
 {
   IGN_PROFILE("WavesVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);

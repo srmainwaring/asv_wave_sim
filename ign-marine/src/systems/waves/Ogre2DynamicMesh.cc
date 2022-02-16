@@ -491,8 +491,8 @@ MarkerType Ogre2DynamicMesh::OperationType() const
 }
 
 /////////////////////////////////////////////////
-void Ogre2DynamicMesh::AddPoint(const ignition::math::Vector3d &_pt,
-    const ignition::math::Color &_color)
+void Ogre2DynamicMesh::AddPoint(const math::Vector3d &_pt,
+    const math::Color &_color)
 {
   this->dataPtr->vertices.push_back(_pt);
 
@@ -502,22 +502,22 @@ void Ogre2DynamicMesh::AddPoint(const ignition::math::Vector3d &_pt,
   // https://forums.ogre3d.org/viewtopic.php?t=93627#p539276
   this->dataPtr->colors.push_back(_color);
 
-  this->dataPtr->normals.push_back(ignition::math::Vector3d::Zero);
-  this->dataPtr->uv0s.push_back(ignition::math::Vector2d::Zero);
+  this->dataPtr->normals.push_back(math::Vector3d::Zero);
+  this->dataPtr->uv0s.push_back(math::Vector2d::Zero);
 
   this->dataPtr->dirty = true;
 }
 
 /////////////////////////////////////////////////
 void Ogre2DynamicMesh::AddPoint(double _x, double _y, double _z,
-    const ignition::math::Color &_color)
+    const math::Color &_color)
 {
-  this->AddPoint(ignition::math::Vector3d(_x, _y, _z), _color);
+  this->AddPoint(math::Vector3d(_x, _y, _z), _color);
 }
 
 /////////////////////////////////////////////////
 void Ogre2DynamicMesh::SetPoint(unsigned int _index,
-    const ignition::math::Vector3d &_value)
+    const math::Vector3d &_value)
 {
   if (_index >= this->dataPtr->vertices.size())
   {
@@ -533,7 +533,7 @@ void Ogre2DynamicMesh::SetPoint(unsigned int _index,
 
 /////////////////////////////////////////////////
 void Ogre2DynamicMesh::SetColor(unsigned int _index,
-    const ignition::math::Color &_color)
+    const math::Color &_color)
 {
   if (_index >= this->dataPtr->colors.size())
   {
@@ -554,7 +554,7 @@ void Ogre2DynamicMesh::SetColor(unsigned int _index,
 
 /////////////////////////////////////////////////
 void Ogre2DynamicMesh::SetNormal(unsigned int _index,
-                              const ignition::math::Vector3d &_normal)
+                              const math::Vector3d &_normal)
 {
   if (_index >= this->dataPtr->normals.size())
   {
@@ -570,7 +570,7 @@ void Ogre2DynamicMesh::SetNormal(unsigned int _index,
 
 /////////////////////////////////////////////////
 void Ogre2DynamicMesh::SetUV0(unsigned int _index,
-                              const ignition::math::Vector2d &_uv0)
+                              const math::Vector2d &_uv0)
 {
   if (_index >= this->dataPtr->uv0s.size())
   {
@@ -585,7 +585,7 @@ void Ogre2DynamicMesh::SetUV0(unsigned int _index,
 }
 
 /////////////////////////////////////////////////
-ignition::math::Vector3d Ogre2DynamicMesh::Point(
+math::Vector3d Ogre2DynamicMesh::Point(
     const unsigned int _index) const
 {
   if (_index >= this->dataPtr->vertices.size())
@@ -593,9 +593,9 @@ ignition::math::Vector3d Ogre2DynamicMesh::Point(
     ignerr << "Point index[" << _index << "] is out of bounds[0-"
            << this->dataPtr->vertices.size()-1 << "]\n";
 
-    return ignition::math::Vector3d(ignition::math::INF_D,
-                                    ignition::math::INF_D,
-                                    ignition::math::INF_D);
+    return math::Vector3d(math::INF_D,
+                          math::INF_D,
+                          math::INF_D);
   }
 
   return this->dataPtr->vertices[_index];

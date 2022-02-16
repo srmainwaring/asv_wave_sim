@@ -47,7 +47,7 @@ namespace marine
 
 ///////////////////////////////////////////////////////////////////////////////    
 // Utilities
-  void DebugPrint(const Triangle& triangle)
+  void DebugPrint(const cgal::Triangle& triangle)
   {
     ignmsg << "Vertex[0]:   " << triangle[0] << std::endl;
     ignmsg << "Vertex[1]:   " << triangle[1] << std::endl;
@@ -58,10 +58,10 @@ namespace marine
 ///////////////////////////////////////////////////////////////////////////////    
 // Physics
 
-  Point3 Physics::CenterOfForce(
+  cgal::Point3 Physics::CenterOfForce(
     double _fA, double _fB,
-    const Point3& _A,
-    const Point3& _B
+    const cgal::Point3& _A,
+    const cgal::Point3& _B
   )
   { 
     double div = _fA + _fB;
@@ -100,14 +100,14 @@ namespace marine
     return CF;
   }
 
-  Point3 Physics::CenterOfPressureApexUp(
+  cgal::Point3 Physics::CenterOfPressureApexUp(
     double _z0,
-    const Point3& _H,
-    const Point3& _M,
-    const Point3& _B
+    const cgal::Point3& _H,
+    const cgal::Point3& _M,
+    const cgal::Point3& _B
   )
   {
-    Vector3 alt = _B - _H;
+    cgal::Vector3 alt = _B - _H;
     double h = _H.z() - _M.z();
     double tc = 2.0/3.0;    
     double div = 6.0 * _z0 + 4.0 * h;
@@ -118,14 +118,14 @@ namespace marine
     return _H + alt * tc;
   }
 
-  Point3 Physics::CenterOfPressureApexDn(
+  cgal::Point3 Physics::CenterOfPressureApexDn(
     double _z0,
-    const Point3& _L,
-    const Point3& _M,
-    const Point3& _B
+    const cgal::Point3& _L,
+    const cgal::Point3& _M,
+    const cgal::Point3& _B
   )
   {
-    Vector3 alt = _L - _B;
+    cgal::Vector3 alt = _L - _B;
     double h = _M.z() - _L.z();
     double tc = 1.0/3.0;
     double div = 6.0 * _z0 + 2.0 * h;
@@ -138,26 +138,26 @@ namespace marine
 
   void Physics::BuoyancyForceAtCenterOfPressure(
     double _depthC,
-    const Point3& _C,
-    const Point3& _H,
-    const Point3& _M,
-    const Point3& _L,
-    const Vector3& _normal,
-    Point3& _center, 
-    Vector3& _force
+    const cgal::Point3& _C,
+    const cgal::Point3& _H,
+    const cgal::Point3& _M,
+    const cgal::Point3& _L,
+    const cgal::Vector3& _normal,
+    cgal::Point3& _center, 
+    cgal::Vector3& _force
   )
   {
     double fluidDensity = PhysicalConstants::WaterDensity(); // kg m^-3 
     double gravity = PhysicalConstants::Gravity();           // m s^-1
     
     // Split the triangle into upper and lower triangles bisected by a line normal to the z-axis
-    Point3 D = Geometry::HorizontalIntercept(_H, _M, _L);
-    Point3 B = Geometry::MidPoint(_M, D);
+    cgal::Point3 D = Geometry::HorizontalIntercept(_H, _M, _L);
+    cgal::Point3 B = Geometry::MidPoint(_M, D);
 
     // Initialise to the base midpoint (correct force calcuation for triangles with a horizontal base)    
     double fU=0, fL=0;
-    Point3 CpU = B;   
-    Point3 CpL = B;
+    cgal::Point3 CpU = B;   
+    cgal::Point3 CpL = B;
 
     // Upper triangle H > M
     if (_H.z() >= _M.z())
@@ -167,7 +167,7 @@ namespace marine
       CpU = CenterOfPressureApexUp(z0, _H, _M, B);
       
       // Force at centroid
-      Point3 CU = Geometry::TriangleCentroid(_H, _M, D);
+      cgal::Point3 CU = Geometry::TriangleCentroid(_H, _M, D);
       double hCU = _depthC + (_C.z() - CU.z());
       double area = Geometry::TriangleArea(_H, _M, D);
       fU = fluidDensity * gravity * area * hCU;    
@@ -197,7 +197,7 @@ namespace marine
       CpL = CenterOfPressureApexDn(z0, _L, _M, B);
       
       // Force at centroid
-      Point3 CL = Geometry::TriangleCentroid(_L, _M, D);
+      cgal::Point3 CL = Geometry::TriangleCentroid(_L, _M, D);
       double hCL = _depthC + (_C.z() - CL.z());
       double area = Geometry::TriangleArea(_L, _M, D);
       fL = fluidDensity * gravity * area * hCL;
@@ -236,9 +236,9 @@ namespace marine
 
   void Physics::BuoyancyForceAtCentroid(
     const WavefieldSampler& _wavefieldSampler,
-    const Triangle& _triangle,
-    Point3& _center,
-    Vector3& _force
+    const cgal::Triangle& _triangle,
+    cgal::Point3& _center,
+    cgal::Vector3& _force
   )
   {
     // Physical constants
@@ -252,20 +252,20 @@ namespace marine
     double h = _wavefieldSampler.ComputeDepth(_center);
 
     // Calculate the force
-    Vector3 normal = Geometry::Normal(_triangle);
+    cgal::Vector3 normal = Geometry::Normal(_triangle);
     double area = Geometry::TriangleArea(_triangle);
     _force = normal * (density * gravity * area * h);
   }
 
   void Physics::BuoyancyForceAtCenterOfPressure(
     const WavefieldSampler& _wavefieldSampler,
-    const Triangle& _triangle,
-    Point3& _center,
-    Vector3& _force
+    const cgal::Triangle& _triangle,
+    cgal::Point3& _center,
+    cgal::Vector3& _force
   )
   {
     // Sort triangle vertices by height.
-    std::array<Point3, 3> v {
+    std::array<cgal::Point3, 3> v {
       _triangle[0],
       _triangle[1],
       _triangle[2]
@@ -273,9 +273,9 @@ namespace marine
     std::array<double, 3> vz { v[0].z(), v[1].z(), v[2].z() };
     auto index = algorithm::sort_indexes(vz); 
     
-    Point3 H = v[index[0]];
-    Point3 M = v[index[1]];
-    Point3 L = v[index[2]];
+    cgal::Point3 H = v[index[0]];
+    cgal::Point3 M = v[index[1]];
+    cgal::Point3 L = v[index[2]];
 
     // @DEBUG_INFO
     // DebugPrint(_triangle);
@@ -286,12 +286,12 @@ namespace marine
     // ignmsg << "L:           " << L << std::endl;
 
     // Calculate the depth at the centroid
-    Point3 C = Geometry::TriangleCentroid(_triangle);
+    cgal::Point3 C = Geometry::TriangleCentroid(_triangle);
 
     // Calculate the depth    
     double depthC = _wavefieldSampler.ComputeDepth(C);
 
-    Vector3 normal = Geometry::Normal(_triangle);
+    cgal::Vector3 normal = Geometry::Normal(_triangle);
 
     // Calculate buoyancy
     BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L, normal, _center, _force);
@@ -299,17 +299,17 @@ namespace marine
 
   std::array<double, 3> Physics::ComputeHeightMap(
     const WavefieldSampler& _wavefieldSampler,
-    const Triangle& _triangle
+    const cgal::Triangle& _triangle
   )
   {
     // Heightmap for the triangle vertices
-    Direction3 direction(0, 0, -1);
+    cgal::Direction3 direction(0, 0, -1);
     std::array<double, 3> heightMap;
 
     // Calculate the height above the surface (-depth)
     for (int i=0; i<3; ++i)
     {
-      Point3 vertex = _triangle[i];
+      cgal::Point3 vertex = _triangle[i];
       heightMap[i] = -_wavefieldSampler.ComputeDepth(vertex);
     }
     return heightMap;
@@ -523,13 +523,13 @@ namespace marine
     }
 
     public: size_t index;                       // index to the original triangle  
-    public: Vector3 normal;                     // triangle normal
+    public: cgal::Vector3 normal;                     // triangle normal
     public: double area;                        // area
     public: double subArea;                     // submerged area
     public: std::array<double, 3> heightMap;    // heightmap[3] - unsorted      
-    public: Point3 vh;                          // high vertex
-    public: Point3 vm;                          // mid vertex
-    public: Point3 vl;                          // low vertex
+    public: cgal::Point3 vh;                          // high vertex
+    public: cgal::Point3 vm;                          // mid vertex
+    public: cgal::Point3 vl;                          // low vertex
     public: double hh;                          // high vertex height
     public: double hm;                          // mid vertex height
     public: double hl;                          // low vertex height
@@ -568,19 +568,19 @@ namespace marine
     {          
     }
 
-    public: int index;        // index to the original triangle  
-    public: Vector3 normal;   // triangle normal
-    public: Point3 centroid;  // triangle centroid = r
-    public: Vector3 xr;       // xr = centroid - CoM = (r - x)
-    public: double area;      // area
-    public: Vector3 vp;       // point velocity vp = v + omega x r, where r = centroid - CoM
-    public: Vector3 up;       // normalized point velocity. 
-    public: double cosTheta;  // cos[theta] = up . normal  
-    public: Vector3 vn;       // point velocity normal to surface vn = (vp . normal) normal
-    public: Vector3 vt;       // point velocity tangential to surface vt = vp - vn
-    public: Vector3 ut;       // normalized tangential point velocity. 
-    public: Vector3 uf;       // direction of tangential flow. uf = - vt / ||vt|| = - ut 
-    public: Vector3 vf;       // tangential flow vf = ||vp|| uf
+    public: int index;              // index to the original triangle  
+    public: cgal::Vector3 normal;   // triangle normal
+    public: cgal::Point3 centroid;  // triangle centroid = r
+    public: cgal::Vector3 xr;       // xr = centroid - CoM = (r - x)
+    public: double area;            // area
+    public: cgal::Vector3 vp;       // point velocity vp = v + omega x r, where r = centroid - CoM
+    public: cgal::Vector3 up;       // normalized point velocity. 
+    public: double cosTheta;        // cos[theta] = up . normal  
+    public: cgal::Vector3 vn;       // point velocity normal to surface vn = (vp . normal) normal
+    public: cgal::Vector3 vt;       // point velocity tangential to surface vt = vp - vn
+    public: cgal::Vector3 ut;       // normalized tangential point velocity. 
+    public: cgal::Vector3 uf;       // direction of tangential flow. uf = - vt / ||vt|| = - ut 
+    public: cgal::Vector3 vf;       // tangential flow vf = ||vp|| uf
   };
 
   void DebugPrint(const SubmergedTriangleProperties& props)
@@ -609,7 +609,7 @@ namespace marine
     public: std::shared_ptr<const HydrodynamicsParameters> params;
 
     /// \brief The mesh of the rigid body described by this model link.
-    public: std::shared_ptr<const Mesh> linkMesh;
+    public: std::shared_ptr<const cgal::Mesh> linkMesh;
 
     /// \brief The wavefield sampler for this rigid body (linkMesh).
     public: std::shared_ptr<const WavefieldSampler>  wavefieldSampler;
@@ -618,37 +618,37 @@ namespace marine
     public: ignition::math::Pose3d pose;
 
     /// \brief Position of the centre of mass (CGAL types).
-    public: Point3 position;
+    public: cgal::Point3 position;
 
     // \brief Linear velocity of the centre of mass.
-    public: Vector3 linVelocity;
+    public: cgal::Vector3 linVelocity;
 
     /// \brief Angular velocity of the centre of mass.
-    public: Vector3 angVelocity;
+    public: cgal::Vector3 angVelocity;
 
     /// \brief The calculated waterline length.
     public: double waterlineLength;
 
     /// \brief The depth at each vertex point.
-    public: Mesh::Property_map<Mesh::Vertex_index, double> depths;
-    public: std::vector<Triangle> submergedTriangles;
+    public: cgal::Mesh::Property_map<cgal::Mesh::Vertex_index, double> depths;
+    public: std::vector<cgal::Triangle> submergedTriangles;
     public: std::vector<TriangleProperties> triangleProperties;
     public: std::vector<SubmergedTriangleProperties> submergedTriangleProperties;
-    public: std::vector<Line> waterline;
+    public: std::vector<cgal::Line> waterline;
 
     public: double area;
 
     public: double submergedArea;
 
     // Keep buoyance force and center of pressure for debugging...
-    public: std::vector<Vector3> fBuoyancy;
-    public: std::vector<Point3>  cBuoyancy;
+    public: std::vector<cgal::Vector3> fBuoyancy;
+    public: std::vector<cgal::Point3>  cBuoyancy;
   
     /// \brief The computed force
-    public: Vector3 force;
+    public: cgal::Vector3 force;
 
     /// \brief The computed torque
-    public: Vector3 torque;
+    public: cgal::Vector3 torque;
   };
 
 ///////////////////////////////////////////////////////////////////////////////    
@@ -656,7 +656,7 @@ namespace marine
 
   Hydrodynamics::Hydrodynamics(
     std::shared_ptr<const HydrodynamicsParameters> _params,
-    std::shared_ptr<const Mesh> _linkMesh,
+    std::shared_ptr<const cgal::Mesh> _linkMesh,
     std::shared_ptr<const WavefieldSampler> _wavefieldSampler
   ) : data(new HydrodynamicsPrivate())
   {
@@ -672,8 +672,8 @@ namespace marine
   void Hydrodynamics::Update(
     std::shared_ptr<const WavefieldSampler> _wavefieldSampler,
     const ignition::math::Pose3d& _pose,
-    const Vector3& _linVelocity,
-    const Vector3& _angVelocity
+    const cgal::Vector3& _linVelocity,
+    const cgal::Vector3& _angVelocity
   )
   {
     // Set rigid body props.
@@ -704,22 +704,22 @@ namespace marine
       this->ComputeDampingForce();
   }
 
-  const Vector3& Hydrodynamics::Force() const
+  const cgal::Vector3& Hydrodynamics::Force() const
   {
     return this->data->force;
   }
 
-  const Vector3& Hydrodynamics::Torque() const
+  const cgal::Vector3& Hydrodynamics::Torque() const
   {
     return this->data->torque;
   }
 
-  const std::vector<Line>& Hydrodynamics::GetWaterline() const
+  const std::vector<cgal::Line>& Hydrodynamics::GetWaterline() const
   {
     return this->data->waterline;
   }
 
-  const std::vector<Triangle>& Hydrodynamics::GetSubmergedTriangles() const
+  const std::vector<cgal::Triangle>& Hydrodynamics::GetSubmergedTriangles() const
   {
     return this->data->submergedTriangles;
   }
@@ -736,8 +736,8 @@ namespace marine
 
     // @TODO_FRAGILE - prefer not to const_cast... assign prop map at creation.
     // Compute depths
-    auto& ncLinkMesh = const_cast<Mesh&>(*this->data->linkMesh);
-    auto pair = ncLinkMesh.add_property_map<Mesh::Vertex_index, double>("v:depth", 0);
+    auto& ncLinkMesh = const_cast<cgal::Mesh&>(*this->data->linkMesh);
+    auto pair = ncLinkMesh.add_property_map<cgal::Mesh::Vertex_index, double>("v:depth", 0);
     this->data->depths = pair.first;
     for (auto&& v : linkMesh.vertices())
     {
@@ -747,7 +747,7 @@ namespace marine
     // Get a list of the meshes exterior triangles
     for (auto&& face : linkMesh.faces())
     {
-      Triangle triangle = Geometry::MakeTriangle(linkMesh, face);
+      cgal::Triangle triangle = Geometry::MakeTriangle(linkMesh, face);
 
       TriangleProperties triProps;
       // triProps.index = i;
@@ -791,7 +791,7 @@ namespace marine
   }
 
   void Hydrodynamics::PopulateSubmergedTriangle(
-    const Triangle& _triangle,
+    const cgal::Triangle& _triangle,
     TriangleProperties& _triProps)
   {
     // Calculations
@@ -824,10 +824,10 @@ namespace marine
 
   void Hydrodynamics::SplitPartiallySubmergedTriangle1(TriangleProperties& _triProps)
   {
-    Vector3& n = _triProps.normal;
-    Point3& vh = _triProps.vh;
-    Point3& vm = _triProps.vm;
-    Point3& vl = _triProps.vl;
+    cgal::Vector3& n = _triProps.normal;
+    cgal::Point3& vh = _triProps.vh;
+    cgal::Point3& vm = _triProps.vm;
+    cgal::Point3& vl = _triProps.vl;
     double hh = _triProps.hh;
     double hm = _triProps.hm;
     double hl = _triProps.hl;
@@ -835,8 +835,8 @@ namespace marine
     double tm = -hl/(hm - hl);
     double th = -hl/(hh - hl);
     
-    Point3 vmi = vl + (vm - vl) * tm;
-    Point3 vhi = vl + (vh - vl) * th; 
+    cgal::Point3 vmi = vl + (vm - vl) * tm;
+    cgal::Point3 vhi = vl + (vh - vl) * th; 
 
     // @DEBUG_INFO
     // ignmsg << "index:         " << _triProps.index << std::endl;
@@ -844,11 +844,11 @@ namespace marine
     // ignmsg << "vhi:           " << vhi << std::endl;
             
     // Create the new submerged triangle
-    Triangle tri0(vl, vmi, vhi);
+    cgal::Triangle tri0(vl, vmi, vhi);
     if (CGAL::scalar_product(n, Geometry::Normal(tri0)) < 0.0)
     {
       // Change orientation
-      tri0 = Triangle(vl, vhi, vmi);
+      tri0 = cgal::Triangle(vl, vhi, vmi);
     }
     this->data->submergedTriangles.push_back(tri0);
 
@@ -864,16 +864,16 @@ namespace marine
     _triProps.subArea = subTriProps0.area;
 
     // Create a new line (for the water line)
-    Line line(vmi, vhi);
+    cgal::Line line(vmi, vhi);
     this->data->waterline.push_back(line);
   }
 
   void Hydrodynamics::SplitPartiallySubmergedTriangle2(TriangleProperties& _triProps)
   {
-    Vector3& n = _triProps.normal;
-    Point3& vh = _triProps.vh;
-    Point3& vm = _triProps.vm;
-    Point3& vl = _triProps.vl;
+    cgal::Vector3& n = _triProps.normal;
+    cgal::Point3& vh = _triProps.vh;
+    cgal::Point3& vm = _triProps.vm;
+    cgal::Point3& vl = _triProps.vl;
     double hh = _triProps.hh;
     double hm = _triProps.hm;
     double hl = _triProps.hl;
@@ -881,20 +881,20 @@ namespace marine
     double tm = -hm/(hh - hm);
     double tl = -hl/(hh - hl);
     
-    Point3 vmi =  vm + (vh - vm) * tm;
-    Point3 vli =  vl + (vh - vl) * tl;
+    cgal::Point3 vmi =  vm + (vh - vm) * tm;
+    cgal::Point3 vli =  vl + (vh - vl) * tl;
           
     // Create the new submerged triangles
-    Triangle tri0(vm, vmi, vl);
-    Triangle tri1(vmi, vli, vl);
+    cgal::Triangle tri0(vm, vmi, vl);
+    cgal::Triangle tri1(vmi, vli, vl);
 
     if (CGAL::scalar_product(n, Geometry::Normal(tri0)) < 0.0)
     {
-      tri0 = Triangle(vmi, vm, vl);
+      tri0 = cgal::Triangle(vmi, vm, vl);
     }
     if (CGAL::scalar_product(n, Geometry::Normal(tri1)) < 0.0)
     {
-      tri1 = Triangle(vli, vmi, vl);
+      tri1 = cgal::Triangle(vli, vmi, vl);
     }
     
     this->data->submergedTriangles.push_back(tri0);
@@ -920,23 +920,23 @@ namespace marine
     _triProps.subArea = subTriProps0.area + subTriProps1.area;
 
     // Create a new line (for the water line)
-    Line line(vmi, vli);
+    cgal::Line line(vmi, vli);
     this->data->waterline.push_back(line);
   }
 
   void Hydrodynamics::AddFullySubmergedTriangle(TriangleProperties& _triProps)
   {
     // Add the full triangle
-    Vector3& n = _triProps.normal;
-    Point3& vh = _triProps.vh;
-    Point3& vm = _triProps.vm;
-    Point3& vl = _triProps.vl;
+    cgal::Vector3& n = _triProps.normal;
+    cgal::Point3& vh = _triProps.vh;
+    cgal::Point3& vm = _triProps.vm;
+    cgal::Point3& vl = _triProps.vl;
     
     // Create the new submerged triangle
-    Triangle tri(vh, vm, vl);
+    cgal::Triangle tri(vh, vm, vl);
     if (CGAL::scalar_product(n, Geometry::Normal(tri)) < 0.0)
     {
-      tri = Triangle(vm, vh, vl);
+      tri = cgal::Triangle(vm, vh, vl);
     }
     this->data->submergedTriangles.push_back(tri);
 
@@ -972,7 +972,7 @@ namespace marine
   void Hydrodynamics::ComputeWaterlineLength()
   {
     // Calculate the direction of the x-axis
-    Vector3 xaxis = ToVector3(this->data->pose.Rot().RotateVector(
+    cgal::Vector3 xaxis = ToVector3(this->data->pose.Rot().RotateVector(
       ignition::math::Vector3d(1, 0, 0)));
 
     // Project the waterline onto the x-axis
@@ -1047,8 +1047,8 @@ namespace marine
 
   void Hydrodynamics::ComputeBuoyancyForce()
   {
-    Vector3 sumForce  = CGAL::NULL_VECTOR;
-    Vector3 sumTorque = CGAL::NULL_VECTOR;
+    cgal::Vector3 sumForce  = CGAL::NULL_VECTOR;
+    cgal::Vector3 sumTorque = CGAL::NULL_VECTOR;
 
     this->data->fBuoyancy.clear();
     this->data->cBuoyancy.clear();
@@ -1059,16 +1059,16 @@ namespace marine
     for (auto&& subTri : this->data->submergedTriangles)
     {
       // Force and center of pressure.
-      Point3 center = CGAL::ORIGIN;
-      Vector3 force = CGAL::NULL_VECTOR;
+      cgal::Point3 center = CGAL::ORIGIN;
+      cgal::Vector3 force = CGAL::NULL_VECTOR;
       Physics::BuoyancyForceAtCenterOfPressure(
         wavefieldSampler, subTri, center, force);
       this->data->fBuoyancy.push_back(force);
       this->data->cBuoyancy.push_back(center);
 
       // Torque    
-      Vector3 xr = center - position;
-      Vector3 torque = CGAL::cross_product(xr, force);
+      cgal::Vector3 xr = center - position;
+      cgal::Vector3 torque = CGAL::cross_product(xr, force);
       sumForce += force;
       sumTorque += torque;    
     }
@@ -1097,12 +1097,12 @@ namespace marine
     auto& v = this->data->linVelocity;
     double linSpeed = std::sqrt(v.squared_length());
     double cL = - rs * (cDampL1 + cDampL2 * linSpeed);
-    Vector3 force = v * cL;
+    cgal::Vector3 force = v * cL;
  
     auto& omega = this->data->angVelocity;
     double angSpeed = std::sqrt(omega.squared_length());
     double cR = - rs * (cDampR1 + cDampR2 * angSpeed);    
-    Vector3 torque = omega * cR;
+    cgal::Vector3 torque = omega * cR;
 
     this->data->force  += force;
     this->data->torque += torque;
@@ -1128,18 +1128,18 @@ namespace marine
     double Rn = this->ComputeReynoldsNumber();
     double cF = Physics::ViscousDragCoefficient(Rn);
  
-    Vector3 sumForce  = CGAL::NULL_VECTOR;
-    Vector3 sumTorque = CGAL::NULL_VECTOR;
+    cgal::Vector3 sumForce  = CGAL::NULL_VECTOR;
+    cgal::Vector3 sumTorque = CGAL::NULL_VECTOR;
     for (auto&& subTriProps : this->data->submergedTriangleProperties)
     {
       // Force
       double fDrag = 0.5 * rho * cF * subTriProps.area 
         * std::sqrt(subTriProps.vf.squared_length());
-      Vector3 force = subTriProps.vf * fDrag;  
+      cgal::Vector3 force = subTriProps.vf * fDrag;  
       sumForce += force;
 
       // Torque;
-      Vector3 torque = CGAL::cross_product(subTriProps.xr, force);
+      cgal::Vector3 torque = CGAL::cross_product(subTriProps.xr, force);
       sumTorque += torque;
     }
 
@@ -1164,8 +1164,8 @@ namespace marine
     // Reference speed
     double vRDrag  = params.VRDrag();
 
-    Vector3 sumForce  = CGAL::NULL_VECTOR;
-    Vector3 sumTorque = CGAL::NULL_VECTOR;
+    cgal::Vector3 sumForce  = CGAL::NULL_VECTOR;
+    cgal::Vector3 sumTorque = CGAL::NULL_VECTOR;
     for (auto&& subTriProps : this->data->submergedTriangleProperties)
     {
       // General
@@ -1183,11 +1183,11 @@ namespace marine
       {
         drag =  (cSDrag1 * v + cSDrag2 * v * v) * S * std::pow(-cosTheta, fSDrag);
       }
-      Vector3 force = subTriProps.normal * drag;
+      cgal::Vector3 force = subTriProps.normal * drag;
       sumForce += force;
 
       // Torque;
-      Vector3 torque = CGAL::cross_product(subTriProps.xr, force);
+      cgal::Vector3 torque = CGAL::cross_product(subTriProps.xr, force);
       sumTorque += torque;
     }
 

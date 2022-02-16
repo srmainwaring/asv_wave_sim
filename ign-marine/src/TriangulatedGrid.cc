@@ -46,30 +46,30 @@ namespace marine
     void CreateMesh();
     void CreateTriangulation();    
 
-    bool Locate(const Point3& query, int64_t& faceIndex) const;
-    bool Height(const Point3& query, double& height) const;
-    bool Height(const std::vector<Point3>& queries, std::vector<double>& heights) const;
+    bool Locate(const cgal::Point3& query, int64_t& faceIndex) const;
+    bool Height(const cgal::Point3& query, double& height) const;
+    bool Height(const std::vector<cgal::Point3>& queries, std::vector<double>& heights) const;
     bool Interpolate(TriangulatedGrid& patch) const;
 
     const Point3Range& Points() const;
     const Index3Range& Indices() const;
-    const Point3& Origin() const;
-    void ApplyPose(const ignition::math::Pose3d& pose);
+    const cgal::Point3& Origin() const;
+    void ApplyPose(const math::Pose3d& pose);
 
     bool IsValid(bool verbose=false) const;
     void DebugPrintMesh() const;
     void DebugPrintTriangulation() const;
-    void UpdatePoints(const std::vector<Point3>& points);
-    void UpdatePoints(const std::vector<ignition::math::Vector3d>& from);
+    void UpdatePoints(const std::vector<cgal::Point3>& points);
+    void UpdatePoints(const std::vector<math::Vector3d>& from);
 
     // void UpdatePoints(const std::vector<Ogre::Vector3>& from);
-    void UpdatePoints(const Mesh& from);
+    void UpdatePoints(const cgal::Mesh& from);
 
     // Type definitions - use a consistent Kernel
     // typedef Kernel                                                      Kernel;
     // typedef CGAL::Simple_cartesian<double>                              Kernel;
     // typedef CGAL::Exact_predicates_inexact_constructions_kernel         Kernel;
-    typedef CGAL::Projection_traits_xy_3<Kernel>                        Gt;
+    typedef CGAL::Projection_traits_xy_3<cgal::Kernel>                  Gt;
     typedef CGAL::Triangulation_vertex_base_with_info_2<int64_t, Gt>    Vbb;
     typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>            Vb;
     typedef CGAL::Constrained_triangulation_face_base_2<Gt>             Fbb;
@@ -87,9 +87,9 @@ namespace marine
     double length_;
 
     // Mesh
-    Point3              origin_;
-    std::vector<Point3> points0_;
-    std::vector<Point3> points_;
+    cgal::Point3              origin_;
+    std::vector<cgal::Point3> points0_;
+    std::vector<cgal::Point3> points_;
     std::vector<Index3> indices_;
     std::vector<Index3> infinite_indices_;
 
@@ -115,7 +115,7 @@ namespace marine
       for (int64_t ix=0; ix<=num_segments_; ++ix) {
         // Vertex position
         double px = ix * dl + lm;
-        Point3 point(px, py, 0.0);
+        cgal::Point3 point(px, py, 0.0);
         points_.push_back(point);
       }
     }
@@ -163,7 +163,7 @@ namespace marine
     // CGAL::Timer timer;
 
     // Point with info
-    // std::vector<std::pair<Point3, int64_t>> pointsWithInfo;
+    // std::vector<std::pair<cgal::Point3, int64_t>> pointsWithInfo;
     // for (int64_t i=0; i<points_.size(); ++i) {
     //   pointsWithInfo.push_back(std::make_pair(points_[i], i));
     // }
@@ -232,7 +232,7 @@ namespace marine
       auto& p0 = points_[f->at(0)];
       auto& p1 = points_[f->at(1)];
       auto& p2 = points_[f->at(2)];
-      Point3 p(
+      cgal::Point3 p(
         (p0.x() + p1.x() + p2.x())/3.0,
         (p0.y() + p1.y() + p2.y())/3.0,
         0.0
@@ -249,7 +249,7 @@ namespace marine
     // std::cout << "face mapping: (" << timer.time() << " s)" << std::endl;    
   }
 
-  bool TriangulatedGrid::Private::Locate(const Point3& query, int64_t& faceIndex) const {
+  bool TriangulatedGrid::Private::Locate(const cgal::Point3& query, int64_t& faceIndex) const {
     auto fh = tri_.locate(query);
     if (fh != nullptr) {
       faceIndex = fh->info();
@@ -258,7 +258,7 @@ namespace marine
     return false;
   }
 
-  bool TriangulatedGrid::Private::Height(const Point3& query, double& height) const {
+  bool TriangulatedGrid::Private::Height(const cgal::Point3& query, double& height) const {
     bool found = false;
     height = 0.0;
     auto fh = tri_.locate(query);
@@ -269,9 +269,9 @@ namespace marine
       const auto& p2 = fh->vertex(2)->point();
 
       // Height query
-      const Direction3 direction(0, 0, 1);      
-      Point3 intersection(query);
-      Triangle triangle(p0, p1, p2);
+      const cgal::Direction3 direction(0, 0, 1);      
+      cgal::Point3 intersection(query);
+      cgal::Triangle triangle(p0, p1, p2);
 
       found = Geometry::LineIntersectsTriangle(
           query, direction, triangle, intersection);
@@ -283,13 +283,13 @@ namespace marine
     return found;
   }
 
-  bool TriangulatedGrid::Private::Height(const std::vector<Point3>& queries, std::vector<double>& heights) const {
+  bool TriangulatedGrid::Private::Height(const std::vector<cgal::Point3>& queries, std::vector<double>& heights) const {
     bool foundAll = true;
     Face_handle fh = nullptr;
     for (int64_t i=0; i<heights.size(); ++i)
     {
       double height_i = 0.0;
-      const Point3& query = queries[i];
+      const cgal::Point3& query = queries[i];
       fh = tri_.locate(query, fh);
       bool found = fh != nullptr;
       if (found) {
@@ -299,9 +299,9 @@ namespace marine
         const auto& p2 = fh->vertex(2)->point();
 
         // Height query
-        const Direction3 direction(0, 0, 1);      
-        Point3 intersection(query);
-        Triangle triangle(p0, p1, p2);
+        const cgal::Direction3 direction(0, 0, 1);      
+        cgal::Point3 intersection(query);
+        cgal::Triangle triangle(p0, p1, p2);
 
         found = Geometry::LineIntersectsTriangle(
             query, direction, triangle, intersection);
@@ -322,7 +322,7 @@ namespace marine
     Face_handle fh = nullptr;
     for (auto it = patch.impl_->points_.begin(); it != patch.impl_->points_.end(); ++it) {
       double height = 0.0;        
-      const Point3& query = *it;
+      const cgal::Point3& query = *it;
       fh = tri_.locate(query, fh);
       bool found = fh != nullptr;
       if (found) {
@@ -332,9 +332,9 @@ namespace marine
         const auto& p2 = fh->vertex(2)->point();
 
         // Height query
-        const Direction3 direction(0, 0, 1);      
-        Point3 intersection(query);
-        Triangle triangle(p0, p1, p2);
+        const cgal::Direction3 direction(0, 0, 1);      
+        cgal::Point3 intersection(query);
+        cgal::Triangle triangle(p0, p1, p2);
 
         found = Geometry::LineIntersectsTriangle(
             query, direction, triangle, intersection);
@@ -349,7 +349,7 @@ namespace marine
         }
       }
       // @NOTE this assumes the patch initially has height = 0.0;
-      *it = Point3(query.x(), query.y(), height);
+      *it = cgal::Point3(query.x(), query.y(), height);
 
       foundAll &= found;
     }
@@ -364,14 +364,14 @@ namespace marine
     return indices_;
   }
 
-  const Point3& TriangulatedGrid::Private::Origin() const {
+  const cgal::Point3& TriangulatedGrid::Private::Origin() const {
     return origin_;
   }
 
-  void TriangulatedGrid::Private::ApplyPose(const ignition::math::Pose3d& pose) {
+  void TriangulatedGrid::Private::ApplyPose(const math::Pose3d& pose) {
     // Origin - slide the patch in the xy - plane only
-    Point3 o = CGAL::ORIGIN;
-    origin_ = Point3(o.x() + pose.Pos().X(), o.y() + pose.Pos().Y(), o.z());
+    cgal::Point3 o = CGAL::ORIGIN;
+    origin_ = cgal::Point3(o.x() + pose.Pos().X(), o.y() + pose.Pos().Y(), o.z());
 
     // Mesh points
     for (
@@ -381,7 +381,7 @@ namespace marine
     {
       const auto& p0 = *it.first;
       auto& p = *it.second;
-      p = Point3(p0.x() + pose.Pos().X(), p0.y() + pose.Pos().Y(), p0.z());
+      p = cgal::Point3(p0.x() + pose.Pos().X(), p0.y() + pose.Pos().Y(), p0.z());
     }
 
     // Triangulation points
@@ -479,7 +479,7 @@ namespace marine
     }
   }
 
-  void TriangulatedGrid::Private::UpdatePoints(const std::vector<Point3>& from) {
+  void TriangulatedGrid::Private::UpdatePoints(const std::vector<cgal::Point3>& from) {
     // Mesh points
     points_ = from;
 
@@ -490,12 +490,12 @@ namespace marine
     }
   }
 
-  void TriangulatedGrid::Private::UpdatePoints(const std::vector<ignition::math::Vector3d>& from) {
+  void TriangulatedGrid::Private::UpdatePoints(const std::vector<math::Vector3d>& from) {
     // Mesh points
     auto it_to = points_.begin();
     auto it_from = from.begin();
     for ( ; it_to != points_.end() && it_from != from.end(); ++it_to, ++it_from) {
-      *it_to = Point3(it_from->X(), it_from->Y(), it_from->Z());
+      *it_to = cgal::Point3(it_from->X(), it_from->Y(), it_from->Z());
     }
 
     // Triangulation points
@@ -511,7 +511,7 @@ namespace marine
     auto it_to = points_.begin();
     auto it_from = from.begin();
     for ( ; it_to != points_.end() && it_from != from.end(); ++it_to, ++it_from) {
-      *it_to = Point3(it_from->x, it_from->y, it_from->z);
+      *it_to = cgal::Point3(it_from->x, it_from->y, it_from->z);
     }
 
     // Triangulation points
@@ -522,13 +522,13 @@ namespace marine
   }
 #endif
 
-  void TriangulatedGrid::Private::UpdatePoints(const Mesh& from) {
+  void TriangulatedGrid::Private::UpdatePoints(const cgal::Mesh& from) {
     // Mesh points
     auto it_to = points_.begin();
     auto it_from = std::begin(from.vertices());
     for ( ; it_to != points_.end() && it_from != std::end(from.vertices()); ++it_to, ++it_from) {
-      const Point3& p = from.point(*it_from);
-      *it_to = Point3(p.x(), p.y(), p.z());
+      const cgal::Point3& p = from.point(*it_from);
+      *it_to = cgal::Point3(p.x(), p.y(), p.z());
     }
 
     // Triangulation points
@@ -564,15 +564,15 @@ namespace marine
     return instance;
   }
 
-  bool TriangulatedGrid::Locate(const Point3& query, int64_t& faceIndex) const {
+  bool TriangulatedGrid::Locate(const cgal::Point3& query, int64_t& faceIndex) const {
     return impl_->Locate(query, faceIndex);
   }
 
-  bool TriangulatedGrid::Height(const Point3& query, double& height) const {
+  bool TriangulatedGrid::Height(const cgal::Point3& query, double& height) const {
     return impl_->Height(query, height);
   }
 
-  bool TriangulatedGrid::Height(const std::vector<Point3>& queries, std::vector<double>& heights) const {
+  bool TriangulatedGrid::Height(const std::vector<cgal::Point3>& queries, std::vector<double>& heights) const {
     return impl_->Height(queries, heights);
   }
 
@@ -588,11 +588,11 @@ namespace marine
     return impl_->Indices();
   }
 
-  const Point3& TriangulatedGrid::Origin() const {
+  const cgal::Point3& TriangulatedGrid::Origin() const {
     return impl_->Origin();    
   }
 
-  void TriangulatedGrid::ApplyPose(const ignition::math::Pose3d& pose) {
+  void TriangulatedGrid::ApplyPose(const math::Pose3d& pose) {
     impl_->ApplyPose(pose);    
   }
 
@@ -608,11 +608,11 @@ namespace marine
     impl_->DebugPrintTriangulation();
   }
 
-  void TriangulatedGrid::UpdatePoints(const std::vector<Point3>& from) {
+  void TriangulatedGrid::UpdatePoints(const std::vector<cgal::Point3>& from) {
     impl_->UpdatePoints(from);
   }
 
-  void TriangulatedGrid::UpdatePoints(const std::vector<ignition::math::Vector3d>& from) {
+  void TriangulatedGrid::UpdatePoints(const std::vector<math::Vector3d>& from) {
     impl_->UpdatePoints(from);
   }
 
@@ -622,7 +622,7 @@ namespace marine
   }
 #endif
 
-  void TriangulatedGrid::UpdatePoints(const Mesh& from) {
+  void TriangulatedGrid::UpdatePoints(const cgal::Mesh& from) {
     impl_->UpdatePoints(from);
   }
 

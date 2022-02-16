@@ -48,6 +48,8 @@
 #include <memory>
 #include <string>
 
+using namespace ignition;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Utilities
 
@@ -61,27 +63,27 @@ namespace {
   typedef Mesh::Face_index Face_descriptor;
   typedef Mesh::Halfedge_index Halfedge_descriptor;  
 
-  std::shared_ptr<ignition::marine::Mesh> CreateSphere(
+  std::shared_ptr<cgal::Mesh> CreateSphere(
     const std::string& meshName,
     double radius
   )
   {
-    ignition::common::MeshManager::Instance()->CreateSphere(
+    common::MeshManager::Instance()->CreateSphere(
       meshName,
       radius,                   // radius
       32,                       // rings
       32);                      // segments
-    IGN_ASSERT(ignition::common::MeshManager::Instance()->HasMesh(meshName),
+    IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
       "Failed to create Mesh for Cylinder");
 
-    const ignition::common::Mesh* source =
-        ignition::common::MeshManager::Instance()->MeshByName(meshName);
+    const common::Mesh* source =
+        common::MeshManager::Instance()->MeshByName(meshName);
     IGN_ASSERT(source != nullptr, "Invalid Sphere Mesh");
     // std::cout << "Mesh:       " << source->GetName() << std::endl;
     // std::cout << "Vertex:     " << source->GetVertexCount() << std::endl;
 
-    std::shared_ptr<ignition::marine::Mesh> target = std::make_shared<ignition::marine::Mesh>();
-    ignition::marine::MeshTools::MakeSurfaceMesh(*source, *target);
+    std::shared_ptr<cgal::Mesh> target = std::make_shared<cgal::Mesh>();
+    marine::MeshTools::MakeSurfaceMesh(*source, *target);
     return target;
   }
 
@@ -285,7 +287,7 @@ TEST(CGAL, SurfaceMeshGridCell) {
     for(auto&& face : mesh.faces()) {
       // std::cout << face << std::endl;
 
-      Triangle tri = ignition::marine::Geometry::MakeTriangle(mesh, face);
+      Triangle tri = marine::Geometry::MakeTriangle(mesh, face);
       // std::cout << tri << std::endl;
     }
   }
@@ -343,10 +345,10 @@ TEST(CGAL, SurfaceMeshGrid) {
   typedef CGAL::Timer Timer;
 
   // Create Grid
-  ignition::marine::Grid grid({ 100, 100 }, { 4, 4 });
+  marine::Grid grid({ 100, 100 }, { 4, 4 });
 
   // Convert to SurfaceMesh
-  const Mesh& mesh = *grid.GetMesh();
+  const cgal::Mesh& mesh = *grid.GetMesh();
 
   // Properties
   // { 
@@ -361,7 +363,7 @@ TEST(CGAL, SurfaceMeshGrid) {
   //   for(auto&& face : mesh.faces()) {
   //     std::cout << face << std::endl;
 
-  //     Triangle tri = ignition::marine::Geometry::MakeTriangle(mesh, face);
+  //     Triangle tri = marine::Geometry::MakeTriangle(mesh, face);
   //     std::cout << tri << std::endl;
   //   }
   // }
@@ -371,7 +373,7 @@ TEST(CGAL, SurfaceMeshGrid) {
     // std::cout << "AABB Tree " << std::endl;
 
     // Create a sphere
-    std::shared_ptr<ignition::marine::Mesh> sphere = CreateSphere(
+    std::shared_ptr<cgal::Mesh> sphere = CreateSphere(
       "TestSurfaceMeshGridCellSphere", 5.25);
 
     Timer t;
@@ -426,10 +428,10 @@ TEST(CGAL, SurfaceMeshModifyGrid) {
   typedef CGAL::Timer Timer;
 
   // Create Grid
-  ignition::marine::Grid grid({ 100, 100 }, { 4, 4 });
+  marine::Grid grid({ 100, 100 }, { 4, 4 });
 
   // Convert to SurfaceMesh
-  Mesh& mesh = const_cast<Mesh&>(*grid.GetMesh());
+  cgal::Mesh& mesh = const_cast<cgal::Mesh&>(*grid.GetMesh());
 
   // Properties
   { 
@@ -445,7 +447,7 @@ TEST(CGAL, SurfaceMeshModifyGrid) {
     for(auto&& face : mesh.faces()) {
       // std::cout << face << std::endl;
 
-      Triangle tri = ignition::marine::Geometry::MakeTriangle(mesh, face);
+      Triangle tri = marine::Geometry::MakeTriangle(mesh, face);
       // std::cout << tri << std::endl;
     }
   }
@@ -475,14 +477,14 @@ TEST(CGAL, SurfaceMeshWavefield) {
   typedef CGAL::Timer Timer;
 
   // Wavefield Parameters
-  std::shared_ptr<ignition::marine::WaveParameters> params(new ignition::marine::WaveParameters());
+  std::shared_ptr<marine::WaveParameters> params(new marine::WaveParameters());
   params->SetNumber(1);
   params->SetAmplitude(3.0);
   params->SetPeriod(10.0);
   params->SetPhase(0.0);
 
   // Wavefield
-  ignition::marine::WavefieldTrochoid wavefield("TestSurfaceMeshWavefield"); 
+  marine::WavefieldTrochoid wavefield("TestSurfaceMeshWavefield"); 
   wavefield.SetParameters(params);
 
   // Evolve to t=10 with 1000 updates
@@ -499,7 +501,7 @@ TEST(CGAL, SurfaceMeshWavefield) {
   // { 
   //   std::cout << "Faces" << std::endl;
   //   for(auto&& face : mesh->faces()) {
-  //     Triangle tri = ignition::marine::Geometry::MakeTriangle(*mesh, face);
+  //     Triangle tri = marine::Geometry::MakeTriangle(*mesh, face);
   //     std::cout << face << ": " << tri << std::endl;
   //   }
   // }
@@ -1034,7 +1036,7 @@ TEST(CGAL, CreateTriangulationN) {
 TEST(CGAL, CreateTriangulationHierarchyN) {
   int N = 4;
   double L = 4.0;
-  ignition::marine::TriangulatedGrid tri_grid(N, L);
+  marine::TriangulatedGrid tri_grid(N, L);
   tri_grid.CreateMesh();
   tri_grid.CreateTriangulation();
 

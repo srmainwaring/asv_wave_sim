@@ -76,10 +76,10 @@ namespace marine
     /// \param[in] _A     The point of application of force A.
     /// \param[in] _B     The point of application of force B.
     /// \return           The point at which the resultant force is applied with no moment.
-    public: static Point3 CenterOfForce(
+    public: static cgal::Point3 CenterOfForce(
       double _fA, double _fB,
-      const Point3& _A,
-      const Point3& _B
+      const cgal::Point3& _A,
+      const cgal::Point3& _B
     );
 
     /// \brief Compute the deep water dispersion.
@@ -111,11 +111,11 @@ namespace marine
     /// \param[in] _M   A base vertex with M.z < H.z.
     /// \param[in] _B   The midpoint of the base B.z = M.z.
     /// \return         The center of pressure.
-    public: static Point3 CenterOfPressureApexUp(
+    public: static cgal::Point3 CenterOfPressureApexUp(
       double _z0,
-      const Point3& _H,
-      const Point3& _M,
-      const Point3& _B
+      const cgal::Point3& _H,
+      const cgal::Point3& _M,
+      const cgal::Point3& _B
     );
 
     /// \brief Compute the centre of pressure for a triangle with horizontal base and apex down. 
@@ -125,11 +125,11 @@ namespace marine
     /// \param[in] _M   A base vertex with L.z < M.z.
     /// \param[in] _B   The midpoint of the base B.z = M.z.
     /// \return         The center of pressure.
-    public: static Point3 CenterOfPressureApexDn(
+    public: static cgal::Point3 CenterOfPressureApexDn(
       double _z0,
-      const Point3& _L,
-      const Point3& _M,
-      const Point3& _B
+      const cgal::Point3& _L,
+      const cgal::Point3& _M,
+      const cgal::Point3& _B
     );
 
     /// \brief Calculate the buoyancy force for a submerged triangle (H, M, L).
@@ -145,13 +145,13 @@ namespace marine
     /// \param[out] _force  The resultant force.
     public: static void BuoyancyForceAtCenterOfPressure(
       double _depthC,
-      const Point3& _C,
-      const Point3& _H,
-      const Point3& _M,
-      const Point3& _L,
-      const Vector3& _normal,
-      Point3& _center, 
-      Vector3& _force
+      const cgal::Point3& _C,
+      const cgal::Point3& _H,
+      const cgal::Point3& _M,
+      const cgal::Point3& _L,
+      const cgal::Vector3& _normal,
+      cgal::Point3& _center, 
+      cgal::Vector3& _force
     );
 
     /// \brief Calculate the buoyancy force at the centroid for a submerged triangle.
@@ -162,9 +162,9 @@ namespace marine
     /// \param[out] _force            The buoyancy force applied at the center.
     public: static void BuoyancyForceAtCentroid(
       const WavefieldSampler& _wavefieldSampler,
-      const Triangle& _triangle,
-      Point3& _center,
-      Vector3& _force
+      const cgal::Triangle& _triangle,
+      cgal::Point3& _center,
+      cgal::Vector3& _force
     );
 
     /// \brief Calculate the buoyancy force and center of pressure for a submerged triangle.
@@ -175,9 +175,9 @@ namespace marine
     /// \param[out] _force            The buoyancy force applied at the center.
     public: static void BuoyancyForceAtCenterOfPressure(
       const WavefieldSampler& _wavefieldSampler,
-      const Triangle& _triangle,
-      Point3& _center,
-      Vector3& _force
+      const cgal::Triangle& _triangle,
+      cgal::Point3& _center,
+      cgal::Vector3& _force
     );
 
     /// \brief Calculate the height map for each triangle vertex given a wavefield.
@@ -187,7 +187,7 @@ namespace marine
     /// \return                       An array of three doubles, the height for each vertex.
     public: static std::array<double, 3> ComputeHeightMap(
       const WavefieldSampler& _wavefieldSampler,
-      const Triangle& _triangle
+      const cgal::Triangle& _triangle
     );
 
   };
@@ -253,7 +253,7 @@ namespace marine
     /// \brief Set the parameters from a message.
     ///
     /// \param[in] _msg   The message containing the hydrodynamics parameters.
-    public: void SetFromMsg(const ignition::msgs::Param_V& _msg);
+    public: void SetFromMsg(const msgs::Param_V& _msg);
 
     /// \brief Set parameters from a SDF tree.
     ///
@@ -291,7 +291,7 @@ namespace marine
     /// \param[in] _wavefieldSampler  An object for sampling the wave field.
     public: Hydrodynamics(
       std::shared_ptr<const HydrodynamicsParameters> _params,
-      std::shared_ptr<const Mesh> _linkMesh,
+      std::shared_ptr<const cgal::Mesh> _linkMesh,
       std::shared_ptr<const WavefieldSampler> _wavefieldSampler
     );
 
@@ -306,30 +306,30 @@ namespace marine
     /// \param[in] _angVelocity       The angular velocity of the center of mass.
     public: void Update(
       std::shared_ptr<const WavefieldSampler> _wavefieldSampler,
-      const ignition::math::Pose3d& _pose,
-      const Vector3& _linVelocity,
-      const Vector3& _angVelocity
+      const math::Pose3d& _pose,
+      const cgal::Vector3& _linVelocity,
+      const cgal::Vector3& _angVelocity
     );
 
     /// \brief Compute the hydrostatic and hydrodynamic forces.
     ///
     /// \return The force in the world frame.
-    public: const Vector3& Force() const;
+    public: const cgal::Vector3& Force() const;
 
     /// \brief Compute the hydrostatic and hydrodynamic torques.
     ///
     /// \return The torque in the world frame.
-    public: const Vector3& Torque() const;
+    public: const cgal::Vector3& Torque() const;
 
     /// \brief The current waterline.
     ///
     /// \return A vector containing Line elements that comnprise the waterline.
-    public: const std::vector<Line>& GetWaterline() const;
+    public: const std::vector<cgal::Line>& GetWaterline() const;
   
     /// \brief The current list of submerged triangles.
     ///
     /// \return A vector containing the trianges that are under water.
-    public: const std::vector<Triangle>& GetSubmergedTriangles() const;
+    public: const std::vector<cgal::Triangle>& GetSubmergedTriangles() const;
 
     /// \internal
     /// \brief Update the list of submerged triangles.
@@ -341,7 +341,7 @@ namespace marine
     /// \param[in] _triangle  The triangle to test whether it is submerged and split if needed.
     /// \param[out] _triProps The computed properties for the input triangle.
     private: void PopulateSubmergedTriangle(
-      const Triangle& _triangle,
+      const cgal::Triangle& _triangle,
       TriangleProperties& _triProps);
 
     /// internal

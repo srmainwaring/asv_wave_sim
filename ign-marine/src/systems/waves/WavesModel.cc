@@ -127,8 +127,8 @@ void WavesModel::Configure(const Entity &_entity,
 
 //////////////////////////////////////////////////
 void WavesModel::PreUpdate(
-  const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &_ecm)
+  const UpdateInfo &_info,
+  EntityComponentManager &_ecm)
 {
   IGN_PROFILE("WavesModel::PreUpdate");
 

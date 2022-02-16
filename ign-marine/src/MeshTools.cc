@@ -42,7 +42,7 @@ namespace marine
   ///   the size of _indices will be Mesh::GetIndexCount()
   ///
   void MeshTools::FillArrays(
-    const ignition::common::Mesh& _source,
+    const common::Mesh& _source,
     std::vector<float>& _vertices,
     std::vector<int>& _indices
   )
@@ -76,7 +76,7 @@ namespace marine
       delete[] indices;
   }
 
-  void MeshTools::MakeSurfaceMesh(const ignition::common::Mesh& _source, Mesh& _target)
+  void MeshTools::MakeSurfaceMesh(const common::Mesh& _source, cgal::Mesh& _target)
   {
     std::vector<float> vertices;
     std::vector<int>   indices;
@@ -89,7 +89,7 @@ namespace marine
       auto&& v0 = vertices[i++];
       auto&& v1 = vertices[i++];
       auto&& v2 = vertices[i++];
-      Point3 p(v0, v1, v2);
+      cgal::Point3 p(v0, v1, v2);
       auto&& v = _target.add_vertex(p);
       
       // @DEBUG_INFO

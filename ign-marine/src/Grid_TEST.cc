@@ -76,8 +76,8 @@ TEST(Grid, Constructor)
   // SetPoint
   // for (size_t i=0; i<grid.GetVertexCount(); ++i)
   // {
-  //   Point3 p = grid.GetPoint(i);
-  //   p += Vector3(0, 0, 10); 
+  //   cgal::Point3 p = grid.GetPoint(i);
+  //   p += cgal::Vector3(0, 0, 10); 
   //   grid.SetPoint(i, p);
   // }
   // for(auto&& vertex : mesh->vertices())
@@ -301,13 +301,13 @@ TEST(Grid, FindIntersectionTriangle)
     EXPECT_EQ(index[2], 0);
 
     // Find intersection
-    Point3 origin = Point3(x, y, 10);
-    Direction3 direction = Direction3(0, 0, 1);
-    Point3 point = CGAL::ORIGIN;
+    cgal::Point3 origin = cgal::Point3(x, y, 10);
+    cgal::Direction3 direction = cgal::Direction3(0, 0, 1);
+    cgal::Point3 point = CGAL::ORIGIN;
     isFound = GridTools::FindIntersectionTriangle(
       grid, origin, direction, index, point);
     EXPECT_EQ(isFound, true);
-    EXPECT_EQ(point, Point3(x, y, 0));
+    EXPECT_EQ(point, cgal::Point3(x, y, 0));
   }
 
   { // cell(0, 0)
@@ -323,13 +323,13 @@ TEST(Grid, FindIntersectionTriangle)
     EXPECT_EQ(index[2], 1);
 
     // Find intersection
-    Point3 origin = Point3(x, y, 10);
-    Direction3 direction = Direction3(0, 0, 1);
-    Point3 point = CGAL::ORIGIN;
+    cgal::Point3 origin = cgal::Point3(x, y, 10);
+    cgal::Direction3 direction = cgal::Direction3(0, 0, 1);
+    cgal::Point3 point = CGAL::ORIGIN;
     isFound = GridTools::FindIntersectionTriangle(
       grid, origin, direction, index, point);
     EXPECT_EQ(isFound, true);
-    EXPECT_EQ(point, Point3(x, y, 0));
+    EXPECT_EQ(point, cgal::Point3(x, y, 0));
   }
 
   { // cell(2, 1)
@@ -345,13 +345,13 @@ TEST(Grid, FindIntersectionTriangle)
     EXPECT_EQ(index[2], 0);
 
     // Find intersection
-    Point3 origin = Point3(x, y, 10);
-    Direction3 direction = Direction3(0, 0, 1);
-    Point3 point = CGAL::ORIGIN;
+    cgal::Point3 origin = cgal::Point3(x, y, 10);
+    cgal::Direction3 direction = cgal::Direction3(0, 0, 1);
+    cgal::Point3 point = CGAL::ORIGIN;
     isFound = GridTools::FindIntersectionTriangle(
       grid, origin, direction, index, point);
     EXPECT_EQ(isFound, true);
-    EXPECT_EQ(point, Point3(x, y, 0));
+    EXPECT_EQ(point, cgal::Point3(x, y, 0));
   }
 }
 
@@ -387,13 +387,13 @@ TEST(Grid, FindIntersectionCell)
     EXPECT_EQ(index[2], 1);
 
     // Find intersection
-    Point3 origin = Point3(x, y, 10);
-    Direction3 direction = Direction3(0, 0, 1);
-    Point3 point = CGAL::ORIGIN;
+    cgal::Point3 origin = cgal::Point3(x, y, 10);
+    cgal::Direction3 direction = cgal::Direction3(0, 0, 1);
+    cgal::Point3 point = CGAL::ORIGIN;
     isFound = GridTools::FindIntersectionCell(
       grid, origin, direction, index, point);
     EXPECT_EQ(isFound, true);
-    EXPECT_EQ(point, Point3(x, y, 0));
+    EXPECT_EQ(point, cgal::Point3(x, y, 0));
 
     std::cout << std::endl;
   }
@@ -428,13 +428,13 @@ TEST(Grid, FindIntersectionGrid)
     index = { 0, 0, 0 };
     
     // Find intersection
-    Point3 origin = Point3(x, y, 10);
-    Direction3 direction = Direction3(0, 0, 1);
-    Point3 point = CGAL::ORIGIN;
+    cgal::Point3 origin = cgal::Point3(x, y, 10);
+    cgal::Direction3 direction = cgal::Direction3(0, 0, 1);
+    cgal::Point3 point = CGAL::ORIGIN;
     isFound = GridTools::FindIntersectionGrid(
       grid, origin, direction, index, point);
     EXPECT_EQ(isFound, true);
-    EXPECT_EQ(point, Point3(x, y, 0));
+    EXPECT_EQ(point, cgal::Point3(x, y, 0));
  
     // Found index
     EXPECT_EQ(index[0], 3);

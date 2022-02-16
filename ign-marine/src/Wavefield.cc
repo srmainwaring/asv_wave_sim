@@ -143,7 +143,7 @@ namespace marine
     this->Update(0.0);
   }
 
-  std::shared_ptr<const Mesh> WavefieldTrochoid::GetMesh() const
+  std::shared_ptr<const cgal::Mesh> WavefieldTrochoid::GetMesh() const
   {
     return this->data->grid->GetMesh();
   }
@@ -153,7 +153,7 @@ namespace marine
     return this->data->grid;
   }
 
-  bool WavefieldTrochoid::Height(const Point3& point, double& height) const
+  bool WavefieldTrochoid::Height(const cgal::Point3& point, double& height) const
   {
     return this->data->triangulatedGrid->Height(point, height);    
   }
@@ -219,7 +219,7 @@ namespace marine
       const auto& wavenumber_i = wavenumber[i];
       const auto& omega_i = omega[i];
       const auto& phase_i = phase[i];
-      const auto& direction_i = Vector2(direction[i].X(), direction[i].Y());
+      const auto& direction_i = cgal::Vector2(direction[i].X(), direction[i].Y());
       const auto& q_i = q[i];
 
       for (
@@ -230,14 +230,14 @@ namespace marine
         auto& vtx0 = *it.first;
         auto& vtx1 = *it.second;
 
-        const Point3& p0 = initMesh.point(vtx0);
-        Vector2 v0(p0.x(), p0.y()); // - CGAL::ORIGIN;        
+        const cgal::Point3& p0 = initMesh.point(vtx0);
+        cgal::Vector2 v0(p0.x(), p0.y()); // - CGAL::ORIGIN;        
 
         // Multiple waves
         const double angle  = CGAL::to_double(direction_i * v0) * wavenumber_i - omega_i * _time + phase_i;
         const double s = std::sin(angle);
         const double c = std::cos(angle);
-        Vector3 v1(
+        cgal::Vector3 v1(
           - direction_i.x() * q_i * amplitude_i * s,
           - direction_i.y() * q_i * amplitude_i * s,
           + amplitude_i * c
@@ -256,15 +256,15 @@ namespace marine
     //   auto& vtx0 = *it.first;
     //   auto& vtx1 = *it.second;
 
-    //   const Point3& p0 = initMesh.point(vtx0);
-    //   Vector3 v0 = p0 - CGAL::ORIGIN;
-    //   Vector3 v1 = CGAL::NULL_VECTOR;
+    //   const cgal::Point3& p0 = initMesh.point(vtx0);
+    //   cgal::Vector3 v0 = p0 - CGAL::ORIGIN;
+    //   cgal::Vector3 v1 = CGAL::NULL_VECTOR;
 
     //   auto prj    = direction * v0;
     //   double ang  = CGAL::to_double(prj) * wavenumber - omega * _time + phase;
     //   double sang = std::sin(ang);
     //   double cang = std::cos(ang);
-    //   v1 += Vector3(
+    //   v1 += cgal::Vector3(
     //     - direction.x() * q * amplitude * sang,
     //     - direction.y() * q * amplitude * sang,
     //     + amplitude * cang
@@ -353,7 +353,7 @@ namespace marine
     ignmsg << "Done constructing WavefieldOceanTile." <<  std::endl;
   }
 
-  std::shared_ptr<const Mesh> WavefieldOceanTile::GetMesh() const
+  std::shared_ptr<const cgal::Mesh> WavefieldOceanTile::GetMesh() const
   {
     return this->data->grid->GetMesh();
   }
@@ -363,7 +363,7 @@ namespace marine
     return this->data->grid;
   }
 
-  bool WavefieldOceanTile::Height(const Point3& point, double& height) const
+  bool WavefieldOceanTile::Height(const cgal::Point3& point, double& height) const
   {
     // @TODO the calculation assumes that the tile origin is at its center.
     const double L = this->data->oceanTile->TileSize();
@@ -378,7 +378,7 @@ namespace marine
     };
 
     // Obtain the point modulo the tile dimensions
-    Point3 moduloPoint(pmod(point.x()), pmod(point.y()), point.z());
+    cgal::Point3 moduloPoint(pmod(point.x()), pmod(point.y()), point.z());
 
     return this->data->triangulatedGrid->Height(moduloPoint, height);    
   }
@@ -413,7 +413,7 @@ namespace marine
       auto& vtx0 = *it.first;
       auto& vtx1 = *it.second;
       // Visual and physics out of phase? x-y transposed?
-      mesh.point(vtx1) = Point3(vtx0.X(), vtx0.Y(), vtx0.Z());
+      mesh.point(vtx1) = cgal::Point3(vtx0.X(), vtx0.Y(), vtx0.Z());
     }
 
     // Update the point locator.

@@ -34,9 +34,9 @@ namespace marine
 // TriangulatedGrid
   
   
-  typedef std::array<int64_t, 3>  Index3;
-  typedef std::vector<Point3>     Point3Range;
-  typedef std::vector<Index3>     Index3Range;
+  typedef std::array<int64_t, 3>    Index3;
+  typedef std::vector<cgal::Point3> Point3Range;
+  typedef std::vector<Index3>       Index3Range;
 
   class TriangulatedGrid {
    public:
@@ -47,24 +47,24 @@ namespace marine
     void CreateTriangulation();
     static std::unique_ptr<TriangulatedGrid> Create(int num_segments, double length);
 
-    bool Locate(const Point3& query, int64_t& faceIndex) const;
-    bool Height(const Point3& query, double& height) const;
-    bool Height(const std::vector<Point3>& queries, std::vector<double>& heights) const;
+    bool Locate(const cgal::Point3& query, int64_t& faceIndex) const;
+    bool Height(const cgal::Point3& query, double& height) const;
+    bool Height(const std::vector<cgal::Point3>& queries, std::vector<double>& heights) const;
     
     bool Interpolate(TriangulatedGrid& patch) const;
 
     const Point3Range& Points() const;
     const Index3Range& Indices() const;
-    const Point3& Origin() const;
-    void ApplyPose(const ignition::math::Pose3d& pose);
+    const cgal::Point3& Origin() const;
+    void ApplyPose(const math::Pose3d& pose);
 
     bool IsValid(bool verbose=false) const;
     void DebugPrintMesh() const;
     void DebugPrintTriangulation() const;
-    void UpdatePoints(const std::vector<Point3>& from);
-    void UpdatePoints(const std::vector<ignition::math::Vector3d>& from);
+    void UpdatePoints(const std::vector<cgal::Point3>& from);
+    void UpdatePoints(const std::vector<math::Vector3d>& from);
     // void UpdatePoints(const std::vector<Ogre::Vector3>& from);
-    void UpdatePoints(const Mesh& from);
+    void UpdatePoints(const cgal::Mesh& from);
 
    private:
     class Private;

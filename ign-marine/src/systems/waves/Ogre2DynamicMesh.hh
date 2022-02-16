@@ -87,8 +87,8 @@ namespace ignition
       /// \brief Add a point to the point list
       /// \param[in] _pt ignition::math::Vector3d point
       /// \param[in] _color ignition::math::Color Point color
-      public: void AddPoint(const ignition::math::Vector3d &_pt,
-            const ignition::math::Color &_color = ignition::math::Color::White);
+      public: void AddPoint(const math::Vector3d &_pt,
+            const math::Color &_color = math::Color::White);
 
       /// \brief Add a point to the point list.
       /// \param[in] _x X position
@@ -96,31 +96,31 @@ namespace ignition
       /// \param[in] _z Z position
       /// \param[in] _color Point color
       public: void AddPoint(const double _x, const double _y, const double _z,
-            const ignition::math::Color &_color = ignition::math::Color::White);
+            const math::Color &_color = math::Color::White);
 
       /// \brief Change the location of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _value Position of the point
       public: void SetPoint(unsigned int _index,
-                            const ignition::math::Vector3d &_value);
+                            const math::Vector3d &_value);
 
       /// \brief Change the color of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _color color to set the point to
       public: void SetColor(unsigned int _index,
-                            const ignition::math::Color &_color);
+                            const math::Color &_color);
 
       /// \brief Change the texture coordinate  of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _normal Normal of the point
       public: void SetNormal(unsigned int _index,
-                            const ignition::math::Vector3d &_normal);
+                            const math::Vector3d &_normal);
 
       /// \brief Change the texture coordinate  of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _uv0 Texture coordinate of the point
       public: void SetUV0(unsigned int _index,
-                            const ignition::math::Vector2d &_uv0);
+                            const math::Vector2d &_uv0);
 
       /// \brief Return the position of an existing point in the point list
       /// \param[in] _index Get the point at this index
@@ -128,7 +128,7 @@ namespace ignition
       /// [ignition::math::INF_D, ignition::math::INF_D, ignition::math::INF_D]
       /// is returned when then the _index is out of bounds.
       /// ignition::math::INF_D==std::numeric_limits<double>::infinity()
-      public: ignition::math::Vector3d Point(unsigned int _index) const;
+      public: math::Vector3d Point(unsigned int _index) const;
 
       /// \brief Return the total number of points in the point list
       /// \return Number of points

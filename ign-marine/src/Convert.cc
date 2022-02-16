@@ -27,34 +27,34 @@ namespace marine
 ///////////////////////////////////////////////////////////////////////////////
 // Conversions
   
-  ignition::math::Vector3d ToIgn(const Point3& _point)
+  math::Vector3d ToIgn(const cgal::Point3& _point)
   {
-    return ignition::math::Vector3d(_point.x(), _point.y(), _point.z());
+    return math::Vector3d(_point.x(), _point.y(), _point.z());
   }
 
-  ignition::math::Vector2d ToIgn(const Vector2& _vector)
+  math::Vector2d ToIgn(const cgal::Vector2& _vector)
   {
-    return ignition::math::Vector2d(_vector.x(), _vector.y());
+    return math::Vector2d(_vector.x(), _vector.y());
   }
 
-  ignition::math::Vector3d ToIgn(const Vector3& _vector)
+  math::Vector3d ToIgn(const cgal::Vector3& _vector)
   {
-    return ignition::math::Vector3d(_vector.x(), _vector.y(), _vector.z());
+    return math::Vector3d(_vector.x(), _vector.y(), _vector.z());
   }
 
-  Point3 ToPoint3(const ignition::math::Vector3d& _vector)
+  cgal::Point3 ToPoint3(const math::Vector3d& _vector)
   {
-    return Point3(_vector.X(), _vector.Y(), _vector.Z());
+    return cgal::Point3(_vector.X(), _vector.Y(), _vector.Z());
   }
 
-  Vector2 ToVector2(const ignition::math::Vector2d& _vector)
+  cgal::Vector2 ToVector2(const math::Vector2d& _vector)
   {
-    return Vector2(_vector.X(), _vector.Y());
+    return cgal::Vector2(_vector.X(), _vector.Y());
   }
 
-  Vector3 ToVector3(const ignition::math::Vector3d& _vector)
+  cgal::Vector3 ToVector3(const math::Vector3d& _vector)
   {
-    return Vector3(_vector.X(), _vector.Y(), _vector.Z());
+    return cgal::Vector3(_vector.X(), _vector.Y(), _vector.Z());
   }
 
 ///////////////////////////////////////////////////////////////////////////////

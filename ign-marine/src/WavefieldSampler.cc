@@ -80,8 +80,8 @@ namespace marine
   {
     // @TODO_FRAGILE - Move to Grid as changing internal state 
     // Apply pose to center
-    const Point3& c0 = this->data->initWaterPatch->GetCenter();
-    Point3 c1(c0.x() + _pose.Pos().X(), c0.y() + _pose.Pos().Y(), c0.z());
+    const cgal::Point3& c0 = this->data->initWaterPatch->GetCenter();
+    cgal::Point3 c1(c0.x() + _pose.Pos().X(), c0.y() + _pose.Pos().Y(), c0.z());
     this->data->waterPatch->SetCenter(c1);
 
     // Iterate over vertices
@@ -94,10 +94,10 @@ namespace marine
     {
       auto& v0 = *it.first;
       auto& v1 = *it.second;
-      const Point3& p0 = source.point(v0);
+      const cgal::Point3& p0 = source.point(v0);
 
       // Transformation: slide the patch in the xy - plane only
-      Point3 p1(p0.x() + _pose.Pos().X(), p0.y() + _pose.Pos().Y(), p0.z());
+      cgal::Point3 p1(p0.x() + _pose.Pos().X(), p0.y() + _pose.Pos().Y(), p0.z());
       target.point(v1) = p1;
     }
   }
@@ -106,7 +106,7 @@ namespace marine
   {
 #if 0
     // Direction of the line search (i.e. positive z-axis)
-    Direction3 direction(0, 0, 1);
+    cgal::Direction3 direction(0, 0, 1);
 
     // Update the water patch Mesh
     const auto& target = this->data->waterPatch->GetMesh();
@@ -118,8 +118,8 @@ namespace marine
     {
       auto& v1 = *vb;
 
-      Point3& origin = target->point(v1);
-      Point3 point = CGAL::ORIGIN;
+      cgal::Point3& origin = target->point(v1);
+      cgal::Point3 point = CGAL::ORIGIN;
 
       auto& wavefieldGrid = *this->data->wavefield->GetGrid();
       std::array<size_t, 3> cellIndex = { 0, 0, 0 };
@@ -162,7 +162,7 @@ namespace marine
       const auto& p0 = target->point(vertex);
       double height = 0.0;
       this->data->wavefield->Height(p0, height);
-      Point3 p1(p0.x(), p0.y(), height);
+      cgal::Point3 p1(p0.x(), p0.y(), height);
       target->point(vertex) = p1;
       // ignmsg << target->point(vertex) << std::endl;
     }
@@ -170,7 +170,7 @@ namespace marine
 #endif
   }
 
-  double WavefieldSampler::ComputeDepth(const Point3& _point) const
+  double WavefieldSampler::ComputeDepth(const cgal::Point3& _point) const
   {
     auto& grid = *this->data->waterPatch;
     return WavefieldSampler::ComputeDepth(grid, _point);
@@ -182,12 +182,12 @@ namespace marine
   
   double WavefieldSampler::ComputeDepth(  
     const Grid& _patch,
-    const Point3& _point
+    const cgal::Point3& _point
   )
   {
     // Calculate the depth
-    Direction3 direction(0, 0, 1);
-    Point3 wavePoint = CGAL::ORIGIN;
+    cgal::Direction3 direction(0, 0, 1);
+    cgal::Point3 wavePoint = CGAL::ORIGIN;
     std::array<size_t, 3> index;
     bool isFound = GridTools::FindIntersectionIndex(
       _patch, _point.x(), _point.y(), index);
@@ -215,7 +215,7 @@ namespace marine
 
   double WavefieldSampler::ComputeDepthDirectly(  
     const WaveParameters& _waveParams,
-    const Point3& _point,
+    const cgal::Point3& _point,
     double time
   )
   {

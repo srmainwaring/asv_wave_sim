@@ -49,12 +49,12 @@ namespace marine
     /// \brief Populate the message with the wave parameters.
     ///
     /// \param[out] _msg  The message to be populated (a vector of parameters).
-    public: void FillMsg(ignition::msgs::Param_V& _msg) const;
+    public: void FillMsg(msgs::Param_V& _msg) const;
 
     /// \brief Set the parameters from a message.
     ///
     /// \param[in] _msg   The message containing the wave parameters.
-    public: void SetFromMsg(const ignition::msgs::Param_V& _msg);
+    public: void SetFromMsg(const msgs::Param_V& _msg);
 
     /// \brief Set the parameters from an SDF Element tree.
     ///
@@ -95,7 +95,7 @@ namespace marine
     public: double Wavenumber() const;
 
     /// \brief A two component vector specifiying the direction of the mean wave.
-    public: ignition::math::Vector2d Direction() const;
+    public: math::Vector2d Direction() const;
 
     /// \brief Set the number of wave components (3 max).
     ///
@@ -138,7 +138,7 @@ namespace marine
     /// \brief Set the mean wave direction.
     ///
     /// \param[in] _direction The direction parameter, a two component vector.
-    public: void SetDirection(const ignition::math::Vector2d& _direction);
+    public: void SetDirection(const math::Vector2d& _direction);
 
     /// \brief Access the component angular frequencies.
     public: const std::vector<double>& AngularFrequency_V() const;
@@ -156,7 +156,7 @@ namespace marine
     public: const std::vector<double>& Wavenumber_V() const;
 
     /// \brief Access the component directions.
-    public: const std::vector<ignition::math::Vector2d>& Direction_V() const;
+    public: const std::vector<math::Vector2d>& Direction_V() const;
 
     /// \brief Print a summary of the wave parameters to the ignmsg stream.
     public: void DebugPrint() const;

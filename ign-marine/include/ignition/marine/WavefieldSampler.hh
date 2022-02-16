@@ -63,7 +63,7 @@ namespace marine
     /// \brief Translate the initial water patch using the Pose X Y coordinates.
     ///
     /// \param[in] _pose    The pose of the rigid body the water patch supports.
-    public: void ApplyPose(const ignition::math::Pose3d& _pose);
+    public: void ApplyPose(const math::Pose3d& _pose);
 
     /// \brief Update the water patch 
     public: void UpdatePatch();
@@ -72,14 +72,14 @@ namespace marine
     ///
     /// \param[in] _point       The point at which we want the depth
     /// \return                 The depth 'h' at the point.
-    public: double ComputeDepth(const Point3& _point) const;
+    public: double ComputeDepth(const cgal::Point3& _point) const;
 
     /// \brief Compute the depth at a point.
     ///
     /// \param[in] _patch       A water patch. 
     /// \param[in] _point       The point at which we want the depth
     /// \return                 The depth 'h' at the point.
-    public: static double ComputeDepth(const Grid& _patch, const Point3& _point);
+    public: static double ComputeDepth(const Grid& _patch, const cgal::Point3& _point);
 
     /// \brief Compute the depth at a point directly (no sampling or interpolation).
     ///
@@ -97,7 +97,7 @@ namespace marine
     /// \return                 The depth 'h' at the point.
     public: static double ComputeDepthDirectly(
       const WaveParameters& _waveParams,
-      const Point3& _point,
+      const cgal::Point3& _point,
       double time);
 
     /// \internal

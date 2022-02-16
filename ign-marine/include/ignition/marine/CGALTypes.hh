@@ -29,7 +29,7 @@
 
 namespace ignition
 {
-namespace marine
+namespace cgal
 {
 ///////////////////////////////////////////////////////////////////////////////
 // CGAL Typedefs
@@ -56,6 +56,8 @@ namespace marine
   typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
   typedef CGAL::AABB_tree<Traits> AABBTree;
 
+  // Pointers
+  typedef std::shared_ptr<Mesh>           MeshPtr;
 }
 }
 

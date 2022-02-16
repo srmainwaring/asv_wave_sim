@@ -42,9 +42,9 @@ namespace marine
     /// \param[in] _p2    Point at the third vertex.
     /// \return           The triangle area
     public: static double TriangleArea(
-      const Point3& _p0,
-      const Point3& _p1,
-      const Point3& _p2
+      const cgal::Point3& _p0,
+      const cgal::Point3& _p1,
+      const cgal::Point3& _p2
     );
 
     /// \brief Calculate the area of a triangle.
@@ -52,7 +52,7 @@ namespace marine
     /// \param[in] _tri   A triangle.
     /// \return           The triangle area
     public: static double TriangleArea(
-      const Triangle& _tri
+      const cgal::Triangle& _tri
     );
 
     /// \brief Calculate the centroid of a triangle.
@@ -61,18 +61,18 @@ namespace marine
     /// \param[in] _p1    Point at the second vertex.
     /// \param[in] _p2    Point at the third vertex.
     /// \return           The triangle centroid
-    public: static Point3 TriangleCentroid(
-      const Point3& _p0,
-      const Point3& _p1,
-      const Point3& _p2
+    public: static cgal::Point3 TriangleCentroid(
+      const cgal::Point3& _p0,
+      const cgal::Point3& _p1,
+      const cgal::Point3& _p2
     );
 
     /// \brief Calculate the centroid of a triangle.
     ///
     /// \param[in] _tri   A triangle.
     /// \return           The triangle centroid
-    public: static Point3 TriangleCentroid(
-      const Triangle& _tri
+    public: static cgal::Point3 TriangleCentroid(
+      const cgal::Triangle& _tri
     );
 
     /// \brief Find the mid-point of a line between points _p0 and _p1.
@@ -80,9 +80,9 @@ namespace marine
     /// \param[in] _p0    First point.
     /// \param[in] _p1    Second point.
     /// \return           The midpoint
-    public: static Point3 MidPoint(
-      const Point3& _p0,
-      const Point3& _p1
+    public: static cgal::Point3 MidPoint(
+      const cgal::Point3& _p0,
+      const cgal::Point3& _p1
     );
 
     /// \brief Calculate the point on a line from the origin passing through _p
@@ -90,19 +90,19 @@ namespace marine
     ///
     /// \param[in] _p     A point.
     /// \return           The point that normalises the vector from the origin to _p.
-    public: static Point3 Normalize(const Point3& _p);
+    public: static cgal::Point3 Normalize(const cgal::Point3& _p);
 
     /// \brief Normalise a Vector2 (i.e. ensure it has unit length)
     ///
     /// \param[in] _v     The vector to normalise.
     /// \return           The normalized vector.
-    public: static Vector2 Normalize(const Vector2& _v);
+    public: static cgal::Vector2 Normalize(const cgal::Vector2& _v);
 
     /// \brief Normalise a Vector3 (i.e. ensure it has unit length)
     ///
     /// \param[in] _v     The vector to normalise.
     /// \return           The normalized vector.
-    public: static Vector3 Normalize(const Vector3& _v);
+    public: static cgal::Vector3 Normalize(const cgal::Vector3& _v);
 
     /// \brief Compute the (normalised) normal to the plane defined by a triangle.
     ///
@@ -110,18 +110,18 @@ namespace marine
     /// \param[in] _p1    Point at the second vertex.
     /// \param[in] _p2    Point at the third vertex.
     /// \return           The normal vector.
-    public: static Vector3 Normal(
-      const Point3& _v0,
-      const Point3& _v1,
-      const Point3& _v2
+    public: static cgal::Vector3 Normal(
+      const cgal::Point3& _v0,
+      const cgal::Point3& _v1,
+      const cgal::Point3& _v2
     );
 
     /// \brief Compute the (normalized) normal to the plane defined by a triangle.
     ///
     /// \param[in] _tri   A triangle.
     /// \return           The normal vector.
-    public: static Vector3 Normal(
-      const Triangle& _tri
+    public: static cgal::Vector3 Normal(
+      const cgal::Triangle& _tri
     );
 
     /// \brief Compute the (normalized) normal to the plane defined by a triangle face.
@@ -129,9 +129,9 @@ namespace marine
     /// \param[in] _mesh  A surface mesh.
     /// \param[in] _face  A face index for the surface mesh.
     /// \return           The normal vector.
-    public: static Vector3 Normal(
-      const Mesh& _mesh,
-      FaceIndex _face
+    public: static cgal::Vector3 Normal(
+      const cgal::Mesh& _mesh,
+      cgal::FaceIndex _face
     );
 
     /// Given a triangle (_high, _mid, _low) with _low.z() <= _mid.z() <= _high.z(), find the intercept of a line 
@@ -141,10 +141,10 @@ namespace marine
     /// \param[in] _mid   The point with z-component lying between _high.z() and _low.z().
     /// \param[in] _low   The point with least z-component _low.z().
     /// \return           The intercept point.
-    public: static Point3 HorizontalIntercept(
-      const Point3& _high,
-      const Point3& _mid,
-      const Point3& _low
+    public: static cgal::Point3 HorizontalIntercept(
+      const cgal::Point3& _high,
+      const cgal::Point3& _mid,
+      const cgal::Point3& _low
     );
 
     /// \brief Fast Minimum Storage Ray-Triangle Interesection
@@ -158,10 +158,10 @@ namespace marine
     /// \param[in] _tri             A triangle.
     /// \param[out] _intersection   The intersection point.
     public: static bool RayIntersectsTriangle(
-      const Point3& _origin,
-      const Direction3& _direction,
-      const Triangle& _tri,
-      Point3& _intersection
+      const cgal::Point3& _origin,
+      const cgal::Direction3& _direction,
+      const cgal::Triangle& _tri,
+      cgal::Point3& _intersection
     );
 
     /// \brief Fast Minimum Storage Ray-Triangle Interesection
@@ -177,10 +177,10 @@ namespace marine
     /// \param[in] _tri             A triangle.
     /// \param[out] _intersection   The intersection point.
     public: static bool LineIntersectsTriangle(
-      const Point3& _origin,
-      const Direction3& _direction,
-      const Triangle& _tri,
-      Point3& _intersection
+      const cgal::Point3& _origin,
+      const cgal::Direction3& _direction,
+      const cgal::Triangle& _tri,
+      cgal::Point3& _intersection
     );
 
     /// \brief Fast Minimum Storage Ray-Triangle Interesection
@@ -198,12 +198,12 @@ namespace marine
     /// \param[in] _p2              Point at the third vertex.
     /// \param[out] _intersection   The intersection point.
     public: static bool LineIntersectsTriangle(
-      const Point3& _origin,
-      const Direction3& _direction,
-      const Point3& _p0,
-      const Point3& _p1,
-      const Point3& _p2,
-      Point3& _intersection
+      const cgal::Point3& _origin,
+      const cgal::Direction3& _direction,
+      const cgal::Point3& _p0,
+      const cgal::Point3& _p1,
+      const cgal::Point3& _p2,
+      cgal::Point3& _intersection
     );
 
     /// \brief Utility to make a triangle given a mesh and face index.
@@ -211,13 +211,13 @@ namespace marine
     /// \param[in] _mesh    A surface mesh.
     /// \param[in] _face    A face index for the surface mesh.
     /// \return             A triangle.
-    public: static Triangle MakeTriangle(const Mesh& _mesh, FaceIndex _face);
+    public: static cgal::Triangle MakeTriangle(const cgal::Mesh& _mesh, cgal::FaceIndex _face);
 
     /// \brief Create an AABB tree for the input mesh.
     ///
     /// \param[in] _mesh            The mesh to search.
     /// \return                     The built AABB tree.
-    public: static std::shared_ptr<AABBTree> MakeAABBTree(const Mesh& _mesh);
+    public: static std::shared_ptr<cgal::AABBTree> MakeAABBTree(const cgal::Mesh& _mesh);
 
     /// \brief Search a mesh for an intersection with the line defined by origin and direction.
     /// NOTE: This version is slow because it builds a AABB tree for each query.
@@ -227,10 +227,10 @@ namespace marine
     /// \param[in] _direction       The direction of the line (both directions are searched).
     /// \param[out] _intersection   The intersection point if found.
     public: static bool SearchMesh(
-      const Mesh& _mesh,
-      const Point3& _origin,
-      const Direction3& _direction,
-      Point3& _intersection
+      const cgal::Mesh& _mesh,
+      const cgal::Point3& _origin,
+      const cgal::Direction3& _direction,
+      cgal::Point3& _intersection
     );
   
     /// \brief Search a mesh for an intersection with the line defined by origin and direction.
@@ -241,10 +241,10 @@ namespace marine
     /// \param[in] _direction       The direction of the line (both directions are searched).
     /// \param[out] _intersection   The intersection point if found.
     public: static bool SearchMesh(
-      const AABBTree& _tree,
-      const Point3& _origin,
-      const Direction3& _direction,
-      Point3& _intersection
+      const cgal::AABBTree& _tree,
+      const cgal::Point3& _origin,
+      const cgal::Direction3& _direction,
+      cgal::Point3& _intersection
     );
 
   };
