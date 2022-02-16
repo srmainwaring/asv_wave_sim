@@ -92,6 +92,12 @@ class ignition::gazebo::systems::WavesModelPrivate
   public: marine::WavefieldPtr wavefield;
 
   ////////// END FROM WavefieldEntity
+
+  /// \brief Update rate [Hz].
+  public: double updateRate{30.0};
+
+  /// \brief Previous update time.
+  public: double lastUpdateTime{0};
 };
 
 /////////////////////////////////////////////////
@@ -226,8 +232,19 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
-  double simTime = std::chrono::duration<double>(_info.simTime).count();
-  this->wavefield->Update(simTime);
+  /// \todo check if model is static
+  {  
+    /// \todo improve wave model update performance
+    // Throttle update [30 FPS by default]
+    auto updatePeriod = 1.0/this->updateRate;
+    double simTime = std::chrono::duration<double>(_info.simTime).count();
+    if ((simTime - this->lastUpdateTime) > updatePeriod)
+    {
+      // ignmsg << "[" << simTime << "] updating wave model\n";
+      this->wavefield->Update(simTime);
+      this->lastUpdateTime = simTime;
+    }
+  }
 }
 
 //////////////////////////////////////////////////
