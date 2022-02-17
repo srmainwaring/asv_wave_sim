@@ -64,7 +64,6 @@ set (sources
   WaveSimulationSinusoid.cc
   WaveSimulationTrochoid.cc
   WaveSpectrum.cc
-#   ${PROTO_PRIVATE_SRC}
 )
 
 set (gtest_sources
@@ -73,7 +72,6 @@ set (gtest_sources
   CGAL_TEST.cc
   Geometry_TEST.cc
   Grid_TEST.cc
-  # GzPhysics_TEST.cc
   MeshTools_TEST.cc
   Physics_TEST.cc
   TriangulatedGrid_TEST.cc
