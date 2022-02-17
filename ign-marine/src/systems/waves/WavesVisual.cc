@@ -427,6 +427,11 @@ void WavesVisualPrivate::OnUpdate()
   double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
       this->currentSimTime).count()) * 1e-9;
 
+  // ocean tile parameters
+  int N = 128;        // tile resolution
+  double L = 256.0;   // tile size
+  double u = 5.0;    // wind strength
+
   OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY;
   switch (method)
   {
@@ -438,10 +443,6 @@ void WavesVisualPrivate::OnUpdate()
       ignmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
 
       // create ocean tile
-      int N = 128;
-      double L = 256.0;
-      double u = 5.0;
-
       this->oceanTile.reset(new marine::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
 
@@ -521,10 +522,6 @@ void WavesVisualPrivate::OnUpdate()
       ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
 
       // create ocean tile
-      int N = 128;
-      double L = 256.0;
-      double u = 5.0;
-
       this->oceanTile.reset(new marine::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
       std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
