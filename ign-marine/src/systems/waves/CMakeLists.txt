@@ -8,6 +8,7 @@ gz_add_system(waves-visual
   SOURCES
     WavesVisual.cc
     Ogre2DynamicMesh.cc
+    Ogre2OceanGeometry.cc
     Ogre2OceanVisual.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
