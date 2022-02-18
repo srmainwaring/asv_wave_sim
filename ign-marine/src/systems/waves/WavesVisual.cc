@@ -237,11 +237,11 @@ using namespace systems;
 
 class ignition::gazebo::systems::WavesVisualPrivate
 {
-  /// \brief Mutex to protect sim time updates.
-  public: std::mutex mutex;
+  /// \brief Destructor
+  public: ~WavesVisualPrivate();
 
-  /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection{nullptr};
+  /// \brief All rendering operations must happen within this call
+  public: void OnUpdate();
 
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
@@ -275,11 +275,11 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Used in DynamicMesh example
   public: common::MeshPtr oceanTileMesh;
 
-  /// \brief Destructor
-  public: ~WavesVisualPrivate();
+  /// \brief Mutex to protect sim time updates.
+  public: std::mutex mutex;
 
-  /// \brief All rendering operations must happen within this call
-  public: void OnUpdate();
+  /// \brief Connection to pre-render event callback
+  public: ignition::common::ConnectionPtr connection{nullptr};
 };
 
 /////////////////////////////////////////////////
@@ -337,6 +337,16 @@ WavesVisualPrivate::~WavesVisualPrivate()
   {
     this->oceanVisual->Destroy();
     this->oceanVisual.reset();
+  }
+
+  for (auto& ogreVisual : this->oceanVisuals)
+  {
+    rendering::VisualPtr visual = ogreVisual;
+    if (visual != nullptr)
+    {
+      visual->Destroy();
+      visual.reset();
+    }
   }
 };
 
@@ -505,9 +515,6 @@ void WavesVisualPrivate::OnUpdate()
     this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
 
     // update the dynamic renderable (CPU => GPU)
-    rendering::Ogre2OceanVisualPtr ogre2Visual =
-        std::dynamic_pointer_cast<rendering::Ogre2OceanVisual>(
-            this->oceanVisual);
     for (auto& visual : this->oceanVisuals)
     {
       visual->UpdateMesh(this->oceanTileMesh);
