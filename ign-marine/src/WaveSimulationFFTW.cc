@@ -43,6 +43,10 @@ namespace marine
 
     public: void SetTime(double _time);
 
+    public: void SetScale(double _scale);
+
+    public: void SetLambda(double _lambda);
+
     public: void ComputeHeights(
       std::vector<double>& _heights);
 
@@ -209,6 +213,18 @@ namespace marine
   void WaveSimulationFFTWImpl::SetTime(double _time)
   {
     ComputeCurrentAmplitudes(_time);
+  }
+
+  void WaveSimulationFFTWImpl::SetScale(double _scale)
+  {
+    mScale = _scale;
+    ComputeBaseAmplitudes();
+  }
+
+  void WaveSimulationFFTWImpl::SetLambda(double _lambda)
+  {
+    mLambda = _lambda;
+    ComputeBaseAmplitudes();
   }
 
   void WaveSimulationFFTWImpl::ComputeHeights(
@@ -639,5 +655,18 @@ namespace marine
     impl->ComputeDisplacements(_sx, _sy);
     impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);    
   }
+
+
+  void WaveSimulationFFTW::SetScale(double _scale)
+  {
+    impl->SetScale(_scale);
+  }
+  
+  void WaveSimulationFFTW::SetLambda(double _lambda)
+  {
+    impl->SetLambda(_lambda);
+  }
+
+
 }
 }

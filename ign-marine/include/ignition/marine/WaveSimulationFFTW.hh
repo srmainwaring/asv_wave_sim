@@ -64,6 +64,9 @@ namespace marine
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
+    public: void SetScale(double _scale);
+    public: void SetLambda(double _lambda);
+
     private: std::unique_ptr<WaveSimulationFFTWImpl> impl;
   };
 

@@ -206,7 +206,10 @@ bool _hasVisuals) :
     case 2:
     {
       // FFTW
-      mWaveSim.reset(new WaveSimulationFFTW(_N, _L));
+      std::unique_ptr<WaveSimulationFFTW> waveSim(new WaveSimulationFFTW(_N, _L));
+      waveSim->SetScale(4.0/_N);    // default 4.0/_N
+      waveSim->SetLambda(2.5);      // larger lambda => steeper waves. default 0.6
+      mWaveSim = std::move(waveSim);
       break;
     }
     // case 3:
