@@ -255,10 +255,14 @@ void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
     auto index = subMesh.lock()->Index(i);
     auto vertex = subMesh.lock()->Vertex(index);
     auto normal = subMesh.lock()->Normal(index);
+    // auto tangent = subMesh.lock()->Tangent(tangent);
     auto uv0 = subMesh.lock()->TexCoord(index);
 
     this->dataPtr->dynMesh->AddPoint(vertex);
     this->dataPtr->dynMesh->SetNormal(i, normal);
+    // this->dataPtr->dynMesh->SetTangent(i, tangent);
+    /// \todo remove hardcoded tangent when we have SubMesh::Tangent
+    this->dataPtr->dynMesh->SetTangent(i, math::Vector3d(1, 0, 0));
     this->dataPtr->dynMesh->SetUV0(i, uv0);
   }
 
@@ -278,10 +282,14 @@ void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
     auto index = subMesh.lock()->Index(i);
     auto vertex = subMesh.lock()->Vertex(index);
     auto normal = subMesh.lock()->Normal(index);
+    // auto tangent = subMesh.lock()->Tangent(index);
     auto uv0 = subMesh.lock()->TexCoord(index);
 
     this->dataPtr->dynMesh->SetPoint(i, vertex);
     this->dataPtr->dynMesh->SetNormal(i, normal);
+    // this->dataPtr->dynMesh->SetTangent(i, tangent);
+    /// \todo remove hardcoded tangent when we have SubMesh::Tangent
+    this->dataPtr->dynMesh->SetTangent(i, math::Vector3d(1, 0, 0));
     this->dataPtr->dynMesh->SetUV0(i, uv0);
   }
 

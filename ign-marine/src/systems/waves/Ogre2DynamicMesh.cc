@@ -63,6 +63,12 @@ class ignition::rendering::Ogre2DynamicMeshPrivate
   /// \brief List of normals for the mesh
   public: std::vector<ignition::math::Vector3d> normals;
 
+  /// \brief List of tangents for the mesh
+  public: std::vector<ignition::math::Vector3d> tangents;
+
+  /// \brief List of binormals for the mesh
+  // public: std::vector<ignition::math::Vector3d> binormals;
+
   /// \brief List of uv0 coordinates for the mesh
   public: std::vector<ignition::math::Vector2d> uv0s;
 
@@ -87,8 +93,12 @@ class ignition::rendering::Ogre2DynamicMeshPrivate
   /// \brief Ogre item created from the dynamic geometry
   public: Ogre::Item *ogreItem {nullptr};
 
-  /// \brief vertex buffer stride = vertex.xyz + normal.xyz + uv.xy
-  public: unsigned int stride {3 + 3 + 2};
+  /// \todo if we use binormals then update teh stride and ensure they are set elsewhere
+  /// \brief vertex buffer stride = vertex.xyz + normal.xyz + tangent.xyz + binormal.xyz + uv0.xy
+  // public: unsigned int stride {3 + 3 + 3 + 3 + 2};
+
+  /// \brief vertex buffer stride = vertex.xyz + normal.xyz + tangent.xyz + uv0.xy
+  public: unsigned int stride {3 + 3 + 3 + 2};
 
   /// \brief raw vertex buffer
   public: float *vbuffer {nullptr};
@@ -124,7 +134,7 @@ Ogre2DynamicMesh::Ogre2DynamicMesh(
   Ogre2ScenePtr s = std::dynamic_pointer_cast<Ogre2Scene>(this->dataPtr->scene);
   this->dataPtr->sceneManager = s->OgreSceneManager();
 
-  this->SetOperationType(MT_LINE_STRIP);
+  this->SetOperationType(MT_TRIANGLE_LIST);
   this->CreateDynamicMesh();
 }
 
@@ -292,6 +302,10 @@ void Ogre2DynamicMesh::UpdateBuffer()
     vertexElements.push_back(
         Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
     vertexElements.push_back(
+        Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_TANGENT));
+    // vertexElements.push_back(
+    //     Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_BINORMAL));
+    vertexElements.push_back(
         Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES));
 
     // create vertex buffer
@@ -326,20 +340,32 @@ void Ogre2DynamicMesh::UpdateBuffer()
 
     // position
     Ogre::Vector3 v = Ogre2Conversions::Convert(this->dataPtr->vertices[i]);
-    vertices[idx+0] = v.x;
-    vertices[idx+1] = v.y;
-    vertices[idx+2] = v.z;
+    vertices[idx++] = v.x;
+    vertices[idx++] = v.y;
+    vertices[idx++] = v.z;
 
     // normal
     Ogre::Vector3 n = Ogre2Conversions::Convert(this->dataPtr->normals[i]);
-    vertices[idx+3] = n.x;
-    vertices[idx+4] = n.y;
-    vertices[idx+5] = n.z;
+    vertices[idx++] = n.x;
+    vertices[idx++] = n.y;
+    vertices[idx++] = n.z;
+
+    // tangent
+    Ogre::Vector3 t = Ogre2Conversions::Convert(this->dataPtr->tangents[i]);
+    vertices[idx++] = t.x;
+    vertices[idx++] = t.y;
+    vertices[idx++] = t.z;
+
+    // // binormal
+    // Ogre::Vector3 b = Ogre2Conversions::Convert(this->dataPtr->binormals[i]);
+    // vertices[idx++] = b.x;
+    // vertices[idx++] = b.y;
+    // vertices[idx++] = b.z;
 
     // uv0
     Ogre::Vector2 uv0(this->dataPtr->uv0s[i].X(), this->dataPtr->uv0s[i].Y());
-    vertices[idx+6] = uv0.x;
-    vertices[idx+7] = uv0.y;
+    vertices[idx++] = uv0.x;
+    vertices[idx++] = uv0.y;
 
     bbox.merge(v);
   }
@@ -350,24 +376,36 @@ void Ogre2DynamicMesh::UpdateBuffer()
   {
     math::Vector3d lastVertex = this->dataPtr->vertices[vertexCount-1];
     math::Vector3d lastNormal = this->dataPtr->normals[vertexCount-1];
+    math::Vector3d lastTangent = this->dataPtr->tangents[vertexCount-1];
+    // math::Vector3d lastBinormal = this->dataPtr->binormals[vertexCount-1];
     math::Vector2d lastUv0 = this->dataPtr->uv0s[vertexCount-1];
     for (unsigned int i = vertexCount; i < this->dataPtr->vertexBufferCapacity;
         ++i)
     {
       unsigned int idx = i * stride;
       // vertex
-      vertices[idx+0] = lastVertex.X();
-      vertices[idx+1] = lastVertex.Y();
-      vertices[idx+2] = lastVertex.Z();
+      vertices[idx++] = lastVertex.X();
+      vertices[idx++] = lastVertex.Y();
+      vertices[idx++] = lastVertex.Z();
 
       // normal
-      vertices[idx+3] = lastNormal.X();
-      vertices[idx+4] = lastNormal.Y();
-      vertices[idx+5] = lastNormal.Z();
+      vertices[idx++] = lastNormal.X();
+      vertices[idx++] = lastNormal.Y();
+      vertices[idx++] = lastNormal.Z();
+
+      // tangent
+      vertices[idx++] = lastTangent.X();
+      vertices[idx++] = lastTangent.Y();
+      vertices[idx++] = lastTangent.Z();
+
+      // binormal
+      // vertices[idx++] = lastBinormal.X();
+      // vertices[idx++] = lastBinormal.Y();
+      // vertices[idx++] = lastBinormal.Z();
 
       // uv0
-      vertices[idx+6] = lastUv0.X();
-      vertices[idx+7] = lastUv0.Y();
+      vertices[idx++] = lastUv0.X();
+      vertices[idx++] = lastUv0.Y();
     }
   }
 
@@ -503,6 +541,8 @@ void Ogre2DynamicMesh::AddPoint(const math::Vector3d &_pt,
   this->dataPtr->colors.push_back(_color);
 
   this->dataPtr->normals.push_back(math::Vector3d::Zero);
+  this->dataPtr->tangents.push_back(math::Vector3d::Zero);
+  // this->dataPtr->binormals.push_back(math::Vector3d::Zero);
   this->dataPtr->uv0s.push_back(math::Vector2d::Zero);
 
   this->dataPtr->dirty = true;
@@ -569,6 +609,22 @@ void Ogre2DynamicMesh::SetNormal(unsigned int _index,
 }
 
 /////////////////////////////////////////////////
+void Ogre2DynamicMesh::SetTangent(unsigned int _index,
+                              const math::Vector3d &_tangent)
+{
+  if (_index >= this->dataPtr->tangents.size())
+  {
+    ignerr << "Point tangent index[" << _index << "] is out of bounds[0-"
+           << this->dataPtr->tangents.size()-1 << "]\n";
+    return;
+  }
+
+  this->dataPtr->tangents[_index] = _tangent;
+
+  this->dataPtr->dirty = true;
+}
+
+/////////////////////////////////////////////////
 void Ogre2DynamicMesh::SetUV0(unsigned int _index,
                               const math::Vector2d &_uv0)
 {
@@ -615,6 +671,8 @@ void Ogre2DynamicMesh::Clear()
 
   this->dataPtr->vertices.clear();
   this->dataPtr->normals.clear();
+  this->dataPtr->tangents.clear();
+  // this->dataPtr->binormals.clear();
   this->dataPtr->colors.clear();
   this->dataPtr->uv0s.clear();
   this->dataPtr->dirty = true;
@@ -658,14 +716,20 @@ void Ogre2DynamicMesh::GenerateNormals(Ogre::OperationType _opType,
   unsigned int stride = this->dataPtr->stride;
 
   // Each vertex occupies 3 + 3 + 2 elements in the vbuffer float array:
-  // vbuffer[i+0] : position x
-  // vbuffer[i+1] : position y
-  // vbuffer[i+2] : position z
-  // vbuffer[i+3] : normal x
-  // vbuffer[i+4] : normal y
-  // vbuffer[i+5] : normal z
-  // vbuffer[i+6] : uv x
-  // vbuffer[i+7] : uv y
+  // vbuffer[i++] : position x
+  // vbuffer[i++] : position y
+  // vbuffer[i++] : position z
+  // vbuffer[i++] : normal x
+  // vbuffer[i++] : normal y
+  // vbuffer[i++] : normal z
+  // vbuffer[i++] : tangent x
+  // vbuffer[i++] : tangent y
+  // vbuffer[i++] : tangent z
+  // vbuffer[i++] : binormal x // disabled
+  // vbuffer[i++] : binormal y // disabled
+  // vbuffer[i++] : binormal z // disabled
+  // vbuffer[i++] : uv x
+  // vbuffer[i++] : uv y
   switch (_opType)
   {
     case Ogre::OperationType::OT_POINT_LIST:
@@ -830,8 +894,7 @@ void Ogre2DynamicMesh::GenerateColors(Ogre::OperationType _opType,
   // vbuffer[i+3] : color r
   // vbuffer[i+4] : color g
   // vbuffer[i+5] : color b
-  // vbuffer[i+6] : uv x
-  // vbuffer[i+7] : uv y
+  // ...
   switch (_opType)
   {
     case Ogre::OperationType::OT_POINT_LIST:

@@ -110,13 +110,19 @@ namespace ignition
       public: void SetColor(unsigned int _index,
                             const math::Color &_color);
 
-      /// \brief Change the texture coordinate  of an existing point in the point list
+      /// \brief Change the normal vector of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _normal Normal of the point
       public: void SetNormal(unsigned int _index,
                             const math::Vector3d &_normal);
 
-      /// \brief Change the texture coordinate  of an existing point in the point list
+      /// \brief Change the tangent vector of an existing point in the point list
+      /// \param[in] _index Index of the point to set
+      /// \param[in] _normal Tangent of the point
+      public: void SetTangent(unsigned int _index,
+                            const math::Vector3d &_tangent);
+
+      /// \brief Change the texture coordinate of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _uv0 Texture coordinate of the point
       public: void SetUV0(unsigned int _index,
