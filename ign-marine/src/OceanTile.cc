@@ -15,6 +15,7 @@
 
 #include "ignition/marine/OceanTile.hh"
 
+#include "ignition/common/SubMeshWithTangents.hh"
 #include "ignition/marine/WaveSimulation.hh"
 #include "ignition/marine/WaveSimulationFFTW.hh"
 #include "ignition/marine/WaveSimulationSinusoid.hh"
@@ -628,7 +629,8 @@ common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _of
   mesh->SetName(_name);
 
   ignmsg << "OceanTile: create submesh\n";
-  common::SubMesh *submesh = new common::SubMesh();
+  std::unique_ptr<common::SubMeshWithTangents> submesh(
+      new common::SubMeshWithTangents());
 
   // Add position vertices
   for (size_t i=0; i<mVertices.size(); ++i)
@@ -643,11 +645,11 @@ common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _of
         mNormals[i][1],
         mNormals[i][2]);
 
-    /// \todo enable if/when tangents are available in submesh
-    // submesh->AddTangent(
-    //     mTangents[i][0],
-    //     mTangents[i][1],
-    //     mTangents[i][2]);
+    /// using an extension that supports tangents
+    submesh->AddTangent(
+        mTangents[i][0],
+        mTangents[i][1],
+        mTangents[i][2]);
 
     // uv0
     submesh->AddTexCoord(
@@ -672,8 +674,9 @@ common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _of
       submesh->AddIndex(mFaces[i][2]);
     }
   }
-
-  mesh->AddSubMesh(*submesh);
+ 
+  // move
+  mesh->AddSubMesh(std::move(submesh));
 
   ignmsg << "OceanTile: mesh created." << std::endl;
   return mesh.release();
@@ -686,16 +689,24 @@ void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
 
   // \todo: add checks
   // \todo: handle more than one submesh
+
   // Get the submesh
-  auto subMesh = _mesh->SubMeshByIndex(0);
+  auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
+  auto subMesh = std::dynamic_pointer_cast<
+      common::SubMeshWithTangents>(baseSubMesh);
+  if (!subMesh)
+  {
+    ignwarn << "OceanTile: submesh does not support tangents\n";
+    return;
+  }
 
   // Update positions, normals, texture coords etc.
   for (size_t i=0; i<mVertices.size(); ++i)
   {
-    subMesh.lock()->SetVertex(i, mVertices[i]);
-    subMesh.lock()->SetNormal(i, mNormals[i]);
-    // subMesh.lock()->SetTangent(i, mTangents[i]);
-    subMesh.lock()->SetTexCoord(i, mTexCoords[i]);
+    subMesh->SetVertex(i, mVertices[i]);
+    subMesh->SetNormal(i, mNormals[i]);
+    subMesh->SetTangent(i, mTangents[i]);
+    subMesh->SetTexCoord(i, mTexCoords[i]);
   }
 }
 

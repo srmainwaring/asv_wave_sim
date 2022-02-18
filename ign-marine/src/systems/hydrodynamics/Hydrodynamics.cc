@@ -71,7 +71,7 @@ namespace gazebo
     public: ~Collision() = default;
 
     /// \brief Constructor
-    /// \param[in] _entity Link entity
+    /// \param[in] _entity Collision entity
     public: explicit Collision(gazebo::Entity _entity = kNullEntity)
       : dataPtr(std::make_unique<CollisionPrivate>())
     {
@@ -79,7 +79,7 @@ namespace gazebo
     }
 
     /// \brief Copy constructor
-    /// \param[in] _link Collision to copy.
+    /// \param[in] _collision Collision to copy.
     public: Collision(const Collision &_collision)
       : dataPtr(std::make_unique<CollisionPrivate>(*_collision.dataPtr))
     {

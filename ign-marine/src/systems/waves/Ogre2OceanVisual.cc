@@ -16,6 +16,8 @@
 #include "Ogre2OceanVisual.hh"
 #include "Ogre2DynamicMesh.hh"
 
+#include "ignition/common/SubMeshWithTangents.hh"
+
 #include <ignition/common.hh>
 #include <ignition/common/SubMesh.hh>
 #include <ignition/rendering/ogre2/Ogre2Material.hh>
@@ -247,22 +249,29 @@ void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
 
   // \todo add checks
   // \todo: handle more than one submesh
-  auto subMesh = _mesh->SubMeshByIndex(0);
+
+  // Get the submesh
+  auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
+  auto subMesh = std::dynamic_pointer_cast<
+      common::SubMeshWithTangents>(baseSubMesh);
+  if (!subMesh)
+  {
+    ignwarn << "Ogre2OceanVisual: submesh does not support tangents\n";
+    return;
+  }
 
   // Loop over all indices
-  for (auto i=0; i < subMesh.lock()->IndexCount(); ++i)
+  for (auto i=0; i < subMesh->IndexCount(); ++i)
   {
-    auto index = subMesh.lock()->Index(i);
-    auto vertex = subMesh.lock()->Vertex(index);
-    auto normal = subMesh.lock()->Normal(index);
-    // auto tangent = subMesh.lock()->Tangent(tangent);
-    auto uv0 = subMesh.lock()->TexCoord(index);
+    auto index = subMesh->Index(i);
+    auto vertex = subMesh->Vertex(index);
+    auto normal = subMesh->Normal(index);
+    auto tangent = subMesh->Tangent(index);
+    auto uv0 = subMesh->TexCoord(index);
 
     this->dataPtr->dynMesh->AddPoint(vertex);
     this->dataPtr->dynMesh->SetNormal(i, normal);
-    // this->dataPtr->dynMesh->SetTangent(i, tangent);
-    /// \todo remove hardcoded tangent when we have SubMesh::Tangent
-    this->dataPtr->dynMesh->SetTangent(i, math::Vector3d(1, 0, 0));
+    this->dataPtr->dynMesh->SetTangent(i, tangent);
     this->dataPtr->dynMesh->SetUV0(i, uv0);
   }
 
@@ -274,22 +283,29 @@ void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
 {
   // \todo add checks
   // \todo: handle more than one submesh
-  auto subMesh = _mesh->SubMeshByIndex(0);
+
+  // Get the submesh
+  auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
+  auto subMesh = std::dynamic_pointer_cast<
+      common::SubMeshWithTangents>(baseSubMesh);
+  if (!subMesh)
+  {
+    ignwarn << "Ogre2OceanVisual: submesh does not support tangents\n";
+    return;
+  }
 
   // Loop over all indices
-  for (auto i=0; i < subMesh.lock()->IndexCount(); ++i)
+  for (auto i=0; i < subMesh->IndexCount(); ++i)
   {
-    auto index = subMesh.lock()->Index(i);
-    auto vertex = subMesh.lock()->Vertex(index);
-    auto normal = subMesh.lock()->Normal(index);
-    // auto tangent = subMesh.lock()->Tangent(index);
-    auto uv0 = subMesh.lock()->TexCoord(index);
+    auto index = subMesh->Index(i);
+    auto vertex = subMesh->Vertex(index);
+    auto normal = subMesh->Normal(index);
+    auto tangent = subMesh->Tangent(index);
+    auto uv0 = subMesh->TexCoord(index);
 
     this->dataPtr->dynMesh->SetPoint(i, vertex);
     this->dataPtr->dynMesh->SetNormal(i, normal);
-    // this->dataPtr->dynMesh->SetTangent(i, tangent);
-    /// \todo remove hardcoded tangent when we have SubMesh::Tangent
-    this->dataPtr->dynMesh->SetTangent(i, math::Vector3d(1, 0, 0));
+    this->dataPtr->dynMesh->SetTangent(i, tangent);
     this->dataPtr->dynMesh->SetUV0(i, uv0);
   }
 

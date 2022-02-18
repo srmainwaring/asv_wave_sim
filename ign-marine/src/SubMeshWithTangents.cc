@@ -48,6 +48,38 @@ SubMeshWithTangents::SubMeshWithTangents(const std::string &_name)
 }
 
 //////////////////////////////////////////////////
+SubMeshWithTangents::SubMeshWithTangents(const SubMeshWithTangents &_submesh)
+  : SubMesh(_submesh),
+  dataPtr(ignition::utils::MakeImpl<Implementation>())
+{
+  // copy this
+  *this->dataPtr = (*_submesh.dataPtr);
+}
+
+//////////////////////////////////////////////////
+SubMeshWithTangents::SubMeshWithTangents(SubMeshWithTangents &&_submesh)
+    noexcept = default;
+
+//////////////////////////////////////////////////
+SubMeshWithTangents &SubMeshWithTangents::operator=(const SubMeshWithTangents &_submesh)
+{
+  if (this != &_submesh)
+  {
+    // copy base
+    (common::SubMesh&)(*this) = _submesh;
+
+    // copy this
+    *this->dataPtr = (*_submesh.dataPtr);
+  }
+
+  return *this;
+}
+
+//////////////////////////////////////////////////
+SubMeshWithTangents &SubMeshWithTangents::operator=(SubMeshWithTangents &&_submesh)
+    noexcept = default;
+
+//////////////////////////////////////////////////
 SubMeshWithTangents::~SubMeshWithTangents()
 {
 }

@@ -41,6 +41,24 @@ namespace ignition
       /// \param _name Name of the submesh.
       public: explicit SubMeshWithTangents(const std::string &_name);
 
+      /// \brief Copy constructor
+      /// \param[in] _submesh SubMeshWithTangents to copy.
+      public: SubMeshWithTangents(const SubMeshWithTangents &_submesh);
+
+      /// \brief Move constructor
+      /// \param[in] _collision SubMeshWithTangents to move.
+      public: SubMeshWithTangents(SubMeshWithTangents &&_submesh) noexcept;
+
+      /// \brief Copy assignment operator.
+      /// \param[in] _submesh SubMeshWithTangents to copy.
+      /// \return Reference to this.
+      public: SubMeshWithTangents &operator=(const SubMeshWithTangents &_submesh);
+
+      /// \brief Move assignment operator.
+      /// \param[in] _collision Collision component to move.
+      /// \return Reference to this.
+      public: SubMeshWithTangents &operator=(SubMeshWithTangents &&_submesh) noexcept;
+
       /// \brief Destructor
       public: virtual ~SubMeshWithTangents();
 
