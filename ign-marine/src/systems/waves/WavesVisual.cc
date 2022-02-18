@@ -445,169 +445,169 @@ void WavesVisualPrivate::OnUpdate()
   OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY;
   switch (method)
   {
-  case OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY:
-  {
-    // Test attaching another visual to the entity
-    if (this->oceanVisuals.empty())
+    case OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY:
     {
-      ignmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
-
-      // retrive the material from the visual's geometry (it's not set on the visual)
-      ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
-      ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
-      auto visualGeometry = this->visual->GeometryByIndex(0);
-      auto material = visualGeometry->Material();
-      // auto material = this->visual->Material();
-      if (!material)
-        ignerr << "WavesVisual: invalid material\n";
-
-      // create ocean tile
-      this->oceanTile.reset(new marine::OceanTile(N, L));
-      this->oceanTile->SetWindVelocity(u, 0.0);
-
-      // create mesh - do not store in MeshManager as it will be modified
-      this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
-
-      // scene: use in object initialisation work-around
-      rendering::Ogre2ScenePtr ogre2Scene =
-          std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
-
-      // NOTE: this approach is not feasible - multiple copies of the mesh
-      // rather than multiple visuals referencing one mesh and relocating it...
-
-      // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
-      const int nX = 3;
-      const int nY = 3;
-      unsigned int id = 50000;
-      // for (int iy=-nY; iy<=nY; ++iy)
-      int iy = 0;
+      // Test attaching another visual to the entity
+      if (this->oceanVisuals.empty())
       {
-        // for (int ix=-nX; ix<=nX; ++ix)
-        int ix = 0;
+        ignmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
+
+        // retrive the material from the visual's geometry (it's not set on the visual)
+        ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
+        ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+        auto visualGeometry = this->visual->GeometryByIndex(0);
+        auto material = visualGeometry->Material();
+        // auto material = this->visual->Material();
+        if (!material)
+          ignerr << "WavesVisual: invalid material\n";
+
+        // create ocean tile
+        this->oceanTile.reset(new marine::OceanTile(N, L));
+        this->oceanTile->SetWindVelocity(u, 0.0);
+
+        // create mesh - do not store in MeshManager as it will be modified
+        this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
+
+        // scene: use in object initialisation work-around
+        rendering::Ogre2ScenePtr ogre2Scene =
+            std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
+
+        // NOTE: this approach is not feasible - multiple copies of the mesh
+        // rather than multiple visuals referencing one mesh and relocating it...
+
+        // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
+        const int nX = 3;
+        const int nY = 3;
+        unsigned int id = 50000;
+        // for (int iy=-nY; iy<=nY; ++iy)
+        int iy = 0;
         {
-          /// \todo: include the current entity position 
-          ignition::math::Vector3d position(
-            /* this->Position() + */ ix * L,
-            /* this->Position() + */ iy * L,
-            /* this->Position() + */ 0.0
-          );
+          // for (int ix=-nX; ix<=nX; ++ix)
+          int ix = 0;
+          {
+            /// \todo: include the current entity position 
+            ignition::math::Vector3d position(
+              /* this->Position() + */ ix * L,
+              /* this->Position() + */ iy * L,
+              /* this->Position() + */ 0.0
+            );
 
-          // create visual
-          rendering::Ogre2OceanVisualPtr ogreVisual =
-              std::make_shared<rendering::Ogre2OceanVisual>(); 
+            // create visual
+            rendering::Ogre2OceanVisualPtr ogreVisual =
+                std::make_shared<rendering::Ogre2OceanVisual>(); 
 
-          unsigned int objId = id++;
-          std::stringstream ss;
-          ss << "OceanVisual(" << objId << ")";
-          std::string objName = ss.str();
+            unsigned int objId = id++;
+            std::stringstream ss;
+            ss << "OceanVisual(" << objId << ")";
+            std::string objName = ss.str();
 
-          ogreVisual->InitObject(ogre2Scene, objId, objName);
-          ogreVisual->LoadMesh(this->oceanTileMesh);
+            ogreVisual->InitObject(ogre2Scene, objId, objName);
+            ogreVisual->LoadMesh(this->oceanTileMesh);
 
-          rendering::VisualPtr visual = ogreVisual;
-          visual->SetLocalPosition(position);
-  
-          if (!material)
-            visual->SetMaterial("OceanBlue");
-          else
-            visual->SetMaterial(material);
+            rendering::VisualPtr visual = ogreVisual;
+            visual->SetLocalPosition(position);
+    
+            if (!material)
+              visual->SetMaterial("OceanBlue");
+            else
+              visual->SetMaterial(material);
 
-          // add visual to parent
-          // auto parent = this->visual->Parent();
-          // parent->AddChild(visual);
+            // add visual to parent
+            // auto parent = this->visual->Parent();
+            // parent->AddChild(visual);
 
-          oceanVisuals.push_back(ogreVisual);
+            oceanVisuals.push_back(ogreVisual);
+          }
         }
       }
+
+      if (this->oceanVisuals.empty())
+        return;
+
+      // update the tile (recalculates vertices)
+      this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
+
+      // update the dynamic renderable (CPU => GPU)
+      for (auto& visual : this->oceanVisuals)
+      {
+        visual->UpdateMesh(this->oceanTileMesh);
+      }
+      break;
     }
-
-    if (this->oceanVisuals.empty())
-      return;
-
-    // update the tile (recalculates vertices)
-    this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
-
-    // update the dynamic renderable (CPU => GPU)
-    for (auto& visual : this->oceanVisuals)
+    case OceanVisualMethod::OGRE2_MESH:
     {
-      visual->UpdateMesh(this->oceanTileMesh);
+      // Test attaching a common::Mesh to the entity
+      if (!this->oceanTile)
+      {
+        ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
+
+        // create ocean tile
+        this->oceanTile.reset(new marine::OceanTile(N, L));
+        this->oceanTile->SetWindVelocity(u, 0.0);
+        std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
+        auto mesh = newMesh.get();
+        common::MeshManager::Instance()->AddMesh(newMesh.release());
+        // this->oceanTile->Update(0.0);
+
+        //convert common::Mesh to rendering::Mesh
+        auto geometry = this->scene->CreateMesh(mesh);
+
+        // create ocean tile visual
+        auto visual = this->scene->CreateVisual("ocean-tile");
+        visual->AddGeometry(geometry);
+        visual->SetLocalPosition(0.0, 0.0, 0.0);
+        visual->SetLocalRotation(0.0, 0.0, 0.0);
+        visual->SetLocalScale(1.0, 1.0, 1.0);
+        visual->SetMaterial("OceanBlue");
+        visual->SetVisible(true);
+
+        // // retrive the material from the visual's geometry (it's not set on the visual)
+        // ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
+        // ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+        // auto visualGeometry = this->visual->GeometryByIndex(0);
+
+        // auto material = visualGeometry->Material();
+        // // auto material = this->visual->Material();
+        // if (!material)
+        //   ignerr << "WavesVisual: invalid material\n";
+        // else
+        //   visual->SetMaterial(material);
+
+        // add visual to parent
+        auto parent = this->visual->Parent();
+        parent->AddChild(visual);
+
+        // keep reference
+        this->oceanVisual = visual;
+      }
+
+      if (!this->oceanTile)
+        return;
+
+      // Update the tile
+      this->oceanTile->Update(simTime);
+      break;
     }
-    break;
-  }
-  case OceanVisualMethod::OGRE2_MESH:
-  {
-    // Test attaching a common::Mesh to the entity
-    if (!this->oceanTile)
+    default:
     {
-      ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
+      // Test attaching another visual to the entity
+      if (!this->oceanVisual)
+      {
+        ignmsg << "WavesVisual: creating default ocean visual\n";
 
-      // create ocean tile
-      this->oceanTile.reset(new marine::OceanTile(N, L));
-      this->oceanTile->SetWindVelocity(u, 0.0);
-      std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
-      auto mesh = newMesh.get();
-      common::MeshManager::Instance()->AddMesh(newMesh.release());
-      // this->oceanTile->Update(0.0);
+        // create plane
+        auto geometry = this->scene->CreatePlane();
 
-      //convert common::Mesh to rendering::Mesh
-      auto geometry = this->scene->CreateMesh(mesh);
-
-      // create ocean tile visual
-      auto visual = this->scene->CreateVisual("ocean-tile");
-      visual->AddGeometry(geometry);
-      visual->SetLocalPosition(0.0, 0.0, 0.0);
-      visual->SetLocalRotation(0.0, 0.0, 0.0);
-      visual->SetLocalScale(1.0, 1.0, 1.0);
-      visual->SetMaterial("OceanBlue");
-      visual->SetVisible(true);
-
-      // // retrive the material from the visual's geometry (it's not set on the visual)
-      // ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
-      // ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
-      // auto visualGeometry = this->visual->GeometryByIndex(0);
-
-      // auto material = visualGeometry->Material();
-      // // auto material = this->visual->Material();
-      // if (!material)
-      //   ignerr << "WavesVisual: invalid material\n";
-      // else
-      //   visual->SetMaterial(material);
-
-      // add visual to parent
-      auto parent = this->visual->Parent();
-      parent->AddChild(visual);
-
-      // keep reference
-      this->oceanVisual = visual;
+        // create visual
+        auto visual = this->scene->CreateVisual("ocean-tile");
+        visual->AddGeometry(geometry);
+        visual->SetLocalPosition(0.0, 0.0, 0.0);
+        visual->SetLocalRotation(0.0, 0.0, 0.0);
+        visual->SetLocalScale(100.0, 100.0, 100.0);
+        visual->SetMaterial("OceanBlue");
+      }
+      break;
     }
-
-    if (!this->oceanTile)
-      return;
-
-    // Update the tile
-    this->oceanTile->Update(simTime);
-    break;
-  }
-  default:
-  {
-    // Test attaching another visual to the entity
-    if (!this->oceanVisual)
-    {
-      ignmsg << "WavesVisual: creating default ocean visual\n";
-
-      // create plane
-      auto geometry = this->scene->CreatePlane();
-
-      // create visual
-      auto visual = this->scene->CreateVisual("ocean-tile");
-      visual->AddGeometry(geometry);
-      visual->SetLocalPosition(0.0, 0.0, 0.0);
-      visual->SetLocalRotation(0.0, 0.0, 0.0);
-      visual->SetLocalScale(100.0, 100.0, 100.0);
-      visual->SetMaterial("OceanBlue");
-    }
-    break;
-  }
   }
 }
 
