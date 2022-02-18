@@ -53,6 +53,7 @@ set (sources
   OceanTile.cc
   PhysicalConstants.cc
   Physics.cc
+  SubMeshWithTangents.cc
   TriangulatedGrid.cc
   Utilities.cc
   Wavefield.cc
