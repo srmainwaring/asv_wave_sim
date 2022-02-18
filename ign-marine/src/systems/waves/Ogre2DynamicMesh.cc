@@ -125,9 +125,9 @@ using namespace ignition;
 using namespace rendering;
 
 //////////////////////////////////////////////////
-Ogre2DynamicMesh::Ogre2DynamicMesh(
-    ScenePtr _scene)
-    : dataPtr(new Ogre2DynamicMeshPrivate)
+Ogre2DynamicMesh::Ogre2DynamicMesh(ScenePtr _scene)
+    : Ogre2Geometry(),
+    dataPtr(new Ogre2DynamicMeshPrivate)
 {
   this->dataPtr->scene = _scene;
 
@@ -177,6 +177,48 @@ void Ogre2DynamicMesh::Destroy()
 }
 
 //////////////////////////////////////////////////
+Ogre::MovableObject *Ogre2DynamicMesh::OgreObject() const
+{
+  return this->dataPtr->ogreItem;
+}
+
+//////////////////////////////////////////////////
+MaterialPtr Ogre2DynamicMesh::Material() const
+{
+  return this->dataPtr->material;
+}
+
+//////////////////////////////////////////////////
+void Ogre2DynamicMesh::SetMaterial(MaterialPtr _material, bool _unique)
+{
+  _material = (_unique) ? _material->Clone() : _material;
+
+  Ogre2MaterialPtr derived =
+      std::dynamic_pointer_cast<Ogre2Material>(_material);
+
+  if (!derived)
+  {
+    ignerr << "Cannot assign material created by another render-engine"
+        << std::endl;
+
+    return;
+  }
+
+  if (this->dataPtr->material && this->dataPtr->ownsMaterial)
+    this->dataPtr->scene->DestroyMaterial(this->dataPtr->material);
+
+  this->dataPtr->ownsMaterial = _unique;
+
+  this->dataPtr->material = derived;
+
+  this->dataPtr->ogreItem->getSubItem(0)->setDatablock(
+      static_cast<Ogre::HlmsPbsDatablock *>(derived->Datablock()));
+
+  // set cast shadows
+  this->dataPtr->ogreItem->setCastShadows(_material->CastShadows());
+}
+
+//////////////////////////////////////////////////
 void Ogre2DynamicMesh::DestroyBuffer()
 {
   if (this->dataPtr->vbuffer)
@@ -203,12 +245,6 @@ void Ogre2DynamicMesh::DestroyBuffer()
   this->dataPtr->vertexBuffer = nullptr;
   this->dataPtr->vao = nullptr;
   this->dataPtr->vbuffer = nullptr;
-}
-
-//////////////////////////////////////////////////
-Ogre::MovableObject *Ogre2DynamicMesh::OgreObject() const
-{
-  return this->dataPtr->ogreItem;
 }
 
 //////////////////////////////////////////////////
@@ -676,36 +712,6 @@ void Ogre2DynamicMesh::Clear()
   this->dataPtr->colors.clear();
   this->dataPtr->uv0s.clear();
   this->dataPtr->dirty = true;
-}
-
-//////////////////////////////////////////////////
-void Ogre2DynamicMesh::SetMaterial(MaterialPtr _material, bool _unique)
-{
-  _material = (_unique) ? _material->Clone() : _material;
-
-  Ogre2MaterialPtr derived =
-      std::dynamic_pointer_cast<Ogre2Material>(_material);
-
-  if (!derived)
-  {
-    ignerr << "Cannot assign material created by another render-engine"
-        << std::endl;
-
-    return;
-  }
-
-  if (this->dataPtr->material && this->dataPtr->ownsMaterial)
-    this->dataPtr->scene->DestroyMaterial(this->dataPtr->material);
-
-  this->dataPtr->ownsMaterial = _unique;
-
-  this->dataPtr->material = derived;
-
-  this->dataPtr->ogreItem->getSubItem(0)->setDatablock(
-      static_cast<Ogre::HlmsPbsDatablock *>(derived->Datablock()));
-
-  // set cast shadows
-  this->dataPtr->ogreItem->setCastShadows(_material->CastShadows());
 }
 
 //////////////////////////////////////////////////

@@ -81,6 +81,32 @@ void Ogre2OceanVisual::Destroy()
 }
 
 //////////////////////////////////////////////////
+MaterialPtr Ogre2OceanVisual::Material() const
+{
+  return this->dataPtr->material;
+}
+
+//////////////////////////////////////////////////
+void Ogre2OceanVisual::SetMaterial(MaterialPtr _material, bool _unique)
+{
+  _material = (_unique) ? _material->Clone() : _material;
+
+  Ogre2MaterialPtr derived =
+      std::dynamic_pointer_cast<Ogre2Material>(_material);
+
+  if (!derived)
+  {
+    ignerr << "Cannot assign material created by another render-engine"
+        << std::endl;
+
+    return;
+  }
+
+  this->dataPtr->dynMesh->SetMaterial(_material, false);
+  this->SetMaterialImpl(derived);
+}
+
+//////////////////////////////////////////////////
 void Ogre2OceanVisual::LoadCube()
 {
   if (!this->dataPtr->dynMesh)
@@ -313,36 +339,10 @@ void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanVisual::SetMaterial(MaterialPtr _material, bool _unique)
-{
-  _material = (_unique) ? _material->Clone() : _material;
-
-  Ogre2MaterialPtr derived =
-      std::dynamic_pointer_cast<Ogre2Material>(_material);
-
-  if (!derived)
-  {
-    ignerr << "Cannot assign material created by another render-engine"
-        << std::endl;
-
-    return;
-  }
-
-  this->dataPtr->dynMesh->SetMaterial(_material, false);
-  this->SetMaterialImpl(derived);
-}
-
-//////////////////////////////////////////////////
 void Ogre2OceanVisual::SetMaterialImpl(Ogre2MaterialPtr _material)
 {
   Ogre::MaterialPtr ogreMaterial = _material->Material();
   this->dataPtr->material = _material;
-}
-
-//////////////////////////////////////////////////
-MaterialPtr Ogre2OceanVisual::Material() const
-{
-  return this->dataPtr->material;
 }
 
 //////////////////////////////////////////////////

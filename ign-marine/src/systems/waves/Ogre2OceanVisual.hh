@@ -57,6 +57,14 @@ namespace ignition
       // Documentation inherited.
       protected: virtual void Destroy() override;
 
+      // Documentation inherited.
+      public: virtual MaterialPtr Material() const override;
+
+      // Documentation inherited.
+      public: virtual void SetMaterial(
+        MaterialPtr _material, bool _unique) override;
+
+
       /// \brief Load a dynamic cube (example)
       public: void LoadCube();
 
@@ -71,13 +79,6 @@ namespace ignition
 
       /// \brief Update from a mesh
       public: void UpdateMesh(common::MeshPtr _mesh);
-
-      // Documentation inherited.
-      public: virtual MaterialPtr Material() const override;
-
-      // Documentation inherited.
-      public: virtual void SetMaterial(
-        MaterialPtr _material, bool _unique) override;
 
       /// \brief Set material to geometry.
       /// \param[in] _material Ogre material.

@@ -29,8 +29,10 @@
 #include "ignition/math.hh"
 
 #include "ignition/rendering/ogre2/Export.hh"
+#include "ignition/rendering/ogre2/Ogre2Geometry.hh"
 #include "ignition/rendering/ogre2/Ogre2RenderTypes.hh"
 #include "ignition/rendering/Marker.hh"
+
 
 #ifdef _MSC_VER
   #pragma warning(push, 0)
@@ -59,7 +61,8 @@ namespace ignition
      */
     /// \brief Dynamic mesh class that manages hardware buffers for
     /// a dynamic mesh
-    class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2DynamicMesh
+    class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2DynamicMesh :
+        public Ogre2Geometry
     {
       /// \brief Constructor
       /// \param[in] _scene Pointer to scene
@@ -67,6 +70,19 @@ namespace ignition
 
       /// \brief Virtual destructor
       public: virtual ~Ogre2DynamicMesh();
+
+      // Documentation inherited.
+      public: virtual void Destroy() override;
+
+      // Documentation inherited.
+      public: virtual Ogre::MovableObject *OgreObject() const override;
+
+      // Documentation inherited.
+      public: virtual MaterialPtr Material() const override;
+
+      // Documentation inherited.
+      public: virtual void
+          SetMaterial(MaterialPtr _material, bool _unique) override;
 
       /////////// FROM DYNAMIC RENDERABLE
 
@@ -80,9 +96,6 @@ namespace ignition
 
       /// \brief Update the dynamic renderable
       public: void Update();
-
-      /// \brief Get the ogre object associated with this dynamic renderable
-      public: Ogre::MovableObject *OgreObject() const;
 
       /// \brief Add a point to the point list
       /// \param[in] _pt ignition::math::Vector3d point
@@ -142,14 +155,6 @@ namespace ignition
 
       /// \brief Remove all points from the point list
       public: void Clear();
-
-      /// \brief Destroy the dynamic renderable
-      public: void Destroy();
-
-      /// \brief Set the material for this dynamic renderable
-      /// \param[in] _material New Material to be assigned
-      /// \param[in] _unique True if the given material should be cloned
-      public: void SetMaterial(MaterialPtr _material, bool _unique = true);
 
       /// \brief Create the dynamic mesh
       private: void CreateDynamicMesh();
