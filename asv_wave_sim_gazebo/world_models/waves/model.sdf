@@ -35,20 +35,30 @@
           </mesh>
         </geometry> -->
 
-        <!-- <material>
-          <ambient>0.0 0.1 0.3 1.0</ambient>
-          <diffuse>0.0 0.05 0.2 1.0</diffuse>
-          <specular>0.1 0.1 0.1 0.1</specular>
-        </material> -->
+        <material>
+          <ambient>0.0 0.05 0.8 0.92</ambient>
+          <diffuse>0.0 0.1 0.7 0.92</diffuse>
+          <specular>0.7 0.7 0.7 0.92</specular>
+          <pbr>
+            <metal>
+              <!-- <albedo_map>materials/water.jpg</albedo_map> -->
+              <normal_map>materials/wave_normals.dds</normal_map>
+              <environment_map>materials/skybox_lowres.dds</environment_map>
+              <roughness>0.3</roughness>
+              <metalness>0.1</metalness>
+            </metal>
+          </pbr>
+        </material>
 
         <plugin
             filename="ignition-marine1-waves-visual-system"
             name="ignition::gazebo::systems::WavesVisual">
-        <!-- </plugin>
+        </plugin>
 
+        <!-- 
         <plugin
             filename="ignition-gazebo-shader-param-system"
-            name="ignition::gazebo::systems::ShaderParam"> -->
+            name="ignition::gazebo::systems::ShaderParam">
           <shader>
             <vertex>materials/waves_vs.metal</vertex>
             <fragment>materials/waves_fs.metal</fragment>
@@ -123,7 +133,7 @@
             <type>texture</type>
           </param>
         </plugin>
-
+        -->
       </visual>
     </link>
   </model>

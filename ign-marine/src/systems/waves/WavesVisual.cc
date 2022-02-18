@@ -452,6 +452,15 @@ void WavesVisualPrivate::OnUpdate()
     {
       ignmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
 
+      // retrive the material from the visual's geometry (it's not set on the visual)
+      ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
+      ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+      auto visualGeometry = this->visual->GeometryByIndex(0);
+      auto material = visualGeometry->Material();
+      // auto material = this->visual->Material();
+      if (!material)
+        ignerr << "WavesVisual: invalid material\n";
+
       // create ocean tile
       this->oceanTile.reset(new marine::OceanTile(N, L));
       this->oceanTile->SetWindVelocity(u, 0.0);
@@ -497,7 +506,11 @@ void WavesVisualPrivate::OnUpdate()
 
           rendering::VisualPtr visual = ogreVisual;
           visual->SetLocalPosition(position);
-          visual->SetMaterial("OceanBlue");
+  
+          if (!material)
+            visual->SetMaterial("OceanBlue");
+          else
+            visual->SetMaterial(material);
 
           // add visual to parent
           // auto parent = this->visual->Parent();

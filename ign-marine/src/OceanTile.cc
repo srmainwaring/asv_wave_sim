@@ -246,6 +246,7 @@ void OceanTilePrivate::Create()
   // Here we are actually mapping (u, v) to each quad in the tile (not the entire tile). 
   // const double xTex = 1.0 * lx;
   // const double yTex = 1.0 * ly;
+  /// \todo add param to tune bump map scaling
   double texScale = Lx;
   const double xTex = texScale / mResolution;
   const double yTex = texScale / mResolution;
@@ -642,20 +643,16 @@ common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _of
         mNormals[i][1],
         mNormals[i][2]);
 
+    /// \todo enable if/when tangents are available in submesh
+    // submesh->AddTangent(
+    //     mTangents[i][0],
+    //     mTangents[i][1],
+    //     mTangents[i][2]);
+
     // uv0
     submesh->AddTexCoord(
         mTexCoords[i][0],
         mTexCoords[i][1]);
-
-    // uv6
-    // *gpuTexVertices++ = mTangents[i][0];
-    // *gpuTexVertices++ = mTangents[i][1];
-    // *gpuTexVertices++ = mTangents[i][2];
-
-    // uv7
-    // *gpuTexVertices++ = mBitangents[i][0];
-    // *gpuTexVertices++ = mBitangents[i][1];
-    // *gpuTexVertices++ = mBitangents[i][2];
   }
 
   // Add indices
@@ -697,6 +694,7 @@ void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
   {
     subMesh.lock()->SetVertex(i, mVertices[i]);
     subMesh.lock()->SetNormal(i, mNormals[i]);
+    // subMesh.lock()->SetTangent(i, mTangents[i]);
     subMesh.lock()->SetTexCoord(i, mTexCoords[i]);
   }
 }
