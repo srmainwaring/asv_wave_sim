@@ -93,6 +93,9 @@ namespace ignition
       /// \brief Private data class
       private: std::unique_ptr<Ogre2OceanVisualPrivate> dataPtr;
     };
+
+    typedef std::shared_ptr<Ogre2OceanVisual> Ogre2OceanVisualPtr;
+
     }
   }
 }

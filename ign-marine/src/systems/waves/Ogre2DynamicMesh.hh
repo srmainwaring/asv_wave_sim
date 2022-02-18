@@ -183,6 +183,9 @@ namespace ignition
       /// \brief Pointer to private data
       private: std::unique_ptr<Ogre2DynamicMeshPrivate> dataPtr;
     };
+
+    typedef std::shared_ptr<Ogre2DynamicMesh> Ogre2DynamicMeshPtr;
+
     }
   }
 }

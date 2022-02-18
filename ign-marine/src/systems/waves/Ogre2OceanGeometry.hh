@@ -48,11 +48,18 @@ namespace ignition
       /// \brief Virtual destructor
       public: virtual ~Ogre2OceanGeometry();
 
+      /// \brief Load from a mesh
+      public: void LoadMesh(common::MeshPtr _mesh);
 
+      /// \brief Update from a mesh
+      public: void UpdateMesh(common::MeshPtr _mesh);
 
       /// \brief Pointer to private data
       private: std::unique_ptr<Ogre2OceanGeometryPrivate> dataPtr;
     };
+
+    typedef std::shared_ptr<Ogre2OceanGeometry> Ogre2OceanGeometryPtr;
+
     }
   }
 }

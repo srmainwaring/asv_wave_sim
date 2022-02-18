@@ -53,9 +53,6 @@ namespace rendering
 {
 inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 
-  // Types
-  typedef std::shared_ptr<Ogre2OceanVisual> Ogre2OceanVisualPtr;
-
   // Subclass from Ogre2Mesh and Ogre2MeshFactory to get
   // indirect access to protected members and override any
   // behaviour that tries to load a common::Mesh which we
