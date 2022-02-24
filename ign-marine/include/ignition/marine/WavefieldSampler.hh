@@ -24,20 +24,13 @@
 
 #include <memory>
 
-///////////////////////////////////////////////////////////////////////////////
-// Forward Declarations
-
 namespace ignition
 {
 namespace marine
 {
-
   class Grid;
   class Wavefield;
   class WaveParameters;
-
-///////////////////////////////////////////////////////////////////////////////
-// WavefieldSampler
 
   /// \internal
   /// \brief Class to hold private data for WavefieldSampler.
@@ -106,9 +99,6 @@ namespace marine
   };
 
   typedef std::shared_ptr<WavefieldSampler> WavefieldSamplerPtr;
-
-///////////////////////////////////////////////////////////////////////////////
-
 }
 }
 

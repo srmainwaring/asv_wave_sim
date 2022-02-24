@@ -36,10 +36,7 @@ namespace ignition
 {
 namespace marine
 {
-
-///////////////////////////////////////////////////////////////////////////////    
-// WavefieldSamplerPrivate
-
+  /////////////////////////////////////////////////
   /// \internal
   /// \brief Private data for the WavefieldSampler.
   class WavefieldSamplerPrivate
@@ -54,13 +51,12 @@ namespace marine
     public: std::shared_ptr<Grid> waterPatch;    
   };
 
-///////////////////////////////////////////////////////////////////////////////    
-// WavefieldSampler
-
+  /////////////////////////////////////////////////
   WavefieldSampler::~WavefieldSampler()
-  {        
+  {
   }
 
+  /////////////////////////////////////////////////
   WavefieldSampler::WavefieldSampler(
     std::shared_ptr<const Wavefield> _wavefield,
     std::shared_ptr<const Grid> _waterPatch
@@ -71,11 +67,13 @@ namespace marine
     this->data->waterPatch.reset(new Grid(*_waterPatch));
   }
 
+  /////////////////////////////////////////////////
   std::shared_ptr<const Grid> WavefieldSampler::GetWaterPatch() const
   {
     return this->data->waterPatch;
   }
 
+  /////////////////////////////////////////////////
   void WavefieldSampler::ApplyPose(const ignition::math::Pose3d& _pose)
   {
     // @TODO_FRAGILE - Move to Grid as changing internal state 
@@ -102,53 +100,9 @@ namespace marine
     }
   }
 
+  /////////////////////////////////////////////////
   void WavefieldSampler::UpdatePatch()
   {
-#if 0
-    // Direction of the line search (i.e. positive z-axis)
-    cgal::Direction3 direction(0, 0, 1);
-
-    // Update the water patch Mesh
-    const auto& target = this->data->waterPatch->GetMesh();
-    for (
-      auto&& vb = std::begin(target->vertices()); 
-      vb != std::end(target->vertices());
-      ++vb
-    )
-    {
-      auto& v1 = *vb;
-
-      cgal::Point3& origin = target->point(v1);
-      cgal::Point3 point = CGAL::ORIGIN;
-
-      auto& wavefieldGrid = *this->data->wavefield->GetGrid();
-      std::array<size_t, 3> cellIndex = { 0, 0, 0 };
-      bool isFound = GridTools::FindIntersectionIndex(
-        wavefieldGrid, origin.x(), origin.y(), cellIndex);
-      if (!isFound)
-      {
-        // @DEBUG_INFO
-        ignmsg << "origin:   " << origin << std::endl;
-        ignerr << "Wavefield is too small" << std::endl;
-        return;
-      }
-      isFound = GridTools::FindIntersectionGrid(
-        wavefieldGrid, origin, direction, cellIndex, point);
-
-      if (!isFound)
-      {
-        // @DEBUG_INFO
-        ignmsg << "origin:   " << origin << std::endl;
-        ignerr << "Wavefield is too small" << std::endl;
-        return;
-      }
-
-      target->point(v1) = point;
-    }
-#else
-
-    // @NOTE: alternative approach using CGAL triangulation.
-
     // Update the water patch Mesh
     // ignmsg << "Update water patch..." << std::endl;
     const auto& target = this->data->waterPatch->GetMesh();
@@ -166,10 +120,9 @@ namespace marine
       target->point(vertex) = p1;
       // ignmsg << target->point(vertex) << std::endl;
     }
-
-#endif
   }
 
+  /////////////////////////////////////////////////
   double WavefieldSampler::ComputeDepth(const cgal::Point3& _point) const
   {
     auto& grid = *this->data->waterPatch;
@@ -179,7 +132,8 @@ namespace marine
     // auto& waveParams = *this->data->wavefield->GetParameters();
     // return WavefieldSampler::ComputeDepthDirectly(waveParams, _point, 0.0);
   }
-  
+
+  /////////////////////////////////////////////////
   double WavefieldSampler::ComputeDepth(  
     const Grid& _patch,
     const cgal::Point3& _point
@@ -319,8 +273,6 @@ namespace marine
     const double h = pz - _point.z();
     return h;
   }
-
-///////////////////////////////////////////////////////////////////////////////
-
+  /////////////////////////////////////////////////
 }
 }

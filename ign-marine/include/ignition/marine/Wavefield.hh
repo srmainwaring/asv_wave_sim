@@ -30,11 +30,7 @@ namespace ignition
 {
 namespace marine
 {
-  class Grid;
-
-///////////////////////////////////////////////////////////////////////////////
-// Wavefield
-
+  /////////////////////////////////////////////////
   class WaveParameters;
   
   /// \brief A class to manage a wave field.
@@ -42,12 +38,6 @@ namespace marine
   {
     /// Destructor.
     public: virtual ~Wavefield();
-
-    /// \brief Access the wave field mesh.
-    public: virtual std::shared_ptr<const cgal::Mesh> GetMesh() const { return nullptr; } //= 0;
-
-    /// \brief Access the wave field grid.
-    public: virtual std::shared_ptr<const Grid> GetGrid() const { return nullptr; } //= 0;
 
     // Compute the height at a point.
     public: virtual bool Height(const cgal::Point3& point, double& height) const { return false; } //= 0;
@@ -69,68 +59,8 @@ namespace marine
   typedef std::shared_ptr<Wavefield> WavefieldPtr; 
   typedef std::weak_ptr<Wavefield> WavefieldWeakPtr; 
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief A class to manage a wave field.
-  class WavefieldTrochoidPrivate;
-
-  class WavefieldTrochoid : public Wavefield
-  {
-    /// Destructor.
-    public: ~WavefieldTrochoid() override;
-
-    /// Constructor.
-    ///
-    /// \param[in] _name    The name for the wave field mesh.
-    public: WavefieldTrochoid(const std::string& _name);
-
-    /// Constructor.
-    ///
-    /// \param[in] _name      The name for the wave field mesh.
-    /// \param[in] _size      A two component array defining the size of the wavefield [m].
-    /// \param[in] _cellCount A two component array defining the number of cells in each direction.
-    public: WavefieldTrochoid(
-      const std::string& _name,
-      const std::array<double, 2>& _size,
-      const std::array<size_t, 2>& _cellCount);
-
-    /// \brief Access the wave field mesh.
-    public: std::shared_ptr<const cgal::Mesh> GetMesh() const override;
-
-    /// \brief Access the wave field grid.
-    public: std::shared_ptr<const Grid> GetGrid() const override;
-
-    // Compute the height at a point.
-    public: bool Height(const cgal::Point3& point, double& height) const override;
-
-    /// \brief Access the wave field mesh as a Gazebo Mesh.
-    // public: std::shared_ptr<const common::Mesh> GetGzMesh() const;
-
-    /// \brief Get the wave parameters.
-    public: std::shared_ptr<const WaveParameters> GetParameters() const override;
-
-    /// \brief Set the wave parameters.
-    ///
-    /// \param[in] _params    The new wave parameters.
-    public: void SetParameters(std::shared_ptr<WaveParameters> _params) const override;
-
-    /// \brief Update (recalculate) the wave field for the given time.
-    ///
-    /// \param[in] _time    The time parameter for the wave evolution.
-    public: void Update(double _time) override;
-
-    /// internal
-    /// \brief Update (recalculate) a Gerstner wave field for the given time.
-    ///
-    /// \param[in] _time    The time parameter for the wave evolution.
-    private: void UpdateGerstnerWave(double _time);
-
-    /// \internal
-    /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldTrochoidPrivate> data;
-  };
-
-///////////////////////////////////////////////////////////////////////////////
-/// \brief A class to manage a wave field.
+  /////////////////////////////////////////////////
+  /// \brief A class to manage a wave field.
   class WavefieldOceanTilePrivate;
 
   class WavefieldOceanTile : public Wavefield
@@ -142,12 +72,6 @@ namespace marine
     ///
     /// \param[in] _name    The name for the wave field mesh.
     public: WavefieldOceanTile(const std::string& _name);
-
-    /// \brief Access the wave field mesh.
-    public: std::shared_ptr<const cgal::Mesh> GetMesh() const override;
-
-    /// \brief Access the wave field grid.
-    public: std::shared_ptr<const Grid> GetGrid() const override;
 
     // Compute the height at a point.
     public: bool Height(const cgal::Point3& point, double& height) const override;
@@ -176,9 +100,7 @@ namespace marine
     void OnWaveWindMsg(ConstParam_VPtr &_msg);
   #endif
   };
-
-///////////////////////////////////////////////////////////////////////////////
-
+  /////////////////////////////////////////////////
 }
 }
 
