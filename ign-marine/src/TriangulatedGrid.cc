@@ -211,7 +211,7 @@ namespace marine
     // Set info on infinite vertex
     tri_.infinite_vertex()->info() = -1;
 
-    // Face list mapping  
+    // Face list mapping
 
     // Initialise face info
     // timer.reset();
@@ -311,7 +311,7 @@ namespace marine
         }
       }
       heights[i] = height_i;
-      foundAll &= found;    
+      foundAll &= found;
     }
     return foundAll;
   }
@@ -386,7 +386,7 @@ namespace marine
 
     // Triangulation points
     for (auto v = tri_.finite_vertices_begin(); v != tri_.finite_vertices_end(); ++v) {
-      int64_t idx = v->info();      
+      int64_t idx = v->info();
       v->set_point(points_[idx]);
     }
   }
@@ -485,7 +485,7 @@ namespace marine
 
     // Triangulation points
     for (auto v = tri_.finite_vertices_begin(); v != tri_.finite_vertices_end(); ++v) {
-      int64_t idx = v->info();      
+      int64_t idx = v->info();
       v->set_point(points_[idx]);
     }
   }
@@ -500,7 +500,7 @@ namespace marine
 
     // Triangulation points
     for (auto v = tri_.finite_vertices_begin(); v != tri_.finite_vertices_end(); ++v) {
-      int64_t idx = v->info();      
+      int64_t idx = v->info();
       v->set_point(points_[idx]);
     }
   }
@@ -516,7 +516,7 @@ namespace marine
 
     // Triangulation points
     for (auto v = tri_.finite_vertices_begin(); v != tri_.finite_vertices_end(); ++v) {
-      int64_t idx = v->info();      
+      int64_t idx = v->info();
       v->set_point(points_[idx]);
     }
   }
@@ -533,7 +533,7 @@ namespace marine
 
     // Triangulation points
     for (auto v = tri_.finite_vertices_begin(); v != tri_.finite_vertices_end(); ++v) {
-      int64_t idx = v->info();      
+      int64_t idx = v->info();
       v->set_point(points_[idx]);
     }
   }
