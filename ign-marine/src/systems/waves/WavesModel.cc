@@ -191,11 +191,11 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
   }
 
   // Wavefield  
-  std::string meshName = "WAVEFIELD";
+  std::string entityName = "wavefield";
 
   // double simTime = this->GetWorld()->SimTime().Double();
 
-  this->wavefield.reset(new marine::WavefieldOceanTile(meshName));
+  this->wavefield.reset(new marine::Wavefield());
   this->wavefield->SetParameters(this->waveParams);
   // this->wavefield->Update(simTime);
 
@@ -203,7 +203,7 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
   this->wavefieldEntity = _ecm.CreateEntity();
 
   _ecm.CreateComponent(this->wavefieldEntity,
-      components::Name(meshName));
+      components::Name(entityName));
 
   auto comp = _ecm.CreateComponent(this->wavefieldEntity,
       marine::components::Wavefield());

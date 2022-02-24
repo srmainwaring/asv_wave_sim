@@ -34,14 +34,10 @@ namespace ignition
 {
 namespace marine
 {
-  Wavefield::~Wavefield()
-  {
-  }
-
   /////////////////////////////////////////////////
   /// \internal
-  /// \brief Private data for the WavefieldOceanTile.
-  class WavefieldOceanTilePrivate
+  /// \brief Private data for the Wavefield.
+  class WavefieldPrivate
   {
     /// \brief Wave parameters
     public: std::shared_ptr<WaveParameters> params;
@@ -59,7 +55,7 @@ namespace marine
   };
 
   /////////////////////////////////////////////////
-  WavefieldOceanTile::~WavefieldOceanTile()
+  Wavefield::~Wavefield()
   {
     // @TODO: relocate
     // this->data->waveWindSub.reset();
@@ -67,17 +63,16 @@ namespace marine
   }
 
   /////////////////////////////////////////////////
-  WavefieldOceanTile::WavefieldOceanTile(
-    const std::string& _name) :
-    data(new WavefieldOceanTilePrivate())
+  Wavefield::Wavefield() :
+    data(new WavefieldPrivate())
   {
-    ignmsg << "Constructing WavefieldOceanTile..." <<  std::endl;
+    ignmsg << "Constructing Wavefield..." <<  std::endl;
 
       // TODO: relocate
       /// \todo(srmainwaring): port to ignition
       // this->data->node;
       // this->data->waveWindSub = this->data->node.Subscribe(
-      //   "~/wave/wind", &WavefieldOceanTile::OnWaveWindMsg, this);
+      //   "~/wave/wind", &Wavefield::OnWaveWindMsg, this);
 
     int N = 128;
     int NPlus1 = N + 1;
@@ -102,11 +97,11 @@ namespace marine
     // Update
     this->Update(0.0);
 
-    ignmsg << "Done constructing WavefieldOceanTile." <<  std::endl;
+    ignmsg << "Done constructing Wavefield." <<  std::endl;
   }
 
   /////////////////////////////////////////////////
-  bool WavefieldOceanTile::Height(const cgal::Point3& point, double& height) const
+  bool Wavefield::Height(const cgal::Point3& point, double& height) const
   {
     // @TODO the calculation assumes that the tile origin is at its center.
     const double L = this->data->oceanTile->TileSize();
@@ -123,23 +118,23 @@ namespace marine
     // Obtain the point modulo the tile dimensions
     cgal::Point3 moduloPoint(pmod(point.x()), pmod(point.y()), point.z());
 
-    return this->data->triangulatedGrid->Height(moduloPoint, height);    
+    return this->data->triangulatedGrid->Height(moduloPoint, height);
   }
 
   /////////////////////////////////////////////////
-  std::shared_ptr<const WaveParameters> WavefieldOceanTile::GetParameters() const
+  std::shared_ptr<const WaveParameters> Wavefield::GetParameters() const
   {
     return this->data->params;
   }
 
   /////////////////////////////////////////////////
-  void WavefieldOceanTile::SetParameters(std::shared_ptr<WaveParameters> _params) const
+  void Wavefield::SetParameters(std::shared_ptr<WaveParameters> _params) const
   {
-    this->data->params = _params;    
+    this->data->params = _params;
   }
 
   /////////////////////////////////////////////////
-  void WavefieldOceanTile::Update(double _time)
+  void Wavefield::Update(double _time)
   {
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
@@ -152,12 +147,10 @@ namespace marine
   }
 
 #if 0
-  /// \todo(srmainwaring): port to ignition 
-  void WavefieldOceanTile::OnWaveWindMsg(ConstParam_VPtr &_msg)
+  /// \todo(srmainwaring): port to ignition
+  void Wavefield::OnWaveWindMsg(ConstParam_VPtr &_msg)
   {
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    GZ_ASSERT(_msg != nullptr, "Message must not be null");
 
     // Get parameters from message
     double wind_angle = 0.0;
@@ -170,7 +163,7 @@ namespace marine
     double wind_vel_y = wind_speed * std::sin(wind_angle);
 
     // @DEBUG_INFO
-    gzmsg << "WavefieldOceanTile received message on topic ["
+    gzmsg << "Wavefield received message on topic ["
       << this->data->waveWindSub->GetTopic() << "]" << std::endl;
     gzmsg << "wind_angle: " << wind_angle << std::endl;
     gzmsg << "wind_speed: " << wind_speed << std::endl;

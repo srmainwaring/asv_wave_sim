@@ -704,7 +704,8 @@ bool HydrodynamicsPrivate::InitWavefield(EntityComponentManager &_ecm)
 {
   /// \todo - remove hardcoded name
   // Retrieve the wavefield entiry using the Name component
-  this->wavefieldEntity = _ecm.EntityByComponents(components::Name("WAVEFIELD"));
+  std::string entityName = "wavefield";
+  this->wavefieldEntity = _ecm.EntityByComponents(components::Name(entityName));
   // this->wavefieldEntity = _ecm.EntityByComponents(marine::components::Wavefield());
   if (this->wavefieldEntity == kNullEntity)  
   {
