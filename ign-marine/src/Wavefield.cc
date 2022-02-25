@@ -43,7 +43,7 @@ namespace marine
     public: std::shared_ptr<WaveParameters> params;
 
     /// \brief Ocean tile
-    public: std::unique_ptr<OceanTile> oceanTile;
+    public: std::unique_ptr<physics::OceanTile> oceanTile;
 
     /// \brief The current position of the wave field.
     public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
@@ -85,7 +85,7 @@ namespace marine
 
     // OceanTile
     ignmsg << "Creating OceanTile." <<  std::endl;
-    this->data->oceanTile.reset(new OceanTile(N, L, false));
+    this->data->oceanTile.reset(new physics::OceanTile(N, L, false));
     this->data->oceanTile->SetWindVelocity(u, 0.0);
     this->data->oceanTile->Create();
     this->data->oceanTile->Update(0.0);

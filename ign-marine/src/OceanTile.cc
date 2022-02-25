@@ -16,6 +16,7 @@
 #include "ignition/marine/OceanTile.hh"
 
 #include "ignition/common/SubMeshWithTangents.hh"
+#include "ignition/marine/Geometry.hh"
 #include "ignition/marine/WaveSimulation.hh"
 #include "ignition/marine/WaveSimulationFFTW.hh"
 #include "ignition/marine/WaveSimulationSinusoid.hh"
@@ -33,6 +34,21 @@ namespace ignition
 {
 namespace marine
 {
+
+namespace vector
+{
+  /// \brief Zero vectors
+  template <typename Vector3>
+  Vector3 Zero;
+
+  template <>
+  math::Vector3d Zero<math::Vector3d> = math::Vector3d::Zero;
+
+  template <>
+  cgal::Point3 Zero<cgal::Point3> = cgal::Point3(0.0, 0.0, 0.0);
+}
+
+template <typename Vector3>
 class OceanTilePrivate
 {
 public:
@@ -50,14 +66,14 @@ public:
   double                      mTileSize;        /// \brief Tile size in world units
   double                      mSpacing;         /// \brief Space between vertices
 
-  std::vector<math::Vector3d> mVertices0;
-  std::vector<math::Vector3d> mVertices;
+  std::vector<Vector3>        mVertices0;
+  std::vector<Vector3>        mVertices;
   std::vector<math::Vector3i> mFaces;
 
-  std::vector<math::Vector3d> mTangents;
+  std::vector<Vector3>        mTangents;
   std::vector<math::Vector2d> mTexCoords;
-  std::vector<math::Vector3d> mBitangents;
-  std::vector<math::Vector3d> mNormals;
+  std::vector<Vector3>        mBitangents;
+  std::vector<Vector3>        mNormals;
 
   std::string                 mAboveOceanMeshName = "AboveOceanTileMesh";
   std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
@@ -105,23 +121,23 @@ public:
   // Lesson 8: Tangent Space: http://jerome.jouvie.free.fr/opengl-tutorials/Lesson8.php
   //
   static void ComputeTBN(
-      const math::Vector3d& _p0, 
-      const math::Vector3d& _p1, 
-      const math::Vector3d& _p2, 
+      const Vector3& _p0, 
+      const Vector3& _p1, 
+      const Vector3& _p2, 
       const math::Vector2d& _uv0, 
       const math::Vector2d& _uv1, 
       const math::Vector2d& _uv2, 
-      math::Vector3d& _tangent, 
-      math::Vector3d& _bitangent, 
-      math::Vector3d& _normal);
+      Vector3& _tangent, 
+      Vector3& _bitangent, 
+      Vector3& _normal);
 
   static void ComputeTBN(
-      const std::vector<math::Vector3d>& _vertices,
+      const std::vector<Vector3>& _vertices,
       const std::vector<math::Vector2d>& _texCoords,
       const std::vector<math::Vector3i>& _faces, 
-      std::vector<math::Vector3d>& _tangents,
-      std::vector<math::Vector3d>& _bitangents,
-      std::vector<math::Vector3d>& _normals);
+      std::vector<Vector3>& _tangents,
+      std::vector<Vector3>& _bitangents,
+      std::vector<Vector3>& _normals);
 
   void Update(double _time);
 
@@ -141,12 +157,14 @@ public:
 };
 
 //////////////////////////////////////////////////
-OceanTilePrivate::~OceanTilePrivate()
+template <typename Vector3>
+OceanTilePrivate<Vector3>::~OceanTilePrivate()
 {
 }
 
 //////////////////////////////////////////////////
-OceanTilePrivate::OceanTilePrivate(
+template <typename Vector3>
+OceanTilePrivate<Vector3>::OceanTilePrivate(
 unsigned int _N,
 double _L,
 bool _hasVisuals) :
@@ -224,13 +242,15 @@ bool _hasVisuals) :
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::SetWindVelocity(double _ux, double _uy)
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::SetWindVelocity(double _ux, double _uy)
 {
   mWaveSim->SetWindVelocity(_ux, _uy);
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::Create()
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::Create()
 {
   ignmsg << "OceanTile: create tile\n";
   ignmsg << "Resolution:    " << mResolution  << "\n";
@@ -265,7 +285,7 @@ void OceanTilePrivate::Create()
       // Vertex position
       double px = ix * lx - Lx/2.0;
 
-      math::Vector3d vertex(px, py, 0);
+      Vector3 vertex(px, py, 0);
       mVertices0.push_back(vertex);
       mVertices.push_back(vertex);
       // Texture coordinates (u, v): top left: (0, 0), bottom right: (1, 1)
@@ -294,9 +314,9 @@ void OceanTilePrivate::Create()
 
   ignmsg << "OceanTile: assigning texture coords\n";
   // Texture Coordinates
-  mTangents.assign(mVertices.size(), math::Vector3d::Zero);
-  mBitangents.assign(mVertices.size(), math::Vector3d::Zero);
-  mNormals.assign(mVertices.size(), math::Vector3d::Zero);
+  mTangents.assign(mVertices.size(), vector::Zero<Vector3>);
+  mBitangents.assign(mVertices.size(), vector::Zero<Vector3>);
+  mNormals.assign(mVertices.size(), vector::Zero<Vector3>);
 
   // \todo(srmainwaring): remove - this to test static model
   UpdateVertices(5.0);
@@ -313,14 +333,16 @@ void OceanTilePrivate::Create()
 }
 
 //////////////////////////////////////////////////
-common::Mesh * OceanTilePrivate::CreateMesh()
+template <typename Vector3>
+common::Mesh * OceanTilePrivate<Vector3>::CreateMesh()
 {
   this->Create();
   return CreateMesh(this->mAboveOceanMeshName, 0.0, false);
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::ComputeNormals()
+template <>
+void OceanTilePrivate<math::Vector3d>::ComputeNormals()
 {
   // ignmsg << "OceanTile: compute normals\n";
 
@@ -357,7 +379,16 @@ void OceanTilePrivate::ComputeNormals()
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::ComputeTangentSpace()
+template <>
+void OceanTilePrivate<cgal::Point3>::ComputeNormals()
+{
+  // Not used
+  ignerr << "No implementation of OceanTilePrivate<cgal::Point3>::ComputeNormals\n";
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::ComputeTangentSpace()
 {
   // ignmsg << "OceanTile: compute tangent space\n";
 
@@ -378,7 +409,8 @@ void OceanTilePrivate::ComputeTangentSpace()
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::ComputeTBN(
+template <>
+void OceanTilePrivate<math::Vector3d>::ComputeTBN(
     const math::Vector3d& _p0, 
     const math::Vector3d& _p1, 
     const math::Vector3d& _p2, 
@@ -414,7 +446,25 @@ void OceanTilePrivate::ComputeTBN(
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::ComputeTBN(
+template <>
+void OceanTilePrivate<cgal::Point3>::ComputeTBN(
+    const cgal::Point3& _p0, 
+    const cgal::Point3& _p1, 
+    const cgal::Point3& _p2, 
+    const math::Vector2d& _uv0, 
+    const math::Vector2d& _uv1, 
+    const math::Vector2d& _uv2, 
+    cgal::Point3& _tangent, 
+    cgal::Point3& _bitangent, 
+    cgal::Point3& _normal)
+{
+  // Not used
+  ignerr << "No implementation of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTilePrivate<math::Vector3d>::ComputeTBN(
     const std::vector<math::Vector3d>& _vertices,
     const std::vector<math::Vector2d>& _texCoords,
     const std::vector<math::Vector3i>& _faces, 
@@ -469,7 +519,22 @@ void OceanTilePrivate::ComputeTBN(
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::Update(double _time)
+template <>
+void OceanTilePrivate<cgal::Point3>::ComputeTBN(
+    const std::vector<cgal::Point3>& _vertices,
+    const std::vector<math::Vector2d>& _texCoords,
+    const std::vector<math::Vector3i>& _faces, 
+    std::vector<cgal::Point3>& _tangents,
+    std::vector<cgal::Point3>& _bitangents,
+    std::vector<cgal::Point3>& _normals)
+{
+  // Not used
+  ignerr << "No implementation of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::Update(double _time)
 {
   UpdateVertices(_time);
 
@@ -483,7 +548,8 @@ void OceanTilePrivate::Update(double _time)
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::UpdateVertex(size_t idx0, size_t idx1)
+template <>
+void OceanTilePrivate<math::Vector3d>::UpdateVertex(size_t idx0, size_t idx1)
 {
   // 1. Update vertex
   double h  = mHeights[idx1];
@@ -498,7 +564,24 @@ void OceanTilePrivate::UpdateVertex(size_t idx0, size_t idx1)
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::UpdateVertexAndTangents(size_t idx0, size_t idx1)
+template <>
+void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t idx0, size_t idx1)
+{
+  // 1. Update vertex
+  double h  = mHeights[idx1];
+  double sx = mDisplacementsX[idx1];
+  double sy = mDisplacementsY[idx1];
+
+  auto&& v0 = mVertices0[idx0];
+  mVertices[idx0] = cgal::Point3(
+    v0.x() + sx,
+    v0.y() + sy,
+    v0.z() + h);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(size_t idx0, size_t idx1)
 {
   // 1. Update vertex
   double h  = mHeights[idx1];
@@ -522,7 +605,7 @@ void OceanTilePrivate::UpdateVertexAndTangents(size_t idx0, size_t idx1)
   auto&& t = mTangents[idx0];
   t.X() = dsxdx + 1.0;
   t.Y() = dsxdy;
-  t.Z() = dhdx;      
+  t.Z() = dhdx;
   
   auto&& b = mBitangents[idx0];
   b.X() = dsxdy;
@@ -531,7 +614,42 @@ void OceanTilePrivate::UpdateVertexAndTangents(size_t idx0, size_t idx1)
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::UpdateVertices(double _time)
+template <>
+void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(size_t idx0, size_t idx1)
+{
+  // 1. Update vertex
+  double h  = mHeights[idx1];
+  double sx = mDisplacementsX[idx1];
+  double sy = mDisplacementsY[idx1];
+
+  auto&& v0 = mVertices0[idx0];
+  auto&& v  = mVertices[idx0] = cgal::Point3(
+    v0.x() + sx,
+    v0.y() + sy,
+    v0.z() + h);
+
+  // 2. Update tangent and bitangent vectors (not normalised).
+  // @TODO Check sign for displacement terms
+  double dhdx  = mDhdx[idx1]; 
+  double dhdy  = mDhdy[idx1]; 
+  double dsxdx = mDxdx[idx1]; 
+  double dsydy = mDydy[idx1]; 
+  double dsxdy = mDxdy[idx1]; 
+
+  mTangents[idx0] = cgal::Point3(
+    dsxdx + 1.0,
+    dsxdy,
+    dhdx);
+  
+  mBitangents[idx0] = cgal::Point3(
+    dsxdy,
+    dsydy + 1.0,
+    dhdy);
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
 {
   mWaveSim->SetTime(_time);
 
@@ -623,7 +741,8 @@ void OceanTilePrivate::UpdateVertices(double _time)
 }
 
 //////////////////////////////////////////////////
-common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _offsetZ,
+template <typename Vector3>
+common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(const std::string &_name, double _offsetZ,
     bool _reverseOrientation)
 {
   // Logging
@@ -686,7 +805,8 @@ common::Mesh * OceanTilePrivate::CreateMesh(const std::string &_name, double _of
 }
 
 //////////////////////////////////////////////////
-void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
+template <>
+void OceanTilePrivate<math::Vector3d>::UpdateMesh(double _time, common::Mesh *_mesh)
 {
   this->Update(_time);
 
@@ -714,94 +834,215 @@ void OceanTilePrivate::UpdateMesh(double _time, common::Mesh *_mesh)
 }
 
 //////////////////////////////////////////////////
+// Specialisation for math::Vector3d
 //////////////////////////////////////////////////
-OceanTile::~OceanTile()
+template <>
+OceanTileT<math::Vector3d>::~OceanTileT()
 {
 }
 
 //////////////////////////////////////////////////
-OceanTile::OceanTile(unsigned int _N, double _L, bool _hasVisuals) :
-    dataPtr(std::make_unique<OceanTilePrivate>(_N, _L, _hasVisuals))
+template <>
+OceanTileT<math::Vector3d>::OceanTileT(unsigned int _N, double _L, bool _hasVisuals) :
+    dataPtr(std::make_unique<OceanTilePrivate<math::Vector3d>>(_N, _L, _hasVisuals))
 {
 }
 
 //////////////////////////////////////////////////
-void OceanTile::SetWindVelocity(double _ux, double _uy)
+template <>
+void OceanTileT<math::Vector3d>::SetWindVelocity(double _ux, double _uy)
 {
   this->dataPtr->SetWindVelocity(_ux, _uy);
 }
 
 //////////////////////////////////////////////////
-double OceanTile::TileSize() const
+template <>
+double OceanTileT<math::Vector3d>::TileSize() const
 {
   return this->dataPtr->mTileSize;
 }
 
 //////////////////////////////////////////////////
-unsigned int OceanTile::Resolution() const
+template <>
+unsigned int OceanTileT<math::Vector3d>::Resolution() const
 {
   return this->dataPtr->mResolution;
 }
 
 //////////////////////////////////////////////////
-void OceanTile::Create()
+template <>
+void OceanTileT<math::Vector3d>::Create()
 {
   return this->dataPtr->Create();
 }
 
 //////////////////////////////////////////////////
-common::Mesh* OceanTile::CreateMesh()
+template <>
+common::Mesh* OceanTileT<math::Vector3d>::CreateMesh()
 {
   return this->dataPtr->CreateMesh();
 }
 
 //////////////////////////////////////////////////
-void OceanTile::Update(double _time)
+template <>
+void OceanTileT<math::Vector3d>::Update(double _time)
 {
   this->dataPtr->Update(_time);
 }
 
 //////////////////////////////////////////////////
-void OceanTile::UpdateMesh(double _time, common::Mesh *_mesh)
+template <>
+void OceanTileT<math::Vector3d>::UpdateMesh(double _time, common::Mesh *_mesh)
 {
   this->dataPtr->UpdateMesh(_time, _mesh);
 }
 
 //////////////////////////////////////////////////
-unsigned int OceanTile::VertexCount() const
+template <>
+unsigned int OceanTileT<math::Vector3d>::VertexCount() const
 {
   return this->dataPtr->mVertices.size();
 }
 
 //////////////////////////////////////////////////
-math::Vector3d OceanTile::Vertex(unsigned int _index) const
+template <>
+math::Vector3d OceanTileT<math::Vector3d>::Vertex(unsigned int _index) const
 {
   return this->dataPtr->mVertices[_index];
 }
 
 //////////////////////////////////////////////////
-math::Vector2d OceanTile::UV0(unsigned int _index) const
+template <>
+math::Vector2d OceanTileT<math::Vector3d>::UV0(unsigned int _index) const
 {
   return this->dataPtr->mTexCoords[_index];
 }
 
 //////////////////////////////////////////////////
-unsigned int OceanTile::FaceCount() const
+template <>
+unsigned int OceanTileT<math::Vector3d>::FaceCount() const
 {
   return this->dataPtr->mFaces.size();
 }
 
 //////////////////////////////////////////////////
-math::Vector3i OceanTile::Face(unsigned int _index) const
+template <>
+math::Vector3i OceanTileT<math::Vector3d>::Face(unsigned int _index) const
 {
   return this->dataPtr->mFaces[_index];
 }
 
 //////////////////////////////////////////////////
-const std::vector<math::Vector3d>& OceanTile::Vertices() const
+template <>
+const std::vector<math::Vector3d>& OceanTileT<math::Vector3d>::Vertices() const
 {
   return this->dataPtr->mVertices;
 }
 
+//////////////////////////////////////////////////
+// Specialisation for cgal::Point3
+//////////////////////////////////////////////////
+template <>
+OceanTileT<cgal::Point3>::~OceanTileT()
+{
+}
+
+//////////////////////////////////////////////////
+template <>
+OceanTileT<cgal::Point3>::OceanTileT(unsigned int _N, double _L, bool _hasVisuals) :
+    dataPtr(std::make_unique<OceanTilePrivate<cgal::Point3>>(_N, _L, _hasVisuals))
+{
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::SetWindVelocity(double _ux, double _uy)
+{
+  this->dataPtr->SetWindVelocity(_ux, _uy);
+}
+
+//////////////////////////////////////////////////
+template <>
+double OceanTileT<cgal::Point3>::TileSize() const
+{
+  return this->dataPtr->mTileSize;
+}
+
+//////////////////////////////////////////////////
+template <>
+unsigned int OceanTileT<cgal::Point3>::Resolution() const
+{
+  return this->dataPtr->mResolution;
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::Create()
+{
+  return this->dataPtr->Create();
+}
+
+//////////////////////////////////////////////////
+template <>
+common::Mesh* OceanTileT<cgal::Point3>::CreateMesh()
+{
+  return this->dataPtr->CreateMesh();
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::Update(double _time)
+{
+  this->dataPtr->Update(_time);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::UpdateMesh(double _time, common::Mesh *_mesh)
+{
+  this->dataPtr->UpdateMesh(_time, _mesh);
+}
+
+//////////////////////////////////////////////////
+template <>
+unsigned int OceanTileT<cgal::Point3>::VertexCount() const
+{
+  return this->dataPtr->mVertices.size();
+}
+
+//////////////////////////////////////////////////
+template <>
+cgal::Point3 OceanTileT<cgal::Point3>::Vertex(unsigned int _index) const
+{
+  return this->dataPtr->mVertices[_index];
+}
+
+//////////////////////////////////////////////////
+template <>
+math::Vector2d OceanTileT<cgal::Point3>::UV0(unsigned int _index) const
+{
+  return this->dataPtr->mTexCoords[_index];
+}
+
+//////////////////////////////////////////////////
+template <>
+unsigned int OceanTileT<cgal::Point3>::FaceCount() const
+{
+  return this->dataPtr->mFaces.size();
+}
+
+//////////////////////////////////////////////////
+template <>
+math::Vector3i OceanTileT<cgal::Point3>::Face(unsigned int _index) const
+{
+  return this->dataPtr->mFaces[_index];
+}
+
+//////////////////////////////////////////////////
+template <>
+const std::vector<cgal::Point3>& OceanTileT<cgal::Point3>::Vertices() const
+{
+  return this->dataPtr->mVertices;
+}
 }
 }

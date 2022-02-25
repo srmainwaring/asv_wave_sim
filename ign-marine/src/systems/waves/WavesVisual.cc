@@ -267,7 +267,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
   // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
 
-  public: marine::OceanTilePtr oceanTile;
+  public: marine::visual::OceanTilePtr oceanTile;
 
   /// \brief Used in DynamicMesh example
   public: common::MeshPtr oceanTileMesh;
@@ -459,7 +459,7 @@ void WavesVisualPrivate::OnUpdate()
           ignerr << "WavesVisual: invalid material\n";
 
         // create ocean tile
-        this->oceanTile.reset(new marine::OceanTile(N, L));
+        this->oceanTile.reset(new marine::visual::OceanTile(N, L));
         this->oceanTile->SetWindVelocity(u, 0.0);
 
         // create mesh - do not store in MeshManager as it will be modified

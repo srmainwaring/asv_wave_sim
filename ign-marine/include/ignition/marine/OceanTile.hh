@@ -16,6 +16,8 @@
 #ifndef IGNITION_MARINE_OCEANTILE_HH_
 #define IGNITION_MARINE_OCEANTILE_HH_
 
+#include "ignition/marine/CGALTypes.hh"
+
 #include <ignition/math.hh>
 #include <ignition/common.hh>
 #include <ignition/common/Mesh.hh>
@@ -26,13 +28,15 @@ namespace ignition
 {
 namespace marine
 {
+  template <typename Vector3>
   class OceanTilePrivate;
 
-  class OceanTile
+  template <typename Vector3>
+  class OceanTileT
   {
-    public: virtual ~OceanTile();
+    public: virtual ~OceanTileT();
 
-    public: OceanTile(unsigned int _N, double _L, bool _hasVisuals=true);
+    public: OceanTileT(unsigned int _N, double _L, bool _hasVisuals=true);
 
     /// \brief The tile size (or length) L. 
     double TileSize() const;
@@ -55,19 +59,25 @@ namespace marine
     ////////////////////////////////////////
     // Access to vertices, texture coordinates and faces
     public: unsigned int VertexCount() const;
-    public: math::Vector3d Vertex(unsigned int _index) const;
+    public: Vector3 Vertex(unsigned int _index) const;
     public: math::Vector2d UV0(unsigned int _index) const;
-
     public: unsigned int FaceCount() const;
     public: math::Vector3i Face(unsigned int _index) const;
+    public: const std::vector<Vector3>& Vertices() const;
 
-    public: const std::vector<math::Vector3d>& Vertices() const;
-
-    private: std::unique_ptr<OceanTilePrivate> dataPtr;
+    private: std::unique_ptr<OceanTilePrivate<Vector3>> dataPtr;
   };
 
-  typedef std::shared_ptr<OceanTile> OceanTilePtr;
-
+  namespace visual
+  {
+    typedef OceanTileT<math::Vector3d> OceanTile;
+    typedef std::shared_ptr<OceanTile> OceanTilePtr;
+  }
+  namespace physics
+  {
+    typedef OceanTileT<cgal::Point3>   OceanTile;
+    typedef std::shared_ptr<OceanTile> OceanTilePtr;
+  }
 }
 }
 
