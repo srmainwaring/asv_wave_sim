@@ -16,6 +16,7 @@
 #include "WavesVisual.hh"
 
 #include "Ogre2OceanVisual.hh"
+#include "Ogre2OceanGeometry.hh"
 
 #include "ignition/marine/OceanTile.hh"
 
@@ -248,7 +249,10 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief Pointer to ocean visual
   public: rendering::VisualPtr oceanVisual;
-  public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
+  // public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
+
+  public: std::vector<rendering::VisualPtr> oceanVisuals;
+  public: rendering::Ogre2OceanGeometryPtr oceanGeometry;
 
   /// \brief Material used by this visual
   public: rendering::MaterialPtr material;
@@ -472,10 +476,22 @@ void WavesVisualPrivate::OnUpdate()
         // NOTE: this approach is not feasible - multiple copies of the mesh
         // rather than multiple visuals referencing one mesh and relocating it...
 
+        // create geometry
+        this->oceanGeometry =
+            std::make_shared<rendering::Ogre2OceanGeometry>();
+
+        unsigned int objId = 50000;
+        std::stringstream ss;
+        ss << "OceanGeometry(" << objId << ")";
+        std::string objName = ss.str();
+
+        this->oceanGeometry->InitObject(ogre2Scene, objId, objName);
+        this->oceanGeometry->LoadMesh(this->oceanTileMesh);
+
         // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
         const int nX = 3;
         const int nY = 3;
-        unsigned int id = 50000;
+        // unsigned int id = 50000;
         // for (int iy=-nY; iy<=nY; ++iy)
         int iy = 0;
         {
@@ -490,30 +506,41 @@ void WavesVisualPrivate::OnUpdate()
             );
 
             // create visual
-            rendering::Ogre2OceanVisualPtr ogreVisual =
-                std::make_shared<rendering::Ogre2OceanVisual>(); 
+            // rendering::Ogre2OceanVisualPtr ogreVisual =
+            //     std::make_shared<rendering::Ogre2OceanVisual>(); 
 
-            unsigned int objId = id++;
-            std::stringstream ss;
-            ss << "OceanVisual(" << objId << ")";
-            std::string objName = ss.str();
+            // unsigned int objId = id++;
+            // std::stringstream ss;
+            // ss << "OceanVisual(" << objId << ")";
+            // std::string objName = ss.str();
 
-            ogreVisual->InitObject(ogre2Scene, objId, objName);
-            ogreVisual->LoadMesh(this->oceanTileMesh);
+            // ogreVisual->InitObject(ogre2Scene, objId, objName);
+            // ogreVisual->LoadMesh(this->oceanTileMesh);
 
-            rendering::VisualPtr visual = ogreVisual;
-            visual->SetLocalPosition(position);
-    
-            if (!material)
-              visual->SetMaterial("OceanBlue");
-            else
-              visual->SetMaterial(material);
+            // rendering::VisualPtr visual = ogreVisual;
+            // visual->SetLocalPosition(position);
+
+            // if (!material)
+            //   visual->SetMaterial("OceanBlue");
+            // else
+            //   visual->SetMaterial(material);
 
             // add visual to parent
             // auto parent = this->visual->Parent();
             // parent->AddChild(visual);
 
-            oceanVisuals.push_back(ogreVisual);
+            // oceanVisuals.push_back(ogreVisual);
+
+            auto visual = this->scene->CreateVisual();
+            visual->AddGeometry(this->oceanGeometry);
+            visual->SetLocalPosition(position);
+
+            if (!material)
+              visual->SetMaterial("OceanBlue");
+            else
+              visual->SetMaterial(material);
+
+            oceanVisuals.push_back(visual);
           }
         }
       }
@@ -525,10 +552,11 @@ void WavesVisualPrivate::OnUpdate()
       this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
 
       // update the dynamic renderable (CPU => GPU)
-      for (auto& visual : this->oceanVisuals)
-      {
-        visual->UpdateMesh(this->oceanTileMesh);
-      }
+      // for (auto& visual : this->oceanVisuals)
+      // {
+      //   visual->UpdateMesh(this->oceanTileMesh);
+      // }
+      this->oceanGeometry->UpdateMesh(this->oceanTileMesh);
       break;
     }
     case OceanVisualMethod::OGRE2_MESH:
@@ -539,7 +567,7 @@ void WavesVisualPrivate::OnUpdate()
         ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
 
         // create ocean tile
-        this->oceanTile.reset(new marine::OceanTile(N, L));
+        this->oceanTile.reset(new marine::visual::OceanTile(N, L));
         this->oceanTile->SetWindVelocity(u, 0.0);
         std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
         auto mesh = newMesh.get();

@@ -17,21 +17,34 @@
 */
 
 #include "Ogre2OceanGeometry.hh"
+#include "Ogre2DynamicMesh.hh"
 
 #include "ignition/common/SubMeshWithTangents.hh"
+
+#include <ignition/common.hh>
+#include <ignition/rendering/ogre2/Ogre2Material.hh>
+
 
 /// \brief Private implementation
 class ignition::rendering::Ogre2OceanGeometryPrivate
 {
+  /// \brief OceanGeometry materal
+  public: Ogre2MaterialPtr material{nullptr};
+
+  /// \brief OceanGeometry dynamic mesh
+  public: Ogre2DynamicMeshPtr dynMesh{nullptr};
+
+  /// \brief Lazy evaluation flag
+  // public: bool dirty{true};
 };
 
 using namespace ignition;
 using namespace rendering;
 
 //////////////////////////////////////////////////
-Ogre2OceanGeometry::Ogre2OceanGeometry(ScenePtr _scene) :
-  Ogre2DynamicMesh(_scene),
-  dataPtr(std::make_unique<Ogre2OceanGeometryPrivate>())
+Ogre2OceanGeometry::Ogre2OceanGeometry() :
+    Ogre2Geometry(),
+    dataPtr(std::make_unique<Ogre2OceanGeometryPrivate>())
 {
 }
 
@@ -39,21 +52,90 @@ Ogre2OceanGeometry::Ogre2OceanGeometry(ScenePtr _scene) :
 Ogre2OceanGeometry::~Ogre2OceanGeometry() = default;
 
 //////////////////////////////////////////////////
+void Ogre2OceanGeometry::Init()
+{
+  Ogre2Geometry::Init();
+  // this->Update();
+}
+
+//////////////////////////////////////////////////
+void Ogre2OceanGeometry::Destroy()
+{
+  if (this->dataPtr->dynMesh)
+  {
+    this->dataPtr->dynMesh->Destroy();
+    this->dataPtr->dynMesh.reset();
+  }
+
+  if (this->dataPtr->material && this->Scene())
+  {
+    this->Scene()->DestroyMaterial(this->dataPtr->material);
+    this->dataPtr->material.reset();
+  }
+}
+
+//////////////////////////////////////////////////
+Ogre::MovableObject *Ogre2OceanGeometry::OgreObject() const
+{
+  if (this->dataPtr->dynMesh)
+    return this->dataPtr->dynMesh->OgreObject();
+  else
+    return nullptr;
+}
+
+//////////////////////////////////////////////////
+void Ogre2OceanGeometry::PreRender()
+{
+  // if (this->dataPtr->dirty)
+  // {
+  //   this->Update();
+  //   this->dataPtr->dirty = false;
+  // }
+}
+
+//////////////////////////////////////////////////
+MaterialPtr Ogre2OceanGeometry::Material() const
+{
+  return this->dataPtr->material;
+}
+
+//////////////////////////////////////////////////
+void Ogre2OceanGeometry::SetMaterial(MaterialPtr _material, bool _unique)
+{
+  _material = (_unique) ? _material->Clone() : _material;
+
+  Ogre2MaterialPtr derived =
+      std::dynamic_pointer_cast<Ogre2Material>(_material);
+
+  if (!derived)
+  {
+    ignerr << "Cannot assign material created by another render-engine"
+        << std::endl;
+
+    return;
+  }
+
+  // Set material for the underlying dynamic renderable
+  this->dataPtr->dynMesh->SetMaterial(derived, false);
+  this->dataPtr->material = derived;
+}
+
+//////////////////////////////////////////////////
 void Ogre2OceanGeometry::LoadMesh(common::MeshPtr _mesh)
 {
-  // if (!this->dataPtr->dynMesh)
-  // {
-  //   this->dataPtr->dynMesh.reset(
-  //     new Ogre2DynamicMesh(this->Scene()));
-  //   this->ogreNode->attachObject(this->dataPtr->dynMesh->OgreObject());
-  // }
+  if (!this->dataPtr->dynMesh)
+  {
+    this->dataPtr->dynMesh.reset(
+      new Ogre2DynamicMesh(this->Scene()));
+    // this->ogreNode->attachObject(this->dataPtr->dynMesh->OgreObject());
+  }
 
   // Clear any previous data from the grid and update
-  this->Clear();
-  this->Update();
+  this->dataPtr->dynMesh->Clear();
+  this->dataPtr->dynMesh->Update();
 
-  this->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
-  if (this->Material() == nullptr)
+  this->dataPtr->dynMesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
+  if (this->dataPtr->material == nullptr)
   {
     MaterialPtr defaultMat =
         this->Scene()->Material("Default/TransBlue")->Clone();
@@ -82,13 +164,13 @@ void Ogre2OceanGeometry::LoadMesh(common::MeshPtr _mesh)
     auto tangent = subMesh->Tangent(index);
     auto uv0 = subMesh->TexCoord(index);
 
-    this->AddPoint(vertex);
-    this->SetNormal(i, normal);
-    this->SetTangent(i, tangent);
-    this->SetUV0(i, uv0);
+    this->dataPtr->dynMesh->AddPoint(vertex);
+    this->dataPtr->dynMesh->SetNormal(i, normal);
+    this->dataPtr->dynMesh->SetTangent(i, tangent);
+    this->dataPtr->dynMesh->SetUV0(i, uv0);
   }
 
-  this->Update();
+  this->dataPtr->dynMesh->Update();
 }
 
 //////////////////////////////////////////////////
@@ -116,11 +198,24 @@ void Ogre2OceanGeometry::UpdateMesh(common::MeshPtr _mesh)
     auto tangent = subMesh->Tangent(index);
     auto uv0 = subMesh->TexCoord(index);
 
-    this->SetPoint(i, vertex);
-    this->SetNormal(i, normal);
-    this->SetTangent(i, tangent);
-    this->SetUV0(i, uv0);
+    this->dataPtr->dynMesh->SetPoint(i, vertex);
+    this->dataPtr->dynMesh->SetNormal(i, normal);
+    this->dataPtr->dynMesh->SetTangent(i, tangent);
+    this->dataPtr->dynMesh->SetUV0(i, uv0);
   }
 
-  this->Update();
+  this->dataPtr->dynMesh->Update();
+}
+
+//////////////////////////////////////////////////
+void Ogre2OceanGeometry::InitObject(Ogre2ScenePtr _scene,
+    unsigned int _id, const std::string &_name)
+{
+  this->id = _id;
+  this->name = _name;
+  this->scene = _scene;
+
+  // initialize object
+  this->Load();
+  this->Init();
 }
