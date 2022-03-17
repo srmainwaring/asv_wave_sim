@@ -14,7 +14,7 @@ System:
 | fft_waves | master| Legacy Gazebo11 version. Includes FFT wave generator, tiling, dynamic reconfigure (ROS). Shader uses InverseTransposeModel matrix to map TBNs |
 | gazebo11 | master | legacy Gazebo11 version. Includes early version of FFT wave generator |
 | havyard-842 | feature/ign-garden-wip | Add ship model (Havyard 842 tug) |
-| ign-garden-dyn-geom | master | First attempt at porting to Ignition - not persued |
+| ign-garden-dyn-geom | master | Replicate Ogre dynamic geometry sample in Ignition |
 | ign-garden-wip | master | Main port to Ignition |
 | ign-garden-wip | ign-garden-wip-shaders | Experiments with custom shaders |
 
