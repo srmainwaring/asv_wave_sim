@@ -8,7 +8,7 @@ This package contains plugins that support the simulation of waves and surface v
 
 This is a development branch `feature/ign-garden-wip` and represents a major reworking of the original wave simulation code developed for Gazebo9 and Gazebo11.
 
-A number of features available in the original version, such as updatiung parameters via messages, have not been migrated to Ignition. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
+A number of features available in the original version, such as updating parameters via messages, have not been migrated to Ignition. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
 
 There are changes in the way that the wave parameters need to be set, and it may not be possible to avoid breaking the existing interface used to specify trochoidal waves. This is still work in progress, and the current version has a fixed set of wave parameters.
 
