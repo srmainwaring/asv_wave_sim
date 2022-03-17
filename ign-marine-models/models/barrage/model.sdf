@@ -3,12 +3,7 @@
 
   <model name="barrage">
 
-    <!-- <plugin
-        filename="ignition-marine1-hydrodynamics-system"
-        name="ignition::gazebo::systems::Hydrodynamics">
-    </plugin> -->
-
-    <include>      
+    <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
       <name>asv_barrage_buoy0</name>
