@@ -1,17 +1,16 @@
-# ASV Wave Simulator
+# Ignition Marine
 
-This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
+This package contains plugins that support the simulation of waves and surface vessels in Ignition Gazebo.  
 
-![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_rs750_fft.jpg)
+![Ignition Marine v1](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v1.jpg)
 
 ## Notes
 
-This is a prototype branch `feature/fft_waves` which contains an updated wave engine
-that uses FFTs to generate the wavefield physics and visuals.
+This is a development branch `feature/ign-garden-wip` and represents a major reworking of the original wave simulation code developed for Gazebo9 and Gazebo11.
 
-There are changes in the way that the wave parameters need to be set, and it may
-not be possible to avoid breaking the existing interface used to specify trochoidal waves.
-This is still work in progress, and the current version has a fixed set of wave parameters.
+A number of features available in the original version, such as updatiung parameters via messages, have not been migrated to Ignition. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
+
+There are changes in the way that the wave parameters need to be set, and it may not be possible to avoid breaking the existing interface used to specify trochoidal waves. This is still work in progress, and the current version has a fixed set of wave parameters.
 
 The library has additional dependencies on two FFT libraries:
 
@@ -30,26 +29,20 @@ And on macOS with:
 brew fftw3 libclfft-dev libfftw3-dev
 ```
 
-Aside from adding the option to use a FFT generated wavefield, the major change is
-in the way that the visuals are generated. Previously the wave displacements for visuals
-were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically
-updated in the the library then pushed into the rendering engine. This means there is no
-need to maintain various sized meshes in the media files, however it does require working
-around Gazebos requirement for static meshes and there is a custom Visual that implements
-this. The OpenCL FFT library allows this work to be offloaded to the GPU when configured.
+Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated. Previously the wave displacements for visuals were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically updated in the the library then pushed into the rendering engine. This means there is no need to maintain various sized meshes in the media files, however it does require working around Gazebos requirement for static meshes and there is a custom Visual that implements this. The OpenCL FFT library allows this work to be offloaded to the GPU when configured.
 
 ## Dependencies
 
-You will need a working installation of ROS and Gazebo in order to use this package.
+You will need a working installation of Ignition Garden in order to use this package. This will require a from source build, see the [Ignition Garden documents](https://ignitionrobotics.org/docs/garden) for details.
 
+The dependency on ROS has been removed.
 
-## Ubuntu
+## Ubuntu (pending tests)
 
-- Ubuntu 18.04
-- ROS Melodic Morenia
-- Gazebo version 9.0.0
+- Ubuntu 20.04
+- Ignition Garden
 
-Install CGAL 4.13 libraries:
+Install CGAL:
 
 ```bash
 sudo apt-get install libcgal-dev
@@ -57,11 +50,10 @@ sudo apt-get install libcgal-dev
 
 ### macOS
 
-- OSX 10.11.6
-- ROS Melodic Morenia
-- Gazebo version 9.6.0
+- OSX 11.6.2
+- Ignition Garden
 
-Install CGAL 4.13 libraries:
+Install CGAL (5.3.1):
 
 ```bash
 brew install cgal
@@ -69,27 +61,23 @@ brew install cgal
 
 ## Installation
 
-### Create and configure a workspace
+We suppose the Ignition source has been cloned to a developer workspace `~/ign_ws/src`.
 
-Source your ROS installation:
+### Build Ignition
+
+On macOS you can build with the `RPATH` settings disabled. This allows you to run Gazebo from the install directory without having to disable SIP. From `~/ign_ws` run:
 
 ```bash
-source /opt/ros/melodic/setup.bash
-source /usr/local/share/gazebo-9/setup.bash
+colcon build --merge-install --cmake-args \
+-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+-DCMAKE_MACOSX_RPATH=FALSE \
+-DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib
 ```
 
-Create a catkin workspace:
+Then source the installation:
 
 ```bash
-mkdir -p asv_ws/src
-cd asv_ws
-catkin init
-```
-
-Configure catkin:
-
-```bash
-catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
+source ./install/setup.zsh
 ```
 
 ### Clone and build the package
@@ -97,80 +85,66 @@ catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 Clone the `asv_wave_sim` repository:
 
 ```bash
-cd src
-git clone https://github.com/srmainwaring/asv_wave_sim.git
+cd ~/ign_ws/src
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/ign-garden-wip
 ```
 
-Compile the packages:
+Compile the package:
 
 ```bash
-catkin build
+colcon build --cmake-args \
+-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+-DCMAKE_MACOSX_RPATH=FALSE \
+-DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib \
+--packages-select ignition-marine1
 ```
 
-or with tests:
+Then re-source the workspace:
 
 ```bash
-catkin build --catkin-make-args run_tests
+source ./install/setup.zsh
 ```
 
 ## Usage
 
-The wiki has details about how to configure and use the plugins:
-
-- [WavefieldPlugin](https://github.com/srmainwaring/asv_wave_sim/wiki/WavefieldPlugin)
-- [WavefieldVisualPlugin](https://github.com/srmainwaring/asv_wave_sim/wiki/WavefieldVisualPlugin)
-- [HydrodynamicsPlugin](https://github.com/srmainwaring/asv_wave_sim/wiki/HydrodynamicsPlugin)
-
-## Tests
-
-Manually run the tests:
+### Set environment variables
 
 ```bash
-./devel/lib/asv_wave_sim_gazebo_plugins/UNIT_Algorithm_TEST
-./devel/lib/asv_wave_sim_gazebo_plugins/UNIT_Geometry_TEST
-./devel/lib/asv_wave_sim_gazebo_plugins/UNIT_Grid_TEST
-./devel/lib/asv_wave_sim_gazebo_plugins/UNIT_Physics_TEST
-./devel/lib/asv_wave_sim_gazebo_plugins/UNIT_Wavefield_TEST
+# for future use - to support multiple ignition versions
+export IGNITION_VERSION=garden
+
+# not usually required as should default to localhost address
+export IGN_IP=127.0.0.1
+
+# ensure ignition finds the config for this installation
+export IGN_CONFIG_PATH=\
+$HOME/ign_ws/install/share/ignition
+
+# ensure the model and world files are found
+export IGN_GAZEBO_RESOURCE_PATH=\
+$HOME/ign_ws/src/asv_wave_sim/ign-marine-models/models:\
+$HOME/ign_ws/src/asv_wave_sim/ign-marine-models/world_models:\
+$HOME/ign_ws/src/asv_wave_sim/ign-marine-models/worlds
 ```
 
 ## Examples
 
-![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_box_example.gif)
+Launch an Ignition Gazebo session.
 
-Launch a Gazebo session with `roslaunch`:
-
-```bash
-roslaunch asv_wave_gazebo ocean_world.launch verbose:=true
-```
-
-Publish a wave parameters message:
+Server:
 
 ```bash
-./devel/lib/asv_wave_sim_gazebo_plugins/WaveMsgPublisher \
-  --number 3 \
-  --amplitude 1 \
-  --period 7 \
-  --direction 1 1 \
-  --scale 2 \
-  --angle 1 \
-  --steepness 1
+ign gazebo -v4 -s -r waves.sdf
 ```
 
-Publish a hydrodynamics parameters message:
+Client:
 
 ```bash
-./devel/lib/asv_wave_sim_gazebo_plugins/HydrodynamicsMsgPublisher \
-  --model box \
-  --damping_on true \
-  --viscous_drag_on true \
-  --pressure_drag_on false \
-  --cDampL1 10 \
-  --cDampL2 1 \
-  --cDampR1 10 \
-  --cDampR2 1
+ign gazebo -v4 -g
 ```
 
-For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/wiki/Example) page in the wiki.
+The session should include a wave field and the floating objects depicted in the image at head of this document.
+
 
 ## Build Status
 
@@ -190,23 +164,15 @@ For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/w
 
 ## License
 
-This is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-This software is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-[GNU General Public License](LICENSE) for more details.
+This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the [GNU General Public License](LICENSE) for more details.
 
-This project makes use of other open source software, for full details see the
-file [LICENSE_THIRDPARTY](LICENSE_THIRDPARTY).
+This project makes use of other open source software, for full details see the file [LICENSE_THIRDPARTY](LICENSE_THIRDPARTY).
 
 ## Acknowledgments
 
 - Jacques Kerner's two part blog describing boat physics for games: [Water interaction model for boats in video games](https://www.gamasutra.com/view/news/237528/Water_interaction_model_for_boats_in_video_games.php) and [Water interaction model for boats in video games: Part 2](https://www.gamasutra.com/view/news/263237/Water_interaction_model_for_boats_in_video_games_Part_2.php).
 - The [CGAL](https://doc.cgal.org) libraries are used for the wave field and model meshes.
 - The [UUV Simulator](https://github.com/uuvsimulator/uuv_simulator) package for the orginal vertex shaders used in the wave field visuals.
-- The [VMRC](https://bitbucket.org/osrf/vmrc) package for textures and meshes used
-in the wave field visuals.
+- The [VMRC](https://bitbucket.org/osrf/vmrc) package for textures and meshes used in the wave field visuals.
