@@ -1,0 +1,140 @@
+<?xml version='1.0' ?>
+<sdf version="1.6">
+  <model name="waves">
+    <static>true</static>
+
+    <plugin
+        filename="ignition-marine1-waves-model-system"
+        name="ignition::gazebo::systems::WavesModel">
+    </plugin>
+
+    <link name="base_link">
+      <visual name="visual">
+        <geometry>
+          <sphere>
+            <radius>0.01</radius>
+          </sphere>
+        </geometry>
+
+        <!-- <geometry>
+          <box>
+            <size>1 1 1</size>
+          </box>
+        </geometry> -->
+
+        <!-- <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>10 10</size>
+          </plane>
+        </geometry> -->
+
+        <!-- <geometry>
+          <mesh>
+            <uri>materials/mesh.dae</uri>
+          </mesh>
+        </geometry> -->
+
+        <material>
+          <ambient>0.0 0.05 0.8 0.92</ambient>
+          <diffuse>0.0 0.1 0.7 0.92</diffuse>
+          <specular>0.7 0.7 0.7 0.92</specular>
+          <pbr>
+            <metal>
+              <!-- <albedo_map>materials/water.jpg</albedo_map> -->
+              <normal_map>materials/wave_normals.dds</normal_map>
+              <environment_map>materials/skybox_lowres.dds</environment_map>
+              <roughness>0.3</roughness>
+              <metalness>0.1</metalness>
+            </metal>
+          </pbr>
+        </material>
+
+        <plugin
+            filename="ignition-marine1-waves-visual-system"
+            name="ignition::gazebo::systems::WavesVisual">
+        </plugin>
+
+        <!-- 
+        <plugin
+            filename="ignition-gazebo-shader-param-system"
+            name="ignition::gazebo::systems::ShaderParam">
+          <shader>
+            <vertex>materials/waves_vs.metal</vertex>
+            <fragment>materials/waves_fs.metal</fragment>
+          </shader>
+
+          <param>
+            <shader>vertex</shader>
+            <name>worldviewproj_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>camera_position_object_space</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>rescale</name>
+            <value>0.5</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpScale</name>
+            <value>25.0 25.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpSpeed</name>
+            <value>0.01 0.01</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>t</name>
+            <value>TIME</value>
+          </param>
+
+          <param>
+            <shader>fragment</shader>
+            <name>deepColor</name>
+            <value>0.0 0.05 0.2 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>shallowColor</name>
+            <value>0.0 0.1 0.3 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>fresnelPower</name>
+            <value>5.0</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>hdrMultiplier</name>
+            <value>0.4</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>cubeMap</name>
+            <value>materials/skybox_lowres.dds</value>
+            <type>texture_cube</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>bumpMap</name>
+            <value>materials/wave_normals.dds</value>
+            <type>texture</type>
+          </param>
+        </plugin>
+        -->
+      </visual>
+    </link>
+  </model>
+</sdf>

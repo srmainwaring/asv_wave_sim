@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="ocean">
+    <static>true</static>
+    <plugin name="wavefield_plugin" filename="libWavefieldModelPlugin.so">
+      <static>false</static>
+      <update_rate>30</update_rate>
+      <size>1000 1000</size>
+      <cell_count>50 50</cell_count>
+      <wave>
+        <number>3</number>
+        <scale>2.5</scale>
+        <angle>0.3</angle>
+        <steepness>1.0</steepness>
+        <amplitude>1.0</amplitude>
+        <period>8.0</period>
+        <direction>1 1</direction>
+      </wave>
+      <markers>
+        <wave_patch>false</wave_patch>
+        <wave_patch_size>4 4</wave_patch_size>
+      </markers>
+    </plugin>
+
+    <link name="ocean_link">
+      <visual name="ocean_visual">
+        <plugin name="ocean_plugin" filename="libOceanVisualPlugin.so" />
+        <geometry>
+          <!-- 
+            The <empty> geometry element should work but gives rise to an error:
+            
+            [Err] [msgs.cc:2872] Unrecognized geometry type
+            
+            The message can be safely ignored.
+
+            See here also:
+            https://answers.gazebosim.org//question/13317/questions-about-the-appropriate-dealing-with-visualplugin/
+          -->
+          <empty />
+        </geometry>
+        <material>
+          <script>
+            <uri>model://ocean/materials/scripts/water.material</uri>
+            <name>Water/Water</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

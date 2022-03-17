@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="mumbles_head">
+    <static>true</static>
+    <link name="base_link">
+      <collision name="collision">
+        <pose>0 0 -10 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1000 1000 1</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <heightmap>
+            <use_terrain_paging>false</use_terrain_paging>
+            <texture>
+                <diffuse>materials/textures/dirt_diffusespecular.png</diffuse>
+                <normal>materials/textures/flat_normal.png</normal>
+                <size>2</size>
+              </texture>
+              <texture>
+                <diffuse>materials/textures/fungus_diffusespecular.png</diffuse>
+                <normal>materials/textures/flat_normal.png</normal>
+                <size>2</size>
+              </texture>
+              <texture>
+                <diffuse>materials/textures/grass_diffusespecular.png</diffuse>
+                <normal>materials/textures/flat_normal.png</normal>
+                <size>5</size>
+              </texture>
+              <blend>
+                <min_height>1</min_height>
+                <fade_dist>5</fade_dist>
+              </blend>
+              <blend>
+                <min_height>10</min_height>
+                <fade_dist>5</fade_dist>
+              </blend>
+            <uri>model://mumbles_head/materials/textures/mumbles_head_513.png</uri>
+            <size>1000 1000 250</size>
+            <pos>0 0 -10</pos>
+          </heightmap>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

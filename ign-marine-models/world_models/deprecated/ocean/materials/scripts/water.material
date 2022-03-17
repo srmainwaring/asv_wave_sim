@@ -1,0 +1,116 @@
+
+vertex_program Water_VS glsl
+{
+  source ../programs/water.vert
+  // syntax glsl110
+}
+
+fragment_program Water_FS glsl
+{
+  source ../programs/water.frag
+  // syntax glsl110
+}
+
+vertex_program Foam_VS glsl
+{
+  source ../programs/foam.vert
+}
+
+fragment_program Foam_FS glsl
+{
+  source ../programs/foam.frag
+}
+
+material Water/Water
+{
+  // Distance, PixelCount
+  // lod_strategy PixelCount
+  // receive_shadows off
+  // transparency_casts_shadows off
+
+  technique GLSL
+  {
+    pass ocean_surface
+    {
+      scene_blend add
+      scene_blend alpha_blend
+      // polygon_mode wireframe
+      // polygon_mode solid
+      // cull_software back
+      // depth_check on
+      // depth_write on
+      // depth_func less_equal
+      // depth_bias 1.0 2.0
+      // transparent_sorting on
+
+      vertex_program_ref Water_VS
+      {
+        param_named_auto uModelViewProjection worldviewproj_matrix
+        param_named_auto uModel world_matrix
+        param_named_auto uView view_matrix
+        param_named_auto uProjection projection_matrix
+        param_named_auto uITModelMatrix inverse_transpose_world_matrix
+        param_named_auto uCameraPosition camera_position
+
+        // Make adjustments to the normal map:
+        // param_named uBumpScale float2 0.05 0.05
+        param_named uBumpScale float2 0.1 0.1
+        param_named uBumpSpeed float2 0.015 0.005
+        param_named_auto uTime time_0_x 100.0
+      }
+
+      fragment_program_ref Water_FS
+      {
+        param_named uDeepColor float4 0.0 0.05 0.3 1.0
+        param_named uShallowColor float4 0.0 0.5 1.0 1.0
+        param_named uReflectColor float4 0.95 1.0 1.0 1.0
+        param_named uReflectAmount float 0.5
+        param_named uReflectBlur float 0.0
+        param_named uWaterAmount float 0.3
+        param_named uFresnelPower float 5.0
+        param_named uFresnelBias float 0.1
+        param_named uHdrMultiplier float 0.4
+        param_named uNormalMap int 0
+        param_named uEnvMap int 1
+      }
+
+      texture_unit
+      {
+        texture ../textures/wave_normals.dds
+      }
+
+      texture_unit
+      {
+        texture ../textures/clouds.jpg cubic
+      }
+    }
+
+    // pass ocean_foam
+    // {
+    //   scene_blend add
+    //   // scene_blend alpha_blend
+      
+    //   vertex_program_ref Foam_VS
+    //   {
+    //     param_named_auto eyePos camera_position_object_space
+    //     param_named osgOcean_FoamScale float 0.25
+    //   }
+
+    //   fragment_program_ref Foam_FS
+    //   {
+    //     param_named osgOcean_FresnelMul float 0.15
+    //     param_named osgOcean_FoamCapBottom float 2.2
+    //     param_named osgOcean_FoamCapTop float 3.0
+    //     param_named osgOcean_FoamMap int 0
+    //   }
+
+    //   texture_unit
+    //   {
+    //     texture ../textures/sea_foam.png
+    //     filtering linear linear linear
+    //   }
+    // }
+
+  }
+}
+
