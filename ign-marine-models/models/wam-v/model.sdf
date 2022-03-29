@@ -33,5 +33,205 @@
         </inertia>
       </inertial>
     </link>
+
+    <!--
+      Dimensions for a standard aft-thruster configuration based on the robot description
+      from the osrf/vrx project.
+
+      Links
+      https://github.com/osrf/vrx/blob/master/wamv_gazebo/urdf/thruster_layouts/wamv_aft_thrusters.xacro
+
+      Joints
+      https://github.com/osrf/vrx/blob/master/wamv_description/urdf/thrusters/engine.xacro 
+    
+    -->
+    <link name="left_engine_link">
+      <pose>-2.373776 1.027135 0.318237 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/engine.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="engine_vertical_axis_collision">
+        <pose>-0.16 0 -0.24 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.15 0.83</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="engine_rear_end_collision">
+        <pose>-0.34 0 0.12 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.15 0.12</size>
+          </box>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>15</mass>
+        <inertia>
+          <ixx>0.88924</ixx>
+          <ixy>0</ixy>
+          <iyy>0.911125</iyy>
+          <iyz>0</iyz>
+          <izz>0.078125</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="left_engine_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>left_engine_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <dynamics>
+          <damping>0.05</damping>
+          <friction>0.05</friction>
+        </dynamics>
+        <limit>
+          <lower>-1.570796</lower>
+          <upper>1.570796</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <link name="right_engine_link">
+      <pose>-2.373776 -1.027135 0.318237 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/engine.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="engine_vertical_axis_collision">
+        <pose>-0.16 0 -0.24 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.15 0.83</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="engine_rear_end_collision">
+        <pose>-0.34 0 0.12 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.15 0.12</size>
+          </box>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>15</mass>
+        <inertia>
+          <ixx>0.88924</ixx>
+          <ixy>0</ixy>
+          <iyy>0.911125</iyy>
+          <iyz>0</iyz>
+          <izz>0.078125</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="right_engine_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>right_engine_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <dynamics>
+          <damping>0.05</damping>
+          <friction>0.05</friction>
+        </dynamics>
+        <limit>
+          <lower>-1.570796</lower>
+          <upper>1.570796</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <link name="left_propeller_link">
+      <pose relative_to="left_propeller_joint">0 0 0 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <pose>-0.08 0 0 0 1.570796 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.18</length>
+            <radius>0.24</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.008545</ixx>
+          <ixy>0</ixy>
+          <iyy>0.008545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0144</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="left_propeller_joint" type="revolute">
+      <pose relative_to="left_engine_link">-0.278156 0 -0.509371 0 0 0</pose>
+      <parent>left_engine_link</parent>
+      <child>left_propeller_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <dynamics>
+          <damping>0.05</damping>
+          <friction>0.05</friction>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <link name="right_propeller_link">
+      <pose relative_to="right_propeller_joint">0 0 0 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <pose>-0.08 0 0 0 1.570796 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.18</length>
+            <radius>0.24</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.008545</ixx>
+          <ixy>0</ixy>
+          <iyy>0.008545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0144</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="right_propeller_joint" type="revolute">
+      <pose relative_to="right_engine_link">-0.278156 0 -0.509371 0 0 0</pose>
+      <parent>right_engine_link</parent>
+      <child>right_propeller_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <dynamics>
+          <damping>0.05</damping>
+          <friction>0.05</friction>
+        </dynamics>
+      </axis>
+    </joint>
+
   </model>
 </sdf>
