@@ -2,11 +2,14 @@
 
 This package contains plugins that support the simulation of waves and surface vessels in Ignition Gazebo.  
 
-![Ignition Marine v1](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v1.jpg)
+![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v1.jpg)
+
+<!-- ![Ignition Marine](https://user-images.githubusercontent.com/24916364/160913834-90f9c03b-4098-4db1-a163-0f9cf1cedc18.png) -->
+
 
 ## Notes
 
-This is a development branch `feature/ign-garden-wip` and represents a major reworking of the original wave simulation code developed for Gazebo9 and Gazebo11.
+The branch `ign-marine` represents a major reworking of the original wave simulation code developed for Gazebo9 and Gazebo11.
 
 A number of features available in the original version, such as updating parameters via messages, have not been migrated to Ignition. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
 
