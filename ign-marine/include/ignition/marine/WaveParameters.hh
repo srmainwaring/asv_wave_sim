@@ -24,6 +24,7 @@
 #include <sdf/sdf.hh>
 
 #include <memory>
+#include <string>
 
 namespace ignition
 {
@@ -61,6 +62,15 @@ namespace marine
     /// \param[in] _sdf   The SDF Element tree containing the wave parameters.
     public: void SetFromSDF(sdf::Element& _sdf);
 
+    /// \brief The wave algorithm (options are: 'sinusoid', 'trochoid', 'fft').
+    public: std::string Algorithm() const;
+
+    /// \brief The size of the wave tile in metres (L).
+    public: double TileSize() const;
+
+    /// \brief The number of cells in the wave tile in each direction (N). 
+    public: size_t CellCount() const;
+
     /// \brief The number of wave components (3 max if visualisation required).
     public: size_t Number() const;
 
@@ -96,6 +106,24 @@ namespace marine
 
     /// \brief A two component vector specifiying the direction of the mean wave.
     public: math::Vector2d Direction() const;
+
+    /// \brief A two component vector specifiying the horizontal wind velocity.
+    public: math::Vector2d WindVelocity() const;
+
+    /// \brief Set the wave algorithm (options are: 'sinusoid', 'trochoid', 'fft').
+    ///
+    /// \param[in] _algorithm    The wave algorithm.
+    public: void SetAlgorithm(const std::string &_algorithm);
+
+    /// \brief Set the size of the wave tile in metres (L).
+    ///
+    /// \param[in] _L    The size of the wave tile.
+    public: void SetTileSize(double _L);
+
+    /// \brief Set the number of cells in the wave tile in each direction (N). 
+    ///
+    /// \param[in] _N    The number of cells.
+    public: void SetCellCount(size_t _N);
 
     /// \brief Set the number of wave components (3 max).
     ///
@@ -139,6 +167,11 @@ namespace marine
     ///
     /// \param[in] _direction The direction parameter, a two component vector.
     public: void SetDirection(const math::Vector2d& _direction);
+
+    /// \brief Set the horizontal wind velocity.
+    ///
+    /// \param[in] _windVelocity The wind velocity, a two component vector.
+    public: void SetWindVelocity(const math::Vector2d& _windVelocity);
 
     /// \brief Access the component angular frequencies.
     public: const std::vector<double>& AngularFrequency_V() const;

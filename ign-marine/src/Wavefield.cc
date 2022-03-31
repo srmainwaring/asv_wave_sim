@@ -48,7 +48,7 @@ namespace marine
     /// \brief The current position of the wave field.
     public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
 
-    // @TODO: relocate
+    /// \todo(srmainwaring): port to ignition
     public: std::recursive_mutex mutex;
     // public: ignition::transport::Node node;
     // public: ignition::transport::SubscriberPtr waveWindSub;
@@ -57,7 +57,7 @@ namespace marine
   /////////////////////////////////////////////////
   Wavefield::~Wavefield()
   {
-    // @TODO: relocate
+    /// \todo(srmainwaring): port to ignition
     // this->data->waveWindSub.reset();
     // this->data->node.reset();
   }
@@ -68,31 +68,15 @@ namespace marine
   {
     ignmsg << "Constructing Wavefield..." <<  std::endl;
 
-      // TODO: relocate
-      /// \todo(srmainwaring): port to ignition
-      // this->data->node;
-      // this->data->waveWindSub = this->data->node.Subscribe(
-      //   "~/wave/wind", &Wavefield::OnWaveWindMsg, this);
-
-    int N = 128;
-    int NPlus1 = N + 1;
-    double L = 256.0;
-    double u = 5.0;
+    /// \todo(srmainwaring): port to ignition
+    // this->data->node;
+    // this->data->waveWindSub = this->data->node.Subscribe(
+    //   "~/wave/wind", &Wavefield::OnWaveWindMsg, this);
 
     // Wave parameters
     ignmsg << "Creating WaveParameters." <<  std::endl;
-    this->data->params.reset(new WaveParameters());
-
-    // OceanTile
-    ignmsg << "Creating OceanTile." <<  std::endl;
-    this->data->oceanTile.reset(new physics::OceanTile(N, L, false));
-    this->data->oceanTile->SetWindVelocity(u, 0.0);
-    this->data->oceanTile->Create();
-    this->data->oceanTile->Update(0.0);
-
-    // Point Locator
-    ignmsg << "Creating triangulated grid." <<  std::endl;
-    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
+    auto params = std::make_shared<WaveParameters>();
+    this->SetParameters(params);
 
     // Update
     this->Update(0.0);
@@ -103,7 +87,7 @@ namespace marine
   /////////////////////////////////////////////////
   bool Wavefield::Height(const cgal::Point3& point, double& height) const
   {
-    // @TODO the calculation assumes that the tile origin is at its center.
+    /// \todo(srmainwaring) the calculation assumes that the tile origin is at its center.
     const double L = this->data->oceanTile->TileSize();
     const double LOver2 = L/2.0;
 
@@ -131,6 +115,25 @@ namespace marine
   void Wavefield::SetParameters(std::shared_ptr<WaveParameters> _params) const
   {
     this->data->params = _params;
+
+    // Force an update of the ocean tile and point locator
+    // size_t N = 128;
+    // double L = 256.0;
+    // double u = 5.0;
+    size_t N = this->data->params->CellCount();
+    double L = this->data->params->TileSize();
+    double u = this->data->params->WindVelocity().X();
+    double v = this->data->params->WindVelocity().Y();
+
+    // OceanTile
+    ignmsg << "Creating OceanTile." <<  std::endl;
+    this->data->oceanTile.reset(new physics::OceanTile(N, L, false));
+    this->data->oceanTile->SetWindVelocity(u, v);
+    this->data->oceanTile->Create();
+
+    // Point Locator
+    ignmsg << "Creating triangulated grid." <<  std::endl;
+    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
   }
 
   /////////////////////////////////////////////////

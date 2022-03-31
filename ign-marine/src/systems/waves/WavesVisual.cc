@@ -19,6 +19,8 @@
 #include "Ogre2OceanGeometry.hh"
 
 #include "ignition/marine/OceanTile.hh"
+#include "ignition/marine/Utilities.hh"
+#include "ignition/marine/WaveParameters.hh"
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>
@@ -261,10 +263,16 @@ class ignition::gazebo::systems::WavesVisualPrivate
   public: rendering::ScenePtr scene;
 
   /// \brief Entity id of the visual
-  public: Entity entity = kNullEntity;
+  public: Entity entity{kNullEntity};
 
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
+
+  /// \brief Set the wavefield to be static [false].
+  public: bool isStatic{false};
+
+  /// \brief The wave parameters.
+  public: marine::WaveParametersPtr waveParams;
 
   /////////////////
   /// OceanTile
@@ -312,6 +320,18 @@ void WavesVisual::Configure(const Entity &_entity,
   this->dataPtr->entity = _entity;
   auto nameComp = _ecm.Component<components::Name>(_entity);
   this->dataPtr->visualName = nameComp->Data();
+
+  // Update parameters
+  this->dataPtr->isStatic = marine::Utilities::SdfParamBool(
+      *sdf,  "static", this->dataPtr->isStatic);
+
+  // Wave parameters
+  this->dataPtr->waveParams.reset(new marine::WaveParameters());
+  if (sdf->HasElement("wave"))
+  {
+    auto sdfWave = sdf->GetElement("wave");
+    this->dataPtr->waveParams->SetFromSDF(*sdfWave);
+  }
 
   // connect to the SceneUpdate event
   // the callback is executed in the rendering thread so do all
@@ -439,9 +459,13 @@ void WavesVisualPrivate::OnUpdate()
       this->currentSimTime).count()) * 1e-9;
 
   // ocean tile parameters
-  int N = 128;        // tile resolution
-  double L = 256.0;   // tile size
-  double u = 5.0;    // wind strength
+  // size_t N = 128;        // tile resolution
+  // double L = 256.0;   // tile size
+  // double u = 5.0;    // wind strength
+  size_t N = this->waveParams->CellCount();
+  double L = this->waveParams->TileSize();
+  double u = this->waveParams->WindVelocity().X();
+  double v = this->waveParams->WindVelocity().Y();
 
   OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY;
   switch (method)
@@ -464,7 +488,7 @@ void WavesVisualPrivate::OnUpdate()
 
         // create ocean tile
         this->oceanTile.reset(new marine::visual::OceanTile(N, L));
-        this->oceanTile->SetWindVelocity(u, 0.0);
+        this->oceanTile->SetWindVelocity(u, v);
 
         // create mesh - do not store in MeshManager as it will be modified
         this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
@@ -545,7 +569,7 @@ void WavesVisualPrivate::OnUpdate()
         }
       }
 
-      if (this->oceanVisuals.empty())
+      if (this->oceanVisuals.empty() || this->isStatic)
         return;
 
       // update the tile (recalculates vertices)

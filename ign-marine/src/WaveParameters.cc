@@ -56,43 +56,47 @@ namespace marine
   {
     /// \brief Constructor.
     public: WaveParametersPrivate():
-      number(1), 
-      scale(2.0),
-      angle(2.0*M_PI/10.0),
-      steepness(1.0),
-      amplitude(0.0), 
-      period(1.0), 
-      phase(0.0), 
-      direction(1, 0),
       angularFrequency(2.0*M_PI),
       wavelength(2*M_PI/Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)), 
       wavenumber(Physics::DeepWaterDispersionToWavenumber(2.0*M_PI))
     {
     }
 
+    /// \brief The wave algorithm.
+    public: std::string algorithm{"fft"};
+
+    /// \brief The size of the wave tile.
+    public: double tileSize{256.0};
+
+    /// \brief The size of the wave tile.
+    public: size_t cellCount{128};
+
     /// \brief The number of component waves.
-    public: size_t number;
+    public: size_t number{1};
 
     /// \brief Set the scale of the largest and smallest waves. 
-    public: double scale;
+    public: double scale{2.0};
 
     /// \brief Set the angle between component waves and the mean direction.
-    public: double angle;
+    public: double angle{2.0*M_PI/10.0};
 
     /// \brief Control the wave steepness. 0 is sine waves, 1 is Gerstner waves.
-    public: double steepness;
+    public: double steepness{1.0};
 
     /// \brief The mean wave amplitude [m].
-    public: double amplitude;
+    public: double amplitude{0.0};
 
     /// \brief The mean wave period [s]
-    public: double period;
+    public: double period{1.0};
 
     /// \brief The mean wve phase (not currently enabled).
-    public: double phase;
+    public: double phase{0.0};
 
     /// \brief The mean wave direction.
-    public: ignition::math::Vector2d direction;
+    public: math::Vector2d direction = math::Vector2d(1.0, 0.0);
+
+    /// \brief The horizontal wind velocity [m/s].
+    public: math::Vector2d windVelocity = math::Vector2d(5.0, 0.0);
 
     /// \brief The mean wave angular frequency (derived).    
     public: double angularFrequency;
@@ -246,6 +250,7 @@ namespace marine
 
   void WaveParameters::SetFromMsg(const ignition::msgs::Param_V& _msg)
   {
+    // todo(srmainwaring) add missing entries
     this->data->number    = Utilities::MsgParamSizeT(_msg,    "number",     this->data->number);
     this->data->amplitude = Utilities::MsgParamDouble(_msg,   "amplitude",  this->data->amplitude);
     this->data->period    = Utilities::MsgParamDouble(_msg,   "period",     this->data->period);
@@ -260,16 +265,35 @@ namespace marine
 
   void WaveParameters::SetFromSDF(sdf::Element& _sdf)
   {
-    this->data->number    = Utilities::SdfParamSizeT(_sdf,    "number",     this->data->number);
-    this->data->amplitude = Utilities::SdfParamDouble(_sdf,   "amplitude",  this->data->amplitude);
-    this->data->period    = Utilities::SdfParamDouble(_sdf,   "period",     this->data->period);
-    this->data->phase     = Utilities::SdfParamDouble(_sdf,   "phase",      this->data->phase);
-    this->data->direction = Utilities::SdfParamVector2d(_sdf, "direction",  this->data->direction);
-    this->data->scale     = Utilities::SdfParamDouble(_sdf,   "scale",      this->data->scale);
-    this->data->angle     = Utilities::SdfParamDouble(_sdf,   "angle",      this->data->angle);
-    this->data->steepness = Utilities::SdfParamDouble(_sdf,   "steepness",  this->data->steepness);
+    this->data->algorithm     = Utilities::SdfParamString(_sdf,   "algorithm",  this->data->algorithm);
+    this->data->tileSize      = Utilities::SdfParamDouble(_sdf,   "tile_size",  this->data->tileSize);
+    this->data->cellCount     = Utilities::SdfParamSizeT(_sdf,    "cell_count", this->data->tileSize);
+    this->data->number        = Utilities::SdfParamSizeT(_sdf,    "number",     this->data->number);
+    this->data->amplitude     = Utilities::SdfParamDouble(_sdf,   "amplitude",  this->data->amplitude);
+    this->data->period        = Utilities::SdfParamDouble(_sdf,   "period",     this->data->period);
+    this->data->phase         = Utilities::SdfParamDouble(_sdf,   "phase",      this->data->phase);
+    this->data->direction     = Utilities::SdfParamVector2d(_sdf, "direction",  this->data->direction);
+    this->data->scale         = Utilities::SdfParamDouble(_sdf,   "scale",      this->data->scale);
+    this->data->angle         = Utilities::SdfParamDouble(_sdf,   "angle",      this->data->angle);
+    this->data->steepness     = Utilities::SdfParamDouble(_sdf,   "steepness",  this->data->steepness);
+    this->data->windVelocity  = Utilities::SdfParamVector2d(_sdf, "wind_velocity",  this->data->windVelocity);
 
     this->data->Recalculate();
+  }
+
+  std::string WaveParameters::Algorithm() const
+  {
+    return this->data->algorithm;
+  }
+
+  double WaveParameters::TileSize() const
+  {
+    return this->data->tileSize;
+  }
+
+  size_t WaveParameters::CellCount() const
+  {
+    return this->data->cellCount;
   }
 
   size_t WaveParameters::Number() const
@@ -327,6 +351,29 @@ namespace marine
     return this->data->direction;
   }
   
+  ignition::math::Vector2d WaveParameters::WindVelocity() const
+  {
+    return this->data->windVelocity;
+  }
+
+  void WaveParameters::SetAlgorithm(const std::string &_algorithm)
+  {
+    this->data->algorithm = _algorithm;
+    this->data->Recalculate();
+  }
+
+  void WaveParameters::SetTileSize(double _tileSize)
+  {
+    this->data->tileSize = _tileSize;
+    this->data->Recalculate();
+  }
+
+  void WaveParameters::SetCellCount(size_t _cellCount)
+  {
+    this->data->cellCount = _cellCount;
+    this->data->Recalculate();
+  }
+
   void WaveParameters::SetNumber(size_t _number)
   {
     this->data->number = _number;
@@ -375,6 +422,12 @@ namespace marine
     this->data->Recalculate();
   }
 
+  void WaveParameters::SetWindVelocity(const ignition::math::Vector2d& _windVelocity)
+  {
+    this->data->windVelocity = _windVelocity;
+    this->data->Recalculate();
+  }
+
   const std::vector<double>& WaveParameters::AngularFrequency_V() const
   {
     return this->data->angularFrequencies;
@@ -407,6 +460,7 @@ namespace marine
  
   void WaveParameters::DebugPrint() const
   {
+    // todo(srmainwaring) add missing entries
     ignmsg << "number:     " << this->data->number << std::endl;
     ignmsg << "scale:      " << this->data->scale << std::endl;
     ignmsg << "angle:      " << this->data->angle << std::endl;

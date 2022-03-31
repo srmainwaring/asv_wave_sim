@@ -77,24 +77,17 @@ class ignition::gazebo::systems::WavesModelPrivate
   /// \brief The wavefield entity for this system
   public: Entity wavefieldEntity{kNullEntity};
 
-  ////////// BEGIN FROM WavefieldEntity
+  /// \brief Set the wavefield to be static [false].
+  public: bool isStatic{false};
 
-  /// \brief The size of the wavefield
-  public: math::Vector2d size;
-
-  /// \brief The number of grid cells in the wavefield
-  public: math::Vector2i cellCount;
+  /// \brief Update rate [Hz].
+  public: double updateRate{30.0};
 
   /// \brief The wave parameters.
   public: marine::WaveParametersPtr waveParams;
 
   /// \brief The wavefield.
   public: marine::WavefieldPtr wavefield;
-
-  ////////// END FROM WavefieldEntity
-
-  /// \brief Update rate [Hz].
-  public: double updateRate{30.0};
 
   /// \brief Previous update time.
   public: double lastUpdateTime{0};
@@ -175,29 +168,26 @@ WavesModelPrivate::~WavesModelPrivate()
 /////////////////////////////////////////////////
 void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 {
-  // Wavefield Parameters
-  this->size = marine::Utilities::SdfParamVector2d(
-      *this->sdf, "size", math::Vector2d(256.0, 256.0));
-  
-  this->cellCount = marine::Utilities::SdfParamVector2i(
-      *this->sdf, "cell_count", math::Vector2i(128, 128));
+  // Update parameters
+  this->isStatic = marine::Utilities::SdfParamBool(
+      *this->sdf,  "static", this->isStatic);
 
-  // Wave Parameters
+  this->updateRate = marine::Utilities::SdfParamDouble(
+      *this->sdf,  "update_rate", this->updateRate);
+
+  // Wave parameters
   this->waveParams.reset(new marine::WaveParameters());
   if (this->sdf->HasElement("wave"))
   {
-    sdf::ElementPtr sdfWave = this->sdf->GetElement("wave");
+    auto sdfWave = this->sdf->GetElement("wave");
     this->waveParams->SetFromSDF(*sdfWave);
   }
 
-  // Wavefield  
+  // Wavefield
   std::string entityName = "wavefield";
-
-  // double simTime = this->GetWorld()->SimTime().Double();
 
   this->wavefield.reset(new marine::Wavefield());
   this->wavefield->SetParameters(this->waveParams);
-  // this->wavefield->Update(simTime);
 
   // Create a new entity and register a wavefield component with it.
   this->wavefieldEntity = _ecm.CreateEntity();
@@ -232,15 +222,13 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
-  /// \todo check if model is static
+  if (!this->isStatic)
   {  
-    /// \todo improve wave model update performance
     // Throttle update [30 FPS by default]
     auto updatePeriod = 1.0/this->updateRate;
     double simTime = std::chrono::duration<double>(_info.simTime).count();
     if ((simTime - this->lastUpdateTime) > updatePeriod)
     {
-      // ignmsg << "[" << simTime << "] updating wave model\n";
       this->wavefield->Update(simTime);
       this->lastUpdateTime = simTime;
     }
