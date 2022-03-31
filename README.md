@@ -152,6 +152,44 @@ The session should include a wave field and the floating objects depicted in the
 
 There are some changes to the plugin SDF schema for hydrodynamics and waves.   
 
+### Waves model and visual plugins
+
+- The `filename` and `name` attributes for the wave model and visal plugins have changed.
+- The `<size>` element has been renamed to `<tile_size>` and moved into `<waves>`
+- The `<cell_count>` element has been moved into `<waves>`
+- Add new element `<algorithm>` to specify the wave generation algorithm. Valid options are: `sinusoid`, `trochoid` and `fft`.
+- Add new element `<wind_velocity>` for use with the `fft` algorithm.
+
+```xml
+<plugin
+    filename="ignition-marine1-waves-model-system"
+    name="ignition::gazebo::systems::WavesModel">
+    <static>0</static>
+    <update_rate>30</update_rate>
+    <wave>
+      <!-- Algorithm: sinusoid, trochoid, fft  -->
+      <algorithm>fft</algorithm>
+
+      <!-- Cell count must be a power of 2 for fft waves -->
+      <tile_size>256</tile_size>
+      <cell_count>128</cell_count>
+      
+      <!-- `fft` waves parameters -->
+      <wind_velocity>5 0</wind_velocity>
+
+      <!-- `trochoid` waves parameters -->
+      <number>3</number>
+      <scale>1.5</scale>
+      <angle>0.4</angle>
+      <amplitude>0.4</amplitude>
+      <period>8.0</period>
+      <phase>0.0</phase>
+      <steepness>1.0</steepness>
+      <direction>1 0</direction>
+    </wave>
+</plugin>
+```
+
 ### Hydrodynamics plugin
 
 - The `filename` and `name` attributes for the hydrodynamics plugin have changed.
@@ -163,7 +201,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 <plugin
   filename="ignition-marine1-hydrodynamics-system"
   name="ignition::gazebo::systems::Hydrodynamics">
-  
+
    <!-- Hydrodynamics -->
    <hydrodynamics>
     <damping_on>1</damping_on>
@@ -175,7 +213,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
     <cDampL2>1.0E-6</cDampL2>
     <cDampR1>1.0E-6</cDampR1>
     <cDampR2>1.0E-6</cDampR2>
-  
+
     <!-- 'Pressure' Drag -->
     <cPDrag1>1.0E+2</cPDrag1>
     <cPDrag2>1.0E+2</cPDrag2>
