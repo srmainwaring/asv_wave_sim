@@ -148,6 +148,47 @@ ign gazebo -v4 -g
 
 The session should include a wave field and the floating objects depicted in the image at head of this document.
 
+## Changes
+
+There are some changes to the plugin SDF schema for hydrodynamics and waves.   
+
+### Hydrodynamics plugin
+
+- The `filename` and `name` attributes for the hydrodynamics plugin have changed.
+- The hydrodynamics parameters are now scoped in an additional `<hydrodynamics>` element.
+- The `<wave_model>` element is not currently used.
+- The `<markers>` element is not currently used (not implemented).
+
+```xml
+<plugin
+  filename="ignition-marine1-hydrodynamics-system"
+  name="ignition::gazebo::systems::Hydrodynamics">
+  
+   <!-- Hydrodynamics -->
+   <hydrodynamics>
+    <damping_on>1</damping_on>
+    <viscous_drag_on>1</viscous_drag_on>
+    <pressure_drag_on>1</pressure_drag_on>
+
+    <!-- Linear and Angular Damping -->  
+    <cDampL1>1.0E-6</cDampL1>
+    <cDampL2>1.0E-6</cDampL2>
+    <cDampR1>1.0E-6</cDampR1>
+    <cDampR2>1.0E-6</cDampR2>
+  
+    <!-- 'Pressure' Drag -->
+    <cPDrag1>1.0E+2</cPDrag1>
+    <cPDrag2>1.0E+2</cPDrag2>
+    <fPDrag>0.4</fPDrag>
+    <cSDrag1>1.0E+2</cSDrag1>
+    <cSDrag2>1.0E+2</cSDrag2>
+    <fSDrag>0.4</fSDrag>
+    <vRDrag>1.0</vRDrag>
+  </hydrodynamics>
+</plugin>
+```
+
+
 
 ## Build Status
 
