@@ -6,6 +6,24 @@
     <plugin
         filename="ignition-marine1-waves-model-system"
         name="ignition::gazebo::systems::WavesModel">
+        <static>0</static>
+        <update_rate>30</update_rate>
+        <wave>
+          <algorithm>fft</algorithm>
+          <tile_size>256</tile_size>
+          <cell_count>128</cell_count>
+          <wind_velocity>5 0</wind_velocity>
+          <!-- unused by FFT waves
+          <number>3</number>
+          <scale>1.5</scale>
+          <angle>0.4</angle>
+          <amplitude>0.4</amplitude>
+          <period>8.0</period>
+          <phase>0.0</phase>
+          <steepness>1.0</steepness>
+          <direction>1 0</direction>
+          -->
+        </wave>
     </plugin>
 
     <link name="base_link">
@@ -50,9 +68,17 @@
           </pbr>
         </material>
 
+        <!-- \todo remove duplicate params; populate from service instead -->
         <plugin
             filename="ignition-marine1-waves-visual-system"
             name="ignition::gazebo::systems::WavesVisual">
+            <static>0</static>
+            <wave>
+              <algorithm>fft</algorithm>
+              <tile_size>256</tile_size>
+              <cell_count>128</cell_count>
+              <wind_velocity>5 0</wind_velocity>
+            </wave>
         </plugin>
 
         <!-- 
