@@ -31,7 +31,40 @@ namespace systems
   // Forward declaration
   class HydrodynamicsPrivate;
 
-  /// \brief A plugin for surface hydrodynamics
+  /// \brief A plugin to manage buoyancy and hydrodynamic force calculations
+  ///
+  /// # Usage
+  /// 
+  /// Add the SDF for the plugin to the <model> element of your model. 
+  /// 
+  /// /code
+  /// <plugin name="ignition::gazebo::systems::Hydrodynamics"
+  ///         filename="ignition-marine1-hydrodynamics-system">
+  ///
+  ///   <!-- Hydrodynamics -->
+  ///   <hydrodynamics>
+  ///     <damping_on>1</damping_on>
+  ///     <viscous_drag_on>1</viscous_drag_on>
+  ///     <pressure_drag_on>1</pressure_drag_on>
+  ///
+  ///     <!-- Linear and Angular Damping -->
+  ///     <cDampL1>1.0E-6</cDampL1>
+  ///     <cDampL2>1.0E-6</cDampL2>
+  ///     <cDampR1>1.0E-6</cDampR1>
+  ///     <cDampR2>1.0E-6</cDampR2>
+  ///
+  ///     <!-- 'Pressure' Drag -->
+  ///     <cPDrag1>1.0E+2</cPDrag1>
+  ///     <cPDrag2>1.0E+2</cPDrag2>
+  ///     <fPDrag>0.4</fPDrag>
+  ///     <cSDrag1>1.0E+2</cSDrag1>
+  ///     <cSDrag2>1.0E+2</cSDrag2>
+  ///     <fSDrag>0.4</fSDrag>
+  ///     <vRDrag>1.0</vRDrag>
+  ///   </hydrodynamics>
+  /// </plugin>
+  /// \endcode
+  ///
   class Hydrodynamics
       : public System,
         public ISystemConfigure,

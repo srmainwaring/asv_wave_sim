@@ -630,9 +630,19 @@ void Hydrodynamics::Configure(const Entity &_entity,
   // // Wave Model
   // this->data->waveModelName = Utilities::SdfParamString(*_sdf, "wave_model", "");
 
+  // Empty sdf element used as a placeholder for missing elements 
+  auto sdfEmpty = std::make_shared<sdf::Element>();
+
   // Hydrodynamics parameters
   this->dataPtr->hydroParams.reset(new marine::HydrodynamicsParameters());
-  this->dataPtr->hydroParams->SetFromSDF(*this->dataPtr->sdf);
+
+  auto sdfHydro = sdfEmpty;
+  if (this->dataPtr->sdf->HasElement("hydrodynamics"))
+  {
+    sdfHydro = _sdf->GetElementImpl("hydrodynamics");
+  }
+  this->dataPtr->hydroParams->SetFromSDF(*sdfHydro);
+
 
   // // Markers
   // if (_sdf->HasElement("markers"))
