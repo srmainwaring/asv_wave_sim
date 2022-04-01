@@ -459,9 +459,6 @@ void WavesVisualPrivate::OnUpdate()
       this->currentSimTime).count()) * 1e-9;
 
   // ocean tile parameters
-  // size_t N = 128;        // tile resolution
-  // double L = 256.0;   // tile size
-  // double u = 5.0;    // wind strength
   size_t N = this->waveParams->CellCount();
   double L = this->waveParams->TileSize();
   double u = this->waveParams->WindVelocity().X();
@@ -487,8 +484,10 @@ void WavesVisualPrivate::OnUpdate()
           ignerr << "WavesVisual: invalid material\n";
 
         // create ocean tile
-        this->oceanTile.reset(new marine::visual::OceanTile(N, L));
+        this->oceanTile.reset(new marine::visual::OceanTile(this->waveParams));
         this->oceanTile->SetWindVelocity(u, v);
+        /// \todo(srmainwaring) rationalise - oceanTile->CreateMesh() calls Create internally
+        // this->oceanTile->Create();
 
         // create mesh - do not store in MeshManager as it will be modified
         this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
@@ -513,14 +512,12 @@ void WavesVisualPrivate::OnUpdate()
         this->oceanGeometry->LoadMesh(this->oceanTileMesh);
 
         // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
-        const int nX = 3;
-        const int nY = 3;
+        const int nX = 0;
+        const int nY = 0;
         // unsigned int id = 50000;
-        // for (int iy=-nY; iy<=nY; ++iy)
-        int iy = 0;
+        for (int iy=-nY; iy<=nY; ++iy)
         {
-          // for (int ix=-nX; ix<=nX; ++ix)
-          int ix = 0;
+          for (int ix=-nX; ix<=nX; ++ix)
           {
             /// \todo: include the current entity position 
             ignition::math::Vector3d position(

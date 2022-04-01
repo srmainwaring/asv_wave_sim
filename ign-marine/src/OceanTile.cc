@@ -55,7 +55,9 @@ public:
   ~OceanTilePrivate();
 
   OceanTilePrivate(unsigned int _N, double _L, bool _hasVisuals=true);
-  
+
+  OceanTilePrivate(WaveParametersPtr _params, bool _hasVisuals=true);
+
   void SetWindVelocity(double _ux, double _uy);
 
   bool                        mHasVisuals;
@@ -143,7 +145,8 @@ public:
 
   /// \brief Update a vertex and it's tangent space.
   ///
-  /// \param idx0 is the index for the (N + 1) x (N + 1) mesh vertices, including skirt
+  /// \param idx0 is the index for the (N + 1) x (N + 1) mesh vertices,
+  ///             including skirt
   /// \param idx1 is the index for the N x N simulated vertices
   void UpdateVertex(size_t idx0, size_t idx1);
   void UpdateVertexAndTangents(size_t idx0, size_t idx1);
@@ -165,9 +168,9 @@ OceanTilePrivate<Vector3>::~OceanTilePrivate()
 //////////////////////////////////////////////////
 template <typename Vector3>
 OceanTilePrivate<Vector3>::OceanTilePrivate(
-unsigned int _N,
-double _L,
-bool _hasVisuals) :
+    unsigned int _N,
+    double _L,
+    bool _hasVisuals) :
     mHasVisuals(_hasVisuals),
     mResolution(_N),
     mRowLength(_N + 1),
@@ -189,7 +192,7 @@ bool _hasVisuals) :
   // 1 - WaveSimulationTrochoid
   // 2 - WaveSimulationFFTW
   // 3 - WaveSimulationOpenCL
-  //
+
   const int wave_sim_type = 2;
   switch (wave_sim_type)
   {
@@ -200,7 +203,8 @@ bool _hasVisuals) :
       double dir_y = 0.0;
       double amplitude = 3.0;
       double period = 10.0;
-      std::unique_ptr<WaveSimulationSinusoid> waveSim(new WaveSimulationSinusoid(_N, _L));
+      std::unique_ptr<WaveSimulationSinusoid> waveSim(
+          new WaveSimulationSinusoid(_N, _L));
       waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);
@@ -224,9 +228,10 @@ bool _hasVisuals) :
     case 2:
     {
       // FFTW
-      std::unique_ptr<WaveSimulationFFTW> waveSim(new WaveSimulationFFTW(_N, _L));
-      waveSim->SetScale(4.0/_N);    // default 4.0/_N
-      waveSim->SetLambda(2.5);      // larger lambda => steeper waves. default 0.6
+      std::unique_ptr<WaveSimulationFFTW> waveSim(
+          new WaveSimulationFFTW(_N, _L));
+      waveSim->SetScale(4.0/_N); // default 4.0/_N
+      waveSim->SetLambda(2.5);   // larger lambda => steeper waves.
       mWaveSim = std::move(waveSim);
       break;
     }
@@ -236,6 +241,92 @@ bool _hasVisuals) :
     //   mWaveSim.reset(new WaveSimulationOpenCL(_N, _L));
     //   break;
     // }
+    default:
+      break;
+  }
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+OceanTilePrivate<Vector3>::OceanTilePrivate(
+    WaveParametersPtr _params,
+    bool _hasVisuals) :
+    mHasVisuals(_hasVisuals),
+    mResolution(_params->CellCount()),
+    mRowLength(_params->CellCount() + 1),
+    mNumVertices((_params->CellCount() + 1) * (_params->CellCount() + 1)),
+    mNumFaces(2 * _params->CellCount() * _params->CellCount()),
+    mTileSize(_params->TileSize()),
+    mSpacing(_params->TileSize() / static_cast<double>(_params->CellCount())),
+    mHeights(_params->CellCount() * _params->CellCount(), 0.0),
+    mDhdx(_params->CellCount() * _params->CellCount(), 0.0),
+    mDhdy(_params->CellCount() * _params->CellCount(), 0.0),
+    mDisplacementsX(_params->CellCount() * _params->CellCount(), 0.0),
+    mDisplacementsY(_params->CellCount() * _params->CellCount(), 0.0),
+    mDxdx(_params->CellCount() * _params->CellCount(), 0.0),
+    mDydy(_params->CellCount() * _params->CellCount(), 0.0),
+    mDxdy(_params->CellCount() * _params->CellCount(), 0.0)
+{
+  size_t _N = _params->CellCount();
+  double _L = _params->TileSize();
+
+  // Different types of wave simulator are supported...
+  // 0 - WaveSimulationSinusoid
+  // 1 - WaveSimulationTrochoid
+  // 2 - WaveSimulationFFTW
+
+  int wave_sim_type = 0;
+  if (_params->Algorithm() == "sinusoid")
+  {
+    wave_sim_type = 0;
+  }
+  else if (_params->Algorithm() == "trochoid")
+  {
+    wave_sim_type = 1;
+  }
+  else if (_params->Algorithm() == "fft")
+  {
+    wave_sim_type = 2;
+  }
+  else
+  {
+    ignerr << "Invalid wave algorithm type: "
+        << _params->Algorithm() << "\n";
+  }
+
+  switch (wave_sim_type)
+  {
+    case 0:
+    {
+      // Simple
+      double dir_x = _params->Direction().X();
+      double dir_y = _params->Direction().Y();
+      double amplitude = _params->Amplitude();
+      double period = _params->Period();
+      std::unique_ptr<WaveSimulationSinusoid> waveSim(
+          new WaveSimulationSinusoid(_N, _L));
+      waveSim->SetDirection(dir_x, dir_y);
+      waveSim->SetAmplitude(amplitude);
+      waveSim->SetPeriod(period);
+      mWaveSim = std::move(waveSim);
+      break;
+    }
+    case 1:
+    {
+      // Trochoid
+      mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, _params));
+      break;
+    }
+    case 2:
+    {
+      // FFTW
+      std::unique_ptr<WaveSimulationFFTW> waveSim(
+          new WaveSimulationFFTW(_N, _L));
+      waveSim->SetScale(4.0/_N);    // default 4.0/_N
+      waveSim->SetLambda(2.5);      // larger lambda => steeper waves.
+      mWaveSim = std::move(waveSim);
+      break;
+    }
     default:
       break;
   }
@@ -267,7 +358,8 @@ void OceanTilePrivate<Vector3>::Create()
   const double Ly = this->mTileSize;
   const double lx = this->mSpacing;
   const double ly = this->mSpacing;
-  // Here we are actually mapping (u, v) to each quad in the tile (not the entire tile). 
+  // Here we are actually mapping (u, v) to each quad in the tile
+  // (not the entire tile). 
   // const double xTex = 1.0 * lx;
   // const double yTex = 1.0 * ly;
   /// \todo add param to tune bump map scaling
@@ -383,7 +475,8 @@ template <>
 void OceanTilePrivate<cgal::Point3>::ComputeNormals()
 {
   // Not used
-  ignerr << "No implementation of OceanTilePrivate<cgal::Point3>::ComputeNormals\n";
+  ignerr << "No implementation"
+      << " of OceanTilePrivate<cgal::Point3>::ComputeNormals\n";
 }
 
 //////////////////////////////////////////////////
@@ -459,7 +552,8 @@ void OceanTilePrivate<cgal::Point3>::ComputeTBN(
     cgal::Point3& _normal)
 {
   // Not used
-  ignerr << "No implementation of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
+  ignerr << "No implementation"
+      << " of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
 }
 
 //////////////////////////////////////////////////
@@ -529,7 +623,8 @@ void OceanTilePrivate<cgal::Point3>::ComputeTBN(
     std::vector<cgal::Point3>& _normals)
 {
   // Not used
-  ignerr << "No implementation of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
+  ignerr << "No implementation " 
+      << " of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
 }
 
 //////////////////////////////////////////////////
@@ -549,7 +644,8 @@ void OceanTilePrivate<Vector3>::Update(double _time)
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::UpdateVertex(size_t idx0, size_t idx1)
+void OceanTilePrivate<math::Vector3d>::UpdateVertex(
+  size_t idx0, size_t idx1)
 {
   // 1. Update vertex
   double h  = mHeights[idx1];
@@ -581,7 +677,8 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t idx0, size_t idx1)
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(size_t idx0, size_t idx1)
+void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(
+    size_t idx0, size_t idx1)
 {
   // 1. Update vertex
   double h  = mHeights[idx1];
@@ -615,7 +712,8 @@ void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(size_t idx0, size
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(size_t idx0, size_t idx1)
+void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(
+    size_t idx0, size_t idx1)
 {
   // 1. Update vertex
   double h  = mHeights[idx1];
@@ -742,7 +840,8 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
 
 //////////////////////////////////////////////////
 template <typename Vector3>
-common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(const std::string &_name, double _offsetZ,
+common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(
+    const std::string &_name, double _offsetZ,
     bool _reverseOrientation)
 {
   // Logging
@@ -806,7 +905,8 @@ common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(const std::string &_name, d
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::UpdateMesh(double _time, common::Mesh *_mesh)
+void OceanTilePrivate<math::Vector3d>::UpdateMesh(
+    double _time, common::Mesh *_mesh)
 {
   this->Update(_time);
 
@@ -843,8 +943,19 @@ OceanTileT<math::Vector3d>::~OceanTileT()
 
 //////////////////////////////////////////////////
 template <>
-OceanTileT<math::Vector3d>::OceanTileT(unsigned int _N, double _L, bool _hasVisuals) :
-    dataPtr(std::make_unique<OceanTilePrivate<math::Vector3d>>(_N, _L, _hasVisuals))
+OceanTileT<math::Vector3d>::OceanTileT(
+    unsigned int _N, double _L, bool _hasVisuals) :
+    dataPtr(std::make_unique<OceanTilePrivate<math::Vector3d>>(
+        _N, _L, _hasVisuals))
+{
+}
+
+//////////////////////////////////////////////////
+template <>
+OceanTileT<math::Vector3d>::OceanTileT(
+    WaveParametersPtr _params, bool _hasVisuals) :
+    dataPtr(std::make_unique<OceanTilePrivate<math::Vector3d>>(
+        _params, _hasVisuals))
 {
 }
 
@@ -949,8 +1060,19 @@ OceanTileT<cgal::Point3>::~OceanTileT()
 
 //////////////////////////////////////////////////
 template <>
-OceanTileT<cgal::Point3>::OceanTileT(unsigned int _N, double _L, bool _hasVisuals) :
-    dataPtr(std::make_unique<OceanTilePrivate<cgal::Point3>>(_N, _L, _hasVisuals))
+OceanTileT<cgal::Point3>::OceanTileT(
+    unsigned int _N, double _L, bool _hasVisuals) :
+    dataPtr(std::make_unique<OceanTilePrivate<cgal::Point3>>(
+        _N, _L, _hasVisuals))
+{
+}
+
+//////////////////////////////////////////////////
+template <>
+OceanTileT<cgal::Point3>::OceanTileT(
+    WaveParametersPtr _params, bool _hasVisuals) :
+    dataPtr(std::make_unique<OceanTilePrivate<cgal::Point3>>(
+        _params, _hasVisuals))
 {
 }
 

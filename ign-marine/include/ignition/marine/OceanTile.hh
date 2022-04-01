@@ -17,6 +17,7 @@
 #define IGNITION_MARINE_OCEANTILE_HH_
 
 #include "ignition/marine/CGALTypes.hh"
+#include "ignition/marine/WaveParameters.hh"
 
 #include <ignition/math.hh>
 #include <ignition/common.hh>
@@ -37,6 +38,8 @@ namespace marine
     public: virtual ~OceanTileT();
 
     public: OceanTileT(unsigned int _N, double _L, bool _hasVisuals=true);
+
+    public: OceanTileT(WaveParametersPtr _params, bool _hasVisuals=true);
 
     /// \brief The tile size (or length) L. 
     double TileSize() const;

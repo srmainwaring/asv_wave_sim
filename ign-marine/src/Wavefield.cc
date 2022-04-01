@@ -117,9 +117,6 @@ namespace marine
     this->data->params = _params;
 
     // Force an update of the ocean tile and point locator
-    // size_t N = 128;
-    // double L = 256.0;
-    // double u = 5.0;
     size_t N = this->data->params->CellCount();
     double L = this->data->params->TileSize();
     double u = this->data->params->WindVelocity().X();
@@ -127,7 +124,8 @@ namespace marine
 
     // OceanTile
     ignmsg << "Creating OceanTile." <<  std::endl;
-    this->data->oceanTile.reset(new physics::OceanTile(N, L, false));
+    this->data->oceanTile.reset(new physics::OceanTile(
+        this->data->params, false));
     this->data->oceanTile->SetWindVelocity(u, v);
     this->data->oceanTile->Create();
 
