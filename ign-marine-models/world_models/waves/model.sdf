@@ -9,11 +9,16 @@
         <static>0</static>
         <update_rate>30</update_rate>
         <wave>
+          <!-- `fft` wave parameters -->
           <algorithm>fft</algorithm>
           <tile_size>256</tile_size>
           <cell_count>128</cell_count>
           <wind_velocity>5 0</wind_velocity>
-          <!-- unused by FFT waves
+
+          <!-- `trochoid` wave parameters -->
+          <!-- <algorithm>trochoid</algorithm>
+          <tile_size>1000</tile_size>
+          <cell_count>50</cell_count>
           <number>3</number>
           <scale>1.5</scale>
           <angle>0.4</angle>
@@ -21,8 +26,7 @@
           <period>8.0</period>
           <phase>0.0</phase>
           <steepness>1.0</steepness>
-          <direction>1 0</direction>
-          -->
+          <direction>1 1</direction> -->
         </wave>
     </plugin>
 
@@ -74,10 +78,24 @@
             name="ignition::gazebo::systems::WavesVisual">
             <static>0</static>
             <wave>
+              <!-- `fft` wave parameters -->
               <algorithm>fft</algorithm>
               <tile_size>256</tile_size>
               <cell_count>128</cell_count>
               <wind_velocity>5 0</wind_velocity>
+
+              <!-- `trochoid` wave parameters -->
+              <!-- <algorithm>trochoid</algorithm>
+              <tile_size>1000</tile_size>
+              <cell_count>50</cell_count>
+              <number>3</number>
+              <scale>1.5</scale>
+              <angle>0.4</angle>
+              <amplitude>0.4</amplitude>
+              <period>8.0</period>
+              <phase>0.0</phase>
+              <steepness>1.0</steepness>
+              <direction>1 1</direction> -->
             </wave>
         </plugin>
 

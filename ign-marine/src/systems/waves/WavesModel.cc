@@ -15,7 +15,6 @@
 
 #include "WavesModel.hh"
 
-#include "ignition/marine/OceanTile.hh"
 #include "ignition/marine/Utilities.hh"
 #include "ignition/marine/Wavefield.hh"
 #include "ignition/marine/WaveParameters.hh"
