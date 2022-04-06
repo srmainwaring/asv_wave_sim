@@ -1,0 +1,188 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <model name="havyard">
+    <plugin
+        filename="gz_waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <damping_on>1</damping_on>
+        <viscous_drag_on>1</viscous_drag_on>
+        <pressure_drag_on>1</pressure_drag_on>
+        <!-- Defaults -->
+        <!-- <cDampL1>1.0E-6</cDampL1>
+        <cDampL2>1.0E-6</cDampL2>
+        <cDampR1>1.0E-6</cDampR1>
+        <cDampR2>1.0E-6</cDampR2>
+        <cPDrag1>1.0E+2</cPDrag1>
+        <cPDrag2>1.0E+2</cPDrag2>
+        <fPDrag>0.4</fPDrag>
+        <cSDrag1>1.0E+2</cSDrag1>
+        <cSDrag2>1.0E+2</cSDrag2>
+        <fSDrag>0.4</fSDrag>
+        <vRDrag>1.0</vRDrag> -->
+        <cDampL1>1.0E-3</cDampL1>
+        <cDampL2>1.0E-3</cDampL2>
+        <cDampR1>1.0E+6</cDampR1>
+        <cDampR2>1.0E+6</cDampR2>
+        <cPDrag1>1.0E+2</cPDrag1>
+        <cPDrag2>1.0E+2</cPDrag2>
+        <fPDrag>0.4</fPDrag>
+        <cSDrag1>1.0E+2</cSDrag1>
+        <cSDrag2>1.0E+2</cSDrag2>
+        <fSDrag>0.4</fSDrag>
+        <vRDrag>1.0</vRDrag>
+    </plugin>
+
+    <link name="base_link">
+
+      <visual name="base_x_axis">
+        <pose>25 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>50 0.1 0.1</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1.0 0.0 0.0 1.0</ambient>
+          <diffuse>1.0 0.0 0.0 1.0</diffuse>
+          <specular>0.8 0.8 0.8 1.0</specular>
+        </material>
+      </visual>
+      <visual name="base_y_axis">
+        <pose>0 10 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 0.1</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.0 1.0 0.0 1.0</ambient>
+          <diffuse>0.0 1.0 0.0 1.0</diffuse>
+          <specular>0.8 0.8 0.8 1.0</specular>
+        </material>
+      </visual>
+      <visual name="base_z_axis">
+        <pose>0 0 10 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.1 20</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.0 0.0 1.0 1.0</ambient>
+          <diffuse>0.0 0.0 1.0 1.0</diffuse>
+          <specular>0.8 0.8 0.8 1.0</specular>
+        </material>
+      </visual>
+
+      <visual name="hull">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/hull.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="hull_anchors">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/hull_anchors.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="hull_fittings">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/hull_fittings.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="main_deck">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/main_deck.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="main_deck_sides">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/main_deck_sides.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="a_deck">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/a_deck.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="b_deck">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/b_deck.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="c_deck">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/c_deck.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="wheelhouse_roof">
+        <geometry>
+          <mesh>
+            <scale>50 50 50</scale>
+            <uri>mesh/wheelhouse_roof.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <!-- <visual name="hull_collision">
+        <geometry>
+          <mesh>
+            <uri>mesh/hull_collision_x50.dae</uri>
+          </mesh>
+        </geometry>
+      </visual> -->
+      <collision name="hull_collision">
+        <geometry>
+          <mesh>
+            <uri>mesh/hull_collision_x50.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <!-- <collision name="deck_collision">
+        <pose>-5 0 1.5 0 0 0</pose>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>10 4</size>
+          </plane>
+        </geometry>
+      </collision> -->
+
+      <inertial>
+        <pose>0 0 -0.5 0 0 0</pose>
+        <mass>3850000</mass>
+        <inertia>
+          <ixx>194548849</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>2210809763</iyy>
+          <iyz>0.0</iyz>
+          <izz>2235396753</izz>
+        </inertia>
+      </inertial>
+    </link>
+  </model>
+</sdf>
