@@ -595,11 +595,14 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     /// \todo fix hardcoded patch size. CollisionBoundingBox is not currently available 
     // auto boundingBox = hd->link->CollisionBoundingBox();
     // double patchSize = 2.2 * boundingBox.Size().Length();
-    double patchSize = 20.0;
-    gzmsg << "Hydrodynamics: set water patch size: "
-        << patchSize << "\n";
+    // size_t patchCellCount = 5;
+    double patchSize = 90.0;
+    size_t patchCellCount = 5;
+    ignmsg << "Hydrodynamics: set water patch size: "
+        << patchSize << std::endl;
     std::shared_ptr<waves::Grid> initWaterPatch(
-        new waves::Grid({patchSize, patchSize}, { 4, 4 }));
+        new waves::Grid({patchSize, patchSize},
+            {patchCellCount, patchCellCount}));
 
     // WavefieldSampler - this is updated by the pose of the link (not the CoM).
     /// \todo add checks that the wavefield weak_ptr is valid

@@ -40,7 +40,7 @@
               </blend>
             <uri>model://mumbles_head/materials/textures/mumbles_head_513.png</uri>
             <size>1000 1000 250</size>
-            <pos>0 0 -10</pos>
+            <pos>-550 550 -10</pos>
           </heightmap>
         </geometry>
       </visual>

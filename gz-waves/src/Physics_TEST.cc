@@ -151,7 +151,7 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
     EXPECT_NEAR(force[2], 0, eps);
   }
 }
-
+#if 0
 TEST(Hydrodynamics, BuoyancyUnitBox)
 {
   double eps = 1E-8;
@@ -188,7 +188,9 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
   EXPECT_NEAR(force[1], 0, eps);
   EXPECT_NEAR(force[2], f, eps);
 }
+#endif
 
+#if 0
 TEST(Hydrodynamics, Buoyancy10x4x2Box)
 {
   double eps = 1E-8;
@@ -307,6 +309,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   // }
 
 }
+#endif
 
 TEST(Hydrodynamics, Rotation)
 {
