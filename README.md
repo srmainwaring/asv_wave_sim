@@ -95,7 +95,7 @@ git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/ign-garden
 Compile the package:
 
 ```bash
-colcon build --cmake-args \
+colcon build --merge-install --cmake-args \
 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_MACOSX_RPATH=FALSE \
 -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib \
