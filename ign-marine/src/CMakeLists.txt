@@ -60,6 +60,7 @@ set (sources
   WavefieldSampler.cc
   WaveParameters.cc
   WaveSimulation.cc
+  WaveSimulationFFT2.cc
   WaveSimulationFFTW.cc
   WaveSimulationOpenCL.cc
   WaveSimulationSinusoid.cc

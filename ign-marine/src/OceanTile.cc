@@ -18,6 +18,7 @@
 #include "ignition/common/SubMeshWithTangents.hh"
 #include "ignition/marine/Geometry.hh"
 #include "ignition/marine/WaveSimulation.hh"
+#include "ignition/marine/WaveSimulationFFT2.hh"
 #include "ignition/marine/WaveSimulationFFTW.hh"
 #include "ignition/marine/WaveSimulationSinusoid.hh"
 #include "ignition/marine/WaveSimulationTrochoid.hh"
@@ -288,6 +289,10 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   {
     wave_sim_type = 2;
   }
+  else if (_params->Algorithm() == "fft2")
+  {
+    wave_sim_type = 3;
+  }
   else
   {
     ignerr << "Invalid wave algorithm type: "
@@ -324,6 +329,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
           new WaveSimulationFFTW(_N, _L));
       waveSim->SetScale(4.0/_N);    // default 4.0/_N
       waveSim->SetLambda(2.5);      // larger lambda => steeper waves.
+      mWaveSim = std::move(waveSim);
+      break;
+    }
+    case 3:
+    {
+      // FFT2
+      std::unique_ptr<WaveSimulationFFT2> waveSim(
+          new WaveSimulationFFT2(_N, _L));
       mWaveSim = std::move(waveSim);
       break;
     }
