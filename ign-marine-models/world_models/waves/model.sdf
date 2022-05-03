@@ -10,8 +10,8 @@
         <update_rate>30</update_rate>
         <wave>
           <!-- `fft` wave parameters -->
-          <algorithm>fft</algorithm>
-          <tile_size>256</tile_size>
+          <algorithm>fft2</algorithm>
+          <tile_size>1024</tile_size>
           <cell_count>128</cell_count>
           <wind_velocity>5 0</wind_velocity>
 
@@ -79,8 +79,8 @@
             <static>0</static>
             <wave>
               <!-- `fft` wave parameters -->
-              <algorithm>fft</algorithm>
-              <tile_size>256</tile_size>
+              <algorithm>fft2</algorithm>
+              <tile_size>1024</tile_size>
               <cell_count>128</cell_count>
               <wind_velocity>5 0</wind_velocity>
 
