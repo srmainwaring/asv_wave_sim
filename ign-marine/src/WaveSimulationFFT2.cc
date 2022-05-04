@@ -88,9 +88,9 @@ namespace marine
     std::vector<complex> mH0;
     */
     std::vector<complex> mH;      // FFT0 - height
-    /*
     std::vector<complex> mHikx;   // FFT1 - d height / dx
     std::vector<complex> mHiky;   // FFT1 - d height / dy
+    /*
     std::vector<complex> mDx;     // FFT3 - displacement x
     std::vector<complex> mDy;     // FFT4 - displacement y
     std::vector<complex> mHkxkx;  // FFT5 - d displacement x / dx
@@ -334,14 +334,13 @@ namespace marine
     std::vector<double>& _dhdx,
     std::vector<double>& _dhdy)
   {
-    /*
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
     {
       mIn1[i][0] = mHikx[i].real();
       mIn1[i][1] = mHikx[i].imag();
 
-      mIn2[i][0]   = mHiky[i].real();
+      mIn2[i][0] = mHiky[i].real();
       mIn2[i][1] = mHiky[i].imag();
     }
 
@@ -363,22 +362,6 @@ namespace marine
     {
       _dhdx[i] = mOut1[i][0] * mScale;
       _dhdy[i] = mOut2[i][0] * mScale;
-    }
-    */
-    // Resize output if necessary
-    if (_dhdx.size() != mN2)
-    {
-      _dhdx.resize(mN2, 0.0);
-    }
-    if (_dhdy.size() != mN2)
-    {
-      _dhdy.resize(mN2, 0.0);
-    }
-
-    for (size_t i=0; i<mN2; ++i)
-    {
-      _dhdx[i] = 0.0;
-      _dhdy[i] = 0.0;
     }
   }
 
@@ -519,9 +502,9 @@ namespace marine
     mH0.resize(mN2, complex(0.0, 0.0));
     */
     mH.resize(mN2, complex(0.0, 0.0));
-    /*
     mHikx.resize(mN2, complex(0.0, 0.0));
     mHiky.resize(mN2, complex(0.0, 0.0));
+    /*
     mDx.resize(mN2, complex(0.0, 0.0));
     mDy.resize(mN2, complex(0.0, 0.0));
     mHkxkx.resize(mN2, complex(0.0, 0.0));
@@ -921,13 +904,27 @@ namespace marine
     /// \todo: change zhat to 1D array and use directly
     /// \todo: calculate the derivatives as well (for tangent space)
 
-    // write into mH
+    // write into mH, mHikx, mHiky
+
     for (int ikx = 0; ikx < Nx; ++ikx)
     {
+      double kx = this->kx_fft[ikx];
       for (int iky = 0; iky < Ny; ++iky)
       {
+        double ky = this->ky_fft[iky];
+
+        // index for flattened arrays
         int idx = ikx * Nx + iky;
-        this->mH[idx] = zhat[ikx][iky];
+
+        complex h  = zhat[ikx][iky];
+        complex hi = h * complex(0.0, 1.0);
+
+        // amplitude
+        this->mH[idx] = h;
+
+        // derivatives wrt x,y
+        this->mHikx[idx] = hi * kx;
+        this->mHiky[idx] = hi * ky;
       }
     }
 
