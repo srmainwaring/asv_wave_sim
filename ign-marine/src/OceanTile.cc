@@ -19,7 +19,6 @@
 #include "ignition/marine/Geometry.hh"
 #include "ignition/marine/WaveSimulation.hh"
 #include "ignition/marine/WaveSimulationFFT2.hh"
-#include "ignition/marine/WaveSimulationFFTW.hh"
 #include "ignition/marine/WaveSimulationSinusoid.hh"
 #include "ignition/marine/WaveSimulationTrochoid.hh"
 #include "ignition/marine/WaveParameters.hh"
@@ -191,8 +190,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   // Different types of wave simulator are supported...
   // 0 - WaveSimulationSinusoid
   // 1 - WaveSimulationTrochoid
-  // 2 - WaveSimulationFFTW
-  // 3 - WaveSimulationOpenCL
+  // 2 - WaveSimulationFFT2
 
   const int wave_sim_type = 2;
   switch (wave_sim_type)
@@ -228,20 +226,13 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     }
     case 2:
     {
-      // FFTW
-      std::unique_ptr<WaveSimulationFFTW> waveSim(
-          new WaveSimulationFFTW(_N, _L));
-      waveSim->SetScale(4.0/_N); // default 4.0/_N
-      waveSim->SetLambda(2.5);   // larger lambda => steeper waves.
+      // FFT2
+      std::unique_ptr<WaveSimulationFFT2> waveSim(
+          new WaveSimulationFFT2(_N, _L));
+      waveSim->SetLambda(1.0);   // larger lambda => steeper waves.
       mWaveSim = std::move(waveSim);
       break;
     }
-    // case 3:
-    // {
-    //   // OpenCL
-    //   mWaveSim.reset(new WaveSimulationOpenCL(_N, _L));
-    //   break;
-    // }
     default:
       break;
   }
@@ -274,7 +265,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   // Different types of wave simulator are supported...
   // 0 - WaveSimulationSinusoid
   // 1 - WaveSimulationTrochoid
-  // 2 - WaveSimulationFFTW
+  // 2 - WaveSimulationFFT2
 
   int wave_sim_type = 0;
   if (_params->Algorithm() == "sinusoid")
@@ -288,10 +279,6 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   else if (_params->Algorithm() == "fft")
   {
     wave_sim_type = 2;
-  }
-  else if (_params->Algorithm() == "fft2")
-  {
-    wave_sim_type = 3;
   }
   else
   {
@@ -324,20 +311,10 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     }
     case 2:
     {
-      // FFTW
-      std::unique_ptr<WaveSimulationFFTW> waveSim(
-          new WaveSimulationFFTW(_N, _L));
-      waveSim->SetScale(4.0/_N);    // default 4.0/_N
-      waveSim->SetLambda(2.5);      // larger lambda => steeper waves.
-      mWaveSim = std::move(waveSim);
-      break;
-    }
-    case 3:
-    {
       // FFT2
       std::unique_ptr<WaveSimulationFFT2> waveSim(
           new WaveSimulationFFT2(_N, _L));
-      waveSim->SetLambda(2.5);      // larger lambda => steeper waves.
+      waveSim->SetLambda(1.0);      // larger lambda => steeper waves.
       mWaveSim = std::move(waveSim);
       break;
     }

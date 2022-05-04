@@ -9,13 +9,13 @@
         <static>0</static>
         <update_rate>30</update_rate>
         <wave>
-          <!-- `fft2` wave parameters -->
-          <algorithm>fft2</algorithm>
+          <!-- `fft` wave parameters -->
+          <algorithm>fft</algorithm>
           <tile_size>512</tile_size>
           <cell_count>128</cell_count>
           <wind_speed>5.0</wind_speed>
-          <wind_angle_deg>45</wind_angle_deg>
-          <steepness>1</steepness>
+          <wind_angle_deg>-45</wind_angle_deg>
+          <steepness>2</steepness>
 
         </wave>
     </plugin>
@@ -47,13 +47,13 @@
             name="ignition::gazebo::systems::WavesVisual">
             <static>0</static>
             <wave>
-              <!-- `fft2` wave parameters -->
-              <algorithm>fft2</algorithm>
+              <!-- `fft` wave parameters -->
+              <algorithm>fft</algorithm>
               <tile_size>512</tile_size>
               <cell_count>128</cell_count>
               <wind_speed>5.0</wind_speed>
-              <wind_angle_deg>45</wind_angle_deg>
-              <steepness>1</steepness>
+              <wind_angle_deg>-45</wind_angle_deg>
+              <steepness>2</steepness>
 
             </wave>
         </plugin>
