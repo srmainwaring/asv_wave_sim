@@ -114,7 +114,7 @@ namespace marine
     int     Ny = this->mN;
     double  u10 = 5.0;
     double  phi10 = 0.0;
-    double  s_param = 10.0;
+    double  s_param = 5.0;
     double  cap_omega_c = 0.84;
 
     // derived quantities
@@ -595,10 +595,13 @@ namespace marine
     // angular temporal frequency for time-dependent (from dispersion)
     for (int ikx = 0; ikx < this->Nx; ++ikx)
     {
+      double kx = this->kx_fft[ikx];
+      double kx2 = kx*kx;
       for (int iky = 0; iky < this->Ny; ++iky)
       {
-        double k = sqrt(this->kx_math[ikx]*this->kx_math[ikx]
-            + this->ky_math[iky]*this->ky_math[iky]);
+        double ky = this->ky_fft[iky];
+        double ky2 = ky*ky;
+        double k = sqrt(kx2 + ky2);
         this->omega_k[ikx][iky] = sqrt(g * k);
       }
     }
