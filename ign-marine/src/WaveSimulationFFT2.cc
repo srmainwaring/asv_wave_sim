@@ -67,8 +67,6 @@ namespace marine
 
     private: void ComputeCurrentAmplitudes(double _time);
     
-    // private: complex Htilde0(double _k, double _kx, double _ky, double _u, double _ux, double _uy, complex _gz);
-
     int mN;
     int mN2;
     double mL;

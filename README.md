@@ -154,7 +154,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 - The `filename` and `name` attributes for the wave model and visal plugins have changed.
 - The `<size>` element has been renamed to `<tile_size>` and moved into `<waves>`
 - The `<cell_count>` element has been moved into `<waves>`
-- Add new element `<algorithm>` to specify the wave generation algorithm. Valid options are: `sinusoid`, `trochoid`, and `fft`.
+- Add new element `<algorithm>` to specify the wave generation algorithm. Valid options are: `sinusoid`, `trochoid` and `fft`.
 - Add new element `<wind_velocity>` for use with the `fft` algorithm.
 - Add new element `<wind_speed>` for use with the `fft` algorithm.
 - Add new element `<wind_angle_deg>` for use with the `fft` algorithm.
