@@ -110,6 +110,12 @@ namespace marine
     /// \brief A two component vector specifiying the horizontal wind velocity.
     public: math::Vector2d WindVelocity() const;
 
+    /// \brief The scalar wind speed [m/s].
+    public: double WindSpeed() const;
+
+    /// \brief The wind angle (counter clockwise from positive x-axis) [rad].
+    public: double WindAngleRad() const;
+
     /// \brief Set the wave algorithm (options are: 'sinusoid', 'trochoid', 'fft').
     ///
     /// \param[in] _algorithm    The wave algorithm.

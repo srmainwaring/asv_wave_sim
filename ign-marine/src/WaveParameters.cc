@@ -278,6 +278,30 @@ namespace marine
     this->data->steepness     = Utilities::SdfParamDouble(_sdf,   "steepness",  this->data->steepness);
     this->data->windVelocity  = Utilities::SdfParamVector2d(_sdf, "wind_velocity",  this->data->windVelocity);
 
+    // override wind speed and angle if parameters are provided
+    if (_sdf.HasElement("wind_speed") || _sdf.HasElement("wind_angle_deg"))
+    {
+      ignmsg << "Overriding 'wind_velocity' using 'wind_speed' and 'wind_angle_deg'\n";
+
+      double vx = this->data->windVelocity.X();
+      double vy = this->data->windVelocity.Y();
+      double u = sqrt(vx*vx + vy*vy);
+      double phi_rad = atan2(vy, vx);
+      double phi_deg = 180.0 / M_PI * phi_rad;
+
+      // override wind speed and angle if parameters are provided
+      u       = Utilities::SdfParamDouble(_sdf, "wind_speed", u);
+      phi_deg = Utilities::SdfParamDouble(_sdf, "wind_angle_deg", phi_deg);
+      phi_rad = M_PI / 180.0 * phi_deg;
+
+
+      // update wind velocity
+      vx = u * cos(phi_rad);
+      vy = u * sin(phi_rad);
+      this->data->windVelocity.X() = vx;
+      this->data->windVelocity.Y() = vy;
+    }
+
     this->data->Recalculate();
   }
 
@@ -354,6 +378,22 @@ namespace marine
   ignition::math::Vector2d WaveParameters::WindVelocity() const
   {
     return this->data->windVelocity;
+  }
+
+  double WaveParameters::WindSpeed() const
+  {
+    double vx = this->data->windVelocity.X();
+    double vy = this->data->windVelocity.Y();
+    double u = sqrt(vx*vx + vy*vy);
+    return u;
+  }
+
+  double WaveParameters::WindAngleRad() const
+  {
+    double vx = this->data->windVelocity.X();
+    double vy = this->data->windVelocity.Y();
+    double phi_rad = atan2(vy, vx);
+    return phi_rad;
   }
 
   void WaveParameters::SetAlgorithm(const std::string &_algorithm)

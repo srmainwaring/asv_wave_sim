@@ -2,10 +2,14 @@
 
 This package contains plugins that support the simulation of waves and surface vessels in Ignition Gazebo.  
 
-![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v1.jpg)
-
+<!-- v0 -->
 <!-- ![Ignition Marine](https://user-images.githubusercontent.com/24916364/160913834-90f9c03b-4098-4db1-a163-0f9cf1cedc18.png) -->
 
+<!-- v1 -->
+<!-- ![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v1.jpg) -->
+
+<!-- v2 -->
+![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v2.jpg)
 
 ## Notes
 
@@ -157,8 +161,10 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 - The `filename` and `name` attributes for the wave model and visal plugins have changed.
 - The `<size>` element has been renamed to `<tile_size>` and moved into `<waves>`
 - The `<cell_count>` element has been moved into `<waves>`
-- Add new element `<algorithm>` to specify the wave generation algorithm. Valid options are: `sinusoid`, `trochoid` and `fft`.
+- Add new element `<algorithm>` to specify the wave generation algorithm. Valid options are: `sinusoid`, `trochoid`, `fft` and `fft2`.
 - Add new element `<wind_velocity>` for use with the `fft` algorithm.
+- Add new element `<wind_speed>` for use with the `fft2` algorithm.
+- Add new element `<wind_angle_deg>` for use with the `fft2` algorithm.
 
 ```xml
 <plugin
@@ -167,15 +173,17 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
     <static>0</static>
     <update_rate>30</update_rate>
     <wave>
-      <!-- Algorithm: sinusoid, trochoid, fft  -->
-      <algorithm>fft</algorithm>
+      <!-- Algorithm: sinusoid, trochoid, fft, fft2  -->
+      <algorithm>fft2</algorithm>
 
       <!-- Cell count must be a power of 2 for fft waves -->
       <tile_size>256</tile_size>
       <cell_count>128</cell_count>
       
-      <!-- `fft` waves parameters -->
-      <wind_velocity>5 0</wind_velocity>
+      <!-- `fft2` waves parameters -->
+      <wind_speed>5.0</wind_speed>
+      <wind_angle_deg>45</wind_angle_deg>
+      <steepness>1</steepness>
 
       <!-- `trochoid` waves parameters -->
       <number>3</number>
