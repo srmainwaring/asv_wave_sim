@@ -11,22 +11,12 @@
         <wave>
           <!-- `fft` wave parameters -->
           <algorithm>fft</algorithm>
-          <tile_size>256</tile_size>
+          <tile_size>512</tile_size>
           <cell_count>128</cell_count>
-          <wind_velocity>5 0</wind_velocity>
+          <wind_speed>5.0</wind_speed>
+          <wind_angle_deg>-45</wind_angle_deg>
+          <steepness>2</steepness>
 
-          <!-- `trochoid` wave parameters -->
-          <!-- <algorithm>trochoid</algorithm>
-          <tile_size>1000</tile_size>
-          <cell_count>50</cell_count>
-          <number>3</number>
-          <scale>1.5</scale>
-          <angle>0.4</angle>
-          <amplitude>0.4</amplitude>
-          <period>8.0</period>
-          <phase>0.0</phase>
-          <steepness>1.0</steepness>
-          <direction>1 1</direction> -->
         </wave>
     </plugin>
 
@@ -37,33 +27,12 @@
             <radius>0.01</radius>
           </sphere>
         </geometry>
-
-        <!-- <geometry>
-          <box>
-            <size>1 1 1</size>
-          </box>
-        </geometry> -->
-
-        <!-- <geometry>
-          <plane>
-            <normal>0 0 1</normal>
-            <size>10 10</size>
-          </plane>
-        </geometry> -->
-
-        <!-- <geometry>
-          <mesh>
-            <uri>materials/mesh.dae</uri>
-          </mesh>
-        </geometry> -->
-
         <material>
           <ambient>0.0 0.05 0.8 0.92</ambient>
           <diffuse>0.0 0.1 0.7 0.92</diffuse>
           <specular>0.7 0.7 0.7 0.92</specular>
           <pbr>
             <metal>
-              <!-- <albedo_map>materials/water.jpg</albedo_map> -->
               <normal_map>materials/wave_normals.dds</normal_map>
               <environment_map>materials/skybox_lowres.dds</environment_map>
               <roughness>0.3</roughness>
@@ -80,104 +49,14 @@
             <wave>
               <!-- `fft` wave parameters -->
               <algorithm>fft</algorithm>
-              <tile_size>256</tile_size>
+              <tile_size>512</tile_size>
               <cell_count>128</cell_count>
-              <wind_velocity>5 0</wind_velocity>
+              <wind_speed>5.0</wind_speed>
+              <wind_angle_deg>-45</wind_angle_deg>
+              <steepness>2</steepness>
 
-              <!-- `trochoid` wave parameters -->
-              <!-- <algorithm>trochoid</algorithm>
-              <tile_size>1000</tile_size>
-              <cell_count>50</cell_count>
-              <number>3</number>
-              <scale>1.5</scale>
-              <angle>0.4</angle>
-              <amplitude>0.4</amplitude>
-              <period>8.0</period>
-              <phase>0.0</phase>
-              <steepness>1.0</steepness>
-              <direction>1 1</direction> -->
             </wave>
         </plugin>
-
-        <!-- 
-        <plugin
-            filename="ignition-gazebo-shader-param-system"
-            name="ignition::gazebo::systems::ShaderParam">
-          <shader>
-            <vertex>materials/waves_vs.metal</vertex>
-            <fragment>materials/waves_fs.metal</fragment>
-          </shader>
-
-          <param>
-            <shader>vertex</shader>
-            <name>worldviewproj_matrix</name>
-          </param>
-          <param>
-            <shader>vertex</shader>
-            <name>camera_position_object_space</name>
-          </param>
-          <param>
-            <shader>vertex</shader>
-            <name>rescale</name>
-            <value>0.5</value>
-            <type>float</type>
-          </param>
-          <param>
-            <shader>vertex</shader>
-            <name>bumpScale</name>
-            <value>25.0 25.0</value>
-            <type>float_array</type>
-          </param>
-          <param>
-            <shader>vertex</shader>
-            <name>bumpSpeed</name>
-            <value>0.01 0.01</value>
-            <type>float_array</type>
-          </param>
-          <param>
-            <shader>vertex</shader>
-            <name>t</name>
-            <value>TIME</value>
-          </param>
-
-          <param>
-            <shader>fragment</shader>
-            <name>deepColor</name>
-            <value>0.0 0.05 0.2 1.0</value>
-            <type>float_array</type>
-          </param>
-          <param>
-            <shader>fragment</shader>
-            <name>shallowColor</name>
-            <value>0.0 0.1 0.3 1.0</value>
-            <type>float_array</type>
-          </param>
-          <param>
-            <shader>fragment</shader>
-            <name>fresnelPower</name>
-            <value>5.0</value>
-            <type>float</type>
-          </param>
-          <param>
-            <shader>fragment</shader>
-            <name>hdrMultiplier</name>
-            <value>0.4</value>
-            <type>float</type>
-          </param>
-          <param>
-            <shader>fragment</shader>
-            <name>cubeMap</name>
-            <value>materials/skybox_lowres.dds</value>
-            <type>texture_cube</type>
-          </param>
-          <param>
-            <shader>fragment</shader>
-            <name>bumpMap</name>
-            <value>materials/wave_normals.dds</value>
-            <type>texture</type>
-          </param>
-        </plugin>
-        -->
       </visual>
     </link>
   </model>

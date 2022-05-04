@@ -2,10 +2,7 @@
 
 This package contains plugins that support the simulation of waves and surface vessels in Ignition Gazebo.  
 
-![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v1.jpg)
-
-<!-- ![Ignition Marine](https://user-images.githubusercontent.com/24916364/160913834-90f9c03b-4098-4db1-a163-0f9cf1cedc18.png) -->
-
+![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v3.jpg)
 
 ## Notes
 
@@ -95,7 +92,7 @@ git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/ign-garden
 Compile the package:
 
 ```bash
-colcon build --cmake-args \
+colcon build --merge-install --cmake-args \
 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_MACOSX_RPATH=FALSE \
 -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib \
@@ -159,6 +156,8 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 - The `<cell_count>` element has been moved into `<waves>`
 - Add new element `<algorithm>` to specify the wave generation algorithm. Valid options are: `sinusoid`, `trochoid` and `fft`.
 - Add new element `<wind_velocity>` for use with the `fft` algorithm.
+- Add new element `<wind_speed>` for use with the `fft` algorithm.
+- Add new element `<wind_angle_deg>` for use with the `fft` algorithm.
 
 ```xml
 <plugin
@@ -175,7 +174,9 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
       <cell_count>128</cell_count>
       
       <!-- `fft` waves parameters -->
-      <wind_velocity>5 0</wind_velocity>
+      <wind_speed>5.0</wind_speed>
+      <wind_angle_deg>45</wind_angle_deg>
+      <steepness>1</steepness>
 
       <!-- `trochoid` waves parameters -->
       <number>3</number>
@@ -258,3 +259,5 @@ This project makes use of other open source software, for full details see the f
 - The [CGAL](https://doc.cgal.org) libraries are used for the wave field and model meshes.
 - The [UUV Simulator](https://github.com/uuvsimulator/uuv_simulator) package for the orginal vertex shaders used in the wave field visuals.
 - The [VMRC](https://bitbucket.org/osrf/vmrc) package for textures and meshes used in the wave field visuals.
+- Jerry Tessendorf's paper on	[Simulating Ocean Water](https://people.cs.clemson.edu/~jtessen/reports/papers_files/coursenotes2004.pdf)
+- Curtis Mobley's web book [Ocean Optics](https://www.oceanopticsbook.info/) in particular the section on [Modeling Sea Surfaces](https://www.oceanopticsbook.info/view/surfaces/level-2/modeling-sea-surfaces) and [example IDL code](https://www.oceanopticsbook.info/packages/iws_l2h/conversion/files/IDL-SurfaceGenerationCode.zip)  
