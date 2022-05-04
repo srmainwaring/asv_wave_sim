@@ -69,7 +69,7 @@ namespace marine
 
     private: void ComputeCurrentAmplitudes(double _time);
     
-    private: complex Htilde0(double _k, double _kx, double _ky, double _u, double _ux, double _uy, complex _gz);
+    // private: complex Htilde0(double _k, double _kx, double _ky, double _u, double _ux, double _uy, complex _gz);
 
     int mN;
     int mN2;
@@ -79,14 +79,16 @@ namespace marine
     double mUy;
     double mScale;
     double mLambda;
-
+    /*
     std::vector<double> mX;
     std::vector<double> mK;
     std::vector<double> mOmega;
 
     std::vector<complex> mGz;
     std::vector<complex> mH0;
+    */
     std::vector<complex> mH;      // FFT0 - height
+    /*
     std::vector<complex> mHikx;   // FFT1 - d height / dx
     std::vector<complex> mHiky;   // FFT1 - d height / dy
     std::vector<complex> mDx;     // FFT3 - displacement x
@@ -94,27 +96,27 @@ namespace marine
     std::vector<complex> mHkxkx;  // FFT5 - d displacement x / dx
     std::vector<complex> mHkyky;  // FFT6 - d displacement y / dy
     std::vector<complex> mHkxky;  // FFT7 - d displacement x / dy = d displacement y / dx
-
+    */
     fftw_complex* mIn0;
     fftw_complex* mIn1;
     fftw_complex* mIn2;
-    fftw_complex* mIn3;
-    fftw_complex* mIn4;
-    fftw_complex* mIn5;
-    fftw_complex* mIn6;
-    fftw_complex* mIn7;
+    // fftw_complex* mIn3;
+    // fftw_complex* mIn4;
+    // fftw_complex* mIn5;
+    // fftw_complex* mIn6;
+    // fftw_complex* mIn7;
 
     fftw_complex* mOut0;
     fftw_complex* mOut1;
     fftw_complex* mOut2;
-    fftw_complex* mOut3;
-    fftw_complex* mOut4;
-    fftw_complex* mOut5;
-    fftw_complex* mOut6;
-    fftw_complex* mOut7;
+    // fftw_complex* mOut3;
+    // fftw_complex* mOut4;
+    // fftw_complex* mOut5;
+    // fftw_complex* mOut6;
+    // fftw_complex* mOut7;
 
     fftw_plan mFFTPlan0, mFFTPlan1, mFFTPlan2;
-    fftw_plan mFFTPlan3, mFFTPlan4, mFFTPlan5, mFFTPlan6, mFFTPlan7;
+    // fftw_plan mFFTPlan3, mFFTPlan4, mFFTPlan5, mFFTPlan6, mFFTPlan7;
 
     ////////////////////////////////////////////////////////////
     /// \note: reworked version
@@ -272,7 +274,312 @@ namespace marine
     mFFTPlan6 = fftw_plan_dft_2d(mN, mN, mIn6, mOut6, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan7 = fftw_plan_dft_2d(mN, mN, mIn7, mOut7, FFTW_BACKWARD, FFTW_ESTIMATE);
     */
+  }
 
+  void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
+  {
+    // Update wind velocity and recompute base amplitudes.
+    this->mUx = _ux;
+    this->mUy = _uy;
+
+    this->u10 = sqrt(_ux*_ux + _uy *_uy);
+    this->phi0 = atan2(_uy, _ux);
+
+    ComputeBaseAmplitudes();
+  }
+
+  void WaveSimulationFFT2Impl::SetTime(double _time)
+  {
+    ComputeCurrentAmplitudes(_time);
+  }
+
+  void WaveSimulationFFT2Impl::SetScale(double _scale)
+  {
+    mScale = _scale;
+    ComputeBaseAmplitudes();
+  }
+
+  void WaveSimulationFFT2Impl::SetLambda(double _lambda)
+  {
+    mLambda = _lambda;
+    ComputeBaseAmplitudes();
+  }
+
+  void WaveSimulationFFT2Impl::ComputeHeights(
+    std::vector<double>& _heights)
+  {
+    // Populate input array
+    for (size_t i=0; i<mN2; ++i)
+    {
+      mIn0[i][0] = mH[i].real();
+      mIn0[i][1] = mH[i].imag();
+    }
+
+    // Run the FFT
+    fftw_execute(mFFTPlan0);
+
+    // Resize output if necessary
+    if (_heights.size() != mN2)
+    {
+      _heights.resize(mN2, 0.0);
+    }
+
+    for (size_t i=0; i<mN2; ++i)
+    {
+      _heights[i] = mOut0[i][0] * mScale;
+    }
+  }
+
+  void WaveSimulationFFT2Impl::ComputeHeightDerivatives(
+    std::vector<double>& _dhdx,
+    std::vector<double>& _dhdy)
+  {
+    /*
+    // Populate input array
+    for (size_t i=0; i<mN2; ++i)
+    {
+      mIn1[i][0] = mHikx[i].real();
+      mIn1[i][1] = mHikx[i].imag();
+
+      mIn2[i][0]   = mHiky[i].real();
+      mIn2[i][1] = mHiky[i].imag();
+    }
+
+    // Run the FFTs
+    fftw_execute(mFFTPlan1);
+    fftw_execute(mFFTPlan2);
+
+    // Resize output if necessary
+    if (_dhdx.size() != mN2)
+    {
+      _dhdx.resize(mN2, 0.0);
+    }
+    if (_dhdy.size() != mN2)
+    {
+      _dhdy.resize(mN2, 0.0);
+    }
+
+    for (size_t i=0; i<mN2; ++i)
+    {
+      _dhdx[i] = mOut1[i][0] * mScale;
+      _dhdy[i] = mOut2[i][0] * mScale;
+    }
+    */
+    // Resize output if necessary
+    if (_dhdx.size() != mN2)
+    {
+      _dhdx.resize(mN2, 0.0);
+    }
+    if (_dhdy.size() != mN2)
+    {
+      _dhdy.resize(mN2, 0.0);
+    }
+
+    for (size_t i=0; i<mN2; ++i)
+    {
+      _dhdx[i] = 0.0;
+      _dhdy[i] = 0.0;
+    }
+  }
+
+  void WaveSimulationFFT2Impl::ComputeDisplacements(
+    std::vector<double>& _sx,
+    std::vector<double>& _sy)
+  {
+    /*
+    // Populate input array
+    for (size_t i=0; i<mN2; ++i)
+    {
+      mIn3[i][0] = mDx[i].real();
+      mIn3[i][1] = mDx[i].imag();
+
+      mIn4[i][0] = mDy[i].real();
+      mIn4[i][1] = mDy[i].imag();
+    }
+
+    // Run the FFTs
+    fftw_execute(mFFTPlan3);
+    fftw_execute(mFFTPlan4);
+
+    // Resize output if necessary
+    if (_sx.size() != mN2)
+    {
+      _sx.resize(mN2, 0.0);
+    }
+    if (_sy.size() != mN2)
+    {
+      _sy.resize(mN2, 0.0);
+    }
+
+    for (size_t i=0; i<mN2; ++i)
+    {
+      _sx[i] = - mOut3[i][0] * mScale * mLambda;
+      _sy[i] = - mOut4[i][0] * mScale * mLambda;
+    }
+    */
+    // Resize output if necessary
+    const int NxNy = this->Nx * this->Ny;
+    if (_sx.size() != NxNy)
+    {
+      _sx.resize(NxNy, 0.0);
+    }
+    if (_sy.size() != NxNy)
+    {
+      _sy.resize(NxNy, 0.0);
+    }
+
+    /// \todo: add horizontal displacements
+    for (int i = 0; i < NxNy; ++i)
+    {
+      _sx[i] = 0.0;
+      _sy[i] = 0.0;
+    }
+  }
+
+  void WaveSimulationFFT2Impl::ComputeDisplacementDerivatives(
+    std::vector<double>& _dsxdx,
+    std::vector<double>& _dsydy,
+    std::vector<double>& _dsxdy)
+  {
+    /*
+    // Populate input array
+    for (size_t i=0; i<mN2; ++i)
+    {
+      mIn5[i][0] = mHkxkx[i].real();
+      mIn5[i][1] = mHkxkx[i].imag();
+
+      mIn6[i][0] = mHkyky[i].real();
+      mIn6[i][1] = mHkyky[i].imag();
+
+      mIn7[i][0] = mHkxky[i].real();
+      mIn7[i][1] = mHkxky[i].imag();
+    }
+
+    // Run the FFTs
+    fftw_execute(mFFTPlan5);
+    fftw_execute(mFFTPlan6);
+    fftw_execute(mFFTPlan7);
+
+    // Resize output if necessary
+    if (_dsxdx.size() != mN2)
+    {
+      _dsxdx.resize(mN2, 0.0);
+    }
+    if (_dsydy.size() != mN2)
+    {
+      _dsydy.resize(mN2, 0.0);
+    }
+    if (_dsxdy.size() != mN2)
+    {
+      _dsxdy.resize(mN2, 0.0);
+    }
+
+    for (size_t i=0; i<mN2; ++i)
+    {
+      _dsxdx[i] = - mOut5[i][0] * mScale * mLambda;
+      _dsydy[i] = - mOut6[i][0] * mScale * mLambda;
+      _dsxdy[i] = - mOut7[i][0] * mScale * mLambda;
+    }
+    */
+    // Resize output if necessary
+    const int NxNy = this->Nx * this->Ny;
+    
+    if (_dsxdx.size() != NxNy)
+    {
+      _dsxdx.resize(NxNy, 0.0);
+    }
+    if (_dsydy.size() != NxNy)
+    {
+      _dsydy.resize(NxNy, 0.0);
+    }
+    if (_dsxdy.size() != NxNy)
+    {
+      _dsxdy.resize(NxNy, 0.0);
+    }
+
+    /// \todo: add horizontal displacements
+    for (int i = 0; i < NxNy; ++i)
+    {
+      _dsxdx[i] = 0.0;
+      _dsydy[i] = 0.0;
+      _dsxdy[i] = 0.0;
+    }
+  }
+
+  void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
+  {
+    /*
+    // 1D axes
+    mX.resize(mN, 0.0);
+    mK.resize(mN, 0.0);
+    mOmega.resize(mN, 0.0);
+
+    // 2D grids
+    mGz.resize(mN2, complex(0.0, 0.0));
+    mH0.resize(mN2, complex(0.0, 0.0));
+    */
+    mH.resize(mN2, complex(0.0, 0.0));
+    /*
+    mHikx.resize(mN2, complex(0.0, 0.0));
+    mHiky.resize(mN2, complex(0.0, 0.0));
+    mDx.resize(mN2, complex(0.0, 0.0));
+    mDy.resize(mN2, complex(0.0, 0.0));
+    mHkxkx.resize(mN2, complex(0.0, 0.0));
+    mHkyky.resize(mN2, complex(0.0, 0.0));
+    mHkxky.resize(mN2, complex(0.0, 0.0));
+
+    // Populate wavenumber and radian frequency arrays. 
+    for (size_t i=1; i<mN/2; ++i)
+    {
+      mK[i] = i * 2.0 * M_PI/ mL;
+      mK[mN - i] = mK[i];
+    }
+    for (size_t i=0; i<mN; ++i)
+    {
+      mK[i] = i * 2.0 * M_PI/ mL;
+    }
+    for (size_t i=0; i<mN; ++i)
+    {
+      mX[i] = i * mL / mN;
+      mOmega[i] = WaveSpectrum::Dispersion(mK[i]);
+    }    
+
+    // Compute Gaussian random variables.
+    auto seed = std::default_random_engine::default_seed;
+    std::default_random_engine generator(seed);
+
+    std::normal_distribution<double> distribution(0.0, 1.0);
+    for (size_t i=0; i<mN2; ++i)
+    {
+      mGz[i].real(distribution(generator));
+      mGz[i].imag(distribution(generator));
+    }
+
+    // Compute Fourier amplitudes.
+    double u  = std::sqrt(mUx*mUx + mUy*mUy);
+    double kx = mK[0];
+    double ky = mK[0];
+    double k  = std::sqrt(kx*kx + ky*ky);
+    complex gz = mGz[0];
+
+    mH0[0] = Htilde0(k, kx, ky, u, mUx, mUy, gz);
+    for (size_t ix=1; ix<mN/2; ++ix)
+    {
+      for (size_t iy=1; iy<mN/2; ++iy)
+      {
+        size_t idx = ix * mN + iy;
+        kx = mK[ix];
+        ky = mK[iy];
+        k  = std::sqrt(kx*kx + ky*ky);
+        gz = mGz[idx];
+        
+        mH0[idx] = Htilde0(k, kx, ky, u, mUx, mUy, gz);
+
+        size_t cdx = (mN - ix) * mN + (mN - iy);
+        mH0[cdx] = std::conj(mH0[idx]);
+      }
+    }
+    */
     ////////////////////////////////////////////////////////////
     /// \note: reworked version
 
@@ -460,294 +767,9 @@ namespace marine
 
   }
 
-  void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
-  {
-    // Update wind velocity and recompute base amplitudes.
-    this->mUx = _ux;
-    this->mUy = _uy;
-
-    this->u10 = sqrt(_ux*_ux + _uy *_uy);
-    this->phi0 = atan2(_uy, _ux);
-
-    ComputeBaseAmplitudes();
-  }
-
-  void WaveSimulationFFT2Impl::SetTime(double _time)
-  {
-    ComputeCurrentAmplitudes(_time);
-  }
-
-  void WaveSimulationFFT2Impl::SetScale(double _scale)
-  {
-    mScale = _scale;
-    ComputeBaseAmplitudes();
-  }
-
-  void WaveSimulationFFT2Impl::SetLambda(double _lambda)
-  {
-    mLambda = _lambda;
-    ComputeBaseAmplitudes();
-  }
-
-  void WaveSimulationFFT2Impl::ComputeHeights(
-    std::vector<double>& _heights)
-  {
-    // Populate input array
-    for (size_t i=0; i<mN2; ++i)
-    {
-      mIn0[i][0] = mH[i].real();
-      mIn0[i][1] = mH[i].imag();
-    }
-
-    // Run the FFT
-    fftw_execute(mFFTPlan0);
-
-    // Resize output if necessary
-    if (_heights.size() != mN2)
-    {
-      _heights.resize(mN2, 0.0);
-    }
-
-    for (size_t i=0; i<mN2; ++i)
-    {
-      _heights[i] = mOut0[i][0] * mScale;
-    }
-  }
-
-  void WaveSimulationFFT2Impl::ComputeHeightDerivatives(
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy)
-  {
-    // Populate input array
-    for (size_t i=0; i<mN2; ++i)
-    {
-      mIn1[i][0] = mHikx[i].real();
-      mIn1[i][1] = mHikx[i].imag();
-
-      mIn2[i][0]   = mHiky[i].real();
-      mIn2[i][1] = mHiky[i].imag();
-    }
-
-    // Run the FFTs
-    fftw_execute(mFFTPlan1);
-    fftw_execute(mFFTPlan2);
-
-    // Resize output if necessary
-    if (_dhdx.size() != mN2)
-    {
-      _dhdx.resize(mN2, 0.0);
-    }
-    if (_dhdy.size() != mN2)
-    {
-      _dhdy.resize(mN2, 0.0);
-    }
-
-    for (size_t i=0; i<mN2; ++i)
-    {
-      _dhdx[i] = mOut1[i][0] * mScale;
-      _dhdy[i] = mOut2[i][0] * mScale;
-    }
-  }
-
-  void WaveSimulationFFT2Impl::ComputeDisplacements(
-    std::vector<double>& _sx,
-    std::vector<double>& _sy)
-  {
-    /*
-    // Populate input array
-    for (size_t i=0; i<mN2; ++i)
-    {
-      mIn3[i][0] = mDx[i].real();
-      mIn3[i][1] = mDx[i].imag();
-
-      mIn4[i][0] = mDy[i].real();
-      mIn4[i][1] = mDy[i].imag();
-    }
-
-    // Run the FFTs
-    fftw_execute(mFFTPlan3);
-    fftw_execute(mFFTPlan4);
-
-    // Resize output if necessary
-    if (_sx.size() != mN2)
-    {
-      _sx.resize(mN2, 0.0);
-    }
-    if (_sy.size() != mN2)
-    {
-      _sy.resize(mN2, 0.0);
-    }
-
-    for (size_t i=0; i<mN2; ++i)
-    {
-      _sx[i] = - mOut3[i][0] * mScale * mLambda;
-      _sy[i] = - mOut4[i][0] * mScale * mLambda;
-    }
-    */
-    // Resize output if necessary
-    const int NxNy = this->Nx * this->Ny;
-    if (_sx.size() != NxNy)
-    {
-      _sx.resize(NxNy, 0.0);
-    }
-    if (_sy.size() != NxNy)
-    {
-      _sy.resize(NxNy, 0.0);
-    }
-
-    /// \todo: add horizontal displacements
-    for (int i = 0; i < NxNy; ++i)
-    {
-      _sx[i] = 0.0;
-      _sy[i] = 0.0;
-    }
-  }
-
-  void WaveSimulationFFT2Impl::ComputeDisplacementDerivatives(
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
-  {
-    /*
-    // Populate input array
-    for (size_t i=0; i<mN2; ++i)
-    {
-      mIn5[i][0] = mHkxkx[i].real();
-      mIn5[i][1] = mHkxkx[i].imag();
-
-      mIn6[i][0] = mHkyky[i].real();
-      mIn6[i][1] = mHkyky[i].imag();
-
-      mIn7[i][0] = mHkxky[i].real();
-      mIn7[i][1] = mHkxky[i].imag();
-    }
-
-    // Run the FFTs
-    fftw_execute(mFFTPlan5);
-    fftw_execute(mFFTPlan6);
-    fftw_execute(mFFTPlan7);
-
-    // Resize output if necessary
-    if (_dsxdx.size() != mN2)
-    {
-      _dsxdx.resize(mN2, 0.0);
-    }
-    if (_dsydy.size() != mN2)
-    {
-      _dsydy.resize(mN2, 0.0);
-    }
-    if (_dsxdy.size() != mN2)
-    {
-      _dsxdy.resize(mN2, 0.0);
-    }
-
-    for (size_t i=0; i<mN2; ++i)
-    {
-      _dsxdx[i] = - mOut5[i][0] * mScale * mLambda;
-      _dsydy[i] = - mOut6[i][0] * mScale * mLambda;
-      _dsxdy[i] = - mOut7[i][0] * mScale * mLambda;
-    }
-    */
-    // Resize output if necessary
-    const int NxNy = this->Nx * this->Ny;
-    
-    if (_dsxdx.size() != NxNy)
-    {
-      _dsxdx.resize(NxNy, 0.0);
-    }
-    if (_dsydy.size() != NxNy)
-    {
-      _dsydy.resize(NxNy, 0.0);
-    }
-    if (_dsxdy.size() != NxNy)
-    {
-      _dsxdy.resize(NxNy, 0.0);
-    }
-
-    /// \todo: add horizontal displacements
-    for (int i = 0; i < NxNy; ++i)
-    {
-      _dsxdx[i] = 0.0;
-      _dsydy[i] = 0.0;
-      _dsxdy[i] = 0.0;
-    }
-  }
-
-  void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
-  {
-    // 1D axes
-    mX.resize(mN, 0.0);
-    mK.resize(mN, 0.0);
-    mOmega.resize(mN, 0.0);
-
-    // 2D grids
-    mGz.resize(mN2, complex(0.0, 0.0));
-    mH0.resize(mN2, complex(0.0, 0.0));
-    mH.resize(mN2, complex(0.0, 0.0));
-    mHikx.resize(mN2, complex(0.0, 0.0));
-    mHiky.resize(mN2, complex(0.0, 0.0));
-    
-    mDx.resize(mN2, complex(0.0, 0.0));
-    mDy.resize(mN2, complex(0.0, 0.0));
-    mHkxkx.resize(mN2, complex(0.0, 0.0));
-    mHkyky.resize(mN2, complex(0.0, 0.0));
-    mHkxky.resize(mN2, complex(0.0, 0.0));
-
-    // Populate wavenumber and radian frequency arrays. 
-    for (size_t i=1; i<mN/2; ++i)
-    {
-      mK[i] = i * 2.0 * M_PI/ mL;
-      mK[mN - i] = mK[i];
-    }
-    for (size_t i=0; i<mN; ++i)
-    {
-      mK[i] = i * 2.0 * M_PI/ mL;
-    }
-    for (size_t i=0; i<mN; ++i)
-    {
-      mX[i] = i * mL / mN;
-      mOmega[i] = WaveSpectrum::Dispersion(mK[i]);
-    }    
-
-    // Compute Gaussian random variables.
-    auto seed = std::default_random_engine::default_seed;
-    std::default_random_engine generator(seed);
-
-    std::normal_distribution<double> distribution(0.0, 1.0);
-    for (size_t i=0; i<mN2; ++i)
-    {
-      mGz[i].real(distribution(generator));
-      mGz[i].imag(distribution(generator));
-    }
-
-    // Compute Fourier amplitudes.
-    double u  = std::sqrt(mUx*mUx + mUy*mUy);
-    double kx = mK[0];
-    double ky = mK[0];
-    double k  = std::sqrt(kx*kx + ky*ky);
-    complex gz = mGz[0];
-
-    mH0[0] = Htilde0(k, kx, ky, u, mUx, mUy, gz);
-    for (size_t ix=1; ix<mN/2; ++ix)
-    {
-      for (size_t iy=1; iy<mN/2; ++iy)
-      {
-        size_t idx = ix * mN + iy;
-        kx = mK[ix];
-        ky = mK[iy];
-        k  = std::sqrt(kx*kx + ky*ky);
-        gz = mGz[idx];
-        
-        mH0[idx] = Htilde0(k, kx, ky, u, mUx, mUy, gz);
-
-        size_t cdx = (mN - ix) * mN + (mN - iy);
-        mH0[cdx] = std::conj(mH0[idx]);
-      }
-    }
-  }
-
   void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
   {
+    /*
     double kx0 = mK[0];
     double ky0 = mK[0];
     double k0  = std::sqrt(kx0*kx0 + ky0*ky0);
@@ -833,7 +855,7 @@ namespace marine
         }
       }
     }
-  
+    */
     ////////////////////////////////////////////////////////////
     /// \note: reworked version
 
@@ -911,12 +933,12 @@ namespace marine
 
   }
 
-  complex WaveSimulationFFT2Impl::Htilde0(double _k, double _kx, double _ky, double _u, double _ux, double _uy, complex _gz)
-  {
-    double rp = std::sqrt(0.5 * WaveSpectrum::Spectrum(_k, _kx, _ky, _u, _ux, _uy));
-    complex h = _gz * rp;
-    return h;
-  }
+  // complex WaveSimulationFFT2Impl::Htilde0(double _k, double _kx, double _ky, double _u, double _ux, double _uy, complex _gz)
+  // {
+  //   double rp = std::sqrt(0.5 * WaveSpectrum::Spectrum(_k, _kx, _ky, _u, _ux, _uy));
+  //   complex h = _gz * rp;
+  //   return h;
+  // }
 
   double WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
       double k, double u10, double cap_omega_c)

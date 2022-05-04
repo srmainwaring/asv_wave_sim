@@ -13,7 +13,7 @@
           <algorithm>fft2</algorithm>
           <tile_size>512</tile_size>
           <cell_count>128</cell_count>
-          <wind_velocity>5 0</wind_velocity>
+          <wind_velocity>5 -5</wind_velocity>
         </wave>
     </plugin>
 
@@ -48,7 +48,7 @@
               <algorithm>fft2</algorithm>
               <tile_size>512</tile_size>
               <cell_count>128</cell_count>
-              <wind_velocity>5 0</wind_velocity>
+              <wind_velocity>5 -5</wind_velocity>
             </wave>
         </plugin>
       </visual>
