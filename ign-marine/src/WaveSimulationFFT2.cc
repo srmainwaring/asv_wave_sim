@@ -16,6 +16,8 @@
 #include "ignition/marine/WaveSimulationFFT2.hh"
 #include "ignition/marine/WaveSpectrum.hh"
 
+#include <ignition/common.hh>
+
 #include <fftw3.h>
 
 #include <complex>
@@ -113,6 +115,76 @@ namespace marine
 
     fftw_plan mFFTPlan0, mFFTPlan1, mFFTPlan2;
     fftw_plan mFFTPlan3, mFFTPlan4, mFFTPlan5, mFFTPlan6, mFFTPlan7;
+
+    ////////////////////////////////////////////////////////////
+    /// \note: reworked version
+
+    // parameters
+    double  Lx = this->mL;
+    double  Ly = this->mL;
+    int     Nx = this->mN;
+    int     Ny = this->mN;
+    double  u10 = 5.0;
+    double  phi0 = 0.0;
+    double  s_param = 10.0;
+    double  cap_omega_c = 0.84;
+
+    // derived quantities
+
+    // sample spacing [m]
+    double  delta_x = this->Lx / this->Nx;
+    double  delta_y = this->Ly / this->Ny;
+
+    // fundamental wavelength [m]
+    double  lambda_x_f = this->Lx;
+    double  lambda_y_f = this->Ly;
+
+    // Nyquist wavelength [m]
+    double  lambda_x_Ny = 2.0 * this->delta_x;
+    double  lambda_y_Ny = 2.0 * this->delta_y;
+
+    // fundamental spatial frequency [1/m]
+    double  nu_x_f = 1.0 / this->Lx;
+    double  nu_y_f = 1.0 / this->Ly;
+
+    // Nyquist spatial frequency [1/m]
+    double  nu_x_Ny = 1.0 / (2.0 * this->delta_x);
+    double  nu_y_Ny = 1.0 / (2.0 * this->delta_y);
+
+    // fundamental angular spatial frequency [rad/m]
+    double  kx_f = 2.0 * M_PI / this->Lx;
+    double  ky_f = 2.0 * M_PI / this->Ly;
+
+    // Nyquist angular spatial frequency [rad/m]
+    double  kx_Ny = this->kx_f * this->Nx / 2.0;
+    double  ky_Ny = this->ky_f * this->Ny / 2.0;
+
+    // angular spatial frequencies in fft and math order
+    std::vector<double> kx_fft  = std::vector<double>(this->Nx, 0.0);
+    std::vector<double> ky_fft  = std::vector<double>(this->Ny, 0.0);
+    std::vector<double> kx_math = std::vector<double>(this->Nx, 0.0);
+    std::vector<double> ky_math = std::vector<double>(this->Ny, 0.0);
+
+    // set to 1 to use a symmetric spreading function (=> standing waves)
+    bool use_symmetric_spreading_fn = false;
+
+    // square-root of two-sided discrete elevation variance spectrum
+    std::vector<std::vector<double>> cap_psi_2s_root = std::vector<std::vector<double>>(
+        this->Nx, std::vector<double>(this->Ny, 0.0));
+
+    // iid random normals for real and imaginary parts of the amplitudes
+    std::vector<std::vector<double>> rho = std::vector<std::vector<double>>(
+        this->Nx, std::vector<double>(this->Ny, 0.0));
+    std::vector<std::vector<double>> sigma = std::vector<std::vector<double>>(
+        this->Nx, std::vector<double>(this->Ny, 0.0));
+
+    // angular temporal frequency
+    std::vector<std::vector<double>> omega_k = std::vector<std::vector<double>>(
+        this->Nx, std::vector<double>(this->Ny, 0.0));
+
+    double ECKVOmniDirectionalSpectrum(double k, double u10, double cap_omega_c=0.84);
+    double ECKVSpreadingFunction(double k, double phi, double u10, double cap_omega_c=0.84);
+    double Cos2SSpreadingFunction(double s_param, double phi, double u10, double cap_omega_c=0.84);
   };
 
   WaveSimulationFFT2Impl::~WaveSimulationFFT2Impl()
@@ -120,29 +192,29 @@ namespace marine
     fftw_destroy_plan(mFFTPlan0);
     fftw_destroy_plan(mFFTPlan1);
     fftw_destroy_plan(mFFTPlan2);
-    fftw_destroy_plan(mFFTPlan3);
-    fftw_destroy_plan(mFFTPlan4);
-    fftw_destroy_plan(mFFTPlan5);
-    fftw_destroy_plan(mFFTPlan6);
-    fftw_destroy_plan(mFFTPlan7);
+    // fftw_destroy_plan(mFFTPlan3);
+    // fftw_destroy_plan(mFFTPlan4);
+    // fftw_destroy_plan(mFFTPlan5);
+    // fftw_destroy_plan(mFFTPlan6);
+    // fftw_destroy_plan(mFFTPlan7);
 
     fftw_free(mOut0);
     fftw_free(mOut1);
     fftw_free(mOut2);
-    fftw_free(mOut3);
-    fftw_free(mOut4);
-    fftw_free(mOut5);
-    fftw_free(mOut6);
-    fftw_free(mOut7);
+    // fftw_free(mOut3);
+    // fftw_free(mOut4);
+    // fftw_free(mOut5);
+    // fftw_free(mOut6);
+    // fftw_free(mOut7);
 
     fftw_free(mIn0);
     fftw_free(mIn1);
     fftw_free(mIn2);
-    fftw_free(mIn3);
-    fftw_free(mIn4);
-    fftw_free(mIn5);
-    fftw_free(mIn6);
-    fftw_free(mIn7);
+    // fftw_free(mIn3);
+    // fftw_free(mIn4);
+    // fftw_free(mIn5);
+    // fftw_free(mIn6);
+    // fftw_free(mIn7);
   }
 
   WaveSimulationFFT2Impl::WaveSimulationFFT2Impl(int _N, double _L) :
@@ -165,11 +237,13 @@ namespace marine
     mIn2  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
 
     // For xy-displacements
+    /*
     mIn3  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn4  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn5  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn6  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn7  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
+    */
 
     // For height
     mOut0 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
@@ -177,11 +251,13 @@ namespace marine
     mOut2 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
 
     // For xy-displacements
+    /*
     mOut3 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut4 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut5 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut6 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut7 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
+    */
 
     // For height
     mFFTPlan0 = fftw_plan_dft_2d(mN, mN, mIn0, mOut0, FFTW_BACKWARD, FFTW_ESTIMATE);
@@ -189,18 +265,210 @@ namespace marine
     mFFTPlan2 = fftw_plan_dft_2d(mN, mN, mIn2, mOut2, FFTW_BACKWARD, FFTW_ESTIMATE);
 
     // For xy-displacements
+    /*
     mFFTPlan3 = fftw_plan_dft_2d(mN, mN, mIn3, mOut3, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan4 = fftw_plan_dft_2d(mN, mN, mIn4, mOut4, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan5 = fftw_plan_dft_2d(mN, mN, mIn5, mOut5, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan6 = fftw_plan_dft_2d(mN, mN, mIn6, mOut6, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan7 = fftw_plan_dft_2d(mN, mN, mIn7, mOut7, FFTW_BACKWARD, FFTW_ESTIMATE);
+    */
+
+    ////////////////////////////////////////////////////////////
+    /// \note: reworked version
+
+    // index, math-order, fft-order
+    // [ 0,  1,  2,  3,  4,  5,  6,  7]
+    // [-4, -3, -2, -1,  0,  1,  2,  3]
+    //                 [ 0,  1,  2,  3, -4, -3, -2, -3]
+
+    // fftfreq and ifftshift
+    for(int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      const double kx = (ikx - this->Nx/2) * this->kx_f;
+      kx_math[ikx] = kx;
+      kx_fft[(ikx + Nx/2) % Nx] = kx;
+    }
+
+    for(int iky = 0; iky < this->Ny; ++iky)
+    {
+      const double ky = (iky - this->Ny/2) * this->ky_f;
+      ky_math[iky] = ky;
+      ky_fft[(iky + Ny/2) % Ny] = ky;
+    }
+
+    // debug
+    ignmsg << "WaveSimulationFFT2" << "\n";
+    ignmsg << "Lx:          " << this->Lx << "\n";
+    ignmsg << "Ly:          " << this->Ly << "\n";
+    ignmsg << "Nx:          " << this->Nx << "\n";
+    ignmsg << "Ny:          " << this->Ny << "\n";
+    ignmsg << "delta_x:     " << this->delta_x << "\n";
+    ignmsg << "delta_x:     " << this->delta_y << "\n";
+    ignmsg << "lambda_x_f:  " << this->lambda_x_f << "\n";
+    ignmsg << "lambda_y_f:  " << this->lambda_y_f << "\n";
+    ignmsg << "nu_x_f:      " << this->nu_x_f << "\n";
+    ignmsg << "nu_y_f:      " << this->nu_y_f << "\n";
+    ignmsg << "nu_x_Ny:     " << this->nu_x_Ny << "\n";
+    ignmsg << "nu_y_Ny:     " << this->nu_y_Ny << "\n";
+    ignmsg << "kx_f:        " << this->kx_f << "\n";
+    ignmsg << "ky_f:        " << this->ky_f << "\n";
+    ignmsg << "kx_Ny:       " << this->kx_Ny << "\n";
+    ignmsg << "ky_Ny:       " << this->ky_Ny << "\n";
+    #if 0
+    {
+      std::ostringstream os;
+      os << "[ "; for (auto& v : this->kx_fft) os << v << " "; os << "]\n";
+      ignmsg << "kx_fft:      " << os.str();
+    }
+    {
+      std::ostringstream os;
+      os << "[ "; for (auto& v : this->ky_fft) os << v << " "; os << "]\n";
+      ignmsg << "ky_fft:      " << os.str();
+    }
+    {
+      std::ostringstream os;
+      os << "[ "; for (auto& v : this->kx_math) os << v << " "; os << "]\n";
+      ignmsg << "kx_math:     " << os.str();
+    }
+    {
+      std::ostringstream os;
+      os << "[ "; for (auto& v : this->ky_math) os << v << " "; os << "]\n";
+      ignmsg << "ky_math:     " << os.str();
+    }
+    #endif
+
+    // continuous two-sided elevation variance spectrum
+    std::vector<std::vector<double>> cap_psi_2s_math(
+        this->Nx, std::vector<double>(this->Ny, 0.0));
+
+    // calculate spectrum in math-order (not vectorised)
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        double k = sqrt(this->kx_math[ikx]*this->kx_math[ikx]
+            + this->ky_math[iky]*this->ky_math[iky]);
+        double phi = atan2(this->ky_math[iky], this->kx_math[ikx]);
+
+        if (k == 0.0)
+        {
+          cap_psi_2s_math[ikx][iky] = 0.0;
+        }
+        else
+        {
+          double cap_psi = 0.0;
+          if (this->use_symmetric_spreading_fn)
+          {
+            // standing waves - symmetric spreading function
+            cap_psi = this->ECKVSpreadingFunction(
+                k, phi - this->phi0, this->u10, this->cap_omega_c);
+          }
+          else
+          {
+            // travelling waves - asymmetric spreading function
+            cap_psi = this->Cos2SSpreadingFunction(
+                this->s_param, phi - this->phi0, this->u10, this->cap_omega_c);
+          }
+          double cap_s = this->ECKVOmniDirectionalSpectrum(
+              k, this->u10, this->cap_omega_c);
+          cap_psi_2s_math[ikx][iky] = cap_s * cap_psi / k;
+        }
+      }
+    }
+
+    // debug
+    #if 0
+    {
+      std::ostringstream os;
+      os << "[\n";
+      for (int ikx = 0; ikx < this->Nx; ++ikx)
+      {
+        os << " [ ";
+        for (auto& v : cap_psi_2s_math[ikx])
+        {
+          os << v << " ";
+        }
+        os << "]\n";
+      }
+      os << "]\n";
+
+      ignmsg << "cap_psi_2s:  " << os.str();
+    }
+    #endif
+
+    // convert to fft-order
+    std::vector<std::vector<double>> cap_psi_2s_fft(
+        this->Nx, std::vector<double>(this->Ny, 0.0));
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      int ikx_fft = (ikx + Nx/2) % Nx;
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        int iky_fft = (iky + Ny/2) % Ny;
+        cap_psi_2s_fft[ikx_fft][iky_fft] = cap_psi_2s_math[ikx][iky];
+      }
+    }
+
+    // square-root of two-sided discrete elevation variance spectrum
+    double cap_psi_norm = 0.5;
+    double delta_kx = this->kx_f;
+    double delta_ky = this->ky_f;
+    // std::vector<std::vector<double>> cap_psi_2s_root(
+    //     this->Nx, std::vector<double>(this->Ny, 0.0));
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        this->cap_psi_2s_root[ikx][iky] =
+            cap_psi_norm * sqrt(cap_psi_2s_fft[ikx][iky] * delta_kx * delta_ky);
+      }
+    }
+
+    // iid random normals for real and imaginary parts of the amplitudes
+    auto seed = std::default_random_engine::default_seed;
+    std::default_random_engine generator(seed);
+    std::normal_distribution<double> distribution(0.0, 1.0);
+
+    // std::vector<std::vector<double>> rho(
+    //     this->Nx, std::vector<double>(this->Ny, 0.0));
+    // std::vector<std::vector<double>> sigma(
+    //     this->Nx, std::vector<double>(this->Ny, 0.0));
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        this->rho[ikx][iky] = distribution(generator);
+        this->sigma[ikx][iky] = distribution(generator);
+      }
+    }
+
+    // gravity acceleration [m/s^2] 
+    double g = 9.82;
+
+    // angular temporal frequency for time-dependent (from dispersion)
+    // std::vector<std::vector<double>> omega_k(
+    //     this->Nx, std::vector<double>(this->Ny, 0.0));
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        double k = sqrt(this->kx_math[ikx]*this->kx_math[ikx]
+            + this->ky_math[iky]*this->ky_math[iky]);
+        this->omega_k[ikx][iky] = sqrt(g * k);
+      }
+    }
+
   }
 
   void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
   {
     // Update wind velocity and recompute base amplitudes.
-    mUx = _ux;
-    mUy = _uy;
+    this->mUx = _ux;
+    this->mUy = _uy;
+
+    this->u10 = sqrt(_ux*_ux + _uy *_uy);
+    this->phi0 = atan2(_uy, _ux);
+
     ComputeBaseAmplitudes();
   }
 
@@ -285,6 +553,7 @@ namespace marine
     std::vector<double>& _sx,
     std::vector<double>& _sy)
   {
+    /*
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
     {
@@ -314,6 +583,24 @@ namespace marine
       _sx[i] = - mOut3[i][0] * mScale * mLambda;
       _sy[i] = - mOut4[i][0] * mScale * mLambda;
     }
+    */
+    // Resize output if necessary
+    const int NxNy = this->Nx * this->Ny;
+    if (_sx.size() != NxNy)
+    {
+      _sx.resize(NxNy, 0.0);
+    }
+    if (_sy.size() != NxNy)
+    {
+      _sy.resize(NxNy, 0.0);
+    }
+
+    /// \todo: add horizontal displacements
+    for (int i = 0; i < NxNy; ++i)
+    {
+      _sx[i] = 0.0;
+      _sy[i] = 0.0;
+    }
   }
 
   void WaveSimulationFFT2Impl::ComputeDisplacementDerivatives(
@@ -321,6 +608,7 @@ namespace marine
     std::vector<double>& _dsydy,
     std::vector<double>& _dsxdy)
   {
+    /*
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
     {
@@ -358,6 +646,30 @@ namespace marine
       _dsxdx[i] = - mOut5[i][0] * mScale * mLambda;
       _dsydy[i] = - mOut6[i][0] * mScale * mLambda;
       _dsxdy[i] = - mOut7[i][0] * mScale * mLambda;
+    }
+    */
+    // Resize output if necessary
+    const int NxNy = this->Nx * this->Ny;
+    
+    if (_dsxdx.size() != NxNy)
+    {
+      _dsxdx.resize(NxNy, 0.0);
+    }
+    if (_dsydy.size() != NxNy)
+    {
+      _dsydy.resize(NxNy, 0.0);
+    }
+    if (_dsxdy.size() != NxNy)
+    {
+      _dsxdy.resize(NxNy, 0.0);
+    }
+
+    /// \todo: add horizontal displacements
+    for (int i = 0; i < NxNy; ++i)
+    {
+      _dsxdx[i] = 0.0;
+      _dsydy[i] = 0.0;
+      _dsxdy[i] = 0.0;
     }
   }
 
@@ -521,6 +833,82 @@ namespace marine
         }
       }
     }
+  
+    ////////////////////////////////////////////////////////////
+    /// \note: reworked version
+
+    // alias
+    auto& Nx = this->Nx;
+    auto& Ny = this->Ny;
+    auto& r = this->rho;
+    auto& s = this->sigma;
+    auto& psi_root = this->cap_psi_2s_root;
+
+
+    // time update
+    std::vector<std::vector<double>> cos_omega_k(
+        Nx, std::vector<double>(Ny, 0.0));
+    std::vector<std::vector<double>> sin_omega_k(
+        Nx, std::vector<double>(Ny, 0.0));
+    for (int ikx = 0; ikx < Nx; ++ikx)
+    {
+      for (int iky = 0; iky < Ny; ++iky)
+      {
+        cos_omega_k[ikx][iky] = cos(this->omega_k[ikx][iky] * _time);
+        sin_omega_k[ikx][iky] = sin(this->omega_k[ikx][iky] * _time);
+      }
+    }
+
+    std::vector<std::vector<complex>> zhat(Nx, std::vector<complex>(Ny, complex(0.0, 0.0)));
+    for (int ikx = 1; ikx < Nx; ++ikx)
+    {
+      for (int iky = 1; iky < Ny; ++iky)
+      {
+        zhat[ikx][iky] = complex(
+            + ( r[ikx][iky] * psi_root[ikx][iky] + r[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * cos_omega_k[ikx][iky]
+            + ( s[ikx][iky] * psi_root[ikx][iky] + s[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * sin_omega_k[ikx][iky],
+            - ( r[ikx][iky] * psi_root[ikx][iky] - r[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * sin_omega_k[ikx][iky]
+            + ( s[ikx][iky] * psi_root[ikx][iky] - s[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * cos_omega_k[ikx][iky]);
+      }
+    }
+
+    for (int iky = 1; iky < Ny/2+1; ++iky)
+    {
+      int ikx = 0;
+      zhat[ikx][iky] = complex(
+          + ( r[ikx][iky] * psi_root[ikx][iky] + r[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * cos_omega_k[ikx][iky]
+          + ( s[ikx][iky] * psi_root[ikx][iky] + s[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * sin_omega_k[ikx][iky],
+          - ( r[ikx][iky] * psi_root[ikx][iky] - r[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * sin_omega_k[ikx][iky]
+          + ( s[ikx][iky] * psi_root[ikx][iky] - s[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * cos_omega_k[ikx][iky]);
+      zhat[ikx][Ny-iky] = std::conj(zhat[ikx][iky]);
+    }
+
+    for (int ikx = 1; ikx < Nx/2+1; ++ikx)
+    {
+      int iky = 0;
+      zhat[ikx][iky] = complex(
+          + ( r[ikx][iky] * psi_root[ikx][iky] + r[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * cos_omega_k[ikx][iky]
+          + ( s[ikx][iky] * psi_root[ikx][iky] + s[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * sin_omega_k[ikx][iky],
+          - ( r[ikx][iky] * psi_root[ikx][iky] - r[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * sin_omega_k[ikx][iky]
+          + ( s[ikx][iky] * psi_root[ikx][iky] - s[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * cos_omega_k[ikx][iky]);
+      zhat[Nx-ikx][iky] = std::conj(zhat[ikx][iky]);
+    }
+
+    zhat[0][0] = complex(0.0, 0.0);
+
+    /// \todo: change zhat to 1D array and use directly
+    /// \todo: calculate the derivatives as well (for tangent space)
+
+    // write into mH
+    for (int ikx = 0; ikx < Nx; ++ikx)
+    {
+      for (int iky = 0; iky < Ny; ++iky)
+      {
+        int idx = ikx * Nx + iky;
+        this->mH[idx] = zhat[ikx][iky];
+      }
+    }
+
   }
 
   complex WaveSimulationFFT2Impl::Htilde0(double _k, double _kx, double _ky, double _u, double _ux, double _uy, complex _gz)
@@ -528,6 +916,130 @@ namespace marine
     double rp = std::sqrt(0.5 * WaveSpectrum::Spectrum(_k, _kx, _ky, _u, _ux, _uy));
     complex h = _gz * rp;
     return h;
+  }
+
+  double WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
+      double k, double u10, double cap_omega_c)
+  {
+    double alpha = 0.0081;
+    double beta = 1.25;
+    double g = 9.82;
+    double Cd_10N = 0.00144;
+    double u_star = sqrt(Cd_10N) * u10;
+    double ao = 0.1733;
+    double ap = 4.0;
+    double km = 370.0;
+    double cm = 0.23;
+    double am = 0.13 * u_star / cm;
+    
+    double gamma = 1.7;
+    if (cap_omega_c < 1.0)
+    {
+      gamma = 1.7;
+    }
+    else
+    {
+      gamma = 1.7 + 6.0 * log10(cap_omega_c);
+    }
+
+    double sigma = 0.08 * (1.0 + 4.0 * pow(cap_omega_c, -3.0));
+    double alpha_p = 0.006 * pow(cap_omega_c, 0.55);
+
+    double alpha_m; 
+    if (u_star <= cm)
+    {
+      alpha_m = 0.01 * (1.0 + log(u_star / cm));
+    }
+    else
+    {
+      alpha_m = 0.01 * (1.0 + 3.0 * log(u_star / cm));
+    }
+
+    double ko = g / u10 / u10;
+    double kp = ko * cap_omega_c * cap_omega_c;
+
+    double cp = sqrt(g / kp);
+    double c  = sqrt((g / k) * (1.0 + pow(k / km, 2.0)));
+        
+    double L_PM = exp(-1.25 * pow(kp / k, 2.0));
+    
+    double Gamma = exp(-1.0/(2.0 * pow(sigma, 2.0)) * pow(sqrt(k / kp) - 1.0, 2.0));
+    
+    double J_p = pow(gamma, Gamma);
+    
+    double F_p = L_PM * J_p * exp(-0.3162 * cap_omega_c * (sqrt(k / kp) - 1.0));
+
+    double F_m = L_PM * J_p * exp(-0.25 * pow(k / km - 1.0, 2.0));
+
+    double B_l = 0.5 * alpha_p * (cp / c) * F_p;
+    double B_h = 0.5 * alpha_m * (cm / c) * F_m;
+    
+    double k3 = k * k * k;
+    double S = (B_l + B_h) / k3;
+
+    // debug
+    // ignmsg << "g:       " << g << "\n";
+    // ignmsg << "Omega_c: " << cap_omega_c << "\n";
+    // ignmsg << "Cd10N:   " << Cd_10N << "\n";
+    // ignmsg << "ustar:   " << u_star << "\n";
+    // ignmsg << "ao:      " << ao << "\n";
+    // ignmsg << "ap:      " << ap << "\n";
+    // ignmsg << "cm:      " << cm << "\n";
+    // ignmsg << "am:      " << am << "\n";
+    // ignmsg << "km:      " << km << "\n";
+    // ignmsg << "gamma:   " << gamma << "\n";
+    // ignmsg << "sigma:   " << sigma << "\n";
+    // ignmsg << "alphap:  " << alpha_p << "\n";
+    // ignmsg << "alpham:  " << alpha_m << "\n";
+    // ignmsg << "ko:      " << ko << "\n";
+    // ignmsg << "kp:      " << kp << "\n";
+    // ignmsg << "cp:      " << cp << "\n";
+    // ignmsg << "c:       " << c << "\n";
+    // ignmsg << "Gamma:   " << Gamma << "\n";
+    // ignmsg << "fJp:     " << J_p << "\n";
+    // ignmsg << "fLpm:    " << L_PM << "\n";
+    // ignmsg << "Fp:      " << F_p << "\n";
+    // ignmsg << "Bl:      " << B_l << "\n";
+    // ignmsg << "Fm:      " << F_m << "\n";
+    // ignmsg << "Bh:      " << B_h << "\n";
+    
+    return S;
+  }
+
+  double WaveSimulationFFT2Impl::ECKVSpreadingFunction(
+      double k, double phi, double u10, double cap_omega_c)
+  {
+    double g = 9.82;
+    double Cd_10N = 0.00144;
+    double u_star = sqrt(Cd_10N) * u10;
+    double ao = 0.1733;
+    double ap = 4.0;
+    double km = 370.0;
+    double cm = 0.23;
+    double am = 0.13 * u_star / cm;
+    double ko = g / u10 / u10;
+    double kp = ko * cap_omega_c * cap_omega_c;
+    double cp = sqrt(g / kp);
+    double c  = sqrt((g / k) * (1 + pow(k / km, 2.0)));
+    double cap_phi = (1 + tanh(ao + ap * pow(c / cp, 2.5)
+        + am * pow(cm / c, 2.5)) * cos(2.0 * phi))/ 2.0 / M_PI;
+    return cap_phi;
+  }
+
+  double WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
+      double s, double phi, double u10, double cap_omega_c)
+  {
+    // Longuet-Higgins et al. 'cosine-2S' spreading function
+    //
+    // Eq. (B.18) from Ocean Optics
+
+
+    // Note: s is the spreading parameter and in general
+    // will depend on k, u10, cap_omega_c
+    // s = 2
+    double cap_c_s = std::tgamma(s + 1) / std::tgamma(s + 0.5) / 2 / sqrt(M_PI);
+    double cap_phi = cap_c_s * pow(cos(phi / 2), 2 * s);
+    return cap_phi;
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -540,7 +1052,7 @@ namespace marine
   WaveSimulationFFT2::WaveSimulationFFT2(int _N, double _L) :
     impl(new WaveSimulationFFT2Impl(_N, _L))
   {
-    impl->SetScale(4.0/_N);
+    impl->SetScale(1.0);
     impl->SetLambda(1.0);
   }
 
