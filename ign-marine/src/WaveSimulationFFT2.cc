@@ -71,19 +71,9 @@ namespace marine
 
     int mN;
     int mN2;
-    int mNOver2;
     double mL;
-    double mUx;
-    double mUy;
     double mLambda;
-    /*
-    std::vector<double> mX;
-    std::vector<double> mK;
-    std::vector<double> mOmega;
 
-    std::vector<complex> mGz;
-    std::vector<complex> mH0;
-    */
     std::vector<complex> mH;      // FFT0 - height
     std::vector<complex> mHikx;   // FFT1 - d height / dx
     std::vector<complex> mHiky;   // FFT1 - d height / dy
@@ -123,7 +113,7 @@ namespace marine
     int     Nx = this->mN;
     int     Ny = this->mN;
     double  u10 = 5.0;
-    double  phi0 = 0.0;
+    double  phi10 = 0.0;
     double  s_param = 10.0;
     double  cap_omega_c = 0.84;
 
@@ -218,10 +208,7 @@ namespace marine
   WaveSimulationFFT2Impl::WaveSimulationFFT2Impl(int _N, double _L) :
     mN(_N),
     mN2(_N * _N),
-    mNOver2(_N / 2),
     mL(_L),
-    mUx(0.0),
-    mUy(0.0),
     mLambda(0.6)
   {
     ComputeBaseAmplitudes();
@@ -268,11 +255,8 @@ namespace marine
   void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
   {
     // Update wind velocity and recompute base amplitudes.
-    this->mUx = _ux;
-    this->mUy = _uy;
-
     this->u10 = sqrt(_ux*_ux + _uy *_uy);
-    this->phi0 = atan2(_uy, _ux);
+    this->phi10 = atan2(_uy, _ux);
 
     ComputeBaseAmplitudes();
   }
@@ -430,16 +414,9 @@ namespace marine
 
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
-    /*
     // 1D axes
-    mX.resize(mN, 0.0);
-    mK.resize(mN, 0.0);
-    mOmega.resize(mN, 0.0);
 
     // 2D grids
-    mGz.resize(mN2, complex(0.0, 0.0));
-    mH0.resize(mN2, complex(0.0, 0.0));
-    */
     mH.resize(mN2, complex(0.0, 0.0));
     mHikx.resize(mN2, complex(0.0, 0.0));
     mHiky.resize(mN2, complex(0.0, 0.0));
@@ -448,62 +425,6 @@ namespace marine
     mHkxkx.resize(mN2, complex(0.0, 0.0));
     mHkyky.resize(mN2, complex(0.0, 0.0));
     mHkxky.resize(mN2, complex(0.0, 0.0));
-
-    /*
-    // Populate wavenumber and radian frequency arrays. 
-    for (size_t i=1; i<mN/2; ++i)
-    {
-      mK[i] = i * 2.0 * M_PI/ mL;
-      mK[mN - i] = mK[i];
-    }
-    for (size_t i=0; i<mN; ++i)
-    {
-      mK[i] = i * 2.0 * M_PI/ mL;
-    }
-    for (size_t i=0; i<mN; ++i)
-    {
-      mX[i] = i * mL / mN;
-      mOmega[i] = WaveSpectrum::Dispersion(mK[i]);
-    }    
-
-    // Compute Gaussian random variables.
-    auto seed = std::default_random_engine::default_seed;
-    std::default_random_engine generator(seed);
-
-    std::normal_distribution<double> distribution(0.0, 1.0);
-    for (size_t i=0; i<mN2; ++i)
-    {
-      mGz[i].real(distribution(generator));
-      mGz[i].imag(distribution(generator));
-    }
-
-    // Compute Fourier amplitudes.
-    double u  = std::sqrt(mUx*mUx + mUy*mUy);
-    double kx = mK[0];
-    double ky = mK[0];
-    double k  = std::sqrt(kx*kx + ky*ky);
-    complex gz = mGz[0];
-
-    mH0[0] = Htilde0(k, kx, ky, u, mUx, mUy, gz);
-    for (size_t ix=1; ix<mN/2; ++ix)
-    {
-      for (size_t iy=1; iy<mN/2; ++iy)
-      {
-        size_t idx = ix * mN + iy;
-        kx = mK[ix];
-        ky = mK[iy];
-        k  = std::sqrt(kx*kx + ky*ky);
-        gz = mGz[idx];
-        
-        mH0[idx] = Htilde0(k, kx, ky, u, mUx, mUy, gz);
-
-        size_t cdx = (mN - ix) * mN + (mN - iy);
-        mH0[cdx] = std::conj(mH0[idx]);
-      }
-    }
-    */
-    ////////////////////////////////////////////////////////////
-    /// \note: reworked version
 
     // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
     // 
@@ -592,13 +513,13 @@ namespace marine
           {
             // standing waves - symmetric spreading function
             cap_psi = this->ECKVSpreadingFunction(
-                k, phi - this->phi0, this->u10, this->cap_omega_c);
+                k, phi - this->phi10, this->u10, this->cap_omega_c);
           }
           else
           {
             // travelling waves - asymmetric spreading function
             cap_psi = this->Cos2SSpreadingFunction(
-                this->s_param, phi - this->phi0, this->u10, this->cap_omega_c);
+                this->s_param, phi - this->phi10, this->u10, this->cap_omega_c);
           }
           double cap_s = this->ECKVOmniDirectionalSpectrum(
               k, this->u10, this->cap_omega_c);
@@ -644,8 +565,7 @@ namespace marine
     double cap_psi_norm = 0.5;
     double delta_kx = this->kx_f;
     double delta_ky = this->ky_f;
-    // std::vector<std::vector<double>> cap_psi_2s_root(
-    //     this->Nx, std::vector<double>(this->Ny, 0.0));
+
     for (int ikx = 0; ikx < this->Nx; ++ikx)
     {
       for (int iky = 0; iky < this->Ny; ++iky)
@@ -660,10 +580,6 @@ namespace marine
     std::default_random_engine generator(seed);
     std::normal_distribution<double> distribution(0.0, 1.0);
 
-    // std::vector<std::vector<double>> rho(
-    //     this->Nx, std::vector<double>(this->Ny, 0.0));
-    // std::vector<std::vector<double>> sigma(
-    //     this->Nx, std::vector<double>(this->Ny, 0.0));
     for (int ikx = 0; ikx < this->Nx; ++ikx)
     {
       for (int iky = 0; iky < this->Ny; ++iky)
@@ -677,8 +593,6 @@ namespace marine
     double g = 9.82;
 
     // angular temporal frequency for time-dependent (from dispersion)
-    // std::vector<std::vector<double>> omega_k(
-    //     this->Nx, std::vector<double>(this->Ny, 0.0));
     for (int ikx = 0; ikx < this->Nx; ++ikx)
     {
       for (int iky = 0; iky < this->Ny; ++iky)
@@ -693,103 +607,12 @@ namespace marine
 
   void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
   {
-    /*
-    double kx0 = mK[0];
-    double ky0 = mK[0];
-    double k0  = std::sqrt(kx0*kx0 + ky0*ky0);
-    double omega0 = WaveSpectrum::Dispersion(k0);
-    complex phase0 = std::exp(complex(0.0, -omega0 * _time));
-    mH[0] = mH0[0] * phase0;
-
-    const complex iunit(0.0, 1.0);
-    const complex czero(0.0, 0.0);
-    for (size_t ix=1; ix<mN/2; ++ix)
-    {
-      double kx = mK[ix];
-      double kx2 = kx*kx;
-      for (size_t iy=1; iy<mN/2; ++iy)
-      {
-        // Wavenumber index and conjugate index 
-        size_t idx = ix * mN + iy;
-        size_t cdx = (mN - ix) * mN + (mN - iy);
-
-        // Time dependence
-        double ky = mK[iy];
-        double ky2 = ky*ky;
-        double k  = std::sqrt(kx2 + ky2);
-        double ook = 1.0 / k;
-        double omega = WaveSpectrum::Dispersion(k);
-        double wt = omega * _time;
-        // complex phase = std::exp(complex(0.0, -omega * _time));
-        double c = std::cos(wt);
-        double s = std::sin(wt);
-        complex phase(c, -s);
-
-        // Height
-        complex h0 = mH0[idx];
-        complex h  = h0 * phase;
-        complex hi = h * iunit;
-        complex hok = h / k;
-        complex hiok = hi / k;
-        mH[idx] = h;
-        mH[cdx] = std::conj(h);
-
-        // Height derivative
-        complex hikx = hi * kx;
-        complex hiky = hi * ky;
-
-        mHikx[idx] = hikx;
-        mHiky[idx] = hiky;
-        mHikx[cdx] = std::conj(hikx);
-        mHiky[cdx] = std::conj(hiky);
-
-        // Displacement and derivatives
-        if (std::abs(k) < 1.0E-8)
-        {          
-          mDx[idx]    = czero;
-          mDy[idx]    = czero;
-          mHkxkx[idx] = czero;
-          mHkyky[idx] = czero;
-          mHkxky[idx] = czero;
-          mDx[cdx]    = czero;
-          mDy[cdx]    = czero;
-          mHkxkx[cdx] = czero;
-          mHkyky[cdx] = czero;
-          mHkxky[cdx] = czero;
-        }
-        else
-        {
-          complex dx  = - hiok * kx;
-          complex dy  = - hiok * ky;
-          complex hkxkx = hok * kx2;
-          complex hkyky = hok * ky2;
-          complex hkxky = hok * kx * ky;
-          
-          mDx[idx]    = dx;
-          mDy[idx]    = dy;
-          mHkxkx[idx] = hkxkx;
-          mHkyky[idx] = hkyky;
-          mHkxky[idx] = hkxky;
-          
-          mDx[cdx]    = std::conj(dx);
-          mDy[cdx]    = std::conj(dy);
-          mHkxkx[cdx] = std::conj(hkxkx);
-          mHkyky[cdx] = std::conj(hkyky);
-          mHkxky[cdx] = std::conj(hkxky);
-        }
-      }
-    }
-    */
-    ////////////////////////////////////////////////////////////
-    /// \note: reworked version
-
     // alias
     auto& Nx = this->Nx;
     auto& Ny = this->Ny;
     auto& r = this->rho;
     auto& s = this->sigma;
     auto& psi_root = this->cap_psi_2s_root;
-
 
     // time update
     std::vector<std::vector<double>> cos_omega_k(
@@ -843,7 +666,6 @@ namespace marine
     zhat[0][0] = complex(0.0, 0.0);
 
     /// \todo: change zhat to 1D array and use directly
-    /// \todo: calculate the derivatives as well (for tangent space)
 
     // write into mH, mHikx, mHiky, etc.
     const complex iunit(0.0, 1.0);
@@ -904,13 +726,6 @@ namespace marine
     }
 
   }
-
-  // complex WaveSimulationFFT2Impl::Htilde0(double _k, double _kx, double _ky, double _u, double _ux, double _uy, complex _gz)
-  // {
-  //   double rp = std::sqrt(0.5 * WaveSpectrum::Spectrum(_k, _kx, _ky, _u, _ux, _uy));
-  //   complex h = _gz * rp;
-  //   return h;
-  // }
 
   double WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
       double k, double u10, double cap_omega_c)
