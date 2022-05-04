@@ -64,6 +64,9 @@ namespace marine
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
+    /// \brief Set lambda, a scaling factor controlling the horizontal wave displacement.
+    public: void SetLambda(double _lambda);
+
     private: std::unique_ptr<WaveSimulationFFT2Impl> impl;
   };
 

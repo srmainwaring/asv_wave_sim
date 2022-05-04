@@ -45,8 +45,6 @@ namespace marine
 
     public: void SetTime(double _time);
 
-    public: void SetScale(double _scale);
-
     public: void SetLambda(double _lambda);
 
     public: void ComputeHeights(
@@ -77,7 +75,6 @@ namespace marine
     double mL;
     double mUx;
     double mUy;
-    double mScale;
     double mLambda;
     /*
     std::vector<double> mX;
@@ -90,33 +87,32 @@ namespace marine
     std::vector<complex> mH;      // FFT0 - height
     std::vector<complex> mHikx;   // FFT1 - d height / dx
     std::vector<complex> mHiky;   // FFT1 - d height / dy
-    /*
     std::vector<complex> mDx;     // FFT3 - displacement x
     std::vector<complex> mDy;     // FFT4 - displacement y
     std::vector<complex> mHkxkx;  // FFT5 - d displacement x / dx
     std::vector<complex> mHkyky;  // FFT6 - d displacement y / dy
     std::vector<complex> mHkxky;  // FFT7 - d displacement x / dy = d displacement y / dx
-    */
+
     fftw_complex* mIn0;
     fftw_complex* mIn1;
     fftw_complex* mIn2;
-    // fftw_complex* mIn3;
-    // fftw_complex* mIn4;
-    // fftw_complex* mIn5;
-    // fftw_complex* mIn6;
-    // fftw_complex* mIn7;
+    fftw_complex* mIn3;
+    fftw_complex* mIn4;
+    fftw_complex* mIn5;
+    fftw_complex* mIn6;
+    fftw_complex* mIn7;
 
     fftw_complex* mOut0;
     fftw_complex* mOut1;
     fftw_complex* mOut2;
-    // fftw_complex* mOut3;
-    // fftw_complex* mOut4;
-    // fftw_complex* mOut5;
-    // fftw_complex* mOut6;
-    // fftw_complex* mOut7;
+    fftw_complex* mOut3;
+    fftw_complex* mOut4;
+    fftw_complex* mOut5;
+    fftw_complex* mOut6;
+    fftw_complex* mOut7;
 
     fftw_plan mFFTPlan0, mFFTPlan1, mFFTPlan2;
-    // fftw_plan mFFTPlan3, mFFTPlan4, mFFTPlan5, mFFTPlan6, mFFTPlan7;
+    fftw_plan mFFTPlan3, mFFTPlan4, mFFTPlan5, mFFTPlan6, mFFTPlan7;
 
     ////////////////////////////////////////////////////////////
     /// \note: reworked version
@@ -194,29 +190,29 @@ namespace marine
     fftw_destroy_plan(mFFTPlan0);
     fftw_destroy_plan(mFFTPlan1);
     fftw_destroy_plan(mFFTPlan2);
-    // fftw_destroy_plan(mFFTPlan3);
-    // fftw_destroy_plan(mFFTPlan4);
-    // fftw_destroy_plan(mFFTPlan5);
-    // fftw_destroy_plan(mFFTPlan6);
-    // fftw_destroy_plan(mFFTPlan7);
+    fftw_destroy_plan(mFFTPlan3);
+    fftw_destroy_plan(mFFTPlan4);
+    fftw_destroy_plan(mFFTPlan5);
+    fftw_destroy_plan(mFFTPlan6);
+    fftw_destroy_plan(mFFTPlan7);
 
     fftw_free(mOut0);
     fftw_free(mOut1);
     fftw_free(mOut2);
-    // fftw_free(mOut3);
-    // fftw_free(mOut4);
-    // fftw_free(mOut5);
-    // fftw_free(mOut6);
-    // fftw_free(mOut7);
+    fftw_free(mOut3);
+    fftw_free(mOut4);
+    fftw_free(mOut5);
+    fftw_free(mOut6);
+    fftw_free(mOut7);
 
     fftw_free(mIn0);
     fftw_free(mIn1);
     fftw_free(mIn2);
-    // fftw_free(mIn3);
-    // fftw_free(mIn4);
-    // fftw_free(mIn5);
-    // fftw_free(mIn6);
-    // fftw_free(mIn7);
+    fftw_free(mIn3);
+    fftw_free(mIn4);
+    fftw_free(mIn5);
+    fftw_free(mIn6);
+    fftw_free(mIn7);
   }
 
   WaveSimulationFFT2Impl::WaveSimulationFFT2Impl(int _N, double _L) :
@@ -226,7 +222,6 @@ namespace marine
     mL(_L),
     mUx(0.0),
     mUy(0.0),
-    mScale(4.0 / _N),
     mLambda(0.6)
   {
     ComputeBaseAmplitudes();
@@ -239,13 +234,11 @@ namespace marine
     mIn2  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
 
     // For xy-displacements
-    /*
     mIn3  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn4  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn5  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn6  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
     mIn7  = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));
-    */
 
     // For height
     mOut0 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
@@ -253,13 +246,11 @@ namespace marine
     mOut2 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
 
     // For xy-displacements
-    /*
     mOut3 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut4 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut5 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut6 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
     mOut7 = (fftw_complex*)fftw_malloc(mN2 * sizeof(fftw_complex));  
-    */
 
     // For height
     mFFTPlan0 = fftw_plan_dft_2d(mN, mN, mIn0, mOut0, FFTW_BACKWARD, FFTW_ESTIMATE);
@@ -267,13 +258,11 @@ namespace marine
     mFFTPlan2 = fftw_plan_dft_2d(mN, mN, mIn2, mOut2, FFTW_BACKWARD, FFTW_ESTIMATE);
 
     // For xy-displacements
-    /*
     mFFTPlan3 = fftw_plan_dft_2d(mN, mN, mIn3, mOut3, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan4 = fftw_plan_dft_2d(mN, mN, mIn4, mOut4, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan5 = fftw_plan_dft_2d(mN, mN, mIn5, mOut5, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan6 = fftw_plan_dft_2d(mN, mN, mIn6, mOut6, FFTW_BACKWARD, FFTW_ESTIMATE);
     mFFTPlan7 = fftw_plan_dft_2d(mN, mN, mIn7, mOut7, FFTW_BACKWARD, FFTW_ESTIMATE);
-    */
   }
 
   void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
@@ -291,12 +280,6 @@ namespace marine
   void WaveSimulationFFT2Impl::SetTime(double _time)
   {
     ComputeCurrentAmplitudes(_time);
-  }
-
-  void WaveSimulationFFT2Impl::SetScale(double _scale)
-  {
-    mScale = _scale;
-    ComputeBaseAmplitudes();
   }
 
   void WaveSimulationFFT2Impl::SetLambda(double _lambda)
@@ -326,7 +309,7 @@ namespace marine
 
     for (size_t i=0; i<mN2; ++i)
     {
-      _heights[i] = mOut0[i][0] * mScale;
+      _heights[i] = mOut0[i][0];
     }
   }
 
@@ -360,8 +343,8 @@ namespace marine
 
     for (size_t i=0; i<mN2; ++i)
     {
-      _dhdx[i] = mOut1[i][0] * mScale;
-      _dhdy[i] = mOut2[i][0] * mScale;
+      _dhdx[i] = mOut1[i][0];
+      _dhdy[i] = mOut2[i][0];
     }
   }
 
@@ -369,7 +352,6 @@ namespace marine
     std::vector<double>& _sx,
     std::vector<double>& _sy)
   {
-    /*
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
     {
@@ -396,26 +378,8 @@ namespace marine
 
     for (size_t i=0; i<mN2; ++i)
     {
-      _sx[i] = - mOut3[i][0] * mScale * mLambda;
-      _sy[i] = - mOut4[i][0] * mScale * mLambda;
-    }
-    */
-    // Resize output if necessary
-    const int NxNy = this->Nx * this->Ny;
-    if (_sx.size() != NxNy)
-    {
-      _sx.resize(NxNy, 0.0);
-    }
-    if (_sy.size() != NxNy)
-    {
-      _sy.resize(NxNy, 0.0);
-    }
-
-    /// \todo: add horizontal displacements
-    for (int i = 0; i < NxNy; ++i)
-    {
-      _sx[i] = 0.0;
-      _sy[i] = 0.0;
+      _sx[i] = mOut3[i][0] * mLambda;
+      _sy[i] = mOut4[i][0] * mLambda;
     }
   }
 
@@ -424,7 +388,6 @@ namespace marine
     std::vector<double>& _dsydy,
     std::vector<double>& _dsxdy)
   {
-    /*
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
     {
@@ -459,33 +422,9 @@ namespace marine
 
     for (size_t i=0; i<mN2; ++i)
     {
-      _dsxdx[i] = - mOut5[i][0] * mScale * mLambda;
-      _dsydy[i] = - mOut6[i][0] * mScale * mLambda;
-      _dsxdy[i] = - mOut7[i][0] * mScale * mLambda;
-    }
-    */
-    // Resize output if necessary
-    const int NxNy = this->Nx * this->Ny;
-    
-    if (_dsxdx.size() != NxNy)
-    {
-      _dsxdx.resize(NxNy, 0.0);
-    }
-    if (_dsydy.size() != NxNy)
-    {
-      _dsydy.resize(NxNy, 0.0);
-    }
-    if (_dsxdy.size() != NxNy)
-    {
-      _dsxdy.resize(NxNy, 0.0);
-    }
-
-    /// \todo: add horizontal displacements
-    for (int i = 0; i < NxNy; ++i)
-    {
-      _dsxdx[i] = 0.0;
-      _dsydy[i] = 0.0;
-      _dsxdy[i] = 0.0;
+      _dsxdx[i] = mOut5[i][0] * mLambda;
+      _dsydy[i] = mOut6[i][0] * mLambda;
+      _dsxdy[i] = mOut7[i][0] * mLambda;
     }
   }
 
@@ -504,13 +443,13 @@ namespace marine
     mH.resize(mN2, complex(0.0, 0.0));
     mHikx.resize(mN2, complex(0.0, 0.0));
     mHiky.resize(mN2, complex(0.0, 0.0));
-    /*
     mDx.resize(mN2, complex(0.0, 0.0));
     mDy.resize(mN2, complex(0.0, 0.0));
     mHkxkx.resize(mN2, complex(0.0, 0.0));
     mHkyky.resize(mN2, complex(0.0, 0.0));
     mHkxky.resize(mN2, complex(0.0, 0.0));
 
+    /*
     // Populate wavenumber and radian frequency arrays. 
     for (size_t i=1; i<mN/2; ++i)
     {
@@ -566,10 +505,12 @@ namespace marine
     ////////////////////////////////////////////////////////////
     /// \note: reworked version
 
-    // index, math-order, fft-order
-    // [ 0,  1,  2,  3,  4,  5,  6,  7]
-    // [-4, -3, -2, -1,  0,  1,  2,  3]
-    //                 [ 0,  1,  2,  3, -4, -3, -2, -3]
+    // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
+    // 
+    // 1. [ 0,  1,  2,  3,  4,  5,  6,  7]
+    // 2. [-4, -3, -2, -1,  0,  1,  2,  3]
+    // 3.                 [ 0,  1,  2,  3, -4, -3, -2, -3]
+    // 
 
     // fftfreq and ifftshift
     for(int ikx = 0; ikx < this->Nx; ++ikx)
@@ -761,7 +702,7 @@ namespace marine
     mH[0] = mH0[0] * phase0;
 
     const complex iunit(0.0, 1.0);
-    const complex czero(0.0, 1.0);
+    const complex czero(0.0, 0.0);
     for (size_t ix=1; ix<mN/2; ++ix)
     {
       double kx = mK[ix];
@@ -904,27 +845,61 @@ namespace marine
     /// \todo: change zhat to 1D array and use directly
     /// \todo: calculate the derivatives as well (for tangent space)
 
-    // write into mH, mHikx, mHiky
-
+    // write into mH, mHikx, mHiky, etc.
+    const complex iunit(0.0, 1.0);
+    const complex czero(0.0, 0.0);
     for (int ikx = 0; ikx < Nx; ++ikx)
     {
       double kx = this->kx_fft[ikx];
+      double kx2 = kx*kx;
       for (int iky = 0; iky < Ny; ++iky)
       {
         double ky = this->ky_fft[iky];
+        double ky2 = ky*ky;
+        double k = sqrt(kx2 + ky2);
+        double ook = 1.0 / k;
 
         // index for flattened arrays
         int idx = ikx * Nx + iky;
 
         complex h  = zhat[ikx][iky];
-        complex hi = h * complex(0.0, 1.0);
+        complex hi = h * iunit;
+        complex hok = h * ook;
+        complex hiok = hi * ook;
 
-        // amplitude
+        // height (amplitude)
         this->mH[idx] = h;
 
-        // derivatives wrt x,y
+        // height derivatives
+        complex hikx = hi * kx;
+        complex hiky = hi * ky;
+
         this->mHikx[idx] = hi * kx;
         this->mHiky[idx] = hi * ky;
+
+        // displacement and derivatives
+        if (std::abs(k) < 1.0E-8)
+        {          
+          mDx[idx]    = czero;
+          mDy[idx]    = czero;
+          mHkxkx[idx] = czero;
+          mHkyky[idx] = czero;
+          mHkxky[idx] = czero;
+        }
+        else
+        {
+          complex dx  = - hiok * kx;
+          complex dy  = - hiok * ky;
+          complex hkxkx = hok * kx2;
+          complex hkyky = hok * ky2;
+          complex hkxky = hok * kx * ky;
+          
+          mDx[idx]    = dx;
+          mDy[idx]    = dy;
+          mHkxkx[idx] = hkxkx;
+          mHkyky[idx] = hkyky;
+          mHkxky[idx] = hkxky;
+        }
       }
     }
 
@@ -1071,8 +1046,6 @@ namespace marine
   WaveSimulationFFT2::WaveSimulationFFT2(int _N, double _L) :
     impl(new WaveSimulationFFT2Impl(_N, _L))
   {
-    impl->SetScale(1.0);
-    impl->SetLambda(1.0);
   }
 
   void WaveSimulationFFT2::SetWindVelocity(double _ux, double _uy)
@@ -1127,6 +1100,11 @@ namespace marine
     impl->ComputeHeightDerivatives(_dhdx, _dhdy);
     impl->ComputeDisplacements(_sx, _sy);
     impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);    
+  }
+
+  void WaveSimulationFFT2::SetLambda(double _lambda)
+  {
+    impl->SetLambda(_lambda);
   }
 
 }
