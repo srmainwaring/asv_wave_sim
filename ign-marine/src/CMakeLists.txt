@@ -41,6 +41,7 @@ set(gtest_sources
   TriangulatedGrid_TEST.cc
   Wavefield_TEST.cc
   WaveSimulation_TEST.cc
+  WaveSimulationFFT2_TEST.cc
 )
 
 # Create the library target
