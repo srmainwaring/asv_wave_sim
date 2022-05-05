@@ -157,8 +157,7 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
     *linkMesh);
 
   // Wavefield and water patch 2x2  
-  std::shared_ptr<const Wavefield> wavefield(
-    new  WavefieldTrochoid("wavefield", { 2, 2 }, { 2, 2 }));
+  std::shared_ptr<const Wavefield> wavefield(new  Wavefield());
   std::shared_ptr<Grid> patch(
     new  Grid({ 2, 2 }, { 2, 2 }));
   std::shared_ptr<const WavefieldSampler> wavefieldSampler(
@@ -195,8 +194,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
     *linkMesh);
 
   // Wavefield and water patch 4x4
-  std::shared_ptr<const Wavefield> wavefield(
-    new  WavefieldTrochoid("wavefield", { 20, 20 }, { 4, 4 }));
+  std::shared_ptr<const Wavefield> wavefield(new  Wavefield());
   std::shared_ptr<Grid> patch(
     new  Grid({ 20, 20 }, { 4, 4 }));
   std::shared_ptr<const WavefieldSampler> wavefieldSampler(
