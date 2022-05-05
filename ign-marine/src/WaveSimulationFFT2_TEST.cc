@@ -67,23 +67,177 @@ TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
 
   // check array dimensions
   EXPECT_EQ(model.kx_fft.size(), this->N);
+  EXPECT_EQ(model.ky_fft.size(), this->N);
   EXPECT_EQ(model.kx_math.size(), this->N);
+  EXPECT_EQ(model.ky_math.size(), this->N);
 
   std::vector<double> ikx_math =
       {-4.0, -3.0, -2.0, -1.0,  0.0,  1.0,  2.0,  3.0};
+  std::vector<double> iky_math = ikx_math;
   std::vector<double> ikx_fft =
       { 0.0,  1.0,  2.0,  3.0, -4.0, -3.0, -2.0, -1.0};
+  std::vector<double> iky_fft = ikx_fft;
 
   // check kx math-ordering
   for (int i=0; i<this->N; ++i)
   {
-    EXPECT_EQ(model.kx_math[i] / model.kx_f, ikx_math[i]);
+    ASSERT_DOUBLE_EQ(model.kx_math[i] / model.kx_f, ikx_math[i]);
+    ASSERT_DOUBLE_EQ(model.ky_math[i] / model.ky_f, iky_math[i]);
   }
 
   // check kx fft-ordering
   for (int i=0; i<this->N; ++i)
   {
-    EXPECT_EQ(model.kx_fft[i] / model.kx_f, ikx_fft[i]);
+    ASSERT_DOUBLE_EQ(model.kx_fft[i] / model.kx_f, ikx_fft[i]);
+    ASSERT_DOUBLE_EQ(model.ky_fft[i] / model.ky_f, iky_fft[i]);
+  }
+}
+
+TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZero)
+{
+  WaveSimulationFFT2Impl model(this->N, this->L);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<this->N; ++ikx)
+  {
+    for (int iky=0; iky<this->N; ++iky)
+    {
+      // indexing for flattened array
+      int idx = ikx * this->N + iky;
+
+      // index for conjugate
+      int cdx = 0;
+      if (ikx == 0)
+        cdx += ikx * this->N;
+      else
+        cdx += (this->N - ikx) * this->N;
+
+      if (iky == 0)
+        cdx += iky;
+      else
+        cdx += (this->N - iky);
+
+      // look up amplitude and conjugate
+      complex h  = model.mH[idx];
+      complex hc = model.mH[cdx];
+
+      // real part symmetric
+      ASSERT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      ASSERT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+
+TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZero)
+{
+  WaveSimulationFFT2Impl model(this->N, this->L);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(11.2);
+
+  for (int ikx=0; ikx<this->N; ++ikx)
+  {
+    for (int iky=0; iky<this->N; ++iky)
+    {
+      // indexing for flattened array
+      int idx = ikx * this->N + iky;
+
+      // index for conjugate
+      int cdx = 0;
+      if (ikx == 0)
+        cdx += ikx * this->N;
+      else
+        cdx += (this->N - ikx) * this->N;
+
+      if (iky == 0)
+        cdx += iky;
+      else
+        cdx += (this->N - iky);
+
+      // look up amplitude and conjugate
+      complex h  = model.mH[idx];
+      complex hc = model.mH[cdx];
+
+      // real part symmetric
+      ASSERT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      ASSERT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+
+TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
+{
+  int N2 = this->N * this->N;
+
+  WaveSimulationFFT2Impl model(this->N, this->L);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  std::vector<double> z;
+  model.ComputeHeights(z);
+
+  EXPECT_EQ(z.size(), N2);
+
+  double sum_z2 = 0.0;
+  double sum_h2 = 0.0;
+  for (int i=0; i<N2; ++i)
+  {
+    sum_z2 += z[i]*z[i];
+    sum_h2 += norm(model.mH[i]);
+  }
+
+  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * N2);
+}
+
+TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
+{
+  int N2 = this->N * this->N;
+
+  WaveSimulationFFT2Impl model(this->N, this->L);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(25.3);
+
+  std::vector<double> z;
+  model.ComputeHeights(z);
+
+  EXPECT_EQ(z.size(), N2);
+
+  double sum_z2 = 0.0;
+  double sum_h2 = 0.0;
+  for (int i=0; i<N2; ++i)
+  {
+    sum_z2 += z[i]*z[i];
+    sum_h2 += norm(model.mH[i]);
+  }
+
+  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * N2);
+}
+
+TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
+{
+  int N2 = this->N * this->N;
+
+  WaveSimulationFFT2Impl model(this->N, this->L);
+
+  // displacements should be zero when lamda = 0
+  model.SetLambda(0.0);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(10.0);
+
+  std::vector<double> sx, sy;
+  model.ComputeDisplacements(sx, sy);
+
+  EXPECT_EQ(sx.size(), N2);
+  EXPECT_EQ(sy.size(), N2);
+
+  for (int i=0; i<N2; ++i)
+  {
+    ASSERT_DOUBLE_EQ(sx[i], 0.0);
+    ASSERT_DOUBLE_EQ(sy[i], 0.0);
   }
 }
 
