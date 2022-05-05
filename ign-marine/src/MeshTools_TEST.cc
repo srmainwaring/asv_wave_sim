@@ -105,6 +105,7 @@ void TestMakeSurfaceMeshUnitBox()
   // }
 }
 
+#if 0 // DEPRECATED FEATURE
 void TestExportWaveMesh()
 {
   std::cout << "TestExportWaveMesh..." << std::endl;
@@ -117,7 +118,7 @@ void TestExportWaveMesh()
   waveParams->SetDirection(math::Vector2d(1.0, 1.0));
 
   // Wavefield
-  WavefieldTrochoid wavefield("__WAVEFIELD__");
+  Wavefield wavefield;
   wavefield.SetParameters(waveParams);
   wavefield.Update(0);
 
@@ -171,6 +172,7 @@ void TestExportWaveMesh()
     "dae");
 
 }
+#endif
 
 void TestExportGridMesh()
 {
@@ -236,7 +238,7 @@ void RunMeshToolsTests()
 {
   TestFillArraysUnitBox();
   TestMakeSurfaceMeshUnitBox();
-  TestExportWaveMesh();
+  // TestExportWaveMesh();
   // TestExportGridMesh();
 }
 

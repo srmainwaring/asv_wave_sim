@@ -227,7 +227,27 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 </plugin>
 ```
 
+## Tests
 
+```bash
+# build with tests
+$ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DBUILD_TESTING=ON --packages-select ignition-marine1
+
+# run tests
+colcon test --merge-install 
+
+# check results
+colcon test-results --all --verbose 
+```
+
+Testing within a project build directory
+
+```bash
+$ cd ~/ign_ws/src/asv_wave_sim/ign-marine
+$ mkdir build && cd build
+$ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
+$ make && make test
+```
 
 ## Build Status
 
