@@ -79,10 +79,10 @@ namespace marine
     void ComputeCurrentAmplitudes(double _time);
     
     /// \brief Reference implementation of base amplitude calculation
-    void ComputeBaseAmplitudesRef();
+    void ComputeBaseAmplitudesReference();
 
     /// \brief Reference implementation of time-dependent amplitude calculation
-    void ComputeCurrentAmplitudesRef(double _time);
+    void ComputeCurrentAmplitudesReference(double _time);
 
     /// \brief Number of samples in each direction. Must be a multiple of 2
     int mN;
@@ -181,18 +181,39 @@ namespace marine
     // set to 1 to use a symmetric spreading function (=> standing waves)
     bool use_symmetric_spreading_fn = false;
 
+    //////////////////////////////////////////////////
+    /// \note: use flattened array storage for optimised version
+
     // square-root of two-sided discrete elevation variance spectrum
-    std::vector<std::vector<double>> cap_psi_2s_root = std::vector<std::vector<double>>(
-        this->Nx, std::vector<double>(this->Ny, 0.0));
+    std::vector<double> cap_psi_2s_root =
+        std::vector<double>(this->Nx * this->Ny, 0.0);
 
     // iid random normals for real and imaginary parts of the amplitudes
-    std::vector<std::vector<double>> rho = std::vector<std::vector<double>>(
+    std::vector<double> rho =
+        std::vector<double>(this->Nx * this->Ny, 0.0);
+    std::vector<double> sigma =
+        std::vector<double>(this->Nx * this->Ny, 0.0);
+
+    // angular temporal frequency
+    std::vector<double> omega_k =
+        std::vector<double>(this->Nx * this->Ny, 0.0);
+
+    //////////////////////////////////////////////////
+    /// \note: use 2d array storage for reference version
+
+    // square-root of two-sided discrete elevation variance spectrum
+    std::vector<std::vector<double>> cap_psi_2s_root_ref =
+        std::vector<std::vector<double>>(
+            this->Nx, std::vector<double>(this->Ny, 0.0));
+
+    // iid random normals for real and imaginary parts of the amplitudes
+    std::vector<std::vector<double>> rho_ref = std::vector<std::vector<double>>(
         this->Nx, std::vector<double>(this->Ny, 0.0));
-    std::vector<std::vector<double>> sigma = std::vector<std::vector<double>>(
+    std::vector<std::vector<double>> sigma_ref = std::vector<std::vector<double>>(
         this->Nx, std::vector<double>(this->Ny, 0.0));
 
     // angular temporal frequency
-    std::vector<std::vector<double>> omega_k = std::vector<std::vector<double>>(
+    std::vector<std::vector<double>> omega_k_ref = std::vector<std::vector<double>>(
         this->Nx, std::vector<double>(this->Ny, 0.0));
 
     double ECKVOmniDirectionalSpectrum(double k, double u10, double cap_omega_c=0.84);
