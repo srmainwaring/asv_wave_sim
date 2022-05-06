@@ -355,35 +355,28 @@ namespace marine
     mHkyky.resize(mN2, complex(0.0, 0.0));
     mHkxky.resize(mN2, complex(0.0, 0.0));
 
-    // fftfreq and ifftshift
-    for(int ikx = 0; ikx < this->Nx; ++ikx)
-    {
-      const double kx = (ikx - this->Nx/2) * this->kx_f;
-      kx_math[ikx] = kx;
-      kx_fft[(ikx + Nx/2) % Nx] = kx;
-    }
-
-    for(int iky = 0; iky < this->Ny; ++iky)
-    {
-      const double ky = (iky - this->Ny/2) * this->ky_f;
-      ky_math[iky] = ky;
-      ky_fft[(iky + Ny/2) % Ny] = ky;
-    }
-
     // continuous two-sided elevation variance spectrum
     std::vector<double> cap_psi_2s_math(this->Nx * this->Ny, 0.0);
 
     // calculate spectrum in math-order (not vectorised)
     for (int ikx = 0; ikx < this->Nx; ++ikx)
     {
-      double kx = this->kx_math[ikx];
-      double kx2 = kx*kx;
+      // kx: fftfreq and ifftshift
+      const double kx = (ikx - this->Nx/2) * this->kx_f;
+      const double kx2 = kx*kx;
+      this->kx_math[ikx] = kx;
+      this->kx_fft[(ikx + Nx/2) % Nx] = kx;
+
       for (int iky = 0; iky < this->Ny; ++iky)
       {
-        double ky = this->ky_math[iky];
-        double ky2 = ky*ky;
-        double k = sqrt(kx2 + ky2);
-        double phi = atan2(ky, kx);
+        // ky: fftfreq and ifftshift
+        const double ky = (iky - this->Ny/2) * this->ky_f;
+        const double ky2 = ky*ky;
+        this->ky_math[iky] = ky;
+        this->ky_fft[(iky + Ny/2) % Ny] = ky;
+        
+        const double k = sqrt(kx2 + ky2);
+        const double phi = atan2(ky, kx);
 
         // index for flattened array
         int idx = ikx * this->Ny + iky;
@@ -407,7 +400,7 @@ namespace marine
             cap_psi = this->Cos2SSpreadingFunction(
                 this->s_param, phi - this->phi10, this->u10, this->cap_omega_c);
           }
-          double cap_s = this->ECKVOmniDirectionalSpectrum(
+          const double cap_s = this->ECKVOmniDirectionalSpectrum(
               k, this->u10, this->cap_omega_c);
           cap_psi_2s_math[idx] = cap_s * cap_psi / k;
         }
@@ -435,17 +428,13 @@ namespace marine
     double cap_psi_norm = 0.5;
     double delta_kx = this->kx_f;
     double delta_ky = this->ky_f;
+    // double c1 = cap_psi_norm * sqrt(delta_kx * delta_ky);
 
-    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    for (int i = 0; i < mN2; ++i)
     {
-      for (int iky = 0; iky < this->Ny; ++iky)
-      {
-        // index for flattened array
-        int idx = ikx * this->Ny + iky;
-
-        this->cap_psi_2s_root[idx] =
-            cap_psi_norm * sqrt(cap_psi_2s_fft[idx] * delta_kx * delta_ky);
-      }
+      // this->cap_psi_2s_root[i] = c1 * sqrt(cap_psi_2s_fft[i]);
+      this->cap_psi_2s_root[i] =
+          cap_psi_norm * sqrt(cap_psi_2s_fft[i] * delta_kx * delta_ky);
     }
 
     // iid random normals for real and imaginary parts of the amplitudes
@@ -453,16 +442,10 @@ namespace marine
     std::default_random_engine generator(seed);
     std::normal_distribution<double> distribution(0.0, 1.0);
 
-    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    for (int i = 0; i < mN2; ++i)
     {
-      for (int iky = 0; iky < this->Ny; ++iky)
-      {
-        // index for flattened array
-        int idx = ikx * this->Ny + iky;
-
-        this->rho[idx] = distribution(generator);
-        this->sigma[idx] = distribution(generator);
-      }
+      this->rho[i] = distribution(generator);
+      this->sigma[i] = distribution(generator);
     }
 
     // gravity acceleration [m/s^2] 
