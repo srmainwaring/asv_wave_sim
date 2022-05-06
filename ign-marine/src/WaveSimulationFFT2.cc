@@ -345,6 +345,18 @@ namespace marine
   /////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
+    this->ComputeBaseAmplitudesRef();
+  }
+
+  /////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
+  {
+    this->ComputeCurrentAmplitudes(_time);
+  }
+
+  /////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesRef()
+  {
     // 1D axes
 
     // 2D grids
@@ -540,7 +552,7 @@ namespace marine
   }
 
   /////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesRef(double _time)
   {
     // alias
     auto& Nx = this->Nx;

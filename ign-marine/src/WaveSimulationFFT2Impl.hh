@@ -33,42 +33,65 @@ namespace marine
   typedef double fftw_data_type;
   typedef std::complex<fftw_data_type> complex;
 
+  /// \brief Implementation of a FFT based wave simulation model
   class WaveSimulationFFT2Impl
   {
   public:
+    /// \brief Destructor 
     ~WaveSimulationFFT2Impl();
 
+    /// \brief Construct a wave simulation model
     WaveSimulationFFT2Impl(int _N, double _L);
 
+    /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double _ux, double _uy);
 
+    /// \brief Set the current time in seconds
     void SetTime(double _time);
 
+    /// \brief Set the horizontal displacement scaling factor
     void SetLambda(double _lambda);
 
+    /// \brief Calculate the sea surface elevation
     void ComputeHeights(
       std::vector<double>& _heights);
 
+    /// \brief Calculate the derivative of the elevation wrt x and y
     void ComputeHeightDerivatives(
       std::vector<double>& _dhdx,
       std::vector<double>& _dhdy);
 
+    /// \brief Calculate the sea surface horizontal displacements
     void ComputeDisplacements(
       std::vector<double>& _sx,
       std::vector<double>& _sy);
 
+    /// \brief Calculate the derivative of the horizontal displacements wrt x and y
     void ComputeDisplacementDerivatives(
       std::vector<double>& _dsxdx,
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy);
 
+    /// \brief Calculate the base (time-independent) Fourier amplitudes
     void ComputeBaseAmplitudes();
 
+    /// \brief Calculate the time-independent Fourier amplitudes
     void ComputeCurrentAmplitudes(double _time);
     
+    /// \brief Reference implementation of base amplitude calculation
+    void ComputeBaseAmplitudesRef();
+
+    /// \brief Reference implementation of time-dependent amplitude calculation
+    void ComputeCurrentAmplitudesRef(double _time);
+
+    /// \brief Number of samples in each direction. Must be a multiple of 2
     int mN;
     int mN2;
+
+    /// \brief Size of the sample region [m]
     double mL;
+
+    /// \brief Horizontal displacement scaling factor. Zero for no displacement
     double mLambda;
 
     std::vector<complex> mH;      // FFT0 - height
@@ -106,9 +129,17 @@ namespace marine
     double  Ly = this->mL;
     int     Nx = this->mN;
     int     Ny = this->mN;
+
+    /// \brief Wind speed at 10m above mean sea level [m]
     double  u10 = 5.0;
+
+    /// \brief Direction of u10. Counter clockwise angle from x-axis [rad]
     double  phi10 = 0.0;
+
+    /// \brief Spreading parameter for the cosine-2S model
     double  s_param = 5.0;
+
+    /// \brief Parameter controlling the maturity of the sea state.
     double  cap_omega_c = 0.84;
 
     // derived quantities
