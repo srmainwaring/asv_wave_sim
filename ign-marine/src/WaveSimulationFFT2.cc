@@ -13,6 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+// The non-vectorised time-dependent update step labelled 'non-vectorised reference version'
+// in WaveSimulationFFT2Impl.ComputeCurrentAmplitudes is based on the Curtis Mobley's
+// IDL code cgAnimate_2D_SeaSurface.py
+
+//***************************************************************************************************
+//* This code is copyright (c) 2016 by Curtis D. Mobley.                                            *
+//* Permission is hereby given to reproduce and use this code for non-commercial academic research, *
+//* provided that the user suitably acknowledges Curtis D. Mobley in any presentations, reports,    *
+//* publications, or other works that make use of the code or its output.  Depending on the extent  *
+//* of use of the code or its outputs, suitable acknowledgement can range from a footnote to offer  *
+//* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
+//***************************************************************************************************
+
 #include "ignition/marine/WaveSimulationFFT2.hh"
 #include "ignition/marine/WaveSpectrum.hh"
 
@@ -549,6 +563,7 @@ namespace marine
       }
     }
 
+    // non-vectorised reference version
     std::vector<std::vector<complex>> zhat(Nx, std::vector<complex>(Ny, complex(0.0, 0.0)));
     for (int ikx = 1; ikx < Nx; ++ikx)
     {
