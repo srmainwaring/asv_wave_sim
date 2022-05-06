@@ -199,22 +199,17 @@ namespace marine
         std::vector<double>(this->Nx * this->Ny, 0.0);
 
     //////////////////////////////////////////////////
-    /// \note: use 2d array storage for reference version
+    /// \note: use 2d array storage for reference version, resized if required
 
     // square-root of two-sided discrete elevation variance spectrum
-    std::vector<std::vector<double>> cap_psi_2s_root_ref =
-        std::vector<std::vector<double>>(
-            this->Nx, std::vector<double>(this->Ny, 0.0));
+    std::vector<std::vector<double>> cap_psi_2s_root_ref;
 
     // iid random normals for real and imaginary parts of the amplitudes
-    std::vector<std::vector<double>> rho_ref = std::vector<std::vector<double>>(
-        this->Nx, std::vector<double>(this->Ny, 0.0));
-    std::vector<std::vector<double>> sigma_ref = std::vector<std::vector<double>>(
-        this->Nx, std::vector<double>(this->Ny, 0.0));
+    std::vector<std::vector<double>> rho_ref;
+    std::vector<std::vector<double>> sigma_ref;
 
     // angular temporal frequency
-    std::vector<std::vector<double>> omega_k_ref = std::vector<std::vector<double>>(
-        this->Nx, std::vector<double>(this->Ny, 0.0));
+    std::vector<std::vector<double>> omega_k_ref;
 
     double ECKVOmniDirectionalSpectrum(double k, double u10, double cap_omega_c=0.84);
     double ECKVSpreadingFunction(double k, double phi, double u10, double cap_omega_c=0.84);

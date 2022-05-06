@@ -345,7 +345,7 @@ namespace marine
   /////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
-    // storage for Fourier coefficients 
+    // storage for Fourier coefficients
     mH.resize(mN2, complex(0.0, 0.0));
     mHikx.resize(mN2, complex(0.0, 0.0));
     mHiky.resize(mN2, complex(0.0, 0.0));
@@ -632,9 +632,7 @@ namespace marine
   /////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudesReference()
   {
-    // 1D axes
-
-    // 2D grids
+    // storage for Fourier coefficients
     mH.resize(mN2, complex(0.0, 0.0));
     mHikx.resize(mN2, complex(0.0, 0.0));
     mHiky.resize(mN2, complex(0.0, 0.0));
@@ -643,6 +641,21 @@ namespace marine
     mHkxkx.resize(mN2, complex(0.0, 0.0));
     mHkyky.resize(mN2, complex(0.0, 0.0));
     mHkxky.resize(mN2, complex(0.0, 0.0));
+
+    // arrays for reference version
+    if (cap_psi_2s_root_ref.empty() || 
+        this->cap_psi_2s_root_ref.size() != this->Nx ||
+        this->cap_psi_2s_root_ref[0].size() != this->Ny)
+    {
+      this->cap_psi_2s_root_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+      this->rho_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+      this->sigma_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+      this->omega_k_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+    }
 
     // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
     // 
