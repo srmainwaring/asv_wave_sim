@@ -345,6 +345,9 @@ namespace marine
   /////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
+    // gravity acceleration [m/s^2] 
+    const double g = 9.82;
+
     // storage for Fourier coefficients
     mH.resize(mN2, complex(0.0, 0.0));
     mHikx.resize(mN2, complex(0.0, 0.0));
@@ -430,13 +433,6 @@ namespace marine
     double delta_ky = this->ky_f;
     // double c1 = cap_psi_norm * sqrt(delta_kx * delta_ky);
 
-    for (int i = 0; i < mN2; ++i)
-    {
-      // this->cap_psi_2s_root[i] = c1 * sqrt(cap_psi_2s_fft[i]);
-      this->cap_psi_2s_root[i] =
-          cap_psi_norm * sqrt(cap_psi_2s_fft[i] * delta_kx * delta_ky);
-    }
-
     // iid random normals for real and imaginary parts of the amplitudes
     auto seed = std::default_random_engine::default_seed;
     std::default_random_engine generator(seed);
@@ -444,12 +440,14 @@ namespace marine
 
     for (int i = 0; i < mN2; ++i)
     {
+      // this->cap_psi_2s_root[i] = c1 * sqrt(cap_psi_2s_fft[i]);
+      this->cap_psi_2s_root[i] =
+          cap_psi_norm * sqrt(cap_psi_2s_fft[i] * delta_kx * delta_ky);
+
       this->rho[i] = distribution(generator);
       this->sigma[i] = distribution(generator);
     }
 
-    // gravity acceleration [m/s^2] 
-    double g = 9.82;
 
     // angular temporal frequency for time-dependent (from dispersion)
     for (int ikx = 0; ikx < this->Nx; ++ikx)
