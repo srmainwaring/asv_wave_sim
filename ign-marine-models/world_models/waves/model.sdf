@@ -14,7 +14,7 @@
           <tile_size>512</tile_size>
           <cell_count>128</cell_count>
           <wind_speed>5.0</wind_speed>
-          <wind_angle_deg>-45</wind_angle_deg>
+          <wind_angle_deg>135</wind_angle_deg>
           <steepness>2</steepness>
 
         </wave>
@@ -52,7 +52,7 @@
               <tile_size>512</tile_size>
               <cell_count>128</cell_count>
               <wind_speed>5.0</wind_speed>
-              <wind_angle_deg>-45</wind_angle_deg>
+              <wind_angle_deg>135</wind_angle_deg>
               <steepness>2</steepness>
 
             </wave>
