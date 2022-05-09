@@ -152,9 +152,20 @@ namespace marine
       _heights.resize(mN2, 0.0);
     }
 
-    for (size_t i=0; i<mN2; ++i)
+    // for (size_t i=0; i<mN2; ++i)
+    // {
+    //   _heights[i] = mOut0[i][0];
+    // }
+    // change from matrix 'ij' to cartesian 'xy' coordinates
+    // z(i,j) => z(x, y): x = j, y = i
+    for (size_t ikx = 0; ikx < this->Nx; ++ikx)
     {
-      _heights[i] = mOut0[i][0];
+      for (size_t iky = 0; iky < this->Ny; ++iky)
+      {
+        int ij = ikx * this->Ny + iky;
+        int xy = iky * this->Nx + ikx;
+        _heights[xy] = mOut0[ij][0];
+      }
     }
   }
 
@@ -187,10 +198,24 @@ namespace marine
       _dhdy.resize(mN2, 0.0);
     }
 
-    for (size_t i=0; i<mN2; ++i)
+    // for (size_t i=0; i<mN2; ++i)
+    // {
+    //   _dhdx[i] = mOut1[i][0];
+    //   _dhdy[i] = mOut2[i][0];
+    // }
+    // change from matrix 'ij' to cartesian 'xy' coordinates
+    // z(i,j) => z(x, y): x = j, y = i
+    // dz(i,j)/di => dz(x, y)/dy: x = j, y = i
+    // dz(i,j)/dj => dz(x, y)/dx: x = j, y = i
+    for (size_t ikx = 0; ikx < this->Nx; ++ikx)
     {
-      _dhdx[i] = mOut1[i][0];
-      _dhdy[i] = mOut2[i][0];
+      for (size_t iky = 0; iky < this->Ny; ++iky)
+      {
+        int ij = ikx * this->Ny + iky;
+        int xy = iky * this->Nx + ikx;
+        _dhdy[xy] = mOut1[ij][0];
+        _dhdx[xy] = mOut2[ij][0];
+      }
     }
   }
 
@@ -223,10 +248,23 @@ namespace marine
       _sy.resize(mN2, 0.0);
     }
 
-    for (size_t i=0; i<mN2; ++i)
+    // for (size_t i=0; i<mN2; ++i)
+    // {
+    //   _sx[i] = mOut3[i][0] * mLambda;
+    //   _sy[i] = mOut4[i][0] * mLambda;
+    // }
+    // change from matrix 'ij' to cartesian 'xy' coordinates
+    // sy(i,j) => si(x, y): x = j, y = i
+    // sx(i,j) => sj(x, y): x = j, y = i
+    for (size_t ikx = 0; ikx < this->Nx; ++ikx)
     {
-      _sx[i] = mOut3[i][0] * mLambda;
-      _sy[i] = mOut4[i][0] * mLambda;
+      for (size_t iky = 0; iky < this->Ny; ++iky)
+      {
+        int ij = ikx * this->Ny + iky;
+        int xy = iky * this->Nx + ikx;
+        _sy[xy] = mOut3[ij][0] * mLambda;
+        _sx[xy] = mOut4[ij][0] * mLambda;
+      }
     }
   }
 
@@ -268,11 +306,25 @@ namespace marine
       _dsxdy.resize(mN2, 0.0);
     }
 
-    for (size_t i=0; i<mN2; ++i)
+    // for (size_t i=0; i<mN2; ++i)
+    // {
+    //   _dsxdx[i] = mOut5[i][0] * mLambda;
+    //   _dsydy[i] = mOut6[i][0] * mLambda;
+    //   _dsxdy[i] = mOut7[i][0] * mLambda;
+    // }
+    // change from matrix 'ij' to cartesian 'xy' coordinates
+    // sy(i,j) => si(x, y): x = j, y = i
+    // sx(i,j) => sj(x, y): x = j, y = i
+    for (size_t ikx = 0; ikx < this->Nx; ++ikx)
     {
-      _dsxdx[i] = mOut5[i][0] * mLambda;
-      _dsydy[i] = mOut6[i][0] * mLambda;
-      _dsxdy[i] = mOut7[i][0] * mLambda;
+      for (size_t iky = 0; iky < this->Ny; ++iky)
+      {
+        int ij = ikx * this->Ny + iky;
+        int xy = iky * this->Nx + ikx;
+        _dsydy[xy] = mOut5[ij][0] * mLambda;
+        _dsxdx[xy] = mOut6[ij][0] * mLambda;
+        _dsxdy[xy] = mOut7[ij][0] * mLambda;
+      }
     }
   }
 
@@ -551,7 +603,7 @@ namespace marine
         double ook = 1.0 / k;
 
         // index for flattened arrays
-        int idx = ikx * Nx + iky;
+        int idx = ikx * Ny + iky;
 
         complex h  = zhat[ikx][iky];
         complex hi = h * iunit;
