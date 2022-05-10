@@ -43,6 +43,7 @@
       <static>1</static>
       <link name="link">
         <visual name="r">
+          <cast_shadows>0</cast_shadows>
           <pose>5 0 0.1 0 0 0</pose>
           <geometry>
             <box>
@@ -57,6 +58,7 @@
           </material>
         </visual>
         <visual name="g">
+          <cast_shadows>0</cast_shadows>
           <pose>0 5 0.1 0 0 0</pose>
           <geometry>
             <box>
@@ -71,6 +73,7 @@
           </material>
         </visual>
         <visual name="b">
+          <cast_shadows>0</cast_shadows>
           <pose>0 0 5.1 0 0 0</pose>
           <geometry>
             <box>

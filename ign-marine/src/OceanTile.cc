@@ -401,13 +401,11 @@ void OceanTilePrivate<Vector3>::Create()
   mBitangents.assign(mVertices.size(), vector::Zero<Vector3>);
   mNormals.assign(mVertices.size(), vector::Zero<Vector3>);
 
-  // \todo(srmainwaring): remove - this to test static model
-  UpdateVertices(5.0);
-
   if (mHasVisuals) 
   {
-    ComputeNormals();
-    ComputeTangentSpace();
+    /// \note: uncomment to calculate normals and tangents by finited difference
+    // ComputeNormals();
+    // ComputeTangentSpace();
 #if 0
     CreateMesh(this->mAboveOceanMeshName, 0.0, false);
     CreateMesh(this->mBelowOceanMeshName, -0.05, true);
@@ -626,8 +624,8 @@ void OceanTilePrivate<Vector3>::Update(double _time)
 
   if (mHasVisuals)
   {
-    // Uncomment to calculate the tangent space using finite differences
-    ComputeTangentSpace();
+    /// \note: Uncomment to calculate the tangent space using finite differences
+    // ComputeTangentSpace();
     // UpdateMesh(mAboveOceanSubMesh, 0.0, false);
     // UpdateMesh(mBelowOceanSubMesh, -0.05, false);
   }
@@ -694,11 +692,24 @@ void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(
   t.X() = dsxdx + 1.0;
   t.Y() = dsxdy;
   t.Z() = dhdx;
-  
+
   auto&& b = mBitangents[idx0];
   b.X() = dsxdy;
   b.Y() = dsydy + 1.0;
   b.Z() = dhdy;
+
+  auto&& n = mNormals[idx0];
+  auto normal =  t.Cross(b);
+  n.X() = normal.X();
+  n.Y() = normal.Y();
+  n.Z() = normal.Z();
+
+  /// \todo add check if this is required for non-FFT models
+  // 3. Normal must be reversed when using FTT waves. This is because
+  // the coordinate change from matrix indexing to cartesian indexing
+  // reflects the surface in the line x=y which flips the
+  // surface orientation.
+  n *= -1.0;
 }
 
 //////////////////////////////////////////////////

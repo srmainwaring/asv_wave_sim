@@ -2,7 +2,7 @@
 
 This package contains plugins that support the simulation of waves and surface vessels in Ignition Gazebo.  
 
-![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v3.jpg)
+![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v4b.jpg)
 
 ## Notes
 

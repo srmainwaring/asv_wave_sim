@@ -13,6 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+// The non-vectorised time-dependent update step labelled 'non-vectorised reference version'
+// in WaveSimulationFFT2Impl.ComputeCurrentAmplitudesReference is based on the Curtis Mobley's
+// IDL code cgAnimate_2D_SeaSurface.py
+
+//***************************************************************************************************
+//* This code is copyright (c) 2016 by Curtis D. Mobley.                                            *
+//* Permission is hereby given to reproduce and use this code for non-commercial academic research, *
+//* provided that the user suitably acknowledges Curtis D. Mobley in any presentations, reports,    *
+//* publications, or other works that make use of the code or its output.  Depending on the extent  *
+//* of use of the code or its outputs, suitable acknowledgement can range from a footnote to offer  *
+//* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
+//***************************************************************************************************
+
 #include "ignition/marine/WaveSimulationFFT2.hh"
 #include "ignition/marine/WaveSpectrum.hh"
 
@@ -331,9 +345,10 @@ namespace marine
   /////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
-    // 1D axes
+    // gravity acceleration [m/s^2] 
+    const double g = 9.82;
 
-    // 2D grids
+    // storage for Fourier coefficients
     mH.resize(mN2, complex(0.0, 0.0));
     mHikx.resize(mN2, complex(0.0, 0.0));
     mHiky.resize(mN2, complex(0.0, 0.0));
@@ -342,6 +357,286 @@ namespace marine
     mHkxkx.resize(mN2, complex(0.0, 0.0));
     mHkyky.resize(mN2, complex(0.0, 0.0));
     mHkxky.resize(mN2, complex(0.0, 0.0));
+
+    // continuous two-sided elevation variance spectrum
+    std::vector<double> cap_psi_2s_math(this->Nx * this->Ny, 0.0);
+
+    // calculate spectrum in math-order (not vectorised)
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      // kx: fftfreq and ifftshift
+      const double kx = (ikx - this->Nx/2) * this->kx_f;
+      const double kx2 = kx*kx;
+      this->kx_math[ikx] = kx;
+      this->kx_fft[(ikx + Nx/2) % Nx] = kx;
+
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        // ky: fftfreq and ifftshift
+        const double ky = (iky - this->Ny/2) * this->ky_f;
+        const double ky2 = ky*ky;
+        this->ky_math[iky] = ky;
+        this->ky_fft[(iky + Ny/2) % Ny] = ky;
+        
+        const double k = sqrt(kx2 + ky2);
+        const double phi = atan2(ky, kx);
+
+        // index for flattened array
+        int idx = ikx * this->Ny + iky;
+
+        if (k == 0.0)
+        {
+          cap_psi_2s_math[idx] = 0.0;
+        }
+        else
+        {
+          double cap_psi = 0.0;
+          if (this->use_symmetric_spreading_fn)
+          {
+            // standing waves - symmetric spreading function
+            cap_psi = this->ECKVSpreadingFunction(
+                k, phi - this->phi10, this->u10, this->cap_omega_c);
+          }
+          else
+          {
+            // travelling waves - asymmetric spreading function
+            cap_psi = this->Cos2SSpreadingFunction(
+                this->s_param, phi - this->phi10, this->u10, this->cap_omega_c);
+          }
+          const double cap_s = this->ECKVOmniDirectionalSpectrum(
+              k, this->u10, this->cap_omega_c);
+          cap_psi_2s_math[idx] = cap_s * cap_psi / k;
+        }
+      }
+    }
+
+    // convert to fft-order
+    std::vector<double> cap_psi_2s_fft(this->Nx * this->Ny, 0.0);
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      int ikx_fft = (ikx + Nx/2) % Nx;
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        int iky_fft = (iky + Ny/2) % Ny;
+
+        // index for flattened array
+        int idx = ikx * this->Ny + iky;
+        int idx_fft = ikx_fft * this->Ny + iky_fft;
+
+        cap_psi_2s_fft[idx_fft] = cap_psi_2s_math[idx];
+      }
+    }
+
+    // square-root of two-sided discrete elevation variance spectrum
+    double cap_psi_norm = 0.5;
+    double delta_kx = this->kx_f;
+    double delta_ky = this->ky_f;
+    // double c1 = cap_psi_norm * sqrt(delta_kx * delta_ky);
+
+    // iid random normals for real and imaginary parts of the amplitudes
+    auto seed = std::default_random_engine::default_seed;
+    std::default_random_engine generator(seed);
+    std::normal_distribution<double> distribution(0.0, 1.0);
+
+    for (int i = 0; i < mN2; ++i)
+    {
+      // this->cap_psi_2s_root[i] = c1 * sqrt(cap_psi_2s_fft[i]);
+      this->cap_psi_2s_root[i] =
+          cap_psi_norm * sqrt(cap_psi_2s_fft[i] * delta_kx * delta_ky);
+
+      this->rho[i] = distribution(generator);
+      this->sigma[i] = distribution(generator);
+    }
+
+
+    // angular temporal frequency for time-dependent (from dispersion)
+    for (int ikx = 0; ikx < this->Nx; ++ikx)
+    {
+      double kx = this->kx_fft[ikx];
+      double kx2 = kx*kx;
+      for (int iky = 0; iky < this->Ny; ++iky)
+      {
+        double ky = this->ky_fft[iky];
+        double ky2 = ky*ky;
+        double k = sqrt(kx2 + ky2);
+
+        // index for flattened array
+        int idx = ikx * this->Ny + iky;
+        this->omega_k[idx] = sqrt(g * k);
+      }
+    }
+  }
+
+  /////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
+  {
+    // alias
+    auto& Nx = this->Nx;
+    auto& Ny = this->Ny;
+    auto& r = this->rho;
+    auto& s = this->sigma;
+    auto& psi_root = this->cap_psi_2s_root;
+
+    // time update
+    std::vector<double> cos_omega_k(Nx * Ny, 0.0);
+    std::vector<double> sin_omega_k(Nx * Ny, 0.0);
+    for (int ikx = 0; ikx < Nx; ++ikx)
+    {
+      for (int iky = 0; iky < Ny; ++iky)
+      {
+        // index for flattened array
+        int idx = ikx * this->Ny + iky;
+
+        double omega_t = this->omega_k[idx] * _time;
+        cos_omega_k[idx] = cos(omega_t);
+        sin_omega_k[idx] = sin(omega_t);
+      }
+    }
+
+    // non-vectorised reference version
+    std::vector<complex> zhat(Nx * Ny, complex(0.0, 0.0));
+    for (int ikx = 1; ikx < Nx; ++ikx)
+    {
+      for (int iky = 1; iky < Ny; ++iky)
+      {
+        // index for flattened array [ikx][iky]
+        int idx = ikx * this->Ny + iky;
+
+        // index for conjugate [Nx-ikx][Ny-iky]
+        int cdx = (Nx-ikx) * this->Ny + (Ny-iky);
+
+        zhat[idx] = complex(
+            + ( r[idx] * psi_root[idx] + r[cdx] * psi_root[cdx] ) * cos_omega_k[idx]
+            + ( s[idx] * psi_root[idx] + s[cdx] * psi_root[cdx] ) * sin_omega_k[idx],
+            - ( r[idx] * psi_root[idx] - r[cdx] * psi_root[cdx] ) * sin_omega_k[idx]
+            + ( s[idx] * psi_root[idx] - s[cdx] * psi_root[cdx] ) * cos_omega_k[idx]);
+      }
+    }
+
+    for (int iky = 1; iky < Ny/2+1; ++iky)
+    {
+      int ikx = 0;
+
+      // index for flattened array [ikx][iky]
+      int idx = ikx * this->Ny + iky;
+
+      // index for conjugate [ikx][Ny-iky]
+      int cdx = ikx * this->Ny + (Ny-iky);
+
+      zhat[idx] = complex(
+          + ( r[idx] * psi_root[idx] + r[cdx] * psi_root[cdx] ) * cos_omega_k[idx]
+          + ( s[idx] * psi_root[idx] + s[cdx] * psi_root[cdx] ) * sin_omega_k[idx],
+          - ( r[idx] * psi_root[idx] - r[cdx] * psi_root[cdx] ) * sin_omega_k[idx]
+          + ( s[idx] * psi_root[idx] - s[cdx] * psi_root[cdx] ) * cos_omega_k[idx]);
+      zhat[cdx] = std::conj(zhat[idx]);
+    }
+
+    for (int ikx = 1; ikx < Nx/2+1; ++ikx)
+    {
+      int iky = 0;
+
+      // index for flattened array [ikx][iky]
+      int idx = ikx * this->Ny + iky;
+
+      // index for conjugate [Nx-ikx][iky]
+      int cdx = (Nx-ikx) * this->Ny + iky;
+
+      zhat[idx] = complex(
+          + ( r[idx] * psi_root[idx] + r[cdx] * psi_root[cdx] ) * cos_omega_k[idx]
+          + ( s[idx] * psi_root[idx] + s[cdx] * psi_root[cdx] ) * sin_omega_k[idx],
+          - ( r[idx] * psi_root[idx] - r[cdx] * psi_root[cdx] ) * sin_omega_k[idx]
+          + ( s[idx] * psi_root[idx] - s[cdx] * psi_root[cdx] ) * cos_omega_k[idx]);
+      zhat[cdx] = std::conj(zhat[idx]);
+    }
+
+    zhat[0] = complex(0.0, 0.0);
+
+    // write into mH, mHikx, mHiky, etc.
+    const complex iunit(0.0, 1.0);
+    const complex czero(0.0, 0.0);
+    for (int ikx = 0; ikx < Nx; ++ikx)
+    {
+      double kx = this->kx_fft[ikx];
+      double kx2 = kx*kx;
+      for (int iky = 0; iky < Ny; ++iky)
+      {
+        double ky = this->ky_fft[iky];
+        double ky2 = ky*ky;
+        double k = sqrt(kx2 + ky2);
+        double ook = 1.0 / k;
+
+        // index for flattened arrays
+        int idx = ikx * Ny + iky;
+
+        complex h  = zhat[idx];
+        complex hi = h * iunit;
+        complex hok = h * ook;
+        complex hiok = hi * ook;
+
+        // height (amplitude)
+        this->mH[idx] = h;
+
+        // height derivatives
+        complex hikx = hi * kx;
+        complex hiky = hi * ky;
+
+        this->mHikx[idx] = hi * kx;
+        this->mHiky[idx] = hi * ky;
+
+        // displacement and derivatives
+        if (std::abs(k) < 1.0E-8)
+        {          
+          mDx[idx]    = czero;
+          mDy[idx]    = czero;
+          mHkxkx[idx] = czero;
+          mHkyky[idx] = czero;
+          mHkxky[idx] = czero;
+        }
+        else
+        {
+          complex dx  = - hiok * kx;
+          complex dy  = - hiok * ky;
+          complex hkxkx = hok * kx2;
+          complex hkyky = hok * ky2;
+          complex hkxky = hok * kx * ky;
+          
+          mDx[idx]    = dx;
+          mDy[idx]    = dy;
+          mHkxkx[idx] = hkxkx;
+          mHkyky[idx] = hkyky;
+          mHkxky[idx] = hkxky;
+        }
+      }
+    }
+  }
+
+  /////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesReference()
+  {
+    // storage for Fourier coefficients
+    mH.resize(mN2, complex(0.0, 0.0));
+    mHikx.resize(mN2, complex(0.0, 0.0));
+    mHiky.resize(mN2, complex(0.0, 0.0));
+    mDx.resize(mN2, complex(0.0, 0.0));
+    mDy.resize(mN2, complex(0.0, 0.0));
+    mHkxkx.resize(mN2, complex(0.0, 0.0));
+    mHkyky.resize(mN2, complex(0.0, 0.0));
+    mHkxky.resize(mN2, complex(0.0, 0.0));
+
+    // arrays for reference version
+    if (cap_psi_2s_root_ref.empty() || 
+        this->cap_psi_2s_root_ref.size() != this->Nx ||
+        this->cap_psi_2s_root_ref[0].size() != this->Ny)
+    {
+      this->cap_psi_2s_root_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+      this->rho_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+      this->sigma_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+      this->omega_k_ref = std::vector<std::vector<double>>(
+          this->Nx, std::vector<double>(this->Ny, 0.0));
+    }
 
     // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
     // 
@@ -487,7 +782,7 @@ namespace marine
     {
       for (int iky = 0; iky < this->Ny; ++iky)
       {
-        this->cap_psi_2s_root[ikx][iky] =
+        this->cap_psi_2s_root_ref[ikx][iky] =
             cap_psi_norm * sqrt(cap_psi_2s_fft[ikx][iky] * delta_kx * delta_ky);
       }
     }
@@ -501,8 +796,8 @@ namespace marine
     {
       for (int iky = 0; iky < this->Ny; ++iky)
       {
-        this->rho[ikx][iky] = distribution(generator);
-        this->sigma[ikx][iky] = distribution(generator);
+        this->rho_ref[ikx][iky] = distribution(generator);
+        this->sigma_ref[ikx][iky] = distribution(generator);
       }
     }
 
@@ -519,21 +814,21 @@ namespace marine
         double ky = this->ky_fft[iky];
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
-        this->omega_k[ikx][iky] = sqrt(g * k);
+        this->omega_k_ref[ikx][iky] = sqrt(g * k);
       }
     }
 
   }
 
   /////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesReference(double _time)
   {
     // alias
     auto& Nx = this->Nx;
     auto& Ny = this->Ny;
-    auto& r = this->rho;
-    auto& s = this->sigma;
-    auto& psi_root = this->cap_psi_2s_root;
+    auto& r = this->rho_ref;
+    auto& s = this->sigma_ref;
+    auto& psi_root = this->cap_psi_2s_root_ref;
 
     // time update
     std::vector<std::vector<double>> cos_omega_k(
@@ -544,11 +839,12 @@ namespace marine
     {
       for (int iky = 0; iky < Ny; ++iky)
       {
-        cos_omega_k[ikx][iky] = cos(this->omega_k[ikx][iky] * _time);
-        sin_omega_k[ikx][iky] = sin(this->omega_k[ikx][iky] * _time);
+        cos_omega_k[ikx][iky] = cos(this->omega_k_ref[ikx][iky] * _time);
+        sin_omega_k[ikx][iky] = sin(this->omega_k_ref[ikx][iky] * _time);
       }
     }
 
+    // non-vectorised reference version
     std::vector<std::vector<complex>> zhat(Nx, std::vector<complex>(Ny, complex(0.0, 0.0)));
     for (int ikx = 1; ikx < Nx; ++ikx)
     {
