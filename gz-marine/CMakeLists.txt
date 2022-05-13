@@ -14,7 +14,9 @@ set(IGN_CMAKE_VER ${ignition-cmake3_VERSION_MAJOR})
 #============================================================================
 # Configure the project
 #============================================================================
-ign_configure_project()
+ign_configure_project(
+  REPLACE_IGNITION_INCLUDE_PATH gz/marine
+)
 
 #============================================================================
 # Search for project-specific dependencies

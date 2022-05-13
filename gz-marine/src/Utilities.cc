@@ -16,8 +16,8 @@
 #include "gz/marine/Utilities.hh"
 #include "gz/marine/Convert.hh"
 
-#include <ignition/common.hh>
-#include <ignition/math.hh>
+#include <gz/common.hh>
+#include <gz/math.hh>
 #include <sdf/sdf.hh>
 
 #include <algorithm>

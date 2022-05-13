@@ -1,10 +1,10 @@
 #include "gz/marine/OceanVisualPlugin.hh"
 #include "gz/marine/OceanVisual.hh"
 
-#include <ignition/common.hh>
-#include <ignition/rendering/Visual.hh>
+#include <gz/common.hh>
+#include <gz/rendering/Visual.hh>
 
-#include <ignition/math/Vector3.hh>
+#include <gz/math/Vector3.hh>
 
 #include <memory>
 #include <thread>

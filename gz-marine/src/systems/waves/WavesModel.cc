@@ -21,8 +21,8 @@
 
 #include "gz/marine/components/Wavefield.hh"
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/plugin/Register.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/plugin/Register.hh>
 
 #include <ignition/gazebo/components/Name.hh>
 

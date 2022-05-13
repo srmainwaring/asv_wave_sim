@@ -16,8 +16,8 @@
 #include "gz/marine/MeshTools.hh"
 #include "gz/marine/CGALTypes.hh"
 
-#include <ignition/common.hh>
-#include <ignition/math.hh>
+#include <gz/common.hh>
+#include <gz/math.hh>
 
 #include <array>
 #include <iostream>

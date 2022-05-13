@@ -27,8 +27,8 @@
 // the gazebo_ros <export> </export> directive in package.xml.
 //
 
-#include <ignition/common.hh>
-#include <ignition/physics.hh>
+#include <gz/common.hh>
+#include <gz/physics.hh>
 #include <chrono>
 #include <thread>
 

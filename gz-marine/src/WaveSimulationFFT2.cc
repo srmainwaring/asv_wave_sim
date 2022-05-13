@@ -32,7 +32,7 @@
 
 #include "WaveSimulationFFT2Impl.hh"
 
-#include <ignition/common.hh>
+#include <gz/common.hh>
 
 #include <fftw3.h>
 

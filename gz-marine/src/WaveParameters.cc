@@ -20,12 +20,12 @@
 #include "gz/marine/Physics.hh"
 #include "gz/marine/Utilities.hh"
 
-#include <ignition/common.hh>
-#include <ignition/msgs.hh>
+#include <gz/common.hh>
+#include <gz/msgs.hh>
 
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Vector2.hh>
-#include <ignition/math/Vector3.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/math/Vector2.hh>
+#include <gz/math/Vector3.hh>
 
 #include <iostream>
 #include <cmath>

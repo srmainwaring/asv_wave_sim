@@ -23,7 +23,7 @@
 #include "gz/marine/Utilities.hh"
 #include <thread>
 
-#include <ignition/transport.hh>
+#include <gz/transport.hh>
 
 #include <array>
 #include <cmath>

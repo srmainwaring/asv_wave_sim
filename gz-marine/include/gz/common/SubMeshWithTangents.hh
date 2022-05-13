@@ -19,9 +19,9 @@
 #ifndef GZ_COMMON_SUBMESHWITHTANGENTS_HH_
 #define GZ_COMMON_SUBMESHWITHTANGENTS_HH_
 
-#include <ignition/common/SubMesh.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/utils/ImplPtr.hh>
+#include <gz/common/SubMesh.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/utils/ImplPtr.hh>
 
 #include <memory>
 #include <string>

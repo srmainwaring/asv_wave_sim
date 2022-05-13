@@ -16,8 +16,8 @@
 #ifndef GZ_MARINE_OCEANVISUAL_HH_
 #define GZ_MARINE_OCEANVISUAL_HH_
 
-#include <ignition/rendering/Visual.hh>
-#include <ignition/msgs/msgs.hh>
+#include <gz/rendering/Visual.hh>
+#include <gz/msgs/msgs.hh>
 
 #include <memory>
 

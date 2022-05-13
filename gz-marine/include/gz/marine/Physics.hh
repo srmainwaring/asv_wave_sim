@@ -44,8 +44,8 @@
 
 #include "gz/marine/CGALTypes.hh"
 
-#include <ignition/math/Pose3.hh>
-#include <ignition/msgs.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/msgs.hh>
 #include <sdf/sdf.hh>
 
 #include <memory>

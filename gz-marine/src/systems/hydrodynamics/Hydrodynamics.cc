@@ -25,10 +25,10 @@
 
 #include "gz/marine/components/Wavefield.hh"
 
-#include <ignition/common/MeshManager.hh>
-#include <ignition/common/Profiler.hh>
+#include <gz/common/MeshManager.hh>
+#include <gz/common/Profiler.hh>
 
-#include <ignition/plugin/Register.hh>
+#include <gz/plugin/Register.hh>
 
 #include <ignition/gazebo/components/AngularVelocity.hh>
 #include <ignition/gazebo/components/Collision.hh>

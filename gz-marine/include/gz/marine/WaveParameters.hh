@@ -18,9 +18,9 @@
 #ifndef GZ_MARINE_WAVEPARAMETERS_HH_
 #define GZ_MARINE_WAVEPARAMETERS_HH_
 
-#include <ignition/math/Vector2.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/msgs.hh>
+#include <gz/math/Vector2.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/msgs.hh>
 #include <sdf/sdf.hh>
 
 #include <memory>

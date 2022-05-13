@@ -21,8 +21,8 @@
 
 #include "gz/marine/CGALTypes.hh"
 
-#include <ignition/math/Vector2.hh>
-#include <ignition/math/Vector3.hh>
+#include <gz/math/Vector2.hh>
+#include <gz/math/Vector3.hh>
 
 namespace ignition
 {

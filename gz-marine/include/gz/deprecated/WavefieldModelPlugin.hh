@@ -19,8 +19,8 @@
 #ifndef GZ_MARINE_WAVEFIELDMODELPLUGIN_HH_
 #define GZ_MARINE_WAVEFIELDMODELPLUGIN_HH_
 
-#include <ignition/physics.hh>
-#include <ignition/msgs.hh>
+#include <gz/physics.hh>
+#include <gz/msgs.hh>
 
 #include <memory>
 

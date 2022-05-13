@@ -19,9 +19,9 @@
 #include "gz/marine/CGALTypes.hh"
 #include "gz/marine/WaveParameters.hh"
 
-#include <ignition/math.hh>
-#include <ignition/common.hh>
-#include <ignition/common/Mesh.hh>
+#include <gz/math.hh>
+#include <gz/common.hh>
+#include <gz/common/Mesh.hh>
 
 #include <memory>
 

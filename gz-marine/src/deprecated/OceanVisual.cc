@@ -4,12 +4,12 @@
 
 #include "gz/marine/Gazebo.hh"
 
-#include <ignition/common.hh>
-#include <ignition/common/MeshManager.hh>
-// #include <ignition/rendering/ogre_gazebo.h>
-#include <ignition/rendering.hh>
-// #include <ignition/rendering/RenderTypes.hh>
-// #include <ignition/rendering/Visual.hh>
+#include <gz/common.hh>
+#include <gz/common/MeshManager.hh>
+// #include <gz/rendering/ogre_gazebo.h>
+#include <gz/rendering.hh>
+// #include <gz/rendering/RenderTypes.hh>
+// #include <gz/rendering/Visual.hh>
 
 #include <cmath>
 #include <memory>

@@ -20,8 +20,8 @@
 #ifndef GZ_MARINE_WAVEFIELDVISUALPLUGIN_HH_
 #define GZ_MARINE_WAVEFIELDVISUALPLUGIN_HH_
 
-#include <ignition/common/Plugin.hh>
-#include <ignition/msgs.hh>
+#include <gz/common/Plugin.hh>
+#include <gz/msgs.hh>
 
 #include <memory>
 

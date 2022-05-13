@@ -22,8 +22,8 @@
 
 #include "gz/marine/CGALTypes.hh"
 
-#include <ignition/common.hh>
-#include <ignition/common/mesh.hh>
+#include <gz/common.hh>
+#include <gz/common/mesh.hh>
 
 #include <memory>
 

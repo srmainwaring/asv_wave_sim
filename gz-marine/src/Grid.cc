@@ -21,7 +21,7 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 
-#include <ignition/common.hh>
+#include <gz/common.hh>
 
 #include <array>
 #include <iostream>

@@ -23,11 +23,11 @@
 
 #include <CGAL/Timer.h>
 
-#include <ignition/common.hh>
-#include <ignition/common/Util.hh>
-#include <ignition/common/MeshManager.hh>
-#include <ignition/common/Mesh.hh>
-#include <ignition/common/SubMesh.hh>
+#include <gz/common.hh>
+#include <gz/common/Util.hh>
+#include <gz/common/MeshManager.hh>
+#include <gz/common/Mesh.hh>
+#include <gz/common/SubMesh.hh>
 
 #include <iostream>
 #include <string>

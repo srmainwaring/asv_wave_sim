@@ -23,10 +23,10 @@
 #include "gz/marine/WavefieldSampler.hh"
 #include "gz/marine/WaveParameters.hh"
 
-#include <ignition/common.hh>
-#include <ignition/common/Util.hh>
-#include <ignition/common/MeshManager.hh>
-#include <ignition/math/Vector3.hh>
+#include <gz/common.hh>
+#include <gz/common/Util.hh>
+#include <gz/common/MeshManager.hh>
+#include <gz/math/Vector3.hh>
 
 #include <gtest/gtest.h>
 

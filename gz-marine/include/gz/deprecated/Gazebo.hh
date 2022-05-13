@@ -21,10 +21,10 @@
 #ifndef GZ_MARINE_GAZEBO_HH_
 #define GZ_MARINE_GAZEBO_HH_
 
-#include <ignition/math.hh>
-#include <ignition/common.hh>
-#include <ignition/rendering.hh>
-#include <ignition/rendering/ogre.hh>
+#include <gz/math.hh>
+#include <gz/common.hh>
+#include <gz/rendering.hh>
+#include <gz/rendering/ogre.hh>
 #include <sdf/sdf.hh>
 
 #include <memory>

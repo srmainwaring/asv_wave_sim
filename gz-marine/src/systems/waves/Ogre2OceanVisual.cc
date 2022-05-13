@@ -16,11 +16,11 @@
 #include "Ogre2OceanVisual.hh"
 #include "Ogre2DynamicMesh.hh"
 
-#include "ignition/common/SubMeshWithTangents.hh"
+#include "gz/common/SubMeshWithTangents.hh"
 
-#include <ignition/common.hh>
-#include <ignition/common/SubMesh.hh>
-#include <ignition/rendering/ogre2/Ogre2Material.hh>
+#include <gz/common.hh>
+#include <gz/common/SubMesh.hh>
+#include <gz/rendering/ogre2/Ogre2Material.hh>
 
 #ifdef _MSC_VER
   #pragma warning(push, 0)

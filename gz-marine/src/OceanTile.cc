@@ -23,9 +23,9 @@
 #include "gz/marine/WaveSimulationTrochoid.hh"
 #include "gz/marine/WaveParameters.hh"
 
-#include <ignition/common.hh>
-#include <ignition/common/Mesh.hh>
-#include <ignition/common/SubMesh.hh>
+#include <gz/common.hh>
+#include <gz/common/Mesh.hh>
+#include <gz/common/SubMesh.hh>
 
 #include <cmath>
 #include <iostream>

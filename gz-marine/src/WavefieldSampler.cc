@@ -22,10 +22,10 @@
 
 #include <Eigen/Dense>
 
-#include <ignition/common.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Vector2.hh>
-#include <ignition/math/Vector3.hh>
+#include <gz/common.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/math/Vector2.hh>
+#include <gz/math/Vector3.hh>
 
 #include <array>
 #include <iostream>

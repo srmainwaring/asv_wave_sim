@@ -14,12 +14,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // #include <gazebo/common/Assert.hh>
-#include <ignition/common.hh>
-#include <ignition/physics.hh>
+#include <gz/common.hh>
+#include <gz/physics.hh>
 
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Triangle3.hh>
-#include <ignition/math/Vector3.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/math/Triangle3.hh>
+#include <gz/math/Vector3.hh>
 
 #include <iostream>
 #include <string>

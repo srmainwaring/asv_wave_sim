@@ -22,7 +22,7 @@
 
 #include "gz/marine/CGALTypes.hh"
 
-#include <ignition/math.hh>
+#include <gz/math.hh>
 
 #include <memory>
 

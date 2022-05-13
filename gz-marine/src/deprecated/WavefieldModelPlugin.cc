@@ -22,16 +22,16 @@
 #include "gz/marine/WaveParameters.hh"
 #include "gz/marine/Utilities.hh"
 
-#include <ignition/common.hh>
-#include <ignition/physics.hh>
+#include <gz/common.hh>
+#include <gz/physics.hh>
 
-#include <ignition/msgs/any.pb.h>
-#include <ignition/msgs/empty.pb.h>
-#include <ignition/msgs/gz_string.pb.h>
-#include <ignition/msgs/param.pb.h>
-#include <ignition/msgs/param_v.pb.h>
+#include <gz/msgs/any.pb.h>
+#include <gz/msgs/empty.pb.h>
+#include <gz/msgs/gz_string.pb.h>
+#include <gz/msgs/param.pb.h>
+#include <gz/msgs/param_v.pb.h>
 
-#include <ignition/math/Vector3.hh>
+#include <gz/math/Vector3.hh>
 
 #include <algorithm>
 #include <iostream>

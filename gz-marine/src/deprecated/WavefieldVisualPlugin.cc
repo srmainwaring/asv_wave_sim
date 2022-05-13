@@ -22,14 +22,14 @@
 #include "gz/marine/WaveParameters.hh"
 #include "gz/marine/Utilities.hh"
 
-#include <ignition/common/Event.hh>
-#include <ignition/common/Plugin.hh>
-#include <ignition/rendering.hh>
-#include <ignition/rendering/RenderTypes.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/Visual.hh>
-#include <ignition/transport.hh>
-#include <gignition/gazebo/transport/Node.hh>
+#include <gz/common/Event.hh>
+#include <gz/common/Plugin.hh>
+#include <gz/rendering.hh>
+#include <gz/rendering/RenderTypes.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/Visual.hh>
+#include <gz/transport.hh>
+#include <ignition/gazebo/transport/Node.hh>
 
 #include <memory>
 #include <thread>

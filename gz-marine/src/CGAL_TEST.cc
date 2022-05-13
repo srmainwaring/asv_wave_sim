@@ -20,11 +20,11 @@
 #include "gz/marine/Wavefield.hh"
 #include "gz/marine/WaveParameters.hh"
 
-#include <ignition/common.hh>
-#include <ignition/common/Util.hh>
-#include <ignition/common/MeshManager.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/math/Triangle.hh>
+#include <gz/common.hh>
+#include <gz/common/Util.hh>
+#include <gz/common/MeshManager.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/math/Triangle.hh>
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/AABB_tree.h>

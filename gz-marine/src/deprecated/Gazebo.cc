@@ -17,8 +17,8 @@
 
 #include "gz/marine/Gazebo.hh"
 
-#include <ignition/common.hh>
-#include <ignition/rendering.hh>
+#include <gz/common.hh>
+#include <gz/rendering.hh>
 
 #include <array>
 #include <iostream>

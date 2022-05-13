@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <ignition/common.hh>
-#include <ignition/transport.hh>
-#include <ignition/physics.hh>
-#include <ignition/msgs.hh>
+#include <gz/common.hh>
+#include <gz/transport.hh>
+#include <gz/physics.hh>
+#include <gz/msgs.hh>
 
 #include <boost/lexical_cast/try_lexical_convert.hpp>
 #include <boost/program_options.hpp>
