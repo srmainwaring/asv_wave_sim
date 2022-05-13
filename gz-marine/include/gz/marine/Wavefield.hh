@@ -20,7 +20,7 @@
 #ifndef GZ_MARINE_WAVEFIELD_HH_
 #define GZ_MARINE_WAVEFIELD_HH_
 
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <ignition/math.hh>
 

@@ -13,15 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/OceanTile.hh"
+#include "gz/marine/OceanTile.hh"
 
-#include "ignition/common/SubMeshWithTangents.hh"
-#include "ignition/marine/Geometry.hh"
-#include "ignition/marine/WaveSimulation.hh"
-#include "ignition/marine/WaveSimulationFFT2.hh"
-#include "ignition/marine/WaveSimulationSinusoid.hh"
-#include "ignition/marine/WaveSimulationTrochoid.hh"
-#include "ignition/marine/WaveParameters.hh"
+#include "gz/common/SubMeshWithTangents.hh"
+#include "gz/marine/Geometry.hh"
+#include "gz/marine/WaveSimulation.hh"
+#include "gz/marine/WaveSimulationFFT2.hh"
+#include "gz/marine/WaveSimulationSinusoid.hh"
+#include "gz/marine/WaveSimulationTrochoid.hh"
+#include "gz/marine/WaveParameters.hh"
 
 #include <ignition/common.hh>
 #include <ignition/common/Mesh.hh>

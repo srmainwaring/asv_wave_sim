@@ -13,17 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/OceanTile.hh"
-#include "ignition/marine/Grid.hh"
-#include "ignition/marine/Wavefield.hh"
-#include "ignition/marine/WavefieldSampler.hh"
-#include "ignition/marine/WaveParameters.hh"
-#include "ignition/marine/WaveSimulation.hh"
-#include "ignition/marine/WaveSimulationFFTW.hh"
-#include "ignition/marine/WaveSimulationOpenCL.hh"
-#include "ignition/marine/WaveSimulationSinusoid.hh"
-#include "ignition/marine/WaveSimulationTrochoid.hh"
-#include "ignition/marine/WaveSpectrum.hh"
+#include "gz/marine/OceanTile.hh"
+#include "gz/marine/Grid.hh"
+#include "gz/marine/Wavefield.hh"
+#include "gz/marine/WavefieldSampler.hh"
+#include "gz/marine/WaveParameters.hh"
+#include "gz/marine/WaveSimulation.hh"
+#include "gz/marine/WaveSimulationFFTW.hh"
+#include "gz/marine/WaveSimulationOpenCL.hh"
+#include "gz/marine/WaveSimulationSinusoid.hh"
+#include "gz/marine/WaveSimulationTrochoid.hh"
+#include "gz/marine/WaveSpectrum.hh"
 
 #include <gtest/gtest.h>
 

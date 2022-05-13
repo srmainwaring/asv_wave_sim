@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/TriangulatedGrid.hh"
-#include "ignition/marine/Geometry.hh"
+#include "gz/marine/TriangulatedGrid.hh"
+#include "gz/marine/Geometry.hh"
 
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

@@ -15,7 +15,7 @@
  *
 */
 
-#include "ignition/marine/Gazebo.hh"
+#include "gz/marine/Gazebo.hh"
 
 #include <ignition/common.hh>
 #include <ignition/rendering.hh>

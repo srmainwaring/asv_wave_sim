@@ -18,9 +18,9 @@
 #include "Ogre2OceanVisual.hh"
 #include "Ogre2OceanGeometry.hh"
 
-#include "ignition/marine/OceanTile.hh"
-#include "ignition/marine/Utilities.hh"
-#include "ignition/marine/WaveParameters.hh"
+#include "gz/marine/OceanTile.hh"
+#include "gz/marine/Utilities.hh"
+#include "gz/marine/WaveParameters.hh"
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>

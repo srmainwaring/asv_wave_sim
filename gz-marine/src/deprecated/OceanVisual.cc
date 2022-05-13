@@ -1,8 +1,8 @@
-#include "ignition/marine/OceanVisual.hh"
-#include "ignition/marine/OceanTile.hh"
-#include "ignition/marine/Utilities.hh"
+#include "gz/marine/OceanVisual.hh"
+#include "gz/marine/OceanTile.hh"
+#include "gz/marine/Utilities.hh"
 
-#include "ignition/marine/Gazebo.hh"
+#include "gz/marine/Gazebo.hh"
 
 #include <ignition/common.hh>
 #include <ignition/common/MeshManager.hh>

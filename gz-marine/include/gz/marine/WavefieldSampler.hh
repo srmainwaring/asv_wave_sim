@@ -18,7 +18,7 @@
 #ifndef GZ_MARINE_WAVEFIELDSAMPLER_HH_
 #define GZ_MARINE_WAVEFIELDSAMPLER_HH_
 
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <ignition/math/Pose3.hh>
 

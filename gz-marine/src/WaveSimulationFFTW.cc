@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/WaveSimulationFFTW.hh"
-#include "ignition/marine/WaveSpectrum.hh"
+#include "gz/marine/WaveSimulationFFTW.hh"
+#include "gz/marine/WaveSpectrum.hh"
 
 #include <fftw3.h>
 

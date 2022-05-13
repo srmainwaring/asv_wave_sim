@@ -15,11 +15,11 @@
 
 #include "WavesModel.hh"
 
-#include "ignition/marine/Utilities.hh"
-#include "ignition/marine/Wavefield.hh"
-#include "ignition/marine/WaveParameters.hh"
+#include "gz/marine/Utilities.hh"
+#include "gz/marine/Wavefield.hh"
+#include "gz/marine/WaveParameters.hh"
 
-#include "ignition/marine/components/Wavefield.hh"
+#include "gz/marine/components/Wavefield.hh"
 
 #include <ignition/common/Profiler.hh>
 #include <ignition/plugin/Register.hh>

@@ -16,7 +16,7 @@
 #ifndef GZ_MARINE_WAVESIMULATIONFFT2_IMPL_HH_
 #define GZ_MARINE_WAVESIMULATIONFFT2_IMPL_HH_
 
-#include "ignition/marine/WaveSimulation.hh"
+#include "gz/marine/WaveSimulation.hh"
 
 #include <fftw3.h>
 

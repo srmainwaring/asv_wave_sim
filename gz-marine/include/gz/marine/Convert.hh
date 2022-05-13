@@ -19,7 +19,7 @@
 #ifndef GZ_MARINE_CONVERT_HH_
 #define GZ_MARINE_CONVERT_HH_
 
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>

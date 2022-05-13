@@ -42,7 +42,7 @@
 #ifndef GZ_MARINE_PHYSICS_HH_
 #define GZ_MARINE_PHYSICS_HH_
 
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <ignition/math/Pose3.hh>
 #include <ignition/msgs.hh>

@@ -16,8 +16,8 @@
  *
 */
 
-#ifndef IGNITION_COMMON_SUBMESHWITHTANGENTS_HH_
-#define IGNITION_COMMON_SUBMESHWITHTANGENTS_HH_
+#ifndef GZ_COMMON_SUBMESHWITHTANGENTS_HH_
+#define GZ_COMMON_SUBMESHWITHTANGENTS_HH_
 
 #include <ignition/common/SubMesh.hh>
 #include <ignition/math/Vector3.hh>

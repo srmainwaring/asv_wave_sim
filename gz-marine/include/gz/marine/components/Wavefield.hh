@@ -2,7 +2,7 @@
 #ifndef GZ_MARINE_COMPONENTS_WAVEFIELD_HH_
 #define GZ_MARINE_COMPONENTS_WAVEFIELD_HH_
 
-#include "ignition/marine/Wavefield.hh"
+#include "gz/marine/Wavefield.hh"
 
 #include <ignition/gazebo/components/Factory.hh>
 #include <ignition/gazebo/components/Component.hh>

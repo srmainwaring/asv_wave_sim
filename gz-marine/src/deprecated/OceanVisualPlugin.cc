@@ -1,5 +1,5 @@
-#include "ignition/marine/OceanVisualPlugin.hh"
-#include "ignition/marine/OceanVisual.hh"
+#include "gz/marine/OceanVisualPlugin.hh"
+#include "gz/marine/OceanVisual.hh"
 
 #include <ignition/common.hh>
 #include <ignition/rendering/Visual.hh>

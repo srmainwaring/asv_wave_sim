@@ -1,4 +1,4 @@
-#include "ignition/marine/WaveSpectrum.hh"
+#include "gz/marine/WaveSpectrum.hh"
 
 #include <cmath>
 

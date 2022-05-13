@@ -16,7 +16,7 @@
  *
 */
 
-#include "ignition/common/SubMeshWithTangents.hh"
+#include "gz/common/SubMeshWithTangents.hh"
 
 #include <ignition/common/Console.hh>
 

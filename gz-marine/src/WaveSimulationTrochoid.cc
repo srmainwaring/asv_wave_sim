@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/WaveSimulationTrochoid.hh"
+#include "gz/marine/WaveSimulationTrochoid.hh"
 
-#include "ignition/marine/Wavefield.hh"
-#include "ignition/marine/WaveParameters.hh"
+#include "gz/marine/Wavefield.hh"
+#include "gz/marine/WaveParameters.hh"
 
 #include <vector>
 

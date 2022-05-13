@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/MeshTools.hh"
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/MeshTools.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <ignition/common.hh>
 #include <ignition/math.hh>

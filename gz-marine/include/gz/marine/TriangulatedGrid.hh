@@ -18,7 +18,7 @@
 #ifndef GZ_MARINE_TRIANGULATEDGRID_HH_
 #define GZ_MARINE_TRIANGULATEDGRID_HH_
 
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <ignition/math.hh>
 

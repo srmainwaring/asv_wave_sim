@@ -27,8 +27,8 @@
 //* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
 //***************************************************************************************************
 
-#include "ignition/marine/WaveSimulationFFT2.hh"
-#include "ignition/marine/WaveSpectrum.hh"
+#include "gz/marine/WaveSimulationFFT2.hh"
+#include "gz/marine/WaveSpectrum.hh"
 
 #include "WaveSimulationFFT2Impl.hh"
 

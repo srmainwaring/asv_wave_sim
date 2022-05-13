@@ -20,7 +20,7 @@
 #ifndef GZ_MARINE_GRID_HH_
 #define GZ_MARINE_GRID_HH_
 
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <array>
 #include <memory>

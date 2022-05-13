@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/MeshTools.hh"
-#include "ignition/marine/Convert.hh"
-#include "ignition/marine/Geometry.hh"
-#include "ignition/marine/Grid.hh"
-#include "ignition/marine/Wavefield.hh"
-#include "ignition/marine/WaveParameters.hh"
-#include "ignition/marine/CGALTypes.hh"
+#include "gz/marine/MeshTools.hh"
+#include "gz/marine/Convert.hh"
+#include "gz/marine/Geometry.hh"
+#include "gz/marine/Grid.hh"
+#include "gz/marine/Wavefield.hh"
+#include "gz/marine/WaveParameters.hh"
+#include "gz/marine/CGALTypes.hh"
 
 #include <CGAL/Timer.h>
 

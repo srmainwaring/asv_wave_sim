@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/PhysicalConstants.hh"
+#include "gz/marine/PhysicalConstants.hh"
 
 namespace ignition
 {

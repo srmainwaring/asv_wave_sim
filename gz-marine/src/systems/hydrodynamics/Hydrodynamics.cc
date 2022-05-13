@@ -15,15 +15,15 @@
 
 #include "Hydrodynamics.hh"
 
-#include "ignition/marine/Convert.hh"
-#include "ignition/marine/Grid.hh"
-#include "ignition/marine/MeshTools.hh"
-#include "ignition/marine/Physics.hh"
-#include "ignition/marine/Utilities.hh"
-#include "ignition/marine/Wavefield.hh"
-#include "ignition/marine/WavefieldSampler.hh"
+#include "gz/marine/Convert.hh"
+#include "gz/marine/Grid.hh"
+#include "gz/marine/MeshTools.hh"
+#include "gz/marine/Physics.hh"
+#include "gz/marine/Utilities.hh"
+#include "gz/marine/Wavefield.hh"
+#include "gz/marine/WavefieldSampler.hh"
 
-#include "ignition/marine/components/Wavefield.hh"
+#include "gz/marine/components/Wavefield.hh"
 
 #include <ignition/common/MeshManager.hh>
 #include <ignition/common/Profiler.hh>

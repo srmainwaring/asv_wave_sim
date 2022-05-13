@@ -16,7 +16,7 @@
 #ifndef IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 #define IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 
-#include "ignition/marine/OceanTile.hh"
+#include "gz/marine/OceanTile.hh"
 
 #include "ignition/rendering/base/BaseVisual.hh"
 #include "ignition/rendering/ogre2/Ogre2Visual.hh"

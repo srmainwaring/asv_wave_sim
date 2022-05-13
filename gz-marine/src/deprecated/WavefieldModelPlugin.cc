@@ -13,14 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/WavefieldModelPlugin.hh"
-#include "ignition/marine/CGALTypes.hh"
-#include "ignition/marine/Convert.hh"
-#include "ignition/marine/Grid.hh"
-#include "ignition/marine/Wavefield.hh"
-#include "ignition/marine/WavefieldEntity.hh"
-#include "ignition/marine/WaveParameters.hh"
-#include "ignition/marine/Utilities.hh"
+#include "gz/marine/WavefieldModelPlugin.hh"
+#include "gz/marine/CGALTypes.hh"
+#include "gz/marine/Convert.hh"
+#include "gz/marine/Grid.hh"
+#include "gz/marine/Wavefield.hh"
+#include "gz/marine/WavefieldEntity.hh"
+#include "gz/marine/WaveParameters.hh"
+#include "gz/marine/Utilities.hh"
 
 #include <ignition/common.hh>
 #include <ignition/physics.hh>

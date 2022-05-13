@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ignition/marine/Utilities.hh"
-#include "ignition/marine/Convert.hh"
+#include "gz/marine/Utilities.hh"
+#include "gz/marine/Convert.hh"
 
 #include <ignition/common.hh>
 #include <ignition/math.hh>

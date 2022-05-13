@@ -16,8 +16,8 @@
 #ifndef GZ_MARINE_OCEANTILE_HH_
 #define GZ_MARINE_OCEANTILE_HH_
 
-#include "ignition/marine/CGALTypes.hh"
-#include "ignition/marine/WaveParameters.hh"
+#include "gz/marine/CGALTypes.hh"
+#include "gz/marine/WaveParameters.hh"
 
 #include <ignition/math.hh>
 #include <ignition/common.hh>
