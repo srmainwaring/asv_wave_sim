@@ -17,8 +17,8 @@
 /// \brief This file contains classes to construct planar meshes and to 
 /// find line intersections with them.
 
-#ifndef IGNITION_MARINE_GRID_HH_
-#define IGNITION_MARINE_GRID_HH_
+#ifndef GZ_MARINE_GRID_HH_
+#define GZ_MARINE_GRID_HH_
 
 #include "ignition/marine/CGALTypes.hh"
 

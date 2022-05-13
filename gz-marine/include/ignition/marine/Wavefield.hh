@@ -17,8 +17,8 @@
 /// \brief This file contains definitions for the class used to manage
 /// a wave field.
 
-#ifndef IGNITION_MARINE_WAVEFIELD_HH_
-#define IGNITION_MARINE_WAVEFIELD_HH_
+#ifndef GZ_MARINE_WAVEFIELD_HH_
+#define GZ_MARINE_WAVEFIELD_HH_
 
 #include "ignition/marine/CGALTypes.hh"
 

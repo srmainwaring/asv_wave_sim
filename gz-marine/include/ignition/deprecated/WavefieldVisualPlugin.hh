@@ -17,8 +17,8 @@
 /// \brief This file defines a Gazebo VisualPlugin used to render
 /// a wave field and keep it synchronised with the model used in the physics engine.
 
-#ifndef IGNITION_MARINE_WAVEFIELDVISUALPLUGIN_HH_
-#define IGNITION_MARINE_WAVEFIELDVISUALPLUGIN_HH_
+#ifndef GZ_MARINE_WAVEFIELDVISUALPLUGIN_HH_
+#define GZ_MARINE_WAVEFIELDVISUALPLUGIN_HH_
 
 #include <ignition/common/Plugin.hh>
 #include <ignition/msgs.hh>

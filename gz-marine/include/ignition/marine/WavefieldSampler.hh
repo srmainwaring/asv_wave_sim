@@ -15,8 +15,8 @@
 
 /// \file WavefieldSampler.hh
 
-#ifndef IGNITION_MARINE_WAVEFIELDSAMPLER_HH_
-#define IGNITION_MARINE_WAVEFIELDSAMPLER_HH_
+#ifndef GZ_MARINE_WAVEFIELDSAMPLER_HH_
+#define GZ_MARINE_WAVEFIELDSAMPLER_HH_
 
 #include "ignition/marine/CGALTypes.hh"
 

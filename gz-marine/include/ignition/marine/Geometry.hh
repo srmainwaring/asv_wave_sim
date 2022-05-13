@@ -16,8 +16,8 @@
 /// \file Geometry.hh
 /// \brief This file contains methods to calculate properties of simple geometrical objects.
 
-#ifndef IGNITION_MARINE_GEOMETRY_HH_
-#define IGNITION_MARINE_GEOMETRY_HH_
+#ifndef GZ_MARINE_GEOMETRY_HH_
+#define GZ_MARINE_GEOMETRY_HH_
 
 #include "ignition/marine/CGALTypes.hh"
 

@@ -16,8 +16,8 @@
 /// \file Convert.hh
 /// \brief Utility methods for converting between CGAL and Gazebo / Ignition types.
 
-#ifndef IGNITION_MARINE_CONVERT_HH_
-#define IGNITION_MARINE_CONVERT_HH_
+#ifndef GZ_MARINE_CONVERT_HH_
+#define GZ_MARINE_CONVERT_HH_
 
 #include "ignition/marine/CGALTypes.hh"
 

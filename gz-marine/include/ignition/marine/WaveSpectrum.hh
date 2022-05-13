@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef IGNITION_MARINE_WAVESPECTRUM_HH_
-#define IGNITION_MARINE_WAVESPECTRUM_HH_
+#ifndef GZ_MARINE_WAVESPECTRUM_HH_
+#define GZ_MARINE_WAVESPECTRUM_HH_
 
 namespace ignition
 {

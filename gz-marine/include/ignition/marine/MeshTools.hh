@@ -17,8 +17,8 @@
 /// \brief This file defines methods used to convert between CGAL
 /// and Gazebo meshes.     
 
-#ifndef IGNITION_MARINE_MESHTOOLS_HH_
-#define IGNITION_MARINE_MESHTOOLS_HH_
+#ifndef GZ_MARINE_MESHTOOLS_HH_
+#define GZ_MARINE_MESHTOOLS_HH_
 
 #include "ignition/marine/CGALTypes.hh"
 

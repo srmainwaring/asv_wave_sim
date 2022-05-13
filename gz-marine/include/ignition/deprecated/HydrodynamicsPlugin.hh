@@ -17,8 +17,8 @@
 /// \brief A Gazebo model plugin to manage hydrodynamics calculations
 /// for a buoyant object.  
 
-#ifndef IGNITION_MARINE_HYDRODYNAMICSPLUGIN_HH_
-#define IGNITION_MARINE_HYDRODYNAMICSPLUGIN_HH_
+#ifndef GZ_MARINE_HYDRODYNAMICSPLUGIN_HH_
+#define GZ_MARINE_HYDRODYNAMICSPLUGIN_HH_
 
 #include <ignition/common.hh>
 #include <ignition/physics.hh>

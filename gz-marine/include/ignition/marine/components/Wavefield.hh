@@ -1,6 +1,6 @@
 
-#ifndef IGNITION_MARINE_COMPONENTS_WAVEFIELD_HH_
-#define IGNITION_MARINE_COMPONENTS_WAVEFIELD_HH_
+#ifndef GZ_MARINE_COMPONENTS_WAVEFIELD_HH_
+#define GZ_MARINE_COMPONENTS_WAVEFIELD_HH_
 
 #include "ignition/marine/Wavefield.hh"
 
@@ -15,7 +15,7 @@ namespace ignition
 namespace marine
 {
 // Inline bracket to help doxygen filtering.
-inline namespace IGNITION_MARINE_VERSION_NAMESPACE {
+inline namespace GZ_MARINE_VERSION_NAMESPACE {
 namespace components
 {
   /// \brief This component holds an entity's wavefield.

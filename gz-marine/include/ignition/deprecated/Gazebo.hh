@@ -18,8 +18,8 @@
 /// \file Gazebo.hh
 /// \brief Support for methods not available in legacy versions of Gazebo.
 
-#ifndef IGNITION_MARINE_GAZEBO_HH_
-#define IGNITION_MARINE_GAZEBO_HH_
+#ifndef GZ_MARINE_GAZEBO_HH_
+#define GZ_MARINE_GAZEBO_HH_
 
 #include <ignition/math.hh>
 #include <ignition/common.hh>

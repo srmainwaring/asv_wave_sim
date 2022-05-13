@@ -15,8 +15,8 @@
 
 /// \file WaveParameters.hh
 
-#ifndef IGNITION_MARINE_WAVEPARAMETERS_HH_
-#define IGNITION_MARINE_WAVEPARAMETERS_HH_
+#ifndef GZ_MARINE_WAVEPARAMETERS_HH_
+#define GZ_MARINE_WAVEPARAMETERS_HH_
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>

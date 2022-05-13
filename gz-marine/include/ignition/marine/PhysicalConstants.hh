@@ -17,8 +17,8 @@
 /// \brief This file contains definitions of some physical constants used 
 /// in the physics calculations.
 
-#ifndef IGNITION_MARINE_PHYSICALCONSTANTS_HH_
-#define IGNITION_MARINE_PHYSICALCONSTANTS_HH_
+#ifndef GZ_MARINE_PHYSICALCONSTANTS_HH_
+#define GZ_MARINE_PHYSICALCONSTANTS_HH_
 
 namespace ignition
 {

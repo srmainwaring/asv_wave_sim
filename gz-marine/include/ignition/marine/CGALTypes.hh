@@ -16,8 +16,8 @@
 /// \file CGALTypes.hh
 /// \brief Type definitions for CGAL structures used in the library.
 
-#ifndef IGNITION_MARINE_CGALTYPES_HH_
-#define IGNITION_MARINE_CGALTYPES_HH_
+#ifndef GZ_MARINE_CGALTYPES_HH_
+#define GZ_MARINE_CGALTYPES_HH_
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/AABB_traits.h>

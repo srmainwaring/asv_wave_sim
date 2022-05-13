@@ -16,8 +16,8 @@
 /// \file Algorithm.hh
 /// \brief Methods for sorting indexes into arrays and vectors.
 
-#ifndef IGNITION_MARINE_ALGORITHM_HH_
-#define IGNITION_MARINE_ALGORITHM_HH_
+#ifndef GZ_MARINE_ALGORITHM_HH_
+#define GZ_MARINE_ALGORITHM_HH_
 
 #include <algorithm>
 #include <array>

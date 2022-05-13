@@ -39,8 +39,8 @@
 /// Parameters are provided that allow these additional forces to be toggled on or off.
 ///
 
-#ifndef IGNITION_MARINE_PHYSICS_HH_
-#define IGNITION_MARINE_PHYSICS_HH_
+#ifndef GZ_MARINE_PHYSICS_HH_
+#define GZ_MARINE_PHYSICS_HH_
 
 #include "ignition/marine/CGALTypes.hh"
 

@@ -16,8 +16,8 @@
 /// \file Utilities.hh
 /// \brief This file defines utilities for extracting parameters from SDF.
 
-#ifndef IGNITION_MARINE_UTILITIES_HH_
-#define IGNITION_MARINE_UTILITIES_HH_
+#ifndef GZ_MARINE_UTILITIES_HH_
+#define GZ_MARINE_UTILITIES_HH_
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>

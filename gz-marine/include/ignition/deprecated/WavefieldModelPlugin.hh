@@ -16,8 +16,8 @@
 /// \file WavefieldModelPlugin.hh
 /// \brief This file defines a Gazebo ModelPlugin used to manage a wave field.
 
-#ifndef IGNITION_MARINE_WAVEFIELDMODELPLUGIN_HH_
-#define IGNITION_MARINE_WAVEFIELDMODELPLUGIN_HH_
+#ifndef GZ_MARINE_WAVEFIELDMODELPLUGIN_HH_
+#define GZ_MARINE_WAVEFIELDMODELPLUGIN_HH_
 
 #include <ignition/physics.hh>
 #include <ignition/msgs.hh>
