@@ -1,16 +1,18 @@
-# Ignition Marine
+# Gazebo Marine
 
-This package contains plugins that support the simulation of waves and surface vessels in Ignition Gazebo.  
+This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
-![Ignition Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ign-marine-v4b.jpg)
+![Gazebo Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-marine-v4b.jpg)
 
 ## Notes
 
-The branch `ign-marine` represents a major reworking of the original wave simulation code developed for Gazebo9 and Gazebo11.
+***!! Migrating from Ignition Gazebo to Gazebo Sim !!: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356)***
 
-A number of features available in the original version, such as updating parameters via messages, have not been migrated to Ignition. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
+The branch `gz-marine` represents a major reworking of the original wave simulation code developed for Gazebo9 and Gazebo11. 
 
-There are changes in the way that the wave parameters need to be set, and it may not be possible to avoid breaking the existing interface used to specify trochoidal waves. This is still work in progress, and the current version has a fixed set of wave parameters.
+A number of features available in the original version, such as updating parameters via messages, have not been migrated to Gazebo Sim. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
+
+There are changes in the way that the wave parameters need to be set, and it may not be possible to avoid breaking the existing interface used to specify trochoidal waves.
 
 The library has additional dependencies on two FFT libraries:
 
@@ -33,14 +35,14 @@ Aside from adding the option to use a FFT generated wavefield, the major change 
 
 ## Dependencies
 
-You will need a working installation of Ignition Garden in order to use this package. This will require a from source build, see the [Ignition Garden documents](https://ignitionrobotics.org/docs/garden) for details.
+You will need a working installation of Gazebo Garden in order to use this package. This will require a from source build, see the [Gazebo Garden documents](https://gazebosim.org/docs/garden) for details.
 
 The dependency on ROS has been removed.
 
 ## Ubuntu (pending tests)
 
 - Ubuntu 20.04
-- Ignition Garden
+- Gazebo Garden
 
 Install CGAL:
 
@@ -51,7 +53,7 @@ sudo apt-get install libcgal-dev
 ### macOS
 
 - OSX 11.6.2
-- Ignition Garden
+- Gazebo Garden
 
 Install CGAL (5.3.1):
 
@@ -61,11 +63,11 @@ brew install cgal
 
 ## Installation
 
-We suppose the Ignition source has been cloned to a developer workspace `~/ign_ws/src`.
+We suppose the Gazebo source has been cloned to a developer workspace `~/gz_ws/src`.
 
-### Build Ignition
+### Build Gazebo
 
-On macOS you can build with the `RPATH` settings disabled. This allows you to run Gazebo from the install directory without having to disable SIP. From `~/ign_ws` run:
+On macOS you can build with the `RPATH` settings disabled. This allows you to run Gazebo from the install directory without having to disable SIP. From `~/gz_ws` run:
 
 ```bash
 colcon build --merge-install --cmake-args \
@@ -85,8 +87,8 @@ source ./install/setup.zsh
 Clone the `asv_wave_sim` repository:
 
 ```bash
-cd ~/ign_ws/src
-git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/ign-garden-wip
+cd ~/gz_ws/src
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b gz-marine
 ```
 
 Compile the package:
@@ -110,26 +112,26 @@ source ./install/setup.zsh
 ### Set environment variables
 
 ```bash
-# for future use - to support multiple ignition versions
+# for future use - to support multiple Gazebo versions
 export IGNITION_VERSION=garden
 
 # not usually required as should default to localhost address
 export IGN_IP=127.0.0.1
 
-# ensure ignition finds the config for this installation
+# ensure gazebo finds the config for this installation
 export IGN_CONFIG_PATH=\
-$HOME/ign_ws/install/share/ignition
+$HOME/gz_ws/install/share/ignition
 
 # ensure the model and world files are found
 export IGN_GAZEBO_RESOURCE_PATH=\
-$HOME/ign_ws/src/asv_wave_sim/ign-marine-models/models:\
-$HOME/ign_ws/src/asv_wave_sim/ign-marine-models/world_models:\
-$HOME/ign_ws/src/asv_wave_sim/ign-marine-models/worlds
+$HOME/gz_ws/src/asv_wave_sim/ignition-marine-models/models:\
+$HOME/gz_ws/src/asv_wave_sim/ignition-marine-models/world_models:\
+$HOME/gz_ws/src/asv_wave_sim/ignition-marine-models/worlds
 ```
 
 ## Examples
 
-Launch an Ignition Gazebo session.
+Launch a Gazebo session.
 
 Server:
 
@@ -243,7 +245,7 @@ colcon test-results --all --verbose
 Testing within a project build directory
 
 ```bash
-$ cd ~/ign_ws/src/asv_wave_sim/ign-marine
+$ cd ~/gz_ws/src/asv_wave_sim/gz-marine
 $ mkdir build && cd build
 $ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
 $ make && make test
