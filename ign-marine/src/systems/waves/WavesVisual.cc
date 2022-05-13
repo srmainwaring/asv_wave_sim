@@ -425,10 +425,9 @@ void WavesVisualPrivate::OnUpdate()
       nodes.pop_front();
       if (n && n->HasUserData("gazebo-entity"))
       {
-        // RenderUtil stores gazebo-entity user data as int
-        // \todo(anyone) Change this to uint64_t in Ignition H?
+        // RenderUtil stores gazebo-entity user data as uint64_t
         auto variant = n->UserData("gazebo-entity");
-        const int *value = std::get_if<int>(&variant);
+        const uint64_t *value = std::get_if<uint64_t>(&variant);
         if (value && *value == static_cast<int>(this->entity))
         {
           this->visual = std::dynamic_pointer_cast<rendering::Visual>(n);
