@@ -28,6 +28,7 @@
 #include <ignition/gazebo/EntityComponentManager.hh>
 #include <ignition/gazebo/gui/GuiEvents.hh>
 
+#include <string>
 
 namespace ignition
 {
@@ -130,8 +131,11 @@ void WavesControl::LoadConfig(const tinyxml2::XMLElement * /*_pluginElem*/)
     this->title = "Waves Control";
   }
 
+  /// \todo: lookup model name
+  std::string modelName("waves");
+
   // Initialise the publisher
-  std::string topic("/model/waves");
+  std::string topic("/model/" + modelName + "/waves");
   this->dataPtr->pub = this->dataPtr->node.Advertise<ignition::msgs::Param>(topic);
   if (!this->dataPtr->pub)
   {
