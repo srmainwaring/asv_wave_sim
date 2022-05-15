@@ -40,9 +40,9 @@ GridLayout {
     Layout.columnSpan: 4
     text: qsTr("Show water patch markers")
     checked: false
-    // onClicked: {
-    //   WavesControl.OnShowWaterPatchMarkers(checked)
-    // }
+    onClicked: {
+      WavesControl.OnShowWaterPatchMarkers(checked)
+    }
   }
 
   // Right spacer
@@ -58,9 +58,9 @@ GridLayout {
     Layout.columnSpan: 4
     text: qsTr("Show waterline markers")
     checked: false
-    // onClicked: {
-    //   WavesControl.OnShowWaterlineMarkers(checked)
-    // }
+    onClicked: {
+      WavesControl.OnShowWaterlineMarkers(checked)
+    }
   }
 
   CheckBox {
@@ -69,9 +69,9 @@ GridLayout {
     Layout.columnSpan: 4
     text: qsTr("Show submerged triangle markers")
     checked: false
-    // onClicked: {
-    //   WavesControl.OnShowSubmergedTriangleMarkers(checked)
-    // }
+    onClicked: {
+      WavesControl.OnShowSubmergedTriangleMarkers(checked)
+    }
   }
 
   // wind speed

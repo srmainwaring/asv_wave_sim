@@ -49,6 +49,18 @@ inline namespace IGNITION_MARINE_VERSION_NAMESPACE
     public: void Update(const ignition::gazebo::UpdateInfo &_info,
         ignition::gazebo::EntityComponentManager &_ecm) override;
 
+    /// \brief Callback when water patch marker checkbox state is changed
+    /// \param[in] _checked indicates show or hide contacts
+    public slots: void OnShowWaterPatchMarkers(bool _checked);
+
+    /// \brief Callback when waterline marker checkbox state is changed
+    /// \param[in] _checked indicates show or hide contacts
+    public slots: void OnShowWaterlineMarkers(bool _checked);
+
+    /// \brief Callback when submerged triangle marker checkbox state is changed
+    /// \param[in] _checked indicates show or hide contacts
+    public slots: void OnShowSubmergedTriangleMarkers(bool _checked);
+
     /// \brief Update the wind speed
     /// \param[in] _windSpeed new wind speed
     public slots: void UpdateWindSpeed(double _windSpeed);
