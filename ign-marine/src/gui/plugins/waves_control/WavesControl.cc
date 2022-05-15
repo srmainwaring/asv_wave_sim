@@ -15,7 +15,14 @@
 
 #include "WavesControl.hh"
 
+#include <ignition/msgs/any.pb.h>
+#include <ignition/msgs/param.pb.h>
+#include <ignition/msgs/param_v.pb.h>
+
+#include <ignition/transport/Node.hh>
+
 #include <ignition/plugin/Register.hh>
+
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/components/World.hh>
 #include <ignition/gazebo/EntityComponentManager.hh>
@@ -31,6 +38,15 @@ inline namespace IGNITION_MARINE_VERSION_NAMESPACE
   /// \brief Private data class for WavesControl
   class WavesControlPrivate
   {
+    /// \brief Transport node
+    public: transport::Node node;
+
+    /// \brief Publisher
+    public: transport::Node::Publisher pub;
+
+    /// \brief Message for visualizing contact positions
+    // public: ignition::msgs::Marker positionMarkerMsg;
+
     /// \brief Current state of the water patch checkbox
     public: bool waterPatchCheckboxState{false};
 
@@ -59,6 +75,10 @@ inline namespace IGNITION_MARINE_VERSION_NAMESPACE
     /// callbacks.
     /// The variables are: windSpeed and windAngle
     public: std::mutex serviceMutex;
+
+    /// \brief Publish a wave parameters message
+    public: void PublishWaveParams();
+
   };
 }
 }
@@ -67,6 +87,32 @@ inline namespace IGNITION_MARINE_VERSION_NAMESPACE
 using namespace ignition;
 using namespace gazebo;
 
+//////////////////////////////////////////////////
+void WavesControlPrivate::PublishWaveParams()
+{
+  // parameters
+  ignition::msgs::Param msg;
+
+  // wind speed
+  {
+    ignition::msgs::Any value;
+    value.set_type(ignition::msgs::Any::DOUBLE);
+    value.set_double_value(this->windSpeed);
+    (*msg.mutable_params())["wind_speed"] = value;
+  }
+  // wind angle
+  {
+    ignition::msgs::Any value;
+    value.set_type(ignition::msgs::Any::DOUBLE);
+    value.set_double_value(this->windAngle);
+    (*msg.mutable_params())["wind_angle"] = value;
+  }
+
+  // publish message
+  this->pub.Publish(msg);
+}
+
+/////////////////////////////////////////////////
 /////////////////////////////////////////////////
 WavesControl::WavesControl()
   : GuiSystem(), dataPtr(new WavesControlPrivate)
@@ -83,6 +129,15 @@ void WavesControl::LoadConfig(const tinyxml2::XMLElement * /*_pluginElem*/)
   {
     this->title = "Waves Control";
   }
+
+  // Initialise the publisher
+  std::string topic("/model/waves");
+  this->dataPtr->pub = this->dataPtr->node.Advertise<ignition::msgs::Param>(topic);
+  if (!this->dataPtr->pub)
+  {
+    ignerr << "Error advertising topic [" << topic << "]\n";
+  }
+
 }
 
 //////////////////////////////////////////////////
@@ -166,6 +221,8 @@ void WavesControl::UpdateWindSpeed(double _windSpeed)
   this->dataPtr->windSpeed = _windSpeed;
 
   ignmsg << "Wind Speed: " << _windSpeed << "\n";
+
+  this->dataPtr->PublishWaveParams();
 }
 
 //////////////////////////////////////////////////
@@ -175,6 +232,8 @@ void WavesControl::UpdateWindAngle(double _windAngle)
   this->dataPtr->windAngle = _windAngle;
 
   ignmsg << "Wind Angle: " << _windAngle << "\n";
+
+  this->dataPtr->PublishWaveParams();
 }
 
 //////////////////////////////////////////////////
