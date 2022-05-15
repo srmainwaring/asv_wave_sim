@@ -1,19 +1,19 @@
-/*
- * Copyright (C) 2020 Open Source Robotics Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
+// Copyright (C) 2022  Rhys Mainwaring
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#include "WavesControl.hh"
 
 #include <ignition/plugin/Register.hh>
 #include <ignition/gazebo/components/Name.hh>
@@ -21,10 +21,39 @@
 #include <ignition/gazebo/EntityComponentManager.hh>
 #include <ignition/gazebo/gui/GuiEvents.hh>
 
-#include "WavesControl.hh"
+
+namespace ignition
+{
+namespace gazebo
+{
+inline namespace IGNITION_MARINE_VERSION_NAMESPACE
+{
+  /// \brief Private data class for WavesControl
+  class WavesControlPrivate
+  {
+    /// \brief Wind speed
+    public: double windSpeed{5.0};
+
+    /// \brief Wind angle
+    public: double windAngle{0.0};
+
+    /// \brief Mutex for variable mutated by the checkbox and spinboxes
+    /// callbacks.
+    /// The variables are: windSpeed and windAngle
+    public: std::mutex serviceMutex;
+  };
+}
+}
+}
+
+using namespace ignition;
+using namespace gazebo;
 
 /////////////////////////////////////////////////
-WavesControl::WavesControl() = default;
+WavesControl::WavesControl()
+  : GuiSystem(), dataPtr(new WavesControlPrivate)
+{
+}
 
 /////////////////////////////////////////////////
 WavesControl::~WavesControl() = default;
@@ -33,41 +62,36 @@ WavesControl::~WavesControl() = default;
 void WavesControl::LoadConfig(const tinyxml2::XMLElement * /*_pluginElem*/)
 {
   if (this->title.empty())
+  {
     this->title = "Waves Control";
-
-  // Here you can read configuration from _pluginElem, if it's not null.
+  }
 }
 
 //////////////////////////////////////////////////
 void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
     ignition::gazebo::EntityComponentManager &_ecm)
 {
-  // In the update loop, you can for example get the name of the world and set
-  // it as a property that can be read from the QML.
-  _ecm.Each<ignition::gazebo::components::Name,
-            ignition::gazebo::components::World>(
-    [&](const ignition::gazebo::Entity &_entity,
-        const ignition::gazebo::components::Name *_name,
-        const ignition::gazebo::components::World *)->bool
-  {
-    this->SetCustomProperty(QString::fromStdString(_name->Data()));
-    return true;
-  });
 }
 
-/////////////////////////////////////////////////
-QString WavesControl::CustomProperty() const
+//////////////////////////////////////////////////
+void WavesControl::UpdateWindSpeed(double _windSpeed)
 {
-  return this->customProperty;
+  std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
+  this->dataPtr->windSpeed = _windSpeed;
+
+  ignmsg << "Wind Speed: " << _windSpeed << "\n";
 }
 
-/////////////////////////////////////////////////
-void WavesControl::SetCustomProperty(const QString &_customProperty)
+//////////////////////////////////////////////////
+void WavesControl::UpdateWindAngle(double _windAngle)
 {
-  this->customProperty = _customProperty;
-  this->CustomPropertyChanged();
+  std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
+  this->dataPtr->windAngle = _windAngle;
+
+  ignmsg << "Wind Angle: " << _windAngle << "\n";
 }
 
+//////////////////////////////////////////////////
 // Register this plugin
 IGNITION_ADD_PLUGIN(WavesControl,
                     ignition::gui::Plugin)
