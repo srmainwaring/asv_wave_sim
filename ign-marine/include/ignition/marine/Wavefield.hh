@@ -61,12 +61,6 @@ namespace marine
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldPrivate> dataPtr;
-
-    // @TODO: relocate
-  #if 0
-    /// \todo(srmainwaring): port to ignition
-    void OnWaveWindMsg(ConstParam_VPtr &_msg);
-  #endif
   };
 
   typedef std::shared_ptr<Wavefield> WavefieldPtr;

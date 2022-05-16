@@ -39,6 +39,11 @@ namespace marine
   /// \brief Private data for the Wavefield.
   class WavefieldPrivate
   {
+    /// \brief Callback for topic "/model/<model>/waves".
+    ///
+    /// \param[in] _msg Wave parameters message.
+    public: void OnWaveMsg(const ignition::msgs::Param &_msg);
+
     /// \brief Wave parameters
     public: std::shared_ptr<WaveParameters> params;
 
@@ -72,7 +77,7 @@ namespace marine
     // Subscribe to wave parameter updates
     std::string topic("/model/" + modelName + "/waves");
     this->dataPtr->node.Subscribe(
-        topic, &WavesModelPrivate::OnWaveMsg, this->dataPtr.get());
+        topic, &WavefieldPrivate::OnWaveMsg, this->dataPtr.get());
 
     // Wave parameters
     ignmsg << "Creating WaveParameters." <<  std::endl;
@@ -148,16 +153,17 @@ namespace marine
     this->dataPtr->triangulatedGrid->UpdatePoints(vertices);
   }
 
+  /////////////////////////////////////////////////
   //////////////////////////////////////////////////
-  void Wavefield::OnWaveMsg(const ignition::msgs::Param &_msg)
+  void WavefieldPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
   {
-    std::lock_guard<std::recursive_mutex> lock(this->dataPtr->mutex);
+    std::lock_guard<std::recursive_mutex> lock(this->mutex);
 
     ignmsg << _msg.DebugString();
 
     // current wind speed and angle
-    double windSpeed = this->waveParams->WindSpeed();
-    double windAngleRad = this->waveParams->WindAngleRad();
+    double windSpeed = this->params->WindSpeed();
+    double windAngleRad = this->params->WindAngleRad();
 
     // extract parameters
     {
@@ -189,8 +195,8 @@ namespace marine
     double uy = windSpeed * sin(windAngleRad);
     
     // update parameters and wavefield
-    this->dataPtr->params->SetWindVelocity(math::Vector2d(ux, uy));
-    this->dataPtr->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
+    this->params->SetWindVelocity(math::Vector2d(ux, uy));
+    this->oceanTile->SetWindVelocity(ux, uy);
   }
 
   /////////////////////////////////////////////////
