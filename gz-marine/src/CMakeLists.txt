@@ -1,3 +1,4 @@
+add_subdirectory(gui)
 add_subdirectory(systems)
 
 # Collect source files into the "sources" variable and unit test files into the

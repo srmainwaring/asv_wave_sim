@@ -22,7 +22,12 @@
 #include "gz/marine/Utilities.hh"
 #include "gz/marine/WaveParameters.hh"
 
+#include <gz/msgs/any.pb.h>
+#include <gz/msgs/param.pb.h>
+#include <gz/msgs/param_v.pb.h>
+
 #include <gz/common/Profiler.hh>
+
 #include <gz/plugin/Register.hh>
 #include <gz/rendering/Material.hh>
 #include <gz/rendering/RenderingIface.hh>
@@ -36,7 +41,10 @@
 #include <gz/rendering/ogre2/Ogre2MeshFactory.hh>
 #include <gz/rendering/ogre2/Ogre2Scene.hh>
 
+#include <gz/transport/Node.hh>
+
 #include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/components/World.hh>
 #include <ignition/gazebo/components/SourceFilePath.hh>
 #include <ignition/gazebo/rendering/Events.hh>
 #include <ignition/gazebo/rendering/RenderUtil.hh>
@@ -243,6 +251,11 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
 
+  /// \brief Callback for topic "/world/<world>/waves".
+  ///
+  /// \param[in] _msg Wave parameters message.
+  public: void OnWaveMsg(const ignition::msgs::Param &_msg);
+
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
 
@@ -273,6 +286,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief The wave parameters.
   public: marine::WaveParametersPtr waveParams;
+  public: bool waveParamsDirty{false};
 
   /////////////////
   /// OceanTile
@@ -284,8 +298,14 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Used in DynamicMesh example
   public: common::MeshPtr oceanTileMesh;
 
-  /// \brief Mutex to protect sim time updates.
+  /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
+
+  /// \brief Name of the world
+  public: std::string worldName;
+
+  /// \brief Transport node
+  public: transport::Node node;
 
   /// \brief Connection to pre-render event callback
   public: ignition::common::ConnectionPtr connection{nullptr};
@@ -327,6 +347,7 @@ void WavesVisual::Configure(const Entity &_entity,
 
   // Wave parameters
   this->dataPtr->waveParams.reset(new marine::WaveParameters());
+  this->dataPtr->waveParamsDirty = true;
   if (sdf->HasElement("wave"))
   {
     auto sdfWave = sdf->GetElement("wave");
@@ -339,6 +360,24 @@ void WavesVisual::Configure(const Entity &_entity,
   this->dataPtr->connection =
       _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
       std::bind(&WavesVisualPrivate::OnUpdate, this->dataPtr.get()));
+
+  // World name
+  _ecm.Each<components::World, components::Name>(
+    [&](const Entity &,
+        const components::World *,
+        const components::Name *_name) -> bool
+    {
+      // Assume there's only one world
+      this->dataPtr->worldName = _name->Data();
+      return false;
+    });
+
+  // Subscribe to wave parameter updates
+  std::string topic("/world/" + this->dataPtr->worldName + "/waves");
+  this->dataPtr->node.Subscribe(
+      topic, &WavesVisualPrivate::OnWaveMsg, this->dataPtr.get());
+
+  ignmsg << "WavesVisual: subscribing to [" << topic << "]\n";
 }
 
 //////////////////////////////////////////////////
@@ -351,6 +390,7 @@ void WavesVisual::PreUpdate(
   this->dataPtr->currentSimTime = _info.simTime;
 }
 
+/////////////////////////////////////////////////
 //////////////////////////////////////////////////
 WavesVisualPrivate::~WavesVisualPrivate()
 {
@@ -394,6 +434,7 @@ enum class OceanVisualMethod : uint16_t
   OCEAN_VISUAL_METHOD_END
 };
 
+//////////////////////////////////////////////////
 void WavesVisualPrivate::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->mutex);
@@ -460,8 +501,8 @@ void WavesVisualPrivate::OnUpdate()
   // ocean tile parameters
   size_t N = this->waveParams->CellCount();
   double L = this->waveParams->TileSize();
-  double u = this->waveParams->WindVelocity().X();
-  double v = this->waveParams->WindVelocity().Y();
+  double ux = this->waveParams->WindVelocity().X();
+  double uy = this->waveParams->WindVelocity().Y();
 
   OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY;
   switch (method)
@@ -484,7 +525,7 @@ void WavesVisualPrivate::OnUpdate()
 
         // create ocean tile
         this->oceanTile.reset(new marine::visual::OceanTile(this->waveParams));
-        this->oceanTile->SetWindVelocity(u, v);
+        this->oceanTile->SetWindVelocity(ux, uy);
         /// \todo(srmainwaring) rationalise - oceanTile->CreateMesh() calls Create internally
         // this->oceanTile->Create();
 
@@ -568,6 +609,14 @@ void WavesVisualPrivate::OnUpdate()
       if (this->oceanVisuals.empty() || this->isStatic)
         return;
 
+      if (this->waveParamsDirty)
+      {
+        double ux = this->waveParams->WindVelocity().X();
+        double uy = this->waveParams->WindVelocity().Y();
+        this->oceanTile->SetWindVelocity(ux, uy);
+        this->waveParamsDirty = false;
+      }
+
       // update the tile (recalculates vertices)
       this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
 
@@ -588,7 +637,7 @@ void WavesVisualPrivate::OnUpdate()
 
         // create ocean tile
         this->oceanTile.reset(new marine::visual::OceanTile(N, L));
-        this->oceanTile->SetWindVelocity(u, 0.0);
+        this->oceanTile->SetWindVelocity(ux, 0.0);
         std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
         auto mesh = newMesh.get();
         common::MeshManager::Instance()->AddMesh(newMesh.release());
@@ -654,6 +703,52 @@ void WavesVisualPrivate::OnUpdate()
       break;
     }
   }
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  // ignmsg << _msg.DebugString();
+
+  // current wind speed and angle
+  double windSpeed = this->waveParams->WindSpeed();
+  double windAngleRad = this->waveParams->WindAngleRad();
+
+  // extract parameters
+  {
+    auto it = _msg.params().find("wind_speed");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is double
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.double_value();
+      windSpeed = value;
+    }
+  }
+  {
+    auto it = _msg.params().find("wind_angle");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is double
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.double_value();
+      windAngleRad = M_PI/180.0*value;
+    }
+  }
+
+  /// \todo: update params correctly - put logic in one place
+  // update wind velocity
+  double ux = windSpeed * cos(windAngleRad);
+  double uy = windSpeed * sin(windAngleRad);
+  
+  /// \note: oceanTile cannot be updated in this function as it
+  //  is created on the render thread and is not available here.
+  this->waveParams->SetWindVelocity(math::Vector2d(ux, uy));
+  this->waveParamsDirty = true;
 }
 
 //////////////////////////////////////////////////
