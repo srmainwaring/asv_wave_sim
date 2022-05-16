@@ -22,12 +22,20 @@
 #include "ignition/marine/components/Wavefield.hh"
 
 #include <ignition/common/Profiler.hh>
+
+#include <ignition/msgs/any.pb.h>
+#include <ignition/msgs/param.pb.h>
+#include <ignition/msgs/param_v.pb.h>
+
 #include <ignition/plugin/Register.hh>
+
+#include <ignition/transport/Node.hh>
 
 #include <ignition/gazebo/components/Name.hh>
 
 #include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/Util.hh>
+
 
 #include <sdf/Element.hh>
 
@@ -60,6 +68,11 @@ class ignition::gazebo::systems::WavesModelPrivate
   public: void UpdateWaves(const UpdateInfo &_info,
                     EntityComponentManager &_ecm);
 
+  /// \brief Callback for topic "/model/<model>/waves".
+  ///
+  /// \param[in] _msg Wave parameters message.
+  public: void OnWaveMsg(const ignition::msgs::Param &_msg);
+
   /// \brief Model interface
   public: Model model{kNullEntity};
 
@@ -90,6 +103,12 @@ class ignition::gazebo::systems::WavesModelPrivate
 
   /// \brief Previous update time.
   public: double lastUpdateTime{0};
+
+  /// \brief Mutex to protect parameter updates.
+  public: std::mutex mutex;
+
+  /// \brief Transport node
+  public: transport::Node node;
 };
 
 /////////////////////////////////////////////////
@@ -121,6 +140,14 @@ void WavesModel::Configure(const Entity &_entity,
     return;
   }
   this->dataPtr->sdf = _sdf->Clone();
+
+  /// \todo: get the modelName
+  std::string modelName("waves");
+
+  // Subscribe to wave parameter updates
+  std::string topic("/model/" + modelName + "/waves");
+  this->dataPtr->node.Subscribe(
+      topic, &WavesModelPrivate::OnWaveMsg, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////
@@ -129,9 +156,6 @@ void WavesModel::PreUpdate(
   EntityComponentManager &_ecm)
 {
   IGN_PROFILE("WavesModel::PreUpdate");
-
-  // std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  // this->dataPtr->currentSimTime = _info.simTime;
 
   /// \todo(anyone) support reset / rewind
   if (_info.dt < std::chrono::steady_clock::duration::zero())
@@ -221,6 +245,8 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
+  std::lock_guard<std::mutex> lock(this->mutex);
+
   if (!this->isStatic)
   {  
     // Throttle update [30 FPS by default]
@@ -232,6 +258,51 @@ void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
       this->lastUpdateTime = simTime;
     }
   }
+}
+
+//////////////////////////////////////////////////
+void WavesModelPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  ignmsg << _msg.DebugString();
+
+  // current wind speed and angle
+  double windSpeed = this->waveParams->WindSpeed();
+  double windAngleRad = this->waveParams->WindAngleRad();
+
+  // extract parameters
+  {
+    auto it = _msg.params().find("wind_speed");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is double
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.double_value();
+      windSpeed = value;
+    }
+  }
+  {
+    auto it = _msg.params().find("wind_angle");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is double
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.double_value();
+      windAngleRad = M_PI/180.0*value;
+    }
+  }
+
+  /// \todo: update params correctly - put logic in one place
+  // update wind velocity
+  double ux = windSpeed * cos(windAngleRad);
+  double uy = windSpeed * sin(windAngleRad);
+  
+  // update parameters and wavefield
+  this->waveParams->SetWindVelocity(math::Vector2d(ux, uy));
+  this->wavefield->SetParameters(this->waveParams);
 }
 
 //////////////////////////////////////////////////

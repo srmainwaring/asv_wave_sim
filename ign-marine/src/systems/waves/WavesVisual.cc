@@ -297,7 +297,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Used in DynamicMesh example
   public: common::MeshPtr oceanTileMesh;
 
-  /// \brief Mutex to protect sim time updates.
+  /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
 
   /// \brief Transport node
@@ -691,7 +691,6 @@ void WavesVisualPrivate::OnUpdate()
     }
   }
 }
-
 
 //////////////////////////////////////////////////
 void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
