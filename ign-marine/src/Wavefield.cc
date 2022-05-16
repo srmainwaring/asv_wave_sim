@@ -156,7 +156,7 @@ namespace marine
   {
     std::lock_guard<std::recursive_mutex> lock(this->mutex);
 
-    ignmsg << _msg.DebugString();
+    // ignmsg << _msg.DebugString();
 
     // current wind speed and angle
     double windSpeed = this->params->WindSpeed();

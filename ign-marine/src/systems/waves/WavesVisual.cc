@@ -711,7 +711,7 @@ void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
 
-  ignmsg << _msg.DebugString();
+  // ignmsg << _msg.DebugString();
 
   // current wind speed and angle
   double windSpeed = this->waveParams->WindSpeed();
