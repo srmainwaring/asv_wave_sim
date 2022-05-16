@@ -71,7 +71,10 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
     public: double windSpeed{5.0};
 
     /// \brief Wind angle
-    public: double windAngle{0.0};
+    public: double windAngle{135.0};
+
+    /// \brief Wave steepness
+    public: double steepness{2.0};
 
     /// \brief Mutex for variable mutated by the checkbox and spinboxes
     /// callbacks.
@@ -110,6 +113,13 @@ void WavesControlPrivate::PublishWaveParams()
     value.set_type(ignition::msgs::Any::DOUBLE);
     value.set_double_value(this->windAngle);
     (*msg.mutable_params())["wind_angle"] = value;
+  }
+  // steepness
+  {
+    ignition::msgs::Any value;
+    value.set_type(ignition::msgs::Any::DOUBLE);
+    value.set_double_value(this->steepness);
+    (*msg.mutable_params())["steepness"] = value;
   }
 
   // publish message
@@ -240,6 +250,17 @@ void WavesControl::UpdateWindAngle(double _windAngle)
   this->dataPtr->windAngle = _windAngle;
 
   ignmsg << "Wind Angle: " << _windAngle << "\n";
+
+  this->dataPtr->PublishWaveParams();
+}
+
+//////////////////////////////////////////////////
+void WavesControl::UpdateSteepness(double _steepness)
+{
+  std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
+  this->dataPtr->steepness = _steepness;
+
+  ignmsg << "Steepness: " << _steepness << "\n";
 
   this->dataPtr->PublishWaveParams();
 }

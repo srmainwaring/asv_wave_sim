@@ -637,7 +637,7 @@ void WavesVisualPrivate::OnUpdate()
 
         // create ocean tile
         this->oceanTile.reset(new marine::visual::OceanTile(N, L));
-        this->oceanTile->SetWindVelocity(ux, 0.0);
+        this->oceanTile->SetWindVelocity(ux, uy);
         std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
         auto mesh = newMesh.get();
         common::MeshManager::Instance()->AddMesh(newMesh.release());
@@ -715,6 +715,7 @@ void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
   // current wind speed and angle
   double windSpeed = this->waveParams->WindSpeed();
   double windAngleRad = this->waveParams->WindAngleRad();
+  double steepness = this->waveParams->Steepness();
 
   // extract parameters
   {
@@ -739,15 +740,23 @@ void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
       windAngleRad = M_PI/180.0*value;
     }
   }
+  {
+    auto it = _msg.params().find("steepness");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is double
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.double_value();
+      steepness = value;
+    }
+  }
 
-  /// \todo: update params correctly - put logic in one place
-  // update wind velocity
-  double ux = windSpeed * cos(windAngleRad);
-  double uy = windSpeed * sin(windAngleRad);
-  
   /// \note: oceanTile cannot be updated in this function as it
   //  is created on the render thread and is not available here.
-  this->waveParams->SetWindVelocity(math::Vector2d(ux, uy));
+  this->waveParams->SetWindSpeedAndAngle(windSpeed, windAngleRad);
+  this->waveParams->SetSteepness(steepness);
+
   this->waveParamsDirty = true;
 }
 

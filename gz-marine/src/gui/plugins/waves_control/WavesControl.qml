@@ -114,6 +114,26 @@ GridLayout {
     onEditingFinished: WavesControl.UpdateWindAngle(windAngle.value)
   }
 
+  // steepness
+  Text {
+    Layout.columnSpan: 2
+    id: steepnessText
+    color: "dimgrey"
+    text: "Steepness"
+  }
+
+  IgnSpinBox {
+    Layout.columnSpan: 2
+    Layout.fillWidth: true
+    id: steepness
+    maximumValue: 10
+    minimumValue: 0
+    value: 2
+    decimals: 1
+    stepSize: 0.1
+    onEditingFinished: WavesControl.UpdateSteepness(steepness.value)
+  }
+
   // Bottom spacer
   Item {
     Layout.columnSpan: 4

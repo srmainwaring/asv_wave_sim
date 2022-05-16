@@ -35,11 +35,8 @@ namespace ignition
 {
 namespace marine
 {
-  // typedef CGAL::Aff_transformation_2<cgal::Kernel> TransformMatrix;
-
-///////////////////////////////////////////////////////////////////////////////
-// Utilities
-
+  //////////////////////////////////////////////////
+  // Utilities
   std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
   { 
     for (auto&& v : _vec )
@@ -47,20 +44,15 @@ namespace marine
     return os;
   }
 
-///////////////////////////////////////////////////////////////////////////////
-// WaveParametersPrivate
+  //////////////////////////////////////////////////
+  // WaveParametersPrivate
 
   /// \internal
   /// \brief Private data for the WavefieldParameters.
   class WaveParametersPrivate
   {
     /// \brief Constructor.
-    public: WaveParametersPrivate():
-      angularFrequency(2.0*M_PI),
-      wavelength(2*M_PI/Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)), 
-      wavenumber(Physics::DeepWaterDispersionToWavenumber(2.0*M_PI))
-    {
-    }
+    public: WaveParametersPrivate() { }
 
     /// \brief The wave algorithm.
     public: std::string algorithm{"fft"};
@@ -99,14 +91,16 @@ namespace marine
     public: math::Vector2d windVelocity = math::Vector2d(5.0, 0.0);
 
     /// \brief The mean wave angular frequency (derived).    
-    public: double angularFrequency;
+    public: double angularFrequency{2.0*M_PI};
 
     /// \brief The mean wavelength (derived).
-    public: double wavelength;
+    public: double wavelength{
+        2*M_PI/Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)};
 
     /// \brief The mean wavenumber (derived).
-    public: double wavenumber;
-  
+    public: double wavenumber{
+        Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)};
+
     /// \brief The component wave angular frequencies (derived).
     public: std::vector<double> angularFrequencies;
 
@@ -167,12 +161,6 @@ namespace marine
         // Direction
         const double c = std::cos(n * this->angle);
         const double s = std::sin(n * this->angle);
-        // const TransformMatrix T(
-        //   c, -s,
-        //   s,  c
-        // );
-        // const Vector2 d = T(this->direction);
-
         double x = c * this->direction.X() - s * this->direction.Y();
         double y = s * this->direction.X() + c * this->direction.Y();
         ignition::math::Vector2d d(x, y);
@@ -181,340 +169,384 @@ namespace marine
       }
     }
   };
+}
+}
 
-///////////////////////////////////////////////////////////////////////////////
-// WaveParameters
+using namespace ignition;
+using namespace marine;
 
-  WaveParameters::~WaveParameters()
+//////////////////////////////////////////////////
+WaveParameters::~WaveParameters()
+{
+}
+
+//////////////////////////////////////////////////
+WaveParameters::WaveParameters()
+  : dataPtr(new WaveParametersPrivate())
+{
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::FillMsg(ignition::msgs::Param_V& _msg) const
+{
+  // Clear 
+  _msg.mutable_param()->Clear();
+
+  // "number"
   {
+    auto nextParam = _msg.add_param();
+
+    (*nextParam->mutable_params())["number"].set_type(ignition::msgs::Any::INT32);
+    (*nextParam->mutable_params())["number"].set_int_value(this->dataPtr->number);
   }
-
-  WaveParameters::WaveParameters()
-    : data(new WaveParametersPrivate())
+  // "scale"
   {
-    this->data->Recalculate();
+    auto nextParam = _msg.add_param();
+    (*nextParam->mutable_params())["scale"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["scale"].set_double_value(this->dataPtr->scale);
   }
-
-  void WaveParameters::FillMsg(ignition::msgs::Param_V& _msg) const
+  // "angle"
   {
-    // Clear 
-    _msg.mutable_param()->Clear();
-
-    // "number"
-    {
-      auto nextParam = _msg.add_param();
-
-      (*nextParam->mutable_params())["number"].set_type(ignition::msgs::Any::INT32);
-      (*nextParam->mutable_params())["number"].set_int_value(this->data->number);
-    }
-    // "scale"
-    {
-      auto nextParam = _msg.add_param();
-      (*nextParam->mutable_params())["scale"].set_type(ignition::msgs::Any::DOUBLE);
-      (*nextParam->mutable_params())["scale"].set_double_value(this->data->scale);
-    }
-    // "angle"
-    {
-      auto nextParam = _msg.add_param();
-      (*nextParam->mutable_params())["angle"].set_type(ignition::msgs::Any::DOUBLE);
-      (*nextParam->mutable_params())["angle"].set_double_value(this->data->angle);
-    }
-    // "steepness"
-    {
-      auto nextParam = _msg.add_param();
-      (*nextParam->mutable_params())["steepness"].set_type(ignition::msgs::Any::DOUBLE);
-      (*nextParam->mutable_params())["steepness"].set_double_value(this->data->steepness);
-    }
-    // "amplitude"
-    {
-      auto nextParam = _msg.add_param();
-      (*nextParam->mutable_params())["amplitude"].set_type(ignition::msgs::Any::DOUBLE);
-      (*nextParam->mutable_params())["amplitude"].set_double_value(this->data->amplitude);
-    }
-    // "period"
-    {
-      auto nextParam = _msg.add_param();
-      (*nextParam->mutable_params())["period"].set_type(ignition::msgs::Any::DOUBLE);
-      (*nextParam->mutable_params())["period"].set_double_value(this->data->period);
-    }
-    // "direction"
-    {
-      const auto& direction = this->data->direction;
-      auto nextParam = _msg.add_param();
-      (*nextParam->mutable_params())["direction"].set_type(ignition::msgs::Any::VECTOR3D);
-      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_x(direction.X());
-      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_y(direction.Y());
-      (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_z(0);
-    }
+    auto nextParam = _msg.add_param();
+    (*nextParam->mutable_params())["angle"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["angle"].set_double_value(this->dataPtr->angle);
   }
-
-  void WaveParameters::SetFromMsg(const ignition::msgs::Param_V& _msg)
+  // "steepness"
   {
-    // todo(srmainwaring) add missing entries
-    this->data->number    = Utilities::MsgParamSizeT(_msg,    "number",     this->data->number);
-    this->data->amplitude = Utilities::MsgParamDouble(_msg,   "amplitude",  this->data->amplitude);
-    this->data->period    = Utilities::MsgParamDouble(_msg,   "period",     this->data->period);
-    this->data->phase     = Utilities::MsgParamDouble(_msg,   "phase",      this->data->phase);
-    this->data->direction = Utilities::MsgParamVector2d(_msg, "direction",  this->data->direction);
-    this->data->scale     = Utilities::MsgParamDouble(_msg,   "scale",      this->data->scale);
-    this->data->angle     = Utilities::MsgParamDouble(_msg,   "angle",      this->data->angle);
-    this->data->steepness = Utilities::MsgParamDouble(_msg,   "steepness",  this->data->steepness);
-
-    this->data->Recalculate();
+    auto nextParam = _msg.add_param();
+    (*nextParam->mutable_params())["steepness"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["steepness"].set_double_value(this->dataPtr->steepness);
   }
-
-  void WaveParameters::SetFromSDF(sdf::Element& _sdf)
+  // "amplitude"
   {
-    this->data->algorithm     = Utilities::SdfParamString(_sdf,   "algorithm",  this->data->algorithm);
-    this->data->tileSize      = Utilities::SdfParamDouble(_sdf,   "tile_size",  this->data->tileSize);
-    this->data->cellCount     = Utilities::SdfParamSizeT(_sdf,    "cell_count", this->data->tileSize);
-    this->data->number        = Utilities::SdfParamSizeT(_sdf,    "number",     this->data->number);
-    this->data->amplitude     = Utilities::SdfParamDouble(_sdf,   "amplitude",  this->data->amplitude);
-    this->data->period        = Utilities::SdfParamDouble(_sdf,   "period",     this->data->period);
-    this->data->phase         = Utilities::SdfParamDouble(_sdf,   "phase",      this->data->phase);
-    this->data->direction     = Utilities::SdfParamVector2d(_sdf, "direction",  this->data->direction);
-    this->data->scale         = Utilities::SdfParamDouble(_sdf,   "scale",      this->data->scale);
-    this->data->angle         = Utilities::SdfParamDouble(_sdf,   "angle",      this->data->angle);
-    this->data->steepness     = Utilities::SdfParamDouble(_sdf,   "steepness",  this->data->steepness);
-    this->data->windVelocity  = Utilities::SdfParamVector2d(_sdf, "wind_velocity",  this->data->windVelocity);
+    auto nextParam = _msg.add_param();
+    (*nextParam->mutable_params())["amplitude"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["amplitude"].set_double_value(this->dataPtr->amplitude);
+  }
+  // "period"
+  {
+    auto nextParam = _msg.add_param();
+    (*nextParam->mutable_params())["period"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["period"].set_double_value(this->dataPtr->period);
+  }
+  // "direction"
+  {
+    const auto& direction = this->dataPtr->direction;
+    auto nextParam = _msg.add_param();
+    (*nextParam->mutable_params())["direction"].set_type(ignition::msgs::Any::VECTOR3D);
+    (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_x(direction.X());
+    (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_y(direction.Y());
+    (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_z(0);
+  }
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetFromMsg(const ignition::msgs::Param_V& _msg)
+{
+  // todo(srmainwaring) add missing entries
+  this->dataPtr->number    = Utilities::MsgParamSizeT(_msg,    "number",     this->dataPtr->number);
+  this->dataPtr->amplitude = Utilities::MsgParamDouble(_msg,   "amplitude",  this->dataPtr->amplitude);
+  this->dataPtr->period    = Utilities::MsgParamDouble(_msg,   "period",     this->dataPtr->period);
+  this->dataPtr->phase     = Utilities::MsgParamDouble(_msg,   "phase",      this->dataPtr->phase);
+  this->dataPtr->direction = Utilities::MsgParamVector2d(_msg, "direction",  this->dataPtr->direction);
+  this->dataPtr->scale     = Utilities::MsgParamDouble(_msg,   "scale",      this->dataPtr->scale);
+  this->dataPtr->angle     = Utilities::MsgParamDouble(_msg,   "angle",      this->dataPtr->angle);
+  this->dataPtr->steepness = Utilities::MsgParamDouble(_msg,   "steepness",  this->dataPtr->steepness);
+
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetFromSDF(sdf::Element& _sdf)
+{
+  this->dataPtr->algorithm     = Utilities::SdfParamString(_sdf,   "algorithm",  this->dataPtr->algorithm);
+  this->dataPtr->tileSize      = Utilities::SdfParamDouble(_sdf,   "tile_size",  this->dataPtr->tileSize);
+  this->dataPtr->cellCount     = Utilities::SdfParamSizeT(_sdf,    "cell_count", this->dataPtr->tileSize);
+  this->dataPtr->number        = Utilities::SdfParamSizeT(_sdf,    "number",     this->dataPtr->number);
+  this->dataPtr->amplitude     = Utilities::SdfParamDouble(_sdf,   "amplitude",  this->dataPtr->amplitude);
+  this->dataPtr->period        = Utilities::SdfParamDouble(_sdf,   "period",     this->dataPtr->period);
+  this->dataPtr->phase         = Utilities::SdfParamDouble(_sdf,   "phase",      this->dataPtr->phase);
+  this->dataPtr->direction     = Utilities::SdfParamVector2d(_sdf, "direction",  this->dataPtr->direction);
+  this->dataPtr->scale         = Utilities::SdfParamDouble(_sdf,   "scale",      this->dataPtr->scale);
+  this->dataPtr->angle         = Utilities::SdfParamDouble(_sdf,   "angle",      this->dataPtr->angle);
+  this->dataPtr->steepness     = Utilities::SdfParamDouble(_sdf,   "steepness",  this->dataPtr->steepness);
+  this->dataPtr->windVelocity  = Utilities::SdfParamVector2d(_sdf, "wind_velocity",  this->dataPtr->windVelocity);
+  this->dataPtr->Recalculate();
+
+  // override wind speed and angle if parameters are provided
+  if (_sdf.HasElement("wind_speed") || _sdf.HasElement("wind_angle_deg"))
+  {
+    ignmsg << "Overriding 'wind_velocity' using 'wind_speed' and 'wind_angle_deg'\n";
+
+    // current wind speed and angle
+    double windSpeed = this->WindSpeed();
+    double windAngleRad = this->WindAngleRad();
+    double windAngleDeg = 180.0 / M_PI * windAngleRad;
 
     // override wind speed and angle if parameters are provided
-    if (_sdf.HasElement("wind_speed") || _sdf.HasElement("wind_angle_deg"))
-    {
-      ignmsg << "Overriding 'wind_velocity' using 'wind_speed' and 'wind_angle_deg'\n";
-
-      double vx = this->data->windVelocity.X();
-      double vy = this->data->windVelocity.Y();
-      double u = sqrt(vx*vx + vy*vy);
-      double phi_rad = atan2(vy, vx);
-      double phi_deg = 180.0 / M_PI * phi_rad;
-
-      // override wind speed and angle if parameters are provided
-      u       = Utilities::SdfParamDouble(_sdf, "wind_speed", u);
-      phi_deg = Utilities::SdfParamDouble(_sdf, "wind_angle_deg", phi_deg);
-      phi_rad = M_PI / 180.0 * phi_deg;
-
-
-      // update wind velocity
-      vx = u * cos(phi_rad);
-      vy = u * sin(phi_rad);
-      this->data->windVelocity.X() = vx;
-      this->data->windVelocity.Y() = vy;
-    }
-
-    this->data->Recalculate();
+    windSpeed    = Utilities::SdfParamDouble(_sdf, "wind_speed", windSpeed);
+    windAngleDeg = Utilities::SdfParamDouble(_sdf, "wind_angle_deg", windAngleDeg);
+    windAngleRad = M_PI / 180.0 * windAngleDeg;
+    this->SetWindSpeedAndAngle(windSpeed, windAngleRad);
   }
-
-  std::string WaveParameters::Algorithm() const
-  {
-    return this->data->algorithm;
-  }
-
-  double WaveParameters::TileSize() const
-  {
-    return this->data->tileSize;
-  }
-
-  size_t WaveParameters::CellCount() const
-  {
-    return this->data->cellCount;
-  }
-
-  size_t WaveParameters::Number() const
-  {
-    return this->data->number;
-  }
-
-  double WaveParameters::Angle() const
-  {
-    return this->data->angle;
-  }
-
-  double WaveParameters::Scale() const
-  {
-    return this->data->scale;
-  }
-
-  double WaveParameters::Steepness() const
-  {
-    return this->data->steepness;
-  }
-
-  double WaveParameters::AngularFrequency() const
-  {
-    return this->data->angularFrequency;
-  }
-
-  double WaveParameters::Amplitude() const
-  {
-    return this->data->amplitude;
-  }
-  
-  double WaveParameters::Period() const
-  {
-    return this->data->period;
-  }
-  
-  double WaveParameters::Phase() const
-  {
-    return this->data->phase;
-  }
-
-  double WaveParameters::Wavelength() const
-  {
-    return this->data->wavelength;
-  }
-
-  double WaveParameters::Wavenumber() const
-  {
-    return this->data->wavenumber;
-  }    
-
-  ignition::math::Vector2d WaveParameters::Direction() const
-  {
-    return this->data->direction;
-  }
-  
-  ignition::math::Vector2d WaveParameters::WindVelocity() const
-  {
-    return this->data->windVelocity;
-  }
-
-  double WaveParameters::WindSpeed() const
-  {
-    double vx = this->data->windVelocity.X();
-    double vy = this->data->windVelocity.Y();
-    double u = sqrt(vx*vx + vy*vy);
-    return u;
-  }
-
-  double WaveParameters::WindAngleRad() const
-  {
-    double vx = this->data->windVelocity.X();
-    double vy = this->data->windVelocity.Y();
-    double phi_rad = atan2(vy, vx);
-    return phi_rad;
-  }
-
-  void WaveParameters::SetAlgorithm(const std::string &_algorithm)
-  {
-    this->data->algorithm = _algorithm;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetTileSize(double _tileSize)
-  {
-    this->data->tileSize = _tileSize;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetCellCount(size_t _cellCount)
-  {
-    this->data->cellCount = _cellCount;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetNumber(size_t _number)
-  {
-    this->data->number = _number;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetAngle(double _angle)
-  {
-    this->data->angle = _angle;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetScale(double _scale)
-  {
-    this->data->scale = _scale;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetSteepness(double _steepness)
-  {
-    this->data->steepness = _steepness;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetAmplitude(double _amplitude)
-  {
-    this->data->amplitude = _amplitude;
-    this->data->Recalculate();
-  }
-  
-  void WaveParameters::SetPeriod(double _period)
-  {
-    this->data->period = _period;
-    this->data->Recalculate();
-  }
-    
-  void WaveParameters::SetPhase(double _phase)
-  {
-    this->data->phase = _phase;
-    this->data->Recalculate();
-  }
-  
-  void WaveParameters::SetDirection(const ignition::math::Vector2d& _direction)
-  {
-    this->data->direction = _direction;
-    this->data->Recalculate();
-  }
-
-  void WaveParameters::SetWindVelocity(const ignition::math::Vector2d& _windVelocity)
-  {
-    this->data->windVelocity = _windVelocity;
-    this->data->Recalculate();
-  }
-
-  const std::vector<double>& WaveParameters::AngularFrequency_V() const
-  {
-    return this->data->angularFrequencies;
-  }
-
-  const std::vector<double>& WaveParameters::Amplitude_V() const
-  {
-    return this->data->amplitudes;
-  }
-  
-  const std::vector<double>& WaveParameters::Phase_V() const
-  {
-    return this->data->phases;
-  }
-  
-  const std::vector<double>& WaveParameters::Steepness_V() const
-  {
-    return this->data->steepnesses;
-  }
-
-  const std::vector<double>& WaveParameters::Wavenumber_V() const
-  {
-    return this->data->wavenumbers;
-  }
-
-  const std::vector<ignition::math::Vector2d>& WaveParameters::Direction_V() const
-  {
-    return this->data->directions;
-  }
- 
-  void WaveParameters::DebugPrint() const
-  {
-    // todo(srmainwaring) add missing entries
-    ignmsg << "number:     " << this->data->number << std::endl;
-    ignmsg << "scale:      " << this->data->scale << std::endl;
-    ignmsg << "angle:      " << this->data->angle << std::endl;
-    ignmsg << "period:     " << this->data->period << std::endl;
-    ignmsg << "amplitude:  " << this->data->amplitudes << std::endl;
-    ignmsg << "wavenumber: " << this->data->wavenumbers << std::endl;
-    ignmsg << "omega:      " << this->data->angularFrequencies << std::endl;
-    ignmsg << "phase:      " << this->data->phases << std::endl;
-    ignmsg << "steepness:  " << this->data->steepnesses << std::endl;
-    for (auto&& d : this->data->directions)
-    {
-      ignmsg << "direction:  " << d << std::endl;
-    }
-  }
-
 }
+
+//////////////////////////////////////////////////
+std::string WaveParameters::Algorithm() const
+{
+  return this->dataPtr->algorithm;
 }
+
+//////////////////////////////////////////////////
+double WaveParameters::TileSize() const
+{
+  return this->dataPtr->tileSize;
+}
+
+//////////////////////////////////////////////////
+size_t WaveParameters::CellCount() const
+{
+  return this->dataPtr->cellCount;
+}
+
+//////////////////////////////////////////////////
+size_t WaveParameters::Number() const
+{
+  return this->dataPtr->number;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Angle() const
+{
+  return this->dataPtr->angle;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Scale() const
+{
+  return this->dataPtr->scale;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Steepness() const
+{
+  return this->dataPtr->steepness;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::AngularFrequency() const
+{
+  return this->dataPtr->angularFrequency;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Amplitude() const
+{
+  return this->dataPtr->amplitude;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Period() const
+{
+  return this->dataPtr->period;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Phase() const
+{
+  return this->dataPtr->phase;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Wavelength() const
+{
+  return this->dataPtr->wavelength;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Wavenumber() const
+{
+  return this->dataPtr->wavenumber;
+}    
+
+//////////////////////////////////////////////////
+ignition::math::Vector2d WaveParameters::Direction() const
+{
+  return this->dataPtr->direction;
+}
+
+//////////////////////////////////////////////////
+ignition::math::Vector2d WaveParameters::WindVelocity() const
+{
+  return this->dataPtr->windVelocity;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::WindSpeed() const
+{
+  double vx = this->dataPtr->windVelocity.X();
+  double vy = this->dataPtr->windVelocity.Y();
+  double u = sqrt(vx*vx + vy*vy);
+  return u;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::WindAngleRad() const
+{
+  double vx = this->dataPtr->windVelocity.X();
+  double vy = this->dataPtr->windVelocity.Y();
+  double phi_rad = atan2(vy, vx);
+  return phi_rad;
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetAlgorithm(const std::string &_algorithm)
+{
+  this->dataPtr->algorithm = _algorithm;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetTileSize(double _tileSize)
+{
+  this->dataPtr->tileSize = _tileSize;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetCellCount(size_t _cellCount)
+{
+  this->dataPtr->cellCount = _cellCount;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetNumber(size_t _number)
+{
+  this->dataPtr->number = _number;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetAngle(double _angle)
+{
+  this->dataPtr->angle = _angle;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetScale(double _scale)
+{
+  this->dataPtr->scale = _scale;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetSteepness(double _steepness)
+{
+  this->dataPtr->steepness = _steepness;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetAmplitude(double _amplitude)
+{
+  this->dataPtr->amplitude = _amplitude;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetPeriod(double _period)
+{
+  this->dataPtr->period = _period;
+  this->dataPtr->Recalculate();
+}
+  
+//////////////////////////////////////////////////
+void WaveParameters::SetPhase(double _phase)
+{
+  this->dataPtr->phase = _phase;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetDirection(const ignition::math::Vector2d& _direction)
+{
+  this->dataPtr->direction = _direction;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetWindVelocity(const ignition::math::Vector2d& _windVelocity)
+{
+  this->dataPtr->windVelocity = _windVelocity;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetWindSpeedAndAngle(double _windSpeed, double _windAngleRad)
+{
+  // update wind velocity
+  double ux = _windSpeed * cos(_windAngleRad);
+  double uy = _windSpeed * sin(_windAngleRad);
+  this->dataPtr->windVelocity.X() = ux;
+  this->dataPtr->windVelocity.Y() = uy;
+  this->dataPtr->Recalculate();
+}
+
+//////////////////////////////////////////////////
+const std::vector<double>& WaveParameters::AngularFrequency_V() const
+{
+  return this->dataPtr->angularFrequencies;
+}
+
+//////////////////////////////////////////////////
+const std::vector<double>& WaveParameters::Amplitude_V() const
+{
+  return this->dataPtr->amplitudes;
+}
+
+//////////////////////////////////////////////////
+const std::vector<double>& WaveParameters::Phase_V() const
+{
+  return this->dataPtr->phases;
+}
+
+//////////////////////////////////////////////////
+const std::vector<double>& WaveParameters::Steepness_V() const
+{
+  return this->dataPtr->steepnesses;
+}
+
+//////////////////////////////////////////////////
+const std::vector<double>& WaveParameters::Wavenumber_V() const
+{
+  return this->dataPtr->wavenumbers;
+}
+
+//////////////////////////////////////////////////
+const std::vector<ignition::math::Vector2d>& WaveParameters::Direction_V() const
+{
+  return this->dataPtr->directions;
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::DebugPrint() const
+{
+  // todo(srmainwaring) add missing entries
+  ignmsg << "number:     " << this->dataPtr->number << std::endl;
+  ignmsg << "scale:      " << this->dataPtr->scale << std::endl;
+  ignmsg << "angle:      " << this->dataPtr->angle << std::endl;
+  ignmsg << "period:     " << this->dataPtr->period << std::endl;
+  ignmsg << "amplitude:  " << this->dataPtr->amplitudes << std::endl;
+  ignmsg << "wavenumber: " << this->dataPtr->wavenumbers << std::endl;
+  ignmsg << "omega:      " << this->dataPtr->angularFrequencies << std::endl;
+  ignmsg << "phase:      " << this->dataPtr->phases << std::endl;
+  ignmsg << "steepness:  " << this->dataPtr->steepnesses << std::endl;
+  for (auto&& d : this->dataPtr->directions)
+  {
+    ignmsg << "direction:  " << d << std::endl;
+  }
+}
+

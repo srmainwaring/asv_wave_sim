@@ -69,6 +69,10 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
     /// \param[in] _windAngle new wind angle
     public slots: void UpdateWindAngle(double _windAngle);
 
+    /// \brief Update the wave steepness
+    /// \param[in] _steepness new steepness
+    public slots: void UpdateSteepness(double _steepness);
+
     /// \internal
     /// \brief Pointer to private data
     private: std::unique_ptr<WavesControlPrivate> dataPtr;
