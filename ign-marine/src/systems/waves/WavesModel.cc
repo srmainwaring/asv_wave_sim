@@ -25,6 +25,7 @@
 #include <ignition/plugin/Register.hh>
 
 #include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/components/World.hh>
 
 #include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/Util.hh>
@@ -167,6 +168,18 @@ WavesModelPrivate::~WavesModelPrivate()
 /////////////////////////////////////////////////
 void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 {
+  // World name
+  std::string worldName;
+  _ecm.Each<components::World, components::Name>(
+    [&](const Entity &,
+        const components::World *,
+        const components::Name *_name) -> bool
+    {
+      // Assume there's only one world
+      worldName = _name->Data();
+      return false;
+    });
+
   // Update parameters
   this->isStatic = marine::Utilities::SdfParamBool(
       *this->sdf,  "static", this->isStatic);
@@ -185,7 +198,7 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
   // Wavefield
   std::string entityName = "wavefield";
 
-  this->wavefield.reset(new marine::Wavefield());
+  this->wavefield.reset(new marine::Wavefield(worldName));
   this->wavefield->SetParameters(this->waveParams);
 
   // Create a new entity and register a wavefield component with it.

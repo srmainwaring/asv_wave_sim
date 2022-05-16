@@ -39,7 +39,7 @@ namespace marine
   /// \brief Private data for the Wavefield.
   class WavefieldPrivate
   {
-    /// \brief Callback for topic "/model/<model>/waves".
+    /// \brief Callback for topic "/world/<world>/waves".
     ///
     /// \param[in] _msg Wave parameters message.
     public: void OnWaveMsg(const ignition::msgs::Param &_msg);
@@ -53,7 +53,7 @@ namespace marine
     /// \brief The current position of the wave field.
     public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
 
-  /// \brief Mutex to protect parameter updates.
+    /// \brief Mutex to protect parameter updates.
     public: std::recursive_mutex mutex;
 
     /// \brief Transport node
@@ -66,16 +66,13 @@ namespace marine
   }
 
   /////////////////////////////////////////////////
-  Wavefield::Wavefield() :
+  Wavefield::Wavefield(const std::string &_worldName) :
     dataPtr(new WavefieldPrivate())
   {
     ignmsg << "Constructing Wavefield..." <<  std::endl;
 
-    /// \todo: get the modelName
-    std::string modelName("waves");
-
     // Subscribe to wave parameter updates
-    std::string topic("/model/" + modelName + "/waves");
+    std::string topic("/world/" + _worldName + "/waves");
     this->dataPtr->node.Subscribe(
         topic, &WavefieldPrivate::OnWaveMsg, this->dataPtr.get());
 
@@ -118,7 +115,7 @@ namespace marine
   }
 
   /////////////////////////////////////////////////
-  void Wavefield::SetParameters(std::shared_ptr<WaveParameters> _params) const
+  void Wavefield::SetParameters(std::shared_ptr<WaveParameters> _params)
   {
     this->dataPtr->params = _params;
 

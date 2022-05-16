@@ -44,6 +44,7 @@
 #include <ignition/transport/Node.hh>
 
 #include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/components/World.hh>
 #include <ignition/gazebo/components/SourceFilePath.hh>
 #include <ignition/gazebo/rendering/Events.hh>
 #include <ignition/gazebo/rendering/RenderUtil.hh>
@@ -250,7 +251,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
 
-  /// \brief Callback for topic "/model/<model>/waves".
+  /// \brief Callback for topic "/world/<world>/waves".
   ///
   /// \param[in] _msg Wave parameters message.
   public: void OnWaveMsg(const ignition::msgs::Param &_msg);
@@ -299,6 +300,9 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
+
+  /// \brief Name of the world
+  public: std::string worldName;
 
   /// \brief Transport node
   public: transport::Node node;
@@ -357,13 +361,23 @@ void WavesVisual::Configure(const Entity &_entity,
       _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
       std::bind(&WavesVisualPrivate::OnUpdate, this->dataPtr.get()));
 
-  /// \todo: get the modelName
-  std::string modelName("waves");
+  // World name
+  _ecm.Each<components::World, components::Name>(
+    [&](const Entity &,
+        const components::World *,
+        const components::Name *_name) -> bool
+    {
+      // Assume there's only one world
+      this->dataPtr->worldName = _name->Data();
+      return false;
+    });
 
   // Subscribe to wave parameter updates
-  std::string topic("/model/" + modelName + "/waves");
+  std::string topic("/world/" + this->dataPtr->worldName + "/waves");
   this->dataPtr->node.Subscribe(
       topic, &WavesVisualPrivate::OnWaveMsg, this->dataPtr.get());
+
+  ignmsg << "WavesVisual: subscribing to [" << topic << "]\n";
 }
 
 //////////////////////////////////////////////////

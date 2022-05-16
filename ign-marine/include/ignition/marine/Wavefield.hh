@@ -25,6 +25,7 @@
 #include <ignition/math.hh>
 
 #include <memory>
+#include <string>
 
 namespace ignition
 {
@@ -40,23 +41,23 @@ namespace marine
     public: virtual ~Wavefield();
 
     /// Constructor.
-    public: Wavefield();
+    public: Wavefield(const std::string &_worldName);
 
     // Compute the height at a point.
-    public: virtual bool Height(const cgal::Point3& point, double& height) const;
+    public: bool Height(const cgal::Point3& point, double& height) const;
 
     /// \brief Get the wave parameters.
-    public: virtual std::shared_ptr<const WaveParameters> GetParameters() const;
+    public: std::shared_ptr<const WaveParameters> GetParameters() const;
 
     /// \brief Set the wave parameters.
     ///
     /// \param[in] _params    The new wave parameters.
-    public: virtual void SetParameters(std::shared_ptr<WaveParameters> _params) const;
+    public: void SetParameters(std::shared_ptr<WaveParameters> _params);
 
     /// \brief Update (recalculate) the wave field for the given time.
     ///
     /// \param[in] _time    The time parameter for the wave evolution.
-    public: virtual void Update(double _time);
+    public: void Update(double _time);
 
     /// \internal
     /// \brief Pointer to the class private data.

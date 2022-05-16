@@ -28,6 +28,7 @@
 #include <ignition/gazebo/EntityComponentManager.hh>
 #include <ignition/gazebo/gui/GuiEvents.hh>
 
+#include <mutex>
 #include <string>
 
 namespace ignition
@@ -39,10 +40,13 @@ inline namespace IGNITION_MARINE_VERSION_NAMESPACE
   /// \brief Private data class for WavesControl
   class WavesControlPrivate
   {
+    /// \brief Publish a wave parameters message to /world/<world>/waves
+    public: void PublishWaveParams();
+
     /// \brief Transport node
     public: transport::Node node;
 
-    /// \brief Publisher
+    /// \brief Publish to topic /world/<world>/waves
     public: transport::Node::Publisher pub;
 
     /// \brief Message for visualizing contact positions
@@ -77,9 +81,11 @@ inline namespace IGNITION_MARINE_VERSION_NAMESPACE
     /// The variables are: windSpeed and windAngle
     public: std::mutex serviceMutex;
 
-    /// \brief Publish a wave parameters message
-    public: void PublishWaveParams();
+    /// \brief Initialization flag
+    public: bool initialized{false};
 
+    /// \brief Name of the world
+    public: std::string worldName;
   };
 }
 }
@@ -130,24 +136,38 @@ void WavesControl::LoadConfig(const tinyxml2::XMLElement * /*_pluginElem*/)
   {
     this->title = "Waves Control";
   }
-
-  /// \todo: lookup model name
-  std::string modelName("waves");
-
-  // Initialise the publisher
-  std::string topic("/model/" + modelName + "/waves");
-  this->dataPtr->pub = this->dataPtr->node.Advertise<ignition::msgs::Param>(topic);
-  if (!this->dataPtr->pub)
-  {
-    ignerr << "Error advertising topic [" << topic << "]\n";
-  }
-
 }
 
 //////////////////////////////////////////////////
 void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
     ignition::gazebo::EntityComponentManager &_ecm)
 {
+  if (!this->dataPtr->initialized)
+  {
+    // Get the name of the world
+    if (this->dataPtr->worldName.empty())
+    {
+      _ecm.Each<components::World, components::Name>(
+        [&](const Entity &,
+            const components::World *,
+            const components::Name *_name) -> bool
+        {
+          // Assume there's only one world
+          this->dataPtr->worldName = _name->Data();
+          return false;
+        });
+    }
+
+    // Initialise the publisher
+    std::string topic("/world/" + this->dataPtr->worldName + "/waves");
+    this->dataPtr->pub = this->dataPtr->node.Advertise<ignition::msgs::Param>(topic);
+    if (!this->dataPtr->pub)
+    {
+      ignerr << "Error advertising topic [" << topic << "]\n";
+    }
+
+    this->dataPtr->initialized = true;
+  }
 
   {
     std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
