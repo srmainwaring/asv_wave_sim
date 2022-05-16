@@ -108,7 +108,7 @@ GridLayout {
     id: windAngle
     maximumValue: 180
     minimumValue: -180
-    value: 0
+    value: 135
     decimals: 0
     stepSize: 10
     onEditingFinished: WavesControl.UpdateWindAngle(windAngle.value)
