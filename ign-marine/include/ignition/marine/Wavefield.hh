@@ -60,7 +60,7 @@ namespace marine
 
     /// \internal
     /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldPrivate> data;
+    private: std::shared_ptr<WavefieldPrivate> dataPtr;
 
     // @TODO: relocate
   #if 0
