@@ -49,9 +49,6 @@ inline namespace IGNITION_MARINE_VERSION_NAMESPACE
     /// \brief Publish to topic /world/<world>/waves
     public: transport::Node::Publisher pub;
 
-    /// \brief Message for visualizing contact positions
-    // public: ignition::msgs::Marker positionMarkerMsg;
-
     /// \brief Current state of the water patch checkbox
     public: bool waterPatchCheckboxState{false};
 
@@ -176,25 +173,12 @@ void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
     if (this->dataPtr->waterPatchCheckboxPrevState &&
         !this->dataPtr->waterPatchCheckboxState)
     {
-      // Remove the markers
-      // this->dataPtr->positionMarkerMsg.set_action(
-      //   ignition::msgs::Marker::DELETE_ALL);
-
       ignmsg << "Removing water patch markers...\n";
-      // this->dataPtr->node.Request(
-      //   "/marker", this->dataPtr->positionMarkerMsg);
-
-      // Change action in case checkbox is checked again
-      // this->dataPtr->positionMarkerMsg.set_action(
-      //   ignition::msgs::Marker::ADD_MODIFY);
     }
 
     this->dataPtr->waterPatchCheckboxPrevState =
         this->dataPtr->waterPatchCheckboxState;
     
-    // if (!this->dataPtr->waterPatchCheckboxState)
-    //   return;
-
     // waterline markers
     if (this->dataPtr->waterlineCheckboxPrevState &&
         !this->dataPtr->waterlineCheckboxState)
