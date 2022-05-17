@@ -276,8 +276,8 @@ namespace marine
       {
         int ij = ikx * this->Ny + iky;
         int xy = iky * this->Nx + ikx;
-        _sy[xy] = mOut3[ij][0] * mLambda;
-        _sx[xy] = mOut4[ij][0] * mLambda;
+        _sy[xy] = mOut3[ij][0] * mLambda * -1.0;
+        _sx[xy] = mOut4[ij][0] * mLambda * -1.0;
       }
     }
   }
@@ -335,9 +335,9 @@ namespace marine
       {
         int ij = ikx * this->Ny + iky;
         int xy = iky * this->Nx + ikx;
-        _dsydy[xy] = mOut5[ij][0] * mLambda;
-        _dsxdx[xy] = mOut6[ij][0] * mLambda;
-        _dsxdy[xy] = mOut7[ij][0] * mLambda;
+        _dsydy[xy] = mOut5[ij][0] * mLambda * -1.0;
+        _dsxdx[xy] = mOut6[ij][0] * mLambda * -1.0;
+        _dsxdy[xy] = mOut7[ij][0] * mLambda *  1.0;
       }
     }
   }

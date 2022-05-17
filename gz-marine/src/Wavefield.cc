@@ -39,6 +39,11 @@ namespace marine
   /// \brief Private data for the Wavefield.
   class WavefieldPrivate
   {
+    /// \brief Callback for topic "/world/<world>/waves".
+    ///
+    /// \param[in] _msg Wave parameters message.
+    public: void OnWaveMsg(const ignition::msgs::Param &_msg);
+
     /// \brief Wave parameters
     public: std::shared_ptr<WaveParameters> params;
 
@@ -48,30 +53,28 @@ namespace marine
     /// \brief The current position of the wave field.
     public: std::unique_ptr<TriangulatedGrid> triangulatedGrid;
 
-    /// \todo(srmainwaring): port to ignition
+    /// \brief Mutex to protect parameter updates.
     public: std::recursive_mutex mutex;
-    // public: ignition::transport::Node node;
-    // public: ignition::transport::SubscriberPtr waveWindSub;
+
+    /// \brief Transport node
+    public: transport::Node node;
   };
 
   /////////////////////////////////////////////////
   Wavefield::~Wavefield()
   {
-    /// \todo(srmainwaring): port to ignition
-    // this->data->waveWindSub.reset();
-    // this->data->node.reset();
   }
 
   /////////////////////////////////////////////////
-  Wavefield::Wavefield() :
-    data(new WavefieldPrivate())
+  Wavefield::Wavefield(const std::string &_worldName) :
+    dataPtr(new WavefieldPrivate())
   {
     ignmsg << "Constructing Wavefield..." <<  std::endl;
 
-    /// \todo(srmainwaring): port to ignition
-    // this->data->node;
-    // this->data->waveWindSub = this->data->node.Subscribe(
-    //   "~/wave/wind", &Wavefield::OnWaveWindMsg, this);
+    // Subscribe to wave parameter updates
+    std::string topic("/world/" + _worldName + "/waves");
+    this->dataPtr->node.Subscribe(
+        topic, &WavefieldPrivate::OnWaveMsg, this->dataPtr.get());
 
     // Wave parameters
     ignmsg << "Creating WaveParameters." <<  std::endl;
@@ -88,7 +91,7 @@ namespace marine
   bool Wavefield::Height(const cgal::Point3& point, double& height) const
   {
     /// \todo(srmainwaring) the calculation assumes that the tile origin is at its center.
-    const double L = this->data->oceanTile->TileSize();
+    const double L = this->dataPtr->oceanTile->TileSize();
     const double LOver2 = L/2.0;
 
     auto pmod = [&](double x)
@@ -102,79 +105,124 @@ namespace marine
     // Obtain the point modulo the tile dimensions
     cgal::Point3 moduloPoint(pmod(point.x()), pmod(point.y()), point.z());
 
-    return this->data->triangulatedGrid->Height(moduloPoint, height);
+    return this->dataPtr->triangulatedGrid->Height(moduloPoint, height);
   }
 
   /////////////////////////////////////////////////
   std::shared_ptr<const WaveParameters> Wavefield::GetParameters() const
   {
-    return this->data->params;
+    return this->dataPtr->params;
   }
 
   /////////////////////////////////////////////////
-  void Wavefield::SetParameters(std::shared_ptr<WaveParameters> _params) const
+  void Wavefield::SetParameters(std::shared_ptr<WaveParameters> _params)
   {
-    this->data->params = _params;
+    this->dataPtr->params = _params;
 
     // Force an update of the ocean tile and point locator
-    size_t N = this->data->params->CellCount();
-    double L = this->data->params->TileSize();
-    double u = this->data->params->WindVelocity().X();
-    double v = this->data->params->WindVelocity().Y();
+    size_t N = this->dataPtr->params->CellCount();
+    double L = this->dataPtr->params->TileSize();
+    double u = this->dataPtr->params->WindVelocity().X();
+    double v = this->dataPtr->params->WindVelocity().Y();
 
     // OceanTile
     ignmsg << "Creating OceanTile." <<  std::endl;
-    this->data->oceanTile.reset(new physics::OceanTile(
-        this->data->params, false));
-    this->data->oceanTile->SetWindVelocity(u, v);
-    this->data->oceanTile->Create();
+    this->dataPtr->oceanTile.reset(new physics::OceanTile(
+        this->dataPtr->params, false));
+    this->dataPtr->oceanTile->SetWindVelocity(u, v);
+    this->dataPtr->oceanTile->Create();
 
     // Point Locator
     ignmsg << "Creating triangulated grid." <<  std::endl;
-    this->data->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
+    this->dataPtr->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
   }
 
   /////////////////////////////////////////////////
   void Wavefield::Update(double _time)
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
+    std::lock_guard<std::recursive_mutex> lock(this->dataPtr->mutex);
 
     // Update the tile.
-    this->data->oceanTile->Update(_time);
+    this->dataPtr->oceanTile->Update(_time);
 
     // Update the point locator.
-    auto& vertices = this->data->oceanTile->Vertices();
-    this->data->triangulatedGrid->UpdatePoints(vertices);
+    auto& vertices = this->dataPtr->oceanTile->Vertices();
+    this->dataPtr->triangulatedGrid->UpdatePoints(vertices);
   }
 
-#if 0
-  /// \todo(srmainwaring): port to ignition
-  void Wavefield::OnWaveWindMsg(ConstParam_VPtr &_msg)
+  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
+  void WavefieldPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
+    std::lock_guard<std::recursive_mutex> lock(this->mutex);
 
-    // Get parameters from message
-    double wind_angle = 0.0;
-    double wind_speed = 0.0;
-    wind_angle = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
-    wind_speed = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
+    // ignmsg << _msg.DebugString();
 
-    // Convert from polar to cartesian
-    double wind_vel_x = wind_speed * std::cos(wind_angle);
-    double wind_vel_y = wind_speed * std::sin(wind_angle);
+    // current wind speed and angle
+    double windSpeed = this->params->WindSpeed();
+    double windAngleRad = this->params->WindAngleRad();
 
-    // @DEBUG_INFO
-    gzmsg << "Wavefield received message on topic ["
-      << this->data->waveWindSub->GetTopic() << "]" << std::endl;
-    gzmsg << "wind_angle: " << wind_angle << std::endl;
-    gzmsg << "wind_speed: " << wind_speed << std::endl;
-    gzmsg << "wind_vel_x: " << wind_vel_x << std::endl;
-    gzmsg << "wind_vel_y: " << wind_vel_y << std::endl;
+    // extract parameters
+    {
+      auto it = _msg.params().find("wind_speed");
+      if (it != _msg.params().end())
+      {
+        /// \todo: assert the type is double
+        auto param = it->second;
+        auto type = param.type();
+        auto value = param.double_value();
+        windSpeed = value;
+      }
+    }
+    {
+      auto it = _msg.params().find("wind_angle");
+      if (it != _msg.params().end())
+      {
+        /// \todo: assert the type is double
+        auto param = it->second;
+        auto type = param.type();
+        auto value = param.double_value();
+        windAngleRad = M_PI/180.0*value;
+      }
+    }
 
-    // Update simulation
-    this->data->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
+    /// \todo: update params correctly - put logic in one place
+    // update wind velocity
+    double ux = windSpeed * cos(windAngleRad);
+    double uy = windSpeed * sin(windAngleRad);
+    
+    // update parameters and wavefield
+    this->params->SetWindVelocity(math::Vector2d(ux, uy));
+    this->oceanTile->SetWindVelocity(ux, uy);
   }
-#endif
+
+  /////////////////////////////////////////////////
+  // void Wavefield::OnWaveWindMsg(ConstParam_VPtr &_msg)
+  // {
+  //   std::lock_guard<std::recursive_mutex> lock(this->dataPtr->mutex);
+
+  //   // Get parameters from message
+  //   double wind_angle = 0.0;
+  //   double wind_speed = 0.0;
+  //   wind_angle = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
+  //   wind_speed = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
+
+  //   // Convert from polar to cartesian
+  //   double wind_vel_x = wind_speed * std::cos(wind_angle);
+  //   double wind_vel_y = wind_speed * std::sin(wind_angle);
+
+  //   // @DEBUG_INFO
+  //   gzmsg << "Wavefield received message on topic ["
+  //     << this->dataPtr->waveWindSub->GetTopic() << "]" << std::endl;
+  //   gzmsg << "wind_angle: " << wind_angle << std::endl;
+  //   gzmsg << "wind_speed: " << wind_speed << std::endl;
+  //   gzmsg << "wind_vel_x: " << wind_vel_x << std::endl;
+  //   gzmsg << "wind_vel_y: " << wind_vel_y << std::endl;
+
+  //   // Update simulation
+  //   this->dataPtr->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
+  // }
+
   /////////////////////////////////////////////////
 
 }
