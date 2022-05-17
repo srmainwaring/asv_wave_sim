@@ -6,11 +6,9 @@ This package contains plugins that support the simulation of waves and surface v
 
 ## Notes
 
-***!! Migrating from Ignition Gazebo to Gazebo Sim !!: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356)***
+The branch `gz-marine` represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It attempts to be compliant with the naming conventions used in the community note: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356).
 
-The branch `gz-marine` represents a major reworking of the original wave simulation code developed for Gazebo9 and Gazebo11. 
-
-A number of features available in the original version, such as updating parameters via messages, have not been migrated to Gazebo Sim. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
+A number of features available in the original version, such as updating parameters via messages, have not been fully migrated to Gazebo Sim. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
 
 There are changes in the way that the wave parameters need to be set, and it may not be possible to avoid breaking the existing interface used to specify trochoidal waves.
 
@@ -31,7 +29,7 @@ And on macOS with:
 brew fftw3 libclfft-dev libfftw3-dev
 ```
 
-Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated. Previously the wave displacements for visuals were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically updated in the the library then pushed into the rendering engine. This means there is no need to maintain various sized meshes in the media files, however it does require working around Gazebos requirement for static meshes and there is a custom Visual that implements this. The OpenCL FFT library allows this work to be offloaded to the GPU when configured.
+Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated. Previously the wave displacements for visuals were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically updated in the the library then pushed into the rendering engine. This means there is no need to maintain various sized meshes in the media files, however it does require working around Gazebos requirement for static meshes and there is a custom Visual that implements this.
 
 ## Dependencies
 
@@ -239,7 +237,7 @@ $ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -D
 colcon test --merge-install 
 
 # check results
-colcon test-results --all --verbose 
+colcon test-result --all --verbose 
 ```
 
 Testing within a project build directory
