@@ -98,7 +98,7 @@ colcon build --merge-install --cmake-args \
 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_MACOSX_RPATH=FALSE \
 -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib \
---packages-select ignition-marine1
+--packages-select gazebo_marine1
 ```
 
 Then re-source the workspace:
@@ -124,9 +124,9 @@ $HOME/gz_ws/install/share/ignition
 
 # ensure the model and world files are found
 export IGN_GAZEBO_RESOURCE_PATH=\
-$HOME/gz_ws/src/asv_wave_sim/ignition-marine-models/models:\
-$HOME/gz_ws/src/asv_wave_sim/ignition-marine-models/world_models:\
-$HOME/gz_ws/src/asv_wave_sim/ignition-marine-models/worlds
+$HOME/gz_ws/src/asv_wave_sim/gz-marine-models/models:\
+$HOME/gz_ws/src/asv_wave_sim/gz-marine-models/world_models:\
+$HOME/gz_ws/src/asv_wave_sim/gz-marine-models/worlds
 ```
 
 ## Examples
@@ -163,7 +163,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```xml
 <plugin
-    filename="ignition-marine1-waves-model-system"
+    filename="gazebo_marine1-waves-model-system"
     name="ignition::gazebo::systems::WavesModel">
     <static>0</static>
     <update_rate>30</update_rate>
@@ -202,7 +202,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```xml
 <plugin
-  filename="ignition-marine1-hydrodynamics-system"
+  filename="gazebo_marine1-hydrodynamics-system"
   name="ignition::gazebo::systems::Hydrodynamics">
 
    <!-- Hydrodynamics -->
@@ -233,7 +233,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```bash
 # build with tests
-$ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DBUILD_TESTING=ON --packages-select ignition-marine1
+$ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DBUILD_TESTING=ON --packages-select gazebo_marine1
 
 # run tests
 colcon test --merge-install 

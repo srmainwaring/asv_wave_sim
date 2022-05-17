@@ -39,7 +39,7 @@ namespace systems
   /// 
   /// /code
   /// <plugin name="ignition::gazebo::systems::Hydrodynamics"
-  ///         filename="ignition-marine1-hydrodynamics-system">
+  ///         filename="gazebo_marine1-hydrodynamics-system">
   ///
   ///   <!-- Hydrodynamics -->
   ///   <hydrodynamics>

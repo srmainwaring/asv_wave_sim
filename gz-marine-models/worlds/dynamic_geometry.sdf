@@ -154,7 +154,7 @@
           </material>
 
           <plugin
-              filename="ignition-marine1-dynamic-geometry-system"
+              filename="gazebo_marine1-dynamic-geometry-system"
               name="ignition::gazebo::systems::DynamicGeometry">
           </plugin>
 

@@ -321,7 +321,7 @@
 
     <!-- Hydrodynamics plugin -->
     <plugin
-        filename="ignition-marine1-hydrodynamics-system"
+        filename="gazebo_marine1-hydrodynamics-system"
         name="ignition::gazebo::systems::Hydrodynamics">
         <hydrodynamics>
           <damping_on>1</damping_on>
