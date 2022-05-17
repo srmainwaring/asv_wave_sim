@@ -4,7 +4,7 @@
     <static>true</static>
 
     <plugin
-        filename="ignition-marine1-waves-model-system"
+        filename="gazebo_marine1-waves-model-system"
         name="ignition::gazebo::systems::WavesModel">
         <static>0</static>
         <update_rate>30</update_rate>
@@ -43,7 +43,7 @@
 
         <!-- \todo remove duplicate params; populate from service instead -->
         <plugin
-            filename="ignition-marine1-waves-visual-system"
+            filename="gazebo_marine1-waves-visual-system"
             name="ignition::gazebo::systems::WavesVisual">
             <static>0</static>
             <wave>

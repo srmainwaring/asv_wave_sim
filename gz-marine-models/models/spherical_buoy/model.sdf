@@ -2,7 +2,7 @@
 <sdf version="1.6">
   <model name="spherical_buoy">        
     <plugin
-        filename="ignition-marine1-hydrodynamics-system"
+        filename="gazebo_marine1-hydrodynamics-system"
         name="ignition::gazebo::systems::Hydrodynamics">
     </plugin>
     <link name="base_link">
