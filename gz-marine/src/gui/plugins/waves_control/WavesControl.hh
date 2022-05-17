@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef IGNITION_MARINE_WAVESCONTROL_HH_
-#define IGNITION_MARINE_WAVESCONTROL_HH_
+#ifndef GZ_MARINE_WAVESCONTROL_HH_
+#define GZ_MARINE_WAVESCONTROL_HH_
 
 #include <ignition/gui/qt.h>
 #include <ignition/gazebo/gui/GuiSystem.hh>
@@ -27,7 +27,7 @@ namespace gazebo
 {
 
 // Inline bracket to help doxygen filtering.
-inline namespace IGNITION_MARINE_VERSION_NAMESPACE
+inline namespace GZ_MARINE_VERSION_NAMESPACE
 {
   class WavesControlPrivate;
 

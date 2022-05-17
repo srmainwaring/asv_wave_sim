@@ -15,13 +15,13 @@
 
 #include "WavesControl.hh"
 
-#include <ignition/msgs/any.pb.h>
-#include <ignition/msgs/param.pb.h>
-#include <ignition/msgs/param_v.pb.h>
+#include <gz/msgs/any.pb.h>
+#include <gz/msgs/param.pb.h>
+#include <gz/msgs/param_v.pb.h>
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
-#include <ignition/plugin/Register.hh>
+#include <gz/plugin/Register.hh>
 
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/components/World.hh>
@@ -35,7 +35,7 @@ namespace ignition
 {
 namespace gazebo
 {
-inline namespace IGNITION_MARINE_VERSION_NAMESPACE
+inline namespace GZ_MARINE_VERSION_NAMESPACE
 {
   /// \brief Private data class for WavesControl
   class WavesControlPrivate
