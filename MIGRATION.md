@@ -1,7 +1,7 @@
 
-# Ignition Migration
+# Gazebo Garden Migration
 
-Notes concerning the migration to Ignition
+Notes concerning the migration from Gazebo Classic to Gazebo Garden
 
 System:
 - macOS Big Sur 11.6.2
@@ -9,19 +9,21 @@ System:
 
 ## Branches
 
-| feature | base | description |
+| branch | base | description |
 | --- | --- | --- |
-| fft_waves | master| Legacy Gazebo11 version. Includes FFT wave generator, tiling, dynamic reconfigure (ROS). Shader uses InverseTransposeModel matrix to map TBNs |
-| gazebo11 | master | legacy Gazebo11 version. Includes early version of FFT wave generator |
-| havyard-842 | feature/ign-garden-wip | Add ship model (Havyard 842 tug) |
-| ign-garden-dyn-geom | master | Replicate Ogre dynamic geometry sample in Ignition |
-| ign-garden-wip | master | Main port to Ignition |
-| ign-garden-wip | ign-garden-wip-shaders | Experiments with custom shaders |
+| demo/ship-landing | ign-marine | ArduPilot ship landing demo |
+| demo/ship-landing-v2 | ign-marine | ArduPilot ship landing demo version 2 |
+| feature/fft_waves | master| Legacy Gazebo11 version. Includes FFT wave generator, tiling, dynamic reconfigure (ROS) |
+| feature/gazebo11 | master | legacy Gazebo11 version. Includes early version of FFT wave generator |
+| feature/ign-garden-dyn-geom | master | Replicate Ogre dynamic geometry sample in Ignition |
+| feature/ign-marine-shaders-wip | master | Experiments with custom shaders |
+| gz-marine | master | Main port from Gazebo Classic to Gazebo Garden |
+| ign-marine | master | Main port from Gazebo Classic to Ignition Garden (to deprecate) |
+
 
 ## Legacy TBB version (Gazebo11)
 
-The legacy version of plugin and Gazebo depend on an old version of TBB. Set the following environment
-variables before running the build.
+The legacy version of plugin and Gazebo depend on an old version of TBB. Set the following environment variables before running the build.
 
 ```bash
 export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/tbb@2020_u3
@@ -40,18 +42,16 @@ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCM
 
 ## Ignition environment variables
 
-Supposing that the colcon workspace directory containing the `src` folder is `$HOME/wave_sim_ws`,
-then the following environment variables should be set to enable Gazebo to locate the plugins
-and models:
+Supposing that the colcon workspace directory containing the `src` folder is `$HOME/wave_sim_ws`, then the following environment variables should be set to enable Gazebo to locate the plugins and models:
 
 ```bash
 export IGN_GAZEBO_RESOURCE_PATH=${IGN_GAZEBO_RESOURCE_PATH}:\
-$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/models:\
-$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/world_models:\
-$HOME/wave_sim_ws/src/asv_wave_sim/asv_wave_sim_gazebo/worlds
+$HOME/wave_sim_ws/src/asv_wave_sim/gz-marine-models/models:\
+$HOME/wave_sim_ws/src/asv_wave_sim/gz-marine-models/world_models:\
+$HOME/wave_sim_ws/src/asv_wave_sim/gz-marine-models/worlds
 
 export IGN_GAZEBO_SYSTEM_PLUGIN_PATH=${IGN_GAZEBO_SYSTEM_PLUGIN_PATH}:\
-$HOME/wave_sim_ws/src/asv_wave_sim/ign-marine/build/lib
+$HOME/wave_sim_ws/install/lib
 ```
 
 ## CGAL library usage

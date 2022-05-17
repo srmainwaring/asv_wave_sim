@@ -65,7 +65,7 @@ namespace marine
     /// \brief The wave algorithm (options are: 'sinusoid', 'trochoid', 'fft').
     public: std::string Algorithm() const;
 
-    /// \brief The size of the wave tile in metres (L).
+    /// \brief The size of the wave tile (m).
     public: double TileSize() const;
 
     /// \brief The number of cells in the wave tile in each direction (N). 
@@ -86,47 +86,52 @@ namespace marine
     ///        with 1 being steepest.
     public: double Steepness() const;
 
-    /// \brief The angular frequency 
+    /// \brief The angular frequency (rad/s) 
     public: double AngularFrequency() const;
 
-    /// \brief The amplitude of the mean wave in [m].
+    /// \brief The amplitude of the mean wave (m).
     public: double Amplitude() const;
 
-    /// \brief The period of the mean wave in [s].
+    /// \brief The period of the mean wave (s).
     public: double Period() const;
 
     /// \brief The phase of the mean wave.
     public: double Phase() const;
 
-    /// \brief The mean wavelength.
+    /// \brief The mean wavelength (m).
     public: double Wavelength() const;
 
-    /// \brief The mean wavenumber.
+    /// \brief The mean angular wavenumber (rad/m).
     public: double Wavenumber() const;
 
-    /// \brief A two component vector specifiying the direction of the mean wave.
+    /// \brief A two component vector specifiying the direction
+    ///        of the mean wave.
     public: math::Vector2d Direction() const;
 
-    /// \brief A two component vector specifiying the horizontal wind velocity.
+    /// \brief A two component vector specifiying the horizontal
+    ///        wind velocity (m/s).
     public: math::Vector2d WindVelocity() const;
 
-    /// \brief The scalar wind speed [m/s].
+    /// \brief The scalar wind speed (m/s).
     public: double WindSpeed() const;
 
-    /// \brief The wind angle (counter clockwise from positive x-axis) [rad].
+    /// \brief The wind angle (counter clockwise from
+    ///        positive x-axis) (rad).
     public: double WindAngleRad() const;
 
-    /// \brief Set the wave algorithm (options are: 'sinusoid', 'trochoid', 'fft').
+    /// \brief Set the wave algorithm (options are: 'sinusoid',
+    ///        'trochoid', 'fft').
     ///
     /// \param[in] _algorithm    The wave algorithm.
     public: void SetAlgorithm(const std::string &_algorithm);
 
-    /// \brief Set the size of the wave tile in metres (L).
+    /// \brief Set the size of the wave tile (m).
     ///
-    /// \param[in] _L    The size of the wave tile.
+    /// \param[in] _L    The size of the wave tile (m).
     public: void SetTileSize(double _L);
 
-    /// \brief Set the number of cells in the wave tile in each direction (N). 
+    /// \brief Set the number of cells in the wave tile
+    ///        in each direction. 
     ///
     /// \param[in] _N    The number of cells.
     public: void SetCellCount(size_t _N);
@@ -154,14 +159,14 @@ namespace marine
     /// \param[in] _steepness The steepness parameter.
     public: void SetSteepness(double _steepness);
 
-    /// \brief Set the mean wave amplitude. Must be positive.
+    /// \brief Set the mean wave amplitude (m). Must be positive.
     ///
-    /// \param[in] _amplitude The amplitude parameter.
+    /// \param[in] _amplitude The amplitude parameter (m).
     public: void SetAmplitude(double _amplitude);
 
-    /// \brief Set the mean wave period. Must be positive.
+    /// \brief Set the mean wave period (s). Must be positive.
     ///
-    /// \param[in] _period The period parameter.
+    /// \param[in] _period The period parameter (s).
     public: void SetPeriod(double _period);
 
     /// \brief Set the mean wave phase.
@@ -171,7 +176,8 @@ namespace marine
 
     /// \brief Set the mean wave direction.
     ///
-    /// \param[in] _direction The direction parameter, a two component vector.
+    /// \param[in] _direction The direction parameter,
+    ///            a two component vector.
     public: void SetDirection(const math::Vector2d& _direction);
 
     /// \brief Set the horizontal wind velocity.
@@ -179,10 +185,17 @@ namespace marine
     /// \param[in] _windVelocity The wind velocity, a two component vector.
     public: void SetWindVelocity(const math::Vector2d& _windVelocity);
 
-    /// \brief Access the component angular frequencies.
+    /// \brief Set the scalar wind speed and downwind angle
+    ///        at 10m above MSL (m/s).
+    ///
+    /// \param[in] _windSpeed    The wind speed (m/s).
+    /// \param[in] _windAngleRad The downwind angle (rad).
+    public: void SetWindSpeedAndAngle(double _windSpeed, double _windAngleRad);
+
+    /// \brief Access the component angular frequencies (rad/s).
     public: const std::vector<double>& AngularFrequency_V() const;
 
-    /// \brief Access the component amplitudes.
+    /// \brief Access the component amplitudes (m).
     public: const std::vector<double>& Amplitude_V() const;
 
     /// \brief Access the component phases.
@@ -191,7 +204,7 @@ namespace marine
     /// \brief Access the steepness components.
     public: const std::vector<double>& Steepness_V() const;
 
-    /// \brief Access the component wavenumbers.
+    /// \brief Access the component wavenumbers (rad/m).
     public: const std::vector<double>& Wavenumber_V() const;
 
     /// \brief Access the component directions.
@@ -202,7 +215,7 @@ namespace marine
 
     /// \internal
     /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WaveParametersPrivate> data;
+    private: std::shared_ptr<WaveParametersPrivate> dataPtr;
   };
 
   typedef std::shared_ptr<WaveParameters> WaveParametersPtr; 

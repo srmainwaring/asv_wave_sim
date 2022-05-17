@@ -158,9 +158,16 @@ namespace marine
 
     // ignmsg << _msg.DebugString();
 
+    // // Get parameters from message
+    // double wind_angle = 0.0;
+    // double wind_speed = 0.0;
+    // wind_angle = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
+    // wind_speed = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
+
     // current wind speed and angle
     double windSpeed = this->params->WindSpeed();
     double windAngleRad = this->params->WindAngleRad();
+    double steepness = this->params->Steepness();
 
     // extract parameters
     {
@@ -185,43 +192,26 @@ namespace marine
         windAngleRad = M_PI/180.0*value;
       }
     }
+    {
+      auto it = _msg.params().find("steepness");
+      if (it != _msg.params().end())
+      {
+        /// \todo: assert the type is double
+        auto param = it->second;
+        auto type = param.type();
+        auto value = param.double_value();
+        steepness = value;
+      }
+    }
 
-    /// \todo: update params correctly - put logic in one place
-    // update wind velocity
-    double ux = windSpeed * cos(windAngleRad);
-    double uy = windSpeed * sin(windAngleRad);
-    
     // update parameters and wavefield
-    this->params->SetWindVelocity(math::Vector2d(ux, uy));
-    this->oceanTile->SetWindVelocity(ux, uy);
+    this->params->SetWindSpeedAndAngle(windSpeed, windAngleRad);
+    this->params->SetSteepness(steepness);
+
+    this->oceanTile->SetWindVelocity(
+        this->params->WindVelocity().X(),
+        this->params->WindVelocity().Y());
   }
-
-  /////////////////////////////////////////////////
-  // void Wavefield::OnWaveWindMsg(ConstParam_VPtr &_msg)
-  // {
-  //   std::lock_guard<std::recursive_mutex> lock(this->dataPtr->mutex);
-
-  //   // Get parameters from message
-  //   double wind_angle = 0.0;
-  //   double wind_speed = 0.0;
-  //   wind_angle = Utilities::MsgParamDouble(*_msg, "wind_angle", wind_angle);
-  //   wind_speed = Utilities::MsgParamDouble(*_msg, "wind_speed", wind_speed);
-
-  //   // Convert from polar to cartesian
-  //   double wind_vel_x = wind_speed * std::cos(wind_angle);
-  //   double wind_vel_y = wind_speed * std::sin(wind_angle);
-
-  //   // @DEBUG_INFO
-  //   gzmsg << "Wavefield received message on topic ["
-  //     << this->dataPtr->waveWindSub->GetTopic() << "]" << std::endl;
-  //   gzmsg << "wind_angle: " << wind_angle << std::endl;
-  //   gzmsg << "wind_speed: " << wind_speed << std::endl;
-  //   gzmsg << "wind_vel_x: " << wind_vel_x << std::endl;
-  //   gzmsg << "wind_vel_y: " << wind_vel_y << std::endl;
-
-  //   // Update simulation
-  //   this->dataPtr->oceanTile->SetWindVelocity(wind_vel_x, wind_vel_y);
-  // }
 
   /////////////////////////////////////////////////
 

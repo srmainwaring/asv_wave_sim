@@ -1,41 +1,36 @@
-# GUI system plugin
+# Waves Control GUI system plugin
 
-This example shows how to create a GUI system plugin.
-
-Gazebo Sim supports any kind of Gazebo GUI plugin
-(`ignition::gui::Plugin`). Gazebo GUI plugins are a special type of 
-GUI plugin which also have access to entity and component updates coming from
-the server.
+This is a GUI system plugin for controlling the waves environment. It is based on the Gazebo Sim example `gz-sim/examples/plugin/gui_system_plugin` which demonstrates how these plugins can access entity and component updates coming from the server.
 
 See `WavesControl.hh` for more information.
 
 ## Build
 
-From the root of the `gz-marine` repository, do the following to build the example:
+From the root of the `asv_wave_sim` repository, do the following to build the example:
 
-~~~
-cd examples/plugin/waves_control
-mkdir build
-cd build
-cmake ..
-make
-~~~
+```bash
+$ cd gz-marine/src/gui/plugin/waves_control
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+```
 
 This will generate the `WavesControl` library under `build`.
 
 ## Run
 
-Add the library to the path:
+Add the library to the `IGN_GUI_PLUGIN_PATH`:
 
-~~~
-cd src/asv_wave_sim/gz-marine/src/gui/plugin/waves_control
-export IGN_GUI_PLUGIN_PATH=`pwd`/build
-~~~
+```bash
+$ cd gz-marine/src/gui/plugin/waves_control
+$ export IGN_GUI_PLUGIN_PATH=$(pwd)/build
+```
 
 Then run a world, for example:
 
-    ign gazebo -v4 waves.sdf
+```
+$ ign gazebo -v4 waves.sdf
+```
 
 From the GUI plugin menu on the top-right, choose "Waves Control".
-
-You'll see your plugin, displaying the world name `waves`.
