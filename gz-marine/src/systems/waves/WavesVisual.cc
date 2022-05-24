@@ -256,6 +256,9 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \param[in] _msg Wave parameters message.
   public: void OnWaveMsg(const ignition::msgs::Param &_msg);
 
+  /// \brief Name of the world
+  public: std::string worldName;
+
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
 
@@ -284,25 +287,47 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Set the wavefield to be static [false].
   public: bool isStatic{false};
 
+  /////////////////
+  /// OGRE2_DYNAMIC_TEXTURE
+  /// \note: new code adapted from ogre ocean materials sample
+  // textures for displacement, normal and tangent maps
+  Ogre::Image2       *mHeightMapImage;
+  Ogre::Image2       *mNormalMapImage;
+  Ogre::Image2       *mTangentMapImage;
+  Ogre::TextureGpu   *mHeightMapTex;
+  Ogre::TextureGpu   *mNormalMapTex;
+  Ogre::TextureGpu   *mTangentMapTex;
+
+  std::string RESOURCE_PATH;
+  
+  public: void InitWaveSim();
+  public: void InitUniforms();
+  public: void InitTextures();
+
+  public: void UpdateWaveSim();
+  public: void UpdateUniforms();
+  public: void UpdateTextures();
+
+  /////////////////
+  /// OGRE2_DYNAMIC_GEOMETRY
+  /// \brief Ocean mesh (not stored in the mesh manager)
+  public: common::MeshPtr oceanTileMesh;
+
+  /////////////////
+  /// OceanTile
   /// \brief The wave parameters.
   public: marine::WaveParametersPtr waveParams;
   public: bool waveParamsDirty{false};
 
-  /////////////////
-  /// OceanTile
   // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
   // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
 
+  /// \brief The ocean tile managing the wave simulation
   public: marine::visual::OceanTilePtr oceanTile;
 
-  /// \brief Used in DynamicMesh example
-  public: common::MeshPtr oceanTileMesh;
 
   /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
-
-  /// \brief Name of the world
-  public: std::string worldName;
 
   /// \brief Transport node
   public: transport::Node node;
@@ -423,7 +448,7 @@ enum class OceanVisualMethod : uint16_t
   UNKNOWN = OCEAN_VISUAL_METHOD_BEGIN,
 
   /// \brief Ogre::Mesh (v2)
-  OGRE2_MESH = 2,
+  OGRE2_DYNAMIC_TEXTURE = 2,
 
   /// \brief Ogre2DynamicGeometry
   OGRE2_DYNAMIC_GEOMETRY = 3,
@@ -504,7 +529,7 @@ void WavesVisualPrivate::OnUpdate()
   double ux = this->waveParams->WindVelocity().X();
   double uy = this->waveParams->WindVelocity().Y();
 
-  OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY;
+  OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_TEXTURE;
   switch (method)
   {
     case OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY:
@@ -628,12 +653,34 @@ void WavesVisualPrivate::OnUpdate()
       this->oceanGeometry->UpdateMesh(this->oceanTileMesh);
       break;
     }
-    case OceanVisualMethod::OGRE2_MESH:
+    case OceanVisualMethod::OGRE2_DYNAMIC_TEXTURE:
     {
       // Test attaching a common::Mesh to the entity
       if (!this->oceanTile)
       {
         ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
+
+        // custom material (see waves_fft)
+
+        /// \todo: replace hardcoded shader files - see ShaderParams plugin
+        const std::string vertexShaderFile = "waves_vs.metal";
+        const std::string fragmentShaderFile = "waves_fs.metal";
+
+        /// \todo: replace hardcoded path - see ShaderParams plugin
+        this->RESOURCE_PATH =
+          "/Users/rhys/Code/robotics/ign_wave_sim/wave_sim_ws/src/asv_wave_sim/gz-marine-models/world_models/waves/materials";
+
+        // path to look for vertex and fragment shader parameters
+        std::string vertexShaderPath = ignition::common::joinPaths(
+            this->RESOURCE_PATH, vertexShaderFile);
+
+        std::string fragmentShaderPath = ignition::common::joinPaths(
+            this->RESOURCE_PATH, fragmentShaderFile);
+
+        // create shader material
+        ignition::rendering::MaterialPtr shader = scene->CreateMaterial();
+        shader->SetVertexShader(vertexShaderPath);
+        shader->SetFragmentShader(fragmentShaderPath);
 
         // create ocean tile
         this->oceanTile.reset(new marine::visual::OceanTile(N, L));
@@ -641,38 +688,34 @@ void WavesVisualPrivate::OnUpdate()
         std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
         auto mesh = newMesh.get();
         common::MeshManager::Instance()->AddMesh(newMesh.release());
-        // this->oceanTile->Update(0.0);
 
-        //convert common::Mesh to rendering::Mesh
+        // convert common::Mesh to rendering::Mesh
         auto geometry = this->scene->CreateMesh(mesh);
 
         // create ocean tile visual
-        auto visual = this->scene->CreateVisual("ocean-tile");
-        visual->AddGeometry(geometry);
-        visual->SetLocalPosition(0.0, 0.0, 0.0);
-        visual->SetLocalRotation(0.0, 0.0, 0.0);
-        visual->SetLocalScale(1.0, 1.0, 1.0);
-        visual->SetMaterial("OceanBlue");
-        visual->SetVisible(true);
+        this->oceanVisual = this->scene->CreateVisual("ocean");
+        this->oceanVisual->AddGeometry(geometry);
+        this->oceanVisual->SetMaterial(shader);
+
+        // this->oceanVisual->SetMaterial("OceanBlue");
 
         // // retrive the material from the visual's geometry (it's not set on the visual)
         // ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
         // ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
         // auto visualGeometry = this->visual->GeometryByIndex(0);
-
         // auto material = visualGeometry->Material();
-        // // auto material = this->visual->Material();
         // if (!material)
         //   ignerr << "WavesVisual: invalid material\n";
         // else
-        //   visual->SetMaterial(material);
+        //   this->oceanVisual->SetMaterial(material);
 
         // add visual to parent
         auto parent = this->visual->Parent();
-        parent->AddChild(visual);
+        parent->AddChild(this->oceanVisual);
 
-        // keep reference
-        this->oceanVisual = visual;
+        this->InitWaveSim();
+        this->InitUniforms();
+        this->InitTextures();
       }
 
       if (!this->oceanTile)
@@ -680,6 +723,10 @@ void WavesVisualPrivate::OnUpdate()
 
       // Update the tile
       this->oceanTile->Update(simTime);
+
+      this->UpdateWaveSim();
+      this->UpdateUniforms();
+      this->UpdateTextures();
       break;
     }
     default:
@@ -758,6 +805,353 @@ void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
   this->waveParams->SetSteepness(steepness);
 
   this->waveParamsDirty = true;
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::InitWaveSim()
+{
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::InitUniforms()
+{
+  auto shader = this->oceanVisual->Material();
+  if (!shader)
+    return;
+
+  // set vertex shader params
+  auto vsParams = shader->VertexShaderParams();
+
+  (*vsParams)["world_matrix"] = 1;
+  (*vsParams)["worldviewproj_matrix"] = 1;
+
+  (*vsParams)["t"] = 0.0f;
+
+  (*vsParams)["rescale"] = 0.5f;
+
+  float bumpScale[2] = {0.1f, 0.1f};
+  (*vsParams)["bumpScale"].InitializeBuffer(2);
+  (*vsParams)["bumpScale"].UpdateBuffer(bumpScale);
+
+  float bumpSpeed[2] = {0.001f, 0.001f};
+  (*vsParams)["bumpSpeed"].InitializeBuffer(2);
+  (*vsParams)["bumpSpeed"].UpdateBuffer(bumpSpeed);
+
+  // camera_position is a constant defined by ogre.
+  (*vsParams)["camera_position"] = 1;
+
+  // set fragment shader params
+  auto fsParams = shader->FragmentShaderParams();
+
+  float hdrMultiplier = 0.4f;
+  (*fsParams)["hdrMultiplier"] = hdrMultiplier;
+
+  float fresnelPower = 5.0f;
+  (*fsParams)["fresnelPower"] = fresnelPower;
+
+  float shallowColor[4] = {0.0f, 0.1f, 0.3f, 1.0f};
+  (*fsParams)["shallowColor"].InitializeBuffer(4);
+  (*fsParams)["shallowColor"].UpdateBuffer(shallowColor);
+
+  float deepColor[4] = {0.0f, 0.05f, 0.2f, 1.0f};
+  (*fsParams)["deepColor"].InitializeBuffer(4);
+  (*fsParams)["deepColor"].UpdateBuffer(deepColor);
+
+  std::string bumpMapPath = ignition::common::joinPaths(
+      this->RESOURCE_PATH,
+      "wave_normals.dds");
+  (*fsParams)["bumpMap"].SetTexture(bumpMapPath);
+
+  std::string cubeMapPath = ignition::common::joinPaths(
+      this->RESOURCE_PATH,
+      "skybox_lowres.dds");
+
+  (*fsParams)["cubeMap"].SetTexture(cubeMapPath,
+      rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, 1u);
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::InitTextures()
+{
+  ignmsg << "WavesVisualPrivate::InitTextures\n";
+
+  // ocean tile parameters
+  uint32_t N = static_cast<uint32_t>(this->waveParams->CellCount());
+  double L   = this->waveParams->TileSize();
+  double ux  = this->waveParams->WindVelocity().X();
+  double uy  = this->waveParams->WindVelocity().Y();
+
+  rendering::MaterialPtr shader = this->oceanVisual->Material();
+  if (!shader)
+    return;
+
+  ignition::rendering::Ogre2ScenePtr ogre2Scene =
+    std::dynamic_pointer_cast<ignition::rendering::Ogre2Scene>(
+        this->scene);
+
+  ignition::rendering::Ogre2MaterialPtr ogre2Material =
+    std::dynamic_pointer_cast<ignition::rendering::Ogre2Material>(
+        shader);
+
+  Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
+
+  Ogre::TextureGpuManager *ogre2TextureManager =
+      ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
+
+  // Create empty image
+  uint32_t width{N};
+  uint32_t height{N};
+  uint32_t depthOrSlices{1};
+  Ogre::TextureTypes::TextureTypes textureType{
+      Ogre::TextureTypes::TextureTypes::Type2D};
+  Ogre::PixelFormatGpu format{
+      Ogre::PixelFormatGpu::PFG_RGBA32_FLOAT};
+  uint8_t numMipmaps{1u};
+
+  ignmsg << "Create HeightMap image\n";
+  mHeightMapImage = new Ogre::Image2();
+  mHeightMapImage->createEmptyImage(width, height, depthOrSlices,
+      textureType, format, numMipmaps);
+
+  ignmsg << "Create NormalMap image\n";
+  mNormalMapImage = new Ogre::Image2();
+  mNormalMapImage->createEmptyImage(width, height, depthOrSlices,
+      textureType, format, numMipmaps);
+
+  ignmsg << "Create TangentMap image\n";
+  mTangentMapImage = new Ogre::Image2();
+  mTangentMapImage->createEmptyImage(width, height, depthOrSlices,
+      textureType, format, numMipmaps);
+
+  ignmsg << "Initialising images\n";
+  memset(mHeightMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
+  memset(mNormalMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
+  memset(mTangentMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
+
+  // Create displacement texture
+  ignmsg << "Create HeightMap texture\n";
+  mHeightMapTex = ogre2TextureManager->createTexture(
+      "HeightMapTex",
+      Ogre::GpuPageOutStrategy::SaveToSystemRam,
+      Ogre::TextureFlags::ManualTexture,
+      Ogre::TextureTypes::Type2D );
+
+  mHeightMapTex->setResolution(mHeightMapImage->getWidth(),
+      mHeightMapImage->getHeight());
+  mHeightMapTex->setPixelFormat(mHeightMapImage->getPixelFormat());
+  mHeightMapTex->setNumMipmaps(Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
+      mHeightMapTex->getWidth(), mHeightMapTex->getHeight()));
+
+  // Create normal texture
+  ignmsg << "Create NormalMap texture\n";
+  mNormalMapTex = ogre2TextureManager->createTexture(
+      "NormalMapTex",
+      Ogre::GpuPageOutStrategy::SaveToSystemRam,
+      Ogre::TextureFlags::ManualTexture,
+      Ogre::TextureTypes::Type2D );
+
+  mNormalMapTex->setResolution(mNormalMapImage->getWidth(),
+      mNormalMapImage->getHeight());
+  mNormalMapTex->setPixelFormat(mNormalMapImage->getPixelFormat());
+  mNormalMapTex->setNumMipmaps(Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
+      mNormalMapTex->getWidth(), mNormalMapTex->getHeight()));
+
+  // Create tangent texture
+  ignmsg << "Create TangentMap texture\n";
+  mTangentMapTex = ogre2TextureManager->createTexture(
+      "TangentMapTex",
+      Ogre::GpuPageOutStrategy::SaveToSystemRam,
+      Ogre::TextureFlags::ManualTexture,
+      Ogre::TextureTypes::Type2D );
+
+  mTangentMapTex->setResolution(mTangentMapImage->getWidth(),
+      mTangentMapImage->getHeight());
+  mTangentMapTex->setPixelFormat(mTangentMapImage->getPixelFormat());
+  mTangentMapTex->setNumMipmaps(Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
+      mTangentMapTex->getWidth(), mTangentMapTex->getHeight()));
+
+  // Set texture on wave material
+  ignmsg << "Setting HeightMapTex\n";
+  auto mat = ogre2Material->Material();
+  auto pass = mat->getTechnique(0u)->getPass(0);
+
+  {
+    auto texUnit = pass->getTextureUnitState("heightMap");
+    if (!texUnit)
+    {
+      texUnit = pass->createTextureUnitState();
+      texUnit->setName("heightMap");
+    }
+    texUnit->setTexture(mHeightMapTex);
+  }
+
+  {
+    auto texUnit = pass->getTextureUnitState("normalMap");
+    if (!texUnit)
+    {
+      texUnit = pass->createTextureUnitState();
+      texUnit->setName("normalMap");
+    }
+    texUnit->setTexture(mNormalMapTex);
+  }
+
+  {
+    auto texUnit = pass->getTextureUnitState("tangentMap");
+    if (!texUnit)
+    {
+      texUnit = pass->createTextureUnitState();
+      texUnit->setName("tangentMap");
+    }
+    texUnit->setTexture(mTangentMapTex);
+  }
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::UpdateWaveSim()
+{
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::UpdateUniforms()
+{
+  // vertex shader params
+  auto shader = this->oceanVisual->Material();
+  if (!shader)
+    return;
+  auto vsParams = shader->VertexShaderParams();
+  if (!vsParams)
+    return;
+
+   float simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
+      this->currentSimTime).count()) * 1e-9;
+
+ // update the time `t` uniform
+  (*vsParams)["t"] = simTime;
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::UpdateTextures()
+{
+  ignition::rendering::Ogre2ScenePtr ogre2Scene =
+    std::dynamic_pointer_cast<ignition::rendering::Ogre2Scene>(
+        this->scene);
+
+  Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
+
+  Ogre::TextureGpuManager *ogre2TextureManager =
+      ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
+
+  // update the image data
+  uint32_t width  = mHeightMapImage->getWidth();
+  uint32_t height = mHeightMapImage->getHeight();
+
+  Ogre::TextureBox heightBox  = mHeightMapImage->getData(0);
+  Ogre::TextureBox normalBox  = mNormalMapImage->getData(0);
+  Ogre::TextureBox tangentBox = mTangentMapImage->getData(0);
+
+  for (uint32_t iv=0; iv < height; ++iv)
+  {
+      // texture index to vertex index
+      int32_t iy = iv;
+      for (uint32_t iu=0; iu < width; ++iu)
+      {
+          // texture index to vertex index
+          int32_t ix = iu;
+
+          float Dx{0.0}, Dy{0.0}, Dz{0.0};
+          float Tx{1.0}, Ty{0.0}, Tz{0.0};
+          float Bx{0.0}, By{1.0}, Bz{0.0};
+          float Nx{0.0}, Ny{0.0}, Nz{1.0};
+
+          // int32_t idx = iv * width + iu;
+          // double h  = mHeights[idx];
+          // double sx = mDisplacementsX[idx];
+          // double sy = mDisplacementsY[idx];
+          // double dhdx  = mDhdx[idx]; 
+          // double dhdy  = mDhdy[idx]; 
+          // double dsxdx = mDxdx[idx]; 
+          // double dsydy = mDydy[idx]; 
+          // double dsxdy = mDxdy[idx]; 
+
+          // // vertex displacements
+          // Dx -= sy;
+          // Dy  = sx;
+          // Dz = h;
+
+          // // tangents
+          // Tx = dsydy + 1.0;
+          // Ty = dsxdy;
+          // Tz = dhdy;
+
+          // // bitangents
+          // Bx = dsxdy;
+          // By = dsxdx + 1.0;
+          // Bz = dhdx;
+
+          // // normals N = T x B
+          // Nx = 1.0 * (Ty*Bz - Tz*Bx);
+          // Ny = 1.0 * (Tz*Bx - Tx*Bz);
+          // Nz = 1.0 * (Tx*By - Ty*Bx);
+
+          heightBox.setColourAt(Ogre::ColourValue(Dx, Dy, Dz, 0.0), iu, iv, 0,
+              mHeightMapImage->getPixelFormat());
+          normalBox.setColourAt(Ogre::ColourValue(Nx, Ny, Nz, 0.0), iu, iv, 0,
+              mNormalMapImage->getPixelFormat());
+          tangentBox.setColourAt(Ogre::ColourValue(Tx, Ty, Tz, 0.0), iu, iv, 0,
+              mTangentMapImage->getPixelFormat());
+      }
+  }
+
+  // schedule update to GPU
+  mHeightMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+  mNormalMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+  mTangentMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+
+  // Staging texture is required for upload from CPU -> GPU
+  {
+    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
+        mHeightMapImage->getWidth(), mHeightMapImage->getHeight(), 1u, 1u, mHeightMapImage->getPixelFormat());
+    stagingTexture->startMapRegion();
+    Ogre::TextureBox texBox = stagingTexture->mapRegion(
+        mHeightMapImage->getWidth(), mHeightMapImage->getHeight(), 1u, 1u, mHeightMapImage->getPixelFormat());
+
+    texBox.copyFrom(mHeightMapImage->getData(0));
+    stagingTexture->stopMapRegion();
+    stagingTexture->upload(texBox, mHeightMapTex, 0, 0, 0);
+    ogre2TextureManager->removeStagingTexture(stagingTexture);
+    stagingTexture = nullptr;
+    mHeightMapTex->notifyDataIsReady();
+  }
+
+  {
+    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
+        mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u, mNormalMapImage->getPixelFormat());
+    stagingTexture->startMapRegion();
+    Ogre::TextureBox texBox = stagingTexture->mapRegion(
+        mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u, mNormalMapImage->getPixelFormat());
+
+    texBox.copyFrom(mNormalMapImage->getData(0));
+    stagingTexture->stopMapRegion();
+    stagingTexture->upload(texBox, mNormalMapTex, 0, 0, 0);
+    ogre2TextureManager->removeStagingTexture(stagingTexture);
+    stagingTexture = nullptr;
+    mNormalMapTex->notifyDataIsReady();
+  }
+
+  {
+    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
+        mTangentMapImage->getWidth(), mTangentMapImage->getHeight(), 1u, 1u, mTangentMapImage->getPixelFormat());
+    stagingTexture->startMapRegion();
+    Ogre::TextureBox texBox = stagingTexture->mapRegion(
+        mTangentMapImage->getWidth(), mTangentMapImage->getHeight(), 1u, 1u, mTangentMapImage->getPixelFormat());
+
+    texBox.copyFrom(mTangentMapImage->getData(0));
+    stagingTexture->stopMapRegion();
+    stagingTexture->upload(texBox, mTangentMapTex, 0, 0, 0);
+    ogre2TextureManager->removeStagingTexture(stagingTexture);
+    stagingTexture = nullptr;
+    mTangentMapTex->notifyDataIsReady();
+  }
 }
 
 //////////////////////////////////////////////////
