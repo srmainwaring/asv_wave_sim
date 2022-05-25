@@ -268,15 +268,14 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Pointer to visual
   public: rendering::VisualPtr visual;
 
+  /// \brief Material used by the ocean visual
+  public: rendering::MaterialPtr oceanMaterial;
+
   /// \brief Pointer to ocean visual
   public: rendering::VisualPtr oceanVisual;
   // public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
-
   public: std::vector<rendering::VisualPtr> oceanVisuals;
   public: rendering::Ogre2OceanGeometryPtr oceanGeometry;
-
-  /// \brief Material used by this visual
-  public: rendering::MaterialPtr material;
 
   /// \brief Pointer to scene
   public: rendering::ScenePtr scene;
@@ -560,9 +559,9 @@ void WavesVisualPrivate::OnUpdate()
         ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
         ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
         auto visualGeometry = this->visual->GeometryByIndex(0);
-        auto material = visualGeometry->Material();
-        // auto material = this->visual->Material();
-        if (!material)
+        this->oceanMaterial = visualGeometry->Material();
+        // this->oceanMaterial = this->visual->Material();
+        if (!this->oceanMaterial)
           ignerr << "WavesVisual: invalid material\n";
 
         // create ocean tile
@@ -623,10 +622,10 @@ void WavesVisualPrivate::OnUpdate()
             // rendering::VisualPtr visual = ogreVisual;
             // visual->SetLocalPosition(position);
 
-            // if (!material)
+            // if (!this->oceanMaterial)
             //   visual->SetMaterial("OceanBlue");
             // else
-            //   visual->SetMaterial(material);
+            //   visual->SetMaterial(this->oceanMaterial);
 
             // add visual to parent
             // auto parent = this->visual->Parent();
@@ -638,10 +637,10 @@ void WavesVisualPrivate::OnUpdate()
             visual->AddGeometry(this->oceanGeometry);
             visual->SetLocalPosition(position);
 
-            if (!material)
+            if (!this->oceanMaterial)
               visual->SetMaterial("OceanBlue");
             else
-              visual->SetMaterial(material);
+              visual->SetMaterial(this->oceanMaterial);
 
             oceanVisuals.push_back(visual);
           }
@@ -695,9 +694,9 @@ void WavesVisualPrivate::OnUpdate()
             this->RESOURCE_PATH, fragmentShaderFile);
 
         // create shader material
-        ignition::rendering::MaterialPtr shader = scene->CreateMaterial();
-        shader->SetVertexShader(vertexShaderPath);
-        shader->SetFragmentShader(fragmentShaderPath);
+        auto material = scene->CreateMaterial();
+        material->SetVertexShader(vertexShaderPath);
+        material->SetFragmentShader(fragmentShaderPath);
 
         // create ocean visual
         this->oceanVisual = this->scene->CreateVisual("ocean");
@@ -708,7 +707,10 @@ void WavesVisualPrivate::OnUpdate()
         descriptor.mesh = meshManager->Load(descriptor.meshName);
         rendering::MeshPtr geometry = this->scene->CreateMesh(descriptor);
         this->oceanVisual->AddGeometry(geometry);
-        this->oceanVisual->SetMaterial(shader);
+        this->oceanVisual->SetMaterial(material);
+
+        // bind to the material owned by the visual
+        this->oceanMaterial = this->oceanVisual->Material();
 
         // add visual to parent
         auto parent = this->visual->Parent();
@@ -842,7 +844,7 @@ void WavesVisualPrivate::InitWaveSim()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::InitUniforms()
 {
-  auto shader = this->oceanVisual->Material();
+  auto shader = this->oceanMaterial;
   if (!shader)
     return;
 
@@ -909,7 +911,7 @@ void WavesVisualPrivate::InitTextures()
   double ux  = this->waveParams->WindVelocity().X();
   double uy  = this->waveParams->WindVelocity().Y();
 
-  rendering::MaterialPtr shader = this->oceanVisual->Material();
+  auto shader = this->oceanMaterial;
   if (!shader)
     return;
 
@@ -1049,7 +1051,7 @@ void WavesVisualPrivate::UpdateWaveSim()
 void WavesVisualPrivate::UpdateUniforms()
 {
   // vertex shader params
-  auto shader = this->oceanVisual->Material();
+  auto shader = this->oceanMaterial;
   if (!shader)
     return;
   auto vsParams = shader->VertexShaderParams();
