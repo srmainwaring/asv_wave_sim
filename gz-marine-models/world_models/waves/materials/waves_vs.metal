@@ -142,8 +142,8 @@ vertex PS_INPUT main_metal
   outVs.uv0 = input.uv0.xy;
 
   // Rescale tangent vectors
-  outVs.T = T * p.rescale;
-  outVs.B = B * p.rescale;
+  outVs.T = T; // * p.rescale;
+  outVs.B = B; // * p.rescale;
   outVs.N = N;
 
   // Compute texture coordinates for bump map

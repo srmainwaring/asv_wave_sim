@@ -891,6 +891,7 @@ void WavesVisualPrivate::InitUniforms()
 
   std::string cubeMapPath = ignition::common::joinPaths(
       this->RESOURCE_PATH,
+      // "skybox_test.dds");
       "skybox_lowres.dds");
 
   (*fsParams)["cubeMap"].SetTexture(cubeMapPath,
@@ -1107,18 +1108,18 @@ void WavesVisualPrivate::UpdateTextures()
           double dsxdy = mDxdy[idx]; 
 
           // vertex displacements
-          Dx = sx;
-          Dy = sy;
+          Dx = -sx;
+          Dy = -sy;
           Dz = h;
 
           // tangents
-          Tx = dsxdx + 1.0;
-          Ty = dsxdy;
+          Tx = -dsxdx - 1.0;
+          Ty = -dsxdy;
           Tz = dhdx;
 
           // bitangents
-          Bx = dsxdy;
-          By = dsydy + 1.0;
+          Bx = -dsxdy;
+          By = -dsydy - 1.0;
           Bz = dhdy;
 
           // normals N = T x B

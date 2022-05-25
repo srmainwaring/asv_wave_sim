@@ -77,6 +77,7 @@ fragment float4 main_metal
   // Compute refraction ratio (Fresnel):
   float facing = 1.0 - dot(-E, N);
   float waterEnvRatio = clamp(pow(facing, p.fresnelPower), 0.0, 1.0);
+  // float waterEnvRatio = clamp(pow(facing, 1), 0.0, 1.0);
 
   // Refracted ray only considers deep and shallow water colors:
   float4 waterColor = mix(p.shallowColor, p.deepColor, facing);

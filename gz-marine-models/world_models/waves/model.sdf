@@ -11,8 +11,8 @@
         <wave>
           <!-- `fft` wave parameters -->
           <algorithm>fft</algorithm>
-          <tile_size>512</tile_size>
-          <cell_count>128</cell_count>
+          <tile_size>256</tile_size>
+          <cell_count>256</cell_count>
           <wind_speed>5.0</wind_speed>
           <wind_angle_deg>135</wind_angle_deg>
           <steepness>2</steepness>
@@ -49,8 +49,8 @@
             <wave>
               <!-- `fft` wave parameters -->
               <algorithm>fft</algorithm>
-              <tile_size>512</tile_size>
-              <cell_count>128</cell_count>
+              <tile_size>256</tile_size>
+              <cell_count>256</cell_count>
               <wind_speed>5.0</wind_speed>
               <wind_angle_deg>135</wind_angle_deg>
               <steepness>2</steepness>
