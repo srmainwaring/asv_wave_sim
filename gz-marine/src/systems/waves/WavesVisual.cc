@@ -268,21 +268,11 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Pointer to visual
   public: rendering::VisualPtr visual;
 
-  /// \brief Material used by the ocean visual
-  public: rendering::MaterialPtr oceanMaterial;
-
-  /// \brief Pointer to ocean visual
-  // public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
-  public: std::vector<rendering::VisualPtr> oceanVisuals;
-
-  /// \brief Pointer to ocean geometry
-  public: rendering::Ogre2OceanGeometryPtr oceanGeometry;
+  /// \brief Entity id of the visual
+  public: Entity entity{kNullEntity};
 
   /// \brief Pointer to scene
   public: rendering::ScenePtr scene;
-
-  /// \brief Entity id of the visual
-  public: Entity entity{kNullEntity};
 
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
@@ -290,6 +280,16 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief Set the wavefield to be static [false].
   public: bool isStatic{false};
+
+  /// \brief Material used by the ocean visual
+  public: rendering::MaterialPtr oceanMaterial;
+
+  /// \brief Pointer to ocean geometry
+  public: rendering::Ogre2OceanGeometryPtr oceanGeometry;
+
+  /// \brief Pointer to ocean visual
+  // public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
+  public: std::vector<rendering::VisualPtr> oceanVisuals;
 
   /////////////////
   /// OGRE2_DYNAMIC_TEXTURE
@@ -338,7 +338,6 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief The ocean tile managing the wave simulation
   public: marine::visual::OceanTilePtr oceanTile;
-
 
   /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
@@ -626,7 +625,7 @@ void WavesVisualPrivate::OnUpdate()
             // auto parent = this->visual->Parent();
             // parent->AddChild(visual);
 
-            // oceanVisuals.push_back(ogreVisual);
+            // this->oceanVisuals.push_back(ogreVisual);
 
             auto visual = this->scene->CreateVisual();
             visual->AddGeometry(this->oceanGeometry);
@@ -637,7 +636,7 @@ void WavesVisualPrivate::OnUpdate()
             else
               visual->SetMaterial(this->oceanMaterial);
 
-            oceanVisuals.push_back(visual);
+            this->oceanVisuals.push_back(visual);
           }
         }
       }
@@ -689,28 +688,47 @@ void WavesVisualPrivate::OnUpdate()
             this->RESOURCE_PATH, fragmentShaderFile);
 
         // create shader material
-        auto material = scene->CreateMaterial();
-        material->SetVertexShader(vertexShaderPath);
-        material->SetFragmentShader(fragmentShaderPath);
+        this->oceanMaterial = scene->CreateMaterial();
+        this->oceanMaterial->SetVertexShader(vertexShaderPath);
+        this->oceanMaterial->SetFragmentShader(fragmentShaderPath);
 
-        // create ocean visual
-        auto oceanVisual = this->scene->CreateVisual();
-
+        // load mesh
         rendering::MeshDescriptor descriptor;
         descriptor.meshName = common::joinPaths(RESOURCE_PATH, "mesh_256x256.dae");
         common::MeshManager *meshManager = common::MeshManager::Instance();
         descriptor.mesh = meshManager->Load(descriptor.meshName);
-        rendering::MeshPtr geometry = this->scene->CreateMesh(descriptor);
-        oceanVisual->AddGeometry(geometry);
-        oceanVisual->SetMaterial(material);
+ 
+        // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
+        auto position = this->visual->LocalPosition();
 
-        // bind to the material owned by the visual
-        this->oceanMaterial = oceanVisual->Material();
+        const int nX = 5;
+        const int nY = 5;
+        for (int iy=-nY; iy<=nY; ++iy)
+        {
+          for (int ix=-nX; ix<=nX; ++ix)
+          {
+            /// \todo: include the current entity position 
+            ignition::math::Vector3d tilePosition(
+              position.X() + ix * L,
+              position.Y() + iy * L,
+              position.Z() + 0.0
+            );
 
-        // add visual to parent
-        auto parent = this->visual->Parent();
-        parent->AddChild(oceanVisual);
-        this->oceanVisuals.push_back(oceanVisual);
+            // create geometry
+            auto geometry = this->scene->CreateMesh(descriptor);
+  
+            // create ocean visual
+            auto oceanVisual = this->scene->CreateVisual();
+            oceanVisual->AddGeometry(geometry);
+            oceanVisual->SetMaterial(this->oceanMaterial, false);
+            oceanVisual->SetLocalPosition(tilePosition);
+
+            // add visual to parent
+            auto parent = this->visual->Parent();
+            parent->AddChild(oceanVisual);
+            this->oceanVisuals.push_back(oceanVisual);
+         }
+        }
 
         this->InitWaveSim();
         this->InitUniforms();
