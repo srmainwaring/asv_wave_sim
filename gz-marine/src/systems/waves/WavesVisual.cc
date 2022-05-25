@@ -281,6 +281,14 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Set the wavefield to be static [false].
   public: bool isStatic{false};
 
+  /// \brief The number of tiles in the x-direction given as an offset range.
+  /// Default [lower=0, upper=0].
+  public: math::Vector2i tiles_x = {0, 0};
+
+  /// \brief The number of tiles in the y-direction given as an offset range.
+  /// Default [lower=0, upper=0].
+  public: math::Vector2i tiles_y = {0, 0};
+
   /// \brief Material used by the ocean visual
   public: rendering::MaterialPtr oceanMaterial;
 
@@ -382,6 +390,12 @@ void WavesVisual::Configure(const Entity &_entity,
   // Update parameters
   this->dataPtr->isStatic = marine::Utilities::SdfParamBool(
       *sdf,  "static", this->dataPtr->isStatic);
+
+  this->dataPtr->tiles_x = marine::Utilities::SdfParamVector2i(
+      *sdf,  "tiles_x", this->dataPtr->tiles_x);
+
+  this->dataPtr->tiles_y = marine::Utilities::SdfParamVector2i(
+      *sdf,  "tiles_y", this->dataPtr->tiles_y);
 
   // Wave parameters
   this->dataPtr->waveParams.reset(new marine::WaveParameters());
@@ -586,19 +600,17 @@ void WavesVisualPrivate::OnUpdate()
         this->oceanGeometry->InitObject(ogre2Scene, objId, objName);
         this->oceanGeometry->LoadMesh(this->oceanTileMesh);
 
-        // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
-        const int nX = 0;
-        const int nY = 0;
-        // unsigned int id = 50000;
-        for (int iy=-nY; iy<=nY; ++iy)
+        // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
+        auto position = this->visual->LocalPosition();
+        for (int iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
         {
-          for (int ix=-nX; ix<=nX; ++ix)
+          for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
           {
-            /// \todo: include the current entity position 
-            ignition::math::Vector3d position(
-              /* this->Position() + */ ix * L,
-              /* this->Position() + */ iy * L,
-              /* this->Position() + */ 0.0
+            // tile position 
+            ignition::math::Vector3d tilePosition(
+              position.X() + ix * L,
+              position.Y() + iy * L,
+              position.Z() + 0.0
             );
 
             // create visual
@@ -698,16 +710,13 @@ void WavesVisualPrivate::OnUpdate()
         common::MeshManager *meshManager = common::MeshManager::Instance();
         descriptor.mesh = meshManager->Load(descriptor.meshName);
  
-        // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
+        // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
         auto position = this->visual->LocalPosition();
-
-        const int nX = 5;
-        const int nY = 5;
-        for (int iy=-nY; iy<=nY; ++iy)
+        for (int iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
         {
-          for (int ix=-nX; ix<=nX; ++ix)
+          for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
           {
-            /// \todo: include the current entity position 
+            // tile position 
             ignition::math::Vector3d tilePosition(
               position.X() + ix * L,
               position.Y() + iy * L,
