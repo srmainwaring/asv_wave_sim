@@ -22,6 +22,9 @@
 #include "gz/marine/Utilities.hh"
 #include "gz/marine/WaveParameters.hh"
 
+#include "gz/marine/WaveSimulation.hh"
+#include "gz/marine/WaveSimulationFFT2.hh"
+
 #include <gz/msgs/any.pb.h>
 #include <gz/msgs/param.pb.h>
 #include <gz/msgs/param_v.pb.h>
@@ -283,6 +286,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
+  public: double                              currentSimTimeSeconds;
 
   /// \brief Set the wavefield to be static [false].
   public: bool isStatic{false};
@@ -298,8 +302,18 @@ class ignition::gazebo::systems::WavesVisualPrivate
   Ogre::TextureGpu   *mNormalMapTex;
   Ogre::TextureGpu   *mTangentMapTex;
 
+  std::unique_ptr<ignition::marine::WaveSimulation> mWaveSim;
+  std::vector<double> mHeights;
+  std::vector<double> mDhdx;
+  std::vector<double> mDhdy;
+  std::vector<double> mDisplacementsX;
+  std::vector<double> mDisplacementsY;
+  std::vector<double> mDxdx;
+  std::vector<double> mDydy;
+  std::vector<double> mDxdy;
+
   std::string RESOURCE_PATH;
-  
+
   public: void InitWaveSim();
   public: void InitUniforms();
   public: void InitTextures();
@@ -413,6 +427,10 @@ void WavesVisual::PreUpdate(
   IGN_PROFILE("WavesVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
+
+  this->dataPtr->currentSimTimeSeconds =
+      (std::chrono::duration_cast<std::chrono::nanoseconds>(
+          this->dataPtr->currentSimTime).count()) * 1e-9;
 }
 
 /////////////////////////////////////////////////
@@ -520,8 +538,7 @@ void WavesVisualPrivate::OnUpdate()
     mat->SetReflectivity(0);
   }
 
-  double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
-      this->currentSimTime).count()) * 1e-9;
+  double simTime = this->currentSimTimeSeconds;
 
   // ocean tile parameters
   size_t N = this->waveParams->CellCount();
@@ -656,7 +673,7 @@ void WavesVisualPrivate::OnUpdate()
     case OceanVisualMethod::OGRE2_DYNAMIC_TEXTURE:
     {
       // Test attaching a common::Mesh to the entity
-      if (!this->oceanTile)
+      if (!this->oceanVisual)
       {
         ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
 
@@ -682,32 +699,16 @@ void WavesVisualPrivate::OnUpdate()
         shader->SetVertexShader(vertexShaderPath);
         shader->SetFragmentShader(fragmentShaderPath);
 
-        // create ocean tile
-        this->oceanTile.reset(new marine::visual::OceanTile(N, L));
-        this->oceanTile->SetWindVelocity(ux, uy);
-        std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
-        auto mesh = newMesh.get();
-        common::MeshManager::Instance()->AddMesh(newMesh.release());
-
-        // convert common::Mesh to rendering::Mesh
-        auto geometry = this->scene->CreateMesh(mesh);
-
-        // create ocean tile visual
+        // create ocean visual
         this->oceanVisual = this->scene->CreateVisual("ocean");
+
+        rendering::MeshDescriptor descriptor;
+        descriptor.meshName = common::joinPaths(RESOURCE_PATH, "mesh_256x256.dae");
+        common::MeshManager *meshManager = common::MeshManager::Instance();
+        descriptor.mesh = meshManager->Load(descriptor.meshName);
+        rendering::MeshPtr geometry = this->scene->CreateMesh(descriptor);
         this->oceanVisual->AddGeometry(geometry);
         this->oceanVisual->SetMaterial(shader);
-
-        // this->oceanVisual->SetMaterial("OceanBlue");
-
-        // // retrive the material from the visual's geometry (it's not set on the visual)
-        // ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
-        // ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
-        // auto visualGeometry = this->visual->GeometryByIndex(0);
-        // auto material = visualGeometry->Material();
-        // if (!material)
-        //   ignerr << "WavesVisual: invalid material\n";
-        // else
-        //   this->oceanVisual->SetMaterial(material);
 
         // add visual to parent
         auto parent = this->visual->Parent();
@@ -718,11 +719,21 @@ void WavesVisualPrivate::OnUpdate()
         this->InitTextures();
       }
 
-      if (!this->oceanTile)
+      if (!this->oceanVisual)
         return;
 
-      // Update the tile
-      this->oceanTile->Update(simTime);
+      if (this->waveParamsDirty)
+      {
+        double ux = this->waveParams->WindVelocity().X();
+        double uy = this->waveParams->WindVelocity().Y();
+        double s  = this->waveParams->Steepness();
+
+        // set params
+        this->mWaveSim->SetWindVelocity(ux, uy);
+        // waveSim->SetLambda(s);
+
+        this->waveParamsDirty = false;
+      }
 
       this->UpdateWaveSim();
       this->UpdateUniforms();
@@ -810,6 +821,22 @@ void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
 //////////////////////////////////////////////////
 void WavesVisualPrivate::InitWaveSim()
 {
+  int N      = this->waveParams->CellCount();
+  double L   = this->waveParams->TileSize();
+  double ux  = this->waveParams->WindVelocity().X();
+  double uy  = this->waveParams->WindVelocity().Y();
+  double s   = this->waveParams->Steepness();
+
+  // create wave model
+  std::unique_ptr<ignition::marine::WaveSimulationFFT2> waveSim(
+      new ignition::marine::WaveSimulationFFT2(N, L));
+
+  // set params
+  waveSim->SetWindVelocity(ux, uy);
+  waveSim->SetLambda(s);
+
+  // move
+  this->mWaveSim = std::move(waveSim);
 }
 
 //////////////////////////////////////////////////
@@ -1009,6 +1036,12 @@ void WavesVisualPrivate::InitTextures()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::UpdateWaveSim()
 {
+  double simTime = this->currentSimTimeSeconds;
+
+  mWaveSim->SetTime(simTime);
+  mWaveSim->ComputeDisplacementsAndDerivatives(
+      mHeights, mDisplacementsX, mDisplacementsY,
+      mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
 }
 
 //////////////////////////////////////////////////
@@ -1022,8 +1055,7 @@ void WavesVisualPrivate::UpdateUniforms()
   if (!vsParams)
     return;
 
-   float simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
-      this->currentSimTime).count()) * 1e-9;
+  float simTime = static_cast<float>(this->currentSimTimeSeconds);
 
  // update the time `t` uniform
   (*vsParams)["t"] = simTime;
@@ -1051,47 +1083,48 @@ void WavesVisualPrivate::UpdateTextures()
 
   for (uint32_t iv=0; iv < height; ++iv)
   {
+      /// \todo: coordinates are flipped in the vertex shader
       // texture index to vertex index
-      int32_t iy = iv;
+      int32_t iy = /*height - 1 - */ iv;
       for (uint32_t iu=0; iu < width; ++iu)
       {
           // texture index to vertex index
-          int32_t ix = iu;
+          int32_t ix = /* width - 1 - */ iu;
 
           float Dx{0.0}, Dy{0.0}, Dz{0.0};
           float Tx{1.0}, Ty{0.0}, Tz{0.0};
           float Bx{0.0}, By{1.0}, Bz{0.0};
           float Nx{0.0}, Ny{0.0}, Nz{1.0};
 
-          // int32_t idx = iv * width + iu;
-          // double h  = mHeights[idx];
-          // double sx = mDisplacementsX[idx];
-          // double sy = mDisplacementsY[idx];
-          // double dhdx  = mDhdx[idx]; 
-          // double dhdy  = mDhdy[idx]; 
-          // double dsxdx = mDxdx[idx]; 
-          // double dsydy = mDydy[idx]; 
-          // double dsxdy = mDxdy[idx]; 
+          int32_t idx = iy * width + ix;
+          double h  = mHeights[idx];
+          double sx = mDisplacementsX[idx];
+          double sy = mDisplacementsY[idx];
+          double dhdx  = mDhdx[idx]; 
+          double dhdy  = mDhdy[idx]; 
+          double dsxdx = mDxdx[idx]; 
+          double dsydy = mDydy[idx]; 
+          double dsxdy = mDxdy[idx]; 
 
-          // // vertex displacements
-          // Dx -= sy;
-          // Dy  = sx;
-          // Dz = h;
+          // vertex displacements
+          Dx = sx;
+          Dy = sy;
+          Dz = h;
 
-          // // tangents
-          // Tx = dsydy + 1.0;
-          // Ty = dsxdy;
-          // Tz = dhdy;
+          // tangents
+          Tx = dsxdx + 1.0;
+          Ty = dsxdy;
+          Tz = dhdx;
 
-          // // bitangents
-          // Bx = dsxdy;
-          // By = dsxdx + 1.0;
-          // Bz = dhdx;
+          // bitangents
+          Bx = dsxdy;
+          By = dsydy + 1.0;
+          Bz = dhdy;
 
-          // // normals N = T x B
-          // Nx = 1.0 * (Ty*Bz - Tz*Bx);
-          // Ny = 1.0 * (Tz*Bx - Tx*Bz);
-          // Nz = 1.0 * (Tx*By - Ty*Bx);
+          // normals N = T x B
+          Nx = 1.0 * (Ty*Bz - Tz*Bx);
+          Ny = 1.0 * (Tz*Bx - Tx*Bz);
+          Nz = 1.0 * (Tx*By - Ty*Bx);
 
           heightBox.setColourAt(Ogre::ColourValue(Dx, Dy, Dz, 0.0), iu, iv, 0,
               mHeightMapImage->getPixelFormat());

@@ -106,7 +106,7 @@ vertex PS_INPUT main_metal
   // debug check to establish which vertex quadrant the uv0 maps to
   // P.y += ((1 - input.uv0.x) > 0.5 && input.uv0.y > 0.5) ? 10.0 : 0.0;
 
-  float2 texcoord(1.0 - input.uv0.x, 1.0 - input.uv0.y);
+  float2 texcoord(/*1.0 - */ input.uv0.x, 1.0 - input.uv0.y);
 
   // Resampling at different scales
   float sampleScale = 1.0;
