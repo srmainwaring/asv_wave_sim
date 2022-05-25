@@ -880,7 +880,7 @@ void WavesVisualPrivate::InitUniforms()
   (*vsParams)["bumpScale"].InitializeBuffer(2);
   (*vsParams)["bumpScale"].UpdateBuffer(bumpScale);
 
-  float bumpSpeed[2] = {0.001f, 0.001f};
+  float bumpSpeed[2] = {0.01f, 0.01f};
   (*vsParams)["bumpSpeed"].InitializeBuffer(2);
   (*vsParams)["bumpSpeed"].UpdateBuffer(bumpSpeed);
 
@@ -1137,19 +1137,19 @@ void WavesVisualPrivate::UpdateTextures()
           double dsxdy = mDxdy[idx]; 
 
           // vertex displacements
-          Dx = -sx;
-          Dy = -sy;
-          Dz = h;
+          Dx += sy;
+          Dy += sx;
+          Dz  = h;
 
           // tangents
-          Tx = -dsxdx - 1.0;
-          Ty = -dsxdy;
-          Tz = dhdx;
+          Tx = dsydy + 1.0;
+          Ty = dsxdy;
+          Tz = dhdy;
 
           // bitangents
-          Bx = -dsxdy;
-          By = -dsydy - 1.0;
-          Bz = dhdy;
+          Bx = dsxdy;
+          By = dsxdx + 1.0;
+          Bz = dhdx;
 
           // normals N = T x B
           Nx = 1.0 * (Ty*Bz - Tz*Bx);

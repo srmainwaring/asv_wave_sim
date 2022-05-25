@@ -83,7 +83,7 @@ vertex PS_INPUT main_metal
   PS_INPUT outVs;
 
   // float2 resolution = float2(128.0, 128.0);
-  float2 resolution = float2(1.0, 1.0) * 16.0;
+  float2 resolution = float2(1.0, 1.0) * 16.0 * 256;
 
   // uncomment to use a custom sampler
   // constexpr sampler s(coord::normalized, address::repeat, filter::linear);
@@ -142,8 +142,8 @@ vertex PS_INPUT main_metal
   outVs.uv0 = input.uv0.xy;
 
   // Rescale tangent vectors
-  outVs.T = T; // * p.rescale;
-  outVs.B = B; // * p.rescale;
+  outVs.T = T * p.rescale;
+  outVs.B = B * p.rescale;
   outVs.N = N;
 
   // Compute texture coordinates for bump map
