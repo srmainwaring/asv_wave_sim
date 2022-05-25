@@ -272,9 +272,10 @@ class ignition::gazebo::systems::WavesVisualPrivate
   public: rendering::MaterialPtr oceanMaterial;
 
   /// \brief Pointer to ocean visual
-  public: rendering::VisualPtr oceanVisual;
   // public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
   public: std::vector<rendering::VisualPtr> oceanVisuals;
+
+  /// \brief Pointer to ocean geometry
   public: rendering::Ogre2OceanGeometryPtr oceanGeometry;
 
   /// \brief Pointer to scene
@@ -436,19 +437,13 @@ void WavesVisual::PreUpdate(
 //////////////////////////////////////////////////
 WavesVisualPrivate::~WavesVisualPrivate()
 {
-  if (this->oceanVisual != nullptr)
-  {
-    this->oceanVisual->Destroy();
-    this->oceanVisual.reset();
-  }
-
   for (auto& ogreVisual : this->oceanVisuals)
   {
-    rendering::VisualPtr visual = ogreVisual;
-    if (visual != nullptr)
+    auto vis = ogreVisual;
+    if (vis != nullptr)
     {
-      visual->Destroy();
-      visual.reset();
+      vis->Destroy();
+      vis.reset();
     }
   }
 };
@@ -672,7 +667,7 @@ void WavesVisualPrivate::OnUpdate()
     case OceanVisualMethod::OGRE2_DYNAMIC_TEXTURE:
     {
       // Test attaching a common::Mesh to the entity
-      if (!this->oceanVisual)
+      if (this->oceanVisuals.empty())
       {
         ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
 
@@ -699,29 +694,30 @@ void WavesVisualPrivate::OnUpdate()
         material->SetFragmentShader(fragmentShaderPath);
 
         // create ocean visual
-        this->oceanVisual = this->scene->CreateVisual("ocean");
+        auto oceanVisual = this->scene->CreateVisual();
 
         rendering::MeshDescriptor descriptor;
         descriptor.meshName = common::joinPaths(RESOURCE_PATH, "mesh_256x256.dae");
         common::MeshManager *meshManager = common::MeshManager::Instance();
         descriptor.mesh = meshManager->Load(descriptor.meshName);
         rendering::MeshPtr geometry = this->scene->CreateMesh(descriptor);
-        this->oceanVisual->AddGeometry(geometry);
-        this->oceanVisual->SetMaterial(material);
+        oceanVisual->AddGeometry(geometry);
+        oceanVisual->SetMaterial(material);
 
         // bind to the material owned by the visual
-        this->oceanMaterial = this->oceanVisual->Material();
+        this->oceanMaterial = oceanVisual->Material();
 
         // add visual to parent
         auto parent = this->visual->Parent();
-        parent->AddChild(this->oceanVisual);
+        parent->AddChild(oceanVisual);
+        this->oceanVisuals.push_back(oceanVisual);
 
         this->InitWaveSim();
         this->InitUniforms();
         this->InitTextures();
       }
 
-      if (!this->oceanVisual)
+      if (this->oceanVisuals.empty() || this->isStatic)
         return;
 
       if (this->waveParamsDirty)
@@ -745,7 +741,7 @@ void WavesVisualPrivate::OnUpdate()
     default:
     {
       // Test attaching another visual to the entity
-      if (!this->oceanVisual)
+      if (this->oceanVisuals.empty())
       {
         ignmsg << "WavesVisual: creating default ocean visual\n";
 
@@ -753,12 +749,13 @@ void WavesVisualPrivate::OnUpdate()
         auto geometry = this->scene->CreatePlane();
 
         // create visual
-        auto visual = this->scene->CreateVisual("ocean-tile");
-        visual->AddGeometry(geometry);
-        visual->SetLocalPosition(0.0, 0.0, 0.0);
-        visual->SetLocalRotation(0.0, 0.0, 0.0);
-        visual->SetLocalScale(100.0, 100.0, 100.0);
-        visual->SetMaterial("OceanBlue");
+        auto oceanVisual = this->scene->CreateVisual("ocean-tile");
+        oceanVisual->AddGeometry(geometry);
+        oceanVisual->SetLocalPosition(0.0, 0.0, 0.0);
+        oceanVisual->SetLocalRotation(0.0, 0.0, 0.0);
+        oceanVisual->SetLocalScale(100.0, 100.0, 100.0);
+        oceanVisual->SetMaterial("OceanBlue");
+        this->oceanVisuals.push_back(oceanVisual);
       }
       break;
     }
@@ -846,7 +843,10 @@ void WavesVisualPrivate::InitUniforms()
 {
   auto shader = this->oceanMaterial;
   if (!shader)
+  {
+    ignerr << "Invalid Ocean Material\n";
     return;
+  }
 
   // set vertex shader params
   auto vsParams = shader->VertexShaderParams();
@@ -913,7 +913,10 @@ void WavesVisualPrivate::InitTextures()
 
   auto shader = this->oceanMaterial;
   if (!shader)
+  {
+    ignerr << "Invalid Ocean Material\n";
     return;
+  }
 
   ignition::rendering::Ogre2ScenePtr ogre2Scene =
     std::dynamic_pointer_cast<ignition::rendering::Ogre2Scene>(
@@ -1053,10 +1056,16 @@ void WavesVisualPrivate::UpdateUniforms()
   // vertex shader params
   auto shader = this->oceanMaterial;
   if (!shader)
+  {
+    ignerr << "Invalid Ocean Material\n";
     return;
+  }
   auto vsParams = shader->VertexShaderParams();
   if (!vsParams)
+  {
+    ignerr << "Invalid Ocean vertex shader params\n";
     return;
+  }
 
   float simTime = static_cast<float>(this->currentSimTimeSeconds);
 
