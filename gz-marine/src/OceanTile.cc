@@ -643,8 +643,8 @@ void OceanTilePrivate<math::Vector3d>::UpdateVertex(
 
   auto&& v0 = mVertices0[idx0];
   auto&& v  = mVertices[idx0];
-  v.X() = v0.X() + sx;
-  v.Y() = v0.Y() + sy;
+  v.X() = v0.X() + sy;
+  v.Y() = v0.Y() + sx;
   v.Z() = v0.Z() + h;
 }
 
@@ -659,8 +659,8 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t idx0, size_t idx1)
 
   auto&& v0 = mVertices0[idx0];
   mVertices[idx0] = cgal::Point3(
-    v0.x() + sx,
-    v0.y() + sy,
+    v0.x() + sy,
+    v0.y() + sx,
     v0.z() + h);
 }
 
@@ -676,8 +676,8 @@ void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(
 
   auto&& v0 = mVertices0[idx0];
   auto&& v  = mVertices[idx0];
-  v.X() = v0.X() + sx;
-  v.Y() = v0.Y() + sy;
+  v.X() = v0.X() + sy;
+  v.Y() = v0.Y() + sx;
   v.Z() = v0.Z() + h;
 
   // 2. Update tangent and bitangent vectors (not normalised).
@@ -689,14 +689,14 @@ void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(
   double dsxdy = mDxdy[idx1]; 
 
   auto&& t = mTangents[idx0];
-  t.X() = dsxdx + 1.0;
+  t.X() = dsydy + 1.0;
   t.Y() = dsxdy;
-  t.Z() = dhdx;
+  t.Z() = dhdy;
 
   auto&& b = mBitangents[idx0];
   b.X() = dsxdy;
-  b.Y() = dsydy + 1.0;
-  b.Z() = dhdy;
+  b.Y() = dsxdx + 1.0;
+  b.Z() = dhdx;
 
   auto&& n = mNormals[idx0];
   auto normal =  t.Cross(b);
@@ -724,8 +724,8 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(
 
   auto&& v0 = mVertices0[idx0];
   auto&& v  = mVertices[idx0] = cgal::Point3(
-    v0.x() + sx,
-    v0.y() + sy,
+    v0.x() + sy,
+    v0.y() + sx,
     v0.z() + h);
 
   // 2. Update tangent and bitangent vectors (not normalised).
@@ -737,14 +737,14 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(
   double dsxdy = mDxdy[idx1]; 
 
   mTangents[idx0] = cgal::Point3(
-    dsxdx + 1.0,
+    dsydy + 1.0,
     dsxdy,
-    dhdx);
+    dhdy);
   
   mBitangents[idx0] = cgal::Point3(
     dsxdy,
-    dsydy + 1.0,
-    dhdy);
+    dsxdx + 1.0,
+    dhdx);
 }
 
 //////////////////////////////////////////////////
