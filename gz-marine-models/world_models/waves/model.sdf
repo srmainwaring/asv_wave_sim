@@ -85,7 +85,7 @@
           <param>
             <shader>vertex</shader>
             <name>bumpScale</name>
-            <value>0.1 0.1</value>
+            <value>128 128</value>
             <type>float_array</type>
           </param>
           <param>

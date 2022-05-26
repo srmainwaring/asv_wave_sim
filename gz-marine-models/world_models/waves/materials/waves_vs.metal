@@ -82,8 +82,7 @@ vertex PS_INPUT main_metal
 {
   PS_INPUT outVs;
 
-  // float2 resolution = float2(128.0, 128.0);
-  float2 resolution = float2(1.0, 1.0) * 16.0 * 256;
+  float2 resolution = float2(1.0, 1.0) * 16.0;
 
   // uncomment to use a custom sampler
   // constexpr sampler s(coord::normalized, address::repeat, filter::linear);
