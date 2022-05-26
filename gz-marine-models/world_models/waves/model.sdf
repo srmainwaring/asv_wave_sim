@@ -22,11 +22,16 @@
     <link name="base_link">
       <visual name="visual">
         <geometry>
-          <sphere>
+          <!-- <sphere>
             <radius>0.01</radius>
-          </sphere>
+          </sphere> -->
+          <mesh>
+            <uri>materials/mesh_256x256.dae</uri>
+          </mesh>
         </geometry>
-        <material>
+        <!-- Uncomment if using DYNAMIC_GEOMETRY which uses PBS rather than a custom shader -->
+        <!--
+          <material>
           <ambient>0.0 0.05 0.8 0.92</ambient>
           <diffuse>0.0 0.1 0.7 0.92</diffuse>
           <specular>0.7 0.7 0.7 0.92</specular>
@@ -38,7 +43,7 @@
               <metalness>0.1</metalness>
             </metal>
           </pbr>
-        </material>
+        </material> -->
 
         <!-- \todo remove duplicate params; populate from service instead -->
         <plugin

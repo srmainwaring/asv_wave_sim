@@ -855,16 +855,26 @@ void WavesVisualPrivate::OnUpdate()
         // create shader material
         this->CreateShaderMaterial();
 
-        /// \todo: do not hardcode mesh name... 
+        /// \note: replaced with cloned geometry from primary visual 
         // load mesh
-        std::string meshPath = common::findFile(
-            asFullPath("materials", this->modelPath));
-
-        rendering::MeshDescriptor descriptor;
-        descriptor.meshName = common::joinPaths(meshPath, "mesh_256x256.dae");
-        common::MeshManager *meshManager = common::MeshManager::Instance();
-        descriptor.mesh = meshManager->Load(descriptor.meshName);
+        // std::string meshPath = common::findFile(
+        //     asFullPath("materials/mesh_256x256.dae", this->modelPath));
+        // rendering::MeshDescriptor descriptor;
+        // descriptor.meshName = meshPath;
+        // common::MeshManager *meshManager = common::MeshManager::Instance();
+        // descriptor.mesh = meshManager->Load(descriptor.meshName);
  
+        // Hide the primary visual
+        this->visual->SetVisible(false);
+
+        // Get geometry (should be a plane mesh)
+        auto geometry = this->visual->GeometryByIndex(0);
+        if (!geometry)
+        {
+          ignerr << "Waves visual has invalid geometry\n";
+          return;
+        }
+
         // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
         auto position = this->visual->LocalPosition();
         for (int iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
@@ -878,12 +888,12 @@ void WavesVisualPrivate::OnUpdate()
               position.Z() + 0.0
             );
 
-            // create geometry
-            auto geometry = this->scene->CreateMesh(descriptor);
+            /// \note: replaced with cloned geometry from primary visual
+            // auto geometry = this->scene->CreateMesh(descriptor);
   
             // create ocean visual
             auto oceanVisual = this->scene->CreateVisual();
-            oceanVisual->AddGeometry(geometry);
+            oceanVisual->AddGeometry(geometry->Clone());
             oceanVisual->SetMaterial(this->oceanMaterial, false);
             oceanVisual->SetLocalPosition(tilePosition);
 
