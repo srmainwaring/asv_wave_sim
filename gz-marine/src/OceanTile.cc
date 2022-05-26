@@ -354,9 +354,9 @@ void OceanTilePrivate<Vector3>::Create()
   // const double xTex = 1.0 * lx;
   // const double yTex = 1.0 * ly;
   /// \todo add param to tune bump map scaling
-  double texScale = Lx;
-  const double xTex = texScale / mResolution;
-  const double yTex = texScale / mResolution;
+  double texScale = 0.1;
+  const double xTex = texScale * Lx / nx;
+  const double yTex = texScale * Ly / ny;
 
   ignmsg << "OceanTile: calculating vertices\n";
   // Vertices - (N+1) vertices in each row / column
