@@ -13,6 +13,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+// Code for retrieving shader params from gz-sim/src/systems/shader_param
+
+/*
+ * Copyright (C) 2022 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 #include "WavesVisual.hh"
 
 #include "Ogre2OceanVisual.hh"
@@ -248,6 +268,39 @@ using namespace systems;
 
 class ignition::gazebo::systems::WavesVisualPrivate
 {
+  /// \brief Data structure for storing shader param info
+  public: class ShaderParamValue
+  {
+    /// \brief shader type: vertex or fragment
+    public: std::string shader;
+
+    /// \brief variable type: int, float, float_array, int_array,
+    /// texture, texture_cube
+    public: std::string type;
+
+    /// \brief variable name of param
+    public: std::string name;
+
+    /// \brief param value
+    public: std::string value;
+
+    /// \brief Any additional arguments
+    public: std::vector<std::string> args;
+  };
+
+  /// \brief Data structure for storing shader files uri
+  public: class ShaderUri
+  {
+    /// \brief Shader language: glsl or metal
+    public: std::string language;
+
+    /// \brief Path to vertex shader
+    public: std::string vertexShaderUri;
+
+    /// \brief Path to fragment shader
+    public: std::string fragmentShaderUri;
+  };
+
   /// \brief Destructor
   public: ~WavesVisualPrivate();
 
@@ -320,7 +373,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   std::vector<double> mDydy;
   std::vector<double> mDxdy;
 
-  std::string RESOURCE_PATH;
+  public: void CreateShaderMaterial();
 
   public: void InitWaveSim();
   public: void InitUniforms();
@@ -346,6 +399,21 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief The ocean tile managing the wave simulation
   public: marine::visual::OceanTilePtr oceanTile;
+
+  /////////////////
+  /// ShaderParams (from gz-sim/src/systems/shader_param)
+
+  /// \brief A map of shader language to shader program files
+  public: std::map<std::string, ShaderUri> shaders;
+
+  /// \brief A list of shader params
+  public: std::vector<ShaderParamValue> shaderParams;
+
+  /// \brief A list of shader params that will be updated every iteration
+  public: std::vector<ShaderParamValue> timeParams;
+
+  /// \brief Path to model
+  public: std::string modelPath;
 
   /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
@@ -382,20 +450,22 @@ void WavesVisual::Configure(const Entity &_entity,
   // function and _sdf is a const shared pointer to a const sdf::Element.
   auto sdf = const_cast<sdf::Element *>(_sdf.get());
 
-  // capture entity 
+  // Capture entity 
   this->dataPtr->entity = _entity;
   auto nameComp = _ecm.Component<components::Name>(_entity);
   this->dataPtr->visualName = nameComp->Data();
 
   // Update parameters
-  this->dataPtr->isStatic = marine::Utilities::SdfParamBool(
-      *sdf,  "static", this->dataPtr->isStatic);
+  {
+    this->dataPtr->isStatic = marine::Utilities::SdfParamBool(
+        *sdf,  "static", this->dataPtr->isStatic);
 
-  this->dataPtr->tiles_x = marine::Utilities::SdfParamVector2i(
-      *sdf,  "tiles_x", this->dataPtr->tiles_x);
+    this->dataPtr->tiles_x = marine::Utilities::SdfParamVector2i(
+        *sdf,  "tiles_x", this->dataPtr->tiles_x);
 
-  this->dataPtr->tiles_y = marine::Utilities::SdfParamVector2i(
-      *sdf,  "tiles_y", this->dataPtr->tiles_y);
+    this->dataPtr->tiles_y = marine::Utilities::SdfParamVector2i(
+        *sdf,  "tiles_y", this->dataPtr->tiles_y);
+  }
 
   // Wave parameters
   this->dataPtr->waveParams.reset(new marine::WaveParameters());
@@ -406,8 +476,108 @@ void WavesVisual::Configure(const Entity &_entity,
     this->dataPtr->waveParams->SetFromSDF(*sdfWave);
   }
 
-  // connect to the SceneUpdate event
-  // the callback is executed in the rendering thread so do all
+  // Shader params
+  if (sdf->HasElement("param"))
+  {
+    // loop and parse all shader params
+    sdf::ElementPtr paramElem = sdf->GetElement("param");
+    while (paramElem)
+    {
+      if (!paramElem->HasElement("shader") ||
+          !paramElem->HasElement("name"))
+      {
+        ignerr << "<param> must have <shader> and <name> sdf elements"
+               << std::endl;
+        paramElem = paramElem->GetNextElement("param");
+        continue;
+      }
+      std::string shaderType = paramElem->Get<std::string>("shader");
+      std::string paramName = paramElem->Get<std::string>("name");
+
+      std::string type = paramElem->Get<std::string>("type", "float").first;
+      std::string value = paramElem->Get<std::string>("value", "").first;
+
+      WavesVisualPrivate::ShaderParamValue spv;
+      spv.shader = shaderType;
+      spv.name = paramName;
+      spv.value = value;
+      spv.type = type;
+
+      if (paramElem->HasElement("arg"))
+      {
+        sdf::ElementPtr argElem = paramElem->GetElement("arg");
+        while (argElem)
+        {
+          spv.args.push_back(argElem->Get<std::string>());
+          argElem = argElem->GetNextElement("arg");
+        }
+      }
+
+      this->dataPtr->shaderParams.push_back(spv);
+      paramElem = paramElem->GetNextElement("param");
+    }
+  }
+
+  // Model path
+  if (this->dataPtr->modelPath.empty())
+  {
+    auto modelEntity = topLevelModel(_entity, _ecm);
+    this->dataPtr->modelPath =
+        _ecm.ComponentData<components::SourceFilePath>(modelEntity).value();
+  }
+
+  // Shader programs
+  {
+    if (!sdf->HasElement("shader"))
+    {
+      ignerr << "Unable to load shader param system. "
+            << "Missing <shader> SDF element." << std::endl;
+      return;
+    }
+
+    // Allow multiple shader SDF element for different shader languages
+    sdf::ElementPtr shaderElem = sdf->GetElement("shader");
+    while (shaderElem)
+    {
+      if (!shaderElem->HasElement("vertex") ||
+          !shaderElem->HasElement("fragment"))
+      {
+        ignerr << "<shader> must have <vertex> and <fragment> sdf elements"
+              << std::endl;
+      }
+      else
+      {
+        // default to glsl
+        std::string api = "glsl";
+        if (shaderElem->HasAttribute("language"))
+          api = shaderElem->GetAttribute("language")->GetAsString();
+
+        WavesVisualPrivate::ShaderUri shader;
+        shader.language = api;
+
+        sdf::ElementPtr vertexElem = shaderElem->GetElement("vertex");
+        shader.vertexShaderUri = common::findFile(
+            asFullPath(vertexElem->Get<std::string>(),
+            this->dataPtr->modelPath));
+        sdf::ElementPtr fragmentElem = shaderElem->GetElement("fragment");
+        shader.fragmentShaderUri = common::findFile(
+            asFullPath(fragmentElem->Get<std::string>(),
+            this->dataPtr->modelPath));
+        this->dataPtr->shaders[api] = shader;
+        shaderElem = shaderElem->GetNextElement("shader");
+      }
+    }
+    if (this->dataPtr->shaders.empty())
+    {
+      ignerr << "Unable to load shader param system. "
+            << "No valid shaders." << std::endl;
+      return;
+    }
+  }
+
+  // Connect to the SceneUpdate event
+  //
+  // The callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
       _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
@@ -682,31 +852,16 @@ void WavesVisualPrivate::OnUpdate()
       {
         ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
 
-        // custom material (see waves_fft)
-
-        /// \todo: replace hardcoded shader files - see ShaderParams plugin
-        const std::string vertexShaderFile = "waves_vs.metal";
-        const std::string fragmentShaderFile = "waves_fs.metal";
-
-        /// \todo: replace hardcoded path - see ShaderParams plugin
-        this->RESOURCE_PATH =
-          "/Users/rhys/Code/robotics/ign_wave_sim/wave_sim_ws/src/asv_wave_sim/gz-marine-models/world_models/waves/materials";
-
-        // path to look for vertex and fragment shader parameters
-        std::string vertexShaderPath = ignition::common::joinPaths(
-            this->RESOURCE_PATH, vertexShaderFile);
-
-        std::string fragmentShaderPath = ignition::common::joinPaths(
-            this->RESOURCE_PATH, fragmentShaderFile);
-
         // create shader material
-        this->oceanMaterial = scene->CreateMaterial();
-        this->oceanMaterial->SetVertexShader(vertexShaderPath);
-        this->oceanMaterial->SetFragmentShader(fragmentShaderPath);
+        this->CreateShaderMaterial();
 
+        /// \todo: do not hardcode mesh name... 
         // load mesh
+        std::string meshPath = common::findFile(
+            asFullPath("materials", this->modelPath));
+
         rendering::MeshDescriptor descriptor;
-        descriptor.meshName = common::joinPaths(RESOURCE_PATH, "mesh_256x256.dae");
+        descriptor.meshName = common::joinPaths(meshPath, "mesh_256x256.dae");
         common::MeshManager *meshManager = common::MeshManager::Instance();
         descriptor.mesh = meshManager->Load(descriptor.meshName);
  
@@ -845,6 +1000,38 @@ void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
 }
 
 //////////////////////////////////////////////////
+void WavesVisualPrivate::CreateShaderMaterial()
+{
+  this->oceanMaterial = this->scene->CreateMaterial();
+
+  // default to glsl
+  auto it = this->shaders.find("glsl");
+  if (it != this->shaders.end())
+  {
+    this->oceanMaterial->SetVertexShader(it->second.vertexShaderUri);
+    this->oceanMaterial->SetFragmentShader(it->second.fragmentShaderUri);
+  }
+  // prefer metal over glsl on macOS
+  /// \todo(anyone) instead of using ifdef to check for macOS,
+  // expose add an accessor function to get the GraphicsApi
+  // from rendering::RenderEngine
+#ifdef __APPLE__
+  auto metalIt = this->shaders.find("metal");
+  if (metalIt != this->shaders.end())
+  {
+    this->oceanMaterial->SetVertexShader(metalIt->second.vertexShaderUri);
+    this->oceanMaterial->SetFragmentShader(metalIt->second.fragmentShaderUri);
+    // if both glsl and metal are specified, print a msg to inform that
+    // metal is used instead of glsl
+    if (it != this->shaders.end())
+    {
+      ignmsg << "Using metal shaders. " << std::endl;
+    }
+  }
+#endif
+}
+
+//////////////////////////////////////////////////
 void WavesVisualPrivate::InitWaveSim()
 {
   int N      = this->waveParams->CellCount();
@@ -868,63 +1055,151 @@ void WavesVisualPrivate::InitWaveSim()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::InitUniforms()
 {
-  auto shader = this->oceanMaterial;
-  if (!shader)
+  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc 
+  /// ShaderParamPrivate::OnUpdate
+
+  // set the shader params read from SDF
+  // this is only done once
+  for (const auto & spv : this->shaderParams)
   {
-    ignerr << "Invalid Ocean Material\n";
-    return;
+    // TIME is reserved keyword for sim time
+    if (spv.value == "TIME")
+    {
+      this->timeParams.push_back(spv);
+      continue;
+    }
+
+    rendering::ShaderParamsPtr params;
+    if (spv.shader == "fragment")
+    {
+      params = this->oceanMaterial->FragmentShaderParams();
+    }
+    else if (spv.shader == "vertex")
+    {
+      params = this->oceanMaterial->VertexShaderParams();
+    }
+
+    // if no <value> is specified, this could be a constant
+    if (spv.value.empty())
+    {
+      // \todo handle args for constants in ign-rendering
+      (*params)[spv.name] = 1;
+      continue;
+    }
+
+    // handle texture params
+    if (spv.type == "texture")
+    {
+      unsigned int uvSetIndex = spv.args.empty() ? 0u :
+          static_cast<unsigned int>(std::stoul(spv.args[0]));
+      std::string texPath = common::findFile(
+          asFullPath(spv.value, this->modelPath));
+      (*params)[spv.name].SetTexture(texPath,
+          rendering::ShaderParam::ParamType::PARAM_TEXTURE, uvSetIndex);
+      
+      ignmsg << "Shader param [" << spv.name << "]" 
+          << ", type: " << spv.type
+          << ", tex coord set: " << uvSetIndex << "\n";
+    }
+    else if (spv.type == "texture_cube")
+    {
+      unsigned int uvSetIndex = spv.args.empty() ? 0u :
+          static_cast<unsigned int>(std::stoul(spv.args[0]));
+      std::string texPath = common::findFile(
+          asFullPath(spv.value, this->modelPath));
+      (*params)[spv.name].SetTexture(texPath,
+          rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, uvSetIndex);
+
+      ignmsg << "Shader param [" << spv.name << "]" 
+          << ", type: " << spv.type
+          << ", tex coord set: " << uvSetIndex << "\n";
+    }
+    // handle int, float, int_array, and float_array params
+    else
+    {
+      std::vector<std::string> values = common::split(spv.value, " ");
+
+      int intValue = 0;
+      float floatValue = 0;
+      std::vector<float> floatArrayValue;
+
+      rendering::ShaderParam::ParamType paramType =
+          rendering::ShaderParam::PARAM_NONE;
+
+      // float / int
+      if (values.size() == 1u)
+      {
+        std::string str = values[0];
+
+        // if <type> is not empty, respect the specified type
+        if (!spv.type.empty())
+        {
+          if (spv.type == "int")
+          {
+            intValue = std::stoi(str);
+            paramType = rendering::ShaderParam::PARAM_INT;
+          }
+          else if (spv.type == "float")
+          {
+            floatValue = std::stof(str);
+            paramType = rendering::ShaderParam::PARAM_FLOAT;
+          }
+        }
+        // else do our best guess at what the type is
+        else
+        {
+          std::string::size_type sz;
+          int n = std::stoi(str, &sz);
+          if ( sz == str.size())
+          {
+            intValue = n;
+            paramType = rendering::ShaderParam::PARAM_INT;
+          }
+          else
+          {
+            floatValue = std::stof(str);
+            paramType = rendering::ShaderParam::PARAM_FLOAT;
+          }
+        }
+      }
+      // arrays
+      else
+      {
+        // int array
+        if (!spv.type.empty() && spv.type == "int_array")
+        {
+          for (const auto &v : values)
+            floatArrayValue.push_back(std::stoi(v));
+          paramType = rendering::ShaderParam::PARAM_INT_BUFFER;
+        }
+        // treat everything else as float_array
+        else
+        {
+          for (const auto &v : values)
+            floatArrayValue.push_back(std::stof(v));
+          paramType = rendering::ShaderParam::PARAM_FLOAT_BUFFER;
+        }
+      }
+
+      // set the params
+      if (paramType == rendering::ShaderParam::PARAM_INT)
+      {
+        (*params)[spv.name] = intValue;
+      }
+      else if (paramType == rendering::ShaderParam::PARAM_FLOAT)
+      {
+        (*params)[spv.name] = floatValue;
+      }
+      else if (paramType == rendering::ShaderParam::PARAM_INT_BUFFER ||
+          paramType == rendering::ShaderParam::PARAM_FLOAT_BUFFER)
+      {
+        (*params)[spv.name].InitializeBuffer(floatArrayValue.size());
+        float *fv = &floatArrayValue[0];
+        (*params)[spv.name].UpdateBuffer(fv);
+      }
+    }
   }
-
-  // set vertex shader params
-  auto vsParams = shader->VertexShaderParams();
-
-  (*vsParams)["world_matrix"] = 1;
-  (*vsParams)["worldviewproj_matrix"] = 1;
-
-  (*vsParams)["t"] = 0.0f;
-
-  (*vsParams)["rescale"] = 0.5f;
-
-  float bumpScale[2] = {0.1f, 0.1f};
-  (*vsParams)["bumpScale"].InitializeBuffer(2);
-  (*vsParams)["bumpScale"].UpdateBuffer(bumpScale);
-
-  float bumpSpeed[2] = {0.01f, 0.01f};
-  (*vsParams)["bumpSpeed"].InitializeBuffer(2);
-  (*vsParams)["bumpSpeed"].UpdateBuffer(bumpSpeed);
-
-  // camera_position is a constant defined by ogre.
-  (*vsParams)["camera_position"] = 1;
-
-  // set fragment shader params
-  auto fsParams = shader->FragmentShaderParams();
-
-  float hdrMultiplier = 0.4f;
-  (*fsParams)["hdrMultiplier"] = hdrMultiplier;
-
-  float fresnelPower = 5.0f;
-  (*fsParams)["fresnelPower"] = fresnelPower;
-
-  float shallowColor[4] = {0.0f, 0.1f, 0.3f, 1.0f};
-  (*fsParams)["shallowColor"].InitializeBuffer(4);
-  (*fsParams)["shallowColor"].UpdateBuffer(shallowColor);
-
-  float deepColor[4] = {0.0f, 0.05f, 0.2f, 1.0f};
-  (*fsParams)["deepColor"].InitializeBuffer(4);
-  (*fsParams)["deepColor"].UpdateBuffer(deepColor);
-
-  std::string bumpMapPath = ignition::common::joinPaths(
-      this->RESOURCE_PATH,
-      "wave_normals.dds");
-  (*fsParams)["bumpMap"].SetTexture(bumpMapPath);
-
-  std::string cubeMapPath = ignition::common::joinPaths(
-      this->RESOURCE_PATH,
-      // "skybox_test.dds");
-      "skybox_lowres.dds");
-
-  (*fsParams)["cubeMap"].SetTexture(cubeMapPath,
-      rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, 1u);
+  this->shaderParams.clear();
 }
 
 //////////////////////////////////////////////////
@@ -1080,24 +1355,25 @@ void WavesVisualPrivate::UpdateWaveSim()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::UpdateUniforms()
 {
-  // vertex shader params
-  auto shader = this->oceanMaterial;
-  if (!shader)
-  {
-    ignerr << "Invalid Ocean Material\n";
-    return;
-  }
-  auto vsParams = shader->VertexShaderParams();
-  if (!vsParams)
-  {
-    ignerr << "Invalid Ocean vertex shader params\n";
-    return;
-  }
+  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc 
+  /// ShaderParamPrivate::OnUpdate
 
   float simTime = static_cast<float>(this->currentSimTimeSeconds);
 
- // update the time `t` uniform
-  (*vsParams)["t"] = simTime;
+  // time variables need to be updated every iteration
+  for (const auto & spv : this->timeParams)
+  {
+    rendering::ShaderParamsPtr params;
+    if (spv.shader == "fragment")
+    {
+      params = this->oceanMaterial->FragmentShaderParams();
+    }
+    else if (spv.shader == "vertex")
+    {
+      params = this->oceanMaterial->VertexShaderParams();
+    }
+    (*params)[spv.name] = simTime;
+  }
 }
 
 //////////////////////////////////////////////////
