@@ -1276,7 +1276,7 @@ void WavesVisualPrivate::InitTextures()
   // Create displacement texture
   ignmsg << "Create HeightMap texture\n";
   mHeightMapTex = ogre2TextureManager->createTexture(
-      "HeightMapTex",
+      "HeightMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
       Ogre::TextureTypes::Type2D );
@@ -1290,7 +1290,7 @@ void WavesVisualPrivate::InitTextures()
   // Create normal texture
   ignmsg << "Create NormalMap texture\n";
   mNormalMapTex = ogre2TextureManager->createTexture(
-      "NormalMapTex",
+      "NormalMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
       Ogre::TextureTypes::Type2D );
@@ -1304,7 +1304,7 @@ void WavesVisualPrivate::InitTextures()
   // Create tangent texture
   ignmsg << "Create TangentMap texture\n";
   mTangentMapTex = ogre2TextureManager->createTexture(
-      "TangentMapTex",
+      "TangentMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
       Ogre::TextureTypes::Type2D );
