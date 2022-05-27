@@ -50,6 +50,7 @@
             filename="gazebo_marine1-waves-visual-system"
             name="ignition::gazebo::systems::WavesVisual">
           <static>0</static>
+          <mesh_deformation_method>DYNAMIC_TEXTURE</mesh_deformation_method>
           <tiles_x>-10 10</tiles_x>
           <tiles_y>-10 10</tiles_y>
           <wave>
