@@ -301,6 +301,35 @@ class ignition::gazebo::systems::WavesVisualPrivate
     public: std::string fragmentShaderUri;
   };
 
+  /// \brief Enum to set the method used for updating shader vertices
+  public: enum class MeshDeformationMethod : uint16_t
+  {
+    /// \internal
+    /// \brief Indicator used to create an iterator over the
+    /// enum. Do not use this.
+    MESH_DEFORMATION_METHOD_BEGIN = 0,
+
+    /// \brief Unknown graphics interface
+    UNKNOWN = MESH_DEFORMATION_METHOD_BEGIN,
+
+    /// \brief Update displacement map textures
+    DYNAMIC_TEXTURE = 1,
+
+    /// \brief Update vertex, normal and tangent arrays
+    DYNAMIC_GEOMETRY = 2,
+
+    /// \internal
+    /// \brief Indicator used to create an iterator over the
+    /// enum. Do not use this.
+    MESH_DEFORMATION_METHOD_END
+  };
+
+  /// \brief Set an enum from a string.
+  /// \param[in] _str String value to convert to enum value.
+  /// \return MeshDeformationMethod enum
+  public: static MeshDeformationMethod SetMeshDeformationMethod(
+      const std::string &_str);
+
   /// \brief Destructor
   public: ~WavesVisualPrivate();
 
@@ -350,8 +379,12 @@ class ignition::gazebo::systems::WavesVisualPrivate
   public: std::vector<rendering::VisualPtr> oceanVisuals;
   public: std::vector<rendering::Ogre2OceanGeometryPtr> oceanGeometries;
 
+  public: MeshDeformationMethod meshDeformationMethod{
+      MeshDeformationMethod::DYNAMIC_GEOMETRY};
+
   /////////////////
-  /// OGRE2_DYNAMIC_TEXTURE
+  // DYNAMIC_TEXTURE
+
   /// \note: new code adapted from ogre ocean materials sample
   // textures for displacement, normal and tangent maps
   Ogre::Image2       *mHeightMapImage;
@@ -382,24 +415,23 @@ class ignition::gazebo::systems::WavesVisualPrivate
   public: void UpdateTextures();
 
   /////////////////
-  /// OGRE2_DYNAMIC_GEOMETRY
+  // DYNAMIC_GEOMETRY
+
   /// \brief Ocean mesh (not stored in the mesh manager)
   public: common::MeshPtr oceanTileMesh;
 
   /////////////////
-  /// OceanTile
+  // OceanTile
+
   /// \brief The wave parameters.
   public: marine::WaveParametersPtr waveParams;
   public: bool waveParamsDirty{false};
-
-  // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
-  // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
 
   /// \brief The ocean tile managing the wave simulation
   public: marine::visual::OceanTilePtr oceanTile;
 
   /////////////////
-  /// ShaderParams (from gz-sim/src/systems/shader_param)
+  // ShaderParams (from gz-sim/src/systems/shader_param)
 
   /// \brief A map of shader language to shader program files
   public: std::map<std::string, ShaderUri> shaders;
@@ -412,6 +444,9 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief Path to model
   public: std::string modelPath;
+
+  /////////////////
+  // Transport and connections
 
   /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
@@ -463,6 +498,11 @@ void WavesVisual::Configure(const Entity &_entity,
 
     this->dataPtr->tiles_y = marine::Utilities::SdfParamVector2i(
         *sdf,  "tiles_y", this->dataPtr->tiles_y);
+
+    std::string meshDeformationMethodStr = marine::Utilities::SdfParamString(
+        *sdf,  "mesh_deformation_method", "DYNAMIC_GEOMETRY");
+    this->dataPtr->meshDeformationMethod =
+        this->dataPtr->SetMeshDeformationMethod(meshDeformationMethodStr);
   }
 
   // Wave parameters
@@ -615,6 +655,27 @@ void WavesVisual::PreUpdate(
 }
 
 /////////////////////////////////////////////////
+IGN_ENUM(meshDeformationMethodIface,
+    WavesVisualPrivate::MeshDeformationMethod,
+    WavesVisualPrivate::MeshDeformationMethod::MESH_DEFORMATION_METHOD_BEGIN,
+    WavesVisualPrivate::MeshDeformationMethod::MESH_DEFORMATION_METHOD_END,
+    "UNKNOWN", "DYNAMIC_TEXTURE", "DYNAMIC_GEOMETRY"
+)
+
+//////////////////////////////////////////////////
+WavesVisualPrivate::MeshDeformationMethod
+WavesVisualPrivate::SetMeshDeformationMethod(const std::string &_str)
+{
+  // Convert to upper case
+  std::string str(_str);
+  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+
+  // Set the enum
+  MeshDeformationMethod e{MeshDeformationMethod::UNKNOWN};
+  meshDeformationMethodIface.Set(e, str);
+  return e;
+}
+
 //////////////////////////////////////////////////
 WavesVisualPrivate::~WavesVisualPrivate()
 {
@@ -627,29 +688,6 @@ WavesVisualPrivate::~WavesVisualPrivate()
       vis.reset();
     }
   }
-};
-
-//////////////////////////////////////////////////
-enum class OceanVisualMethod : uint16_t
-{
-  /// \internal
-  /// \brief Indicator used to create an iterator over the
-  /// enum. Do not use this.
-  OCEAN_VISUAL_METHOD_BEGIN = 0,
-
-  /// \brief Unknown graphics interface
-  UNKNOWN = OCEAN_VISUAL_METHOD_BEGIN,
-
-  /// \brief Ogre::Mesh (v2)
-  OGRE2_DYNAMIC_TEXTURE = 2,
-
-  /// \brief Ogre2DynamicGeometry
-  OGRE2_DYNAMIC_GEOMETRY = 3,
-
-  /// \internal
-  /// \brief Indicator used to create an iterator over the
-  /// enum. Do not use this.
-  OCEAN_VISUAL_METHOD_END
 };
 
 //////////////////////////////////////////////////
@@ -721,10 +759,9 @@ void WavesVisualPrivate::OnUpdate()
   double ux = this->waveParams->WindVelocity().X();
   double uy = this->waveParams->WindVelocity().Y();
 
-  OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_TEXTURE;
-  switch (method)
+  switch (this->meshDeformationMethod)
   {
-    case OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY:
+    case MeshDeformationMethod::DYNAMIC_GEOMETRY:
     {
       // Test attaching another visual to the entity
       if (this->oceanVisuals.empty() && oceanOgreVisuals.empty())
@@ -857,12 +894,12 @@ void WavesVisualPrivate::OnUpdate()
 #endif
       break;
     }
-    case OceanVisualMethod::OGRE2_DYNAMIC_TEXTURE:
+    case MeshDeformationMethod::DYNAMIC_TEXTURE:
     {
       // Test attaching a common::Mesh to the entity
       if (this->oceanVisuals.empty())
       {
-        ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
+        ignmsg << "WavesVisual: creating dynamic texture ocean visual\n";
 
         // create shader material
         this->CreateShaderMaterial();
@@ -944,23 +981,7 @@ void WavesVisualPrivate::OnUpdate()
     }
     default:
     {
-      // Test attaching another visual to the entity
-      if (this->oceanVisuals.empty())
-      {
-        ignmsg << "WavesVisual: creating default ocean visual\n";
-
-        // create plane
-        auto geometry = this->scene->CreatePlane();
-
-        // create visual
-        auto oceanVisual = this->scene->CreateVisual("ocean-tile");
-        oceanVisual->AddGeometry(geometry);
-        oceanVisual->SetLocalPosition(0.0, 0.0, 0.0);
-        oceanVisual->SetLocalRotation(0.0, 0.0, 0.0);
-        oceanVisual->SetLocalScale(100.0, 100.0, 100.0);
-        oceanVisual->SetMaterial("OceanBlue");
-        this->oceanVisuals.push_back(oceanVisual);
-      }
+      ignerr << "Invalid mesh deformation method\n";
       break;
     }
   }
