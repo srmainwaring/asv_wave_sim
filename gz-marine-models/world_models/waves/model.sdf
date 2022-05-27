@@ -22,37 +22,37 @@
     <link name="base_link">
       <visual name="visual">
         <geometry>
-          <!-- <sphere>
-            <radius>0.01</radius>
-          </sphere> -->
           <mesh>
-            <uri>materials/mesh_256x256.dae</uri>
+            <uri>materials/mesh_L256m_N256.dae</uri>
           </mesh>
         </geometry>
-        <!-- Uncomment if using DYNAMIC_GEOMETRY which uses PBS rather than a custom shader -->
-        <!--
-          <material>
+        <!-- 
+          Uncomment material if using DYNAMIC_GEOMETRY which uses PBS
+          rather than a custom shader
+        -->
+        <material>
           <ambient>0.0 0.05 0.8 0.92</ambient>
           <diffuse>0.0 0.1 0.7 0.92</diffuse>
           <specular>0.7 0.7 0.7 0.92</specular>
           <pbr>
             <metal>
+              <albedo_map>materials/water.jpg</albedo_map>
               <normal_map>materials/wave_normals.dds</normal_map>
               <environment_map>materials/skybox_lowres.dds</environment_map>
               <roughness>0.3</roughness>
               <metalness>0.1</metalness>
             </metal>
           </pbr>
-        </material> -->
+        </material>
 
         <!-- \todo remove duplicate params; populate from service instead -->
         <plugin
             filename="gazebo_marine1-waves-visual-system"
             name="ignition::gazebo::systems::WavesVisual">
           <static>0</static>
-          <mesh_deformation_method>DYNAMIC_TEXTURE</mesh_deformation_method>
-          <tiles_x>-10 10</tiles_x>
-          <tiles_y>-10 10</tiles_y>
+          <mesh_deformation_method>DYNAMIC_GEOMETRY</mesh_deformation_method>
+          <tiles_x>-0 0</tiles_x>
+          <tiles_y>-0 0</tiles_y>
           <wave>
             <!-- `fft` wave parameters -->
             <algorithm>fft</algorithm>
@@ -62,6 +62,11 @@
             <wind_angle_deg>135</wind_angle_deg>
             <steepness>2</steepness>
           </wave>
+
+          <!--
+            The section below for shaders is ignored when using
+            DYNAMIC_TEXTURE
+          -->
 
           <!-- shader program -->
           <shader language="metal">
