@@ -160,11 +160,13 @@ namespace systems
   /// \param[in]  _model    The model being processed. 
   /// \param[out] _links    A vector holding a copy of pointers to the the model's links. 
   /// \param[out] _meshes   A vector of vectors containing a surface mesh for each collision in a link.
+  /// \param[out] _collisionElements  A vector of vectors containing the collision entities in a link.
   void CreateCollisionMeshes(
     EntityComponentManager &_ecm,
     gazebo::Model _model,
     std::vector<gazebo::Entity>& _links,
-    std::vector<std::vector<cgal::MeshPtr>>& _meshes)
+    std::vector<std::vector<cgal::MeshPtr>>& _meshes,
+    std::vector<std::vector<Entity>>& _collisions)
   {
     // There will be more than one mesh per link if the link contains mutiple collisions.
 
@@ -181,6 +183,7 @@ namespace systems
       /// \todo check link has valid name component
       std::string linkName(link.Name(_ecm).value());
       std::vector<std::shared_ptr<cgal::Mesh>> linkMeshes;
+      std::vector<Entity> linkCollisions;
 
       ignmsg << "Hydrodynamics: create collision mesh for link ["
           << linkName << "]\n";
@@ -190,7 +193,7 @@ namespace systems
       {
         IGN_ASSERT(collisionEntity != kNullEntity, "Collision must be valid");
   
-        gazebo::Collision collision(collisionEntity); 
+        gazebo::Collision collision(collisionEntity);
         std::string collisionName(collision.Name(_ecm).value());
         ignmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
 
@@ -229,6 +232,7 @@ namespace systems
                 *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
+            linkCollisions.push_back(collisionEntity);
 
             ignmsg << "Type:       " << "BOX" << std::endl;
             ignmsg << "Size:       " << box.Size() << std::endl;
@@ -260,6 +264,7 @@ namespace systems
                 *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
+            linkCollisions.push_back(collisionEntity);
 
             ignmsg << "Type:       " << "SPHERE" << std::endl;
             ignmsg << "Radius:     " << sphere.Radius() << std::endl;
@@ -291,6 +296,7 @@ namespace systems
                 *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
+            linkCollisions.push_back(collisionEntity);
 
             ignmsg << "Type:       " << "CYLINDER" << std::endl;
             ignmsg << "Radius:     " << cylinder.Radius() << std::endl;
@@ -338,6 +344,7 @@ namespace systems
                 *common::MeshManager::Instance()->Load(file), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
+            linkCollisions.push_back(collisionEntity);
 
             ignmsg << "Type:       " << "MESH" << std::endl;
             ignmsg << "Uri:        " << uri << std::endl;
@@ -357,6 +364,7 @@ namespace systems
 
       // Add meshes for this link
       _meshes.push_back(linkMeshes);
+      _collisions.push_back(linkCollisions);
     }
   } 
 
@@ -470,6 +478,9 @@ namespace systems
 
     /// \brief The transformed meshes for this link.
     public: std::vector<cgal::MeshPtr> linkMeshes;
+
+    /// \brief The collision entities for this link.
+    public: std::vector<Entity> linkCollisions;
 
     /// \brief Objects to compute the hydrodynamics forces for each link mesh.
     public: std::vector<marine::HydrodynamicsPtr> hydrodynamics;
@@ -750,7 +761,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
   // Populate link meshes
   std::vector<gazebo::Entity> links;
   std::vector<std::vector<cgal::MeshPtr>> meshes;
-  CreateCollisionMeshes(_ecm, this->model, links, meshes);
+  std::vector<std::vector<Entity>> collisions;
+  CreateCollisionMeshes(_ecm, this->model, links, meshes, collisions);
   ignmsg << "Hydrodynamics: links:  " << links.size() << std::endl;
   ignmsg << "Hydrodynamics: meshes: " << meshes.size() << std::endl;
 
@@ -762,6 +774,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     this->hydroData.push_back(hd);
     hd->initLinkMeshes.resize(meshCount);
     hd->linkMeshes.resize(meshCount);
+    hd->linkCollisions.resize(meshCount);
     hd->hydrodynamics.resize(meshCount);
     // hd->waterlineMsgs.resize(meshCount);
     // hd->underwaterSurfaceMsgs.resize(meshCount);
@@ -820,14 +833,19 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       std::shared_ptr<cgal::Mesh> initLinkMesh = meshes[i][j];
       std::shared_ptr<cgal::Mesh> linkMesh =
           std::make_shared<cgal::Mesh>(*initLinkMesh);
-      IGN_ASSERT(linkMesh != nullptr, "Invalid Mesh returned from CopyMesh");
+      IGN_ASSERT(linkMesh != nullptr,
+          "Invalid Mesh returned from CreateCollisionMeshes");
+
+      auto linkCollision = collisions[i][j];
 
       // Mesh
       hd->initLinkMeshes[j] = initLinkMesh;
       hd->linkMeshes[j] = linkMesh;
+      hd->linkCollisions[j] = linkCollision;
 
       // Update link mesh
-      ApplyPose(linkPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
+      auto collisionPose = worldPose(linkCollision, _ecm);
+      ApplyPose(collisionPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
 
       // Initialise Hydrodynamics
       hd->hydrodynamics[j].reset(
@@ -899,7 +917,9 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     for (size_t j=0; j<hd->linkMeshes.size(); ++j)
     {
       // Update link mesh
-      ApplyPose(linkPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
+      auto linkCollision = hd->linkCollisions[j];
+      auto collisionPose = worldPose(linkCollision, _ecm);
+      ApplyPose(collisionPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
       
       // Update hydrodynamics
       hd->hydrodynamics[j]->Update(
