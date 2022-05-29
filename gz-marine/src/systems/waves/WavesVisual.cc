@@ -13,6 +13,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+// Code for retrieving shader params from gz-sim/src/systems/shader_param
+
+/*
+ * Copyright (C) 2022 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 #include "WavesVisual.hh"
 
 #include "Ogre2OceanVisual.hh"
@@ -21,6 +41,9 @@
 #include "gz/marine/OceanTile.hh"
 #include "gz/marine/Utilities.hh"
 #include "gz/marine/WaveParameters.hh"
+
+#include "gz/marine/WaveSimulation.hh"
+#include "gz/marine/WaveSimulationFFT2.hh"
 
 #include <gz/msgs/any.pb.h>
 #include <gz/msgs/param.pb.h>
@@ -245,6 +268,68 @@ using namespace systems;
 
 class ignition::gazebo::systems::WavesVisualPrivate
 {
+  /// \brief Data structure for storing shader param info
+  public: class ShaderParamValue
+  {
+    /// \brief shader type: vertex or fragment
+    public: std::string shader;
+
+    /// \brief variable type: int, float, float_array, int_array,
+    /// texture, texture_cube
+    public: std::string type;
+
+    /// \brief variable name of param
+    public: std::string name;
+
+    /// \brief param value
+    public: std::string value;
+
+    /// \brief Any additional arguments
+    public: std::vector<std::string> args;
+  };
+
+  /// \brief Data structure for storing shader files uri
+  public: class ShaderUri
+  {
+    /// \brief Shader language: glsl or metal
+    public: std::string language;
+
+    /// \brief Path to vertex shader
+    public: std::string vertexShaderUri;
+
+    /// \brief Path to fragment shader
+    public: std::string fragmentShaderUri;
+  };
+
+  /// \brief Enum to set the method used for updating shader vertices
+  public: enum class MeshDeformationMethod : uint16_t
+  {
+    /// \internal
+    /// \brief Indicator used to create an iterator over the
+    /// enum. Do not use this.
+    MESH_DEFORMATION_METHOD_BEGIN = 0,
+
+    /// \brief Unknown graphics interface
+    UNKNOWN = MESH_DEFORMATION_METHOD_BEGIN,
+
+    /// \brief Update displacement map textures
+    DYNAMIC_TEXTURE = 1,
+
+    /// \brief Update vertex, normal and tangent arrays
+    DYNAMIC_GEOMETRY = 2,
+
+    /// \internal
+    /// \brief Indicator used to create an iterator over the
+    /// enum. Do not use this.
+    MESH_DEFORMATION_METHOD_END
+  };
+
+  /// \brief Set an enum from a string.
+  /// \param[in] _str String value to convert to enum value.
+  /// \return MeshDeformationMethod enum
+  public: static MeshDeformationMethod SetMeshDeformationMethod(
+      const std::string &_str);
+
   /// \brief Destructor
   public: ~WavesVisualPrivate();
 
@@ -256,53 +341,115 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \param[in] _msg Wave parameters message.
   public: void OnWaveMsg(const ignition::msgs::Param &_msg);
 
+  /// \brief Name of the world
+  public: std::string worldName;
+
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
 
   /// \brief Pointer to visual
   public: rendering::VisualPtr visual;
 
-  /// \brief Pointer to ocean visual
-  public: rendering::VisualPtr oceanVisual;
-  // public: std::vector<rendering::Ogre2OceanVisualPtr> oceanVisuals;
-
-  public: std::vector<rendering::VisualPtr> oceanVisuals;
-  public: rendering::Ogre2OceanGeometryPtr oceanGeometry;
-
-  /// \brief Material used by this visual
-  public: rendering::MaterialPtr material;
+  /// \brief Entity id of the visual
+  public: Entity entity{kNullEntity};
 
   /// \brief Pointer to scene
   public: rendering::ScenePtr scene;
 
-  /// \brief Entity id of the visual
-  public: Entity entity{kNullEntity};
-
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
+  public: double                              currentSimTimeSeconds;
 
   /// \brief Set the wavefield to be static [false].
   public: bool isStatic{false};
+
+  /// \brief The number of tiles in the x-direction given as an offset range.
+  /// Default [lower=0, upper=0].
+  public: math::Vector2i tiles_x = {0, 0};
+
+  /// \brief The number of tiles in the y-direction given as an offset range.
+  /// Default [lower=0, upper=0].
+  public: math::Vector2i tiles_y = {0, 0};
+
+  /// \brief Material used by the ocean visual
+  public: rendering::MaterialPtr oceanMaterial;
+
+  /// \brief Pointer to ocean visual
+  public: std::vector<rendering::Ogre2OceanVisualPtr> oceanOgreVisuals;
+  public: std::vector<rendering::VisualPtr> oceanVisuals;
+  public: std::vector<rendering::Ogre2OceanGeometryPtr> oceanGeometries;
+
+  public: MeshDeformationMethod meshDeformationMethod{
+      MeshDeformationMethod::DYNAMIC_GEOMETRY};
+
+  /////////////////
+  // DYNAMIC_TEXTURE
+
+  /// \note: new code adapted from ogre ocean materials sample
+  // textures for displacement, normal and tangent maps
+  Ogre::Image2       *mHeightMapImage;
+  Ogre::Image2       *mNormalMapImage;
+  Ogre::Image2       *mTangentMapImage;
+  Ogre::TextureGpu   *mHeightMapTex;
+  Ogre::TextureGpu   *mNormalMapTex;
+  Ogre::TextureGpu   *mTangentMapTex;
+
+  std::unique_ptr<ignition::marine::WaveSimulation> mWaveSim;
+  std::vector<double> mHeights;
+  std::vector<double> mDhdx;
+  std::vector<double> mDhdy;
+  std::vector<double> mDisplacementsX;
+  std::vector<double> mDisplacementsY;
+  std::vector<double> mDxdx;
+  std::vector<double> mDydy;
+  std::vector<double> mDxdy;
+
+  public: void CreateShaderMaterial();
+
+  public: void InitWaveSim();
+  public: void InitUniforms();
+  public: void InitTextures();
+
+  public: void UpdateWaveSim();
+  public: void UpdateUniforms();
+  public: void UpdateTextures();
+
+  /////////////////
+  // DYNAMIC_GEOMETRY
+
+  /// \brief Ocean mesh (not stored in the mesh manager)
+  public: common::MeshPtr oceanTileMesh;
+
+  /////////////////
+  // OceanTile
 
   /// \brief The wave parameters.
   public: marine::WaveParametersPtr waveParams;
   public: bool waveParamsDirty{false};
 
-  /////////////////
-  /// OceanTile
-  // std::string mAboveOceanMeshName = "AboveOceanTileMesh";
-  // std::string mBelowOceanMeshName = "BelowOceanTileMesh";
-
+  /// \brief The ocean tile managing the wave simulation
   public: marine::visual::OceanTilePtr oceanTile;
 
-  /// \brief Used in DynamicMesh example
-  public: common::MeshPtr oceanTileMesh;
+  /////////////////
+  // ShaderParams (from gz-sim/src/systems/shader_param)
+
+  /// \brief A map of shader language to shader program files
+  public: std::map<std::string, ShaderUri> shaders;
+
+  /// \brief A list of shader params
+  public: std::vector<ShaderParamValue> shaderParams;
+
+  /// \brief A list of shader params that will be updated every iteration
+  public: std::vector<ShaderParamValue> timeParams;
+
+  /// \brief Path to model
+  public: std::string modelPath;
+
+  /////////////////
+  // Transport and connections
 
   /// \brief Mutex to protect sim time and parameter updates.
   public: std::mutex mutex;
-
-  /// \brief Name of the world
-  public: std::string worldName;
 
   /// \brief Transport node
   public: transport::Node node;
@@ -336,14 +483,27 @@ void WavesVisual::Configure(const Entity &_entity,
   // function and _sdf is a const shared pointer to a const sdf::Element.
   auto sdf = const_cast<sdf::Element *>(_sdf.get());
 
-  // capture entity 
+  // Capture entity 
   this->dataPtr->entity = _entity;
   auto nameComp = _ecm.Component<components::Name>(_entity);
   this->dataPtr->visualName = nameComp->Data();
 
   // Update parameters
-  this->dataPtr->isStatic = marine::Utilities::SdfParamBool(
-      *sdf,  "static", this->dataPtr->isStatic);
+  {
+    this->dataPtr->isStatic = marine::Utilities::SdfParamBool(
+        *sdf,  "static", this->dataPtr->isStatic);
+
+    this->dataPtr->tiles_x = marine::Utilities::SdfParamVector2i(
+        *sdf,  "tiles_x", this->dataPtr->tiles_x);
+
+    this->dataPtr->tiles_y = marine::Utilities::SdfParamVector2i(
+        *sdf,  "tiles_y", this->dataPtr->tiles_y);
+
+    std::string meshDeformationMethodStr = marine::Utilities::SdfParamString(
+        *sdf,  "mesh_deformation_method", "DYNAMIC_GEOMETRY");
+    this->dataPtr->meshDeformationMethod =
+        this->dataPtr->SetMeshDeformationMethod(meshDeformationMethodStr);
+  }
 
   // Wave parameters
   this->dataPtr->waveParams.reset(new marine::WaveParameters());
@@ -354,8 +514,108 @@ void WavesVisual::Configure(const Entity &_entity,
     this->dataPtr->waveParams->SetFromSDF(*sdfWave);
   }
 
-  // connect to the SceneUpdate event
-  // the callback is executed in the rendering thread so do all
+  // Shader params
+  if (sdf->HasElement("param"))
+  {
+    // loop and parse all shader params
+    sdf::ElementPtr paramElem = sdf->GetElement("param");
+    while (paramElem)
+    {
+      if (!paramElem->HasElement("shader") ||
+          !paramElem->HasElement("name"))
+      {
+        ignerr << "<param> must have <shader> and <name> sdf elements"
+               << std::endl;
+        paramElem = paramElem->GetNextElement("param");
+        continue;
+      }
+      std::string shaderType = paramElem->Get<std::string>("shader");
+      std::string paramName = paramElem->Get<std::string>("name");
+
+      std::string type = paramElem->Get<std::string>("type", "float").first;
+      std::string value = paramElem->Get<std::string>("value", "").first;
+
+      WavesVisualPrivate::ShaderParamValue spv;
+      spv.shader = shaderType;
+      spv.name = paramName;
+      spv.value = value;
+      spv.type = type;
+
+      if (paramElem->HasElement("arg"))
+      {
+        sdf::ElementPtr argElem = paramElem->GetElement("arg");
+        while (argElem)
+        {
+          spv.args.push_back(argElem->Get<std::string>());
+          argElem = argElem->GetNextElement("arg");
+        }
+      }
+
+      this->dataPtr->shaderParams.push_back(spv);
+      paramElem = paramElem->GetNextElement("param");
+    }
+  }
+
+  // Model path
+  if (this->dataPtr->modelPath.empty())
+  {
+    auto modelEntity = topLevelModel(_entity, _ecm);
+    this->dataPtr->modelPath =
+        _ecm.ComponentData<components::SourceFilePath>(modelEntity).value();
+  }
+
+  // Shader programs
+  {
+    if (!sdf->HasElement("shader"))
+    {
+      ignerr << "Unable to load shader param system. "
+            << "Missing <shader> SDF element." << std::endl;
+      return;
+    }
+
+    // Allow multiple shader SDF element for different shader languages
+    sdf::ElementPtr shaderElem = sdf->GetElement("shader");
+    while (shaderElem)
+    {
+      if (!shaderElem->HasElement("vertex") ||
+          !shaderElem->HasElement("fragment"))
+      {
+        ignerr << "<shader> must have <vertex> and <fragment> sdf elements"
+              << std::endl;
+      }
+      else
+      {
+        // default to glsl
+        std::string api = "glsl";
+        if (shaderElem->HasAttribute("language"))
+          api = shaderElem->GetAttribute("language")->GetAsString();
+
+        WavesVisualPrivate::ShaderUri shader;
+        shader.language = api;
+
+        sdf::ElementPtr vertexElem = shaderElem->GetElement("vertex");
+        shader.vertexShaderUri = common::findFile(
+            asFullPath(vertexElem->Get<std::string>(),
+            this->dataPtr->modelPath));
+        sdf::ElementPtr fragmentElem = shaderElem->GetElement("fragment");
+        shader.fragmentShaderUri = common::findFile(
+            asFullPath(fragmentElem->Get<std::string>(),
+            this->dataPtr->modelPath));
+        this->dataPtr->shaders[api] = shader;
+        shaderElem = shaderElem->GetNextElement("shader");
+      }
+    }
+    if (this->dataPtr->shaders.empty())
+    {
+      ignerr << "Unable to load shader param system. "
+            << "No valid shaders." << std::endl;
+      return;
+    }
+  }
+
+  // Connect to the SceneUpdate event
+  //
+  // The callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
       _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
@@ -388,50 +648,46 @@ void WavesVisual::PreUpdate(
   IGN_PROFILE("WavesVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
+
+  this->dataPtr->currentSimTimeSeconds =
+      (std::chrono::duration_cast<std::chrono::nanoseconds>(
+          this->dataPtr->currentSimTime).count()) * 1e-9;
 }
 
 /////////////////////////////////////////////////
+IGN_ENUM(meshDeformationMethodIface,
+    WavesVisualPrivate::MeshDeformationMethod,
+    WavesVisualPrivate::MeshDeformationMethod::MESH_DEFORMATION_METHOD_BEGIN,
+    WavesVisualPrivate::MeshDeformationMethod::MESH_DEFORMATION_METHOD_END,
+    "UNKNOWN", "DYNAMIC_TEXTURE", "DYNAMIC_GEOMETRY"
+)
+
+//////////////////////////////////////////////////
+WavesVisualPrivate::MeshDeformationMethod
+WavesVisualPrivate::SetMeshDeformationMethod(const std::string &_str)
+{
+  // Convert to upper case
+  std::string str(_str);
+  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+
+  // Set the enum
+  MeshDeformationMethod e{MeshDeformationMethod::UNKNOWN};
+  meshDeformationMethodIface.Set(e, str);
+  return e;
+}
+
 //////////////////////////////////////////////////
 WavesVisualPrivate::~WavesVisualPrivate()
 {
-  if (this->oceanVisual != nullptr)
-  {
-    this->oceanVisual->Destroy();
-    this->oceanVisual.reset();
-  }
-
   for (auto& ogreVisual : this->oceanVisuals)
   {
-    rendering::VisualPtr visual = ogreVisual;
-    if (visual != nullptr)
+    auto vis = ogreVisual;
+    if (vis != nullptr)
     {
-      visual->Destroy();
-      visual.reset();
+      vis->Destroy();
+      vis.reset();
     }
   }
-};
-
-//////////////////////////////////////////////////
-enum class OceanVisualMethod : uint16_t
-{
-  /// \internal
-  /// \brief Indicator used to create an iterator over the
-  /// enum. Do not use this.
-  OCEAN_VISUAL_METHOD_BEGIN = 0,
-
-  /// \brief Unknown graphics interface
-  UNKNOWN = OCEAN_VISUAL_METHOD_BEGIN,
-
-  /// \brief Ogre::Mesh (v2)
-  OGRE2_MESH = 2,
-
-  /// \brief Ogre2DynamicGeometry
-  OGRE2_DYNAMIC_GEOMETRY = 3,
-
-  /// \internal
-  /// \brief Indicator used to create an iterator over the
-  /// enum. Do not use this.
-  OCEAN_VISUAL_METHOD_END
 };
 
 //////////////////////////////////////////////////
@@ -495,8 +751,7 @@ void WavesVisualPrivate::OnUpdate()
     mat->SetReflectivity(0);
   }
 
-  double simTime = (std::chrono::duration_cast<std::chrono::nanoseconds>(
-      this->currentSimTime).count()) * 1e-9;
+  double simTime = this->currentSimTimeSeconds;
 
   // ocean tile parameters
   size_t N = this->waveParams->CellCount();
@@ -504,13 +759,12 @@ void WavesVisualPrivate::OnUpdate()
   double ux = this->waveParams->WindVelocity().X();
   double uy = this->waveParams->WindVelocity().Y();
 
-  OceanVisualMethod method = OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY;
-  switch (method)
+  switch (this->meshDeformationMethod)
   {
-    case OceanVisualMethod::OGRE2_DYNAMIC_GEOMETRY:
+    case MeshDeformationMethod::DYNAMIC_GEOMETRY:
     {
       // Test attaching another visual to the entity
-      if (this->oceanVisuals.empty())
+      if (this->oceanVisuals.empty() && oceanOgreVisuals.empty())
       {
         ignmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
 
@@ -518,16 +772,16 @@ void WavesVisualPrivate::OnUpdate()
         ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
         ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
         auto visualGeometry = this->visual->GeometryByIndex(0);
-        auto material = visualGeometry->Material();
-        // auto material = this->visual->Material();
-        if (!material)
+        this->oceanMaterial = visualGeometry->Material();
+        if (!this->oceanMaterial)
+        {
           ignerr << "WavesVisual: invalid material\n";
+          return;
+        }
 
         // create ocean tile
         this->oceanTile.reset(new marine::visual::OceanTile(this->waveParams));
         this->oceanTile->SetWindVelocity(ux, uy);
-        /// \todo(srmainwaring) rationalise - oceanTile->CreateMesh() calls Create internally
-        // this->oceanTile->Create();
 
         // create mesh - do not store in MeshManager as it will be modified
         this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
@@ -536,77 +790,84 @@ void WavesVisualPrivate::OnUpdate()
         rendering::Ogre2ScenePtr ogre2Scene =
             std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
 
-        // NOTE: this approach is not feasible - multiple copies of the mesh
-        // rather than multiple visuals referencing one mesh and relocating it...
+        // Hide the primary visual
+        this->visual->SetVisible(false);
 
-        // create geometry
-        this->oceanGeometry =
-            std::make_shared<rendering::Ogre2OceanGeometry>();
+        /// \note: how feasible? - multiple copies of the mesh
+        // rather than multiple visuals referencing one mesh and instancing?
 
+        // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
         unsigned int objId = 50000;
-        std::stringstream ss;
-        ss << "OceanGeometry(" << objId << ")";
-        std::string objName = ss.str();
-
-        this->oceanGeometry->InitObject(ogre2Scene, objId, objName);
-        this->oceanGeometry->LoadMesh(this->oceanTileMesh);
-
-        // Water tiles -nX, -nX + 1, ...,0, 1, ..., nX, etc.
-        const int nX = 0;
-        const int nY = 0;
-        // unsigned int id = 50000;
-        for (int iy=-nY; iy<=nY; ++iy)
+        auto position = this->visual->LocalPosition();
+        for (int iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
         {
-          for (int ix=-nX; ix<=nX; ++ix)
+          for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
           {
-            /// \todo: include the current entity position 
-            ignition::math::Vector3d position(
-              /* this->Position() + */ ix * L,
-              /* this->Position() + */ iy * L,
-              /* this->Position() + */ 0.0
+            // tile position 
+            ignition::math::Vector3d tilePosition(
+              position.X() + ix * L,
+              position.Y() + iy * L,
+              position.Z() + 0.0
             );
 
+#define GZ_MARINE_UPDATE_VISUALS 1
+#if GZ_MARINE_UPDATE_VISUALS
+            // create name
+            std::stringstream ss;
+            ss << "OceanVisual(" << objId++ << ")";
+            std::string objName = ss.str();
+
             // create visual
-            // rendering::Ogre2OceanVisualPtr ogreVisual =
-            //     std::make_shared<rendering::Ogre2OceanVisual>(); 
+            // ignmsg << "Creating visual: tile: ["
+            //     << ix << ", " << iy << "]"
+            //     << ", name: " << objName << "\n";
+            rendering::Ogre2OceanVisualPtr ogreVisual =
+                std::make_shared<rendering::Ogre2OceanVisual>(); 
+            ogreVisual->InitObject(ogre2Scene, objId, objName);
+            ogreVisual->LoadMesh(this->oceanTileMesh);
 
-            // unsigned int objId = id++;
-            // std::stringstream ss;
-            // ss << "OceanVisual(" << objId << ")";
-            // std::string objName = ss.str();
-
-            // ogreVisual->InitObject(ogre2Scene, objId, objName);
-            // ogreVisual->LoadMesh(this->oceanTileMesh);
-
-            // rendering::VisualPtr visual = ogreVisual;
-            // visual->SetLocalPosition(position);
-
-            // if (!material)
-            //   visual->SetMaterial("OceanBlue");
-            // else
-            //   visual->SetMaterial(material);
+            ogreVisual->SetLocalPosition(tilePosition);
+            ogreVisual->SetMaterial(this->oceanMaterial, false);
+            ogreVisual->SetVisible(true);
 
             // add visual to parent
-            // auto parent = this->visual->Parent();
-            // parent->AddChild(visual);
+            auto parent = this->visual->Parent();
+            parent->AddChild(ogreVisual);
+            this->oceanOgreVisuals.push_back(ogreVisual);
+#else
+            // create name
+            std::stringstream ss;
+            ss << "OceanGeometry(" << objId++ << ")";
+            std::string objName = ss.str();
 
-            // oceanVisuals.push_back(ogreVisual);
+            // create visual
+            auto oceanVisual = this->scene->CreateVisual();
+            oceanVisual->SetLocalPosition(tilePosition);
 
-            auto visual = this->scene->CreateVisual();
-            visual->AddGeometry(this->oceanGeometry);
-            visual->SetLocalPosition(position);
+            // create geometry
+            // ignmsg << "Creating geometry: tile: ["
+            //     << ix << ", " << iy << "]"
+            //     << ", name: " << objName << "\n";
+            auto geometry =
+                std::make_shared<rendering::Ogre2OceanGeometry>();
+            geometry->InitObject(ogre2Scene, objId, objName);
+            geometry->LoadMesh(this->oceanTileMesh);
 
-            if (!material)
-              visual->SetMaterial("OceanBlue");
-            else
-              visual->SetMaterial(material);
+            geometry->SetMaterial(this->oceanMaterial, false);
 
-            oceanVisuals.push_back(visual);
+            oceanVisual->AddGeometry(geometry);
+
+            // add visual to parent
+            auto parent = this->visual->Parent();
+            parent->AddChild(oceanVisual);
+            this->oceanVisuals.push_back(oceanVisual);
+            this->oceanGeometries.push_back(geometry);
+#endif
           }
         }
       }
 
-      if (this->oceanVisuals.empty() || this->isStatic)
+      if ((this->oceanVisuals.empty() && oceanOgreVisuals.empty()) || this->isStatic)
         return;
 
       if (this->waveParamsDirty)
@@ -620,86 +881,107 @@ void WavesVisualPrivate::OnUpdate()
       // update the tile (recalculates vertices)
       this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
 
-      // update the dynamic renderable (CPU => GPU)
-      // for (auto& visual : this->oceanVisuals)
-      // {
-      //   visual->UpdateMesh(this->oceanTileMesh);
-      // }
-      this->oceanGeometry->UpdateMesh(this->oceanTileMesh);
+#if GZ_MARINE_UPDATE_VISUALS
+      for (auto& vis : this->oceanOgreVisuals)
+      {
+        vis->UpdateMesh(this->oceanTileMesh);
+      }
+#else
+      for (auto& geom : this->oceanGeometries)
+      {
+        geom->UpdateMesh(this->oceanTileMesh);
+      }
+#endif
       break;
     }
-    case OceanVisualMethod::OGRE2_MESH:
+    case MeshDeformationMethod::DYNAMIC_TEXTURE:
     {
       // Test attaching a common::Mesh to the entity
-      if (!this->oceanTile)
+      if (this->oceanVisuals.empty())
       {
-        ignmsg << "WavesVisual: creating Ogre::Mesh ocean visual\n";
+        ignmsg << "WavesVisual: creating dynamic texture ocean visual\n";
 
-        // create ocean tile
-        this->oceanTile.reset(new marine::visual::OceanTile(N, L));
-        this->oceanTile->SetWindVelocity(ux, uy);
-        std::unique_ptr<common::Mesh> newMesh(this->oceanTile->CreateMesh());
-        auto mesh = newMesh.get();
-        common::MeshManager::Instance()->AddMesh(newMesh.release());
-        // this->oceanTile->Update(0.0);
+        // create shader material
+        this->CreateShaderMaterial();
 
-        //convert common::Mesh to rendering::Mesh
-        auto geometry = this->scene->CreateMesh(mesh);
+        /// \note: replaced with cloned geometry from primary visual 
+        // load mesh
+        // std::string meshPath = common::findFile(
+        //     asFullPath("materials/mesh_256x256.dae", this->modelPath));
+        // rendering::MeshDescriptor descriptor;
+        // descriptor.meshName = meshPath;
+        // common::MeshManager *meshManager = common::MeshManager::Instance();
+        // descriptor.mesh = meshManager->Load(descriptor.meshName);
+ 
+        // Hide the primary visual
+        this->visual->SetVisible(false);
 
-        // create ocean tile visual
-        auto visual = this->scene->CreateVisual("ocean-tile");
-        visual->AddGeometry(geometry);
-        visual->SetLocalPosition(0.0, 0.0, 0.0);
-        visual->SetLocalRotation(0.0, 0.0, 0.0);
-        visual->SetLocalScale(1.0, 1.0, 1.0);
-        visual->SetMaterial("OceanBlue");
-        visual->SetVisible(true);
+        // Get geometry (should be a plane mesh)
+        auto geometry = this->visual->GeometryByIndex(0);
+        if (!geometry)
+        {
+          ignerr << "Waves visual has invalid geometry\n";
+          return;
+        }
 
-        // // retrive the material from the visual's geometry (it's not set on the visual)
-        // ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
-        // ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
-        // auto visualGeometry = this->visual->GeometryByIndex(0);
+        // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
+        auto position = this->visual->LocalPosition();
+        for (int iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
+        {
+          for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
+          {
+            // tile position 
+            ignition::math::Vector3d tilePosition(
+              position.X() + ix * L,
+              position.Y() + iy * L,
+              position.Z() + 0.0
+            );
 
-        // auto material = visualGeometry->Material();
-        // // auto material = this->visual->Material();
-        // if (!material)
-        //   ignerr << "WavesVisual: invalid material\n";
-        // else
-        //   visual->SetMaterial(material);
+            /// \note: replaced with cloned geometry from primary visual
+            // auto geometry = this->scene->CreateMesh(descriptor);
+  
+            // create ocean visual
+            auto oceanVisual = this->scene->CreateVisual();
+            oceanVisual->AddGeometry(geometry->Clone());
+            oceanVisual->SetMaterial(this->oceanMaterial, false);
+            oceanVisual->SetLocalPosition(tilePosition);
 
-        // add visual to parent
-        auto parent = this->visual->Parent();
-        parent->AddChild(visual);
+            // add visual to parent
+            auto parent = this->visual->Parent();
+            parent->AddChild(oceanVisual);
+            this->oceanVisuals.push_back(oceanVisual);
+         }
+        }
 
-        // keep reference
-        this->oceanVisual = visual;
+        this->InitWaveSim();
+        this->InitUniforms();
+        this->InitTextures();
       }
 
-      if (!this->oceanTile)
+      if (this->oceanVisuals.empty() || this->isStatic)
         return;
 
-      // Update the tile
-      this->oceanTile->Update(simTime);
+      if (this->waveParamsDirty)
+      {
+        double ux = this->waveParams->WindVelocity().X();
+        double uy = this->waveParams->WindVelocity().Y();
+        double s  = this->waveParams->Steepness();
+
+        // set params
+        this->mWaveSim->SetWindVelocity(ux, uy);
+        // waveSim->SetLambda(s);
+
+        this->waveParamsDirty = false;
+      }
+
+      this->UpdateWaveSim();
+      this->UpdateUniforms();
+      this->UpdateTextures();
       break;
     }
     default:
     {
-      // Test attaching another visual to the entity
-      if (!this->oceanVisual)
-      {
-        ignmsg << "WavesVisual: creating default ocean visual\n";
-
-        // create plane
-        auto geometry = this->scene->CreatePlane();
-
-        // create visual
-        auto visual = this->scene->CreateVisual("ocean-tile");
-        visual->AddGeometry(geometry);
-        visual->SetLocalPosition(0.0, 0.0, 0.0);
-        visual->SetLocalRotation(0.0, 0.0, 0.0);
-        visual->SetLocalScale(100.0, 100.0, 100.0);
-        visual->SetMaterial("OceanBlue");
-      }
+      ignerr << "Invalid mesh deformation method\n";
       break;
     }
   }
@@ -758,6 +1040,509 @@ void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
   this->waveParams->SetSteepness(steepness);
 
   this->waveParamsDirty = true;
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::CreateShaderMaterial()
+{
+  this->oceanMaterial = this->scene->CreateMaterial();
+
+  // default to glsl
+  auto it = this->shaders.find("glsl");
+  if (it != this->shaders.end())
+  {
+    this->oceanMaterial->SetVertexShader(it->second.vertexShaderUri);
+    this->oceanMaterial->SetFragmentShader(it->second.fragmentShaderUri);
+  }
+  // prefer metal over glsl on macOS
+  /// \todo(anyone) instead of using ifdef to check for macOS,
+  // expose add an accessor function to get the GraphicsApi
+  // from rendering::RenderEngine
+#ifdef __APPLE__
+  auto metalIt = this->shaders.find("metal");
+  if (metalIt != this->shaders.end())
+  {
+    this->oceanMaterial->SetVertexShader(metalIt->second.vertexShaderUri);
+    this->oceanMaterial->SetFragmentShader(metalIt->second.fragmentShaderUri);
+    // if both glsl and metal are specified, print a msg to inform that
+    // metal is used instead of glsl
+    if (it != this->shaders.end())
+    {
+      ignmsg << "Using metal shaders. " << std::endl;
+    }
+  }
+#endif
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::InitWaveSim()
+{
+  int N      = this->waveParams->CellCount();
+  double L   = this->waveParams->TileSize();
+  double ux  = this->waveParams->WindVelocity().X();
+  double uy  = this->waveParams->WindVelocity().Y();
+  double s   = this->waveParams->Steepness();
+
+  // create wave model
+  std::unique_ptr<ignition::marine::WaveSimulationFFT2> waveSim(
+      new ignition::marine::WaveSimulationFFT2(N, L));
+
+  // set params
+  waveSim->SetWindVelocity(ux, uy);
+  waveSim->SetLambda(s);
+
+  // move
+  this->mWaveSim = std::move(waveSim);
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::InitUniforms()
+{
+  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc 
+  /// ShaderParamPrivate::OnUpdate
+
+  // set the shader params read from SDF
+  // this is only done once
+  for (const auto & spv : this->shaderParams)
+  {
+    // TIME is reserved keyword for sim time
+    if (spv.value == "TIME")
+    {
+      this->timeParams.push_back(spv);
+      continue;
+    }
+
+    rendering::ShaderParamsPtr params;
+    if (spv.shader == "fragment")
+    {
+      params = this->oceanMaterial->FragmentShaderParams();
+    }
+    else if (spv.shader == "vertex")
+    {
+      params = this->oceanMaterial->VertexShaderParams();
+    }
+
+    // if no <value> is specified, this could be a constant
+    if (spv.value.empty())
+    {
+      // \todo handle args for constants in ign-rendering
+      (*params)[spv.name] = 1;
+      continue;
+    }
+
+    // handle texture params
+    if (spv.type == "texture")
+    {
+      unsigned int uvSetIndex = spv.args.empty() ? 0u :
+          static_cast<unsigned int>(std::stoul(spv.args[0]));
+      std::string texPath = common::findFile(
+          asFullPath(spv.value, this->modelPath));
+      (*params)[spv.name].SetTexture(texPath,
+          rendering::ShaderParam::ParamType::PARAM_TEXTURE, uvSetIndex);
+      
+      ignmsg << "Shader param [" << spv.name << "]" 
+          << ", type: " << spv.type
+          << ", tex coord set: " << uvSetIndex << "\n";
+    }
+    else if (spv.type == "texture_cube")
+    {
+      unsigned int uvSetIndex = spv.args.empty() ? 0u :
+          static_cast<unsigned int>(std::stoul(spv.args[0]));
+      std::string texPath = common::findFile(
+          asFullPath(spv.value, this->modelPath));
+      (*params)[spv.name].SetTexture(texPath,
+          rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, uvSetIndex);
+
+      ignmsg << "Shader param [" << spv.name << "]" 
+          << ", type: " << spv.type
+          << ", tex coord set: " << uvSetIndex << "\n";
+    }
+    // handle int, float, int_array, and float_array params
+    else
+    {
+      std::vector<std::string> values = common::split(spv.value, " ");
+
+      int intValue = 0;
+      float floatValue = 0;
+      std::vector<float> floatArrayValue;
+
+      rendering::ShaderParam::ParamType paramType =
+          rendering::ShaderParam::PARAM_NONE;
+
+      // float / int
+      if (values.size() == 1u)
+      {
+        std::string str = values[0];
+
+        // if <type> is not empty, respect the specified type
+        if (!spv.type.empty())
+        {
+          if (spv.type == "int")
+          {
+            intValue = std::stoi(str);
+            paramType = rendering::ShaderParam::PARAM_INT;
+          }
+          else if (spv.type == "float")
+          {
+            floatValue = std::stof(str);
+            paramType = rendering::ShaderParam::PARAM_FLOAT;
+          }
+        }
+        // else do our best guess at what the type is
+        else
+        {
+          std::string::size_type sz;
+          int n = std::stoi(str, &sz);
+          if ( sz == str.size())
+          {
+            intValue = n;
+            paramType = rendering::ShaderParam::PARAM_INT;
+          }
+          else
+          {
+            floatValue = std::stof(str);
+            paramType = rendering::ShaderParam::PARAM_FLOAT;
+          }
+        }
+      }
+      // arrays
+      else
+      {
+        // int array
+        if (!spv.type.empty() && spv.type == "int_array")
+        {
+          for (const auto &v : values)
+            floatArrayValue.push_back(std::stoi(v));
+          paramType = rendering::ShaderParam::PARAM_INT_BUFFER;
+        }
+        // treat everything else as float_array
+        else
+        {
+          for (const auto &v : values)
+            floatArrayValue.push_back(std::stof(v));
+          paramType = rendering::ShaderParam::PARAM_FLOAT_BUFFER;
+        }
+      }
+
+      // set the params
+      if (paramType == rendering::ShaderParam::PARAM_INT)
+      {
+        (*params)[spv.name] = intValue;
+      }
+      else if (paramType == rendering::ShaderParam::PARAM_FLOAT)
+      {
+        (*params)[spv.name] = floatValue;
+      }
+      else if (paramType == rendering::ShaderParam::PARAM_INT_BUFFER ||
+          paramType == rendering::ShaderParam::PARAM_FLOAT_BUFFER)
+      {
+        (*params)[spv.name].InitializeBuffer(floatArrayValue.size());
+        float *fv = &floatArrayValue[0];
+        (*params)[spv.name].UpdateBuffer(fv);
+      }
+    }
+  }
+  this->shaderParams.clear();
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::InitTextures()
+{
+  ignmsg << "WavesVisualPrivate::InitTextures\n";
+
+  // ocean tile parameters
+  uint32_t N = static_cast<uint32_t>(this->waveParams->CellCount());
+  double L   = this->waveParams->TileSize();
+  double ux  = this->waveParams->WindVelocity().X();
+  double uy  = this->waveParams->WindVelocity().Y();
+
+  auto shader = this->oceanMaterial;
+  if (!shader)
+  {
+    ignerr << "Invalid Ocean Material\n";
+    return;
+  }
+
+  ignition::rendering::Ogre2ScenePtr ogre2Scene =
+    std::dynamic_pointer_cast<ignition::rendering::Ogre2Scene>(
+        this->scene);
+
+  ignition::rendering::Ogre2MaterialPtr ogre2Material =
+    std::dynamic_pointer_cast<ignition::rendering::Ogre2Material>(
+        shader);
+
+  Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
+
+  Ogre::TextureGpuManager *ogre2TextureManager =
+      ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
+
+  // Create empty image
+  uint32_t width{N};
+  uint32_t height{N};
+  uint32_t depthOrSlices{1};
+  Ogre::TextureTypes::TextureTypes textureType{
+      Ogre::TextureTypes::TextureTypes::Type2D};
+  Ogre::PixelFormatGpu format{
+      Ogre::PixelFormatGpu::PFG_RGBA32_FLOAT};
+  uint8_t numMipmaps{1u};
+
+  ignmsg << "Create HeightMap image\n";
+  mHeightMapImage = new Ogre::Image2();
+  mHeightMapImage->createEmptyImage(width, height, depthOrSlices,
+      textureType, format, numMipmaps);
+
+  ignmsg << "Create NormalMap image\n";
+  mNormalMapImage = new Ogre::Image2();
+  mNormalMapImage->createEmptyImage(width, height, depthOrSlices,
+      textureType, format, numMipmaps);
+
+  ignmsg << "Create TangentMap image\n";
+  mTangentMapImage = new Ogre::Image2();
+  mTangentMapImage->createEmptyImage(width, height, depthOrSlices,
+      textureType, format, numMipmaps);
+
+  ignmsg << "Initialising images\n";
+  memset(mHeightMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
+  memset(mNormalMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
+  memset(mTangentMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
+
+  // Create displacement texture
+  ignmsg << "Create HeightMap texture\n";
+  mHeightMapTex = ogre2TextureManager->createTexture(
+      "HeightMapTex(" + std::to_string(this->entity) + ")",
+      Ogre::GpuPageOutStrategy::SaveToSystemRam,
+      Ogre::TextureFlags::ManualTexture,
+      Ogre::TextureTypes::Type2D );
+
+  mHeightMapTex->setResolution(mHeightMapImage->getWidth(),
+      mHeightMapImage->getHeight());
+  mHeightMapTex->setPixelFormat(mHeightMapImage->getPixelFormat());
+  mHeightMapTex->setNumMipmaps(Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
+      mHeightMapTex->getWidth(), mHeightMapTex->getHeight()));
+
+  // Create normal texture
+  ignmsg << "Create NormalMap texture\n";
+  mNormalMapTex = ogre2TextureManager->createTexture(
+      "NormalMapTex(" + std::to_string(this->entity) + ")",
+      Ogre::GpuPageOutStrategy::SaveToSystemRam,
+      Ogre::TextureFlags::ManualTexture,
+      Ogre::TextureTypes::Type2D );
+
+  mNormalMapTex->setResolution(mNormalMapImage->getWidth(),
+      mNormalMapImage->getHeight());
+  mNormalMapTex->setPixelFormat(mNormalMapImage->getPixelFormat());
+  mNormalMapTex->setNumMipmaps(Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
+      mNormalMapTex->getWidth(), mNormalMapTex->getHeight()));
+
+  // Create tangent texture
+  ignmsg << "Create TangentMap texture\n";
+  mTangentMapTex = ogre2TextureManager->createTexture(
+      "TangentMapTex(" + std::to_string(this->entity) + ")",
+      Ogre::GpuPageOutStrategy::SaveToSystemRam,
+      Ogre::TextureFlags::ManualTexture,
+      Ogre::TextureTypes::Type2D );
+
+  mTangentMapTex->setResolution(mTangentMapImage->getWidth(),
+      mTangentMapImage->getHeight());
+  mTangentMapTex->setPixelFormat(mTangentMapImage->getPixelFormat());
+  mTangentMapTex->setNumMipmaps(Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
+      mTangentMapTex->getWidth(), mTangentMapTex->getHeight()));
+
+  // Set texture on wave material
+  ignmsg << "Setting HeightMapTex\n";
+  auto mat = ogre2Material->Material();
+  auto pass = mat->getTechnique(0u)->getPass(0);
+
+  {
+    auto texUnit = pass->getTextureUnitState("heightMap");
+    if (!texUnit)
+    {
+      texUnit = pass->createTextureUnitState();
+      texUnit->setName("heightMap");
+    }
+    texUnit->setTexture(mHeightMapTex);
+  }
+
+  {
+    auto texUnit = pass->getTextureUnitState("normalMap");
+    if (!texUnit)
+    {
+      texUnit = pass->createTextureUnitState();
+      texUnit->setName("normalMap");
+    }
+    texUnit->setTexture(mNormalMapTex);
+  }
+
+  {
+    auto texUnit = pass->getTextureUnitState("tangentMap");
+    if (!texUnit)
+    {
+      texUnit = pass->createTextureUnitState();
+      texUnit->setName("tangentMap");
+    }
+    texUnit->setTexture(mTangentMapTex);
+  }
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::UpdateWaveSim()
+{
+  double simTime = this->currentSimTimeSeconds;
+
+  mWaveSim->SetTime(simTime);
+  mWaveSim->ComputeDisplacementsAndDerivatives(
+      mHeights, mDisplacementsX, mDisplacementsY,
+      mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::UpdateUniforms()
+{
+  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc 
+  /// ShaderParamPrivate::OnUpdate
+
+  float simTime = static_cast<float>(this->currentSimTimeSeconds);
+
+  // time variables need to be updated every iteration
+  for (const auto & spv : this->timeParams)
+  {
+    rendering::ShaderParamsPtr params;
+    if (spv.shader == "fragment")
+    {
+      params = this->oceanMaterial->FragmentShaderParams();
+    }
+    else if (spv.shader == "vertex")
+    {
+      params = this->oceanMaterial->VertexShaderParams();
+    }
+    (*params)[spv.name] = simTime;
+  }
+}
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::UpdateTextures()
+{
+  ignition::rendering::Ogre2ScenePtr ogre2Scene =
+    std::dynamic_pointer_cast<ignition::rendering::Ogre2Scene>(
+        this->scene);
+
+  Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
+
+  Ogre::TextureGpuManager *ogre2TextureManager =
+      ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
+
+  // update the image data
+  uint32_t width  = mHeightMapImage->getWidth();
+  uint32_t height = mHeightMapImage->getHeight();
+
+  Ogre::TextureBox heightBox  = mHeightMapImage->getData(0);
+  Ogre::TextureBox normalBox  = mNormalMapImage->getData(0);
+  Ogre::TextureBox tangentBox = mTangentMapImage->getData(0);
+
+  for (uint32_t iv=0; iv < height; ++iv)
+  {
+      /// \todo: coordinates are flipped in the vertex shader
+      // texture index to vertex index
+      int32_t iy = /*height - 1 - */ iv;
+      for (uint32_t iu=0; iu < width; ++iu)
+      {
+          // texture index to vertex index
+          int32_t ix = /* width - 1 - */ iu;
+
+          float Dx{0.0}, Dy{0.0}, Dz{0.0};
+          float Tx{1.0}, Ty{0.0}, Tz{0.0};
+          float Bx{0.0}, By{1.0}, Bz{0.0};
+          float Nx{0.0}, Ny{0.0}, Nz{1.0};
+
+          int32_t idx = iy * width + ix;
+          double h  = mHeights[idx];
+          double sx = mDisplacementsX[idx];
+          double sy = mDisplacementsY[idx];
+          double dhdx  = mDhdx[idx]; 
+          double dhdy  = mDhdy[idx]; 
+          double dsxdx = mDxdx[idx]; 
+          double dsydy = mDydy[idx]; 
+          double dsxdy = mDxdy[idx]; 
+
+          // vertex displacements
+          Dx += sy;
+          Dy += sx;
+          Dz  = h;
+
+          // tangents
+          Tx = dsydy + 1.0;
+          Ty = dsxdy;
+          Tz = dhdy;
+
+          // bitangents
+          Bx = dsxdy;
+          By = dsxdx + 1.0;
+          Bz = dhdx;
+
+          // normals N = T x B
+          Nx = 1.0 * (Ty*Bz - Tz*Bx);
+          Ny = 1.0 * (Tz*Bx - Tx*Bz);
+          Nz = 1.0 * (Tx*By - Ty*Bx);
+
+          heightBox.setColourAt(Ogre::ColourValue(Dx, Dy, Dz, 0.0), iu, iv, 0,
+              mHeightMapImage->getPixelFormat());
+          normalBox.setColourAt(Ogre::ColourValue(Nx, Ny, Nz, 0.0), iu, iv, 0,
+              mNormalMapImage->getPixelFormat());
+          tangentBox.setColourAt(Ogre::ColourValue(Tx, Ty, Tz, 0.0), iu, iv, 0,
+              mTangentMapImage->getPixelFormat());
+      }
+  }
+
+  // schedule update to GPU
+  mHeightMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+  mNormalMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+  mTangentMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+
+  // Staging texture is required for upload from CPU -> GPU
+  {
+    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
+        mHeightMapImage->getWidth(), mHeightMapImage->getHeight(), 1u, 1u, mHeightMapImage->getPixelFormat());
+    stagingTexture->startMapRegion();
+    Ogre::TextureBox texBox = stagingTexture->mapRegion(
+        mHeightMapImage->getWidth(), mHeightMapImage->getHeight(), 1u, 1u, mHeightMapImage->getPixelFormat());
+
+    texBox.copyFrom(mHeightMapImage->getData(0));
+    stagingTexture->stopMapRegion();
+    stagingTexture->upload(texBox, mHeightMapTex, 0, 0, 0);
+    ogre2TextureManager->removeStagingTexture(stagingTexture);
+    stagingTexture = nullptr;
+    mHeightMapTex->notifyDataIsReady();
+  }
+
+  {
+    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
+        mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u, mNormalMapImage->getPixelFormat());
+    stagingTexture->startMapRegion();
+    Ogre::TextureBox texBox = stagingTexture->mapRegion(
+        mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u, mNormalMapImage->getPixelFormat());
+
+    texBox.copyFrom(mNormalMapImage->getData(0));
+    stagingTexture->stopMapRegion();
+    stagingTexture->upload(texBox, mNormalMapTex, 0, 0, 0);
+    ogre2TextureManager->removeStagingTexture(stagingTexture);
+    stagingTexture = nullptr;
+    mNormalMapTex->notifyDataIsReady();
+  }
+
+  {
+    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
+        mTangentMapImage->getWidth(), mTangentMapImage->getHeight(), 1u, 1u, mTangentMapImage->getPixelFormat());
+    stagingTexture->startMapRegion();
+    Ogre::TextureBox texBox = stagingTexture->mapRegion(
+        mTangentMapImage->getWidth(), mTangentMapImage->getHeight(), 1u, 1u, mTangentMapImage->getPixelFormat());
+
+    texBox.copyFrom(mTangentMapImage->getData(0));
+    stagingTexture->stopMapRegion();
+    stagingTexture->upload(texBox, mTangentMapTex, 0, 0, 0);
+    ogre2TextureManager->removeStagingTexture(stagingTexture);
+    stagingTexture = nullptr;
+    mTangentMapTex->notifyDataIsReady();
+  }
 }
 
 //////////////////////////////////////////////////
