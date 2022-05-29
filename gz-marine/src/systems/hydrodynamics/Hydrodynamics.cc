@@ -790,15 +790,39 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 
     /// \todo check that the link has valid pose components
 
-    ignmsg << "Hydrodynamics: getting link world pose\n";
-    // The link pose is required for the water patch, the CoM pose for dynamics.
-    math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+    /// \note bug on initialisation
+    /// Issue 1:
+    /// The link may contain more than one collision, and at present the
+    /// water patch is centred on the origin of the link. This could
+    /// cause issues if the patch was just sufficient to contain the
+    /// collision AABB and the collision was offset from the link.
+    ///
+    /// Issue 2:
+    /// The hd->link.WorldInertialPose does not appear to be updated when
+    /// this function is called, so on the first call (initialisation) the
+    /// value retured is the origin. The utility function worldPose is
+    /// correct, and its usage for the linkPose, linkCoGPose and collisionPose
+    /// ensure that they are correct.
+    ///
+    /// See also: 
+    /// HydrodynamicsPrivate::UpdatePhysics it appears that the component
+    /// data for the link is updated one time-step behind.
+    ///
 
-    ignmsg << "Hydrodynamics: getting link world CoM pose\n";
+    // The link pose is required for the water patch, the CoM pose for dynamics.
+    // math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+    math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
+    ignmsg << "Hydrodynamics: link world pose\n";
+    ignmsg << linkPose << "\n";
+
     /// \todo subtle difference here - inertial pose includes
     /// any rotation of the inertial matrix where CoG pose does not.
     // math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
-    math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
+    // math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();    
+    auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
+    math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();
+    ignmsg << "Hydrodynamics: link world CoM pose\n";
+    ignmsg << linkCoMPose << "\n";
 
     // Water patch grid
     /// \todo fix hardcoded patch size. CollisionBoundingBox is not currently available 
@@ -846,6 +870,10 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       // Update link mesh
       auto collisionPose = worldPose(linkCollision, _ecm);
       ApplyPose(collisionPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
+      
+      // DEBUG_INFO
+      // ignmsg << "Hydrodynamics: collision pose\n";
+      // ignmsg << collisionPose << "\n";
 
       // Initialise Hydrodynamics
       hd->hydrodynamics[j].reset(
@@ -891,10 +919,20 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
   for (auto& hd : this->hydroData)
   {
     // The link pose is required for the water patch, the CoM pose for dynamics.
-    math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+    // math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+    math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
+    // DEBUG_INFO
+    // ignmsg << "Hydrodynamics: link world pose\n";
+    // ignmsg << linkPose << "\n";
+
     /// \todo WorldCoGPose is currently not available
     // math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
-    math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
+    // math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
+    auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
+    math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();;
+    // DEBUG_INFO
+    // ignmsg << "Hydrodynamics: link world CoM pose\n";
+    // ignmsg << linkCoMPose << "\n";
 
     // Update water patch
     hd->wavefieldSampler->ApplyPose(linkPose);
@@ -920,7 +958,11 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       auto linkCollision = hd->linkCollisions[j];
       auto collisionPose = worldPose(linkCollision, _ecm);
       ApplyPose(collisionPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
-      
+
+      // DEBUG_INFO
+      // ignmsg << "Hydrodynamics: collision pose\n";
+      // ignmsg << collisionPose << "\n";
+
       // Update hydrodynamics
       hd->hydrodynamics[j]->Update(
         hd->wavefieldSampler, linkCoMPose, linVelocity, angVelocity);
