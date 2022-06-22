@@ -30,7 +30,7 @@
 #include <iostream>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -42,7 +42,7 @@ namespace marine
     /// \brief Callback for topic "/world/<world>/waves".
     ///
     /// \param[in] _msg Wave parameters message.
-    public: void OnWaveMsg(const ignition::msgs::Param &_msg);
+    public: void OnWaveMsg(const gz::msgs::Param &_msg);
 
     /// \brief Wave parameters
     public: std::shared_ptr<WaveParameters> params;
@@ -152,7 +152,7 @@ namespace marine
 
   /////////////////////////////////////////////////
   //////////////////////////////////////////////////
-  void WavefieldPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
+  void WavefieldPrivate::OnWaveMsg(const gz::msgs::Param &_msg)
   {
     std::lock_guard<std::recursive_mutex> lock(this->mutex);
 

@@ -26,7 +26,7 @@
 
 
 /// \brief Private implementation
-class ignition::rendering::Ogre2OceanGeometryPrivate
+class gz::rendering::Ogre2OceanGeometryPrivate
 {
   /// \brief OceanGeometry materal
   public: Ogre2MaterialPtr material{nullptr};
@@ -38,7 +38,7 @@ class ignition::rendering::Ogre2OceanGeometryPrivate
   // public: bool dirty{true};
 };
 
-using namespace ignition;
+using namespace gz;
 using namespace rendering;
 
 //////////////////////////////////////////////////
@@ -121,7 +121,7 @@ void Ogre2OceanGeometry::SetMaterial(MaterialPtr _material, bool _unique)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanGeometry::LoadMesh(common::MeshPtr _mesh)
+void Ogre2OceanGeometry::LoadMesh(gz::common::MeshPtr _mesh)
 {
   if (!this->dataPtr->dynMesh)
   {
@@ -148,7 +148,7 @@ void Ogre2OceanGeometry::LoadMesh(common::MeshPtr _mesh)
   // Get the submesh
   auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
   auto subMesh = std::dynamic_pointer_cast<
-      common::SubMeshWithTangents>(baseSubMesh);
+      gz::common::SubMeshWithTangents>(baseSubMesh);
   if (!subMesh)
   {
     ignwarn << "Ogre2OceanGeometry: submesh does not support tangents\n";
@@ -174,7 +174,7 @@ void Ogre2OceanGeometry::LoadMesh(common::MeshPtr _mesh)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanGeometry::UpdateMesh(common::MeshPtr _mesh)
+void Ogre2OceanGeometry::UpdateMesh(gz::common::MeshPtr _mesh)
 {
   // \todo add checks
   // \todo: handle more than one submesh
@@ -182,7 +182,7 @@ void Ogre2OceanGeometry::UpdateMesh(common::MeshPtr _mesh)
   // Get the submesh
   auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
   auto subMesh = std::dynamic_pointer_cast<
-      common::SubMeshWithTangents>(baseSubMesh);
+      gz::common::SubMeshWithTangents>(baseSubMesh);
   if (!subMesh)
   {
     ignwarn << "Ogre2OceanGeometry: submesh does not support tangents\n";

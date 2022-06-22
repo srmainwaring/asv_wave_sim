@@ -25,7 +25,7 @@
 
 #include <memory>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -51,21 +51,21 @@ namespace marine
 
     public: void Create();
 
-    // Returns a new common::Mesh. The caller must take ownership.
-    public: common::Mesh* CreateMesh();
+    // Returns a new gz::common::Mesh. The caller must take ownership.
+    public: gz::common::Mesh* CreateMesh();
 
     public: void Update(double _time);
 
-    public: void UpdateMesh(double _time, common::Mesh *_mesh);
+    public: void UpdateMesh(double _time, gz::common::Mesh *_mesh);
 
 
     ////////////////////////////////////////
     // Access to vertices, texture coordinates and faces
     public: unsigned int VertexCount() const;
     public: Vector3 Vertex(unsigned int _index) const;
-    public: math::Vector2d UV0(unsigned int _index) const;
+    public: gz::math::Vector2d UV0(unsigned int _index) const;
     public: unsigned int FaceCount() const;
-    public: math::Vector3i Face(unsigned int _index) const;
+    public: gz::math::Vector3i Face(unsigned int _index) const;
     public: const std::vector<Vector3>& Vertices() const;
 
     private: std::unique_ptr<OceanTilePrivate<Vector3>> dataPtr;
@@ -73,7 +73,7 @@ namespace marine
 
   namespace visual
   {
-    typedef OceanTileT<math::Vector3d> OceanTile;
+    typedef OceanTileT<gz::math::Vector3d> OceanTile;
     typedef std::shared_ptr<OceanTile> OceanTilePtr;
   }
   namespace physics

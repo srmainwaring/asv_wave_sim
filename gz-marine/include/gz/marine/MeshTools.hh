@@ -27,7 +27,7 @@
 
 #include <memory>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -38,13 +38,13 @@ namespace marine
   /// \brief A collection of static methods for switching between Gazebo and CGAL meshes.
   class MeshTools
   {
-    /// \brief Wrapper around gazebo::common::Mesh::FillArrays to populate vectors instead of raw arrays.
+    /// \brief Wrapper around gz::sim::common::Mesh::FillArrays to populate vectors instead of raw arrays.
     ///
     /// \param[in] _source      The source mesh (a Gazebo Mesh).
     /// \param[out] _vertices   The vector of vertices to populate.
     /// \param[out] _indices    The vector of indices to populate.
     public: static void FillArrays(
-      const common::Mesh& _source,
+      const gz::common::Mesh& _source,
       std::vector<float>& _vertices,
       std::vector<int>& _indices
     );
@@ -54,7 +54,7 @@ namespace marine
     /// \param[in] _source      The source mesh (a Gazebo Mesh).
     /// \param[out] _target     The target mesg (a CGAL SurfaceMesh).
     public: static void MakeSurfaceMesh(
-      const common::Mesh& _source,
+      const gz::common::Mesh& _source,
       cgal::Mesh& _target
     );
   };

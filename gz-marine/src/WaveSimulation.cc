@@ -15,7 +15,7 @@
 
 #include "gz/marine/WaveSimulation.hh"
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

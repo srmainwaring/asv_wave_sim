@@ -92,6 +92,12 @@ else()
 endif()
 
 #--------------------------------------
+# Other dependencies...
+
+find_package(Eigen3 REQUIRED)
+find_package(TBB REQUIRED)
+
+#--------------------------------------
 # CGAL and its components...
 
 find_package(CGAL REQUIRED COMPONENTS Core)
@@ -103,12 +109,6 @@ endif()
 
 # include helper file
 include(${CGAL_USE_FILE})
-
-#--------------------------------------
-# Other dependencies...
-
-find_package(Eigen3 REQUIRED)
-find_package(TBB REQUIRED)
 
 #--------------------------------------
 # Find FFTW3 (double-precision) (GPL) as FFT library.

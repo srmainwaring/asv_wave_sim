@@ -24,11 +24,11 @@
 #include <gz/common/Profiler.hh>
 #include <gz/plugin/Register.hh>
 
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/World.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/World.hh>
 
-#include <ignition/gazebo/Model.hh>
-#include <ignition/gazebo/Util.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/Util.hh>
 
 #include <sdf/Element.hh>
 
@@ -38,13 +38,13 @@
 #include <vector>
 #include <string>
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 using namespace systems;
 
 /// \brief Modelled on the Wind and LiftDrags systems.
 /// Applies at the model level rather than the world 
-class ignition::gazebo::systems::WavesModelPrivate
+class gz::sim::systems::WavesModelPrivate
 {
   /// \brief Destructor
   public: ~WavesModelPrivate();
@@ -249,9 +249,9 @@ void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
 
 //////////////////////////////////////////////////
 IGNITION_ADD_PLUGIN(WavesModel,
-                    ignition::gazebo::System,
+                    gz::sim::System,
                     WavesModel::ISystemConfigure,
                     WavesModel::ISystemPreUpdate)
 
 IGNITION_ADD_PLUGIN_ALIAS(WavesModel,
-  "ignition::gazebo::systems::WavesModel")
+  "gz::sim::systems::WavesModel")

@@ -4,13 +4,13 @@
 
 #include "gz/marine/Wavefield.hh"
 
-#include <ignition/gazebo/components/Factory.hh>
-#include <ignition/gazebo/components/Component.hh>
-#include <ignition/gazebo/components/Serialization.hh>
-#include <ignition/gazebo/config.hh>
-#include <ignition/gazebo/Conversions.hh>
+#include <gz/sim/components/Factory.hh>
+#include <gz/sim/components/Component.hh>
+#include <gz/sim/components/Serialization.hh>
+#include <gz/sim/config.hh>
+#include <gz/sim/Conversions.hh>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -19,7 +19,7 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE {
 namespace components
 {
   /// \brief This component holds an entity's wavefield.
-  using Wavefield = gazebo::components::Component<marine::WavefieldPtr, class WavefieldTag>;
+  using Wavefield = gz::sim::components::Component<marine::WavefieldPtr, class WavefieldTag>;
   IGN_GAZEBO_REGISTER_COMPONENT("ign_marine_components.Wavefield", Wavefield)
 }
 }

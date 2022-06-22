@@ -19,7 +19,7 @@
 #include <gz/math/Vector2.hh>
 #include <gz/math/Vector3.hh>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -27,32 +27,32 @@ namespace marine
 ///////////////////////////////////////////////////////////////////////////////
 // Conversions
   
-  math::Vector3d ToIgn(const cgal::Point3& _point)
+  gz::math::Vector3d ToIgn(const cgal::Point3& _point)
   {
-    return math::Vector3d(_point.x(), _point.y(), _point.z());
+    return gz::math::Vector3d(_point.x(), _point.y(), _point.z());
   }
 
-  math::Vector2d ToIgn(const cgal::Vector2& _vector)
+  gz::math::Vector2d ToIgn(const cgal::Vector2& _vector)
   {
-    return math::Vector2d(_vector.x(), _vector.y());
+    return gz::math::Vector2d(_vector.x(), _vector.y());
   }
 
-  math::Vector3d ToIgn(const cgal::Vector3& _vector)
+  gz::math::Vector3d ToIgn(const cgal::Vector3& _vector)
   {
-    return math::Vector3d(_vector.x(), _vector.y(), _vector.z());
+    return gz::math::Vector3d(_vector.x(), _vector.y(), _vector.z());
   }
 
-  cgal::Point3 ToPoint3(const math::Vector3d& _vector)
+  cgal::Point3 ToPoint3(const gz::math::Vector3d& _vector)
   {
     return cgal::Point3(_vector.X(), _vector.Y(), _vector.Z());
   }
 
-  cgal::Vector2 ToVector2(const math::Vector2d& _vector)
+  cgal::Vector2 ToVector2(const gz::math::Vector2d& _vector)
   {
     return cgal::Vector2(_vector.X(), _vector.Y());
   }
 
-  cgal::Vector3 ToVector3(const math::Vector3d& _vector)
+  cgal::Vector3 ToVector3(const gz::math::Vector3d& _vector)
   {
     return cgal::Vector3(_vector.X(), _vector.Y(), _vector.Z());
   }

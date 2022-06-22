@@ -66,12 +66,12 @@
 
 #include <gz/transport/Node.hh>
 
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/World.hh>
-#include <ignition/gazebo/components/SourceFilePath.hh>
-#include <ignition/gazebo/rendering/Events.hh>
-#include <ignition/gazebo/rendering/RenderUtil.hh>
-#include <ignition/gazebo/Util.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/components/SourceFilePath.hh>
+#include <gz/sim/rendering/Events.hh>
+#include <gz/sim/rendering/RenderUtil.hh>
+#include <gz/sim/Util.hh>
 
 #include <sdf/Element.hh>
 
@@ -81,19 +81,19 @@
 #include <vector>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace rendering
 {
-inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
   // Subclass from Ogre2Mesh and Ogre2MeshFactory to get
   // indirect access to protected members and override any
-  // behaviour that tries to load a common::Mesh which we
+  // behaviour that tries to load a gz::common::Mesh which we
   // are not using.
 
   //////////////////////////////////////////////////
-  class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshExt :
+  class GZ_RENDERING_OGRE2_VISIBLE Ogre2MeshExt :
       public Ogre2Mesh
   {
     /// \brief Destructor
@@ -132,7 +132,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
   typedef std::shared_ptr<Ogre2MeshExt> Ogre2MeshExtPtr;
 
   //////////////////////////////////////////////////
-  class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshFactoryExt :
+  class GZ_RENDERING_OGRE2_VISIBLE Ogre2MeshFactoryExt :
       public Ogre2MeshFactory
   {
     /// \brief Destructor
@@ -148,7 +148,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       // create ogre entity
       Ogre2MeshExtPtr mesh(new Ogre2MeshExt);
       MeshDescriptor normDesc = _desc;
-      // \todo do this? override MeshDescriptor behaviour as we're not using common::Mesh
+      // \todo do this? override MeshDescriptor behaviour as we're not using gz::common::Mesh
       normDesc.Load();
       mesh->SetOgreItem(this->OgreItem(normDesc));
 
@@ -239,7 +239,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       {
         ignerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
         return false;
-        // Override MeshDescriptor behaviour as we're not using common::Mesh
+        // Override MeshDescriptor behaviour as we're not using gz::common::Mesh
         // return true;
       }
 
@@ -262,11 +262,11 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 }
 }
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 using namespace systems;
 
-class ignition::gazebo::systems::WavesVisualPrivate
+class gz::sim::systems::WavesVisualPrivate
 {
   /// \brief Data structure for storing shader param info
   public: class ShaderParamValue
@@ -339,7 +339,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   /// \brief Callback for topic "/world/<world>/waves".
   ///
   /// \param[in] _msg Wave parameters message.
-  public: void OnWaveMsg(const ignition::msgs::Param &_msg);
+  public: void OnWaveMsg(const gz::msgs::Param &_msg);
 
   /// \brief Name of the world
   public: std::string worldName;
@@ -365,11 +365,11 @@ class ignition::gazebo::systems::WavesVisualPrivate
 
   /// \brief The number of tiles in the x-direction given as an offset range.
   /// Default [lower=0, upper=0].
-  public: math::Vector2i tiles_x = {0, 0};
+  public: gz::math::Vector2i tiles_x = {0, 0};
 
   /// \brief The number of tiles in the y-direction given as an offset range.
   /// Default [lower=0, upper=0].
-  public: math::Vector2i tiles_y = {0, 0};
+  public: gz::math::Vector2i tiles_y = {0, 0};
 
   /// \brief Material used by the ocean visual
   public: rendering::MaterialPtr oceanMaterial;
@@ -394,7 +394,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   Ogre::TextureGpu   *mNormalMapTex;
   Ogre::TextureGpu   *mTangentMapTex;
 
-  std::unique_ptr<ignition::marine::WaveSimulation> mWaveSim;
+  std::unique_ptr<gz::marine::WaveSimulation> mWaveSim;
   std::vector<double> mHeights;
   std::vector<double> mDhdx;
   std::vector<double> mDhdy;
@@ -418,7 +418,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   // DYNAMIC_GEOMETRY
 
   /// \brief Ocean mesh (not stored in the mesh manager)
-  public: common::MeshPtr oceanTileMesh;
+  public: gz::common::MeshPtr oceanTileMesh;
 
   /////////////////
   // OceanTile
@@ -455,7 +455,7 @@ class ignition::gazebo::systems::WavesVisualPrivate
   public: transport::Node node;
 
   /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection{nullptr};
+  public: gz::common::ConnectionPtr connection{nullptr};
 };
 
 /////////////////////////////////////////////////
@@ -594,11 +594,11 @@ void WavesVisual::Configure(const Entity &_entity,
         shader.language = api;
 
         sdf::ElementPtr vertexElem = shaderElem->GetElement("vertex");
-        shader.vertexShaderUri = common::findFile(
+        shader.vertexShaderUri = gz::common::findFile(
             asFullPath(vertexElem->Get<std::string>(),
             this->dataPtr->modelPath));
         sdf::ElementPtr fragmentElem = shaderElem->GetElement("fragment");
-        shader.fragmentShaderUri = common::findFile(
+        shader.fragmentShaderUri = gz::common::findFile(
             asFullPath(fragmentElem->Get<std::string>(),
             this->dataPtr->modelPath));
         this->dataPtr->shaders[api] = shader;
@@ -618,7 +618,7 @@ void WavesVisual::Configure(const Entity &_entity,
   // The callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
-      _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
+      _eventMgr.Connect<gz::sim::events::SceneUpdate>(
       std::bind(&WavesVisualPrivate::OnUpdate, this->dataPtr.get()));
 
   // World name
@@ -804,7 +804,7 @@ void WavesVisualPrivate::OnUpdate()
           for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
           {
             // tile position 
-            ignition::math::Vector3d tilePosition(
+            gz::math::Vector3d tilePosition(
               position.X() + ix * L,
               position.Y() + iy * L,
               position.Z() + 0.0
@@ -896,7 +896,7 @@ void WavesVisualPrivate::OnUpdate()
     }
     case MeshDeformationMethod::DYNAMIC_TEXTURE:
     {
-      // Test attaching a common::Mesh to the entity
+      // Test attaching a gz::common::Mesh to the entity
       if (this->oceanVisuals.empty())
       {
         ignmsg << "WavesVisual: creating dynamic texture ocean visual\n";
@@ -906,11 +906,11 @@ void WavesVisualPrivate::OnUpdate()
 
         /// \note: replaced with cloned geometry from primary visual 
         // load mesh
-        // std::string meshPath = common::findFile(
+        // std::string meshPath = gz::common::findFile(
         //     asFullPath("materials/mesh_256x256.dae", this->modelPath));
         // rendering::MeshDescriptor descriptor;
         // descriptor.meshName = meshPath;
-        // common::MeshManager *meshManager = common::MeshManager::Instance();
+        // gz::common::MeshManager *meshManager = gz::common::MeshManager::Instance();
         // descriptor.mesh = meshManager->Load(descriptor.meshName);
  
         // Hide the primary visual
@@ -931,7 +931,7 @@ void WavesVisualPrivate::OnUpdate()
           for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
           {
             // tile position 
-            ignition::math::Vector3d tilePosition(
+            gz::math::Vector3d tilePosition(
               position.X() + ix * L,
               position.Y() + iy * L,
               position.Z() + 0.0
@@ -988,7 +988,7 @@ void WavesVisualPrivate::OnUpdate()
 }
 
 //////////////////////////////////////////////////
-void WavesVisualPrivate::OnWaveMsg(const ignition::msgs::Param &_msg)
+void WavesVisualPrivate::OnWaveMsg(const gz::msgs::Param &_msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
 
@@ -1084,8 +1084,8 @@ void WavesVisualPrivate::InitWaveSim()
   double s   = this->waveParams->Steepness();
 
   // create wave model
-  std::unique_ptr<ignition::marine::WaveSimulationFFT2> waveSim(
-      new ignition::marine::WaveSimulationFFT2(N, L));
+  std::unique_ptr<gz::marine::WaveSimulationFFT2> waveSim(
+      new gz::marine::WaveSimulationFFT2(N, L));
 
   // set params
   waveSim->SetWindVelocity(ux, uy);
@@ -1135,7 +1135,7 @@ void WavesVisualPrivate::InitUniforms()
     {
       unsigned int uvSetIndex = spv.args.empty() ? 0u :
           static_cast<unsigned int>(std::stoul(spv.args[0]));
-      std::string texPath = common::findFile(
+      std::string texPath = gz::common::findFile(
           asFullPath(spv.value, this->modelPath));
       (*params)[spv.name].SetTexture(texPath,
           rendering::ShaderParam::ParamType::PARAM_TEXTURE, uvSetIndex);
@@ -1148,7 +1148,7 @@ void WavesVisualPrivate::InitUniforms()
     {
       unsigned int uvSetIndex = spv.args.empty() ? 0u :
           static_cast<unsigned int>(std::stoul(spv.args[0]));
-      std::string texPath = common::findFile(
+      std::string texPath = gz::common::findFile(
           asFullPath(spv.value, this->modelPath));
       (*params)[spv.name].SetTexture(texPath,
           rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, uvSetIndex);
@@ -1160,7 +1160,7 @@ void WavesVisualPrivate::InitUniforms()
     // handle int, float, int_array, and float_array params
     else
     {
-      std::vector<std::string> values = common::split(spv.value, " ");
+      std::vector<std::string> values = gz::common::split(spv.value, " ");
 
       int intValue = 0;
       float floatValue = 0;
@@ -1263,12 +1263,12 @@ void WavesVisualPrivate::InitTextures()
     return;
   }
 
-  ignition::rendering::Ogre2ScenePtr ogre2Scene =
-    std::dynamic_pointer_cast<ignition::rendering::Ogre2Scene>(
+  gz::rendering::Ogre2ScenePtr ogre2Scene =
+    std::dynamic_pointer_cast<gz::rendering::Ogre2Scene>(
         this->scene);
 
-  ignition::rendering::Ogre2MaterialPtr ogre2Material =
-    std::dynamic_pointer_cast<ignition::rendering::Ogre2Material>(
+  gz::rendering::Ogre2MaterialPtr ogre2Material =
+    std::dynamic_pointer_cast<gz::rendering::Ogre2Material>(
         shader);
 
   Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
@@ -1422,8 +1422,8 @@ void WavesVisualPrivate::UpdateUniforms()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::UpdateTextures()
 {
-  ignition::rendering::Ogre2ScenePtr ogre2Scene =
-    std::dynamic_pointer_cast<ignition::rendering::Ogre2Scene>(
+  gz::rendering::Ogre2ScenePtr ogre2Scene =
+    std::dynamic_pointer_cast<gz::rendering::Ogre2Scene>(
         this->scene);
 
   Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
@@ -1547,9 +1547,9 @@ void WavesVisualPrivate::UpdateTextures()
 
 //////////////////////////////////////////////////
 IGNITION_ADD_PLUGIN(WavesVisual,
-                    ignition::gazebo::System,
+                    gz::sim::System,
                     WavesVisual::ISystemConfigure,
                     WavesVisual::ISystemPreUpdate)
 
 IGNITION_ADD_PLUGIN_ALIAS(WavesVisual,
-  "ignition::gazebo::systems::WavesVisual")
+  "gz::sim::systems::WavesVisual")

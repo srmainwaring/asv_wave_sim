@@ -32,11 +32,11 @@
 #pragma warning(pop)
 #endif
 
-#include "ignition/common/Console.hh"
-#include "ignition/rendering/ogre2/Ogre2Conversions.hh"
-#include "ignition/rendering/ogre2/Ogre2Material.hh"
-#include "ignition/rendering/ogre2/Ogre2RenderEngine.hh"
-#include "ignition/rendering/ogre2/Ogre2Scene.hh"
+#include <gz/common/Console.hh>
+#include <gz/rendering/ogre2/Ogre2Conversions.hh>
+#include <gz/rendering/ogre2/Ogre2Material.hh>
+#include <gz/rendering/ogre2/Ogre2RenderEngine.hh>
+#include <gz/rendering/ogre2/Ogre2Scene.hh>
 
 #ifdef _MSC_VER
   #pragma warning(push, 0)
@@ -52,25 +52,25 @@
 #endif
 
 /// \brief Private implementation
-class ignition::rendering::Ogre2DynamicMeshPrivate
+class gz::rendering::Ogre2DynamicMeshPrivate
 {
   /// \brief list of colors at each point
-  public: std::vector<ignition::math::Color> colors;
+  public: std::vector<gz::math::Color> colors;
 
   /// \brief List of vertices for the mesh
-  public: std::vector<ignition::math::Vector3d> vertices;
+  public: std::vector<gz::math::Vector3d> vertices;
 
   /// \brief List of normals for the mesh
-  public: std::vector<ignition::math::Vector3d> normals;
+  public: std::vector<gz::math::Vector3d> normals;
 
   /// \brief List of tangents for the mesh
-  public: std::vector<ignition::math::Vector3d> tangents;
+  public: std::vector<gz::math::Vector3d> tangents;
 
   /// \brief List of binormals for the mesh
-  // public: std::vector<ignition::math::Vector3d> binormals;
+  // public: std::vector<gz::math::Vector3d> binormals;
 
   /// \brief List of uv0 coordinates for the mesh
-  public: std::vector<ignition::math::Vector2d> uv0s;
+  public: std::vector<gz::math::Vector2d> uv0s;
 
   /// \brief Used to indicate if the lines require an update
   public: bool dirty {false};
@@ -121,7 +121,7 @@ class ignition::rendering::Ogre2DynamicMeshPrivate
 };
 
 
-using namespace ignition;
+using namespace gz;
 using namespace rendering;
 
 //////////////////////////////////////////////////

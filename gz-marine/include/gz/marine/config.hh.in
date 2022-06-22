@@ -11,7 +11,7 @@
 
 #define GZ_MARINE_VERSION_NAMESPACE v${PROJECT_VERSION_MAJOR}
 
-#define GZ_MARINE_VERSION_HEADER "Ignition Marine, version ${PROJECT_VERSION_FULL}\nCopyright (C) 2022 Rhys Mainwaring.\nReleased under the GPLv3 License.\n\n"
+#define GZ_MARINE_VERSION_HEADER "Gazebo Marine, version ${PROJECT_VERSION_FULL}\nCopyright (C) 2022 Rhys Mainwaring.\nReleased under the GPLv3 License.\n\n"
 
 #define GZ_MARINE_GUI_CONFIG_PATH "${CMAKE_INSTALL_PREFIX}/${IGN_DATA_INSTALL_DIR}/gui"
 #define GZ_MARINE_SYSTEM_CONFIG_PATH "${CMAKE_INSTALL_PREFIX}/${IGN_DATA_INSTALL_DIR}/systems"

@@ -23,7 +23,7 @@
 
 #include <array>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

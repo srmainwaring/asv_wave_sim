@@ -20,7 +20,7 @@
 #ifndef GZ_MARINE_PHYSICALCONSTANTS_HH_
 #define GZ_MARINE_PHYSICALCONSTANTS_HH_
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

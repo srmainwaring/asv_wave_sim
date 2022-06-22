@@ -24,14 +24,14 @@
 #include <iterator>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
 ///////////////////////////////////////////////////////////////////////////////
 // MeshTools
 
-  /// Vertex and Index conventions used by ignition::common::Mesh 
+  /// Vertex and Index conventions used by gz::common::Mesh 
   ///
   /// Mesh::GetVertexCount()
   ///   returns the number of vertices in the mesh, which means that
@@ -42,7 +42,7 @@ namespace marine
   ///   the size of _indices will be Mesh::GetIndexCount()
   ///
   void MeshTools::FillArrays(
-    const common::Mesh& _source,
+    const gz::common::Mesh& _source,
     std::vector<float>& _vertices,
     std::vector<int>& _indices
   )
@@ -76,7 +76,7 @@ namespace marine
       delete[] indices;
   }
 
-  void MeshTools::MakeSurfaceMesh(const common::Mesh& _source, cgal::Mesh& _target)
+  void MeshTools::MakeSurfaceMesh(const gz::common::Mesh& _source, cgal::Mesh& _target)
   {
     std::vector<float> vertices;
     std::vector<int>   indices;

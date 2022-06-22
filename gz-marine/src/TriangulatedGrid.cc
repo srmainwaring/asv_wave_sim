@@ -31,7 +31,7 @@
 #include <CGAL/algorithm.h>
 #include <CGAL/point_generators_2.h>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -54,13 +54,13 @@ namespace marine
     const Point3Range& Points() const;
     const Index3Range& Indices() const;
     const cgal::Point3& Origin() const;
-    void ApplyPose(const math::Pose3d& pose);
+    void ApplyPose(const gz::math::Pose3d& pose);
 
     bool IsValid(bool verbose=false) const;
     void DebugPrintMesh() const;
     void DebugPrintTriangulation() const;
     void UpdatePoints(const std::vector<cgal::Point3>& points);
-    void UpdatePoints(const std::vector<math::Vector3d>& from);
+    void UpdatePoints(const std::vector<gz::math::Vector3d>& from);
 
     // void UpdatePoints(const std::vector<Ogre::Vector3>& from);
     void UpdatePoints(const cgal::Mesh& from);
@@ -75,8 +75,8 @@ namespace marine
     typedef CGAL::Constrained_triangulation_face_base_2<Gt>               Fbb;
     typedef CGAL::Triangulation_face_base_with_info_2<int64_t, Gt, Fbb>   Fb;
     typedef CGAL::Triangulation_data_structure_2<Vb, Fb>                  Tds;
-    // typedef CGAL::No_intersection_tag                                   Itag;
-    typedef CGAL::No_constraint_intersection_requiring_constructions_tag  Itag;
+    typedef CGAL::No_intersection_tag                                   Itag;
+    // typedef CGAL::No_constraint_intersection_requiring_constructions_tag  Itag;
     typedef CGAL::Constrained_Delaunay_triangulation_2<Gt, Tds, Itag>     Tb;
     typedef CGAL::Triangulation_hierarchy_2<Tb>                           Triangulation;
     typedef Triangulation::Vertex_handle                                  Vertex_handle;
@@ -369,7 +369,7 @@ namespace marine
     return origin_;
   }
 
-  void TriangulatedGrid::Private::ApplyPose(const math::Pose3d& pose) {
+  void TriangulatedGrid::Private::ApplyPose(const gz::math::Pose3d& pose) {
     // Origin - slide the patch in the xy - plane only
     cgal::Point3 o = CGAL::ORIGIN;
     origin_ = cgal::Point3(o.x() + pose.Pos().X(), o.y() + pose.Pos().Y(), o.z());
@@ -491,7 +491,7 @@ namespace marine
     }
   }
 
-  void TriangulatedGrid::Private::UpdatePoints(const std::vector<math::Vector3d>& from) {
+  void TriangulatedGrid::Private::UpdatePoints(const std::vector<gz::math::Vector3d>& from) {
     // Mesh points
     auto it_to = points_.begin();
     auto it_from = from.begin();
@@ -593,7 +593,7 @@ namespace marine
     return impl_->Origin();    
   }
 
-  void TriangulatedGrid::ApplyPose(const math::Pose3d& pose) {
+  void TriangulatedGrid::ApplyPose(const gz::math::Pose3d& pose) {
     impl_->ApplyPose(pose);    
   }
 
@@ -613,7 +613,7 @@ namespace marine
     impl_->UpdatePoints(from);
   }
 
-  void TriangulatedGrid::UpdatePoints(const std::vector<math::Vector3d>& from) {
+  void TriangulatedGrid::UpdatePoints(const std::vector<gz::math::Vector3d>& from) {
     impl_->UpdatePoints(from);
   }
 

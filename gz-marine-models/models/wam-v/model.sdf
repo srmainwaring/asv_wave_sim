@@ -274,21 +274,21 @@
 
     <!-- Joint state and force plugins -->
     <plugin filename="libignition-gazebo-joint-state-publisher-system.so"
-      name="ignition::gazebo::systems::JointStatePublisher">
+      name="gz::sim::systems::JointStatePublisher">
     </plugin>
     <plugin filename="libignition-gazebo-apply-joint-force-system.so"
-      name="ignition::gazebo::systems::ApplyJointForce">
+      name="gz::sim::systems::ApplyJointForce">
       <joint_name>left_engine_joint</joint_name>
     </plugin>
     <plugin filename="libignition-gazebo-apply-joint-force-system.so"
-      name="ignition::gazebo::systems::ApplyJointForce">
+      name="gz::sim::systems::ApplyJointForce">
       <joint_name>right_engine_joint</joint_name>
     </plugin>
 
     <!-- Thruster plugins -->
     <plugin
         filename="ignition-gazebo-thruster-system"
-        name="ignition::gazebo::systems::Thruster">
+        name="gz::sim::systems::Thruster">
       <namespace>wam-v</namespace>
       <joint_name>left_propeller_joint</joint_name>
       <use_angvel_cmd>0</use_angvel_cmd>
@@ -304,7 +304,7 @@
     </plugin>
     <plugin
         filename="ignition-gazebo-thruster-system"
-        name="ignition::gazebo::systems::Thruster">
+        name="gz::sim::systems::Thruster">
       <namespace>wam-v</namespace>
       <joint_name>right_propeller_joint</joint_name>
       <use_angvel_cmd>0</use_angvel_cmd>
@@ -322,7 +322,7 @@
     <!-- Hydrodynamics plugin -->
     <plugin
         filename="gazebo_marine1-hydrodynamics-system"
-        name="ignition::gazebo::systems::Hydrodynamics">
+        name="gz::sim::systems::Hydrodynamics">
         <hydrodynamics>
           <damping_on>1</damping_on>
           <viscous_drag_on>1</viscous_drag_on>

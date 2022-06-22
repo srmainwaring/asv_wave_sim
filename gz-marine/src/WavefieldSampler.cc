@@ -32,7 +32,7 @@
 #include <cmath>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -74,7 +74,7 @@ namespace marine
   }
 
   /////////////////////////////////////////////////
-  void WavefieldSampler::ApplyPose(const ignition::math::Pose3d& _pose)
+  void WavefieldSampler::ApplyPose(const gz::math::Pose3d& _pose)
   {
     // @TODO_FRAGILE - Move to Grid as changing internal state 
     // Apply pose to center
@@ -182,7 +182,7 @@ namespace marine
         const std::vector<double>& _omega,
         const std::vector<double>& _phi,
         const std::vector<double>& _q,
-        const std::vector<ignition::math::Vector2d>& _dir) :
+        const std::vector<gz::math::Vector2d>& _dir) :
         a(_a), k(_k), omega(_omega), phi(_phi), q(_q), dir(_dir) {}
 
       const std::vector<double>& a;
@@ -190,7 +190,7 @@ namespace marine
       const std::vector<double>& omega;
       const std::vector<double>& phi;
       const std::vector<double>& q;
-      const std::vector<ignition::math::Vector2d>& dir;
+      const std::vector<gz::math::Vector2d>& dir;
     };
 
     // Compute the target function and Jacobian. Also calculate pz,

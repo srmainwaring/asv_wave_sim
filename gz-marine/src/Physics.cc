@@ -40,7 +40,7 @@
 #include <limits>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -447,7 +447,7 @@ namespace marine
     return this->data->vRDrag;
   }
 
-  void HydrodynamicsParameters::SetFromMsg(const ignition::msgs::Param_V& _msg)
+  void HydrodynamicsParameters::SetFromMsg(const gz::msgs::Param_V& _msg)
   {
     this->data->dampingOn      = Utilities::MsgParamBool(_msg,  "damping_on",       this->data->dampingOn);
     this->data->viscousDragOn  = Utilities::MsgParamBool(_msg,  "viscous_drag_on",  this->data->viscousDragOn);
@@ -615,7 +615,7 @@ namespace marine
     public: std::shared_ptr<const WavefieldSampler>  wavefieldSampler;
 
     /// \brief Pose of the centre of mass.
-    public: ignition::math::Pose3d pose;
+    public: gz::math::Pose3d pose;
 
     /// \brief Position of the centre of mass (CGAL types).
     public: cgal::Point3 position;
@@ -671,7 +671,7 @@ namespace marine
 
   void Hydrodynamics::Update(
     std::shared_ptr<const WavefieldSampler> _wavefieldSampler,
-    const ignition::math::Pose3d& _pose,
+    const gz::math::Pose3d& _pose,
     const cgal::Vector3& _linVelocity,
     const cgal::Vector3& _angVelocity
   )
@@ -973,7 +973,7 @@ namespace marine
   {
     // Calculate the direction of the x-axis
     cgal::Vector3 xaxis = ToVector3(this->data->pose.Rot().RotateVector(
-      ignition::math::Vector3d(1, 0, 0)));
+      gz::math::Vector3d(1, 0, 0)));
 
     // Project the waterline onto the x-axis
     double length = 0.0;

@@ -30,10 +30,10 @@
   #pragma warning(pop)
 #endif
 
-using namespace ignition;
+using namespace gz;
 using namespace rendering;
 
-class ignition::rendering::Ogre2OceanVisualPrivate
+class gz::rendering::Ogre2OceanVisualPrivate
 {
   /// \brief visual materal
   public: Ogre2MaterialPtr material = nullptr;
@@ -131,14 +131,14 @@ void Ogre2OceanVisual::LoadCube()
   // Position indicator - with dynamic geometry
   // must specify vertices for each face and get
   // the orientation correct.
-  math::Vector3d p0(-1, -1,  1);
-  math::Vector3d p1( 1, -1,  1);
-  math::Vector3d p2( 1,  1,  1);
-  math::Vector3d p3(-1,  1,  1);
-  math::Vector3d p4(-1, -1, -1);
-  math::Vector3d p5( 1, -1, -1);
-  math::Vector3d p6( 1,  1, -1);
-  math::Vector3d p7(-1,  1, -1);
+  gz::math::Vector3d p0(-1, -1,  1);
+  gz::math::Vector3d p1( 1, -1,  1);
+  gz::math::Vector3d p2( 1,  1,  1);
+  gz::math::Vector3d p3(-1,  1,  1);
+  gz::math::Vector3d p4(-1, -1, -1);
+  gz::math::Vector3d p5( 1, -1, -1);
+  gz::math::Vector3d p6( 1,  1, -1);
+  gz::math::Vector3d p7(-1,  1, -1);
 
   // front face
   this->dataPtr->dynMesh->AddPoint(p0);
@@ -252,7 +252,7 @@ void Ogre2OceanVisual::UpdateOceanTile(marine::visual::OceanTilePtr _oceanTile)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
+void Ogre2OceanVisual::LoadMesh(gz::common::MeshPtr _mesh)
 {
   if (!this->dataPtr->dynMesh)
   {
@@ -279,7 +279,7 @@ void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
   // Get the submesh
   auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
   auto subMesh = std::dynamic_pointer_cast<
-      common::SubMeshWithTangents>(baseSubMesh);
+      gz::common::SubMeshWithTangents>(baseSubMesh);
   if (!subMesh)
   {
     ignwarn << "Ogre2OceanVisual: submesh does not support tangents\n";
@@ -305,7 +305,7 @@ void Ogre2OceanVisual::LoadMesh(common::MeshPtr _mesh)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
+void Ogre2OceanVisual::UpdateMesh(gz::common::MeshPtr _mesh)
 {
   // \todo add checks
   // \todo: handle more than one submesh
@@ -313,7 +313,7 @@ void Ogre2OceanVisual::UpdateMesh(common::MeshPtr _mesh)
   // Get the submesh
   auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
   auto subMesh = std::dynamic_pointer_cast<
-      common::SubMeshWithTangents>(baseSubMesh);
+      gz::common::SubMeshWithTangents>(baseSubMesh);
   if (!subMesh)
   {
     ignwarn << "Ogre2OceanVisual: submesh does not support tangents\n";

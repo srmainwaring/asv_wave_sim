@@ -30,19 +30,19 @@
 
 #include <gz/plugin/Register.hh>
 
-#include <ignition/gazebo/components/AngularVelocity.hh>
-#include <ignition/gazebo/components/Collision.hh>
-#include <ignition/gazebo/components/Inertial.hh>
-#include <ignition/gazebo/components/LinearVelocity.hh>
-#include <ignition/gazebo/components/Link.hh>
-#include <ignition/gazebo/components/Model.hh>
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/ParentEntity.hh>
-#include <ignition/gazebo/components/Pose.hh>
+#include <gz/sim/components/AngularVelocity.hh>
+#include <gz/sim/components/Collision.hh>
+#include <gz/sim/components/Inertial.hh>
+#include <gz/sim/components/LinearVelocity.hh>
+#include <gz/sim/components/Link.hh>
+#include <gz/sim/components/Model.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/ParentEntity.hh>
+#include <gz/sim/components/Pose.hh>
 
-#include <ignition/gazebo/Link.hh>
-#include <ignition/gazebo/Model.hh>
-#include <ignition/gazebo/Util.hh>
+#include <gz/sim/Link.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/Util.hh>
 
 #include <sdf/Element.hh>
 
@@ -52,12 +52,12 @@
 #include <vector>
 #include <string>
 
-namespace ignition
+namespace gz
 {
-namespace gazebo
+namespace sim
 {
   /////////////////////////////////////////////////
-  // Collision (similar to gazebo::Link and gazebo::Model interfaces)
+  // Collision (similar to sim::Link and sim::Model interfaces)
  
   class CollisionPrivate
   {
@@ -72,7 +72,7 @@ namespace gazebo
 
     /// \brief Constructor
     /// \param[in] _entity Collision entity
-    public: explicit Collision(gazebo::Entity _entity = kNullEntity)
+    public: explicit Collision(sim::Entity _entity = kNullEntity)
       : dataPtr(std::make_unique<CollisionPrivate>())
     {
       this->dataPtr->id = _entity;
@@ -105,7 +105,7 @@ namespace gazebo
 
     /// \brief Get the entity which this Collision is related to.
     /// \return Collision entity.
-    public: gazebo::Entity Entity() const
+    public: sim::Entity Entity() const
     {
       return this->dataPtr->id;
     }
@@ -163,8 +163,8 @@ namespace systems
   /// \param[out] _collisionElements  A vector of vectors containing the collision entities in a link.
   void CreateCollisionMeshes(
     EntityComponentManager &_ecm,
-    gazebo::Model _model,
-    std::vector<gazebo::Entity>& _links,
+    sim::Model _model,
+    std::vector<sim::Entity>& _links,
     std::vector<std::vector<cgal::MeshPtr>>& _meshes,
     std::vector<std::vector<Entity>>& _collisions)
   {
@@ -178,7 +178,7 @@ namespace systems
     {
       IGN_ASSERT(linkEntity != kNullEntity, "Link must be valid");
       _links.push_back(linkEntity);
-      gazebo::Link link(linkEntity);
+      sim::Link link(linkEntity);
 
       /// \todo check link has valid name component
       std::string linkName(link.Name(_ecm).value());
@@ -193,7 +193,7 @@ namespace systems
       {
         IGN_ASSERT(collisionEntity != kNullEntity, "Collision must be valid");
   
-        gazebo::Collision collision(collisionEntity);
+        sim::Collision collision(collisionEntity);
         std::string collisionName(collision.Name(_ecm).value());
         ignmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
 
@@ -214,22 +214,22 @@ namespace systems
             // Get shape from the collision component
             auto& box = coll->Data().Geom()->BoxShape()->Shape();
 
-            // Create the ignition mesh
+            // Create the gazebo mesh
             std::string meshName = std::string(modelName)
                 .append(".").append(linkName)
                 .append(".").append(collisionName)
                 .append(".box");
-            common::MeshManager::Instance()->CreateBox(
+            gz::common::MeshManager::Instance()->CreateBox(
                 meshName,
                 box.Size(),
-                math::Vector2d(1, 1));          
-            IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
+                gz::math::Vector2d(1, 1));          
+            IGN_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
                 "Failed to create Mesh for Box");
 
             // Create the CGAL surface mesh
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
-                *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+                *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
@@ -245,23 +245,23 @@ namespace systems
             // Get shape from the collision component
             auto& sphere = coll->Data().Geom()->SphereShape()->Shape();
 
-            // Create the ignition mesh
+            // Create the gazebo mesh
             std::string meshName = std::string(modelName)
                 .append(".").append(linkName)
                 .append(".").append(collisionName)
                 .append(".sphere");
-            common::MeshManager::Instance()->CreateSphere(
+            gz::common::MeshManager::Instance()->CreateSphere(
                 meshName,
                 sphere.Radius(),        // radius
                 8,                      // rings
                 8);                     // segments
-            IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
+            IGN_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
                 "Failed to create Mesh for Sphere");
 
             // Create the CGAL surface mesh
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
-                *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+                *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
@@ -276,24 +276,24 @@ namespace systems
           {
             auto& cylinder = coll->Data().Geom()->CylinderShape()->Shape();
 
-            // Create the ignition mesh
+            // Create the gazebo mesh
             std::string meshName = std::string(modelName)
                 .append(".").append(linkName)
                 .append(".").append(collisionName)
                 .append(".cylinder");
-            common::MeshManager::Instance()->CreateCylinder(
+            gz::common::MeshManager::Instance()->CreateCylinder(
                 meshName,
                 cylinder.Radius(),      // radius
                 cylinder.Length(),      // length,
                 1,                      // rings
                 32);                    // segments
-            IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
+            IGN_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
                 "Failed to create Mesh for Cylinder");
 
             // Create the CGAL surface mesh
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
-                *common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+                *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
@@ -317,10 +317,10 @@ namespace systems
             std::string filePath = coll->Data().Geom()->MeshShape()->FilePath();
 
             std::string file = asFullPath(uri, filePath);
-            // if (common::MeshManager::Instance()->IsValidFilename(file))
+            // if (gz::common::MeshManager::Instance()->IsValidFilename(file))
             // {
-            //   const common::Mesh *mesh =
-            //     common::MeshManager::Instance()->Load(file);
+            //   const gz::common::Mesh *mesh =
+            //     gz::common::MeshManager::Instance()->Load(file);
             //   if (mesh)
             //     volume = mesh->Volume();
             //   else
@@ -332,7 +332,7 @@ namespace systems
             // }
 
             // Mesh
-            if (!common::MeshManager::Instance()->IsValidFilename(file))
+            if (!gz::common::MeshManager::Instance()->IsValidFilename(file))
             {
               ignerr << "Mesh: " << file << " was not loaded"<< std::endl;
               return;
@@ -341,7 +341,7 @@ namespace systems
             // Create the CGAL surface mesh
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
-                *common::MeshManager::Instance()->Load(file), *mesh);
+                *gz::common::MeshManager::Instance()->Load(file), *mesh);
             IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
@@ -375,7 +375,7 @@ namespace systems
   /// \param[in] _source  The original mesh to transform.
   /// \param[out] _target The transformed mesh.
   void ApplyPose(
-    const math::Pose3d& _pose,
+    const gz::math::Pose3d& _pose,
     const cgal::Mesh& _source,
     cgal::Mesh& _target)
   {
@@ -389,8 +389,8 @@ namespace systems
       const cgal::Point3& p0 = _source.point(v0);
 
       // Affine transformation
-      math::Vector3d ignP0(p0.x(), p0.y(), p0.z());
-      math::Vector3d ignP1 = _pose.Rot().RotateVector(ignP0) + _pose.Pos();
+      gz::math::Vector3d ignP0(p0.x(), p0.y(), p0.z());
+      gz::math::Vector3d ignP1 = _pose.Rot().RotateVector(ignP0) + _pose.Pos();
 
       cgal::Point3& p1 = _target.point(v1);
       p1 = cgal::Point3(ignP1.X(), ignP1.Y(), ignP1.Z());
@@ -467,8 +467,8 @@ namespace systems
     }
 
     /// \brief A Link entity.
-    // public: gazebo::Entity link;
-    public: gazebo::Link link{kNullEntity};
+    // public: sim::Entity link;
+    public: sim::Link link{kNullEntity};
 
     /// \brief The wavefield sampler for this link.
     public: marine::WavefieldSamplerPtr wavefieldSampler;
@@ -500,11 +500,11 @@ namespace systems
 }
 }
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 using namespace systems;
 
-class ignition::gazebo::systems::HydrodynamicsPrivate
+class gz::sim::systems::HydrodynamicsPrivate
 {
   /// \brief Destructor
   public: ~HydrodynamicsPrivate();
@@ -534,7 +534,7 @@ class ignition::gazebo::systems::HydrodynamicsPrivate
                               EntityComponentManager &_ecm);
 
   /// \brief Model interface
-  public: gazebo::Model model{kNullEntity};
+  public: sim::Model model{kNullEntity};
 
   /// \brief Copy of the sdf configuration used for this plugin
   public: sdf::ElementPtr sdf;
@@ -576,12 +576,12 @@ class ignition::gazebo::systems::HydrodynamicsPrivate
   // public: double updateRate;
 
   // /// \brief Previous update time.
-  // public: common::Time prevTime;
+  // public: gz::common::Time prevTime;
 
   // /// \brief Connection to the World Update events.
   // public: event::ConnectionPtr updateConnection;
 
-  // /// \brief Ignition transport node for igntopic "/marker".
+  // /// \brief Gazebo transport node for igntopic "/marker".
   // public: transport::Node ignNode;
 
   // /// \brief Gazebo transport node.
@@ -669,8 +669,8 @@ void Hydrodynamics::Configure(const Entity &_entity,
 
 //////////////////////////////////////////////////
 void Hydrodynamics::PreUpdate(
-  const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &_ecm)
+  const gz::sim::UpdateInfo &_info,
+  gz::sim::EntityComponentManager &_ecm)
 {
   IGN_PROFILE("Hydrodynamics::PreUpdate");
 
@@ -759,7 +759,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
   std::string modelName(this->model.Name(_ecm));
 
   // Populate link meshes
-  std::vector<gazebo::Entity> links;
+  std::vector<sim::Entity> links;
   std::vector<std::vector<cgal::MeshPtr>> meshes;
   std::vector<std::vector<Entity>> collisions;
   CreateCollisionMeshes(_ecm, this->model, links, meshes, collisions);
@@ -780,7 +780,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // hd->underwaterSurfaceMsgs.resize(meshCount);
 
     // Wavefield and Link
-    hd->link = gazebo::Link(links[i]);
+    hd->link = sim::Link(links[i]);
     hd->link.EnableVelocityChecks(_ecm);
 
     ignmsg << "Hydrodynamics: initialising link ["
@@ -810,17 +810,17 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     ///
 
     // The link pose is required for the water patch, the CoM pose for dynamics.
-    // math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
-    math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
+    // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+    gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
     ignmsg << "Hydrodynamics: link world pose\n";
     ignmsg << linkPose << "\n";
 
     /// \todo subtle difference here - inertial pose includes
     /// any rotation of the inertial matrix where CoG pose does not.
-    // math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
-    // math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();    
+    // gz::math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
+    // gz::math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();    
     auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
-    math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();
+    gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();
     ignmsg << "Hydrodynamics: link world CoM pose\n";
     ignmsg << linkCoMPose << "\n";
 
@@ -919,17 +919,17 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
   for (auto& hd : this->hydroData)
   {
     // The link pose is required for the water patch, the CoM pose for dynamics.
-    // math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
-    math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
+    // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
+    gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
     // DEBUG_INFO
     // ignmsg << "Hydrodynamics: link world pose\n";
     // ignmsg << linkPose << "\n";
 
     /// \todo WorldCoGPose is currently not available
-    // math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
-    // math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
+    // gz::math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
+    // gz::math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
     auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
-    math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();;
+    gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();;
     // DEBUG_INFO
     // ignmsg << "Hydrodynamics: link world CoM pose\n";
     // ignmsg << linkCoMPose << "\n";
@@ -978,7 +978,7 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       auto torque = marine::ToIgn(hd->hydrodynamics[j]->Torque());
       if (torque.IsFinite()) 
       {
-        hd->link.AddWorldWrench(_ecm, math::Vector3d::Zero, torque);
+        hd->link.AddWorldWrench(_ecm, gz::math::Vector3d::Zero, torque);
       }
 
       // Info for Markers
@@ -997,9 +997,9 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
 
 //////////////////////////////////////////////////
 IGNITION_ADD_PLUGIN(Hydrodynamics,
-                    ignition::gazebo::System,
+                    gz::sim::System,
                     Hydrodynamics::ISystemConfigure,
                     Hydrodynamics::ISystemPreUpdate)
 
 IGNITION_ADD_PLUGIN_ALIAS(Hydrodynamics,
-  "ignition::gazebo::systems::Hydrodynamics")
+  "gz::sim::systems::Hydrodynamics")

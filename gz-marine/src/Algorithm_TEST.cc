@@ -21,7 +21,7 @@
 #include <iostream>
 #include <string>
 
-using namespace ignition;
+using namespace gz;
 using namespace marine;
 using namespace algorithm;
 

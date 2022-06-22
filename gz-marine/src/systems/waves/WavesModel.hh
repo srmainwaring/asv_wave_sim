@@ -13,19 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef IGNITION_GAZEBO_SYSTEMS_WAVESMODEL_HH_
-#define IGNITION_GAZEBO_SYSTEMS_WAVESMODEL_HH_
+#ifndef GZ_SIM_SYSTEMS_WAVESMODEL_HH_
+#define GZ_SIM_SYSTEMS_WAVESMODEL_HH_
 
 #include <memory>
 
-#include <ignition/gazebo/System.hh>
+#include <gz/sim/System.hh>
 
-namespace ignition
+namespace gz
 {
-namespace gazebo
+namespace sim
 {
 // Inline bracket to help doxygen filtering.
-inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
+inline namespace GZ_SIM_VERSION_NAMESPACE {
 namespace systems
 {
   // Forward declaration

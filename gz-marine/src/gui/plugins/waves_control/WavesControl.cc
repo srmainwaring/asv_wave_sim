@@ -23,17 +23,17 @@
 
 #include <gz/plugin/Register.hh>
 
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/World.hh>
-#include <ignition/gazebo/EntityComponentManager.hh>
-#include <ignition/gazebo/gui/GuiEvents.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/EntityComponentManager.hh>
+#include <gz/sim/gui/GuiEvents.hh>
 
 #include <mutex>
 #include <string>
 
-namespace ignition
+namespace gz
 {
-namespace gazebo
+namespace sim
 {
 inline namespace GZ_MARINE_VERSION_NAMESPACE
 {
@@ -91,33 +91,33 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
 }
 }
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 
 //////////////////////////////////////////////////
 void WavesControlPrivate::PublishWaveParams()
 {
   // parameters
-  ignition::msgs::Param msg;
+  gz::msgs::Param msg;
 
   // wind speed
   {
-    ignition::msgs::Any value;
-    value.set_type(ignition::msgs::Any::DOUBLE);
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::DOUBLE);
     value.set_double_value(this->windSpeed);
     (*msg.mutable_params())["wind_speed"] = value;
   }
   // wind angle
   {
-    ignition::msgs::Any value;
-    value.set_type(ignition::msgs::Any::DOUBLE);
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::DOUBLE);
     value.set_double_value(this->windAngle);
     (*msg.mutable_params())["wind_angle"] = value;
   }
   // steepness
   {
-    ignition::msgs::Any value;
-    value.set_type(ignition::msgs::Any::DOUBLE);
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::DOUBLE);
     value.set_double_value(this->steepness);
     (*msg.mutable_params())["steepness"] = value;
   }
@@ -146,8 +146,8 @@ void WavesControl::LoadConfig(const tinyxml2::XMLElement * /*_pluginElem*/)
 }
 
 //////////////////////////////////////////////////
-void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
-    ignition::gazebo::EntityComponentManager &_ecm)
+void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
+    gz::sim::EntityComponentManager &_ecm)
 {
   if (!this->dataPtr->initialized)
   {
@@ -167,7 +167,7 @@ void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
 
     // Initialise the publisher
     std::string topic("/world/" + this->dataPtr->worldName + "/waves");
-    this->dataPtr->pub = this->dataPtr->node.Advertise<ignition::msgs::Param>(topic);
+    this->dataPtr->pub = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
     if (!this->dataPtr->pub)
     {
       ignerr << "Error advertising topic [" << topic << "]\n";
@@ -268,4 +268,4 @@ void WavesControl::UpdateSteepness(double _steepness)
 //////////////////////////////////////////////////
 // Register this plugin
 IGNITION_ADD_PLUGIN(WavesControl,
-                    ignition::gui::Plugin)
+                    gz::gui::Plugin)

@@ -18,7 +18,7 @@
 
 #include <vector>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

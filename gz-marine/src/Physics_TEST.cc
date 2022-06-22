@@ -35,7 +35,7 @@
 #include <string>
 #include <thread>
 
-using namespace ignition;
+using namespace gz;
 using namespace marine;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,15 +145,15 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
   double eps = 1E-8;
 
   // Mesh: 1 x 1 x 1 box
-  math::Pose3d linkPose;
+  gz::math::Pose3d linkPose;
   std::string linkMeshName("box_1x1x1");
-  common::MeshManager::Instance()->CreateBox(
+  gz::common::MeshManager::Instance()->CreateBox(
     linkMeshName,
-    math::Vector3d(1, 1, 1),
-    math::Vector2d(1, 1));
+    gz::math::Vector3d(1, 1, 1),
+    gz::math::Vector2d(1, 1));
   std::shared_ptr<cgal::Mesh> linkMesh = std::make_shared<cgal::Mesh>();
   MeshTools::MakeSurfaceMesh(
-    *common::MeshManager::Instance()->MeshByName(linkMeshName),
+    *gz::common::MeshManager::Instance()->MeshByName(linkMeshName),
     *linkMesh);
 
   // Wavefield and water patch 2x2  
@@ -182,15 +182,15 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   double eps = 1E-8;
 
   // Mesh: 10 x 4 x 2 box
-  math::Pose3d linkPose;
+  gz::math::Pose3d linkPose;
   std::string linkMeshName("box_10x4x2");
-  common::MeshManager::Instance()->CreateBox(
+  gz::common::MeshManager::Instance()->CreateBox(
     linkMeshName,
-    math::Vector3d(10, 4, 2),
-    math::Vector2d(1, 1));
+    gz::math::Vector3d(10, 4, 2),
+    gz::math::Vector2d(1, 1));
   std::shared_ptr<cgal::Mesh> linkMesh = std::make_shared<cgal::Mesh>();
   MeshTools::MakeSurfaceMesh(
-    *common::MeshManager::Instance()->MeshByName(linkMeshName),
+    *gz::common::MeshManager::Instance()->MeshByName(linkMeshName),
     *linkMesh);
 
   // Wavefield and water patch 4x4
@@ -219,8 +219,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   Pose3d linkPose(0, 0, 0, 0, 0, M_PI/4.0);
   //   for (size_t i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
-  //     math::Vector3d v0 = initLinkMesh->GetVertex(i);
-  //     math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
+  //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
+  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
   //     linkMesh->SetVertex(i, v1);
   //   }
 
@@ -238,8 +238,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   Pose3d linkPose(0, 0, 0, M_PI/4.0, 0, 0);
   //   for (size_t i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
-  //     math::Vector3d v0 = initLinkMesh->GetVertex(i);
-  //     math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
+  //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
+  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
   //     linkMesh->SetVertex(i, v1);
   //   }
 
@@ -257,8 +257,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   Pose3d linkPose(0, 0, 0.973235, -0.737731, 0, 0);
   //   for (size_t i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
-  //     math::Vector3d v0 = initLinkMesh->GetVertex(i);
-  //     math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
+  //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
+  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
   //     linkMesh->SetVertex(i, v1);
   //   }
 

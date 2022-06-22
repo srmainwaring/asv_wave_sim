@@ -19,19 +19,19 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_RENDERING_OGRE2_OGRE2DYNAMICMESH_HH_
-#define IGNITION_RENDERING_OGRE2_OGRE2DYNAMICMESH_HH_
+#ifndef GZ_RENDERING_OGRE2_OGRE2DYNAMICMESH_HH_
+#define GZ_RENDERING_OGRE2_OGRE2DYNAMICMESH_HH_
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "ignition/math.hh"
+#include <gz/math.hh>
 
-#include "ignition/rendering/ogre2/Export.hh"
-#include "ignition/rendering/ogre2/Ogre2Geometry.hh"
-#include "ignition/rendering/ogre2/Ogre2RenderTypes.hh"
-#include "ignition/rendering/Marker.hh"
+#include <gz/rendering/ogre2/Export.hh>
+#include <gz/rendering/ogre2/Ogre2Geometry.hh>
+#include <gz/rendering/ogre2/Ogre2RenderTypes.hh>
+#include <gz/rendering/Marker.hh>
 
 
 #ifdef _MSC_VER
@@ -47,21 +47,21 @@ namespace Ogre
   class MovableObject;
 }
 
-namespace ignition
+namespace gz
 {
   namespace rendering
   {
-    inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
+    inline namespace GZ_RENDERING_VERSION_NAMESPACE {
     //
     // forward declarations
     class Ogre2DynamicMeshPrivate;
 
     /*  \class Ogre2DynamicMesh Ogre2DynamicMesh.hh \
-     *  ignition/rendering/ogre2/Ogre2DynamicMesh.hh
+     *  gz/rendering/ogre2/Ogre2DynamicMesh.hh
      */
     /// \brief Dynamic mesh class that manages hardware buffers for
     /// a dynamic mesh
-    class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2DynamicMesh :
+    class GZ_RENDERING_OGRE2_VISIBLE Ogre2DynamicMesh :
         public Ogre2Geometry
     {
       /// \brief Constructor
@@ -98,10 +98,10 @@ namespace ignition
       public: void Update();
 
       /// \brief Add a point to the point list
-      /// \param[in] _pt ignition::math::Vector3d point
-      /// \param[in] _color ignition::math::Color Point color
-      public: void AddPoint(const math::Vector3d &_pt,
-            const math::Color &_color = math::Color::White);
+      /// \param[in] _pt gz::math::Vector3d point
+      /// \param[in] _color gz::math::Color Point color
+      public: void AddPoint(const gz::math::Vector3d &_pt,
+            const gz::math::Color &_color = gz::math::Color::White);
 
       /// \brief Add a point to the point list.
       /// \param[in] _x X position
@@ -109,45 +109,45 @@ namespace ignition
       /// \param[in] _z Z position
       /// \param[in] _color Point color
       public: void AddPoint(const double _x, const double _y, const double _z,
-            const math::Color &_color = math::Color::White);
+            const gz::math::Color &_color = gz::math::Color::White);
 
       /// \brief Change the location of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _value Position of the point
       public: void SetPoint(unsigned int _index,
-                            const math::Vector3d &_value);
+                            const gz::math::Vector3d &_value);
 
       /// \brief Change the color of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _color color to set the point to
       public: void SetColor(unsigned int _index,
-                            const math::Color &_color);
+                            const gz::math::Color &_color);
 
       /// \brief Change the normal vector of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _normal Normal of the point
       public: void SetNormal(unsigned int _index,
-                            const math::Vector3d &_normal);
+                            const gz::math::Vector3d &_normal);
 
       /// \brief Change the tangent vector of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _normal Tangent of the point
       public: void SetTangent(unsigned int _index,
-                            const math::Vector3d &_tangent);
+                            const gz::math::Vector3d &_tangent);
 
       /// \brief Change the texture coordinate of an existing point in the point list
       /// \param[in] _index Index of the point to set
       /// \param[in] _uv0 Texture coordinate of the point
       public: void SetUV0(unsigned int _index,
-                            const math::Vector2d &_uv0);
+                            const gz::math::Vector2d &_uv0);
 
       /// \brief Return the position of an existing point in the point list
       /// \param[in] _index Get the point at this index
       /// \return position of point. A vector of
-      /// [ignition::math::INF_D, ignition::math::INF_D, ignition::math::INF_D]
+      /// [gz::math::INF_D, gz::math::INF_D, gz::math::INF_D]
       /// is returned when then the _index is out of bounds.
-      /// ignition::math::INF_D==std::numeric_limits<double>::infinity()
-      public: math::Vector3d Point(unsigned int _index) const;
+      /// gz::math::INF_D==std::numeric_limits<double>::infinity()
+      public: gz::math::Vector3d Point(unsigned int _index) const;
 
       /// \brief Return the total number of points in the point list
       /// \return Number of points
@@ -167,7 +167,7 @@ namespace ignition
       /// \param[in] _vertices a list of vertices
       /// \param[in,out] _vbuffer vertex buffer to be filled
       private: void GenerateNormals(Ogre::OperationType _opType,
-          const std::vector<math::Vector3d> &_vertices, float *_vbuffer);
+          const std::vector<gz::math::Vector3d> &_vertices, float *_vbuffer);
 
       /// \brief Helper function to generate colors per-vertex. Only applies
       /// to points. The colors fill the normal slots on the vertex buffer.
@@ -175,7 +175,7 @@ namespace ignition
       /// \param[in] _vertices a list of vertices
       /// \param[in,out] _vbuffer vertex buffer to be filled
       private: void GenerateColors(Ogre::OperationType _opType,
-          const std::vector<math::Vector3d> &_vertices, float *_vbuffer);
+          const std::vector<gz::math::Vector3d> &_vertices, float *_vbuffer);
 
       /// \brief Destroy the vertex buffer
       private: void DestroyBuffer();

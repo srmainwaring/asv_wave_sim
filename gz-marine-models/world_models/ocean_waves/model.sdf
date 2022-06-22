@@ -5,7 +5,7 @@
 
     <plugin
         filename="gazebo_marine1-waves-model-system"
-        name="ignition::gazebo::systems::WavesModel">
+        name="gz::sim::systems::WavesModel">
       <static>0</static>
       <update_rate>30</update_rate>
       <wave>
@@ -30,7 +30,7 @@
         <!-- \todo remove duplicate params; populate from service instead -->
         <plugin
             filename="gazebo_marine1-waves-visual-system"
-            name="ignition::gazebo::systems::WavesVisual">
+            name="gz::sim::systems::WavesVisual">
           <static>0</static>
           <mesh_deformation_method>DYNAMIC_TEXTURE</mesh_deformation_method>
           <tiles_x>-10 10</tiles_x>
@@ -140,7 +140,7 @@
         </geometry>
         <plugin
             filename="gazebo_marine1-waves-visual-system"
-            name="ignition::gazebo::systems::WavesVisual">
+            name="gz::sim::systems::WavesVisual">
           <static>0</static>
           <mesh_deformation_method>DYNAMIC_TEXTURE</mesh_deformation_method>
           <tiles_x>-10 10</tiles_x>

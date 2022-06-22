@@ -53,11 +53,11 @@
 #include <gz/rendering/ogre2/Ogre2MeshFactory.hh>
 #include <gz/rendering/ogre2/Ogre2Scene.hh>
 
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/SourceFilePath.hh>
-#include <ignition/gazebo/rendering/Events.hh>
-#include <ignition/gazebo/rendering/RenderUtil.hh>
-#include <ignition/gazebo/Util.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/SourceFilePath.hh>
+#include <gz/sim/rendering/Events.hh>
+#include <gz/sim/rendering/RenderUtil.hh>
+#include <gz/sim/Util.hh>
 
 #include <sdf/Element.hh>
 
@@ -76,21 +76,21 @@
 #include <vector>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace rendering
 {
-inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
   //////////////////////////////////////////////////
 
   // Subclass from Ogre2Mesh and Ogre2MeshFactory to get
   // indirect access to protected members and override any
-  // behaviour that tries to load a common::Mesh which we
+  // behaviour that tries to load a gz::common::Mesh which we
   // are not using.
 
   //////////////////////////////////////////////////
-  class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshExt :
+  class GZ_RENDERING_OGRE2_VISIBLE Ogre2MeshExt :
       public Ogre2Mesh
   {
     /// \brief Destructor
@@ -129,7 +129,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
   typedef std::shared_ptr<Ogre2MeshExt> Ogre2MeshExtPtr;
 
   //////////////////////////////////////////////////
-  class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshFactoryExt :
+  class GZ_RENDERING_OGRE2_VISIBLE Ogre2MeshFactoryExt :
       public Ogre2MeshFactory
   {
     /// \brief Destructor
@@ -145,7 +145,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       // create ogre entity
       Ogre2MeshExtPtr mesh(new Ogre2MeshExt);
       MeshDescriptor normDesc = _desc;
-      // \todo do this? override MeshDescriptor behaviour as we're not using common::Mesh
+      // \todo do this? override MeshDescriptor behaviour as we're not using gz::common::Mesh
       normDesc.Load();
       mesh->SetOgreItem(this->OgreItem(normDesc));
 
@@ -240,7 +240,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       {
         ignerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
         return false;
-        // Override MeshDescriptor behaviour as we're not using common::Mesh
+        // Override MeshDescriptor behaviour as we're not using gz::common::Mesh
         // return true;
       }
 
@@ -263,13 +263,13 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 }
 }
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 using namespace systems;
 
 // From ogre-next/Samples/2.0/ApiUsage/DynamicGeometry/DynamicGeometryGameState.h/cpp
 
-struct ignition::gazebo::systems::CubeVertices
+struct gz::sim::systems::CubeVertices
 {
     float px, py, pz;   //Position
     float nx, ny, nz;   //Normals
@@ -295,7 +295,7 @@ const CubeVertices c_originalVertices[8] =
     CubeVertices( -1,  1, -1, -0.57737,  0.57737, -0.57737 )
 };
 
-class ignition::gazebo::systems::DynamicGeometryPrivate
+class gz::sim::systems::DynamicGeometryPrivate
 {
   /// \brief Path to the model
   public: std::string modelPath;
@@ -304,7 +304,7 @@ class ignition::gazebo::systems::DynamicGeometryPrivate
   public: std::mutex mutex;
 
   /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection {nullptr};
+  public: gz::common::ConnectionPtr connection {nullptr};
 
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
@@ -398,14 +398,14 @@ void DynamicGeometry::Configure(const Entity &_entity,
   // the callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
-      _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
+      _eventMgr.Connect<gz::sim::events::SceneUpdate>(
       std::bind(&DynamicGeometryPrivate::OnUpdate, this->dataPtr.get()));
 }
 
 //////////////////////////////////////////////////
 void DynamicGeometry::PreUpdate(
-  const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &)
+  const gz::sim::UpdateInfo &_info,
+  gz::sim::EntityComponentManager &)
 {
   IGN_PROFILE("DynamicGeometry::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
@@ -839,9 +839,9 @@ void DynamicGeometryPrivate::DestroyScene()
 
 //////////////////////////////////////////////////
 IGNITION_ADD_PLUGIN(DynamicGeometry,
-                    ignition::gazebo::System,
+                    gz::sim::System,
                     DynamicGeometry::ISystemConfigure,
                     DynamicGeometry::ISystemPreUpdate)
 
 IGNITION_ADD_PLUGIN_ALIAS(DynamicGeometry,
-  "ignition::gazebo::systems::DynamicGeometry")
+  "gz::sim::systems::DynamicGeometry")

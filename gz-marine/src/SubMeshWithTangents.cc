@@ -22,35 +22,35 @@
 
 #include <string>
 
-using namespace ignition;
+using namespace gz;
 using namespace common;
 
 /// \brief Private data for SubMeshWithTangents
-class ignition::common::SubMeshWithTangents::Implementation
+class gz::common::SubMeshWithTangents::Implementation
 {
   /// \brief the tangents array
-  public: std::vector<ignition::math::Vector3d> tangents;
+  public: std::vector<gz::math::Vector3d> tangents;
 
 };
 
 //////////////////////////////////////////////////
 SubMeshWithTangents::SubMeshWithTangents()
     : SubMesh(),
-    dataPtr(ignition::utils::MakeImpl<Implementation>())
+    dataPtr(gz::utils::MakeImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
 SubMeshWithTangents::SubMeshWithTangents(const std::string &_name)
     : SubMesh(_name),
-    dataPtr(ignition::utils::MakeImpl<Implementation>())
+    dataPtr(gz::utils::MakeImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
 SubMeshWithTangents::SubMeshWithTangents(const SubMeshWithTangents &_submesh)
   : SubMesh(_submesh),
-  dataPtr(ignition::utils::MakeImpl<Implementation>())
+  dataPtr(gz::utils::MakeImpl<Implementation>())
 {
   // copy this
   *this->dataPtr = (*_submesh.dataPtr);
@@ -85,7 +85,7 @@ SubMeshWithTangents::~SubMeshWithTangents()
 }
 
 //////////////////////////////////////////////////
-void SubMeshWithTangents::AddTangent(const ignition::math::Vector3d &_tanget)
+void SubMeshWithTangents::AddTangent(const gz::math::Vector3d &_tanget)
 {
   this->dataPtr->tangents.push_back(_tanget);
 }
@@ -93,11 +93,11 @@ void SubMeshWithTangents::AddTangent(const ignition::math::Vector3d &_tanget)
 //////////////////////////////////////////////////
 void SubMeshWithTangents::AddTangent(const double _x, const double _y, const double _z)
 {
-  this->AddTangent(ignition::math::Vector3d(_x, _y, _z));
+  this->AddTangent(gz::math::Vector3d(_x, _y, _z));
 }
 
 //////////////////////////////////////////////////
-ignition::math::Vector3d SubMeshWithTangents::Tangent(const unsigned int _index) const
+gz::math::Vector3d SubMeshWithTangents::Tangent(const unsigned int _index) const
 {
   if (_index >= this->dataPtr->tangents.size())
   {
@@ -116,7 +116,7 @@ bool SubMeshWithTangents::HasTangent(const unsigned int _index) const
 
 //////////////////////////////////////////////////
 void SubMeshWithTangents::SetTangent(const unsigned int _index,
-    const ignition::math::Vector3d &_n)
+    const gz::math::Vector3d &_n)
 {
   if (_index >= this->dataPtr->tangents.size())
   {
