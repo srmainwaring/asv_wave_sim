@@ -1059,6 +1059,7 @@ void HydrodynamicsPrivate::InitWaterPatchMarkers(
     hd->waterPatchMsg.set_type(gz::msgs::Marker::TRIANGLE_LIST);
     hd->waterPatchMsg.set_visibility(gz::msgs::Marker::GUI);
 
+    // set lifetime
     hd->waterPatchMsg.mutable_lifetime()->set_sec(0);
     hd->waterPatchMsg.mutable_lifetime()->set_nsec(updatePeriodNsec);
 
@@ -1123,7 +1124,7 @@ void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
   {
     for (size_t j=0; j<hd->linkMeshes.size(); ++j)
     {
-      hd->underwaterSurfaceMsgs[j].set_ns(modelName + "/submerged_triangles");
+      hd->underwaterSurfaceMsgs[j].set_ns(modelName + "/underwater_surface");
       hd->underwaterSurfaceMsgs[j].set_id(markerId++);
       hd->underwaterSurfaceMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
       hd->underwaterSurfaceMsgs[j].set_type(gz::msgs::Marker::TRIANGLE_LIST);
