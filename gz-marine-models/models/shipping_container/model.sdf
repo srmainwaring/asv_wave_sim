@@ -4,6 +4,13 @@
     <plugin
         filename="gazebo_marine1-hydrodynamics-system"
         name="gz::sim::systems::Hydrodynamics">
+
+        <markers>
+          <update_rate>10</update_rate>
+          <water_patch>1</water_patch>
+          <waterline>1</waterline>
+          <underwater_surface>1</underwater_surface>
+        </markers>
     </plugin>
     <link name="base_link">
       <visual name="visual">

@@ -30,6 +30,8 @@
 
 #include <gz/plugin/Register.hh>
 
+#include <gz/transport.hh>
+
 #include <gz/sim/components/AngularVelocity.hh>
 #include <gz/sim/components/Collision.hh>
 #include <gz/sim/components/Inertial.hh>
@@ -486,13 +488,13 @@ namespace systems
     public: std::vector<marine::HydrodynamicsPtr> hydrodynamics;
 
     /// \brief Marker messages for the water patch.
-    // public: msgs::Marker waterPatchMsg;
+    public: msgs::Marker waterPatchMsg;
 
     /// \brief Marker messages for the waterline.
-    // public: std::vector<msgs::Marker> waterlineMsgs;
+    public: std::vector<msgs::Marker> waterlineMsgs;
 
     /// \brief Marker messages for the underwater portion of the mesh.
-    // public: std::vector<msgs::Marker> underwaterSurfaceMsgs;
+    public: std::vector<msgs::Marker> underwaterSurfaceMsgs;
   };
 
   typedef std::shared_ptr<HydrodynamicsLinkData> HydrodynamicsLinkDataPtr;
@@ -563,26 +565,40 @@ class gz::sim::systems::HydrodynamicsPrivate
   // /// \brief The wave model name. This is used to retrieve a pointer to the wave field.
   // public: std::string waveModelName;
 
-  // /// \brief Show the water patch markers.
-  // public: bool showWaterPatch;
+  public: bool InitMarkers(EntityComponentManager &_ecm);
+  public: void InitWaterPatchMarkers(EntityComponentManager &_ecm);
+  public: void InitWaterlineMarkers(EntityComponentManager &_ecm);
+  public: void InitUnderwaterSurfaceMarkers(EntityComponentManager &_ecm);
 
-  // /// \brief Show the waterline markers.
-  // public: bool showWaterline;
+  public: void UpdateMarkers(const UpdateInfo &_info,
+                        EntityComponentManager &_ecm);
+  public: void UpdateWaterPatchMarkers(const UpdateInfo &_info,
+                        EntityComponentManager &_ecm);
+  public: void UpdateWaterlineMarkers(const UpdateInfo &_info,
+                        EntityComponentManager &_ecm);
+  public: void UpdateUnderwaterSurfaceMarkers(const UpdateInfo &_info,
+                        EntityComponentManager &_ecm);
 
-  // /// \brief Show the underwater surface.
-  // public: bool showUnderwaterSurface;
+  /// \brief Show the water patch markers.
+  public: bool showWaterPatch {false};
+
+  /// \brief Show the waterline markers.
+  public: bool showWaterline {false};
+
+  /// \brief Show the underwater surface.
+  public: bool showUnderwaterSurface {false};
 
   // /// \brief The update rate for visual markers.
-  // public: double updateRate;
+  public: double updateRate;
 
   // /// \brief Previous update time.
-  // public: gz::common::Time prevTime;
+  public: double prevTime;
 
   // /// \brief Connection to the World Update events.
   // public: event::ConnectionPtr updateConnection;
 
-  // /// \brief Gazebo transport node for igntopic "/marker".
-  // public: transport::Node ignNode;
+  /// \brief Gazebo transport node for igntopic "/marker".
+  public: transport::Node node;
 
   // /// \brief Gazebo transport node.
   // public: transport::NodePtr gzNode;
@@ -654,17 +670,15 @@ void Hydrodynamics::Configure(const Entity &_entity,
   }
   this->dataPtr->hydroParams->SetFromSDF(*sdfHydro);
 
-
-  // // Markers
-  // if (_sdf->HasElement("markers"))
-  // {
-  //   sdf::ElementPtr sdfMarkers = _sdf->GetElement("markers");
-  //   this->data->updateRate            = Utilities::SdfParamDouble(*sdfMarkers, "update_rate",         30.0);
-  //   this->data->showWaterPatch        = Utilities::SdfParamBool(*sdfMarkers,   "water_patch",         false);
-  //   this->data->showWaterline         = Utilities::SdfParamBool(*sdfMarkers,   "waterline",           false);
-  //   this->data->showUnderwaterSurface = Utilities::SdfParamBool(*sdfMarkers,   "underwater_surface",  false);
-  // }
-
+  // Markers
+  if (_sdf->HasElement("markers"))
+  {
+    sdf::ElementPtr sdfMarkers = _sdf->GetElementImpl("markers");
+    this->dataPtr->updateRate            = marine::Utilities::SdfParamDouble(*sdfMarkers, "update_rate",         30.0);
+    this->dataPtr->showWaterPatch        = marine::Utilities::SdfParamBool(*sdfMarkers,   "water_patch",         false);
+    this->dataPtr->showWaterline         = marine::Utilities::SdfParamBool(*sdfMarkers,   "waterline",           false);
+    this->dataPtr->showUnderwaterSurface = marine::Utilities::SdfParamBool(*sdfMarkers,   "underwater_surface",  false);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -714,8 +728,8 @@ void HydrodynamicsPrivate::Init(EntityComponentManager &_ecm)
   if(!this->InitPhysics(_ecm))
     return;
 
-  // if(!this->InitMarkers(_ecm))
-  //   return;
+  if(!this->InitMarkers(_ecm))
+    return;
 
   this->validConfig = true;
 }
@@ -895,7 +909,7 @@ void HydrodynamicsPrivate::Update(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
   this->UpdatePhysics(_info, _ecm);
-  // this->UpdateMarkers(_info, _ecm);
+  this->UpdateMarkers(_info, _ecm);
 }
 
 /////////////////////////////////////////////////
@@ -993,6 +1007,126 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       // ignmsg << "Torque:       " << torque << std::endl;
     }
   }
+}
+
+//////////////////////////////////////////////////
+bool HydrodynamicsPrivate::InitMarkers(
+    EntityComponentManager &_ecm)
+{
+  if (this->showWaterPatch)      
+    this->InitWaterPatchMarkers(_ecm);
+
+  if (this->showWaterline)  
+    this->InitWaterlineMarkers(_ecm);
+
+  if (this->showUnderwaterSurface)  
+    this->InitUnderwaterSurfaceMarkers(_ecm);
+  
+  return true;
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::InitWaterPatchMarkers(
+    EntityComponentManager &_ecm)
+{
+  std::string modelName(this->model.Name(_ecm));
+  int markerId = 0;
+  for (auto&& hd : this->hydroData)
+  {
+    hd->waterPatchMsg.set_ns(modelName + "/water_patch");
+    hd->waterPatchMsg.set_id(markerId++);
+    hd->waterPatchMsg.set_action(gz::msgs::Marker::ADD_MODIFY);
+    hd->waterPatchMsg.set_type(gz::msgs::Marker::TRIANGLE_LIST);
+
+    // Set material properties
+    gz::msgs::Set(
+      hd->waterPatchMsg.mutable_material()->mutable_ambient(),
+      gz::math::Color(0, 0, 1, 0.5));
+    gz::msgs::Set(
+      hd->waterPatchMsg.mutable_material()->mutable_diffuse(),
+      gz::math::Color(0, 0, 1, 0.5));
+  }
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::InitWaterlineMarkers(
+    EntityComponentManager &_ecm)
+{
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
+    EntityComponentManager &_ecm)
+{
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::UpdateMarkers(
+    const UpdateInfo &_info,
+    EntityComponentManager &_ecm)
+{
+  std::string topicName("/marker");
+
+  // Throttle update [30 FPS by default]
+  double updatePeriod = 1.0/this->updateRate;
+  double currentTime = std::chrono::duration<double>(_info.simTime).count();
+  if ((currentTime - this->prevTime) < updatePeriod)
+  {
+    return;
+  }
+  this->prevTime = currentTime; 
+
+  if (this->showWaterPatch)
+    this->UpdateWaterPatchMarkers(_info, _ecm);
+
+  if (this->showWaterline)
+    this->UpdateWaterlineMarkers(_info, _ecm);
+
+  if (this->showUnderwaterSurface)
+    this->UpdateUnderwaterSurfaceMarkers(_info, _ecm);
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
+    const UpdateInfo &_info,
+    EntityComponentManager &_ecm)
+{
+  std::string topicName("/marker");
+
+  for (auto&& hd : this->hydroData)
+  {
+    auto& grid = *hd->wavefieldSampler->GetWaterPatch();
+
+    hd->waterPatchMsg.mutable_point()->Clear();
+    for (size_t ix=0; ix<grid.GetCellCount()[0]; ++ix)
+    {
+      for (size_t iy=0; iy<grid.GetCellCount()[1]; ++iy)
+      {
+        for (size_t k=0; k<2; ++k)
+        {
+          cgal::Triangle tri = grid.GetTriangle(ix, iy, k);
+          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToIgn(tri[0]));
+          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToIgn(tri[1]));
+          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToIgn(tri[2]));
+        }
+      }
+    }
+    this->node.Request(topicName, hd->waterPatchMsg);
+  }
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::UpdateWaterlineMarkers(
+    const UpdateInfo &_info,
+    EntityComponentManager &_ecm)
+{
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
+    const UpdateInfo &_info,
+    EntityComponentManager &_ecm)
+{
 }
 
 //////////////////////////////////////////////////
