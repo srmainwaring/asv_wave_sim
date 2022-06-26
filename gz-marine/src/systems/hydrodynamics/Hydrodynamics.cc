@@ -41,6 +41,7 @@
 #include <gz/sim/components/Name.hh>
 #include <gz/sim/components/ParentEntity.hh>
 #include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/World.hh>
 
 #include <gz/sim/Link.hh>
 #include <gz/sim/Model.hh>
@@ -579,6 +580,23 @@ class gz::sim::systems::HydrodynamicsPrivate
   public: void UpdateUnderwaterSurfaceMarkers(const UpdateInfo &_info,
                         EntityComponentManager &_ecm);
 
+  /// \brief Callback for topic "/world/<world>/waves/markers".
+  ///
+  /// \param[in] _msg Wave parameters message.
+  public: void OnWaveMarkersMsg(const gz::msgs::Param &_msg);
+
+  /// \brief Name of the world
+  public: std::string worldName;
+
+  /// \brief Water patch markers are initialised
+  public: bool initializedWaterPatch{false};
+
+  /// \brief Waterline markers are initialised
+  public: bool initializedWaterline{false};
+
+  /// \brief Underwater surface markers are initialised
+  public: bool initializedUnderwaterSurface{false};
+
   /// \brief Show the water patch markers.
   public: bool showWaterPatch {false};
 
@@ -594,11 +612,11 @@ class gz::sim::systems::HydrodynamicsPrivate
   /// \brief Previous update time (s).
   public: double prevTime;
 
-  /// \brief Gazebo transport node for igntopic "/marker".
-  public: transport::Node node;
+  /// \brief Mutex to protect wave marker updates.
+  public: std::recursive_mutex mutex;
 
-  // /// \brief Subscribe to gztopic "~/hydrodynamics".
-  // public: transport::SubscriberPtr hydroSub;
+  /// \brief Transport node for wave marker messages
+  public: transport::Node node;
 
   ////////// END HYDRODYNAMICS PLUGIN
 
@@ -625,6 +643,20 @@ void Hydrodynamics::Configure(const Entity &_entity,
 
   ignmsg << "Hydrodynamics: configuring\n";
 
+  // Get the name of the world
+  if (this->dataPtr->worldName.empty())
+  {
+    _ecm.Each<components::World, components::Name>(
+      [&](const Entity &,
+          const components::World *,
+          const components::Name *_name) -> bool
+      {
+        // Assume there's only one world
+        this->dataPtr->worldName = _name->Data();
+        return false;
+      });
+  }
+
   // Capture the model entity
   this->dataPtr->model = Model(_entity);
   if (!this->dataPtr->model.Valid(_ecm))
@@ -635,21 +667,10 @@ void Hydrodynamics::Configure(const Entity &_entity,
   }
   this->dataPtr->sdf = _sdf->Clone();
 
-  // // Transport
-  // this->data->gzNode = transport::NodePtr(new transport::Node());
-  // this->data->gzNode->Init(this->data->world->Name() + "/" + this->data->model->GetName());
-
-  // // Subscribers
-  // this->data->hydroSub = this->data->gzNode->Subscribe(
-  //   "~/hydrodynamics", &HydrodynamicsPlugin::OnHydrodynamicsMsg, this);
-
-  // // Bind the update callback to the world update event 
-  // this->data->updateConnection = event::Events::ConnectWorldUpdateBegin(
-  //   std::bind(&HydrodynamicsPlugin::OnUpdate, this));
-
-  // Moved to HydrodynamicsPrivate::Load (deferred until other entities available)
-  // // Wave Model
-  // this->data->waveModelName = Utilities::SdfParamString(*_sdf, "wave_model", "");
+  // Subscribe to wave marker updates
+  std::string topic("/world/" + this->dataPtr->worldName + "/waves/markers");
+  this->dataPtr->node.Subscribe(
+      topic, &HydrodynamicsPrivate::OnWaveMarkersMsg, this->dataPtr.get());
 
   // Empty sdf element used as a placeholder for missing elements 
   auto sdfEmpty = std::make_shared<sdf::Element>();
@@ -1007,13 +1028,14 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
 bool HydrodynamicsPrivate::InitMarkers(
     EntityComponentManager &_ecm)
 {
-  if (this->showWaterPatch)      
+  // initialise each marker type
+  if (!this->initializedWaterPatch && this->showWaterPatch) 
     this->InitWaterPatchMarkers(_ecm);
 
-  if (this->showWaterline)  
+  if (!this->initializedWaterline && this->showWaterline)  
     this->InitWaterlineMarkers(_ecm);
 
-  if (this->showUnderwaterSurface)  
+  if (!this->initializedUnderwaterSurface && this->showUnderwaterSurface)  
     this->InitUnderwaterSurfaceMarkers(_ecm);
   
   return true;
@@ -1048,6 +1070,7 @@ void HydrodynamicsPrivate::InitWaterPatchMarkers(
       hd->waterPatchMsg.mutable_material()->mutable_diffuse(),
       gz::math::Color(0, 0, 1, 0.7));
   }
+  this->initializedWaterPatch = true;
 }
 
 //////////////////////////////////////////////////
@@ -1083,6 +1106,7 @@ void HydrodynamicsPrivate::InitWaterlineMarkers(
         gz::math::Color(0, 0, 0, 1));
     }
   }
+  this->initializedWaterline = true;
 }
 
 //////////////////////////////////////////////////
@@ -1118,6 +1142,7 @@ void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
         gz::math::Color(0, 0, 1, 0.7));
     }
   }
+  this->initializedUnderwaterSurface = true;
 }
 
 //////////////////////////////////////////////////
@@ -1137,13 +1162,28 @@ void HydrodynamicsPrivate::UpdateMarkers(
   this->prevTime = currentTime; 
 
   if (this->showWaterPatch)
+  {
+    if(!this->initializedWaterPatch)
+      this->InitWaterPatchMarkers(_ecm);
+
     this->UpdateWaterPatchMarkers(_info, _ecm);
+  }
 
   if (this->showWaterline)
+  {
+    if(!this->initializedWaterline)
+      this->InitWaterlineMarkers(_ecm);
+
     this->UpdateWaterlineMarkers(_info, _ecm);
+  }
 
   if (this->showUnderwaterSurface)
+  {
+    if(!this->initializedUnderwaterSurface)
+      this->InitUnderwaterSurfaceMarkers(_ecm);
+
     this->UpdateUnderwaterSurfaceMarkers(_info, _ecm);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -1229,6 +1269,47 @@ void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
         gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToIgn(tri[2]));
       }
       this->node.Request(topicName, hd->underwaterSurfaceMsgs[j]);
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
+{
+  std::lock_guard<std::recursive_mutex> lock(this->mutex);
+
+  // extract parameters
+  {
+    auto it = _msg.params().find("water_patch");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is bool
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.bool_value();
+      this->showWaterPatch = value;
+    }
+  }
+  {
+    auto it = _msg.params().find("waterline");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is bool
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.bool_value();
+      this->showWaterline = value;
+    }
+  }
+  {
+    auto it = _msg.params().find("underwater_surface");
+    if (it != _msg.params().end())
+    {
+      /// \todo: assert the type is bool
+      auto param = it->second;
+      auto type = param.type();
+      auto value = param.bool_value();
+      this->showUnderwaterSurface = value;
     }
   }
 }
