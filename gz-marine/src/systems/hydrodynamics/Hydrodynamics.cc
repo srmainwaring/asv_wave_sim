@@ -562,7 +562,7 @@ class gz::sim::systems::HydrodynamicsPrivate
   /// \brief Hydrodynamic physics for each Link.
   public: std::vector<HydrodynamicsLinkDataPtr> hydroData;
 
-  // /// \brief The wave model name. This is used to retrieve a pointer to the wave field.
+  /// \brief The wave model name. This is used to retrieve a pointer to the wave field.
   // public: std::string waveModelName;
 
   public: bool InitMarkers(EntityComponentManager &_ecm);
@@ -588,20 +588,14 @@ class gz::sim::systems::HydrodynamicsPrivate
   /// \brief Show the underwater surface.
   public: bool showUnderwaterSurface {false};
 
-  // /// \brief The update rate for visual markers.
-  public: double updateRate;
+  /// \brief The update rate for visual markers (Hz).
+  public: double updateRate {30.0};
 
-  // /// \brief Previous update time.
+  /// \brief Previous update time (s).
   public: double prevTime;
-
-  // /// \brief Connection to the World Update events.
-  // public: event::ConnectionPtr updateConnection;
 
   /// \brief Gazebo transport node for igntopic "/marker".
   public: transport::Node node;
-
-  // /// \brief Gazebo transport node.
-  // public: transport::NodePtr gzNode;
 
   // /// \brief Subscribe to gztopic "~/hydrodynamics".
   // public: transport::SubscriberPtr hydroSub;
@@ -790,8 +784,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     hd->linkMeshes.resize(meshCount);
     hd->linkCollisions.resize(meshCount);
     hd->hydrodynamics.resize(meshCount);
-    // hd->waterlineMsgs.resize(meshCount);
-    // hd->underwaterSurfaceMsgs.resize(meshCount);
+    hd->waterlineMsgs.resize(meshCount);
+    hd->underwaterSurfaceMsgs.resize(meshCount);
 
     // Wavefield and Link
     hd->link = sim::Link(links[i]);
@@ -1029,6 +1023,10 @@ bool HydrodynamicsPrivate::InitMarkers(
 void HydrodynamicsPrivate::InitWaterPatchMarkers(
     EntityComponentManager &_ecm)
 {
+  // marker lifetime
+  double updatePeriodNsec = static_cast<uint32_t>(
+    1.0E9/this->updateRate);
+
   std::string modelName(this->model.Name(_ecm));
   int markerId = 0;
   for (auto&& hd : this->hydroData)
@@ -1037,14 +1035,18 @@ void HydrodynamicsPrivate::InitWaterPatchMarkers(
     hd->waterPatchMsg.set_id(markerId++);
     hd->waterPatchMsg.set_action(gz::msgs::Marker::ADD_MODIFY);
     hd->waterPatchMsg.set_type(gz::msgs::Marker::TRIANGLE_LIST);
+    hd->waterPatchMsg.set_visibility(gz::msgs::Marker::GUI);
+
+    hd->waterPatchMsg.mutable_lifetime()->set_sec(0);
+    hd->waterPatchMsg.mutable_lifetime()->set_nsec(updatePeriodNsec);
 
     // Set material properties
     gz::msgs::Set(
       hd->waterPatchMsg.mutable_material()->mutable_ambient(),
-      gz::math::Color(0, 0, 1, 0.5));
+      gz::math::Color(0, 0, 1, 0.7));
     gz::msgs::Set(
       hd->waterPatchMsg.mutable_material()->mutable_diffuse(),
-      gz::math::Color(0, 0, 1, 0.5));
+      gz::math::Color(0, 0, 1, 0.7));
   }
 }
 
@@ -1052,12 +1054,70 @@ void HydrodynamicsPrivate::InitWaterPatchMarkers(
 void HydrodynamicsPrivate::InitWaterlineMarkers(
     EntityComponentManager &_ecm)
 {
+  // marker lifetime
+  double updatePeriodNsec = static_cast<uint32_t>(
+    1.0E9/this->updateRate);
+
+  std::string modelName(this->model.Name(_ecm));
+  int markerId = 0;
+  for (auto&& hd : this->hydroData)
+  {
+    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    {
+      hd->waterlineMsgs[j].set_ns(modelName + "/waterline");
+      hd->waterlineMsgs[j].set_id(markerId++);
+      hd->waterlineMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
+      hd->waterlineMsgs[j].set_type(gz::msgs::Marker::LINE_LIST);
+      hd->waterlineMsgs[j].set_visibility(gz::msgs::Marker::GUI);
+
+      // set lifetime
+      hd->waterlineMsgs[j].mutable_lifetime()->set_sec(0);
+      hd->waterlineMsgs[j].mutable_lifetime()->set_nsec(updatePeriodNsec);
+
+      // Set material properties
+      gz::msgs::Set(
+        hd->waterlineMsgs[j].mutable_material()->mutable_ambient(),
+        gz::math::Color(0, 0, 0, 1));
+      gz::msgs::Set(
+        hd->waterlineMsgs[j].mutable_material()->mutable_diffuse(),
+        gz::math::Color(0, 0, 0, 1));
+    }
+  }
 }
 
 //////////////////////////////////////////////////
 void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
     EntityComponentManager &_ecm)
 {
+  // marker lifetime
+  double updatePeriodNsec = static_cast<uint32_t>(
+    1.0E9/this->updateRate);
+
+  std::string modelName(this->model.Name(_ecm));
+  int markerId = 0;
+  for (auto&& hd : this->hydroData)
+  {
+    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    {
+      hd->underwaterSurfaceMsgs[j].set_ns(modelName + "/submerged_triangles");
+      hd->underwaterSurfaceMsgs[j].set_id(markerId++);
+      hd->underwaterSurfaceMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
+      hd->underwaterSurfaceMsgs[j].set_type(gz::msgs::Marker::TRIANGLE_LIST);
+      hd->underwaterSurfaceMsgs[j].set_visibility(gz::msgs::Marker::GUI);
+
+      // set lifetime
+      hd->underwaterSurfaceMsgs[j].mutable_lifetime()->set_sec(0);
+      hd->underwaterSurfaceMsgs[j].mutable_lifetime()->set_nsec(updatePeriodNsec);
+
+      // Set material properties
+      gz::msgs::Set(
+        hd->underwaterSurfaceMsgs[j].mutable_material()->mutable_ambient(),
+        gz::math::Color(0, 0, 1, 0.7));
+      gz::msgs::Set(
+        hd->underwaterSurfaceMsgs[j].mutable_material()->mutable_diffuse(),
+        gz::math::Color(0, 0, 1, 0.7));
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -1097,6 +1157,7 @@ void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
   {
     auto& grid = *hd->wavefieldSampler->GetWaterPatch();
 
+    // clear and update
     hd->waterPatchMsg.mutable_point()->Clear();
     for (size_t ix=0; ix<grid.GetCellCount()[0]; ++ix)
     {
@@ -1120,6 +1181,27 @@ void HydrodynamicsPrivate::UpdateWaterlineMarkers(
     const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
+  std::string topicName("/marker");
+
+  for (auto&& hd : this->hydroData)
+  {
+    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    {
+      hd->waterlineMsgs[j].mutable_point()->Clear();
+      if (hd->hydrodynamics[j]->GetWaterline().empty())
+      {
+        /// \todo workaround. The previous marker is not cleared if a cleared point list is published.
+        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), gz::math::Vector3d::Zero);
+        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), gz::math::Vector3d::Zero);
+      }
+      for (auto&& line : hd->hydrodynamics[j]->GetWaterline())
+      {
+        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), marine::ToIgn(line.point(0)));
+        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), marine::ToIgn(line.point(1)));
+      }
+      this->node.Request(topicName, hd->waterlineMsgs[j]);
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -1127,6 +1209,28 @@ void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
     const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
+  std::string topicName("/marker");
+
+  for (auto&& hd : this->hydroData)
+  {
+    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    {
+      hd->underwaterSurfaceMsgs[j].mutable_point()->Clear();
+      if (hd->hydrodynamics[j]->GetSubmergedTriangles().empty())
+      {
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), gz::math::Vector3d::Zero);
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), gz::math::Vector3d::Zero);
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), gz::math::Vector3d::Zero);
+      }
+      for (auto&& tri : hd->hydrodynamics[j]->GetSubmergedTriangles())
+      {
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToIgn(tri[0]));
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToIgn(tri[1]));
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToIgn(tri[2]));
+      }
+      this->node.Request(topicName, hd->underwaterSurfaceMsgs[j]);
+    }
+  }
 }
 
 //////////////////////////////////////////////////
