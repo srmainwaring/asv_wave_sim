@@ -43,11 +43,17 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
     /// \brief Publish a wave parameters message to /world/<world>/waves
     public: void PublishWaveParams();
 
+    /// \brief Publish a wave markers message to /world/<world>/waves/markers
+    public: void PublishWaveMarkers();
+
     /// \brief Transport node
     public: transport::Node node;
 
     /// \brief Publish to topic /world/<world>/waves
-    public: transport::Node::Publisher pub;
+    public: transport::Node::Publisher pubWaveParams;
+
+    /// \brief Publish to topic /world/<world>/waves/markers
+    public: transport::Node::Publisher pubWaveMarkers;
 
     /// \brief Current state of the water patch checkbox
     public: bool waterPatchCheckboxState{false};
@@ -123,7 +129,39 @@ void WavesControlPrivate::PublishWaveParams()
   }
 
   // publish message
-  this->pub.Publish(msg);
+  this->pubWaveParams.Publish(msg);
+}
+
+//////////////////////////////////////////////////
+void WavesControlPrivate::PublishWaveMarkers()
+{
+  // parameters
+  gz::msgs::Param msg;
+
+  // water patch markers
+  {
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::BOOLEAN);
+    value.set_bool_value(this->waterPatchCheckboxState);
+    (*msg.mutable_params())["water_patch"] = value;
+  }
+  // waterline markers
+  {
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::BOOLEAN);
+    value.set_bool_value(this->waterlineCheckboxState);
+    (*msg.mutable_params())["waterline"] = value;
+  }
+  // underwater surface markers
+  {
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::BOOLEAN);
+    value.set_bool_value(this->submergedTriangleCheckboxState);
+    (*msg.mutable_params())["underwater_surface"] = value;
+  }
+
+  // publish message
+  this->pubWaveMarkers.Publish(msg);
 }
 
 /////////////////////////////////////////////////
@@ -165,12 +203,23 @@ void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
         });
     }
 
-    // Initialise the publisher
-    std::string topic("/world/" + this->dataPtr->worldName + "/waves");
-    this->dataPtr->pub = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
-    if (!this->dataPtr->pub)
+    // Initialise the publishers
     {
-      ignerr << "Error advertising topic [" << topic << "]\n";
+      std::string topic("/world/" + this->dataPtr->worldName + "/waves");
+      this->dataPtr->pubWaveParams = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
+      if (!this->dataPtr->pubWaveParams)
+      {
+        ignerr << "Error advertising topic [" << topic << "]\n";
+      }
+    }
+
+    {
+      std::string topic("/world/" + this->dataPtr->worldName + "/waves/markers");
+      this->dataPtr->pubWaveMarkers = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
+      if (!this->dataPtr->pubWaveMarkers)
+      {
+        ignerr << "Error advertising topic [" << topic << "]\n";
+      }
     }
 
     this->dataPtr->initialized = true;
@@ -216,6 +265,7 @@ void WavesControl::OnShowWaterPatchMarkers(bool _checked)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->waterPatchCheckboxState = _checked;
+  this->dataPtr->PublishWaveMarkers();
 }
 
 //////////////////////////////////////////////////
@@ -223,6 +273,7 @@ void WavesControl::OnShowWaterlineMarkers(bool _checked)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->waterlineCheckboxState = _checked;
+  this->dataPtr->PublishWaveMarkers();
 }
 
 //////////////////////////////////////////////////
@@ -230,6 +281,7 @@ void WavesControl::OnShowSubmergedTriangleMarkers(bool _checked)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->submergedTriangleCheckboxState = _checked;
+  this->dataPtr->PublishWaveMarkers();
 }
 
 //////////////////////////////////////////////////
