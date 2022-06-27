@@ -30,7 +30,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -42,7 +42,7 @@ namespace vector
   Vector3 Zero;
 
   template <>
-  math::Vector3d Zero<math::Vector3d> = math::Vector3d::Zero;
+  gz::math::Vector3d Zero<gz::math::Vector3d> = gz::math::Vector3d::Zero;
 
   template <>
   cgal::Point3 Zero<cgal::Point3> = cgal::Point3(0.0, 0.0, 0.0);
@@ -70,10 +70,10 @@ public:
 
   std::vector<Vector3>        mVertices0;
   std::vector<Vector3>        mVertices;
-  std::vector<math::Vector3i> mFaces;
+  std::vector<gz::math::Vector3i> mFaces;
 
   std::vector<Vector3>        mTangents;
-  std::vector<math::Vector2d> mTexCoords;
+  std::vector<gz::math::Vector2d> mTexCoords;
   std::vector<Vector3>        mBitangents;
   std::vector<Vector3>        mNormals;
 
@@ -105,7 +105,7 @@ public:
   // (u, v) = (1, 1) at the bottom right 
   // The tangent space basis calculation is adjusted to 
   // conform with this convention.
-  common::Mesh * CreateMesh();
+  gz::common::Mesh * CreateMesh();
 
   void ComputeNormals();
 
@@ -126,17 +126,17 @@ public:
       const Vector3& _p0, 
       const Vector3& _p1, 
       const Vector3& _p2, 
-      const math::Vector2d& _uv0, 
-      const math::Vector2d& _uv1, 
-      const math::Vector2d& _uv2, 
+      const gz::math::Vector2d& _uv0, 
+      const gz::math::Vector2d& _uv1, 
+      const gz::math::Vector2d& _uv2, 
       Vector3& _tangent, 
       Vector3& _bitangent, 
       Vector3& _normal);
 
   static void ComputeTBN(
       const std::vector<Vector3>& _vertices,
-      const std::vector<math::Vector2d>& _texCoords,
-      const std::vector<math::Vector3i>& _faces, 
+      const std::vector<gz::math::Vector2d>& _texCoords,
+      const std::vector<gz::math::Vector3i>& _faces, 
       std::vector<Vector3>& _tangents,
       std::vector<Vector3>& _bitangents,
       std::vector<Vector3>& _normals);
@@ -152,10 +152,10 @@ public:
   void UpdateVertexAndTangents(size_t idx0, size_t idx1);
   void UpdateVertices(double _time);
 
-  common::Mesh * CreateMesh(const std::string &_name, double _offsetZ,
+  gz::common::Mesh * CreateMesh(const std::string &_name, double _offsetZ,
       bool _reverseOrientation);
 
-  void UpdateMesh(double _time, common::Mesh *_mesh);
+  void UpdateMesh(double _time, gz::common::Mesh *_mesh);
 
 };
 
@@ -220,7 +220,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       waveParams->SetSteepness(1.0);
       waveParams->SetAmplitude(3.0);
       waveParams->SetPeriod(7.0);
-      waveParams->SetDirection(math::Vector2d(1.0, 0.0));
+      waveParams->SetDirection(gz::math::Vector2d(1.0, 0.0));
       mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
       break;
     }
@@ -282,7 +282,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   }
   else
   {
-    ignerr << "Invalid wave algorithm type: "
+    gzerr << "Invalid wave algorithm type: "
         << _params->Algorithm() << "\n";
   }
 
@@ -334,13 +334,13 @@ void OceanTilePrivate<Vector3>::SetWindVelocity(double _ux, double _uy)
 template <typename Vector3>
 void OceanTilePrivate<Vector3>::Create()
 {
-  ignmsg << "OceanTile: create tile\n";
-  ignmsg << "Resolution:    " << mResolution  << "\n";
-  ignmsg << "RowLength:     " << mRowLength   << "\n";
-  ignmsg << "NumVertices:   " << mNumVertices << "\n";
-  ignmsg << "NumFaces:      " << mNumFaces    << "\n";
-  ignmsg << "TileSize:      " << mTileSize    << "\n";
-  ignmsg << "Spacing:       " << mSpacing     << "\n";
+  gzmsg << "OceanTile: create tile\n";
+  gzmsg << "Resolution:    " << mResolution  << "\n";
+  gzmsg << "RowLength:     " << mRowLength   << "\n";
+  gzmsg << "NumVertices:   " << mNumVertices << "\n";
+  gzmsg << "NumFaces:      " << mNumFaces    << "\n";
+  gzmsg << "TileSize:      " << mTileSize    << "\n";
+  gzmsg << "Spacing:       " << mSpacing     << "\n";
 
   // Grid dimensions
   const size_t nx = this->mResolution;
@@ -358,7 +358,7 @@ void OceanTilePrivate<Vector3>::Create()
   const double xTex = texScale * Lx / nx;
   const double yTex = texScale * Ly / ny;
 
-  ignmsg << "OceanTile: calculating vertices\n";
+  gzmsg << "OceanTile: calculating vertices\n";
   // Vertices - (N+1) vertices in each row / column
   for (size_t iy=0; iy<=ny; ++iy)
   {
@@ -372,12 +372,12 @@ void OceanTilePrivate<Vector3>::Create()
       mVertices0.push_back(vertex);
       mVertices.push_back(vertex);
       // Texture coordinates (u, v): top left: (0, 0), bottom right: (1, 1)
-      math::Vector2d texCoord(ix * xTex, 1.0 - (iy * yTex));
+      gz::math::Vector2d texCoord(ix * xTex, 1.0 - (iy * yTex));
       mTexCoords.push_back(texCoord);
     }
   }
 
-  ignmsg << "OceanTile: calculating indices\n";
+  gzmsg << "OceanTile: calculating indices\n";
   // Indices
   for (size_t iy=0; iy<ny; ++iy)
   {
@@ -390,12 +390,12 @@ void OceanTilePrivate<Vector3>::Create()
       const size_t idx3 = (iy+1) * (nx+1) + ix;
 
       // Indices
-      mFaces.push_back(ignition::math::Vector3i(idx0, idx1, idx2));
-      mFaces.push_back(ignition::math::Vector3i(idx0, idx2, idx3));
+      mFaces.push_back(gz::math::Vector3i(idx0, idx1, idx2));
+      mFaces.push_back(gz::math::Vector3i(idx0, idx2, idx3));
     }
   }
 
-  ignmsg << "OceanTile: assigning texture coords\n";
+  gzmsg << "OceanTile: assigning texture coords\n";
   // Texture Coordinates
   mTangents.assign(mVertices.size(), vector::Zero<Vector3>);
   mBitangents.assign(mVertices.size(), vector::Zero<Vector3>);
@@ -415,7 +415,7 @@ void OceanTilePrivate<Vector3>::Create()
 
 //////////////////////////////////////////////////
 template <typename Vector3>
-common::Mesh * OceanTilePrivate<Vector3>::CreateMesh()
+gz::common::Mesh * OceanTilePrivate<Vector3>::CreateMesh()
 {
   this->Create();
   return CreateMesh(this->mAboveOceanMeshName, 0.0, false);
@@ -423,12 +423,12 @@ common::Mesh * OceanTilePrivate<Vector3>::CreateMesh()
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::ComputeNormals()
+void OceanTilePrivate<gz::math::Vector3d>::ComputeNormals()
 {
-  // ignmsg << "OceanTile: compute normals\n";
+  // gzmsg << "OceanTile: compute normals\n";
 
   // 0. Reset normals.
-  mNormals.assign(mVertices.size(), math::Vector3d::Zero);
+  mNormals.assign(mVertices.size(), gz::math::Vector3d::Zero);
 
   // 1. For each face calculate the normal and add to each vertex in the face
   for (size_t i=0; i<mNumFaces; ++i)
@@ -442,7 +442,7 @@ void OceanTilePrivate<math::Vector3d>::ComputeNormals()
     auto&& v2 = mVertices[v2Idx];
 
     // Normal
-    math::Vector3d normal(math::Vector3d::Normal(v0, v1, v2));
+    gz::math::Vector3d normal(gz::math::Vector3d::Normal(v0, v1, v2));
 
     // Add to vertices
     mNormals[v0Idx] += normal;
@@ -456,7 +456,7 @@ void OceanTilePrivate<math::Vector3d>::ComputeNormals()
       normal.Normalize();
   }
 
-  // ignmsg << "OceanTile: done compute normals\n";
+  // gzmsg << "OceanTile: done compute normals\n";
 }
 
 //////////////////////////////////////////////////
@@ -464,7 +464,7 @@ template <>
 void OceanTilePrivate<cgal::Point3>::ComputeNormals()
 {
   // Not used
-  ignerr << "No implementation"
+  gzerr << "No implementation"
       << " of OceanTilePrivate<cgal::Point3>::ComputeNormals\n";
 }
 
@@ -472,36 +472,36 @@ void OceanTilePrivate<cgal::Point3>::ComputeNormals()
 template <typename Vector3>
 void OceanTilePrivate<Vector3>::ComputeTangentSpace()
 {
-  // ignmsg << "OceanTile: compute tangent space\n";
+  // gzmsg << "OceanTile: compute tangent space\n";
 
   ComputeTBN(mVertices, mTexCoords, mFaces, mTangents, mBitangents, mNormals);
 
 #if DEBUG
   for (size_t i=0; i<std::min(static_cast<size_t>(20), mVertices.size()) ; ++i)
   {
-    ignmsg << "V["  << i << "]:  "  << mVertices[i]   << "\n";
-    ignmsg << "UV[" << i << "]: "   << mTexCoords[i]  << "\n"
-    ignmsg << "T["  << i << "]:  "  << mTangents[i]   << "\n";
-    ignmsg << "B["  << i << "]:  "  << mBitangents[i] << "\n";
-    ignmsg << "N["  << i << "]:  "  << mNormals[i]    << "\n";
+    gzmsg << "V["  << i << "]:  "  << mVertices[i]   << "\n";
+    gzmsg << "UV[" << i << "]: "   << mTexCoords[i]  << "\n"
+    gzmsg << "T["  << i << "]:  "  << mTangents[i]   << "\n";
+    gzmsg << "B["  << i << "]:  "  << mBitangents[i] << "\n";
+    gzmsg << "N["  << i << "]:  "  << mNormals[i]    << "\n";
   }
 #endif
 
-  // ignmsg << "OceanTile: done compute tangent space\n";
+  // gzmsg << "OceanTile: done compute tangent space\n";
 }
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::ComputeTBN(
-    const math::Vector3d& _p0, 
-    const math::Vector3d& _p1, 
-    const math::Vector3d& _p2, 
-    const math::Vector2d& _uv0, 
-    const math::Vector2d& _uv1, 
-    const math::Vector2d& _uv2, 
-    math::Vector3d& _tangent, 
-    math::Vector3d& _bitangent, 
-    math::Vector3d& _normal)
+void OceanTilePrivate<gz::math::Vector3d>::ComputeTBN(
+    const gz::math::Vector3d& _p0, 
+    const gz::math::Vector3d& _p1, 
+    const gz::math::Vector3d& _p2, 
+    const gz::math::Vector2d& _uv0, 
+    const gz::math::Vector2d& _uv1, 
+    const gz::math::Vector2d& _uv2, 
+    gz::math::Vector3d& _tangent, 
+    gz::math::Vector3d& _bitangent, 
+    gz::math::Vector3d& _normal)
 {
   // Correction to the TBN calculation when the v texture coordinate
   // is 0 at the top of a texture and 1 at the bottom. 
@@ -533,32 +533,32 @@ void OceanTilePrivate<cgal::Point3>::ComputeTBN(
     const cgal::Point3& _p0, 
     const cgal::Point3& _p1, 
     const cgal::Point3& _p2, 
-    const math::Vector2d& _uv0, 
-    const math::Vector2d& _uv1, 
-    const math::Vector2d& _uv2, 
+    const gz::math::Vector2d& _uv0, 
+    const gz::math::Vector2d& _uv1, 
+    const gz::math::Vector2d& _uv2, 
     cgal::Point3& _tangent, 
     cgal::Point3& _bitangent, 
     cgal::Point3& _normal)
 {
   // Not used
-  ignerr << "No implementation"
+  gzerr << "No implementation"
       << " of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
 }
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::ComputeTBN(
-    const std::vector<math::Vector3d>& _vertices,
-    const std::vector<math::Vector2d>& _texCoords,
-    const std::vector<math::Vector3i>& _faces, 
-    std::vector<math::Vector3d>& _tangents,
-    std::vector<math::Vector3d>& _bitangents,
-    std::vector<math::Vector3d>& _normals)
+void OceanTilePrivate<gz::math::Vector3d>::ComputeTBN(
+    const std::vector<gz::math::Vector3d>& _vertices,
+    const std::vector<gz::math::Vector2d>& _texCoords,
+    const std::vector<gz::math::Vector3i>& _faces, 
+    std::vector<gz::math::Vector3d>& _tangents,
+    std::vector<gz::math::Vector3d>& _bitangents,
+    std::vector<gz::math::Vector3d>& _normals)
 {
   // 0. Resize and zero outputs.
-  _tangents.assign(_vertices.size(), math::Vector3d::Zero);
-  _bitangents.assign(_vertices.size(), math::Vector3d::Zero);
-  _normals.assign(_vertices.size(), math::Vector3d::Zero);
+  _tangents.assign(_vertices.size(), gz::math::Vector3d::Zero);
+  _bitangents.assign(_vertices.size(), gz::math::Vector3d::Zero);
+  _normals.assign(_vertices.size(), gz::math::Vector3d::Zero);
 
   // 1. For each face calculate TBN and add to each vertex in the face.
   for (auto&& face : _faces)
@@ -579,7 +579,7 @@ void OceanTilePrivate<math::Vector3d>::ComputeTBN(
     auto&& uv2 = _texCoords[idx2];
 
     // Compute tangent space.
-    math::Vector3d T, B, N;
+    gz::math::Vector3d T, B, N;
     ComputeTBN(p0, p1, p2, uv0, uv1, uv2, T, B, N);
 
     // Assign to vertices.
@@ -605,14 +605,14 @@ void OceanTilePrivate<math::Vector3d>::ComputeTBN(
 template <>
 void OceanTilePrivate<cgal::Point3>::ComputeTBN(
     const std::vector<cgal::Point3>& _vertices,
-    const std::vector<math::Vector2d>& _texCoords,
-    const std::vector<math::Vector3i>& _faces, 
+    const std::vector<gz::math::Vector2d>& _texCoords,
+    const std::vector<gz::math::Vector3i>& _faces, 
     std::vector<cgal::Point3>& _tangents,
     std::vector<cgal::Point3>& _bitangents,
     std::vector<cgal::Point3>& _normals)
 {
   // Not used
-  ignerr << "No implementation " 
+  gzerr << "No implementation " 
       << " of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
 }
 
@@ -633,7 +633,7 @@ void OceanTilePrivate<Vector3>::Update(double _time)
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::UpdateVertex(
+void OceanTilePrivate<gz::math::Vector3d>::UpdateVertex(
   size_t idx0, size_t idx1)
 {
   // 1. Update vertex
@@ -666,7 +666,7 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t idx0, size_t idx1)
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::UpdateVertexAndTangents(
+void OceanTilePrivate<gz::math::Vector3d>::UpdateVertexAndTangents(
     size_t idx0, size_t idx1)
 {
   // 1. Update vertex
@@ -842,18 +842,18 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
 
 //////////////////////////////////////////////////
 template <typename Vector3>
-common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(
+gz::common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(
     const std::string &_name, double _offsetZ,
     bool _reverseOrientation)
 {
   // Logging
-  ignmsg << "OceanTile: creating mesh\n";
-  std::unique_ptr<common::Mesh> mesh = std::make_unique<common::Mesh>();
+  gzmsg << "OceanTile: creating mesh\n";
+  std::unique_ptr<gz::common::Mesh> mesh = std::make_unique<gz::common::Mesh>();
   mesh->SetName(_name);
 
-  ignmsg << "OceanTile: create submesh\n";
-  std::unique_ptr<common::SubMeshWithTangents> submesh(
-      new common::SubMeshWithTangents());
+  gzmsg << "OceanTile: create submesh\n";
+  std::unique_ptr<gz::common::SubMeshWithTangents> submesh(
+      new gz::common::SubMeshWithTangents());
 
   // Add position vertices
   for (size_t i=0; i<mVertices.size(); ++i)
@@ -901,14 +901,14 @@ common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(
   // move
   mesh->AddSubMesh(std::move(submesh));
 
-  ignmsg << "OceanTile: mesh created." << std::endl;
+  gzmsg << "OceanTile: mesh created." << std::endl;
   return mesh.release();
 }
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<math::Vector3d>::UpdateMesh(
-    double _time, common::Mesh *_mesh)
+void OceanTilePrivate<gz::math::Vector3d>::UpdateMesh(
+    double _time, gz::common::Mesh *_mesh)
 {
   this->Update(_time);
 
@@ -918,7 +918,7 @@ void OceanTilePrivate<math::Vector3d>::UpdateMesh(
   // Get the submesh
   auto baseSubMesh = _mesh->SubMeshByIndex(0).lock();
   auto subMesh = std::dynamic_pointer_cast<
-      common::SubMeshWithTangents>(baseSubMesh);
+      gz::common::SubMeshWithTangents>(baseSubMesh);
   if (!subMesh)
   {
     ignwarn << "OceanTile: submesh does not support tangents\n";
@@ -936,118 +936,118 @@ void OceanTilePrivate<math::Vector3d>::UpdateMesh(
 }
 
 //////////////////////////////////////////////////
-// Specialisation for math::Vector3d
+// Specialisation for gz::math::Vector3d
 //////////////////////////////////////////////////
 template <>
-OceanTileT<math::Vector3d>::~OceanTileT()
+OceanTileT<gz::math::Vector3d>::~OceanTileT()
 {
 }
 
 //////////////////////////////////////////////////
 template <>
-OceanTileT<math::Vector3d>::OceanTileT(
+OceanTileT<gz::math::Vector3d>::OceanTileT(
     unsigned int _N, double _L, bool _hasVisuals) :
-    dataPtr(std::make_unique<OceanTilePrivate<math::Vector3d>>(
+    dataPtr(std::make_unique<OceanTilePrivate<gz::math::Vector3d>>(
         _N, _L, _hasVisuals))
 {
 }
 
 //////////////////////////////////////////////////
 template <>
-OceanTileT<math::Vector3d>::OceanTileT(
+OceanTileT<gz::math::Vector3d>::OceanTileT(
     WaveParametersPtr _params, bool _hasVisuals) :
-    dataPtr(std::make_unique<OceanTilePrivate<math::Vector3d>>(
+    dataPtr(std::make_unique<OceanTilePrivate<gz::math::Vector3d>>(
         _params, _hasVisuals))
 {
 }
 
 //////////////////////////////////////////////////
 template <>
-void OceanTileT<math::Vector3d>::SetWindVelocity(double _ux, double _uy)
+void OceanTileT<gz::math::Vector3d>::SetWindVelocity(double _ux, double _uy)
 {
   this->dataPtr->SetWindVelocity(_ux, _uy);
 }
 
 //////////////////////////////////////////////////
 template <>
-double OceanTileT<math::Vector3d>::TileSize() const
+double OceanTileT<gz::math::Vector3d>::TileSize() const
 {
   return this->dataPtr->mTileSize;
 }
 
 //////////////////////////////////////////////////
 template <>
-unsigned int OceanTileT<math::Vector3d>::Resolution() const
+unsigned int OceanTileT<gz::math::Vector3d>::Resolution() const
 {
   return this->dataPtr->mResolution;
 }
 
 //////////////////////////////////////////////////
 template <>
-void OceanTileT<math::Vector3d>::Create()
+void OceanTileT<gz::math::Vector3d>::Create()
 {
   return this->dataPtr->Create();
 }
 
 //////////////////////////////////////////////////
 template <>
-common::Mesh* OceanTileT<math::Vector3d>::CreateMesh()
+gz::common::Mesh* OceanTileT<gz::math::Vector3d>::CreateMesh()
 {
   return this->dataPtr->CreateMesh();
 }
 
 //////////////////////////////////////////////////
 template <>
-void OceanTileT<math::Vector3d>::Update(double _time)
+void OceanTileT<gz::math::Vector3d>::Update(double _time)
 {
   this->dataPtr->Update(_time);
 }
 
 //////////////////////////////////////////////////
 template <>
-void OceanTileT<math::Vector3d>::UpdateMesh(double _time, common::Mesh *_mesh)
+void OceanTileT<gz::math::Vector3d>::UpdateMesh(double _time, gz::common::Mesh *_mesh)
 {
   this->dataPtr->UpdateMesh(_time, _mesh);
 }
 
 //////////////////////////////////////////////////
 template <>
-unsigned int OceanTileT<math::Vector3d>::VertexCount() const
+unsigned int OceanTileT<gz::math::Vector3d>::VertexCount() const
 {
   return this->dataPtr->mVertices.size();
 }
 
 //////////////////////////////////////////////////
 template <>
-math::Vector3d OceanTileT<math::Vector3d>::Vertex(unsigned int _index) const
+gz::math::Vector3d OceanTileT<gz::math::Vector3d>::Vertex(unsigned int _index) const
 {
   return this->dataPtr->mVertices[_index];
 }
 
 //////////////////////////////////////////////////
 template <>
-math::Vector2d OceanTileT<math::Vector3d>::UV0(unsigned int _index) const
+gz::math::Vector2d OceanTileT<gz::math::Vector3d>::UV0(unsigned int _index) const
 {
   return this->dataPtr->mTexCoords[_index];
 }
 
 //////////////////////////////////////////////////
 template <>
-unsigned int OceanTileT<math::Vector3d>::FaceCount() const
+unsigned int OceanTileT<gz::math::Vector3d>::FaceCount() const
 {
   return this->dataPtr->mFaces.size();
 }
 
 //////////////////////////////////////////////////
 template <>
-math::Vector3i OceanTileT<math::Vector3d>::Face(unsigned int _index) const
+gz::math::Vector3i OceanTileT<gz::math::Vector3d>::Face(unsigned int _index) const
 {
   return this->dataPtr->mFaces[_index];
 }
 
 //////////////////////////////////////////////////
 template <>
-const std::vector<math::Vector3d>& OceanTileT<math::Vector3d>::Vertices() const
+const std::vector<gz::math::Vector3d>& OceanTileT<gz::math::Vector3d>::Vertices() const
 {
   return this->dataPtr->mVertices;
 }
@@ -1108,7 +1108,7 @@ void OceanTileT<cgal::Point3>::Create()
 
 //////////////////////////////////////////////////
 template <>
-common::Mesh* OceanTileT<cgal::Point3>::CreateMesh()
+gz::common::Mesh* OceanTileT<cgal::Point3>::CreateMesh()
 {
   return this->dataPtr->CreateMesh();
 }
@@ -1122,7 +1122,7 @@ void OceanTileT<cgal::Point3>::Update(double _time)
 
 //////////////////////////////////////////////////
 template <>
-void OceanTileT<cgal::Point3>::UpdateMesh(double _time, common::Mesh *_mesh)
+void OceanTileT<cgal::Point3>::UpdateMesh(double _time, gz::common::Mesh *_mesh)
 {
   this->dataPtr->UpdateMesh(_time, _mesh);
 }
@@ -1143,7 +1143,7 @@ cgal::Point3 OceanTileT<cgal::Point3>::Vertex(unsigned int _index) const
 
 //////////////////////////////////////////////////
 template <>
-math::Vector2d OceanTileT<cgal::Point3>::UV0(unsigned int _index) const
+gz::math::Vector2d OceanTileT<cgal::Point3>::UV0(unsigned int _index) const
 {
   return this->dataPtr->mTexCoords[_index];
 }
@@ -1157,7 +1157,7 @@ unsigned int OceanTileT<cgal::Point3>::FaceCount() const
 
 //////////////////////////////////////////////////
 template <>
-math::Vector3i OceanTileT<cgal::Point3>::Face(unsigned int _index) const
+gz::math::Vector3i OceanTileT<cgal::Point3>::Face(unsigned int _index) const
 {
   return this->dataPtr->mFaces[_index];
 }

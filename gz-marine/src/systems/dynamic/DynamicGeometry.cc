@@ -53,11 +53,11 @@
 #include <gz/rendering/ogre2/Ogre2MeshFactory.hh>
 #include <gz/rendering/ogre2/Ogre2Scene.hh>
 
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/SourceFilePath.hh>
-#include <ignition/gazebo/rendering/Events.hh>
-#include <ignition/gazebo/rendering/RenderUtil.hh>
-#include <ignition/gazebo/Util.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/SourceFilePath.hh>
+#include <gz/sim/rendering/Events.hh>
+#include <gz/sim/rendering/RenderUtil.hh>
+#include <gz/sim/Util.hh>
 
 #include <sdf/Element.hh>
 
@@ -76,21 +76,21 @@
 #include <vector>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace rendering
 {
-inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
   //////////////////////////////////////////////////
 
   // Subclass from Ogre2Mesh and Ogre2MeshFactory to get
   // indirect access to protected members and override any
-  // behaviour that tries to load a common::Mesh which we
+  // behaviour that tries to load a gz::common::Mesh which we
   // are not using.
 
   //////////////////////////////////////////////////
-  class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshExt :
+  class GZ_RENDERING_OGRE2_VISIBLE Ogre2MeshExt :
       public Ogre2Mesh
   {
     /// \brief Destructor
@@ -129,7 +129,7 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
   typedef std::shared_ptr<Ogre2MeshExt> Ogre2MeshExtPtr;
 
   //////////////////////////////////////////////////
-  class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2MeshFactoryExt :
+  class GZ_RENDERING_OGRE2_VISIBLE Ogre2MeshFactoryExt :
       public Ogre2MeshFactory
   {
     /// \brief Destructor
@@ -145,14 +145,14 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       // create ogre entity
       Ogre2MeshExtPtr mesh(new Ogre2MeshExt);
       MeshDescriptor normDesc = _desc;
-      // \todo do this? override MeshDescriptor behaviour as we're not using common::Mesh
+      // \todo do this? override MeshDescriptor behaviour as we're not using gz::common::Mesh
       normDesc.Load();
       mesh->SetOgreItem(this->OgreItem(normDesc));
 
       // check if invalid mesh
       if (!mesh->ogreItem)
       {
-        ignerr << "Failed to get Ogre item for [" << _desc.meshName << "]"
+        gzerr << "Failed to get Ogre item for [" << _desc.meshName << "]"
                 << std::endl;
         return nullptr;
       }
@@ -178,10 +178,10 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       }
 
       std::string name = this->MeshName(_desc);
-      ignmsg << "Get Ogre::SceneManager\n";
+      gzmsg << "Get Ogre::SceneManager\n";
       Ogre::SceneManager *sceneManager = this->scene->OgreSceneManager();
 
-      ignmsg << "Check for v2 mesh\n";
+      gzmsg << "Check for v2 mesh\n";
       // check if a v2 mesh already exists
       Ogre::MeshPtr mesh =
           Ogre::MeshManager::getSingleton().getByName(name);
@@ -189,31 +189,31 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
       // if not, it probably has not been imported from v1 yet
       if (!mesh)
       {
-        ignmsg << "Check for v1 mesh\n";
+        gzmsg << "Check for v1 mesh\n";
         Ogre::v1::MeshPtr v1Mesh =
             Ogre::v1::MeshManager::getSingleton().getByName(name);
         if (!v1Mesh)
         {
-          ignerr << "Did not find v1 mesh [" << name << "]\n";
+          gzerr << "Did not find v1 mesh [" << name << "]\n";
           return nullptr;
         }
 
         // examine v1 mesh properties
         v1Mesh->load();
-        ignmsg << "v1 mesh: isLoaded: " << v1Mesh->isLoaded() << "\n";
+        gzmsg << "v1 mesh: isLoaded: " << v1Mesh->isLoaded() << "\n";
 
-        ignmsg << "Creating v2 mesh\n";
+        gzmsg << "Creating v2 mesh\n";
         // create v2 mesh from v1
         mesh = Ogre::MeshManager::getSingleton().createManual(
             name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-        ignmsg << "Importing v2 mesh\n";
+        gzmsg << "Importing v2 mesh\n";
         mesh->importV1(v1Mesh.get(), false, true, true);
         this->ogreMeshes.push_back(name);
       }
       else
       {
-        ignmsg << "Found v2 mesh\n";
+        gzmsg << "Found v2 mesh\n";
       }
 
       return sceneManager->createItem(mesh, Ogre::SCENE_DYNAMIC);
@@ -232,21 +232,21 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
     {
       if (!_desc.mesh && _desc.meshName.empty())
       {
-        ignerr << "Invalid mesh-descriptor, no mesh specified" << std::endl;
+        gzerr << "Invalid mesh-descriptor, no mesh specified" << std::endl;
         return false;
       }
 
       if (!_desc.mesh)
       {
-        ignerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
+        gzerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
         return false;
-        // Override MeshDescriptor behaviour as we're not using common::Mesh
+        // Override MeshDescriptor behaviour as we're not using gz::common::Mesh
         // return true;
       }
 
       if (_desc.mesh->SubMeshCount() == 0)
       {
-        ignerr << "Cannot load mesh with zero sub-meshes" << std::endl;
+        gzerr << "Cannot load mesh with zero sub-meshes" << std::endl;
         return false;
       }
 
@@ -263,13 +263,13 @@ inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
 }
 }
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 using namespace systems;
 
 // From ogre-next/Samples/2.0/ApiUsage/DynamicGeometry/DynamicGeometryGameState.h/cpp
 
-struct ignition::gazebo::systems::CubeVertices
+struct gz::sim::systems::CubeVertices
 {
     float px, py, pz;   //Position
     float nx, ny, nz;   //Normals
@@ -295,7 +295,7 @@ const CubeVertices c_originalVertices[8] =
     CubeVertices( -1,  1, -1, -0.57737,  0.57737, -0.57737 )
 };
 
-class ignition::gazebo::systems::DynamicGeometryPrivate
+class gz::sim::systems::DynamicGeometryPrivate
 {
   /// \brief Path to the model
   public: std::string modelPath;
@@ -304,7 +304,7 @@ class ignition::gazebo::systems::DynamicGeometryPrivate
   public: std::mutex mutex;
 
   /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection {nullptr};
+  public: gz::common::ConnectionPtr connection {nullptr};
 
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
@@ -381,9 +381,9 @@ void DynamicGeometry::Configure(const Entity &_entity,
     EntityComponentManager &_ecm,
     EventManager &_eventMgr)
 {
-  IGN_PROFILE("DynamicGeometry::Configure");
+  GZ_PROFILE("DynamicGeometry::Configure");
 
-  ignmsg << "DynamicGeometry: configuring\n";
+  gzmsg << "DynamicGeometry: configuring\n";
 
   // Ugly, but needed because the sdf::Element::GetElement is not a const
   // function and _sdf is a const shared pointer to a const sdf::Element.
@@ -398,16 +398,16 @@ void DynamicGeometry::Configure(const Entity &_entity,
   // the callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
-      _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
+      _eventMgr.Connect<gz::sim::events::SceneUpdate>(
       std::bind(&DynamicGeometryPrivate::OnUpdate, this->dataPtr.get()));
 }
 
 //////////////////////////////////////////////////
 void DynamicGeometry::PreUpdate(
-  const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &)
+  const gz::sim::UpdateInfo &_info,
+  gz::sim::EntityComponentManager &)
 {
-  IGN_PROFILE("DynamicGeometry::PreUpdate");
+  GZ_PROFILE("DynamicGeometry::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
 }
@@ -434,7 +434,7 @@ void DynamicGeometryPrivate::OnUpdate()
 
   if (!this->scene)
   {
-    ignmsg << "DynamicGeometry: retrieving scene from render engine\n";
+    gzmsg << "DynamicGeometry: retrieving scene from render engine\n";
     this->scene = rendering::sceneFromFirstRenderEngine();
   }
 
@@ -444,7 +444,7 @@ void DynamicGeometryPrivate::OnUpdate()
   // Ogre2 DynamicGeometry sample
   if (!this->isSceneInitialised)
   {
-    ignmsg << "DynamicGeometry: creating scene\n";
+    gzmsg << "DynamicGeometry: creating scene\n";
 
     // create the sample scene
     this->CreateScene01();
@@ -838,10 +838,10 @@ void DynamicGeometryPrivate::DestroyScene()
 }
 
 //////////////////////////////////////////////////
-IGNITION_ADD_PLUGIN(DynamicGeometry,
-                    ignition::gazebo::System,
-                    DynamicGeometry::ISystemConfigure,
-                    DynamicGeometry::ISystemPreUpdate)
+GZ_ADD_PLUGIN(DynamicGeometry,
+              gz::sim::System,
+              DynamicGeometry::ISystemConfigure,
+              DynamicGeometry::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(DynamicGeometry,
-  "ignition::gazebo::systems::DynamicGeometry")
+GZ_ADD_PLUGIN_ALIAS(DynamicGeometry,
+    "gz::sim::systems::DynamicGeometry")

@@ -8,9 +8,7 @@ This package contains plugins that support the simulation of waves and surface v
 
 The branch `gz-marine` represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It attempts to be compliant with the naming conventions used in the community note: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356).
 
-A number of features available in the original version, such as updating parameters via messages, have not been fully migrated to Gazebo Sim. On the other hand there are new features from the `feature/fft_waves` development branch that have been included, such as Ocean tiling and different wave generation methods.
-
-There are changes in the way that the wave parameters need to be set, and it may not be possible to avoid breaking the existing interface used to specify trochoidal waves.
+The simulation includes new features such as Ocean tiling and different wave generation methods. There are some changes in the way that the wave parameters need to be set, but as far possible we have attempted to retain compatibility with the Gazebo 11 version. Further details are described below.
 
 The library has additional dependencies on two FFT libraries:
 
@@ -29,7 +27,7 @@ And on macOS with:
 brew fftw3 libclfft-dev libfftw3-dev
 ```
 
-Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated. Previously the wave displacements for visuals were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically updated in the the library then pushed into the rendering engine. This means there is no need to maintain various sized meshes in the media files, however it does require working around Gazebos requirement for static meshes and there is a custom Visual that implements this.
+Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated and the simulation now supports the ogre2 render engine.
 
 ## Dependencies
 
@@ -96,7 +94,7 @@ colcon build --merge-install --cmake-args \
 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_MACOSX_RPATH=FALSE \
 -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib \
---packages-select gazebo_marine1
+--packages-select gz-marine1
 ```
 
 Then re-source the workspace:
@@ -111,17 +109,17 @@ source ./install/setup.zsh
 
 ```bash
 # for future use - to support multiple Gazebo versions
-export IGNITION_VERSION=garden
+export GZ_VERSION=garden
 
 # not usually required as should default to localhost address
-export IGN_IP=127.0.0.1
+export GZ_IP=127.0.0.1
 
 # ensure gazebo finds the config for this installation
-export IGN_CONFIG_PATH=\
+export GZ_CONFIG_PATH=\
 $HOME/gz_ws/install/share/ignition
 
 # ensure the model and world files are found
-export IGN_GAZEBO_RESOURCE_PATH=\
+export GZ_SIM_RESOURCE_PATH=\
 $HOME/gz_ws/src/asv_wave_sim/gz-marine-models/models:\
 $HOME/gz_ws/src/asv_wave_sim/gz-marine-models/world_models:\
 $HOME/gz_ws/src/asv_wave_sim/gz-marine-models/worlds
@@ -134,16 +132,16 @@ Launch a Gazebo session.
 Server:
 
 ```bash
-ign gazebo -v4 -s -r waves.sdf
+gz sim -v4 -s -r waves.sdf
 ```
 
 Client:
 
 ```bash
-ign gazebo -v4 -g
+gz sim -v4 -g
 ```
 
-The session should include a wave field and the floating objects depicted in the image at head of this document.
+The session should include a wave field and some floating objects.
 
 ## Changes
 
@@ -161,8 +159,8 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```xml
 <plugin
-    filename="gazebo_marine1-waves-model-system"
-    name="ignition::gazebo::systems::WavesModel">
+    filename="gz-marine1-waves-model-system"
+    name="gz::sim::systems::WavesModel">
     <static>0</static>
     <update_rate>30</update_rate>
     <wave>
@@ -200,8 +198,8 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```xml
 <plugin
-  filename="gazebo_marine1-hydrodynamics-system"
-  name="ignition::gazebo::systems::Hydrodynamics">
+  filename="gz-marine1-hydrodynamics-system"
+  name="gz::sim::systems::Hydrodynamics">
 
    <!-- Hydrodynamics -->
    <hydrodynamics>
@@ -231,7 +229,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```bash
 # build with tests
-$ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DBUILD_TESTING=ON --packages-select gazebo_marine1
+$ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DBUILD_TESTING=ON --packages-select gz-marine1
 
 # run tests
 colcon test --merge-install 

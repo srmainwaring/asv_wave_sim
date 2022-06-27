@@ -24,7 +24,7 @@
 
 #include <memory>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

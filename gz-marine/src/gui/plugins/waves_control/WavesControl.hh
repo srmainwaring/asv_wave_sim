@@ -16,14 +16,14 @@
 #ifndef GZ_MARINE_WAVESCONTROL_HH_
 #define GZ_MARINE_WAVESCONTROL_HH_
 
-#include <ignition/gui/qt.h>
-#include <ignition/gazebo/gui/GuiSystem.hh>
+#include <gz/gui/qt.h>
+#include <gz/sim/gui/GuiSystem.hh>
 
 #include <memory>
 
-namespace ignition
+namespace gz
 {
-namespace gazebo
+namespace sim
 {
 
 // Inline bracket to help doxygen filtering.
@@ -32,7 +32,7 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
   class WavesControlPrivate;
 
   /// \brief Edit parameters controlling the waves systems plugins.
-  class WavesControl : public ignition::gazebo::GuiSystem
+  class WavesControl : public gz::sim::GuiSystem
   {
     Q_OBJECT
 
@@ -46,8 +46,8 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
     public: void LoadConfig(const tinyxml2::XMLElement *_pluginElem) override;
 
     // Documentation inherited
-    public: void Update(const ignition::gazebo::UpdateInfo &_info,
-        ignition::gazebo::EntityComponentManager &_ecm) override;
+    public: void Update(const gz::sim::UpdateInfo &_info,
+        gz::sim::EntityComponentManager &_ecm) override;
 
     /// \brief Callback when water patch marker checkbox state is changed
     /// \param[in] _checked indicates show or hide contacts

@@ -51,7 +51,7 @@
 #include <memory>
 #include <vector>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -260,7 +260,7 @@ namespace marine
     /// \param[in] _sdf   A reference to a SDF element.
     public: void SetFromSDF(sdf::Element& _sdf);
 
-    /// \brief Print a summary of the hydrodynamics parameters to the ignmsg stream.
+    /// \brief Print a summary of the hydrodynamics parameters to the msg stream.
     public: void DebugPrint() const;
 
     /// \internal

@@ -24,14 +24,14 @@
 #include <iterator>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
 ///////////////////////////////////////////////////////////////////////////////
 // MeshTools
 
-  /// Vertex and Index conventions used by ignition::common::Mesh 
+  /// Vertex and Index conventions used by gz::common::Mesh 
   ///
   /// Mesh::GetVertexCount()
   ///   returns the number of vertices in the mesh, which means that
@@ -42,7 +42,7 @@ namespace marine
   ///   the size of _indices will be Mesh::GetIndexCount()
   ///
   void MeshTools::FillArrays(
-    const common::Mesh& _source,
+    const gz::common::Mesh& _source,
     std::vector<float>& _vertices,
     std::vector<int>& _indices
   )
@@ -57,8 +57,8 @@ namespace marine
       size_t ni = _source.IndexCount();
 
       // @DEBUG_INFO
-      // ignmsg << "nv: " << nv << std::endl; 
-      // ignmsg << "ni: " << ni << std::endl; 
+      // gzmsg << "nv: " << nv << std::endl; 
+      // gzmsg << "ni: " << ni << std::endl; 
 
       _source.FillArrays(&vertices, &indices);
       
@@ -67,7 +67,7 @@ namespace marine
     }
     catch(...) 
     {
-      ignerr << "Unknown Error in Mesh::FillArrays" << std::endl;
+      gzerr << "Unknown Error in Mesh::FillArrays" << std::endl;
     }
     // Clean up
     if (vertices)
@@ -76,7 +76,7 @@ namespace marine
       delete[] indices;
   }
 
-  void MeshTools::MakeSurfaceMesh(const common::Mesh& _source, cgal::Mesh& _target)
+  void MeshTools::MakeSurfaceMesh(const gz::common::Mesh& _source, cgal::Mesh& _target)
   {
     std::vector<float> vertices;
     std::vector<int>   indices;
@@ -93,14 +93,14 @@ namespace marine
       auto&& v = _target.add_vertex(p);
       
       // @DEBUG_INFO
-      // ignmsg << v << ": " << _target.point(v) << std::endl; 
+      // gzmsg << v << ": " << _target.point(v) << std::endl; 
     }
 
     // Faces
     for (size_t i=0; i<indices.size(); )
     {
       // @DEBUG_INFO
-      // ignmsg << "face" << i/3 << std::endl; 
+      // gzmsg << "face" << i/3 << std::endl; 
 
       auto v0 = _target.vertices().begin();
       auto v1 = _target.vertices().begin(); 
@@ -114,10 +114,10 @@ namespace marine
       _target.add_face(*v0, *v1, *v2);  
 
       // @DEBUG_INFO
-      // ignmsg << i0 << ", " << i1 << ", " << i2 << std::endl; 
-      // ignmsg << *v0 << ": " << _target.point(*v0) << std::endl; 
-      // ignmsg << *v1 << ": " << _target.point(*v1) << std::endl; 
-      // ignmsg << *v2 << ": " << _target.point(*v2) << std::endl; 
+      // gzmsg << i0 << ", " << i1 << ", " << i2 << std::endl; 
+      // gzmsg << *v0 << ": " << _target.point(*v0) << std::endl; 
+      // gzmsg << *v1 << ": " << _target.point(*v1) << std::endl; 
+      // gzmsg << *v2 << ": " << _target.point(*v2) << std::endl; 
     }
   }
 

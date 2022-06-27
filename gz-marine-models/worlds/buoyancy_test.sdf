@@ -2,21 +2,21 @@
 <sdf version="1.6">
   <world name="buoyancy_test">
     <plugin filename="ignition-gazebo-physics-system"
-            name="ignition::gazebo::systems::Physics">
+            name="gz::sim::systems::Physics">
     </plugin>
     <plugin filename="ignition-gazebo-sensors-system"
-            name="ignition::gazebo::systems::Sensors">
+            name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
       <background_color>0.8 0.8 0.8</background_color>
     </plugin>
     <plugin filename="ignition-gazebo-scene-broadcaster-system"
-            name="ignition::gazebo::systems::SceneBroadcaster">
+            name="gz::sim::systems::SceneBroadcaster">
     </plugin>
     <plugin filename="ignition-gazebo-user-commands-system"
-            name="ignition::gazebo::systems::UserCommands">
+            name="gz::sim::systems::UserCommands">
     </plugin>
     <plugin filename="libignition-gazebo-imu-system.so"
-            name="ignition::gazebo::systems::Imu">
+            name="gz::sim::systems::Imu">
     </plugin>
 
     <scene>
@@ -111,8 +111,8 @@
     <model name="buoy_1">
       <pose>0 0 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
-          name="ignition::gazebo::systems::Hydrodynamics">
+          filename="gz-marine1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">
         <visual name="visual">
@@ -161,8 +161,8 @@
     <model name="buoy_2">
       <pose>0 2 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
-          name="ignition::gazebo::systems::Hydrodynamics">
+          filename="gz-marine1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">
         <visual name="visual">
@@ -211,8 +211,8 @@
     <model name="buoy_3">
       <pose>0 4 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
-          name="ignition::gazebo::systems::Hydrodynamics">
+          filename="gz-marine1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">
         <visual name="visual">
@@ -261,8 +261,8 @@
     <model name="buoy_4">
       <pose>0 6 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
-          name="ignition::gazebo::systems::Hydrodynamics">
+          filename="gz-marine1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">
         <visual name="visual">

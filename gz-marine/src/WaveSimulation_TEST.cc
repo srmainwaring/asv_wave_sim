@@ -31,7 +31,7 @@
 #include <memory>
 #include <string>
 
-using namespace ignition;
+using namespace gz;
 using namespace marine;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   waveParams->SetSteepness(1.0);
   waveParams->SetAmplitude(1.0);
   waveParams->SetPeriod(8.0);
-  waveParams->SetDirection(ignition::math::Vector2d(1.0, 0.0));
+  waveParams->SetDirection(gz::math::Vector2d(1.0, 0.0));
   
   waveSim->SetTime(0.0);
   waveSim->ComputeHeights(h);

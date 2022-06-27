@@ -23,17 +23,17 @@
 
 #include <gz/plugin/Register.hh>
 
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/World.hh>
-#include <ignition/gazebo/EntityComponentManager.hh>
-#include <ignition/gazebo/gui/GuiEvents.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/EntityComponentManager.hh>
+#include <gz/sim/gui/GuiEvents.hh>
 
 #include <mutex>
 #include <string>
 
-namespace ignition
+namespace gz
 {
-namespace gazebo
+namespace sim
 {
 inline namespace GZ_MARINE_VERSION_NAMESPACE
 {
@@ -43,11 +43,17 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
     /// \brief Publish a wave parameters message to /world/<world>/waves
     public: void PublishWaveParams();
 
+    /// \brief Publish a wave markers message to /world/<world>/waves/markers
+    public: void PublishWaveMarkers();
+
     /// \brief Transport node
     public: transport::Node node;
 
     /// \brief Publish to topic /world/<world>/waves
-    public: transport::Node::Publisher pub;
+    public: transport::Node::Publisher pubWaveParams;
+
+    /// \brief Publish to topic /world/<world>/waves/markers
+    public: transport::Node::Publisher pubWaveMarkers;
 
     /// \brief Current state of the water patch checkbox
     public: bool waterPatchCheckboxState{false};
@@ -91,39 +97,71 @@ inline namespace GZ_MARINE_VERSION_NAMESPACE
 }
 }
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 
 //////////////////////////////////////////////////
 void WavesControlPrivate::PublishWaveParams()
 {
   // parameters
-  ignition::msgs::Param msg;
+  gz::msgs::Param msg;
 
   // wind speed
   {
-    ignition::msgs::Any value;
-    value.set_type(ignition::msgs::Any::DOUBLE);
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::DOUBLE);
     value.set_double_value(this->windSpeed);
     (*msg.mutable_params())["wind_speed"] = value;
   }
   // wind angle
   {
-    ignition::msgs::Any value;
-    value.set_type(ignition::msgs::Any::DOUBLE);
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::DOUBLE);
     value.set_double_value(this->windAngle);
     (*msg.mutable_params())["wind_angle"] = value;
   }
   // steepness
   {
-    ignition::msgs::Any value;
-    value.set_type(ignition::msgs::Any::DOUBLE);
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::DOUBLE);
     value.set_double_value(this->steepness);
     (*msg.mutable_params())["steepness"] = value;
   }
 
   // publish message
-  this->pub.Publish(msg);
+  this->pubWaveParams.Publish(msg);
+}
+
+//////////////////////////////////////////////////
+void WavesControlPrivate::PublishWaveMarkers()
+{
+  // parameters
+  gz::msgs::Param msg;
+
+  // water patch markers
+  {
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::BOOLEAN);
+    value.set_bool_value(this->waterPatchCheckboxState);
+    (*msg.mutable_params())["water_patch"] = value;
+  }
+  // waterline markers
+  {
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::BOOLEAN);
+    value.set_bool_value(this->waterlineCheckboxState);
+    (*msg.mutable_params())["waterline"] = value;
+  }
+  // underwater surface markers
+  {
+    gz::msgs::Any value;
+    value.set_type(gz::msgs::Any::BOOLEAN);
+    value.set_bool_value(this->submergedTriangleCheckboxState);
+    (*msg.mutable_params())["underwater_surface"] = value;
+  }
+
+  // publish message
+  this->pubWaveMarkers.Publish(msg);
 }
 
 /////////////////////////////////////////////////
@@ -146,8 +184,8 @@ void WavesControl::LoadConfig(const tinyxml2::XMLElement * /*_pluginElem*/)
 }
 
 //////////////////////////////////////////////////
-void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
-    ignition::gazebo::EntityComponentManager &_ecm)
+void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
+    gz::sim::EntityComponentManager &_ecm)
 {
   if (!this->dataPtr->initialized)
   {
@@ -165,12 +203,23 @@ void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
         });
     }
 
-    // Initialise the publisher
-    std::string topic("/world/" + this->dataPtr->worldName + "/waves");
-    this->dataPtr->pub = this->dataPtr->node.Advertise<ignition::msgs::Param>(topic);
-    if (!this->dataPtr->pub)
+    // Initialise the publishers
     {
-      ignerr << "Error advertising topic [" << topic << "]\n";
+      std::string topic("/world/" + this->dataPtr->worldName + "/waves");
+      this->dataPtr->pubWaveParams = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
+      if (!this->dataPtr->pubWaveParams)
+      {
+        gzerr << "Error advertising topic [" << topic << "]\n";
+      }
+    }
+
+    {
+      std::string topic("/world/" + this->dataPtr->worldName + "/waves/markers");
+      this->dataPtr->pubWaveMarkers = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
+      if (!this->dataPtr->pubWaveMarkers)
+      {
+        gzerr << "Error advertising topic [" << topic << "]\n";
+      }
     }
 
     this->dataPtr->initialized = true;
@@ -183,7 +232,7 @@ void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
     if (this->dataPtr->waterPatchCheckboxPrevState &&
         !this->dataPtr->waterPatchCheckboxState)
     {
-      ignmsg << "Removing water patch markers...\n";
+      gzmsg << "Removing water patch markers...\n";
     }
 
     this->dataPtr->waterPatchCheckboxPrevState =
@@ -193,7 +242,7 @@ void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
     if (this->dataPtr->waterlineCheckboxPrevState &&
         !this->dataPtr->waterlineCheckboxState)
     {
-      ignmsg << "Removing waterline markers...\n";
+      gzmsg << "Removing waterline markers...\n";
     }
 
     this->dataPtr->waterlineCheckboxPrevState =
@@ -203,7 +252,7 @@ void WavesControl::Update(const ignition::gazebo::UpdateInfo & /*_info*/,
     if (this->dataPtr->submergedTriangleCheckboxPrevState &&
         !this->dataPtr->submergedTriangleCheckboxState)
     {
-      ignmsg << "Removing submerged triangle markers...\n";
+      gzmsg << "Removing submerged triangle markers...\n";
     }
 
     this->dataPtr->submergedTriangleCheckboxPrevState =
@@ -216,6 +265,7 @@ void WavesControl::OnShowWaterPatchMarkers(bool _checked)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->waterPatchCheckboxState = _checked;
+  this->dataPtr->PublishWaveMarkers();
 }
 
 //////////////////////////////////////////////////
@@ -223,6 +273,7 @@ void WavesControl::OnShowWaterlineMarkers(bool _checked)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->waterlineCheckboxState = _checked;
+  this->dataPtr->PublishWaveMarkers();
 }
 
 //////////////////////////////////////////////////
@@ -230,6 +281,7 @@ void WavesControl::OnShowSubmergedTriangleMarkers(bool _checked)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->submergedTriangleCheckboxState = _checked;
+  this->dataPtr->PublishWaveMarkers();
 }
 
 //////////////////////////////////////////////////
@@ -238,7 +290,7 @@ void WavesControl::UpdateWindSpeed(double _windSpeed)
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->windSpeed = _windSpeed;
 
-  ignmsg << "Wind Speed: " << _windSpeed << "\n";
+  gzmsg << "Wind Speed: " << _windSpeed << "\n";
 
   this->dataPtr->PublishWaveParams();
 }
@@ -249,7 +301,7 @@ void WavesControl::UpdateWindAngle(double _windAngle)
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->windAngle = _windAngle;
 
-  ignmsg << "Wind Angle: " << _windAngle << "\n";
+  gzmsg << "Wind Angle: " << _windAngle << "\n";
 
   this->dataPtr->PublishWaveParams();
 }
@@ -260,12 +312,12 @@ void WavesControl::UpdateSteepness(double _steepness)
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->steepness = _steepness;
 
-  ignmsg << "Steepness: " << _steepness << "\n";
+  gzmsg << "Steepness: " << _steepness << "\n";
 
   this->dataPtr->PublishWaveParams();
 }
 
 //////////////////////////////////////////////////
 // Register this plugin
-IGNITION_ADD_PLUGIN(WavesControl,
-                    ignition::gui::Plugin)
+GZ_ADD_PLUGIN(WavesControl,
+              gz::gui::Plugin)

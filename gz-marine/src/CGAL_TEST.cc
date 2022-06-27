@@ -48,7 +48,7 @@
 #include <memory>
 #include <string>
 
-using namespace ignition;
+using namespace gz;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Utilities
@@ -68,17 +68,17 @@ namespace {
     double radius
   )
   {
-    common::MeshManager::Instance()->CreateSphere(
+    gz::common::MeshManager::Instance()->CreateSphere(
       meshName,
       radius,                   // radius
       32,                       // rings
       32);                      // segments
-    IGN_ASSERT(common::MeshManager::Instance()->HasMesh(meshName),
+    GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
       "Failed to create Mesh for Cylinder");
 
-    const common::Mesh* source =
-        common::MeshManager::Instance()->MeshByName(meshName);
-    IGN_ASSERT(source != nullptr, "Invalid Sphere Mesh");
+    const gz::common::Mesh* source =
+        gz::common::MeshManager::Instance()->MeshByName(meshName);
+    GZ_ASSERT(source != nullptr, "Invalid Sphere Mesh");
     // std::cout << "Mesh:       " << source->GetName() << std::endl;
     // std::cout << "Vertex:     " << source->GetVertexCount() << std::endl;
 

@@ -29,7 +29,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests
 
-using namespace ignition;
+using namespace gz;
 using namespace marine;
 
 TEST(TriangulatedGrid, Create) {
@@ -44,7 +44,7 @@ TEST(TriangulatedGrid, Create) {
   EXPECT_EQ(tri_grid->Origin(), CGAL::ORIGIN);
 
   // ApplyPose
-  ignition::math::Pose3d pose(10.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+  gz::math::Pose3d pose(10.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   tri_grid->ApplyPose(pose);
   // tri_grid->DebugPrintMesh();
   // tri_grid->DebugPrintTriangulation();
@@ -122,7 +122,7 @@ TEST(TriangulatedGrid, Interpolate) {
 
 
   // ApplyPose
-  ignition::math::Pose3d pose(20.0, 10.0, 0.0, 0.0, 0.0, 0.0);
+  gz::math::Pose3d pose(20.0, 10.0, 0.0, 0.0, 0.0, 0.0);
   patch->ApplyPose(pose);
   // patch->DebugPrintMesh();
   // patch->DebugPrintTriangulation();

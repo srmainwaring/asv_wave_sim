@@ -32,7 +32,7 @@
 #include <iostream>
 #include <string>
 
-using namespace ignition;
+using namespace gz;
 using namespace marine;
 
 typedef CGAL::Timer Timer;
@@ -46,16 +46,16 @@ void TestFillArraysUnitBox()
 
   // Mesh: 1 x 1 x 1 box
   std::string meshName("box_1x1x1");
-  common::MeshManager::Instance()->CreateBox(
+  gz::common::MeshManager::Instance()->CreateBox(
     meshName,
-    math::Vector3d(1, 1, 1),
-    math::Vector2d(1, 1));
+    gz::math::Vector3d(1, 1, 1),
+    gz::math::Vector2d(1, 1));
   
   cgal::Mesh mesh;
   std::vector<float> vertices;
   std::vector<int> indices;
   MeshTools::FillArrays(
-    *common::MeshManager::Instance()->MeshByName(meshName),
+    *gz::common::MeshManager::Instance()->MeshByName(meshName),
     vertices, indices);
 
   // std::cout << "Vertices..." << std::endl;
@@ -81,14 +81,14 @@ void TestMakeSurfaceMeshUnitBox()
 
   // Mesh: 1 x 1 x 1 box
   std::string meshName("box_1x1x1");
-  common::MeshManager::Instance()->CreateBox(
+  gz::common::MeshManager::Instance()->CreateBox(
     meshName,
-    math::Vector3d(1, 1, 1),
-    math::Vector2d(1, 1));
+    gz::math::Vector3d(1, 1, 1),
+    gz::math::Vector2d(1, 1));
   
   cgal::Mesh mesh;
   MeshTools::MakeSurfaceMesh(
-    *common::MeshManager::Instance()->MeshByName(meshName),
+    *gz::common::MeshManager::Instance()->MeshByName(meshName),
     mesh);
 
   // std::cout << "Vertices " << std::endl;
@@ -115,7 +115,7 @@ void TestExportWaveMesh()
   waveParams->SetNumber(1);
   waveParams->SetAmplitude(2.0);
   waveParams->SetPeriod(10.0);
-  waveParams->SetDirection(math::Vector2d(1.0, 1.0));
+  waveParams->SetDirection(gz::math::Vector2d(1.0, 1.0));
 
   // Wavefield
   Wavefield wavefield;
@@ -130,27 +130,27 @@ void TestExportWaveMesh()
   t.start();
 
   std::string name("wavefield");
-  std::shared_ptr<common::Mesh> gzMesh(new common::Mesh());
+  std::shared_ptr<gz::common::Mesh> gzMesh(new gz::common::Mesh());
   gzMesh->SetName(name);
 
-  std::unique_ptr<common::SubMesh> gzSubMesh(new common::SubMesh());  
+  std::unique_ptr<gz::common::SubMesh> gzSubMesh(new gz::common::SubMesh());  
   unsigned long iv = 0;
   for(auto&& face : mesh.faces())
   {
     cgal::Triangle tri  = Geometry::MakeTriangle(mesh, face);
     cgal::Vector3 normal = Geometry::Normal(tri);
 
-    math::Vector3d ignP0(ToIgn(tri[0]));
-    math::Vector3d ignP1(ToIgn(tri[1]));
-    math::Vector3d ignP2(ToIgn(tri[2]));
-    math::Vector3d ignNormal(ToIgn(normal));
+    gz::math::Vector3d gzP0(ToGz(tri[0]));
+    gz::math::Vector3d gzP1(ToGz(tri[1]));
+    gz::math::Vector3d gzP2(ToGz(tri[2]));
+    gz::math::Vector3d gzNormal(ToGZ(normal));
 
-    gzSubMesh->AddVertex(ignP0);
-    gzSubMesh->AddVertex(ignP1);
-    gzSubMesh->AddVertex(ignP2);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
+    gzSubMesh->AddVertex(gzP0);
+    gzSubMesh->AddVertex(gzP1);
+    gzSubMesh->AddVertex(gzP2);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
 
     gzSubMesh->AddIndex(iv++);
     gzSubMesh->AddIndex(iv++);
@@ -164,7 +164,7 @@ void TestExportWaveMesh()
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;
 
-  auto& meshManager = *common::MeshManager::Instance();
+  auto& meshManager = *gz::common::MeshManager::Instance();
 
   meshManager.Export(
     gzMesh.get(),
@@ -189,27 +189,27 @@ void TestExportGridMesh()
   t.start();
 
   std::string name("grid_500m_x_500m_5m_x_5m");
-  std::shared_ptr<common::Mesh> gzMesh(new common::Mesh());
+  std::shared_ptr<gz::common::Mesh> gzMesh(new gz::common::Mesh());
   gzMesh->SetName(name);
 
-  std::unique_ptr<common::SubMesh> gzSubMesh(new common::SubMesh());  
+  std::unique_ptr<gz::common::SubMesh> gzSubMesh(new gz::common::SubMesh());  
   unsigned long iv = 0;
   for(auto&& face : mesh.faces())
   {
     cgal::Triangle tri  = Geometry::MakeTriangle(mesh, face);
     cgal::Vector3 normal = Geometry::Normal(tri);
 
-    math::Vector3d ignP0(ToIgn(tri[0]));
-    math::Vector3d ignP1(ToIgn(tri[1]));
-    math::Vector3d ignP2(ToIgn(tri[2]));
-    math::Vector3d ignNormal(ToIgn(normal));
+    gz::math::Vector3d gzP0(ToGz(tri[0]));
+    gz::math::Vector3d gzP1(ToGz(tri[1]));
+    gz::math::Vector3d gzP2(ToGz(tri[2]));
+    gz::math::Vector3d gzNormal(ToGz(normal));
 
-    gzSubMesh->AddVertex(ignP0);
-    gzSubMesh->AddVertex(ignP1);
-    gzSubMesh->AddVertex(ignP2);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
+    gzSubMesh->AddVertex(gzP0);
+    gzSubMesh->AddVertex(gzP1);
+    gzSubMesh->AddVertex(gzP2);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
 
     gzSubMesh->AddIndex(iv++);
     gzSubMesh->AddIndex(iv++);
@@ -223,7 +223,7 @@ void TestExportGridMesh()
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;
 
-  auto& meshManager = *common::MeshManager::Instance();
+  auto& meshManager = *gz::common::MeshManager::Instance();
 
   meshManager.Export(
     gzMesh.get(),

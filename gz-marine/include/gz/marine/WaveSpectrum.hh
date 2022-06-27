@@ -16,7 +16,7 @@
 #ifndef GZ_MARINE_WAVESPECTRUM_HH_
 #define GZ_MARINE_WAVESPECTRUM_HH_
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

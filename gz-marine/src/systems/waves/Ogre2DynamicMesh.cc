@@ -32,11 +32,11 @@
 #pragma warning(pop)
 #endif
 
-#include "ignition/common/Console.hh"
-#include "ignition/rendering/ogre2/Ogre2Conversions.hh"
-#include "ignition/rendering/ogre2/Ogre2Material.hh"
-#include "ignition/rendering/ogre2/Ogre2RenderEngine.hh"
-#include "ignition/rendering/ogre2/Ogre2Scene.hh"
+#include <gz/common/Console.hh>
+#include <gz/rendering/ogre2/Ogre2Conversions.hh>
+#include <gz/rendering/ogre2/Ogre2Material.hh>
+#include <gz/rendering/ogre2/Ogre2RenderEngine.hh>
+#include <gz/rendering/ogre2/Ogre2Scene.hh>
 
 #ifdef _MSC_VER
   #pragma warning(push, 0)
@@ -52,25 +52,25 @@
 #endif
 
 /// \brief Private implementation
-class ignition::rendering::Ogre2DynamicMeshPrivate
+class gz::rendering::Ogre2DynamicMeshPrivate
 {
   /// \brief list of colors at each point
-  public: std::vector<ignition::math::Color> colors;
+  public: std::vector<gz::math::Color> colors;
 
   /// \brief List of vertices for the mesh
-  public: std::vector<ignition::math::Vector3d> vertices;
+  public: std::vector<gz::math::Vector3d> vertices;
 
   /// \brief List of normals for the mesh
-  public: std::vector<ignition::math::Vector3d> normals;
+  public: std::vector<gz::math::Vector3d> normals;
 
   /// \brief List of tangents for the mesh
-  public: std::vector<ignition::math::Vector3d> tangents;
+  public: std::vector<gz::math::Vector3d> tangents;
 
   /// \brief List of binormals for the mesh
-  // public: std::vector<ignition::math::Vector3d> binormals;
+  // public: std::vector<gz::math::Vector3d> binormals;
 
   /// \brief List of uv0 coordinates for the mesh
-  public: std::vector<ignition::math::Vector2d> uv0s;
+  public: std::vector<gz::math::Vector2d> uv0s;
 
   /// \brief Used to indicate if the lines require an update
   public: bool dirty {false};
@@ -121,7 +121,7 @@ class ignition::rendering::Ogre2DynamicMeshPrivate
 };
 
 
-using namespace ignition;
+using namespace gz;
 using namespace rendering;
 
 //////////////////////////////////////////////////
@@ -198,7 +198,7 @@ void Ogre2DynamicMesh::SetMaterial(MaterialPtr _material, bool _unique)
 
   if (!derived)
   {
-    ignerr << "Cannot assign material created by another render-engine"
+    gzerr << "Cannot assign material created by another render-engine"
         << std::endl;
 
     return;
@@ -524,7 +524,7 @@ void Ogre2DynamicMesh::SetOperationType(MarkerType _opType)
       break;
 
     default:
-      ignerr << "Unknown render operation type[" << _opType << "]\n";
+      gzerr << "Unknown render operation type[" << _opType << "]\n";
       return;
   }
 }
@@ -597,7 +597,7 @@ void Ogre2DynamicMesh::SetPoint(unsigned int _index,
 {
   if (_index >= this->dataPtr->vertices.size())
   {
-    ignerr << "Point index[" << _index << "] is out of bounds[0-"
+    gzerr << "Point index[" << _index << "] is out of bounds[0-"
            << this->dataPtr->vertices.size()-1 << "]\n";
     return;
   }
@@ -613,7 +613,7 @@ void Ogre2DynamicMesh::SetColor(unsigned int _index,
 {
   if (_index >= this->dataPtr->colors.size())
   {
-    ignerr << "Point color index[" << _index << "] is out of bounds[0-"
+    gzerr << "Point color index[" << _index << "] is out of bounds[0-"
            << this->dataPtr->colors.size()-1 << "]\n";
     return;
   }
@@ -634,7 +634,7 @@ void Ogre2DynamicMesh::SetNormal(unsigned int _index,
 {
   if (_index >= this->dataPtr->normals.size())
   {
-    ignerr << "Point normal index[" << _index << "] is out of bounds[0-"
+    gzerr << "Point normal index[" << _index << "] is out of bounds[0-"
            << this->dataPtr->normals.size()-1 << "]\n";
     return;
   }
@@ -650,7 +650,7 @@ void Ogre2DynamicMesh::SetTangent(unsigned int _index,
 {
   if (_index >= this->dataPtr->tangents.size())
   {
-    ignerr << "Point tangent index[" << _index << "] is out of bounds[0-"
+    gzerr << "Point tangent index[" << _index << "] is out of bounds[0-"
            << this->dataPtr->tangents.size()-1 << "]\n";
     return;
   }
@@ -666,7 +666,7 @@ void Ogre2DynamicMesh::SetUV0(unsigned int _index,
 {
   if (_index >= this->dataPtr->uv0s.size())
   {
-    ignerr << "Point uv0 index[" << _index << "] is out of bounds[0-"
+    gzerr << "Point uv0 index[" << _index << "] is out of bounds[0-"
            << this->dataPtr->uv0s.size()-1 << "]\n";
     return;
   }
@@ -682,7 +682,7 @@ math::Vector3d Ogre2DynamicMesh::Point(
 {
   if (_index >= this->dataPtr->vertices.size())
   {
-    ignerr << "Point index[" << _index << "] is out of bounds[0-"
+    gzerr << "Point index[" << _index << "] is out of bounds[0-"
            << this->dataPtr->vertices.size()-1 << "]\n";
 
     return math::Vector3d(math::INF_D,

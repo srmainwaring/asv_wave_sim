@@ -26,7 +26,7 @@
 #include <memory>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -210,7 +210,7 @@ namespace marine
     /// \brief Access the component directions.
     public: const std::vector<math::Vector2d>& Direction_V() const;
 
-    /// \brief Print a summary of the wave parameters to the ignmsg stream.
+    /// \brief Print a summary of the wave parameters to the msg stream.
     public: void DebugPrint() const;
 
     /// \internal

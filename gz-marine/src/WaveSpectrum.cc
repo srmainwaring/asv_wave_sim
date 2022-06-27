@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

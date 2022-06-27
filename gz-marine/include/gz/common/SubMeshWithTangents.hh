@@ -27,12 +27,12 @@
 #include <string>
 #include <vector>
 
-namespace ignition
+namespace gz
 {
   namespace common
   {
     /// \brief A child mesh
-    class IGNITION_COMMON_GRAPHICS_VISIBLE SubMeshWithTangents : public SubMesh
+    class GZ_COMMON_GRAPHICS_VISIBLE SubMeshWithTangents : public SubMesh
     {
       /// \brief Constructor
       public: SubMeshWithTangents();
@@ -64,7 +64,7 @@ namespace ignition
 
       /// \brief Add a tangent to the mesh
       /// \param[in] _n The tangent
-      public: void AddTangent(const ignition::math::Vector3d &_tangent);
+      public: void AddTangent(const gz::math::Vector3d &_tangent);
 
       /// \brief Add a tangent to the mesh
       /// \param[in] _x Position along x
@@ -74,16 +74,16 @@ namespace ignition
 
       /// \brief Get a tangent
       /// \param[in] _index The tangent index
-      /// \return The tangent direction or ignition::math::Vector3d::Zero
+      /// \return The tangent direction or gz::math::Vector3d::Zero
       ///  if index is out of bounds.
       /// \sa bool HasTangent(const unsigned int _index);
-      public: ignition::math::Vector3d Tangent(const unsigned int _index) const;
+      public: gz::math::Vector3d Tangent(const unsigned int _index) const;
 
       /// \brief Set a tangent
       /// \param[in] _index Index of the tangent that will be set.
       /// \param[in] _n The new tangent direction
       public: void SetTangent(const unsigned int _index,
-                  const ignition::math::Vector3d &_tangent);
+                  const gz::math::Vector3d &_tangent);
 
       /// \brief Return the number of tangents
       /// \return The number of tangents.
@@ -100,7 +100,7 @@ namespace ignition
       public: void RecalculateTangents();
 
       /// \brief Private data pointer.
-      IGN_UTILS_IMPL_PTR(dataPtr)
+      GZ_UTILS_IMPL_PTR(dataPtr)
     };
   }
 }

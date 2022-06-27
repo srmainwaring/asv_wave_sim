@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
-#define IGNITION_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
+#ifndef GZ_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
+#define GZ_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 
 #include "gz/marine/OceanTile.hh"
 
-#include "ignition/rendering/base/BaseVisual.hh"
-#include "ignition/rendering/ogre2/Ogre2Visual.hh"
+#include <gz/rendering/base/BaseVisual.hh>
+#include <gz/rendering/ogre2/Ogre2Visual.hh>
 
 #include <memory>
 
@@ -28,17 +28,17 @@ namespace Ogre
   class MovableObject;
 }
 
-namespace ignition
+namespace gz
 {
   namespace rendering
   {
-    inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
+    inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
     // Forward declaration
     class Ogre2OceanVisualPrivate;
 
     /// \brief Ogre2.x implementation of an ocean visual class
-    class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2OceanVisual :
+    class GZ_RENDERING_OGRE2_VISIBLE Ogre2OceanVisual :
       public Ogre2Visual
     {
       /// \brief Constructor
@@ -75,10 +75,10 @@ namespace ignition
       public: void UpdateOceanTile(marine::visual::OceanTilePtr _oceanTile);
 
       /// \brief Load from a mesh
-      public: void LoadMesh(common::MeshPtr _mesh);
+      public: void LoadMesh(gz::common::MeshPtr _mesh);
 
       /// \brief Update from a mesh
-      public: void UpdateMesh(common::MeshPtr _mesh);
+      public: void UpdateMesh(gz::common::MeshPtr _mesh);
 
       /// \brief Set material to geometry.
       /// \param[in] _material Ogre material.

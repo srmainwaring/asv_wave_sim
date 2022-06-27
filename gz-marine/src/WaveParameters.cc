@@ -31,7 +31,7 @@
 #include <cmath>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -85,10 +85,10 @@ namespace marine
     public: double phase{0.0};
 
     /// \brief The mean wave direction.
-    public: math::Vector2d direction = math::Vector2d(1.0, 0.0);
+    public: gz::math::Vector2d direction = gz::math::Vector2d(1.0, 0.0);
 
     /// \brief The horizontal wind velocity [m/s].
-    public: math::Vector2d windVelocity = math::Vector2d(5.0, 0.0);
+    public: gz::math::Vector2d windVelocity = gz::math::Vector2d(5.0, 0.0);
 
     /// \brief The mean wave angular frequency (derived).    
     public: double angularFrequency{2.0*M_PI};
@@ -117,7 +117,7 @@ namespace marine
     public: std::vector<double> wavenumbers;
 
     /// \brief The component wave dirctions (derived).
-    public: std::vector<ignition::math::Vector2d> directions;
+    public: std::vector<gz::math::Vector2d> directions;
 
     /// \brief Recalculate all derived quantities from inputs.
     public: void Recalculate()
@@ -163,7 +163,7 @@ namespace marine
         const double s = std::sin(n * this->angle);
         double x = c * this->direction.X() - s * this->direction.Y();
         double y = s * this->direction.X() + c * this->direction.Y();
-        ignition::math::Vector2d d(x, y);
+        gz::math::Vector2d d(x, y);
 
         directions.push_back(d);
       }
@@ -172,7 +172,7 @@ namespace marine
 }
 }
 
-using namespace ignition;
+using namespace gz;
 using namespace marine;
 
 //////////////////////////////////////////////////
@@ -188,7 +188,7 @@ WaveParameters::WaveParameters()
 }
 
 //////////////////////////////////////////////////
-void WaveParameters::FillMsg(ignition::msgs::Param_V& _msg) const
+void WaveParameters::FillMsg(gz::msgs::Param_V& _msg) const
 {
   // Clear 
   _msg.mutable_param()->Clear();
@@ -197,44 +197,44 @@ void WaveParameters::FillMsg(ignition::msgs::Param_V& _msg) const
   {
     auto nextParam = _msg.add_param();
 
-    (*nextParam->mutable_params())["number"].set_type(ignition::msgs::Any::INT32);
+    (*nextParam->mutable_params())["number"].set_type(gz::msgs::Any::INT32);
     (*nextParam->mutable_params())["number"].set_int_value(this->dataPtr->number);
   }
   // "scale"
   {
     auto nextParam = _msg.add_param();
-    (*nextParam->mutable_params())["scale"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["scale"].set_type(gz::msgs::Any::DOUBLE);
     (*nextParam->mutable_params())["scale"].set_double_value(this->dataPtr->scale);
   }
   // "angle"
   {
     auto nextParam = _msg.add_param();
-    (*nextParam->mutable_params())["angle"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["angle"].set_type(gz::msgs::Any::DOUBLE);
     (*nextParam->mutable_params())["angle"].set_double_value(this->dataPtr->angle);
   }
   // "steepness"
   {
     auto nextParam = _msg.add_param();
-    (*nextParam->mutable_params())["steepness"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["steepness"].set_type(gz::msgs::Any::DOUBLE);
     (*nextParam->mutable_params())["steepness"].set_double_value(this->dataPtr->steepness);
   }
   // "amplitude"
   {
     auto nextParam = _msg.add_param();
-    (*nextParam->mutable_params())["amplitude"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["amplitude"].set_type(gz::msgs::Any::DOUBLE);
     (*nextParam->mutable_params())["amplitude"].set_double_value(this->dataPtr->amplitude);
   }
   // "period"
   {
     auto nextParam = _msg.add_param();
-    (*nextParam->mutable_params())["period"].set_type(ignition::msgs::Any::DOUBLE);
+    (*nextParam->mutable_params())["period"].set_type(gz::msgs::Any::DOUBLE);
     (*nextParam->mutable_params())["period"].set_double_value(this->dataPtr->period);
   }
   // "direction"
   {
     const auto& direction = this->dataPtr->direction;
     auto nextParam = _msg.add_param();
-    (*nextParam->mutable_params())["direction"].set_type(ignition::msgs::Any::VECTOR3D);
+    (*nextParam->mutable_params())["direction"].set_type(gz::msgs::Any::VECTOR3D);
     (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_x(direction.X());
     (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_y(direction.Y());
     (*nextParam->mutable_params())["direction"].mutable_vector3d_value()->set_z(0);
@@ -242,7 +242,7 @@ void WaveParameters::FillMsg(ignition::msgs::Param_V& _msg) const
 }
 
 //////////////////////////////////////////////////
-void WaveParameters::SetFromMsg(const ignition::msgs::Param_V& _msg)
+void WaveParameters::SetFromMsg(const gz::msgs::Param_V& _msg)
 {
   // todo(srmainwaring) add missing entries
   this->dataPtr->number    = Utilities::MsgParamSizeT(_msg,    "number",     this->dataPtr->number);
@@ -277,7 +277,7 @@ void WaveParameters::SetFromSDF(sdf::Element& _sdf)
   // override wind speed and angle if parameters are provided
   if (_sdf.HasElement("wind_speed") || _sdf.HasElement("wind_angle_deg"))
   {
-    ignmsg << "Overriding 'wind_velocity' using 'wind_speed' and 'wind_angle_deg'\n";
+    gzmsg << "Overriding 'wind_velocity' using 'wind_speed' and 'wind_angle_deg'\n";
 
     // current wind speed and angle
     double windSpeed = this->WindSpeed();
@@ -371,13 +371,13 @@ double WaveParameters::Wavenumber() const
 }    
 
 //////////////////////////////////////////////////
-ignition::math::Vector2d WaveParameters::Direction() const
+gz::math::Vector2d WaveParameters::Direction() const
 {
   return this->dataPtr->direction;
 }
 
 //////////////////////////////////////////////////
-ignition::math::Vector2d WaveParameters::WindVelocity() const
+gz::math::Vector2d WaveParameters::WindVelocity() const
 {
   return this->dataPtr->windVelocity;
 }
@@ -471,14 +471,14 @@ void WaveParameters::SetPhase(double _phase)
 }
 
 //////////////////////////////////////////////////
-void WaveParameters::SetDirection(const ignition::math::Vector2d& _direction)
+void WaveParameters::SetDirection(const gz::math::Vector2d& _direction)
 {
   this->dataPtr->direction = _direction;
   this->dataPtr->Recalculate();
 }
 
 //////////////////////////////////////////////////
-void WaveParameters::SetWindVelocity(const ignition::math::Vector2d& _windVelocity)
+void WaveParameters::SetWindVelocity(const gz::math::Vector2d& _windVelocity)
 {
   this->dataPtr->windVelocity = _windVelocity;
   this->dataPtr->Recalculate();
@@ -526,7 +526,7 @@ const std::vector<double>& WaveParameters::Wavenumber_V() const
 }
 
 //////////////////////////////////////////////////
-const std::vector<ignition::math::Vector2d>& WaveParameters::Direction_V() const
+const std::vector<gz::math::Vector2d>& WaveParameters::Direction_V() const
 {
   return this->dataPtr->directions;
 }
@@ -535,18 +535,18 @@ const std::vector<ignition::math::Vector2d>& WaveParameters::Direction_V() const
 void WaveParameters::DebugPrint() const
 {
   // todo(srmainwaring) add missing entries
-  ignmsg << "number:     " << this->dataPtr->number << std::endl;
-  ignmsg << "scale:      " << this->dataPtr->scale << std::endl;
-  ignmsg << "angle:      " << this->dataPtr->angle << std::endl;
-  ignmsg << "period:     " << this->dataPtr->period << std::endl;
-  ignmsg << "amplitude:  " << this->dataPtr->amplitudes << std::endl;
-  ignmsg << "wavenumber: " << this->dataPtr->wavenumbers << std::endl;
-  ignmsg << "omega:      " << this->dataPtr->angularFrequencies << std::endl;
-  ignmsg << "phase:      " << this->dataPtr->phases << std::endl;
-  ignmsg << "steepness:  " << this->dataPtr->steepnesses << std::endl;
+  gzmsg << "number:     " << this->dataPtr->number << std::endl;
+  gzmsg << "scale:      " << this->dataPtr->scale << std::endl;
+  gzmsg << "angle:      " << this->dataPtr->angle << std::endl;
+  gzmsg << "period:     " << this->dataPtr->period << std::endl;
+  gzmsg << "amplitude:  " << this->dataPtr->amplitudes << std::endl;
+  gzmsg << "wavenumber: " << this->dataPtr->wavenumbers << std::endl;
+  gzmsg << "omega:      " << this->dataPtr->angularFrequencies << std::endl;
+  gzmsg << "phase:      " << this->dataPtr->phases << std::endl;
+  gzmsg << "steepness:  " << this->dataPtr->steepnesses << std::endl;
   for (auto&& d : this->dataPtr->directions)
   {
-    ignmsg << "direction:  " << d << std::endl;
+    gzmsg << "direction:  " << d << std::endl;
   }
 }
 

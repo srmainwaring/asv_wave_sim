@@ -15,7 +15,7 @@
 
 #include "gz/marine/PhysicalConstants.hh"
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {

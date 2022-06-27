@@ -40,7 +40,7 @@
 #include <random>
 #include <vector>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -661,43 +661,43 @@ namespace marine
     }
 
     // debug
-    ignmsg << "WaveSimulationFFT2" << "\n";
-    ignmsg << "Lx:          " << this->Lx << "\n";
-    ignmsg << "Ly:          " << this->Ly << "\n";
-    ignmsg << "Nx:          " << this->Nx << "\n";
-    ignmsg << "Ny:          " << this->Ny << "\n";
-    ignmsg << "delta_x:     " << this->delta_x << "\n";
-    ignmsg << "delta_x:     " << this->delta_y << "\n";
-    ignmsg << "lambda_x_f:  " << this->lambda_x_f << "\n";
-    ignmsg << "lambda_y_f:  " << this->lambda_y_f << "\n";
-    ignmsg << "nu_x_f:      " << this->nu_x_f << "\n";
-    ignmsg << "nu_y_f:      " << this->nu_y_f << "\n";
-    ignmsg << "nu_x_Ny:     " << this->nu_x_Ny << "\n";
-    ignmsg << "nu_y_Ny:     " << this->nu_y_Ny << "\n";
-    ignmsg << "kx_f:        " << this->kx_f << "\n";
-    ignmsg << "ky_f:        " << this->ky_f << "\n";
-    ignmsg << "kx_Ny:       " << this->kx_Ny << "\n";
-    ignmsg << "ky_Ny:       " << this->ky_Ny << "\n";
+    gzmsg << "WaveSimulationFFT2" << "\n";
+    gzmsg << "Lx:          " << this->Lx << "\n";
+    gzmsg << "Ly:          " << this->Ly << "\n";
+    gzmsg << "Nx:          " << this->Nx << "\n";
+    gzmsg << "Ny:          " << this->Ny << "\n";
+    gzmsg << "delta_x:     " << this->delta_x << "\n";
+    gzmsg << "delta_x:     " << this->delta_y << "\n";
+    gzmsg << "lambda_x_f:  " << this->lambda_x_f << "\n";
+    gzmsg << "lambda_y_f:  " << this->lambda_y_f << "\n";
+    gzmsg << "nu_x_f:      " << this->nu_x_f << "\n";
+    gzmsg << "nu_y_f:      " << this->nu_y_f << "\n";
+    gzmsg << "nu_x_Ny:     " << this->nu_x_Ny << "\n";
+    gzmsg << "nu_y_Ny:     " << this->nu_y_Ny << "\n";
+    gzmsg << "kx_f:        " << this->kx_f << "\n";
+    gzmsg << "ky_f:        " << this->ky_f << "\n";
+    gzmsg << "kx_Ny:       " << this->kx_Ny << "\n";
+    gzmsg << "ky_Ny:       " << this->ky_Ny << "\n";
     #if 0
     {
       std::ostringstream os;
       os << "[ "; for (auto& v : this->kx_fft) os << v << " "; os << "]\n";
-      ignmsg << "kx_fft:      " << os.str();
+      gzmsg << "kx_fft:      " << os.str();
     }
     {
       std::ostringstream os;
       os << "[ "; for (auto& v : this->ky_fft) os << v << " "; os << "]\n";
-      ignmsg << "ky_fft:      " << os.str();
+      gzmsg << "ky_fft:      " << os.str();
     }
     {
       std::ostringstream os;
       os << "[ "; for (auto& v : this->kx_math) os << v << " "; os << "]\n";
-      ignmsg << "kx_math:     " << os.str();
+      gzmsg << "kx_math:     " << os.str();
     }
     {
       std::ostringstream os;
       os << "[ "; for (auto& v : this->ky_math) os << v << " "; os << "]\n";
-      ignmsg << "ky_math:     " << os.str();
+      gzmsg << "ky_math:     " << os.str();
     }
     #endif
 
@@ -756,7 +756,7 @@ namespace marine
       }
       os << "]\n";
 
-      ignmsg << "cap_psi_2s:  " << os.str();
+      gzmsg << "cap_psi_2s:  " << os.str();
     }
     #endif
 
@@ -1005,30 +1005,30 @@ namespace marine
     double S = (B_l + B_h) / k3;
 
     // debug
-    // ignmsg << "g:       " << g << "\n";
-    // ignmsg << "Omega_c: " << cap_omega_c << "\n";
-    // ignmsg << "Cd10N:   " << Cd_10N << "\n";
-    // ignmsg << "ustar:   " << u_star << "\n";
-    // ignmsg << "ao:      " << ao << "\n";
-    // ignmsg << "ap:      " << ap << "\n";
-    // ignmsg << "cm:      " << cm << "\n";
-    // ignmsg << "am:      " << am << "\n";
-    // ignmsg << "km:      " << km << "\n";
-    // ignmsg << "gamma:   " << gamma << "\n";
-    // ignmsg << "sigma:   " << sigma << "\n";
-    // ignmsg << "alphap:  " << alpha_p << "\n";
-    // ignmsg << "alpham:  " << alpha_m << "\n";
-    // ignmsg << "ko:      " << ko << "\n";
-    // ignmsg << "kp:      " << kp << "\n";
-    // ignmsg << "cp:      " << cp << "\n";
-    // ignmsg << "c:       " << c << "\n";
-    // ignmsg << "Gamma:   " << Gamma << "\n";
-    // ignmsg << "fJp:     " << J_p << "\n";
-    // ignmsg << "fLpm:    " << L_PM << "\n";
-    // ignmsg << "Fp:      " << F_p << "\n";
-    // ignmsg << "Bl:      " << B_l << "\n";
-    // ignmsg << "Fm:      " << F_m << "\n";
-    // ignmsg << "Bh:      " << B_h << "\n";
+    // gzmsg << "g:       " << g << "\n";
+    // gzmsg << "Omega_c: " << cap_omega_c << "\n";
+    // gzmsg << "Cd10N:   " << Cd_10N << "\n";
+    // gzmsg << "ustar:   " << u_star << "\n";
+    // gzmsg << "ao:      " << ao << "\n";
+    // gzmsg << "ap:      " << ap << "\n";
+    // gzmsg << "cm:      " << cm << "\n";
+    // gzmsg << "am:      " << am << "\n";
+    // gzmsg << "km:      " << km << "\n";
+    // gzmsg << "gamma:   " << gamma << "\n";
+    // gzmsg << "sigma:   " << sigma << "\n";
+    // gzmsg << "alphap:  " << alpha_p << "\n";
+    // gzmsg << "alpham:  " << alpha_m << "\n";
+    // gzmsg << "ko:      " << ko << "\n";
+    // gzmsg << "kp:      " << kp << "\n";
+    // gzmsg << "cp:      " << cp << "\n";
+    // gzmsg << "c:       " << c << "\n";
+    // gzmsg << "Gamma:   " << Gamma << "\n";
+    // gzmsg << "fJp:     " << J_p << "\n";
+    // gzmsg << "fLpm:    " << L_PM << "\n";
+    // gzmsg << "Fp:      " << F_p << "\n";
+    // gzmsg << "Bl:      " << B_l << "\n";
+    // gzmsg << "Fm:      " << F_m << "\n";
+    // gzmsg << "Bh:      " << B_h << "\n";
     
     return S;
   }

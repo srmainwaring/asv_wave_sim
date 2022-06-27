@@ -15,30 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
 */
-#ifndef IGNITION_RENDERING_OGRE2_OGRE2OCEANGEOMETRY_HH_
-#define IGNITION_RENDERING_OGRE2_OGRE2OCEANGEOMETRY_HH_
+#ifndef GZ_RENDERING_OGRE2_OGRE2OCEANGEOMETRY_HH_
+#define GZ_RENDERING_OGRE2_OGRE2OCEANGEOMETRY_HH_
 
-#include "ignition/rendering/ogre2/Export.hh"
-#include "ignition/rendering/ogre2/Ogre2Geometry.hh"
-#include "ignition/rendering/RenderTypes.hh"
-// #include "ignition/rendering/Scene.hh"
+#include <gz/rendering/ogre2/Export.hh>
+#include <gz/rendering/ogre2/Ogre2Geometry.hh>
+#include <gz/rendering/RenderTypes.hh>
+// #include <gz/rendering/Scene.hh>
 
 #include <memory>
 
-namespace ignition
+namespace gz
 {
   namespace rendering
   {
-    inline namespace IGNITION_RENDERING_VERSION_NAMESPACE {
+    inline namespace GZ_RENDERING_VERSION_NAMESPACE {
     //
     // forward declarations
     class Ogre2OceanGeometryPrivate;
 
     /*  \class Ogre2OceanGeometry Ogre2OceanGeometry.hh \
-     *  ignition/rendering/ogre2/Ogre2OceanGeometry.hh
+     *  gz/rendering/ogre2/Ogre2OceanGeometry.hh
      */
     /// \brief Ocean geometry class based on a dynamic mesh
-    class IGNITION_RENDERING_OGRE2_VISIBLE Ogre2OceanGeometry :
+    class GZ_RENDERING_OGRE2_VISIBLE Ogre2OceanGeometry :
         public Ogre2Geometry
     {
       /// \brief Constructor
@@ -68,10 +68,10 @@ namespace ignition
         SetMaterial(MaterialPtr _material, bool _unique) override;
 
       /// \brief Load from a mesh
-      public: void LoadMesh(common::MeshPtr _mesh);
+      public: void LoadMesh(gz::common::MeshPtr _mesh);
 
       /// \brief Update from a mesh
-      public: void UpdateMesh(common::MeshPtr _mesh);
+      public: void UpdateMesh(gz::common::MeshPtr _mesh);
 
       /// \brief Work-around the protected accessors and protected methods in Scene
       public: void InitObject(Ogre2ScenePtr _scene,

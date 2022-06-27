@@ -2,21 +2,21 @@
 <sdf version="1.6">
   <world name="waves">
     <plugin filename="ignition-gazebo-physics-system"
-            name="ignition::gazebo::systems::Physics">
+            name="gz::sim::systems::Physics">
     </plugin>
     <plugin filename="ignition-gazebo-sensors-system"
-            name="ignition::gazebo::systems::Sensors">
+            name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
       <background_color>0.8 0.8 0.8</background_color>
     </plugin>
     <plugin filename="ignition-gazebo-scene-broadcaster-system"
-            name="ignition::gazebo::systems::SceneBroadcaster">
+            name="gz::sim::systems::SceneBroadcaster">
     </plugin>
     <plugin filename="ignition-gazebo-user-commands-system"
-            name="ignition::gazebo::systems::UserCommands">
+            name="gz::sim::systems::UserCommands">
     </plugin>
     <plugin filename="libignition-gazebo-imu-system.so"
-            name="ignition::gazebo::systems::Imu">
+            name="gz::sim::systems::Imu">
     </plugin>
 
     <scene>
@@ -100,10 +100,10 @@
       <uri>model://spherical_buoy</uri>
     </include>
 
-    <include>
+    <!-- <include>
       <pose>5 0 0 0 0 0</pose>
       <uri>model://wam-v</uri>
-    </include>
+    </include> -->
 
     <!-- <include>
       <pose>5 0 0 0 0 1.51</pose>

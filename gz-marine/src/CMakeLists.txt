@@ -3,7 +3,7 @@ add_subdirectory(systems)
 
 # Collect source files into the "sources" variable and unit test files into the
 # "gtest_sources" variable.
-# ign_get_libsources_and_unittests(sources gtest_sources)
+# gz_get_libsources_and_unittests(sources gtest_sources)
 
 # Collect source and test files manually
 
@@ -46,16 +46,16 @@ set(gtest_sources
 )
 
 # Create the library target
-ign_create_core_library(SOURCES ${sources} CXX_STANDARD 17)
+gz_create_core_library(SOURCES ${sources} CXX_STANDARD 17)
 
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
-  ignition-math${IGN_MATH_VER}
-  ignition-msgs${IGN_MSGS_VER}::ignition-msgs${IGN_MSGS_VER}
-  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-  ignition-common${IGN_COMMON_VER}::graphics
-  ignition-common${IGN_COMMON_VER}::profiler
-  ignition-transport${IGN_TRANSPORT_VER}::ignition-transport${IGN_TRANSPORT_VER}
+  gz-math${GZ_MATH_VER}
+  gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER}
+  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+  gz-common${GZ_COMMON_VER}::graphics
+  gz-common${GZ_COMMON_VER}::profiler
+  gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
   sdformat${SDF_VER}::sdformat${SDF_VER}
   ${TBB_LIBRARIES}
 )
@@ -73,7 +73,7 @@ target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
 include_directories(${PROJECT_SOURCE_DIR}/test)
 
 # Build the unit tests
-ign_build_tests(TYPE UNIT
+gz_build_tests(TYPE UNIT
   SOURCES
     ${gtest_sources}
   LIB_DEPS

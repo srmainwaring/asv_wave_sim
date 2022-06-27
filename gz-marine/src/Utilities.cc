@@ -24,7 +24,7 @@
 #include <iostream>
 #include <string>
 
-namespace ignition
+namespace gz
 {
 namespace marine
 {
@@ -38,20 +38,20 @@ T SdfParam(const sdf::Element& _sdf, const std::string &_paramName, const T _def
 {
   if (!_sdf.HasElement(_paramName))
   {
-    ignmsg << "Parameter <" << _paramName << "> not found: " 
+    gzmsg << "Parameter <" << _paramName << "> not found: " 
       <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
 
   T val = _sdf.Get<T>(_paramName);
-  ignmsg << "Parameter found - setting <" << _paramName 
+  gzmsg << "Parameter found - setting <" << _paramName 
     << "> to <" << val << ">." << std::endl;
   return val;
 }
 
 /// \brief Template function for extracting a value from a parameter message.
 template <typename T>
-T MsgParamGetValue(const ignition::msgs::Param& _msg)
+T MsgParamGetValue(const gz::msgs::Param& _msg)
 {
   ignwarn << "Using default template for MsgParamGetValue" << std::endl;
   return T();  
@@ -59,7 +59,7 @@ T MsgParamGetValue(const ignition::msgs::Param& _msg)
 
 /// \brief Template specialization for extracting a bool from a parameter message.
 template <>
-bool MsgParamGetValue<bool>(const ignition::msgs::Param& _msg)
+bool MsgParamGetValue<bool>(const gz::msgs::Param& _msg)
 { 
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
@@ -68,7 +68,7 @@ bool MsgParamGetValue<bool>(const ignition::msgs::Param& _msg)
 
 /// \brief Template specialization for extracting an int from a parameter message.
 template <>
-int MsgParamGetValue<int>(const ignition::msgs::Param& _msg)
+int MsgParamGetValue<int>(const gz::msgs::Param& _msg)
 { 
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
@@ -77,7 +77,7 @@ int MsgParamGetValue<int>(const ignition::msgs::Param& _msg)
 
 /// \brief Template specialization for extracting a size_t from a parameter message.
 template <>
-size_t MsgParamGetValue<size_t>(const ignition::msgs::Param& _msg)
+size_t MsgParamGetValue<size_t>(const gz::msgs::Param& _msg)
 { 
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
@@ -86,7 +86,7 @@ size_t MsgParamGetValue<size_t>(const ignition::msgs::Param& _msg)
 
 /// \brief Template specialization for extracting a double from a parameter message.
 template <>
-double MsgParamGetValue<double>(const ignition::msgs::Param& _msg)
+double MsgParamGetValue<double>(const gz::msgs::Param& _msg)
 { 
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
@@ -95,7 +95,7 @@ double MsgParamGetValue<double>(const ignition::msgs::Param& _msg)
 
 /// \brief Template specialization for extracting a string from a parameter message.
 template <>
-std::string MsgParamGetValue<std::string>(const ignition::msgs::Param& _msg)
+std::string MsgParamGetValue<std::string>(const gz::msgs::Param& _msg)
 { 
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
@@ -104,29 +104,29 @@ std::string MsgParamGetValue<std::string>(const ignition::msgs::Param& _msg)
 
 /// \brief Template specialization for extracting a Vector2i from a parameter message.
 template <>
-ignition::math::Vector2i MsgParamGetValue<ignition::math::Vector2i>(
-    const ignition::msgs::Param& _msg)
+gz::math::Vector2i MsgParamGetValue<gz::math::Vector2i>(
+    const gz::msgs::Param& _msg)
 { 
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   auto vec = paramValue.vector3d_value();
-  return ignition::math::Vector2i(vec.x(), vec.y());
+  return gz::math::Vector2i(vec.x(), vec.y());
 }
 
 /// \brief Template specialization for extracting a Vector3 from a parameter message.
 template <>
-ignition::math::Vector3d MsgParamGetValue<ignition::math::Vector3d>(
-    const ignition::msgs::Param& _msg)
+gz::math::Vector3d MsgParamGetValue<gz::math::Vector3d>(
+    const gz::msgs::Param& _msg)
 { 
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   auto vec = paramValue.vector3d_value();
-  return ignition::math::Vector3d(vec.x(), vec.y(), vec.z());
+  return gz::math::Vector3d(vec.x(), vec.y(), vec.z());
 }
 
 /// \brief Template for extracting a named parameter from a parameter vector message.
 template <typename T>
-T MsgParam(const ignition::msgs::Param_V& _msg, const std::string &_paramName, const T _defaultVal)
+T MsgParam(const gz::msgs::Param_V& _msg, const std::string &_paramName, const T _defaultVal)
 {
   // Custom compare for params
   auto compare = [=](auto& _param)
@@ -142,7 +142,7 @@ T MsgParam(const ignition::msgs::Param_V& _msg, const std::string &_paramName, c
   if (it == std::end(_msg.param()))
   {
   // @DEBUG_INFO
-    // ignmsg << "Parameter <" << _paramName << "> not found: " 
+    // gzmsg << "Parameter <" << _paramName << "> not found: " 
     //   <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
@@ -152,7 +152,7 @@ T MsgParam(const ignition::msgs::Param_V& _msg, const std::string &_paramName, c
   T val = MsgParamGetValue<T>(param);
 
   // @DEBUG_INFO
-  // ignmsg << "Parameter found - setting <" << _paramName 
+  // gzmsg << "Parameter found - setting <" << _paramName 
   //   << "> to <" << val << ">." << std::endl;
   return val;
 }
@@ -185,67 +185,67 @@ std::string Utilities::SdfParamString(const sdf::Element& _sdf,
   return SdfParam<std::string>(_sdf, _paramName, _defaultVal);
 }
 
-ignition::math::Vector2d Utilities::SdfParamVector2d(const sdf::Element& _sdf,
-  const std::string& _paramName, const ignition::math::Vector2d _defaultVal)
+gz::math::Vector2d Utilities::SdfParamVector2d(const sdf::Element& _sdf,
+  const std::string& _paramName, const gz::math::Vector2d _defaultVal)
 {
-  return SdfParam<ignition::math::Vector2d>(
+  return SdfParam<gz::math::Vector2d>(
     _sdf, _paramName, _defaultVal);
 }
 
-ignition::math::Vector2i Utilities::SdfParamVector2i(const sdf::Element& _sdf,
-  const std::string& _paramName, const ignition::math::Vector2i _defaultVal)
+gz::math::Vector2i Utilities::SdfParamVector2i(const sdf::Element& _sdf,
+  const std::string& _paramName, const gz::math::Vector2i _defaultVal)
 {
-  return SdfParam<ignition::math::Vector2i>(
+  return SdfParam<gz::math::Vector2i>(
     _sdf, _paramName, _defaultVal);
 }
 
-ignition::math::Vector3d Utilities::SdfParamVector3d(const sdf::Element& _sdf,
-  const std::string& _paramName, const ignition::math::Vector3d _defaultVal)
+gz::math::Vector3d Utilities::SdfParamVector3d(const sdf::Element& _sdf,
+  const std::string& _paramName, const gz::math::Vector3d _defaultVal)
 {
-  return SdfParam<ignition::math::Vector3d>(
+  return SdfParam<gz::math::Vector3d>(
     _sdf, _paramName, _defaultVal);
 }
 
-bool Utilities::MsgParamBool(const ignition::msgs::Param_V& _msg,
+bool Utilities::MsgParamBool(const gz::msgs::Param_V& _msg,
   const std::string &_paramName, const bool _defaultVal)
 {
   return MsgParam<bool>(_msg, _paramName, _defaultVal);
 }
 
-size_t Utilities::MsgParamSizeT(const ignition::msgs::Param_V& _msg,
+size_t Utilities::MsgParamSizeT(const gz::msgs::Param_V& _msg,
   const std::string &_paramName, const size_t _defaultVal)
 {
   return MsgParam<size_t>(_msg, _paramName, _defaultVal);
 }
 
-double Utilities::MsgParamDouble(const ignition::msgs::Param_V& _msg,
+double Utilities::MsgParamDouble(const gz::msgs::Param_V& _msg,
   const std::string &_paramName, const double _defaultVal)
 {
   return MsgParam<double>(_msg, _paramName, _defaultVal);
 }
 
-std::string Utilities::MsgParamString(const ignition::msgs::Param_V& _msg,
+std::string Utilities::MsgParamString(const gz::msgs::Param_V& _msg,
   const std::string &_paramName, const std::string _defaultVal)
 {
   return MsgParam<std::string>(_msg, _paramName, _defaultVal);
 }
 
-ignition::math::Vector2i Utilities::MsgParamVector2i(const ignition::msgs::Param_V& _msg,
-  const std::string &_paramName, const ignition::math::Vector2i _defaultVal)
+gz::math::Vector2i Utilities::MsgParamVector2i(const gz::msgs::Param_V& _msg,
+  const std::string &_paramName, const gz::math::Vector2i _defaultVal)
 {
-  return MsgParam<ignition::math::Vector2i>(_msg, _paramName, _defaultVal);
+  return MsgParam<gz::math::Vector2i>(_msg, _paramName, _defaultVal);
 }
 
-ignition::math::Vector2d Utilities::MsgParamVector2d(const ignition::msgs::Param_V& _msg,
-  const std::string &_paramName, const ignition::math::Vector2d _defaultVal)
+gz::math::Vector2d Utilities::MsgParamVector2d(const gz::msgs::Param_V& _msg,
+  const std::string &_paramName, const gz::math::Vector2d _defaultVal)
 {
-  return MsgParam<ignition::math::Vector2d>(_msg, _paramName, _defaultVal);
+  return MsgParam<gz::math::Vector2d>(_msg, _paramName, _defaultVal);
 }
 
-ignition::math::Vector3d Utilities::MsgParamVector3d(const ignition::msgs::Param_V& _msg,
-  const std::string &_paramName, const ignition::math::Vector3d _defaultVal)
+gz::math::Vector3d Utilities::MsgParamVector3d(const gz::msgs::Param_V& _msg,
+  const std::string &_paramName, const gz::math::Vector3d _defaultVal)
 {
-  return MsgParam<ignition::math::Vector3d>(_msg, _paramName, _defaultVal);
+  return MsgParam<gz::math::Vector3d>(_msg, _paramName, _defaultVal);
 }
 
 

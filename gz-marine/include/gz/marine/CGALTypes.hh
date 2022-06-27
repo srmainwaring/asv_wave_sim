@@ -27,7 +27,7 @@
 
 #include <memory>
 
-namespace ignition
+namespace gz
 {
 namespace cgal
 {
