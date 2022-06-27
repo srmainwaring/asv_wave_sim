@@ -101,7 +101,7 @@ gz::math::Vector3d SubMeshWithTangents::Tangent(const unsigned int _index) const
 {
   if (_index >= this->dataPtr->tangents.size())
   {
-    ignerr << "Index too large" << std::endl;
+    gzerr << "Index too large" << std::endl;
     return math::Vector3d::Zero;
   }
 
@@ -120,7 +120,7 @@ void SubMeshWithTangents::SetTangent(const unsigned int _index,
 {
   if (_index >= this->dataPtr->tangents.size())
   {
-    ignerr << "Index too large" << std::endl;
+    gzerr << "Index too large" << std::endl;
     return;
   }
 

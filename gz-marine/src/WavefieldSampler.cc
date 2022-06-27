@@ -104,7 +104,7 @@ namespace marine
   void WavefieldSampler::UpdatePatch()
   {
     // Update the water patch Mesh
-    // ignmsg << "Update water patch..." << std::endl;
+    // gzmsg << "Update water patch..." << std::endl;
     const auto& target = this->data->waterPatch->GetMesh();
     for (
       auto&& vb = std::begin(target->vertices()); 
@@ -118,7 +118,7 @@ namespace marine
       this->data->wavefield->Height(p0, height);
       cgal::Point3 p1(p0.x(), p0.y(), height);
       target->point(vertex) = p1;
-      // ignmsg << target->point(vertex) << std::endl;
+      // gzmsg << target->point(vertex) << std::endl;
     }
   }
 
@@ -148,9 +148,9 @@ namespace marine
     if (!isFound)
     {
       // @DEBUG_INFO
-      ignerr << "point:  " << _point << std::endl;
+      gzerr << "point:  " << _point << std::endl;
       // _patch.DebugPrint();
-      ignerr << "Water patch is too small" << std::endl;
+      gzerr << "Water patch is too small" << std::endl;
       return 0;
     }
     isFound = GridTools::FindIntersectionGrid(
@@ -158,9 +158,9 @@ namespace marine
     if (!isFound)
     {
       // @DEBUG_INFO
-      ignerr << "point:  " << _point << std::endl;
+      gzerr << "point:  " << _point << std::endl;
       // _patch.DebugPrint();
-      ignerr << "Water patch is too small" << std::endl;
+      gzerr << "Water patch is too small" << std::endl;
       return 0;
     }
     double h = wavePoint.z() - _point.z();

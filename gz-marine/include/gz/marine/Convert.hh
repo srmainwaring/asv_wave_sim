@@ -35,17 +35,17 @@ namespace marine
   /// \brief Convert a CGAL Point3 to a gazebo Vector3d
   /// \param[in] _point   The point to convert
   /// \return             The converted point 
-  gz::math::Vector3d ToIgn(const cgal::Point3& _point);
+  gz::math::Vector3d ToGz(const cgal::Point3& _point);
 
   /// \brief Convert a CGAL Vector2 to a gazebo Vector2d
   /// \param[in] _vector  The vector to convert
   /// \return             The converted vector 
-  gz::math::Vector2d ToIgn(const cgal::Vector2& _vector);
+  gz::math::Vector2d ToGz(const cgal::Vector2& _vector);
 
   /// \brief Convert a CGAL Vector3 to a gazebo Vector3d
   /// \param[in] _vector  The vector to convert
   /// \return             The converted vector 
-  gz::math::Vector3d ToIgn(const cgal::Vector3& _vector);
+  gz::math::Vector3d ToGz(const cgal::Vector3& _vector);
 
   /// \brief Convert a gazebo Vector3d to a CGAL Point3
   /// \param[in] _vector  The vector to convert

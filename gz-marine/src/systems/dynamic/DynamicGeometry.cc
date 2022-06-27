@@ -152,7 +152,7 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
       // check if invalid mesh
       if (!mesh->ogreItem)
       {
-        ignerr << "Failed to get Ogre item for [" << _desc.meshName << "]"
+        gzerr << "Failed to get Ogre item for [" << _desc.meshName << "]"
                 << std::endl;
         return nullptr;
       }
@@ -178,10 +178,10 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
       }
 
       std::string name = this->MeshName(_desc);
-      ignmsg << "Get Ogre::SceneManager\n";
+      gzmsg << "Get Ogre::SceneManager\n";
       Ogre::SceneManager *sceneManager = this->scene->OgreSceneManager();
 
-      ignmsg << "Check for v2 mesh\n";
+      gzmsg << "Check for v2 mesh\n";
       // check if a v2 mesh already exists
       Ogre::MeshPtr mesh =
           Ogre::MeshManager::getSingleton().getByName(name);
@@ -189,31 +189,31 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
       // if not, it probably has not been imported from v1 yet
       if (!mesh)
       {
-        ignmsg << "Check for v1 mesh\n";
+        gzmsg << "Check for v1 mesh\n";
         Ogre::v1::MeshPtr v1Mesh =
             Ogre::v1::MeshManager::getSingleton().getByName(name);
         if (!v1Mesh)
         {
-          ignerr << "Did not find v1 mesh [" << name << "]\n";
+          gzerr << "Did not find v1 mesh [" << name << "]\n";
           return nullptr;
         }
 
         // examine v1 mesh properties
         v1Mesh->load();
-        ignmsg << "v1 mesh: isLoaded: " << v1Mesh->isLoaded() << "\n";
+        gzmsg << "v1 mesh: isLoaded: " << v1Mesh->isLoaded() << "\n";
 
-        ignmsg << "Creating v2 mesh\n";
+        gzmsg << "Creating v2 mesh\n";
         // create v2 mesh from v1
         mesh = Ogre::MeshManager::getSingleton().createManual(
             name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-        ignmsg << "Importing v2 mesh\n";
+        gzmsg << "Importing v2 mesh\n";
         mesh->importV1(v1Mesh.get(), false, true, true);
         this->ogreMeshes.push_back(name);
       }
       else
       {
-        ignmsg << "Found v2 mesh\n";
+        gzmsg << "Found v2 mesh\n";
       }
 
       return sceneManager->createItem(mesh, Ogre::SCENE_DYNAMIC);
@@ -232,13 +232,13 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
     {
       if (!_desc.mesh && _desc.meshName.empty())
       {
-        ignerr << "Invalid mesh-descriptor, no mesh specified" << std::endl;
+        gzerr << "Invalid mesh-descriptor, no mesh specified" << std::endl;
         return false;
       }
 
       if (!_desc.mesh)
       {
-        ignerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
+        gzerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
         return false;
         // Override MeshDescriptor behaviour as we're not using gz::common::Mesh
         // return true;
@@ -246,7 +246,7 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
       if (_desc.mesh->SubMeshCount() == 0)
       {
-        ignerr << "Cannot load mesh with zero sub-meshes" << std::endl;
+        gzerr << "Cannot load mesh with zero sub-meshes" << std::endl;
         return false;
       }
 
@@ -381,9 +381,9 @@ void DynamicGeometry::Configure(const Entity &_entity,
     EntityComponentManager &_ecm,
     EventManager &_eventMgr)
 {
-  IGN_PROFILE("DynamicGeometry::Configure");
+  GZ_PROFILE("DynamicGeometry::Configure");
 
-  ignmsg << "DynamicGeometry: configuring\n";
+  gzmsg << "DynamicGeometry: configuring\n";
 
   // Ugly, but needed because the sdf::Element::GetElement is not a const
   // function and _sdf is a const shared pointer to a const sdf::Element.
@@ -407,7 +407,7 @@ void DynamicGeometry::PreUpdate(
   const gz::sim::UpdateInfo &_info,
   gz::sim::EntityComponentManager &)
 {
-  IGN_PROFILE("DynamicGeometry::PreUpdate");
+  GZ_PROFILE("DynamicGeometry::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
 }
@@ -434,7 +434,7 @@ void DynamicGeometryPrivate::OnUpdate()
 
   if (!this->scene)
   {
-    ignmsg << "DynamicGeometry: retrieving scene from render engine\n";
+    gzmsg << "DynamicGeometry: retrieving scene from render engine\n";
     this->scene = rendering::sceneFromFirstRenderEngine();
   }
 
@@ -444,7 +444,7 @@ void DynamicGeometryPrivate::OnUpdate()
   // Ogre2 DynamicGeometry sample
   if (!this->isSceneInitialised)
   {
-    ignmsg << "DynamicGeometry: creating scene\n";
+    gzmsg << "DynamicGeometry: creating scene\n";
 
     // create the sample scene
     this->CreateScene01();
@@ -838,10 +838,10 @@ void DynamicGeometryPrivate::DestroyScene()
 }
 
 //////////////////////////////////////////////////
-IGNITION_ADD_PLUGIN(DynamicGeometry,
-                    gz::sim::System,
-                    DynamicGeometry::ISystemConfigure,
-                    DynamicGeometry::ISystemPreUpdate)
+GZ_ADD_PLUGIN(DynamicGeometry,
+              gz::sim::System,
+              DynamicGeometry::ISystemConfigure,
+              DynamicGeometry::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(DynamicGeometry,
-  "gz::sim::systems::DynamicGeometry")
+GZ_ADD_PLUGIN_ALIAS(DynamicGeometry,
+    "gz::sim::systems::DynamicGeometry")

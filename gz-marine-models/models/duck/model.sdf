@@ -3,7 +3,7 @@
   <model name='duck'>
     <static>false</static>
     <plugin
-        filename="gazebo_marine1-hydrodynamics-system"
+        filename="gz-marine1-hydrodynamics-system"
         name="gz::sim::systems::Hydrodynamics">
     </plugin>
     <link name="base_link">

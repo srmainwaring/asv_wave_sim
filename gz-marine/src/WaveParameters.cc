@@ -277,7 +277,7 @@ void WaveParameters::SetFromSDF(sdf::Element& _sdf)
   // override wind speed and angle if parameters are provided
   if (_sdf.HasElement("wind_speed") || _sdf.HasElement("wind_angle_deg"))
   {
-    ignmsg << "Overriding 'wind_velocity' using 'wind_speed' and 'wind_angle_deg'\n";
+    gzmsg << "Overriding 'wind_velocity' using 'wind_speed' and 'wind_angle_deg'\n";
 
     // current wind speed and angle
     double windSpeed = this->WindSpeed();
@@ -535,18 +535,18 @@ const std::vector<gz::math::Vector2d>& WaveParameters::Direction_V() const
 void WaveParameters::DebugPrint() const
 {
   // todo(srmainwaring) add missing entries
-  ignmsg << "number:     " << this->dataPtr->number << std::endl;
-  ignmsg << "scale:      " << this->dataPtr->scale << std::endl;
-  ignmsg << "angle:      " << this->dataPtr->angle << std::endl;
-  ignmsg << "period:     " << this->dataPtr->period << std::endl;
-  ignmsg << "amplitude:  " << this->dataPtr->amplitudes << std::endl;
-  ignmsg << "wavenumber: " << this->dataPtr->wavenumbers << std::endl;
-  ignmsg << "omega:      " << this->dataPtr->angularFrequencies << std::endl;
-  ignmsg << "phase:      " << this->dataPtr->phases << std::endl;
-  ignmsg << "steepness:  " << this->dataPtr->steepnesses << std::endl;
+  gzmsg << "number:     " << this->dataPtr->number << std::endl;
+  gzmsg << "scale:      " << this->dataPtr->scale << std::endl;
+  gzmsg << "angle:      " << this->dataPtr->angle << std::endl;
+  gzmsg << "period:     " << this->dataPtr->period << std::endl;
+  gzmsg << "amplitude:  " << this->dataPtr->amplitudes << std::endl;
+  gzmsg << "wavenumber: " << this->dataPtr->wavenumbers << std::endl;
+  gzmsg << "omega:      " << this->dataPtr->angularFrequencies << std::endl;
+  gzmsg << "phase:      " << this->dataPtr->phases << std::endl;
+  gzmsg << "steepness:  " << this->dataPtr->steepnesses << std::endl;
   for (auto&& d : this->dataPtr->directions)
   {
-    ignmsg << "direction:  " << d << std::endl;
+    gzmsg << "direction:  " << d << std::endl;
   }
 }
 

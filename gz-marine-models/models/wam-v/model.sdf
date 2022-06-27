@@ -321,7 +321,7 @@
 
     <!-- Hydrodynamics plugin -->
     <plugin
-        filename="gazebo_marine1-hydrodynamics-system"
+        filename="gz-marine1-hydrodynamics-system"
         name="gz::sim::systems::Hydrodynamics">
         <hydrodynamics>
           <damping_on>1</damping_on>

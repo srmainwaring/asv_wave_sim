@@ -20,7 +20,7 @@ namespace components
 {
   /// \brief This component holds an entity's wavefield.
   using Wavefield = gz::sim::components::Component<marine::WavefieldPtr, class WavefieldTag>;
-  IGN_GAZEBO_REGISTER_COMPONENT("ign_marine_components.Wavefield", Wavefield)
+  GZ_SIM_REGISTER_COMPONENT("gz_marine_components.Wavefield", Wavefield)
 }
 }
 }

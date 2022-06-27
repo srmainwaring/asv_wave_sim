@@ -179,7 +179,7 @@ namespace systems
     // Links
     for (auto& linkEntity : _model.Links(_ecm))
     {
-      IGN_ASSERT(linkEntity != kNullEntity, "Link must be valid");
+      GZ_ASSERT(linkEntity != kNullEntity, "Link must be valid");
       _links.push_back(linkEntity);
       sim::Link link(linkEntity);
 
@@ -188,24 +188,24 @@ namespace systems
       std::vector<std::shared_ptr<cgal::Mesh>> linkMeshes;
       std::vector<Entity> linkCollisions;
 
-      ignmsg << "Hydrodynamics: create collision mesh for link ["
+      gzmsg << "Hydrodynamics: create collision mesh for link ["
           << linkName << "]\n";
       
       // Collisions
       for (auto& collisionEntity : link.Collisions(_ecm))
       {
-        IGN_ASSERT(collisionEntity != kNullEntity, "Collision must be valid");
+        GZ_ASSERT(collisionEntity != kNullEntity, "Collision must be valid");
   
         sim::Collision collision(collisionEntity);
         std::string collisionName(collision.Name(_ecm).value());
-        ignmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
+        gzmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
 
         const components::CollisionElement *coll =
           _ecm.Component<components::CollisionElement>(collisionEntity);
 
         if (!coll)
         {
-          ignerr << "Invalid collision pointer. This shouldn't happen\n";
+          gzerr << "Invalid collision pointer. This shouldn't happen\n";
           continue;
         }
 
@@ -226,21 +226,21 @@ namespace systems
                 meshName,
                 box.Size(),
                 gz::math::Vector2d(1, 1));          
-            IGN_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
+            GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
                 "Failed to create Mesh for Box");
 
             // Create the CGAL surface mesh
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
                 *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
-            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
 
-            ignmsg << "Type:       " << "BOX" << std::endl;
-            ignmsg << "Size:       " << box.Size() << std::endl;
-            ignmsg << "MeshName:   " << meshName << std::endl;            
-            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            gzmsg << "Type:       " << "BOX" << std::endl;
+            gzmsg << "Size:       " << box.Size() << std::endl;
+            gzmsg << "MeshName:   " << meshName << std::endl;            
+            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
             break;
           }
           case sdf::GeometryType::SPHERE:
@@ -258,21 +258,21 @@ namespace systems
                 sphere.Radius(),        // radius
                 8,                      // rings
                 8);                     // segments
-            IGN_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
+            GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
                 "Failed to create Mesh for Sphere");
 
             // Create the CGAL surface mesh
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
                 *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
-            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
 
-            ignmsg << "Type:       " << "SPHERE" << std::endl;
-            ignmsg << "Radius:     " << sphere.Radius() << std::endl;
-            ignmsg << "MeshName:   " << meshName << std::endl;            
-            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            gzmsg << "Type:       " << "SPHERE" << std::endl;
+            gzmsg << "Radius:     " << sphere.Radius() << std::endl;
+            gzmsg << "MeshName:   " << meshName << std::endl;            
+            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
             break;
           }
           case sdf::GeometryType::CYLINDER:
@@ -290,22 +290,22 @@ namespace systems
                 cylinder.Length(),      // length,
                 1,                      // rings
                 32);                    // segments
-            IGN_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
+            GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
                 "Failed to create Mesh for Cylinder");
 
             // Create the CGAL surface mesh
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
                 *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
-            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
 
-            ignmsg << "Type:       " << "CYLINDER" << std::endl;
-            ignmsg << "Radius:     " << cylinder.Radius() << std::endl;
-            ignmsg << "Length:     " << cylinder.Length() << std::endl;
-            ignmsg << "MeshName:   " << meshName << std::endl;            
-            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            gzmsg << "Type:       " << "CYLINDER" << std::endl;
+            gzmsg << "Radius:     " << cylinder.Radius() << std::endl;
+            gzmsg << "Length:     " << cylinder.Length() << std::endl;
+            gzmsg << "MeshName:   " << meshName << std::endl;            
+            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
             break;
           }
           case sdf::GeometryType::PLANE:
@@ -327,17 +327,17 @@ namespace systems
             //   if (mesh)
             //     volume = mesh->Volume();
             //   else
-            //     ignerr << "Unable to load mesh[" << file << "]\n";
+            //     gzerr << "Unable to load mesh[" << file << "]\n";
             // }
             // else
             // {
-            //   ignerr << "Invalid mesh filename[" << file << "]\n";
+            //   gzerr << "Invalid mesh filename[" << file << "]\n";
             // }
 
             // Mesh
             if (!gz::common::MeshManager::Instance()->IsValidFilename(file))
             {
-              ignerr << "Mesh: " << file << " was not loaded"<< std::endl;
+              gzerr << "Mesh: " << file << " was not loaded"<< std::endl;
               return;
             } 
 
@@ -345,20 +345,20 @@ namespace systems
             std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
             marine::MeshTools::MakeSurfaceMesh(
                 *gz::common::MeshManager::Instance()->Load(file), *mesh);
-            IGN_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
             linkMeshes.push_back(mesh);
             linkCollisions.push_back(collisionEntity);
 
-            ignmsg << "Type:       " << "MESH" << std::endl;
-            ignmsg << "Uri:        " << uri << std::endl;
-            ignmsg << "FilePath:   " << filePath << std::endl;
-            ignmsg << "MeshFile:   " << file << std::endl;
-            ignmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+            gzmsg << "Type:       " << "MESH" << std::endl;
+            gzmsg << "Uri:        " << uri << std::endl;
+            gzmsg << "FilePath:   " << filePath << std::endl;
+            gzmsg << "MeshFile:   " << file << std::endl;
+            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
             break;
           }
           default:
           {
-            ignerr << "Unsupported collision geometry["
+            gzerr << "Unsupported collision geometry["
               << static_cast<int>(coll->Data().Geom()->Type()) << "]\n";
             break;
           }
@@ -639,9 +639,9 @@ void Hydrodynamics::Configure(const Entity &_entity,
     EntityComponentManager &_ecm,
     EventManager &_eventMgr)
 {
-  IGN_PROFILE("Hydrodynamics::Configure");
+  GZ_PROFILE("Hydrodynamics::Configure");
 
-  ignmsg << "Hydrodynamics: configuring\n";
+  gzmsg << "Hydrodynamics: configuring\n";
 
   // Get the name of the world
   if (this->dataPtr->worldName.empty())
@@ -661,7 +661,7 @@ void Hydrodynamics::Configure(const Entity &_entity,
   this->dataPtr->model = Model(_entity);
   if (!this->dataPtr->model.Valid(_ecm))
   {
-    ignerr << "The Hydrodynamics system should be attached to a model entity. "
+    gzerr << "The Hydrodynamics system should be attached to a model entity. "
            << "Failed to initialize." << std::endl;
     return;
   }
@@ -701,7 +701,7 @@ void Hydrodynamics::PreUpdate(
   const gz::sim::UpdateInfo &_info,
   gz::sim::EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("Hydrodynamics::PreUpdate");
+  GZ_PROFILE("Hydrodynamics::PreUpdate");
 
   /// \todo(anyone) support reset / rewind
   if (_info.dt < std::chrono::steady_clock::duration::zero())
@@ -781,7 +781,7 @@ bool HydrodynamicsPrivate::InitWavefield(EntityComponentManager &_ecm)
 /////////////////////////////////////////////////
 bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 {
-  ignmsg << "Hydrodynamics: initialise physics\n";
+  gzmsg << "Hydrodynamics: initialise physics\n";
 
   /// \todo add checks for a valid wavefield and lock the waek_ptr
 
@@ -792,8 +792,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
   std::vector<std::vector<cgal::MeshPtr>> meshes;
   std::vector<std::vector<Entity>> collisions;
   CreateCollisionMeshes(_ecm, this->model, links, meshes, collisions);
-  ignmsg << "Hydrodynamics: links:  " << links.size() << std::endl;
-  ignmsg << "Hydrodynamics: meshes: " << meshes.size() << std::endl;
+  gzmsg << "Hydrodynamics: links:  " << links.size() << std::endl;
+  gzmsg << "Hydrodynamics: meshes: " << meshes.size() << std::endl;
 
   for (size_t i=0; i<links.size(); ++i)
   {
@@ -812,9 +812,9 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     hd->link = sim::Link(links[i]);
     hd->link.EnableVelocityChecks(_ecm);
 
-    ignmsg << "Hydrodynamics: initialising link ["
+    gzmsg << "Hydrodynamics: initialising link ["
         << hd->link.Name(_ecm).value() << "]\n";
-    ignmsg << "Hydrodynamics: link has ["
+    gzmsg << "Hydrodynamics: link has ["
         << meshCount << "] collision meshes\n";
 
     /// \todo check that the link has valid pose components
@@ -841,8 +841,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // The link pose is required for the water patch, the CoM pose for dynamics.
     // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
     gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
-    ignmsg << "Hydrodynamics: link world pose\n";
-    ignmsg << linkPose << "\n";
+    gzmsg << "Hydrodynamics: link world pose\n";
+    gzmsg << linkPose << "\n";
 
     /// \todo subtle difference here - inertial pose includes
     /// any rotation of the inertial matrix where CoG pose does not.
@@ -850,15 +850,15 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // gz::math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();    
     auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
     gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();
-    ignmsg << "Hydrodynamics: link world CoM pose\n";
-    ignmsg << linkCoMPose << "\n";
+    gzmsg << "Hydrodynamics: link world CoM pose\n";
+    gzmsg << linkCoMPose << "\n";
 
     // Water patch grid
     /// \todo fix hardcoded patch size. CollisionBoundingBox is not currently available 
     // auto boundingBox = hd->link->CollisionBoundingBox();
     // double patchSize = 2.2 * boundingBox.Size().Length();
     double patchSize = 20.0;
-    ignmsg << "Hydrodynamics: set water patch size: "
+    gzmsg << "Hydrodynamics: set water patch size: "
         << patchSize << std::endl;
     std::shared_ptr<marine::Grid> initWaterPatch(
         new marine::Grid({patchSize, patchSize}, { 4, 4 }));
@@ -886,7 +886,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       std::shared_ptr<cgal::Mesh> initLinkMesh = meshes[i][j];
       std::shared_ptr<cgal::Mesh> linkMesh =
           std::make_shared<cgal::Mesh>(*initLinkMesh);
-      IGN_ASSERT(linkMesh != nullptr,
+      GZ_ASSERT(linkMesh != nullptr,
           "Invalid Mesh returned from CreateCollisionMeshes");
 
       auto linkCollision = collisions[i][j];
@@ -901,8 +901,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       ApplyPose(collisionPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
       
       // DEBUG_INFO
-      // ignmsg << "Hydrodynamics: collision pose\n";
-      // ignmsg << collisionPose << "\n";
+      // gzmsg << "Hydrodynamics: collision pose\n";
+      // gzmsg << collisionPose << "\n";
 
       // Initialise Hydrodynamics
       hd->hydrodynamics[j].reset(
@@ -915,7 +915,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     }
   }
 
-  ignmsg << "Hydrodynamics: done initialise physics\n";
+  gzmsg << "Hydrodynamics: done initialise physics\n";
   return true;
 }
 
@@ -939,7 +939,7 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
   double waveHeight{0.0};
   this->wavefield.lock()->Height(point, waveHeight);
 
-  // ignmsg << "[" << simTime << "] : " << waveHeight << "\n";  
+  // gzmsg << "[" << simTime << "] : " << waveHeight << "\n";  
 
   ////////// END TESTING
 
@@ -951,8 +951,8 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
     gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
     // DEBUG_INFO
-    // ignmsg << "Hydrodynamics: link world pose\n";
-    // ignmsg << linkPose << "\n";
+    // gzmsg << "Hydrodynamics: link world pose\n";
+    // gzmsg << linkPose << "\n";
 
     /// \todo WorldCoGPose is currently not available
     // gz::math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
@@ -960,8 +960,8 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
     gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();;
     // DEBUG_INFO
-    // ignmsg << "Hydrodynamics: link world CoM pose\n";
-    // ignmsg << linkCoMPose << "\n";
+    // gzmsg << "Hydrodynamics: link world CoM pose\n";
+    // gzmsg << linkCoMPose << "\n";
 
     // Update water patch
     hd->wavefieldSampler->ApplyPose(linkPose);
@@ -989,22 +989,22 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       ApplyPose(collisionPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
 
       // DEBUG_INFO
-      // ignmsg << "Hydrodynamics: collision pose\n";
-      // ignmsg << collisionPose << "\n";
+      // gzmsg << "Hydrodynamics: collision pose\n";
+      // gzmsg << collisionPose << "\n";
 
       // Update hydrodynamics
       hd->hydrodynamics[j]->Update(
         hd->wavefieldSampler, linkCoMPose, linVelocity, angVelocity);
 
       // Apply forces to the Link
-      auto force = marine::ToIgn(hd->hydrodynamics[j]->Force());
+      auto force = marine::ToGz(hd->hydrodynamics[j]->Force());
       if (force.IsFinite()) 
       {
         hd->link.AddWorldForce(_ecm, force);
       }
 
       // Apply torques to the link
-      auto torque = marine::ToIgn(hd->hydrodynamics[j]->Torque());
+      auto torque = marine::ToGz(hd->hydrodynamics[j]->Torque());
       if (torque.IsFinite()) 
       {
         hd->link.AddWorldWrench(_ecm, gz::math::Vector3d::Zero, torque);
@@ -1014,12 +1014,12 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       nSubTri += hd->hydrodynamics[j]->GetSubmergedTriangles().size();
 
       // DEBUG_INFO
-      // ignmsg << "Link:         " << hd->link->GetName() << std::endl;
-      // ignmsg << "Position:     " << linkPose.Pos() << std::endl;
-      // ignmsg << "Rotation:     " << linkPose.Rot().Euler() << std::endl;
-      // ignmsg << "SubTriCount:  " << nSubTri << std::endl;
-      // ignmsg << "Force:        " << force << std::endl;
-      // ignmsg << "Torque:       " << torque << std::endl;
+      // gzmsg << "Link:         " << hd->link->GetName() << std::endl;
+      // gzmsg << "Position:     " << linkPose.Pos() << std::endl;
+      // gzmsg << "Rotation:     " << linkPose.Rot().Euler() << std::endl;
+      // gzmsg << "SubTriCount:  " << nSubTri << std::endl;
+      // gzmsg << "Force:        " << force << std::endl;
+      // gzmsg << "Torque:       " << torque << std::endl;
     }
   }
 }
@@ -1207,9 +1207,9 @@ void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
         for (size_t k=0; k<2; ++k)
         {
           cgal::Triangle tri = grid.GetTriangle(ix, iy, k);
-          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToIgn(tri[0]));
-          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToIgn(tri[1]));
-          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToIgn(tri[2]));
+          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToGz(tri[0]));
+          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToGz(tri[1]));
+          gz::msgs::Set(hd->waterPatchMsg.add_point(), marine::ToGz(tri[2]));
         }
       }
     }
@@ -1237,8 +1237,8 @@ void HydrodynamicsPrivate::UpdateWaterlineMarkers(
       }
       for (auto&& line : hd->hydrodynamics[j]->GetWaterline())
       {
-        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), marine::ToIgn(line.point(0)));
-        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), marine::ToIgn(line.point(1)));
+        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), marine::ToGz(line.point(0)));
+        gz::msgs::Set(hd->waterlineMsgs[j].add_point(), marine::ToGz(line.point(1)));
       }
       this->node.Request(topicName, hd->waterlineMsgs[j]);
     }
@@ -1265,9 +1265,9 @@ void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
       }
       for (auto&& tri : hd->hydrodynamics[j]->GetSubmergedTriangles())
       {
-        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToIgn(tri[0]));
-        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToIgn(tri[1]));
-        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToIgn(tri[2]));
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToGz(tri[0]));
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToGz(tri[1]));
+        gz::msgs::Set(hd->underwaterSurfaceMsgs[j].add_point(), marine::ToGz(tri[2]));
       }
       this->node.Request(topicName, hd->underwaterSurfaceMsgs[j]);
     }
@@ -1316,10 +1316,10 @@ void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
 }
 
 //////////////////////////////////////////////////
-IGNITION_ADD_PLUGIN(Hydrodynamics,
-                    gz::sim::System,
-                    Hydrodynamics::ISystemConfigure,
-                    Hydrodynamics::ISystemPreUpdate)
+GZ_ADD_PLUGIN(Hydrodynamics,
+              gz::sim::System,
+              Hydrodynamics::ISystemConfigure,
+              Hydrodynamics::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(Hydrodynamics,
-  "gz::sim::systems::Hydrodynamics")
+GZ_ADD_PLUGIN_ALIAS(Hydrodynamics,
+                    "gz::sim::systems::Hydrodynamics")

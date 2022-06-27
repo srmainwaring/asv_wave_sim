@@ -282,7 +282,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   }
   else
   {
-    ignerr << "Invalid wave algorithm type: "
+    gzerr << "Invalid wave algorithm type: "
         << _params->Algorithm() << "\n";
   }
 
@@ -334,13 +334,13 @@ void OceanTilePrivate<Vector3>::SetWindVelocity(double _ux, double _uy)
 template <typename Vector3>
 void OceanTilePrivate<Vector3>::Create()
 {
-  ignmsg << "OceanTile: create tile\n";
-  ignmsg << "Resolution:    " << mResolution  << "\n";
-  ignmsg << "RowLength:     " << mRowLength   << "\n";
-  ignmsg << "NumVertices:   " << mNumVertices << "\n";
-  ignmsg << "NumFaces:      " << mNumFaces    << "\n";
-  ignmsg << "TileSize:      " << mTileSize    << "\n";
-  ignmsg << "Spacing:       " << mSpacing     << "\n";
+  gzmsg << "OceanTile: create tile\n";
+  gzmsg << "Resolution:    " << mResolution  << "\n";
+  gzmsg << "RowLength:     " << mRowLength   << "\n";
+  gzmsg << "NumVertices:   " << mNumVertices << "\n";
+  gzmsg << "NumFaces:      " << mNumFaces    << "\n";
+  gzmsg << "TileSize:      " << mTileSize    << "\n";
+  gzmsg << "Spacing:       " << mSpacing     << "\n";
 
   // Grid dimensions
   const size_t nx = this->mResolution;
@@ -358,7 +358,7 @@ void OceanTilePrivate<Vector3>::Create()
   const double xTex = texScale * Lx / nx;
   const double yTex = texScale * Ly / ny;
 
-  ignmsg << "OceanTile: calculating vertices\n";
+  gzmsg << "OceanTile: calculating vertices\n";
   // Vertices - (N+1) vertices in each row / column
   for (size_t iy=0; iy<=ny; ++iy)
   {
@@ -377,7 +377,7 @@ void OceanTilePrivate<Vector3>::Create()
     }
   }
 
-  ignmsg << "OceanTile: calculating indices\n";
+  gzmsg << "OceanTile: calculating indices\n";
   // Indices
   for (size_t iy=0; iy<ny; ++iy)
   {
@@ -395,7 +395,7 @@ void OceanTilePrivate<Vector3>::Create()
     }
   }
 
-  ignmsg << "OceanTile: assigning texture coords\n";
+  gzmsg << "OceanTile: assigning texture coords\n";
   // Texture Coordinates
   mTangents.assign(mVertices.size(), vector::Zero<Vector3>);
   mBitangents.assign(mVertices.size(), vector::Zero<Vector3>);
@@ -425,7 +425,7 @@ gz::common::Mesh * OceanTilePrivate<Vector3>::CreateMesh()
 template <>
 void OceanTilePrivate<gz::math::Vector3d>::ComputeNormals()
 {
-  // ignmsg << "OceanTile: compute normals\n";
+  // gzmsg << "OceanTile: compute normals\n";
 
   // 0. Reset normals.
   mNormals.assign(mVertices.size(), gz::math::Vector3d::Zero);
@@ -456,7 +456,7 @@ void OceanTilePrivate<gz::math::Vector3d>::ComputeNormals()
       normal.Normalize();
   }
 
-  // ignmsg << "OceanTile: done compute normals\n";
+  // gzmsg << "OceanTile: done compute normals\n";
 }
 
 //////////////////////////////////////////////////
@@ -464,7 +464,7 @@ template <>
 void OceanTilePrivate<cgal::Point3>::ComputeNormals()
 {
   // Not used
-  ignerr << "No implementation"
+  gzerr << "No implementation"
       << " of OceanTilePrivate<cgal::Point3>::ComputeNormals\n";
 }
 
@@ -472,22 +472,22 @@ void OceanTilePrivate<cgal::Point3>::ComputeNormals()
 template <typename Vector3>
 void OceanTilePrivate<Vector3>::ComputeTangentSpace()
 {
-  // ignmsg << "OceanTile: compute tangent space\n";
+  // gzmsg << "OceanTile: compute tangent space\n";
 
   ComputeTBN(mVertices, mTexCoords, mFaces, mTangents, mBitangents, mNormals);
 
 #if DEBUG
   for (size_t i=0; i<std::min(static_cast<size_t>(20), mVertices.size()) ; ++i)
   {
-    ignmsg << "V["  << i << "]:  "  << mVertices[i]   << "\n";
-    ignmsg << "UV[" << i << "]: "   << mTexCoords[i]  << "\n"
-    ignmsg << "T["  << i << "]:  "  << mTangents[i]   << "\n";
-    ignmsg << "B["  << i << "]:  "  << mBitangents[i] << "\n";
-    ignmsg << "N["  << i << "]:  "  << mNormals[i]    << "\n";
+    gzmsg << "V["  << i << "]:  "  << mVertices[i]   << "\n";
+    gzmsg << "UV[" << i << "]: "   << mTexCoords[i]  << "\n"
+    gzmsg << "T["  << i << "]:  "  << mTangents[i]   << "\n";
+    gzmsg << "B["  << i << "]:  "  << mBitangents[i] << "\n";
+    gzmsg << "N["  << i << "]:  "  << mNormals[i]    << "\n";
   }
 #endif
 
-  // ignmsg << "OceanTile: done compute tangent space\n";
+  // gzmsg << "OceanTile: done compute tangent space\n";
 }
 
 //////////////////////////////////////////////////
@@ -541,7 +541,7 @@ void OceanTilePrivate<cgal::Point3>::ComputeTBN(
     cgal::Point3& _normal)
 {
   // Not used
-  ignerr << "No implementation"
+  gzerr << "No implementation"
       << " of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
 }
 
@@ -612,7 +612,7 @@ void OceanTilePrivate<cgal::Point3>::ComputeTBN(
     std::vector<cgal::Point3>& _normals)
 {
   // Not used
-  ignerr << "No implementation " 
+  gzerr << "No implementation " 
       << " of OceanTilePrivate<cgal::Point3>::ComputeTBN\n";
 }
 
@@ -847,11 +847,11 @@ gz::common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(
     bool _reverseOrientation)
 {
   // Logging
-  ignmsg << "OceanTile: creating mesh\n";
+  gzmsg << "OceanTile: creating mesh\n";
   std::unique_ptr<gz::common::Mesh> mesh = std::make_unique<gz::common::Mesh>();
   mesh->SetName(_name);
 
-  ignmsg << "OceanTile: create submesh\n";
+  gzmsg << "OceanTile: create submesh\n";
   std::unique_ptr<gz::common::SubMeshWithTangents> submesh(
       new gz::common::SubMeshWithTangents());
 
@@ -901,7 +901,7 @@ gz::common::Mesh * OceanTilePrivate<Vector3>::CreateMesh(
   // move
   mesh->AddSubMesh(std::move(submesh));
 
-  ignmsg << "OceanTile: mesh created." << std::endl;
+  gzmsg << "OceanTile: mesh created." << std::endl;
   return mesh.release();
 }
 

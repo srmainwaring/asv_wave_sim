@@ -2,7 +2,7 @@
 <sdf version="1.6">
   <model name="shipping_container">        
     <plugin
-        filename="gazebo_marine1-hydrodynamics-system"
+        filename="gz-marine1-hydrodynamics-system"
         name="gz::sim::systems::Hydrodynamics">
 
         <markers>

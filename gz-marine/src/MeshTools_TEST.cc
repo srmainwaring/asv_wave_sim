@@ -140,17 +140,17 @@ void TestExportWaveMesh()
     cgal::Triangle tri  = Geometry::MakeTriangle(mesh, face);
     cgal::Vector3 normal = Geometry::Normal(tri);
 
-    gz::math::Vector3d ignP0(ToIgn(tri[0]));
-    gz::math::Vector3d ignP1(ToIgn(tri[1]));
-    gz::math::Vector3d ignP2(ToIgn(tri[2]));
-    gz::math::Vector3d ignNormal(ToIgn(normal));
+    gz::math::Vector3d gzP0(ToGz(tri[0]));
+    gz::math::Vector3d gzP1(ToGz(tri[1]));
+    gz::math::Vector3d gzP2(ToGz(tri[2]));
+    gz::math::Vector3d gzNormal(ToGZ(normal));
 
-    gzSubMesh->AddVertex(ignP0);
-    gzSubMesh->AddVertex(ignP1);
-    gzSubMesh->AddVertex(ignP2);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
+    gzSubMesh->AddVertex(gzP0);
+    gzSubMesh->AddVertex(gzP1);
+    gzSubMesh->AddVertex(gzP2);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
 
     gzSubMesh->AddIndex(iv++);
     gzSubMesh->AddIndex(iv++);
@@ -199,17 +199,17 @@ void TestExportGridMesh()
     cgal::Triangle tri  = Geometry::MakeTriangle(mesh, face);
     cgal::Vector3 normal = Geometry::Normal(tri);
 
-    gz::math::Vector3d ignP0(ToIgn(tri[0]));
-    gz::math::Vector3d ignP1(ToIgn(tri[1]));
-    gz::math::Vector3d ignP2(ToIgn(tri[2]));
-    gz::math::Vector3d ignNormal(ToIgn(normal));
+    gz::math::Vector3d gzP0(ToGz(tri[0]));
+    gz::math::Vector3d gzP1(ToGz(tri[1]));
+    gz::math::Vector3d gzP2(ToGz(tri[2]));
+    gz::math::Vector3d gzNormal(ToGz(normal));
 
-    gzSubMesh->AddVertex(ignP0);
-    gzSubMesh->AddVertex(ignP1);
-    gzSubMesh->AddVertex(ignP2);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
-    gzSubMesh->AddNormal(ignNormal);
+    gzSubMesh->AddVertex(gzP0);
+    gzSubMesh->AddVertex(gzP1);
+    gzSubMesh->AddVertex(gzP2);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
+    gzSubMesh->AddNormal(gzNormal);
 
     gzSubMesh->AddIndex(iv++);
     gzSubMesh->AddIndex(iv++);

@@ -5,7 +5,7 @@
 #              [PRIVATE_LINK_LIBS <libraries...>]
 #              [PRIVATE_COMPILE_DEFS <definitions...>])
 #
-# Add a system component to Ignition Gazebo.
+# Add a system component to Gazebo.
 #
 # <system> Required. Name of the system.
 #
@@ -44,7 +44,7 @@ function(gz_add_system system_name)
   endif()
 
 
-  ign_add_component(${system_name}
+  gz_add_component(${system_name}
     SOURCES ${sources}
     GET_TARGET_NAME system_target
     INDEPENDENT_FROM_PROJECT_LIB TRUE
@@ -56,7 +56,7 @@ function(gz_add_system system_name)
       ${PROJECT_LIBRARY_TARGET_NAME}
     PRIVATE
       ${gz_add_system_PRIVATE_LINK_LIBS}
-      ignition-plugin${IGN_PLUGIN_VER}::register
+      gz-plugin${GZ_PLUGIN_VER}::register
   )
 
   if(gz_add_system_PRIVATE_COMPILE_DEFS)
@@ -67,10 +67,10 @@ function(gz_add_system system_name)
   endif()
 
   # # Note that plugins are currently being installed in 2 places. /lib and the plugin dir
-  # install(TARGETS ${system_target} DESTINATION ${IGNITION_GAZEBO_PLUGIN_INSTALL_DIR})
+  # install(TARGETS ${system_target} DESTINATION ${GZ_SIM_PLUGIN_INSTALL_DIR})
 
-  # # The library created by `ign_add_component` includes the ign-gazebo version
-  # # (i.e. libignition-gazebo1-name-system.so), but for portability of SDF
+  # # The library created by `gz_add_component` includes the gz-sim version
+  # # (i.e. libgz-sim-name-system.so), but for portability of SDF
   # # files, we also install an unversioned symlink into the same versioned folder.
   # set(versioned ${CMAKE_SHARED_LIBRARY_PREFIX}${system_target}${CMAKE_SHARED_LIBRARY_SUFFIX})
   # set(unversioned ${CMAKE_SHARED_LIBRARY_PREFIX}${PROJECT_NAME_NO_VERSION_LOWER}-${system_name}${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -83,7 +83,7 @@ function(gz_add_system system_name)
   # else()
   #   file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
   #   EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E create_symlink ${versioned} ${unversioned} WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
-  #   INSTALL(FILES ${PROJECT_BINARY_DIR}/lib/${unversioned} DESTINATION ${IGNITION_GAZEBO_PLUGIN_INSTALL_DIR})
+  #   INSTALL(FILES ${PROJECT_BINARY_DIR}/lib/${unversioned} DESTINATION ${GZ_SIM_PLUGIN_INSTALL_DIR})
   # endif()
 endfunction()
 

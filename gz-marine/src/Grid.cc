@@ -294,19 +294,19 @@ namespace marine
   {
     auto&& mesh = *this->data->mesh;
 
-    ignmsg << "Center " << std::endl;    
-    ignmsg << "c0:  " << this->data->center << std::endl;
+    gzmsg << "Center " << std::endl;    
+    gzmsg << "c0:  " << this->data->center << std::endl;
 
-    ignmsg << "Vertices " << std::endl;    
+    gzmsg << "Vertices " << std::endl;    
     for(auto&& vertex : mesh.vertices())
     {
-      ignmsg << vertex << ": " << mesh.point(vertex) << std::endl;
+      gzmsg << vertex << ": " << mesh.point(vertex) << std::endl;
     }
-    ignmsg << "Faces " << std::endl;
+    gzmsg << "Faces " << std::endl;
     for(auto&& face : mesh.faces())
     {
       cgal::Triangle tri = Geometry::MakeTriangle(mesh, face);
-      ignmsg << face << ": " << tri << std::endl;
+      gzmsg << face << ": " << tri << std::endl;
     }
   }
 
@@ -351,13 +351,13 @@ namespace marine
     size_t k = _y > (m * _x + c) ? 1 : 0;
 
     // @DEBUG_INFO
-    // ignmsg << "ix: " << ix << std::endl;
-    // ignmsg << "iy: " << iy << std::endl;
-    // ignmsg << "x0: " << x0 << std::endl;
-    // ignmsg << "y0: " << y0 << std::endl;
-    // ignmsg << "m:  " << m  << std::endl;
-    // ignmsg << "c:  " << c  << std::endl;
-    // ignmsg << "k:  " << k  << std::endl;
+    // gzmsg << "ix: " << ix << std::endl;
+    // gzmsg << "iy: " << iy << std::endl;
+    // gzmsg << "x0: " << x0 << std::endl;
+    // gzmsg << "y0: " << y0 << std::endl;
+    // gzmsg << "m:  " << m  << std::endl;
+    // gzmsg << "c:  " << c  << std::endl;
+    // gzmsg << "k:  " << k  << std::endl;
 
     _index[0] = ix;
     _index[1] = iy;

@@ -4,7 +4,7 @@
     <static>true</static>
 
     <plugin
-        filename="gazebo_marine1-waves-model-system"
+        filename="gz-marine1-waves-model-system"
         name="gz::sim::systems::WavesModel">
       <static>0</static>
       <update_rate>30</update_rate>
@@ -47,7 +47,7 @@
 
         <!-- \todo remove duplicate params; populate from service instead -->
         <plugin
-            filename="gazebo_marine1-waves-visual-system"
+            filename="gz-marine1-waves-visual-system"
             name="gz::sim::systems::WavesVisual">
           <static>0</static>
           <mesh_deformation_method>DYNAMIC_GEOMETRY</mesh_deformation_method>

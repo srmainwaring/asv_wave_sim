@@ -154,7 +154,7 @@
           </material>
 
           <plugin
-              filename="gazebo_marine1-dynamic-geometry-system"
+              filename="gz-marine1-dynamic-geometry-system"
               name="gz::sim::systems::DynamicGeometry">
           </plugin>
 

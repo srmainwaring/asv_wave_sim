@@ -1,17 +1,17 @@
 
-set(IGNITION-RENDERING_LIBRARY_DIRS
-  ${IGNITION-RENDERING_INCLUDE_DIRS}/../../../lib/ign-rendering-${IGN_RENDERING_VER}/engine-plugins)
+set(GZ-RENDERING_LIBRARY_DIRS
+  ${GZ-RENDERING_INCLUDE_DIRS}/../../../lib/ign-rendering-${GZ_RENDERING_VER}/engine-plugins)
 
-link_directories(${IGNITION-RENDERING_LIBRARY_DIRS})
+link_directories(${GZ-RENDERING_LIBRARY_DIRS})
 
 gz_add_system(dynamic-geometry
   SOURCES
     DynamicGeometry.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
-    ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-    ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
-    ignition-rendering${IGN_RENDERING_VER}-ogre2
-    ignition-gazebo${IGN_GAZEBO_VER}::ignition-gazebo${IGN_GAZEBO_VER}
+    gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+    gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
+    gz-rendering${GZ_RENDERING_VER}-ogre2
+    gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
     IgnOGRE2::IgnOGRE2
 )

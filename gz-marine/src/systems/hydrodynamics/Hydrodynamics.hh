@@ -39,7 +39,7 @@ namespace systems
   /// 
   /// /code
   /// <plugin name="gz::sim::systems::Hydrodynamics"
-  ///         filename="gazebo_marine1-hydrodynamics-system">
+  ///         filename="gz-marine1-hydrodynamics-system">
   ///
   ///   <!-- Hydrodynamics -->
   ///   <hydrodynamics>

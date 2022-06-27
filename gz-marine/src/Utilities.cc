@@ -38,13 +38,13 @@ T SdfParam(const sdf::Element& _sdf, const std::string &_paramName, const T _def
 {
   if (!_sdf.HasElement(_paramName))
   {
-    ignmsg << "Parameter <" << _paramName << "> not found: " 
+    gzmsg << "Parameter <" << _paramName << "> not found: " 
       <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
 
   T val = _sdf.Get<T>(_paramName);
-  ignmsg << "Parameter found - setting <" << _paramName 
+  gzmsg << "Parameter found - setting <" << _paramName 
     << "> to <" << val << ">." << std::endl;
   return val;
 }
@@ -142,7 +142,7 @@ T MsgParam(const gz::msgs::Param_V& _msg, const std::string &_paramName, const T
   if (it == std::end(_msg.param()))
   {
   // @DEBUG_INFO
-    // ignmsg << "Parameter <" << _paramName << "> not found: " 
+    // gzmsg << "Parameter <" << _paramName << "> not found: " 
     //   <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
@@ -152,7 +152,7 @@ T MsgParam(const gz::msgs::Param_V& _msg, const std::string &_paramName, const T
   T val = MsgParamGetValue<T>(param);
 
   // @DEBUG_INFO
-  // ignmsg << "Parameter found - setting <" << _paramName 
+  // gzmsg << "Parameter found - setting <" << _paramName 
   //   << "> to <" << val << ">." << std::endl;
   return val;
 }

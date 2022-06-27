@@ -69,7 +69,7 @@ namespace marine
   Wavefield::Wavefield(const std::string &_worldName) :
     dataPtr(new WavefieldPrivate())
   {
-    ignmsg << "Constructing Wavefield..." <<  std::endl;
+    gzmsg << "Constructing Wavefield..." <<  std::endl;
 
     // Subscribe to wave parameter updates
     std::string topic("/world/" + _worldName + "/waves");
@@ -77,14 +77,14 @@ namespace marine
         topic, &WavefieldPrivate::OnWaveMsg, this->dataPtr.get());
 
     // Wave parameters
-    ignmsg << "Creating WaveParameters." <<  std::endl;
+    gzmsg << "Creating WaveParameters." <<  std::endl;
     auto params = std::make_shared<WaveParameters>();
     this->SetParameters(params);
 
     // Update
     this->Update(0.0);
 
-    ignmsg << "Done constructing Wavefield." <<  std::endl;
+    gzmsg << "Done constructing Wavefield." <<  std::endl;
   }
 
   /////////////////////////////////////////////////
@@ -126,14 +126,14 @@ namespace marine
     double v = this->dataPtr->params->WindVelocity().Y();
 
     // OceanTile
-    ignmsg << "Creating OceanTile." <<  std::endl;
+    gzmsg << "Creating OceanTile." <<  std::endl;
     this->dataPtr->oceanTile.reset(new physics::OceanTile(
         this->dataPtr->params, false));
     this->dataPtr->oceanTile->SetWindVelocity(u, v);
     this->dataPtr->oceanTile->Create();
 
     // Point Locator
-    ignmsg << "Creating triangulated grid." <<  std::endl;
+    gzmsg << "Creating triangulated grid." <<  std::endl;
     this->dataPtr->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
   }
 
@@ -156,7 +156,7 @@ namespace marine
   {
     std::lock_guard<std::recursive_mutex> lock(this->mutex);
 
-    // ignmsg << _msg.DebugString();
+    // gzmsg << _msg.DebugString();
 
     // // Get parameters from message
     // double wind_angle = 0.0;

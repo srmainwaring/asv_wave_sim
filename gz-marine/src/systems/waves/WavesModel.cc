@@ -110,14 +110,14 @@ void WavesModel::Configure(const Entity &_entity,
     EntityComponentManager &_ecm,
     EventManager &_eventMgr)
 {
-  IGN_PROFILE("WavesModel::Configure");
+  GZ_PROFILE("WavesModel::Configure");
 
-  ignmsg << "WavesModel: configuring\n";
+  gzmsg << "WavesModel: configuring\n";
 
   this->dataPtr->model = Model(_entity);
   if (!this->dataPtr->model.Valid(_ecm))
   {
-    ignerr << "The WavesModel system should be attached to a model entity. "
+    gzerr << "The WavesModel system should be attached to a model entity. "
            << "Failed to initialize." << std::endl;
     return;
   }
@@ -129,7 +129,7 @@ void WavesModel::PreUpdate(
   const UpdateInfo &_info,
   EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("WavesModel::PreUpdate");
+  GZ_PROFILE("WavesModel::PreUpdate");
 
   // std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // this->dataPtr->currentSimTime = _info.simTime;
@@ -211,7 +211,7 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
       marine::components::Wavefield());
   comp->Data() = this->wavefield;
 
-  ignmsg << "WavesModel: created wavefield in entity ["
+  gzmsg << "WavesModel: created wavefield in entity ["
       << this->wavefieldEntity << "]\n";
 
   // fetch the wavefield back to check...
@@ -223,7 +223,7 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
   }
   else
   {
-    ignmsg << "WavesModel: found wavefield with params" <<  std::endl;
+    gzmsg << "WavesModel: found wavefield with params" <<  std::endl;
     this->waveParams->DebugPrint();
   }
 
@@ -248,10 +248,10 @@ void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
 }
 
 //////////////////////////////////////////////////
-IGNITION_ADD_PLUGIN(WavesModel,
+GZ_ADD_PLUGIN(WavesModel,
                     gz::sim::System,
                     WavesModel::ISystemConfigure,
                     WavesModel::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(WavesModel,
+GZ_ADD_PLUGIN_ALIAS(WavesModel,
   "gz::sim::systems::WavesModel")

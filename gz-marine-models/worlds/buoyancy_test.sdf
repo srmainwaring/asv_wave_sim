@@ -111,7 +111,7 @@
     <model name="buoy_1">
       <pose>0 0 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
+          filename="gz-marine1-hydrodynamics-system"
           name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">
@@ -161,7 +161,7 @@
     <model name="buoy_2">
       <pose>0 2 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
+          filename="gz-marine1-hydrodynamics-system"
           name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">
@@ -211,7 +211,7 @@
     <model name="buoy_3">
       <pose>0 4 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
+          filename="gz-marine1-hydrodynamics-system"
           name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">
@@ -261,7 +261,7 @@
     <model name="buoy_4">
       <pose>0 6 -0.5 0 0 0</pose>
       <plugin
-          filename="gazebo_marine1-hydrodynamics-system"
+          filename="gz-marine1-hydrodynamics-system"
           name="gz::sim::systems::Hydrodynamics">
       </plugin>
       <link name="base_link">

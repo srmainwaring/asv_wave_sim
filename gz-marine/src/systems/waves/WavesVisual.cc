@@ -155,7 +155,7 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
       // check if invalid mesh
       if (!mesh->ogreItem)
       {
-        ignerr << "Failed to get Ogre item for [" << _desc.meshName << "]"
+        gzerr << "Failed to get Ogre item for [" << _desc.meshName << "]"
                 << std::endl;
         return nullptr;
       }
@@ -181,10 +181,10 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
       }
 
       std::string name = this->MeshName(_desc);
-      ignmsg << "Get Ogre::SceneManager\n";
+      gzmsg << "Get Ogre::SceneManager\n";
       Ogre::SceneManager *sceneManager = this->scene->OgreSceneManager();
 
-      ignmsg << "Check for v2 mesh\n";
+      gzmsg << "Check for v2 mesh\n";
       // check if a v2 mesh already exists
       Ogre::MeshPtr mesh =
           Ogre::MeshManager::getSingleton().getByName(name);
@@ -192,25 +192,25 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
       // if not, it probably has not been imported from v1 yet
       if (!mesh)
       {
-        ignmsg << "Check for v1 mesh\n";
+        gzmsg << "Check for v1 mesh\n";
         Ogre::v1::MeshPtr v1Mesh =
             Ogre::v1::MeshManager::getSingleton().getByName(name);
         if (!v1Mesh)
         {
-          ignerr << "Did not find v1 mesh [" << name << "]\n";
+          gzerr << "Did not find v1 mesh [" << name << "]\n";
           return nullptr;
         }
 
         // examine v1 mesh properties
         v1Mesh->load();
-        ignmsg << "v1 mesh: isLoaded: " << v1Mesh->isLoaded() << "\n";
+        gzmsg << "v1 mesh: isLoaded: " << v1Mesh->isLoaded() << "\n";
 
-        ignmsg << "Creating v2 mesh\n";
+        gzmsg << "Creating v2 mesh\n";
         // create v2 mesh from v1
         mesh = Ogre::MeshManager::getSingleton().createManual(
             name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-        ignmsg << "Importing v2 mesh\n";
+        gzmsg << "Importing v2 mesh\n";
         mesh->importV1(v1Mesh.get(), false, true, true);
         this->ogreMeshes.push_back(name);
       }
@@ -231,13 +231,13 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
     {
       if (!_desc.mesh && _desc.meshName.empty())
       {
-        ignerr << "Invalid mesh-descriptor, no mesh specified" << std::endl;
+        gzerr << "Invalid mesh-descriptor, no mesh specified" << std::endl;
         return false;
       }
 
       if (!_desc.mesh)
       {
-        ignerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
+        gzerr << "Cannot load null mesh [" << _desc.meshName << "]" << std::endl;
         return false;
         // Override MeshDescriptor behaviour as we're not using gz::common::Mesh
         // return true;
@@ -245,7 +245,7 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
       if (_desc.mesh->SubMeshCount() == 0)
       {
-        ignerr << "Cannot load mesh with zero sub-meshes" << std::endl;
+        gzerr << "Cannot load mesh with zero sub-meshes" << std::endl;
         return false;
       }
 
@@ -475,9 +475,9 @@ void WavesVisual::Configure(const Entity &_entity,
     EntityComponentManager &_ecm,
     EventManager &_eventMgr)
 {
-  IGN_PROFILE("WavesVisual::Configure");
+  GZ_PROFILE("WavesVisual::Configure");
 
-  ignmsg << "WavesVisual: configuring\n";
+  gzmsg << "WavesVisual: configuring\n";
 
   // Ugly, but needed because the sdf::Element::GetElement is not a const
   // function and _sdf is a const shared pointer to a const sdf::Element.
@@ -524,7 +524,7 @@ void WavesVisual::Configure(const Entity &_entity,
       if (!paramElem->HasElement("shader") ||
           !paramElem->HasElement("name"))
       {
-        ignerr << "<param> must have <shader> and <name> sdf elements"
+        gzerr << "<param> must have <shader> and <name> sdf elements"
                << std::endl;
         paramElem = paramElem->GetNextElement("param");
         continue;
@@ -568,7 +568,7 @@ void WavesVisual::Configure(const Entity &_entity,
   {
     if (!sdf->HasElement("shader"))
     {
-      ignerr << "Unable to load shader param system. "
+      gzerr << "Unable to load shader param system. "
             << "Missing <shader> SDF element." << std::endl;
       return;
     }
@@ -580,7 +580,7 @@ void WavesVisual::Configure(const Entity &_entity,
       if (!shaderElem->HasElement("vertex") ||
           !shaderElem->HasElement("fragment"))
       {
-        ignerr << "<shader> must have <vertex> and <fragment> sdf elements"
+        gzerr << "<shader> must have <vertex> and <fragment> sdf elements"
               << std::endl;
       }
       else
@@ -607,7 +607,7 @@ void WavesVisual::Configure(const Entity &_entity,
     }
     if (this->dataPtr->shaders.empty())
     {
-      ignerr << "Unable to load shader param system. "
+      gzerr << "Unable to load shader param system. "
             << "No valid shaders." << std::endl;
       return;
     }
@@ -637,7 +637,7 @@ void WavesVisual::Configure(const Entity &_entity,
   this->dataPtr->node.Subscribe(
       topic, &WavesVisualPrivate::OnWaveMsg, this->dataPtr.get());
 
-  ignmsg << "WavesVisual: subscribing to [" << topic << "]\n";
+  gzmsg << "WavesVisual: subscribing to [" << topic << "]\n";
 }
 
 //////////////////////////////////////////////////
@@ -645,7 +645,7 @@ void WavesVisual::PreUpdate(
   const UpdateInfo &_info,
   EntityComponentManager &)
 {
-  IGN_PROFILE("WavesVisual::PreUpdate");
+  GZ_PROFILE("WavesVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
 
@@ -655,7 +655,7 @@ void WavesVisual::PreUpdate(
 }
 
 /////////////////////////////////////////////////
-IGN_ENUM(meshDeformationMethodIface,
+GZ_ENUM(meshDeformationMethodIface,
     WavesVisualPrivate::MeshDeformationMethod,
     WavesVisualPrivate::MeshDeformationMethod::MESH_DEFORMATION_METHOD_BEGIN,
     WavesVisualPrivate::MeshDeformationMethod::MESH_DEFORMATION_METHOD_END,
@@ -699,7 +699,7 @@ void WavesVisualPrivate::OnUpdate()
 
   if (!this->scene)
   {
-    ignmsg << "WavesVisual: retrieving scene from render engine\n";
+    gzmsg << "WavesVisual: retrieving scene from render engine\n";
     this->scene = rendering::sceneFromFirstRenderEngine();
   }
 
@@ -708,7 +708,7 @@ void WavesVisualPrivate::OnUpdate()
 
   if (!this->visual)
   {
-    ignmsg << "WavesVisual: searching for visual\n";
+    gzmsg << "WavesVisual: searching for visual\n";
 
     // this does a breadth first search for visual with the entity id
     // \todo(anyone) provide a helper function in RenderUtil to search for
@@ -741,7 +741,7 @@ void WavesVisualPrivate::OnUpdate()
 
   if (!this->scene->MaterialRegistered("OceanBlue"))
   {
-    ignmsg << "WavesVisual: creating material `OceanBlue`\n";
+    gzmsg << "WavesVisual: creating material `OceanBlue`\n";
 
     auto mat = this->scene->CreateMaterial("OceanBlue");
     mat->SetAmbient(0.0, 0.0, 0.3);
@@ -766,16 +766,16 @@ void WavesVisualPrivate::OnUpdate()
       // Test attaching another visual to the entity
       if (this->oceanVisuals.empty() && oceanOgreVisuals.empty())
       {
-        ignmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
+        gzmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
 
         // retrive the material from the visual's geometry (it's not set on the visual)
-        ignmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
-        ignmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+        gzmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
+        gzmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
         auto visualGeometry = this->visual->GeometryByIndex(0);
         this->oceanMaterial = visualGeometry->Material();
         if (!this->oceanMaterial)
         {
-          ignerr << "WavesVisual: invalid material\n";
+          gzerr << "WavesVisual: invalid material\n";
           return;
         }
 
@@ -818,7 +818,7 @@ void WavesVisualPrivate::OnUpdate()
             std::string objName = ss.str();
 
             // create visual
-            // ignmsg << "Creating visual: tile: ["
+            // gzmsg << "Creating visual: tile: ["
             //     << ix << ", " << iy << "]"
             //     << ", name: " << objName << "\n";
             rendering::Ogre2OceanVisualPtr ogreVisual =
@@ -845,7 +845,7 @@ void WavesVisualPrivate::OnUpdate()
             oceanVisual->SetLocalPosition(tilePosition);
 
             // create geometry
-            // ignmsg << "Creating geometry: tile: ["
+            // gzmsg << "Creating geometry: tile: ["
             //     << ix << ", " << iy << "]"
             //     << ", name: " << objName << "\n";
             auto geometry =
@@ -899,7 +899,7 @@ void WavesVisualPrivate::OnUpdate()
       // Test attaching a gz::common::Mesh to the entity
       if (this->oceanVisuals.empty())
       {
-        ignmsg << "WavesVisual: creating dynamic texture ocean visual\n";
+        gzmsg << "WavesVisual: creating dynamic texture ocean visual\n";
 
         // create shader material
         this->CreateShaderMaterial();
@@ -920,7 +920,7 @@ void WavesVisualPrivate::OnUpdate()
         auto geometry = this->visual->GeometryByIndex(0);
         if (!geometry)
         {
-          ignerr << "Waves visual has invalid geometry\n";
+          gzerr << "Waves visual has invalid geometry\n";
           return;
         }
 
@@ -981,7 +981,7 @@ void WavesVisualPrivate::OnUpdate()
     }
     default:
     {
-      ignerr << "Invalid mesh deformation method\n";
+      gzerr << "Invalid mesh deformation method\n";
       break;
     }
   }
@@ -992,7 +992,7 @@ void WavesVisualPrivate::OnWaveMsg(const gz::msgs::Param &_msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
 
-  // ignmsg << _msg.DebugString();
+  // gzmsg << _msg.DebugString();
 
   // current wind speed and angle
   double windSpeed = this->waveParams->WindSpeed();
@@ -1068,7 +1068,7 @@ void WavesVisualPrivate::CreateShaderMaterial()
     // metal is used instead of glsl
     if (it != this->shaders.end())
     {
-      ignmsg << "Using metal shaders. " << std::endl;
+      gzmsg << "Using metal shaders. " << std::endl;
     }
   }
 #endif
@@ -1140,7 +1140,7 @@ void WavesVisualPrivate::InitUniforms()
       (*params)[spv.name].SetTexture(texPath,
           rendering::ShaderParam::ParamType::PARAM_TEXTURE, uvSetIndex);
       
-      ignmsg << "Shader param [" << spv.name << "]" 
+      gzmsg << "Shader param [" << spv.name << "]" 
           << ", type: " << spv.type
           << ", tex coord set: " << uvSetIndex << "\n";
     }
@@ -1153,7 +1153,7 @@ void WavesVisualPrivate::InitUniforms()
       (*params)[spv.name].SetTexture(texPath,
           rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, uvSetIndex);
 
-      ignmsg << "Shader param [" << spv.name << "]" 
+      gzmsg << "Shader param [" << spv.name << "]" 
           << ", type: " << spv.type
           << ", tex coord set: " << uvSetIndex << "\n";
     }
@@ -1248,7 +1248,7 @@ void WavesVisualPrivate::InitUniforms()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::InitTextures()
 {
-  ignmsg << "WavesVisualPrivate::InitTextures\n";
+  gzmsg << "WavesVisualPrivate::InitTextures\n";
 
   // ocean tile parameters
   uint32_t N = static_cast<uint32_t>(this->waveParams->CellCount());
@@ -1259,7 +1259,7 @@ void WavesVisualPrivate::InitTextures()
   auto shader = this->oceanMaterial;
   if (!shader)
   {
-    ignerr << "Invalid Ocean Material\n";
+    gzerr << "Invalid Ocean Material\n";
     return;
   }
 
@@ -1286,28 +1286,28 @@ void WavesVisualPrivate::InitTextures()
       Ogre::PixelFormatGpu::PFG_RGBA32_FLOAT};
   uint8_t numMipmaps{1u};
 
-  ignmsg << "Create HeightMap image\n";
+  gzmsg << "Create HeightMap image\n";
   mHeightMapImage = new Ogre::Image2();
   mHeightMapImage->createEmptyImage(width, height, depthOrSlices,
       textureType, format, numMipmaps);
 
-  ignmsg << "Create NormalMap image\n";
+  gzmsg << "Create NormalMap image\n";
   mNormalMapImage = new Ogre::Image2();
   mNormalMapImage->createEmptyImage(width, height, depthOrSlices,
       textureType, format, numMipmaps);
 
-  ignmsg << "Create TangentMap image\n";
+  gzmsg << "Create TangentMap image\n";
   mTangentMapImage = new Ogre::Image2();
   mTangentMapImage->createEmptyImage(width, height, depthOrSlices,
       textureType, format, numMipmaps);
 
-  ignmsg << "Initialising images\n";
+  gzmsg << "Initialising images\n";
   memset(mHeightMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
   memset(mNormalMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
   memset(mTangentMapImage->getRawBuffer(), 0, sizeof(float) * 4 * width * height);
 
   // Create displacement texture
-  ignmsg << "Create HeightMap texture\n";
+  gzmsg << "Create HeightMap texture\n";
   mHeightMapTex = ogre2TextureManager->createTexture(
       "HeightMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
@@ -1321,7 +1321,7 @@ void WavesVisualPrivate::InitTextures()
       mHeightMapTex->getWidth(), mHeightMapTex->getHeight()));
 
   // Create normal texture
-  ignmsg << "Create NormalMap texture\n";
+  gzmsg << "Create NormalMap texture\n";
   mNormalMapTex = ogre2TextureManager->createTexture(
       "NormalMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
@@ -1335,7 +1335,7 @@ void WavesVisualPrivate::InitTextures()
       mNormalMapTex->getWidth(), mNormalMapTex->getHeight()));
 
   // Create tangent texture
-  ignmsg << "Create TangentMap texture\n";
+  gzmsg << "Create TangentMap texture\n";
   mTangentMapTex = ogre2TextureManager->createTexture(
       "TangentMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
@@ -1349,7 +1349,7 @@ void WavesVisualPrivate::InitTextures()
       mTangentMapTex->getWidth(), mTangentMapTex->getHeight()));
 
   // Set texture on wave material
-  ignmsg << "Setting HeightMapTex\n";
+  gzmsg << "Setting HeightMapTex\n";
   auto mat = ogre2Material->Material();
   auto pass = mat->getTechnique(0u)->getPass(0);
 
@@ -1546,10 +1546,10 @@ void WavesVisualPrivate::UpdateTextures()
 }
 
 //////////////////////////////////////////////////
-IGNITION_ADD_PLUGIN(WavesVisual,
+GZ_ADD_PLUGIN(WavesVisual,
                     gz::sim::System,
                     WavesVisual::ISystemConfigure,
                     WavesVisual::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(WavesVisual,
+GZ_ADD_PLUGIN_ALIAS(WavesVisual,
   "gz::sim::systems::WavesVisual")

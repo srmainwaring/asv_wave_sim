@@ -209,7 +209,7 @@ void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
       this->dataPtr->pubWaveParams = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
       if (!this->dataPtr->pubWaveParams)
       {
-        ignerr << "Error advertising topic [" << topic << "]\n";
+        gzerr << "Error advertising topic [" << topic << "]\n";
       }
     }
 
@@ -218,7 +218,7 @@ void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
       this->dataPtr->pubWaveMarkers = this->dataPtr->node.Advertise<gz::msgs::Param>(topic);
       if (!this->dataPtr->pubWaveMarkers)
       {
-        ignerr << "Error advertising topic [" << topic << "]\n";
+        gzerr << "Error advertising topic [" << topic << "]\n";
       }
     }
 
@@ -232,7 +232,7 @@ void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
     if (this->dataPtr->waterPatchCheckboxPrevState &&
         !this->dataPtr->waterPatchCheckboxState)
     {
-      ignmsg << "Removing water patch markers...\n";
+      gzmsg << "Removing water patch markers...\n";
     }
 
     this->dataPtr->waterPatchCheckboxPrevState =
@@ -242,7 +242,7 @@ void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
     if (this->dataPtr->waterlineCheckboxPrevState &&
         !this->dataPtr->waterlineCheckboxState)
     {
-      ignmsg << "Removing waterline markers...\n";
+      gzmsg << "Removing waterline markers...\n";
     }
 
     this->dataPtr->waterlineCheckboxPrevState =
@@ -252,7 +252,7 @@ void WavesControl::Update(const gz::sim::UpdateInfo & /*_info*/,
     if (this->dataPtr->submergedTriangleCheckboxPrevState &&
         !this->dataPtr->submergedTriangleCheckboxState)
     {
-      ignmsg << "Removing submerged triangle markers...\n";
+      gzmsg << "Removing submerged triangle markers...\n";
     }
 
     this->dataPtr->submergedTriangleCheckboxPrevState =
@@ -290,7 +290,7 @@ void WavesControl::UpdateWindSpeed(double _windSpeed)
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->windSpeed = _windSpeed;
 
-  ignmsg << "Wind Speed: " << _windSpeed << "\n";
+  gzmsg << "Wind Speed: " << _windSpeed << "\n";
 
   this->dataPtr->PublishWaveParams();
 }
@@ -301,7 +301,7 @@ void WavesControl::UpdateWindAngle(double _windAngle)
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->windAngle = _windAngle;
 
-  ignmsg << "Wind Angle: " << _windAngle << "\n";
+  gzmsg << "Wind Angle: " << _windAngle << "\n";
 
   this->dataPtr->PublishWaveParams();
 }
@@ -312,12 +312,12 @@ void WavesControl::UpdateSteepness(double _steepness)
   std::lock_guard<std::mutex> lock(this->dataPtr->serviceMutex);
   this->dataPtr->steepness = _steepness;
 
-  ignmsg << "Steepness: " << _steepness << "\n";
+  gzmsg << "Steepness: " << _steepness << "\n";
 
   this->dataPtr->PublishWaveParams();
 }
 
 //////////////////////////////////////////////////
 // Register this plugin
-IGNITION_ADD_PLUGIN(WavesControl,
-                    gz::gui::Plugin)
+GZ_ADD_PLUGIN(WavesControl,
+              gz::gui::Plugin)
