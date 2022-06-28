@@ -53,10 +53,10 @@
         </geometry>
       </visual>
       <collision name="engine_vertical_axis_collision">
-        <pose>-0.16 0 -0.24 0 0 0</pose>
+        <pose>-0.16 0 -0.215 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.2 0.15 0.83</size>
+            <size>0.2 0.1 0.83</size>
           </box>
         </geometry>
       </collision>
@@ -104,10 +104,10 @@
         </geometry>
       </visual>
       <collision name="engine_vertical_axis_collision">
-        <pose>-0.16 0 -0.24 0 0 0</pose>
+        <pose>-0.16 0 -0.215 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.2 0.15 0.83</size>
+            <size>0.2 0.1 0.83</size>
           </box>
         </geometry>
       </collision>
@@ -155,10 +155,10 @@
         </geometry>
       </visual>
       <collision name="collision">
-        <pose>-0.08 0 0 0 1.570796 0</pose>
+        <pose>-0.11 0 0 0 1.570796 0</pose>
         <geometry>
           <cylinder>
-            <length>0.18</length>
+            <length>0.08</length>
             <radius>0.24</radius>
           </cylinder>
         </geometry>
@@ -200,10 +200,10 @@
         </geometry>
       </visual>
       <collision name="collision">
-        <pose>-0.08 0 0 0 1.570796 0</pose>
+        <pose>-0.11 0 0 0 1.570796 0</pose>
         <geometry>
           <cylinder>
-            <length>0.18</length>
+            <length>0.08</length>
             <radius>0.24</radius>
           </cylinder>
         </geometry>
