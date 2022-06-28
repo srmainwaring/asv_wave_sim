@@ -15,10 +15,10 @@ System:
 | demo/ship-landing-v2 | ign-marine | ArduPilot ship landing demo version 2 |
 | feature/fft_waves | master| Legacy Gazebo11 version. Includes FFT wave generator, tiling, dynamic reconfigure (ROS) |
 | feature/gazebo11 | master | legacy Gazebo11 version. Includes early version of FFT wave generator |
-| feature/ign-garden-dyn-geom | master | Replicate Ogre dynamic geometry sample in Ignition |
+| feature/ign-garden-dyn-geom | master | Replicate Ogre dynamic geometry sample |
 | feature/ign-marine-shaders-wip | master | Experiments with custom shaders |
 | gz-marine | master | Main port from Gazebo Classic to Gazebo Garden |
-| ign-marine | master | Main port from Gazebo Classic to Ignition Garden (to deprecate) |
+| ign-marine | master | Main port from Gazebo Classic to Garden (to deprecate) |
 
 
 ## Legacy TBB version (Gazebo11)
@@ -40,7 +40,7 @@ control the `RPATH` settings:
 colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib
 ```
 
-## Ignition environment variables
+## Gazebo environment variables
 
 Supposing that the colcon workspace directory containing the `src` folder is `$HOME/wave_sim_ws`, then the following environment variables should be set to enable Gazebo to locate the plugins and models:
 
@@ -63,7 +63,7 @@ The CGAL library is used for the following calculations:
 
 `Convert`
 - types: Point3, Vector2, Vector3
-- functions: ignition::math <=> CGAL
+- functions: gz::math <=> CGAL
 
 `Geometry`
 - types: Triangle, Point3, Vector2, Vector3, Direction3, Mesh, AABBTree

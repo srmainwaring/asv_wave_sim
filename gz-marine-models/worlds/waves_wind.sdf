@@ -1,24 +1,24 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
   <world name="waves">
-    <plugin filename="ignition-gazebo-physics-system"
+    <plugin filename="gz-sim-physics-system"
             name="gz::sim::systems::Physics">
     </plugin>
-    <plugin filename="ignition-gazebo-sensors-system"
+    <plugin filename="gz-sim-sensors-system"
             name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
       <background_color>0.8 0.8 0.8</background_color>
     </plugin>
-    <plugin filename="ignition-gazebo-scene-broadcaster-system"
+    <plugin filename="gz-sim-scene-broadcaster-system"
             name="gz::sim::systems::SceneBroadcaster">
     </plugin>
-    <plugin filename="ignition-gazebo-user-commands-system"
+    <plugin filename="gz-sim-user-commands-system"
             name="gz::sim::systems::UserCommands">
     </plugin>
-    <plugin filename="libignition-gazebo-imu-system.so"
+    <plugin filename="libgz-sim-imu-system.so"
             name="gz::sim::systems::Imu">
     </plugin>
-    <plugin filename="ignition-gazebo-wind-effects-system"
+    <plugin filename="gz-sim-wind-effects-system"
             name="gz::sim::systems::WindEffects">
       <force_approximation_scaling_factor>1.0</force_approximation_scaling_factor>
       <horizontal>
@@ -81,7 +81,7 @@
       <uri>model://wam-v</uri>
     </include>
 
-    <!-- ignition-gazebo/examples/worlds/wind.sdf -->
+    <!-- gz-sim/examples/worlds/wind.sdf -->
     <model name="wind_sock">
       <pose>0 0 0 0 0 0</pose>
       <static>false</static>
