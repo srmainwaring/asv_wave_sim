@@ -14,7 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/marine/Geometry.hh"
-#include "gz/marine/Grid.hh"
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/AABB_tree.h>
