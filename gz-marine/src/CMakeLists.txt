@@ -25,7 +25,6 @@ set(sources
   WaveSimulation.cc
   WaveSimulationFFT2.cc
   WaveSimulationFFTW.cc
-  WaveSimulationOpenCL.cc
   WaveSimulationSinusoid.cc
   WaveSimulationTrochoid.cc
   WaveSpectrum.cc

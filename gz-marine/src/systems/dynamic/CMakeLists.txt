@@ -1,6 +1,6 @@
 
 set(GZ-RENDERING_LIBRARY_DIRS
-  ${GZ-RENDERING_INCLUDE_DIRS}/../../../lib/ign-rendering-${GZ_RENDERING_VER}/engine-plugins)
+  ${GZ-RENDERING_INCLUDE_DIRS}/../../../lib/gz-rendering-${GZ_RENDERING_VER}/engine-plugins)
 
 link_directories(${GZ-RENDERING_LIBRARY_DIRS})
 

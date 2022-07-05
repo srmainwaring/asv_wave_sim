@@ -936,6 +936,16 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateMesh(
 }
 
 //////////////////////////////////////////////////
+template <>
+void OceanTilePrivate<cgal::Point3>::UpdateMesh(
+    double _time, gz::common::Mesh *_mesh)
+{
+  /// \note This template specialisation is supplied for compilation on
+  ///       macOS M1 (arm64). It should never be called. 
+  GZ_ASSERT(false, "Should never reach here");
+}
+
+//////////////////////////////////////////////////
 // Specialisation for gz::math::Vector3d
 //////////////////////////////////////////////////
 template <>
