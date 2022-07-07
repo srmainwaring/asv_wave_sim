@@ -14,7 +14,14 @@ set(GZ_CMAKE_VER ${gz-cmake3_VERSION_MAJOR})
 #============================================================================
 # Configure the project
 #============================================================================
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 gz_configure_project()
+
+#============================================================================
+# Set project-specific options
+#============================================================================
 
 #============================================================================
 # Search for project-specific dependencies
@@ -90,6 +97,14 @@ else()
 endif()
 
 #--------------------------------------
+# Find eigen3
+# gz_find_package(
+#   EIGEN3
+#   REQUIRED_BY eigen3
+#   PRETTY eigen3
+#   PURPOSE "Provide conversions to eigen3 types")
+
+#--------------------------------------
 # Other dependencies...
 
 find_package(Eigen3 REQUIRED)
@@ -132,23 +147,22 @@ set(FFT_LIBRARIES ${FFTW3-3_LIBRARY})
 #--------------------------------------
 # Find OpenCL
 
-find_package(OpenCL REQUIRED)
+# find_package(OpenCL REQUIRED)
 
 #--------------------------------------
 # Find clFFT
 
-find_package(clFFT REQUIRED)
+# find_package(clFFT REQUIRED)
+
+#============================================================================
+
+# Location of "fake install folder" used in tests
+# Defined here at root scope so it is available for tests in src and test folders
+set(FAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/fake/install")
 
 #============================================================================
 # Configure the build
 #============================================================================
-
-# if (HAVE_OGRE2)
-#   list(APPEND RENDERING_COMPONENTS ogre2)
-# endif()
-
-# gz_configure_build(QUIT_IF_BUILD_ERRORS
-#     COMPONENTS ${RENDERING_COMPONENTS})
 
 gz_configure_build(QUIT_IF_BUILD_ERRORS)
 
