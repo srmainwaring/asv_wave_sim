@@ -273,14 +273,14 @@
     </joint>
 
     <!-- Joint state and force plugins -->
-    <plugin filename="gz-sim-joint-state-publisher-system.so"
+    <plugin filename="gz-sim-joint-state-publisher-system"
       name="gz::sim::systems::JointStatePublisher">
     </plugin>
-    <plugin filename="gz-sim-apply-joint-force-system.so"
+    <plugin filename="gz-sim-apply-joint-force-system"
       name="gz::sim::systems::ApplyJointForce">
       <joint_name>left_engine_joint</joint_name>
     </plugin>
-    <plugin filename="gz-sim-apply-joint-force-system.so"
+    <plugin filename="gz-sim-apply-joint-force-system"
       name="gz::sim::systems::ApplyJointForce">
       <joint_name>right_engine_joint</joint_name>
     </plugin>
