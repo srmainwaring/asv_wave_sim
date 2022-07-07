@@ -17,7 +17,6 @@
 #include "gz/marine/Algorithm.hh"
 #include "gz/marine/Convert.hh"
 #include "gz/marine/Geometry.hh"
-#include "gz/marine/Grid.hh"
 #include "gz/marine/PhysicalConstants.hh"
 #include "gz/marine/Utilities.hh"
 #include "gz/marine/Wavefield.hh"
