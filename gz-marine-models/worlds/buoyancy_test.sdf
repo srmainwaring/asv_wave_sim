@@ -15,7 +15,7 @@
     <plugin filename="gz-sim-user-commands-system"
             name="gz::sim::systems::UserCommands">
     </plugin>
-    <plugin filename="libgz-sim-imu-system.so"
+    <plugin filename="gz-sim-imu-system"
             name="gz::sim::systems::Imu">
     </plugin>
 
