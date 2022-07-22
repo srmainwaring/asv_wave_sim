@@ -394,6 +394,14 @@ class gz::sim::systems::WavesVisualPrivate
   Ogre::TextureGpu   *mNormalMapTex;
   Ogre::TextureGpu   *mTangentMapTex;
 
+  /// \note Triple buffer staging textures
+  Ogre::StagingTexture* mHeightMapStagingTextures[3];
+  Ogre::StagingTexture* mNormalMapStagingTextures[3];
+  Ogre::StagingTexture* mTangentMapStagingTextures[3];
+  uint8_t mHeightMapFrameIdx{0};
+  uint8_t mNormalMapFrameIdx{0};
+  uint8_t mTangentMapFrameIdx{0};
+
   std::unique_ptr<gz::marine::WaveSimulation> mWaveSim;
   std::vector<double> mHeights;
   std::vector<double> mDhdx;
@@ -679,6 +687,34 @@ WavesVisualPrivate::SetMeshDeformationMethod(const std::string &_str)
 //////////////////////////////////////////////////
 WavesVisualPrivate::~WavesVisualPrivate()
 {
+  // Remove staging textures
+  gz::rendering::Ogre2ScenePtr ogre2Scene =
+    std::dynamic_pointer_cast<gz::rendering::Ogre2Scene>(
+        this->scene);
+
+  Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
+
+  Ogre::TextureGpuManager *ogre2TextureManager =
+      ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
+
+  for (uint8_t i=0; i<3; ++i)   {
+    if (mHeightMapStagingTextures[i]) {
+        ogre2TextureManager->removeStagingTexture(mHeightMapStagingTextures[i]);
+        mHeightMapStagingTextures[i] = nullptr;
+    }
+
+    if (mNormalMapStagingTextures[i]) {
+        ogre2TextureManager->removeStagingTexture(mNormalMapStagingTextures[i]);
+        mNormalMapStagingTextures[i] = nullptr;
+    }
+
+    if (mTangentMapStagingTextures[i]) {
+        ogre2TextureManager->removeStagingTexture(mTangentMapStagingTextures[i]);
+        mTangentMapStagingTextures[i] = nullptr;
+    }
+  }
+
+  // Remove visuals
   for (auto& ogreVisual : this->oceanVisuals)
   {
     auto vis = ogreVisual;
@@ -1500,47 +1536,77 @@ void WavesVisualPrivate::UpdateTextures()
 
   // Staging texture is required for upload from CPU -> GPU
   {
-    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
-        mHeightMapImage->getWidth(), mHeightMapImage->getHeight(), 1u, 1u, mHeightMapImage->getPixelFormat());
+    if (!mHeightMapStagingTextures[mHeightMapFrameIdx]) {
+        mHeightMapStagingTextures[mHeightMapFrameIdx] =
+            ogre2TextureManager->getStagingTexture(
+                mHeightMapImage->getWidth(),
+                mHeightMapImage->getHeight(),
+                1u, 1u,
+                mHeightMapImage->getPixelFormat(),
+                100u);
+    }
+
+    Ogre::StagingTexture *stagingTexture = mHeightMapStagingTextures[mHeightMapFrameIdx];
+    mHeightMapFrameIdx = (mHeightMapFrameIdx + 1) % 3;
+
     stagingTexture->startMapRegion();
     Ogre::TextureBox texBox = stagingTexture->mapRegion(
-        mHeightMapImage->getWidth(), mHeightMapImage->getHeight(), 1u, 1u, mHeightMapImage->getPixelFormat());
+        mHeightMapImage->getWidth(), mHeightMapImage->getHeight(), 1u, 1u,
+        mHeightMapImage->getPixelFormat());
 
     texBox.copyFrom(mHeightMapImage->getData(0));
     stagingTexture->stopMapRegion();
     stagingTexture->upload(texBox, mHeightMapTex, 0, 0, 0);
-    ogre2TextureManager->removeStagingTexture(stagingTexture);
-    stagingTexture = nullptr;
     mHeightMapTex->notifyDataIsReady();
   }
 
   {
-    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
-        mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u, mNormalMapImage->getPixelFormat());
+    if (!mNormalMapStagingTextures[mNormalMapFrameIdx]) {
+        mNormalMapStagingTextures[mNormalMapFrameIdx] =
+            ogre2TextureManager->getStagingTexture(
+                mNormalMapImage->getWidth(),
+                mNormalMapImage->getHeight(),
+                1u, 1u,
+                mNormalMapImage->getPixelFormat(),
+                100u);
+    }
+
+    Ogre::StagingTexture *stagingTexture = mNormalMapStagingTextures[mNormalMapFrameIdx];
+    mNormalMapFrameIdx = (mNormalMapFrameIdx + 1) % 3;
+    
     stagingTexture->startMapRegion();
     Ogre::TextureBox texBox = stagingTexture->mapRegion(
-        mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u, mNormalMapImage->getPixelFormat());
+        mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u,
+        mNormalMapImage->getPixelFormat());
 
     texBox.copyFrom(mNormalMapImage->getData(0));
     stagingTexture->stopMapRegion();
     stagingTexture->upload(texBox, mNormalMapTex, 0, 0, 0);
-    ogre2TextureManager->removeStagingTexture(stagingTexture);
-    stagingTexture = nullptr;
     mNormalMapTex->notifyDataIsReady();
   }
 
   {
-    Ogre::StagingTexture *stagingTexture = ogre2TextureManager->getStagingTexture(
-        mTangentMapImage->getWidth(), mTangentMapImage->getHeight(), 1u, 1u, mTangentMapImage->getPixelFormat());
+    if (!mTangentMapStagingTextures[mTangentMapFrameIdx]) {
+        mTangentMapStagingTextures[mTangentMapFrameIdx] =
+            ogre2TextureManager->getStagingTexture(
+                mTangentMapImage->getWidth(),
+                mTangentMapImage->getHeight(),
+                1u, 1u,
+                mTangentMapImage->getPixelFormat(),
+                100u);
+    }
+
+    Ogre::StagingTexture *stagingTexture = mTangentMapStagingTextures[mTangentMapFrameIdx];
+    mTangentMapFrameIdx = (mTangentMapFrameIdx + 1) % 3;
+
     stagingTexture->startMapRegion();
     Ogre::TextureBox texBox = stagingTexture->mapRegion(
-        mTangentMapImage->getWidth(), mTangentMapImage->getHeight(), 1u, 1u, mTangentMapImage->getPixelFormat());
+        mTangentMapImage->getWidth(), mTangentMapImage->getHeight(), 1u, 1u,
+        mTangentMapImage->getPixelFormat());
 
     texBox.copyFrom(mTangentMapImage->getData(0));
     stagingTexture->stopMapRegion();
     stagingTexture->upload(texBox, mTangentMapTex, 0, 0, 0);
-    ogre2TextureManager->removeStagingTexture(stagingTexture);
-    stagingTexture = nullptr;
     mTangentMapTex->notifyDataIsReady();
   }
 }
