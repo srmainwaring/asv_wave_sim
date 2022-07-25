@@ -1292,8 +1292,7 @@ void WavesVisualPrivate::InitTextures()
   double ux  = this->waveParams->WindVelocity().X();
   double uy  = this->waveParams->WindVelocity().Y();
 
-  auto shader = this->oceanMaterial;
-  if (!shader)
+  if (!this->oceanMaterial)
   {
     gzerr << "Invalid Ocean Material\n";
     return;
@@ -1305,7 +1304,7 @@ void WavesVisualPrivate::InitTextures()
 
   gz::rendering::Ogre2MaterialPtr ogre2Material =
     std::dynamic_pointer_cast<gz::rendering::Ogre2Material>(
-        shader);
+        this->oceanMaterial);
 
   Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
 
@@ -1385,9 +1384,10 @@ void WavesVisualPrivate::InitTextures()
       mTangentMapTex->getWidth(), mTangentMapTex->getHeight()));
 
   // Set texture on wave material
-  gzmsg << "Setting HeightMapTex\n";
+  gzmsg << "Assign dynamic textures to material\n";
   auto mat = ogre2Material->Material();
   auto pass = mat->getTechnique(0u)->getPass(0);
+  auto ogreParams = pass->getVertexProgramParameters();
 
   {
     auto texUnit = pass->getTextureUnitState("heightMap");
@@ -1397,6 +1397,26 @@ void WavesVisualPrivate::InitTextures()
       texUnit->setName("heightMap");
     }
     texUnit->setTexture(mHeightMapTex);
+    texUnit->setTextureCoordSet(0);
+    int texIndex = static_cast<int>(pass->getTextureUnitStateIndex(texUnit));
+
+    gzmsg << "texNameStr:   " << mHeightMapTex->getNameStr() << "\n";
+    gzmsg << "texCoordSet:  " << 0 << "\n";
+    gzmsg << "texIndex:     " << texIndex << "\n";
+
+    // set to wrap mode otherwise default is clamp mode
+    Ogre::HlmsSamplerblock samplerBlockRef;
+    samplerBlockRef.mU = Ogre::TAM_WRAP;
+    samplerBlockRef.mV = Ogre::TAM_WRAP;
+    samplerBlockRef.mW = Ogre::TAM_WRAP;
+    texUnit->setSamplerblock(samplerBlockRef);
+
+    if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
+        rendering::GraphicsAPI::OPENGL)
+    {
+      // set the texture map index
+      ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
+    }
   }
 
   {
@@ -1407,6 +1427,26 @@ void WavesVisualPrivate::InitTextures()
       texUnit->setName("normalMap");
     }
     texUnit->setTexture(mNormalMapTex);
+    texUnit->setTextureCoordSet(0);
+    int texIndex = static_cast<int>(pass->getTextureUnitStateIndex(texUnit));
+
+    gzmsg << "texNameStr:   " << mNormalMapTex->getNameStr() << "\n";
+    gzmsg << "texCoordSet:  " << 0 << "\n";
+    gzmsg << "texIndex:     " << texIndex << "\n";
+
+    // set to wrap mode otherwise default is clamp mode
+    Ogre::HlmsSamplerblock samplerBlockRef;
+    samplerBlockRef.mU = Ogre::TAM_WRAP;
+    samplerBlockRef.mV = Ogre::TAM_WRAP;
+    samplerBlockRef.mW = Ogre::TAM_WRAP;
+    texUnit->setSamplerblock(samplerBlockRef);
+
+    if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
+        rendering::GraphicsAPI::OPENGL)
+    {
+      // set the texture map index
+      ogreParams->setNamedConstant("normalMap", &texIndex, 1, 1);
+    }
   }
 
   {
@@ -1417,6 +1457,26 @@ void WavesVisualPrivate::InitTextures()
       texUnit->setName("tangentMap");
     }
     texUnit->setTexture(mTangentMapTex);
+    texUnit->setTextureCoordSet(0);
+    int texIndex = static_cast<int>(pass->getTextureUnitStateIndex(texUnit));
+
+    gzmsg << "texNameStr:   " << mTangentMapTex->getNameStr() << "\n";
+    gzmsg << "texCoordSet:  " << 0 << "\n";
+    gzmsg << "texIndex:     " << texIndex << "\n";
+
+    // set to wrap mode otherwise default is clamp mode
+    Ogre::HlmsSamplerblock samplerBlockRef;
+    samplerBlockRef.mU = Ogre::TAM_WRAP;
+    samplerBlockRef.mV = Ogre::TAM_WRAP;
+    samplerBlockRef.mW = Ogre::TAM_WRAP;
+    texUnit->setSamplerblock(samplerBlockRef);
+
+    if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
+        rendering::GraphicsAPI::OPENGL)
+    {
+      // set the texture map index
+      ogreParams->setNamedConstant("tangentMap", &texIndex, 1, 1);
+    }
   }
 }
 
@@ -1530,9 +1590,9 @@ void WavesVisualPrivate::UpdateTextures()
   }
 
   // schedule update to GPU
-  mHeightMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
-  mNormalMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
-  mTangentMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+  mHeightMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+  mNormalMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+  mTangentMapTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
 
   // Staging texture is required for upload from CPU -> GPU
   {
@@ -1557,7 +1617,9 @@ void WavesVisualPrivate::UpdateTextures()
     texBox.copyFrom(mHeightMapImage->getData(0));
     stagingTexture->stopMapRegion();
     stagingTexture->upload(texBox, mHeightMapTex, 0, 0, 0);
-    mHeightMapTex->notifyDataIsReady();
+    if (!mHeightMapTex->isDataReady()) {
+        mHeightMapTex->notifyDataIsReady();
+    }
   }
 
   {
@@ -1582,7 +1644,9 @@ void WavesVisualPrivate::UpdateTextures()
     texBox.copyFrom(mNormalMapImage->getData(0));
     stagingTexture->stopMapRegion();
     stagingTexture->upload(texBox, mNormalMapTex, 0, 0, 0);
-    mNormalMapTex->notifyDataIsReady();
+    if (!mNormalMapTex->isDataReady()) {
+        mNormalMapTex->notifyDataIsReady();
+    }
   }
 
   {
@@ -1607,7 +1671,9 @@ void WavesVisualPrivate::UpdateTextures()
     texBox.copyFrom(mTangentMapImage->getData(0));
     stagingTexture->stopMapRegion();
     stagingTexture->upload(texBox, mTangentMapTex, 0, 0, 0);
-    mTangentMapTex->notifyDataIsReady();
+    if (!mTangentMapTex->isDataReady()) {
+      mTangentMapTex->notifyDataIsReady();
+    }
   }
 }
 

@@ -62,7 +62,8 @@ namespace marine
     const cgal::Point3& _A,
     const cgal::Point3& _B
   )
-  { 
+  {
+    /// \todo provide robust floating point checks
     double div = _fA + _fB;
     if (div != 0)
     {

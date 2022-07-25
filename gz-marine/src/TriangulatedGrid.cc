@@ -182,7 +182,7 @@ namespace marine
     // timer.reset();
     // timer.start();
     Face_handle fh;
-    for (int64_t i=0; i<points_.size(); ++i) {
+    for (uint64_t i=0; i<points_.size(); ++i) {
       auto vh = tri_.insert(points_[i] ,fh);
       if (vh != nullptr) {
         vh->info() = i;
@@ -287,7 +287,7 @@ namespace marine
   bool TriangulatedGrid::Private::Height(const std::vector<cgal::Point3>& queries, std::vector<double>& heights) const {
     bool foundAll = true;
     Face_handle fh = nullptr;
-    for (int64_t i=0; i<heights.size(); ++i)
+    for (uint64_t i=0; i<heights.size(); ++i)
     {
       double height_i = 0.0;
       const cgal::Point3& query = queries[i];

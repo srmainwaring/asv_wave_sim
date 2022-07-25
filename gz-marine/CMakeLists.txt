@@ -79,21 +79,24 @@ gz_find_package(IgnOGRE VERSION 1.9.0
   PRIVATE_FOR ogre)
 
 #--------------------------------------
-# Find OGRE-Next
-find_package(OGRE-Next QUIET)
-if (OGRE-Next_FOUND)
-  set(HAVE_OGRE2 TRUE)
-  set(HAVE_OGRE-Next TRUE)
-else()
-  # Find OGRE2
-  gz_find_package(IgnOGRE2 VERSION 2.2.0
-      COMPONENTS HlmsPbs HlmsUnlit Overlay
-      REQUIRED_BY ogre2
-      PRIVATE_FOR ogre2)
+# Find OGRE2: first try to find OGRE2 built with PlanarReflections support and
+# fallback to look for OGRE2 without it. Both seems to works for gz-rendering.
+# See https://github.com/gazebosim/gz-rendering/issues/597
+gz_find_package(GzOGRE2 VERSION 2.2.0
+    COMPONENTS HlmsPbs HlmsUnlit Overlay PlanarReflections
+    PRIVATE_FOR ogre2
+    QUIET)
 
-  if (OGRE2_FOUND)
-    set(HAVE_OGRE2 TRUE)
-  endif()
+if ("${OGRE2-PlanarReflections}" STREQUAL "OGRE2-PlanarReflections-NOTFOUND")
+  message(STATUS "PlanarReflections component was not found. Try looking without it:")
+  gz_find_package(GzOGRE2 VERSION 2.2.0
+    COMPONENTS HlmsPbs HlmsUnlit Overlay
+    REQUIRED_BY ogre2
+    PRIVATE_FOR ogre2)
+endif()
+
+if (OGRE2_FOUND)
+  set(HAVE_OGRE2 TRUE)
 endif()
 
 #--------------------------------------

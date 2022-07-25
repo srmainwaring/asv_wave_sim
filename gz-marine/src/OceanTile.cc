@@ -530,15 +530,15 @@ void OceanTilePrivate<gz::math::Vector3d>::ComputeTBN(
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<cgal::Point3>::ComputeTBN(
-    const cgal::Point3& _p0, 
-    const cgal::Point3& _p1, 
-    const cgal::Point3& _p2, 
-    const gz::math::Vector2d& _uv0, 
-    const gz::math::Vector2d& _uv1, 
-    const gz::math::Vector2d& _uv2, 
-    cgal::Point3& _tangent, 
-    cgal::Point3& _bitangent, 
-    cgal::Point3& _normal)
+    const cgal::Point3& /*_p0*/, 
+    const cgal::Point3& /*_p1*/, 
+    const cgal::Point3& /*_p2*/, 
+    const gz::math::Vector2d& /*_uv0*/, 
+    const gz::math::Vector2d& /*_uv1*/, 
+    const gz::math::Vector2d& /*_uv2*/, 
+    cgal::Point3& /*_tangent*/, 
+    cgal::Point3& /*_bitangent*/, 
+    cgal::Point3& /*_normal*/)
 {
   // Not used
   gzerr << "No implementation"
@@ -604,12 +604,12 @@ void OceanTilePrivate<gz::math::Vector3d>::ComputeTBN(
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<cgal::Point3>::ComputeTBN(
-    const std::vector<cgal::Point3>& _vertices,
-    const std::vector<gz::math::Vector2d>& _texCoords,
-    const std::vector<gz::math::Vector3i>& _faces, 
-    std::vector<cgal::Point3>& _tangents,
-    std::vector<cgal::Point3>& _bitangents,
-    std::vector<cgal::Point3>& _normals)
+    const std::vector<cgal::Point3>& /*_vertices*/,
+    const std::vector<gz::math::Vector2d>& /*_texCoords*/,
+    const std::vector<gz::math::Vector3i>& /*_faces*/, 
+    std::vector<cgal::Point3>& /*_tangents*/,
+    std::vector<cgal::Point3>& /*_bitangents*/,
+    std::vector<cgal::Point3>& /*_normals*/)
 {
   // Not used
   gzerr << "No implementation " 
@@ -761,7 +761,6 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
   
     const size_t N = mResolution;
     const size_t NPlus1  = N + 1;
-    const size_t NMinus1 = N - 1;
 
     for (size_t iy=0; iy<N; ++iy)
     {
@@ -803,7 +802,6 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
 
     const size_t N = mResolution;
     const size_t NPlus1  = N + 1;
-    const size_t NMinus1 = N - 1;
 
     for (size_t iy=0; iy<N; ++iy)
     {
@@ -938,7 +936,7 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateMesh(
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<cgal::Point3>::UpdateMesh(
-    double _time, gz::common::Mesh *_mesh)
+    double /*_time*/, gz::common::Mesh */*_mesh*/)
 {
   /// \note This template specialisation is supplied for compilation on
   ///       macOS M1 (arm64). It should never be called. 
