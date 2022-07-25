@@ -46,6 +46,10 @@
           </wave>
 
           <!-- shader program -->
+          <shader language="glsl">
+            <vertex>materials/waves_vs.glsl</vertex>
+            <fragment>materials/waves_fs.glsl</fragment>
+          </shader>
           <shader language="metal">
             <vertex>materials/waves_vs.metal</vertex>
             <fragment>materials/waves_fs.metal</fragment>
@@ -153,6 +157,10 @@
             <wind_angle_deg>135</wind_angle_deg>
             <steepness>2</steepness>
           </wave>
+          <shader language="glsl">
+            <vertex>materials/waves_vs.glsl</vertex>
+            <fragment>materials/waves_fs.glsl</fragment>
+          </shader>
           <shader language="metal">
             <vertex>materials/waves_vs.metal</vertex>
             <fragment>materials/waves_fs.metal</fragment>
