@@ -1,3 +1,5 @@
+#version 330
+
 // Copyright (C) 2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
@@ -30,8 +32,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.s
-
-#version 330
 
 in vec4 position;
 in vec2 uv0;
