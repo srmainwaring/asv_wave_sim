@@ -123,6 +123,12 @@ namespace marine
     const cgal::Triangle& _tri
   )
   {
+    /// \todo improve handling of triangles containing collinear points
+    /// https://github.com/srmainwaring/asv_wave_sim/issues/50
+    if (CGAL::collinear(_tri[0], _tri[1], _tri[2]))
+    {
+      return CGAL::NULL_VECTOR;
+    }
     auto n = CGAL::normal(_tri[0], _tri[1], _tri[2]);
     if (n == CGAL::NULL_VECTOR)
       return n;
