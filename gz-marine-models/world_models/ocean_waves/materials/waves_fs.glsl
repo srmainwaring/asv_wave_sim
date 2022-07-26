@@ -1,3 +1,5 @@
+#version 330
+
 // Copyright (C) 2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
@@ -31,68 +33,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <metal_stdlib>
-using namespace metal;
-
-struct PS_INPUT
+in block
 {
-  float2 uv0;
-  float3 T;
-  float3 B;
-  float3 N;
-  float3 eyeVec;
-  float2 bumpCoord;
-};
+  vec2 uv0;
+  vec3 T;
+  vec3 B;
+  vec3 N;
+  vec3 eyeVec;
+  vec2 bumpCoord;
+} inPs;
 
-struct Params
-{
-  float4 deepColor;
-  float4 shallowColor;
-  float fresnelPower;
-  float hdrMultiplier;
-};
+uniform vec4 deepColor;
+uniform vec4 shallowColor;
+uniform float fresnelPower;
+uniform float hdrMultiplier;
 
-fragment float4 main_metal
-(
-  PS_INPUT inPs [[stage_in]]
-  , texturecube<float>  cubeMap           [[texture(3)]]
-  , texture2d<float>    bumpMap           [[texture(4)]]
-  , sampler             cubeMapSampler    [[sampler(3)]]
-  , sampler             bumpMapSampler    [[sampler(4)]]
-  , constant Params &p [[buffer(PARAMETER_SLOT)]]
-)
+uniform samplerCube cubeMap;
+uniform sampler2D bumpMap;
+
+out vec4 fragColor;
+
+void main()
 {
   // Apply bump mapping to normal vector to make waves look more detailed:
-  float4 bump = bumpMap.sample(bumpMapSampler, inPs.bumpCoord)*2.0 - 1.0;
-  float3x3 rotMatrix(inPs.T, inPs.B, inPs.N);
-  float3 N = normalize(rotMatrix * bump.xyz);
+  vec4 bump = texture(bumpMap, inPs.bumpCoord)*2.0 - 1.0;
+  mat3 rotMatrix = mat3(inPs.T, inPs.B, inPs.N);
+  vec3 N = normalize(rotMatrix * bump.xyz);
 
   // Reflected ray:
-  float3 E = normalize(inPs.eyeVec);
-  float3 R = reflect(E, N);
+  vec3 E = normalize(inPs.eyeVec);
+  vec3 R = reflect(E, N);
 
-  // Negate z for use with the skybox texture that comes with ign-rendering
-  R = float3(R.x, R.y, -R.z);
-
-  // uncomment this line if using other textures that are Y up
-  // Gazebo requires rotated cube map lookup.
-  // R = float3(R.x, R.z, R.y);
+  // Negate z for use with the skybox texture that comes with gz-rendering
+  R = vec3(R.x, R.y, -R.z);
 
   // Get environment color of reflected ray:
-  float4 envColor = cubeMap.sample(cubeMapSampler, R);
+  vec4 envColor = texture(cubeMap, R, 0.0);
 
   // Cheap hdr effect:
-  envColor.rgb *= (envColor.r+envColor.g+envColor.b)*p.hdrMultiplier;
+  envColor.rgb *= (envColor.r+envColor.g+envColor.b)*hdrMultiplier;
 
   // Compute refraction ratio (Fresnel):
   float facing = 1.0 - dot(-E, N);
-  float waterEnvRatio = clamp(pow(facing, p.fresnelPower), 0.0, 1.0);
+  float waterEnvRatio = clamp(pow(facing, fresnelPower), 0.0, 1.0);
 
   // Refracted ray only considers deep and shallow water colors:
-  float4 waterColor = mix(p.shallowColor, p.deepColor, facing);
+  vec4 waterColor = mix(shallowColor, deepColor, facing);
 
   // Perform linear interpolation between reflection and refraction.
-  float4 color = mix(waterColor, envColor, waterEnvRatio);
+  vec4 color = mix(waterColor, envColor, waterEnvRatio);
 
-  return float4(color.xyz, 0.9);
+  fragColor = vec4(color.xyz, 0.9);
+
+  // debug
+  // fragColor = vec4(inPs.T, 1.0);
 }

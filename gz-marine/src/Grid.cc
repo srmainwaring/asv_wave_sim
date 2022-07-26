@@ -230,7 +230,6 @@ namespace marine
     // Optimised lookup using face indexing
     // Face index
     const size_t nx = this->data->cellCount[0];
-    const size_t ny = this->data->cellCount[1];
     const size_t idx = 2 * (nx * _iy + _ix) + _k;
 
     // Make triangle from face descriptor
@@ -244,7 +243,6 @@ namespace marine
   {
     // Face index
     const size_t nx = this->data->cellCount[0];
-    const size_t ny = this->data->cellCount[1];
     const size_t idx = 2 * (nx * _iy + _ix) + _k;
 
     // Make triangle from face descriptor
@@ -258,7 +256,6 @@ namespace marine
   {
     // Face index
     const size_t nx = this->data->cellCount[0];
-    const size_t ny = this->data->cellCount[1];
     const size_t idx = 2 * (nx * _iy + _ix) + _k;
 
     return this->data->normals[idx];

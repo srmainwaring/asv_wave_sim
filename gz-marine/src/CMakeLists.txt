@@ -57,6 +57,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
   sdformat${SDF_VER}::sdformat${SDF_VER}
   ${TBB_LIBRARIES}
+  ${FFT_LIBRARIES}
 )
 if (UNIX AND NOT APPLE)
   target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}

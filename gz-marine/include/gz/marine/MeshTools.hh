@@ -23,7 +23,7 @@
 #include "gz/marine/CGALTypes.hh"
 
 #include <gz/common.hh>
-#include <gz/common/mesh.hh>
+#include <gz/common/Mesh.hh>
 
 #include <memory>
 
