@@ -1085,11 +1085,7 @@ void WavesVisualPrivate::CreateShaderMaterial()
 
   // default to glsl
   auto it = this->shaders.find("glsl");
-  if (it != this->shaders.end())
-  {
-    this->oceanMaterial->SetVertexShader(it->second.vertexShaderUri);
-    this->oceanMaterial->SetFragmentShader(it->second.fragmentShaderUri);
-  }
+
   // prefer metal over glsl on macOS
   /// \todo(anyone) instead of using ifdef to check for macOS,
   // expose add an accessor function to get the GraphicsApi
@@ -1106,6 +1102,12 @@ void WavesVisualPrivate::CreateShaderMaterial()
     {
       gzmsg << "Using metal shaders. " << std::endl;
     }
+  }
+#else
+  if (it != this->shaders.end())
+  {
+    this->oceanMaterial->SetVertexShader(it->second.vertexShaderUri);
+    this->oceanMaterial->SetFragmentShader(it->second.fragmentShaderUri);
   }
 #endif
 }
