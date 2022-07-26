@@ -1,12 +1,12 @@
-# Gazebo Marine
+# Gazebo Waves
 
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
-![Gazebo Marine](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-marine-v4b.jpg)
+![Gazebo Waves](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-waves-v4b.jpg)
 
 ## Notes
 
-The branch `gz-marine` represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It attempts to be compliant with the naming conventions used in the community note: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356).
+The branch `gz-waves` represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It attempts to be compliant with the naming conventions used in the community note: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356).
 
 The simulation includes new features such as Ocean tiling and different wave generation methods. There are some changes in the way that the wave parameters need to be set, but as far possible we have attempted to retain compatibility with the Gazebo 11 version. Further details are described below.
 
@@ -84,7 +84,7 @@ Clone the `asv_wave_sim` repository:
 
 ```bash
 cd ~/gz_ws/src
-git clone https://github.com/srmainwaring/asv_wave_sim.git -b gz-marine
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b gz-waves
 ```
 
 Compile the package:
@@ -94,7 +94,7 @@ colcon build --merge-install --cmake-args \
 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_MACOSX_RPATH=FALSE \
 -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib \
---packages-select gz-marine1
+--packages-select gz-waves1
 ```
 
 Then re-source the workspace:
@@ -116,13 +116,13 @@ export GZ_IP=127.0.0.1
 
 # ensure gazebo finds the config for this installation
 export GZ_CONFIG_PATH=\
-$HOME/gz_ws/install/share/ignition
+$HOME/gz_ws/install/share/gz
 
 # ensure the model and world files are found
 export GZ_SIM_RESOURCE_PATH=\
-$HOME/gz_ws/src/asv_wave_sim/gz-marine-models/models:\
-$HOME/gz_ws/src/asv_wave_sim/gz-marine-models/world_models:\
-$HOME/gz_ws/src/asv_wave_sim/gz-marine-models/worlds
+$HOME/gz_ws/src/asv_wave_sim/gz-waves-models/models:\
+$HOME/gz_ws/src/asv_wave_sim/gz-waves-models/world_models:\
+$HOME/gz_ws/src/asv_wave_sim/gz-waves-models/worlds
 ```
 
 ## Examples
@@ -159,7 +159,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```xml
 <plugin
-    filename="gz-marine1-waves-model-system"
+    filename="gz-waves1-waves-model-system"
     name="gz::sim::systems::WavesModel">
     <static>0</static>
     <update_rate>30</update_rate>
@@ -198,7 +198,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```xml
 <plugin
-  filename="gz-marine1-hydrodynamics-system"
+  filename="gz-waves1-hydrodynamics-system"
   name="gz::sim::systems::Hydrodynamics">
 
    <!-- Hydrodynamics -->
@@ -229,7 +229,7 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 
 ```bash
 # build with tests
-$ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DBUILD_TESTING=ON --packages-select gz-marine1
+$ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DBUILD_TESTING=ON --packages-select gz-waves1
 
 # run tests
 colcon test --merge-install 
@@ -241,7 +241,7 @@ colcon test-result --all --verbose
 Testing within a project build directory
 
 ```bash
-$ cd ~/gz_ws/src/asv_wave_sim/gz-marine
+$ cd ~/gz_ws/src/asv_wave_sim/gz-waves
 $ mkdir build && cd build
 $ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
 $ make && make test

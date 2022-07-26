@@ -11,14 +11,14 @@ System:
 
 | branch | base | description |
 | --- | --- | --- |
-| demo/ship-landing | ign-marine | ArduPilot ship landing demo |
-| demo/ship-landing-v2 | ign-marine | ArduPilot ship landing demo version 2 |
+| demo/ship-landing | gz-waves | ArduPilot ship landing demo |
+| demo/ship-landing-v2 | gz-waves | ArduPilot ship landing demo version 2 |
 | feature/fft_waves | master| Legacy Gazebo11 version. Includes FFT wave generator, tiling, dynamic reconfigure (ROS) |
 | feature/gazebo11 | master | legacy Gazebo11 version. Includes early version of FFT wave generator |
 | feature/ign-garden-dyn-geom | master | Replicate Ogre dynamic geometry sample |
-| feature/ign-marine-shaders-wip | master | Experiments with custom shaders |
-| gz-marine | master | Main port from Gazebo Classic to Gazebo Garden |
-| ign-marine | master | Main port from Gazebo Classic to Garden (to deprecate) |
+| feature/ign-waves-shaders-wip | master | Experiments with custom shaders |
+| gz-waves | master | Main port from Gazebo Classic to Gazebo Garden |
+| gz-waves | master | Main port from Gazebo Classic to Garden (to deprecate) |
 
 
 ## Legacy TBB version (Gazebo11)
@@ -45,12 +45,12 @@ colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCM
 Supposing that the colcon workspace directory containing the `src` folder is `$HOME/wave_sim_ws`, then the following environment variables should be set to enable Gazebo to locate the plugins and models:
 
 ```bash
-export IGN_GAZEBO_RESOURCE_PATH=${IGN_GAZEBO_RESOURCE_PATH}:\
-$HOME/wave_sim_ws/src/asv_wave_sim/gz-marine-models/models:\
-$HOME/wave_sim_ws/src/asv_wave_sim/gz-marine-models/world_models:\
-$HOME/wave_sim_ws/src/asv_wave_sim/gz-marine-models/worlds
+export GZ_SIM_RESOURCE_PATH=${GZ_SIM_RESOURCE_PATH}:\
+$HOME/wave_sim_ws/src/asv_wave_sim/gz-waves-models/models:\
+$HOME/wave_sim_ws/src/asv_wave_sim/gz-waves-models/world_models:\
+$HOME/wave_sim_ws/src/asv_wave_sim/gz-waves-models/worlds
 
-export IGN_GAZEBO_SYSTEM_PLUGIN_PATH=${IGN_GAZEBO_SYSTEM_PLUGIN_PATH}:\
+export GZ_SIM_SYSTEM_PLUGIN_PATH=${GZ_SIM_SYSTEM_PLUGIN_PATH}:\
 $HOME/wave_sim_ws/install/lib
 ```
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="shipping_container">        
+    <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+
+        <markers>
+          <update_rate>10</update_rate>
+          <water_patch>1</water_patch>
+          <waterline>1</waterline>
+          <underwater_surface>1</underwater_surface>
+        </markers>
+    </plugin>
+    <link name="base_link">
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>12.9 2.44 2.59</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>1.0 0.5 0.0 1.0</ambient>
+          <diffuse>1.0 0.5 0.0 1.0</diffuse>
+          <specular>0.8 0.8 0.8 1.0</specular>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>12.9 2.44 2.59</size>
+          </box>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>20000</mass>
+        <inertia>
+          <ixx>21102.83333</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>288530.1667</iyy>
+          <iyz>0.0</iyz>
+          <izz>287272.6667</izz>
+        </inertia>
+      </inertial>
+    </link>
+  </model>
+</sdf>
