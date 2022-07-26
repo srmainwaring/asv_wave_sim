@@ -692,25 +692,37 @@ WavesVisualPrivate::~WavesVisualPrivate()
     std::dynamic_pointer_cast<gz::rendering::Ogre2Scene>(
         this->scene);
 
-  Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
+  if(ogre2Scene != nullptr)
+  {
+    Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
 
-  Ogre::TextureGpuManager *ogre2TextureManager =
-      ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
+    if (ogre2SceneManager != nullptr)
+    {
+      Ogre::TextureGpuManager *ogre2TextureManager =
+          ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
 
-  for (uint8_t i=0; i<3; ++i)   {
-    if (mHeightMapStagingTextures[i]) {
-        ogre2TextureManager->removeStagingTexture(mHeightMapStagingTextures[i]);
-        mHeightMapStagingTextures[i] = nullptr;
-    }
+      if (ogre2TextureManager != nullptr)
+      {
+        for (uint8_t i=0; i<3; ++i)   {
+          if (mHeightMapStagingTextures[i]) {
+              ogre2TextureManager->removeStagingTexture(
+                  mHeightMapStagingTextures[i]);
+              mHeightMapStagingTextures[i] = nullptr;
+          }
 
-    if (mNormalMapStagingTextures[i]) {
-        ogre2TextureManager->removeStagingTexture(mNormalMapStagingTextures[i]);
-        mNormalMapStagingTextures[i] = nullptr;
-    }
+          if (mNormalMapStagingTextures[i]) {
+              ogre2TextureManager->removeStagingTexture(
+                  mNormalMapStagingTextures[i]);
+              mNormalMapStagingTextures[i] = nullptr;
+          }
 
-    if (mTangentMapStagingTextures[i]) {
-        ogre2TextureManager->removeStagingTexture(mTangentMapStagingTextures[i]);
-        mTangentMapStagingTextures[i] = nullptr;
+          if (mTangentMapStagingTextures[i]) {
+              ogre2TextureManager->removeStagingTexture(
+                  mTangentMapStagingTextures[i]);
+              mTangentMapStagingTextures[i] = nullptr;
+          }
+        }
+      }
     }
   }
 
