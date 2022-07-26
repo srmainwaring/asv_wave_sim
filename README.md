@@ -4,9 +4,7 @@ This package contains plugins that support the simulation of waves and surface v
 
 ![Gazebo Waves](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-waves-v4b.jpg)
 
-## Notes
-
-The branch `gz-waves` represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It attempts to be compliant with the naming conventions used in the community note: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356).
+The latest version represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It attempts to be compliant with the naming conventions used in the community note: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356).
 
 The simulation includes new features such as Ocean tiling and different wave generation methods. There are some changes in the way that the wave parameters need to be set, but as far possible we have attempted to retain compatibility with the Gazebo 11 version. Further details are described below.
 
@@ -29,6 +27,10 @@ brew fftw3 libclfft-dev libfftw3-dev
 
 Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated and the simulation now supports the ogre2 render engine.
 
+## Previous version
+
+The previous version can be obtained by either checking out the tag `v0.1.2` or the branch [`gazebo9`](https://github.com/srmainwaring/asv_wave_sim/tree/gazebo9).
+
 ## Dependencies
 
 You will need a working installation of Gazebo Garden in order to use this package. This will require a from source build, see the [Gazebo Garden documents](https://gazebosim.org/docs/garden) for details.
@@ -37,7 +39,7 @@ The dependency on ROS has been removed.
 
 ## Ubuntu (pending tests)
 
-- Ubuntu 20.04
+- Ubuntu 22.04
 - Gazebo Garden
 
 Install CGAL:
@@ -84,7 +86,7 @@ Clone the `asv_wave_sim` repository:
 
 ```bash
 cd ~/gz_ws/src
-git clone https://github.com/srmainwaring/asv_wave_sim.git -b gz-waves
+git clone https://github.com/srmainwaring/asv_wave_sim.git
 ```
 
 Compile the package:
