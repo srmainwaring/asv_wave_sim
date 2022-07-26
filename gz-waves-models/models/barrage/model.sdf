@@ -1,0 +1,169 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+
+  <model name="barrage">
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>asv_barrage_buoy0</name>
+    </include>
+
+    <include>
+      <pose>-3.0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>barrage_buoy-1</name>
+    </include>
+
+    <include>
+      <pose>3.0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>barrage_buoy+1</name>
+    </include>
+
+    <include>
+      <pose>-6.0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>barrage_buoy-2</name>
+    </include>
+
+    <include>
+      <pose>6.0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>barrage_buoy+2</name>
+    </include>
+
+    <include>
+      <pose>-9.0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>barrage_buoy-3</name>
+    </include>
+
+    <include>
+      <pose>9.0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>barrage_buoy+3</name>
+    </include>
+
+    <joint type="universal" name="barrage_buoy_0_-1_joint">
+      <pose>1.5 0 0 0 0 0</pose>
+      <child>barrage_buoy-1::base_link</child>
+      <parent>asv_barrage_buoy0::base_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis2>
+    </joint>
+    
+    <joint type="universal" name="barrage_buoy_0_+1_joint">
+      <pose>-1.5 0 0 0 0 0</pose>
+      <child>barrage_buoy+1::base_link</child>
+      <parent>asv_barrage_buoy0::base_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis2>
+    </joint>
+
+    <joint type="universal" name="barrage_buoy_-1_-2_joint">
+      <pose>1.5 0 0 0 0 0</pose>
+      <child>barrage_buoy-2::base_link</child>
+      <parent>barrage_buoy-1::base_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis2>
+    </joint>
+
+    <joint type="universal" name="barrage_buoy_+1_+2_joint">
+      <pose>-1.5 0 0 0 0 0</pose>
+      <child>barrage_buoy+2::base_link</child>
+      <parent>barrage_buoy+1::base_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis2>
+    </joint>
+
+    <joint type="universal" name="barrage_buoy_-2_-3_joint">
+      <pose>1.5 0 0 0 0 0</pose>
+      <child>barrage_buoy-3::base_link</child>
+      <parent>barrage_buoy-2::base_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis2>
+    </joint>
+
+    <joint type="universal" name="barrage_buoy_+2_+3_joint">
+      <pose>-1.5 0 0 0 0 0</pose>
+      <child>barrage_buoy+3::base_link</child>
+      <parent>barrage_buoy+2::base_link</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.78539</lower>
+          <upper>0.78539</upper>
+        </limit>
+      </axis2>
+    </joint>
+
+  </model>
+</sdf>

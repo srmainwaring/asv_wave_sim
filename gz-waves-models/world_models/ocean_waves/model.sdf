@@ -1,0 +1,245 @@
+<?xml version='1.0' ?>
+<sdf version="1.6">
+  <model name="ocean_waves">
+    <static>true</static>
+
+    <plugin
+        filename="gz-waves1-waves-model-system"
+        name="gz::sim::systems::WavesModel">
+      <static>0</static>
+      <update_rate>30</update_rate>
+      <wave>
+        <!-- `fft` wave parameters -->
+        <algorithm>fft</algorithm>
+        <tile_size>100</tile_size>
+        <cell_count>256</cell_count>
+        <wind_speed>5</wind_speed>
+        <wind_angle_deg>135</wind_angle_deg>
+        <steepness>2</steepness>
+      </wave>
+    </plugin>
+
+    <link name="base_link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>materials/mesh_L100m_N256.dae</uri>
+          </mesh>
+        </geometry>
+
+        <!-- \todo remove duplicate params; populate from service instead -->
+        <plugin
+            filename="gz-waves1-waves-visual-system"
+            name="gz::sim::systems::WavesVisual">
+          <static>0</static>
+          <mesh_deformation_method>DYNAMIC_TEXTURE</mesh_deformation_method>
+          <tiles_x>-10 10</tiles_x>
+          <tiles_y>-10 10</tiles_y>
+          <wave>
+            <!-- `fft` wave parameters -->
+            <algorithm>fft</algorithm>
+            <tile_size>100</tile_size>
+            <cell_count>256</cell_count>
+            <wind_speed>5</wind_speed>
+            <wind_angle_deg>135</wind_angle_deg>
+            <steepness>2</steepness>
+          </wave>
+
+          <!-- shader program -->
+          <shader language="glsl">
+            <vertex>materials/waves_vs.glsl</vertex>
+            <fragment>materials/waves_fs.glsl</fragment>
+          </shader>
+          <shader language="metal">
+            <vertex>materials/waves_vs.metal</vertex>
+            <fragment>materials/waves_fs.metal</fragment>
+          </shader>
+
+          <!-- vertex shader params -->
+          <param>
+            <shader>vertex</shader>
+            <name>world_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>worldviewproj_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>camera_position</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>rescale</name>
+            <value>0.5</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpScale</name>
+            <value>64 64</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpSpeed</name>
+            <value>0.01 0.01</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>t</name>
+            <value>TIME</value>
+          </param>
+
+          <!-- pixel shader params -->
+          <param>
+            <shader>fragment</shader>
+            <name>deepColor</name>
+            <value>0.0 0.05 0.2 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>shallowColor</name>
+            <value>0.0 0.1 0.3 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>fresnelPower</name>
+            <value>5.0</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>hdrMultiplier</name>
+            <value>0.4</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>bumpMap</name>
+            <value>materials/wave_normals.dds</value>
+            <type>texture</type>
+            <arg>0</arg>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>cubeMap</name>
+            <value>materials/skybox_lowres.dds</value>
+            <type>texture_cube</type>
+            <arg>1</arg>
+          </param>
+
+        </plugin>
+      </visual>
+
+      <visual name="visual_below">
+        <pose>0 0 -0.01 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>materials/mesh_L100m_N256_below.dae</uri>
+          </mesh>
+        </geometry>
+        <plugin
+            filename="gz-waves1-waves-visual-system"
+            name="gz::sim::systems::WavesVisual">
+          <static>0</static>
+          <mesh_deformation_method>DYNAMIC_TEXTURE</mesh_deformation_method>
+          <tiles_x>-10 10</tiles_x>
+          <tiles_y>-10 10</tiles_y>
+          <wave>
+            <algorithm>fft</algorithm>
+            <tile_size>100</tile_size>
+            <cell_count>256</cell_count>
+            <wind_speed>5</wind_speed>
+            <wind_angle_deg>135</wind_angle_deg>
+            <steepness>2</steepness>
+          </wave>
+          <shader language="glsl">
+            <vertex>materials/waves_vs.glsl</vertex>
+            <fragment>materials/waves_fs.glsl</fragment>
+          </shader>
+          <shader language="metal">
+            <vertex>materials/waves_vs.metal</vertex>
+            <fragment>materials/waves_fs.metal</fragment>
+          </shader>
+          <param>
+            <shader>vertex</shader>
+            <name>world_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>worldviewproj_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>camera_position</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>rescale</name>
+            <value>0.5</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpScale</name>
+            <value>64 64</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpSpeed</name>
+            <value>0.01 0.01</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>t</name>
+            <value>TIME</value>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>deepColor</name>
+            <value>0.0 0.05 0.2 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>shallowColor</name>
+            <value>0.0 0.1 0.3 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>fresnelPower</name>
+            <value>5.0</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>hdrMultiplier</name>
+            <value>0.4</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>bumpMap</name>
+            <value>materials/wave_normals.dds</value>
+            <type>texture</type>
+            <arg>0</arg>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>cubeMap</name>
+            <value>materials/skybox_lowres.dds</value>
+            <type>texture_cube</type>
+            <arg>1</arg>
+          </param>
+        </plugin>
+      </visual>
+    </link>
+  </model>
+</sdf>

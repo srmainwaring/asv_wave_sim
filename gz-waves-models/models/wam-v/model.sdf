@@ -1,0 +1,423 @@
+<?xml version='1.0'?>
+<sdf version='1.7'>
+  <model name='wam-v'>
+    <enable_wind>true</enable_wind>
+
+    <link name="base_link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/WAM-V-Base.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/wam-v-base_collision_406.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>180</mass>
+        <inertia>
+          <ixx>120</ixx>
+          <ixy>0</ixy>
+          <iyy>393</iyy>
+          <iyz>0</iyz>
+          <izz>446</izz>
+        </inertia>
+      </inertial>
+    </link>
+
+    <!--
+      Dimensions for a standard aft-thruster H-configuration based on the robot description
+      from the osrf/vrx project.
+      https://github.com/osrf/vrx/wiki/tutorials-PropulsionConfiguration
+
+      Links
+      https://github.com/osrf/vrx/blob/master/wamv_gazebo/urdf/thruster_layouts/wamv_aft_thrusters.xacro
+
+      Joints
+      https://github.com/osrf/vrx/blob/master/wamv_description/urdf/thrusters/engine.xacro 
+    
+    -->
+    <link name="left_engine_link">
+      <pose>-2.373776 1.027135 0.318237 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/engine.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="engine_vertical_axis_collision">
+        <pose>-0.16 0 -0.215 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.1 0.83</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="engine_rear_end_collision">
+        <pose>-0.34 0 0.12 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.15 0.12</size>
+          </box>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>15</mass>
+        <inertia>
+          <ixx>0.88924</ixx>
+          <ixy>0</ixy>
+          <iyy>0.911125</iyy>
+          <iyz>0</iyz>
+          <izz>0.078125</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="left_engine_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>left_engine_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.570796</lower>
+          <upper>1.570796</upper>
+        </limit>
+        <dynamics>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <link name="right_engine_link">
+      <pose>-2.373776 -1.027135 0.318237 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/engine.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="engine_vertical_axis_collision">
+        <pose>-0.16 0 -0.215 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.1 0.83</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="engine_rear_end_collision">
+        <pose>-0.34 0 0.12 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.15 0.12</size>
+          </box>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>15</mass>
+        <inertia>
+          <ixx>0.88924</ixx>
+          <ixy>0</ixy>
+          <iyy>0.911125</iyy>
+          <iyz>0</iyz>
+          <izz>0.078125</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="right_engine_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>right_engine_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.570796</lower>
+          <upper>1.570796</upper>
+        </limit>
+        <dynamics>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <link name="left_propeller_link">
+      <pose relative_to="left_propeller_joint">0 0 0 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <pose>-0.11 0 0 0 1.570796 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.08</length>
+            <radius>0.24</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.008545</ixx>
+          <ixy>0</ixy>
+          <iyy>0.008545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0144</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="left_propeller_joint" type="revolute">
+      <pose relative_to="left_engine_link">-0.278156 0 -0.509371 0 0 0</pose>
+      <parent>left_engine_link</parent>
+      <child>left_propeller_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <dynamics>
+          <damping>0.01</damping>
+        </dynamics>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <link name="right_propeller_link">
+      <pose relative_to="right_propeller_joint">0 0 0 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <pose>-0.11 0 0 0 1.570796 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.08</length>
+            <radius>0.24</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.008545</ixx>
+          <ixy>0</ixy>
+          <iyy>0.008545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0144</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="right_propeller_joint" type="revolute">
+      <pose relative_to="right_engine_link">-0.278156 0 -0.509371 0 0 0</pose>
+      <parent>right_engine_link</parent>
+      <child>right_propeller_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <dynamics>
+          <damping>0.01</damping>
+        </dynamics>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- Sensors -->
+    <link name="imu_link">
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.15</mass>
+        <inertia>
+          <ixx>0.00001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00002</iyy>
+          <iyz>0</iyz>
+          <izz>0.00002</izz>
+        </inertia>
+      </inertial>
+      <sensor name="imu_sensor" type="imu">
+        <pose>0 0 0 3.141593 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>1000.0</update_rate>
+      </sensor>
+    </link>
+    <joint name="imu_joint" type="revolute">
+      <child>imu_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+        <dynamics>
+          <damping>1.0</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <!-- Joint state and force plugins -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system"
+      name="gz::sim::systems::ApplyJointForce">
+      <joint_name>left_engine_joint</joint_name>
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system"
+      name="gz::sim::systems::ApplyJointForce">
+      <joint_name>right_engine_joint</joint_name>
+    </plugin>
+
+    <!-- Thruster plugins -->
+    <plugin
+        filename="gz-sim-thruster-system"
+        name="gz::sim::systems::Thruster">
+      <namespace>wam-v</namespace>
+      <joint_name>left_propeller_joint</joint_name>
+      <use_angvel_cmd>0</use_angvel_cmd>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.48</propeller_diameter>
+      <thrust_coefficient>0.01</thrust_coefficient>
+      <velocity_control>1</velocity_control>
+      <!-- <p_gain>1.0</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.0</d_gain> -->
+      <max_thrust_cmd>2000.0</max_thrust_cmd>
+      <min_thrust_cmd>-2000.0</min_thrust_cmd>
+    </plugin>
+    <plugin
+        filename="gz-sim-thruster-system"
+        name="gz::sim::systems::Thruster">
+      <namespace>wam-v</namespace>
+      <joint_name>right_propeller_joint</joint_name>
+      <use_angvel_cmd>0</use_angvel_cmd>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.48</propeller_diameter>
+      <thrust_coefficient>0.01</thrust_coefficient>
+      <velocity_control>1</velocity_control>
+      <!-- <p_gain>1.0</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.0</d_gain> -->
+      <max_thrust_cmd>2000.0</max_thrust_cmd>
+      <min_thrust_cmd>-2000.0</min_thrust_cmd>
+    </plugin>
+
+    <!-- Hydrodynamics plugin -->
+    <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <hydrodynamics>
+          <damping_on>1</damping_on>
+          <viscous_drag_on>1</viscous_drag_on>
+          <pressure_drag_on>1</pressure_drag_on>
+        
+          <!-- Linear and Angular Damping -->
+          <cDampL1>1.0E-6</cDampL1>
+          <cDampL2>1.0E-6</cDampL2>
+          <cDampR1>1.0E-6</cDampR1>
+          <cDampR2>1.0E-6</cDampR2>
+        
+          <!-- 'Pressure' Drag -->
+          <cPDrag1>1.0E+2</cPDrag1>
+          <cPDrag2>1.0E+2</cPDrag2>
+          <fPDrag>0.4</fPDrag>
+          <cSDrag1>1.0E+2</cSDrag1>
+          <cSDrag2>1.0E+2</cSDrag2>
+          <fSDrag>0.4</fSDrag>
+          <vRDrag>1.0</vRDrag>
+        </hydrodynamics>
+    </plugin>
+
+    <!-- ArduPilot plugin -->
+    <plugin name="ArduPilotPlugin" filename="libArduPilotPlugin.so">
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <connectionTimeoutMaxCount>5</connectionTimeoutMaxCount>
+      <lock_step>1</lock_step>
+      <modelXYZToAirplaneXForwardZDown>0 0 0 3.141593 0 0</modelXYZToAirplaneXForwardZDown>
+      <gazeboXYZToNED>0 0 0 3.141593 0 0</gazeboXYZToNED>
+      <imuName>imu_sensor</imuName>
+
+      <!--
+        SERVO1_FUNCTION 26 (GroundSteering)
+      -->
+      <control channel="0">
+        <jointName>left_engine_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>3.1415926</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>POSITION</type>
+        <p_gain>500.0</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>10</d_gain>
+        <i_max>-1</i_max>
+        <i_min>0</i_min>
+        <cmd_max>5000.0</cmd_max>
+        <cmd_min>-5000.0</cmd_min>
+      </control>
+      <control channel="0">
+        <jointName>right_engine_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>3.1415926</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>POSITION</type>
+        <p_gain>500.0</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>10</d_gain>
+        <i_max>-1</i_max>
+        <i_min>0</i_min>
+        <cmd_max>5000.0</cmd_max>
+        <cmd_min>-5000.0</cmd_min>
+      </control>
+
+        <!--
+          SERVO3_FUNCTION 70 (Throttle)
+
+          max thrust: +/- 1500 N (larger than VRX settings of +250 N / -100 N)
+
+        -->
+      <control channel="2">
+        <jointName>left_propeller_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>3000</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>COMMAND</type>
+        <cmd_topic>/model/wam-v/joint/left_propeller_joint/cmd_thrust</cmd_topic>
+      </control>
+      <control channel="2">
+        <jointName>right_propeller_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>3000</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>COMMAND</type>
+        <cmd_topic>/model/wam-v/joint/right_propeller_joint/cmd_thrust</cmd_topic>
+      </control>
+    </plugin>
+
+  </model>
+</sdf>
