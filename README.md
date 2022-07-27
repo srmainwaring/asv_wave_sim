@@ -14,7 +14,7 @@ The previous version can be obtained by either checking out the tag `v0.1.2` or 
 
 ## Dependencies
 
-- You will need a working installation of [Gazebo Garden](https://gazebosim.org/docs/garden) which may need to be built from source.
+- Install [Gazebo Garden](https://gazebosim.org/docs/garden) which may need to be built from source.
 - The simulation uses the [CGAL](https://www.cgal.org/) library for mesh manipulation and [FFTW](http://www.fftw.org/) to compute Fourier transforms. Both libraries are licensed GPLv3.
 - The dependency on ROS has been removed.
 
@@ -36,7 +36,7 @@ If running on an Ubuntu virtual machine you may need to use software rendering i
 sudo apt-get install mesa-utils
 ```
 
-To use the llvmpipe software renderer prefix, Gazebo commands with the `LIBGL_ALWAYS_SOFTWARE` environment variable:
+To use the llvmpipe software renderer, prefix Gazebo commands with the `LIBGL_ALWAYS_SOFTWARE` environment variable:
 
 ```bash
 LIBGL_ALWAYS_SOFTWARE=1 gz sim waves.sdf
