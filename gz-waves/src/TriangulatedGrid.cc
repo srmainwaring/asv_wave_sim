@@ -75,8 +75,7 @@ namespace waves
     typedef CGAL::Constrained_triangulation_face_base_2<Gt>               Fbb;
     typedef CGAL::Triangulation_face_base_with_info_2<int64_t, Gt, Fbb>   Fb;
     typedef CGAL::Triangulation_data_structure_2<Vb, Fb>                  Tds;
-    typedef CGAL::No_intersection_tag                                   Itag;
-    // typedef CGAL::No_constraint_intersection_requiring_constructions_tag  Itag;
+    typedef CGAL::No_constraint_intersection_tag                          Itag;
     typedef CGAL::Constrained_Delaunay_triangulation_2<Gt, Tds, Itag>     Tb;
     typedef CGAL::Triangulation_hierarchy_2<Tb>                           Triangulation;
     typedef Triangulation::Vertex_handle                                  Vertex_handle;

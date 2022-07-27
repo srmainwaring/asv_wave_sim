@@ -1603,7 +1603,7 @@ TEST(CGAL, CreateConstrainedTrianguation4) {
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
   typedef CGAL::Constrained_triangulation_face_base_2<K>      Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
-  typedef CGAL::No_intersection_tag                          Itag;
+  typedef CGAL::No_constraint_intersection_tag                Itag;
   typedef CGAL::Constrained_triangulation_2<K, Tds>           TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
@@ -1647,7 +1647,7 @@ TEST(CGAL, CreateCTAlt) {
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
   typedef CGAL::Constrained_triangulation_face_base_2<K>      Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
-  typedef CGAL::No_intersection_tag                          Itag;
+  typedef CGAL::No_constraint_intersection_tag                Itag;
   typedef CGAL::Constrained_triangulation_2<K, Tds>           TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
@@ -1693,7 +1693,7 @@ TEST(CGAL, CreateCTAltN) {
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
   typedef CGAL::Constrained_triangulation_face_base_2<Kp>     Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
-  typedef CGAL::No_intersection_tag                           Itag;
+  typedef CGAL::No_constraint_intersection_tag                Itag;
   typedef CGAL::Constrained_Delaunay_triangulation_2<Kp, Tds> TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
