@@ -103,11 +103,11 @@ float3x3 m_inverse(float3x3 m)
   float det = a*A + b*B + c*C;
   float inv_det = 1.0/det;
 
-  float3x3 out = float3x3(
+  float3x3 inv = float3x3(
       A, D, G, B, E, H, C, F, I);
-  out = out * inv_det;
+  inv = inv * inv_det;
 
-  return out;
+  return inv;
 }
 
 vertex PS_INPUT main_metal
@@ -144,9 +144,6 @@ vertex PS_INPUT main_metal
 
   float4 P = input.position.xyzw;
 
-  float3 T = float3(0.0, 0.0, 0.0);
-  float3 N = float3(0.0, 0.0, 0.0);
-
   // debug check to establish which vertex quadrant the uv0 maps to
   // P.y += ((1 - input.uv0.x) > 0.5 && input.uv0.y > 0.5) ? 10.0 : 0.0;
 
@@ -158,10 +155,10 @@ vertex PS_INPUT main_metal
   P.z += displacements.z;
 
   float4 tangent = tangentMap.sample(tangentMapSampler, texcoord);
-  T += tangent.xyz;
+  float3 T = tangent.xyz;
 
   float4 normal = normalMap.sample(normalMapSampler, texcoord);
-  N += normal.xyz;
+  float3 N = normal.xyz;
  
   T = normalize(normal_matrix * T);
   N = normalize(normal_matrix * N);
