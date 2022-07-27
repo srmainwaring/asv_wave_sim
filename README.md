@@ -37,26 +37,27 @@ You will need a working installation of Gazebo Garden in order to use this packa
 
 The dependency on ROS has been removed.
 
-## Ubuntu (pending tests)
+### macOS
+
+- macOS Big Sur Version 11.6.2
+- Gazebo Garden
+
+Install CGAL and FFTW:
+
+```bash
+brew install cgal fftw
+```
+
+## Ubuntu (VM)
 
 - Ubuntu 22.04
 - Gazebo Garden
 
-Install CGAL:
+Install CGAL and FFTW:
 
 ```bash
-sudo apt-get install libcgal-dev
-```
+sudo apt-get install libcgal-dev libfftw3-dev
 
-### macOS
-
-- OSX 11.6.2
-- Gazebo Garden
-
-Install CGAL (5.3.1):
-
-```bash
-brew install cgal
 ```
 
 ## Installation
