@@ -63,29 +63,77 @@ uniform sampler2D heightMap;
 uniform sampler2D normalMap;
 uniform sampler2D tangentMap;
 
+float m_det(mat3 m)
+{
+  float a = m[0][0];
+  float b = m[0][1];
+  float c = m[0][2];
+  float d = m[1][0];
+  float e = m[1][1];
+  float f = m[1][2];
+  float g = m[2][0];
+  float h = m[2][1];
+  float i = m[2][2];
+  float A =  (e*i - f*h);
+  float B = -(d*i - f*g);
+  float C =  (d*h - e*g);
+  float det = a*A + b*B + c*C;
+  return det;
+ }
+
+mat3 m_inverse(mat3 m)
+{
+  float a = m[0][0];
+  float b = m[0][1];
+  float c = m[0][2];
+  float d = m[1][0];
+  float e = m[1][1];
+  float f = m[1][2];
+  float g = m[2][0];
+  float h = m[2][1];
+  float i = m[2][2];
+  float A =  (e*i - f*h);
+  float B = -(d*i - f*g);
+  float C =  (d*h - e*g);
+  float D = -(b*i - c*h);
+  float E =  (a*i - c*g);
+  float F = -(a*h - b*g);
+  float G =  (b*f - c*e);
+  float H = -(a*f - c*d);
+  float I =  (a*e - b*d);
+  float det = a*A + b*B + c*C;
+  float inv_det = 1.0/det;
+
+  mat3 inv = mat3(
+      A, D, G, B, E, H, C, F, I);
+  inv = inv * inv_det;
+
+  return inv;
+}
+
 void main()
 {
   vec2 resolution = vec2(1.0, 1.0) * 16.0;
 
-  mat4 model = world_matrix;
+  mat4 worldM = world_matrix;
 
   // compute normal matrix
-  // vec3 model0 = model[0].xyz;
-  // vec3 model1 = model[1].xyz;
-  // vec3 model2 = model[2].xyz;
-  // mat3 model_inv = inverse(mat3(
-  //     model0.x, model0.y, model0.z,
-  //     model1.x, model1.y, model1.z,
-  //     model2.x, model2.y, model2.z));
-  // mat3 normal_matrix = transpose(model_inv);
+  vec3 model0 = worldM[0].xyz;
+  vec3 model1 = worldM[1].xyz;
+  vec3 model2 = worldM[2].xyz;
+  mat3 model = mat3(
+    model0.x, model0.y, model0.z,
+    model1.x, model1.y, model1.z,
+    model2.x, model2.y, model2.z);
+  mat3 inv_model = m_inverse(model);
+  mat3 normal_matrix = transpose(inv_model);
 
   vec4 P = position.xyzw;
 
   // debug check to establish which vertex quadrant the uv0 maps to
-//  P.z += ((1 - uv0.x) > 0.5 && uv0.y > 0.5) ? 10.0 : 0.0;
-  //P.z += (uv0.x > 0.5 && uv0.y > 0.5) ? 10.0 : 0.0;
+  // P.z += ((1 - uv0.x) > 0.5 && uv0.y > 0.5) ? 10.0 : 0.0;
 
-  vec2 texcoord = vec2(/*1.0 - */ uv0.x, /*1.0 -*/ uv0.y);
+  vec2 texcoord = vec2(/*1.0 - */ uv0.x, 1.0 - uv0.y);
 
   // Displacement map
   vec4 displacements = texture(heightMap, texcoord);
@@ -94,12 +142,13 @@ void main()
   P.z += displacements.z;
 
   vec4 tangent = texture(tangentMap, texcoord);
-  vec3 T = (model * tangent).xyz;
-  T = normalize(T);
+  vec3 T = tangent.xyz;
 
   vec4 normal = texture(normalMap, texcoord);
-  vec3 N = (model * normal).xyz;
-  N = normalize(N);
+  vec3 N = normal.xyz;
+
+  T = normalize(normal_matrix * T);
+  N = normalize(normal_matrix * N);
 
   vec3 B = cross(N, T);
   B = normalize(B);
@@ -116,5 +165,5 @@ void main()
   outVs.bumpCoord = uv0.xy * bumpScale * resolution + t * bumpSpeed;
 
   // Eye position in world space
-  outVs.eyeVec = (model * P).xyz - camera_position;
+  outVs.eyeVec = (worldM * P).xyz - camera_position;
 }
