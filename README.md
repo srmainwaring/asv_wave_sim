@@ -1,31 +1,12 @@
 # Gazebo Waves
 
-This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
+This package contains plugins that support the simulation of waves and surface vessels in [Gazebo](https://gazebosim.org/home).
 
-![Gazebo Waves](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-waves-v4b.jpg)
+![Gazebo Waves](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-waves-v5b.jpg)
 
-The latest version represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It attempts to be compliant with the naming conventions used in the community note: [A new era for Gazebo](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356).
+The latest version represents a major reworking of the wave simulation code originally developed for Gazebo9 and Gazebo11. It complies with the naming conventions used in the community note [*"A new era for Gazebo"*](https://community.gazebosim.org/t/a-new-era-for-gazebo/1356) and targets [Gazebo Garden](https://gazebosim.org/docs/garden) or later.
 
-The simulation includes new features such as Ocean tiling and different wave generation methods. There are some changes in the way that the wave parameters need to be set, but as far possible we have attempted to retain compatibility with the Gazebo 11 version. Further details are described below.
-
-The library has additional dependencies on two FFT libraries:
-
-- [clMathLibraries/clFFT](https://github.com/clMathLibraries/clFFT)
-- [fftw](http://www.fftw.org/)
-
-These can be installed on linux with:
-
-```bash
-sudo apt-get update && apt-get install fftw clfft
-```
-
-And on macOS with:
-
-```bash
-brew fftw3 libclfft-dev libfftw3-dev
-```
-
-Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated and the simulation now supports the ogre2 render engine.
+There are new features including FFT wave generation methods, ocean tiling, and support for the ogre2 render engine. There are some changes in the way that the wave parameters need to be set, but as far possible we have attempted to retain compatibility with the Gazebo9 version. Further details are described below.
 
 ## Previous version
 
@@ -33,30 +14,32 @@ The previous version can be obtained by either checking out the tag `v0.1.2` or 
 
 ## Dependencies
 
-You will need a working installation of Gazebo Garden in order to use this package. This will require a from source build, see the [Gazebo Garden documents](https://gazebosim.org/docs/garden) for details.
+- Install [Gazebo Garden](https://gazebosim.org/docs/garden) which may need to be built from source.
+- The simulation uses the [CGAL](https://www.cgal.org/) library for mesh manipulation and [FFTW](http://www.fftw.org/) to compute Fourier transforms. Both libraries are licensed GPLv3.
+- The dependency on ROS has been removed.
 
-The dependency on ROS has been removed.
-
-## Ubuntu (pending tests)
-
-- Ubuntu 22.04
-- Gazebo Garden
-
-Install CGAL:
+### macOS Big Sur Version 11.6.2
 
 ```bash
-sudo apt-get install libcgal-dev
+brew install cgal fftw
 ```
 
-### macOS
-
-- OSX 11.6.2
-- Gazebo Garden
-
-Install CGAL (5.3.1):
+### Ubuntu 22.04
 
 ```bash
-brew install cgal
+sudo apt-get install libcgal-dev libfftw3-dev
+```
+
+If running on an Ubuntu virtual machine you may need to use software rendering if the hypervisor does not support hardware acceleration for OpenGL 4.2+. Install `mesa-utils` to enable llvmpipe:
+
+```bash
+sudo apt-get install mesa-utils
+```
+
+To use the llvmpipe software renderer, prefix Gazebo commands with the `LIBGL_ALWAYS_SOFTWARE` environment variable:
+
+```bash
+LIBGL_ALWAYS_SOFTWARE=1 gz sim waves.sdf
 ```
 
 ## Installation
@@ -65,7 +48,7 @@ We suppose the Gazebo source has been cloned to a developer workspace `~/gz_ws/s
 
 ### Build Gazebo
 
-On macOS you can build with the `RPATH` settings disabled. This allows you to run Gazebo from the install directory without having to disable SIP. From `~/gz_ws` run:
+On macOS you can run Gazebo from the install directory without having to disable SIP by disabling the `RPATH` option in the build:
 
 ```bash
 colcon build --merge-install --cmake-args \
@@ -105,6 +88,16 @@ Then re-source the workspace:
 source ./install/setup.zsh
 ```
 
+### Build the GUI plugin (optional) 
+
+There is an optional GUI plugin that controls the wave parameters.
+
+```bash
+cd ~/gz_ws/src/asv_wave_sim/gz-waves/src/gui/plugins/waves_control 
+mkdir build && cd build
+cmake .. && make
+```
+
 ## Usage
 
 ### Set environment variables
@@ -125,6 +118,10 @@ export GZ_SIM_RESOURCE_PATH=\
 $HOME/gz_ws/src/asv_wave_sim/gz-waves-models/models:\
 $HOME/gz_ws/src/asv_wave_sim/gz-waves-models/world_models:\
 $HOME/gz_ws/src/asv_wave_sim/gz-waves-models/worlds
+
+# ensure the gui plugin is found
+export GZ_GUI_PLUGIN_PATH=\
+$HOME/gz_ws/src/asv_wave_sim/gz-waves/src/gui/plugins/waves_control/build
 ```
 
 ## Examples
@@ -173,12 +170,12 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
       <tile_size>256</tile_size>
       <cell_count>128</cell_count>
       
-      <!-- `fft` waves parameters -->
+      <!-- Either: `fft` waves parameters -->
       <wind_speed>5.0</wind_speed>
       <wind_angle_deg>45</wind_angle_deg>
       <steepness>1</steepness>
 
-      <!-- `trochoid` waves parameters -->
+      <!-- Or: `trochoid` waves parameters -->
       <number>3</number>
       <scale>1.5</scale>
       <angle>0.4</angle>
@@ -191,12 +188,133 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
 </plugin>
 ```
 
+The waves visual plugin has the same algorithm elements as the model plugin and extra elements to control the shading algorithm. Two approaches are available:
+
+  - `DYNAMIC_GEOMETRY` uses PBS shaders and is suitable for small areas.
+  - `DYNAMIC_TEXTURE` uses a custom shader and is suitable for tiled areas.
+
+```xml
+<plugin
+    filename="gz-waves1-waves-visual-system"
+    name="gz::sim::systems::WavesVisual">
+  <static>0</static>
+
+  <!-- set the mesh deformation method  -->
+  <mesh_deformation_method>DYNAMIC_GEOMETRY</mesh_deformation_method>
+
+  <!-- number of additional tiles along each axis -->
+  <tiles_x>-1 1</tiles_x>
+  <tiles_y>-1 1</tiles_y>
+  <wave>
+    <!-- `fft` wave parameters -->
+    <algorithm>fft</algorithm>
+    <tile_size>100</tile_size>
+    <cell_count>256</cell_count>
+    <wind_speed>5</wind_speed>
+    <wind_angle_deg>135</wind_angle_deg>
+    <steepness>2</steepness>
+  </wave>
+
+  <!--
+    Shader parameters only apply when using DYNAMIC_TEXTURE
+  -->
+
+  <!-- shader program -->
+  <shader language="glsl">
+    <vertex>materials/waves_vs.glsl</vertex>
+    <fragment>materials/waves_fs.glsl</fragment>
+  </shader>
+  <shader language="metal">
+    <vertex>materials/waves_vs.metal</vertex>
+    <fragment>materials/waves_fs.metal</fragment>
+  </shader>
+
+  <!-- vertex shader params -->
+  <param>
+    <shader>vertex</shader>
+    <name>world_matrix</name>
+  </param>
+  <param>
+    <shader>vertex</shader>
+    <name>worldviewproj_matrix</name>
+  </param>
+  <param>
+    <shader>vertex</shader>
+    <name>camera_position</name>
+  </param>
+  <param>
+    <shader>vertex</shader>
+    <name>rescale</name>
+    <value>0.5</value>
+    <type>float</type>
+  </param>
+  <param>
+    <shader>vertex</shader>
+    <name>bumpScale</name>
+    <value>64 64</value>
+    <type>float_array</type>
+  </param>
+  <param>
+    <shader>vertex</shader>
+    <name>bumpSpeed</name>
+    <value>0.01 0.01</value>
+    <type>float_array</type>
+  </param>
+  <param>
+    <shader>vertex</shader>
+    <name>t</name>
+    <value>TIME</value>
+  </param>
+
+  <!-- pixel shader params -->
+  <param>
+    <shader>fragment</shader>
+    <name>deepColor</name>
+    <value>0.0 0.05 0.2 1.0</value>
+    <type>float_array</type>
+  </param>
+  <param>
+    <shader>fragment</shader>
+    <name>shallowColor</name>
+    <value>0.0 0.1 0.3 1.0</value>
+    <type>float_array</type>
+  </param>
+  <param>
+    <shader>fragment</shader>
+    <name>fresnelPower</name>
+    <value>5.0</value>
+    <type>float</type>
+  </param>
+  <param>
+    <shader>fragment</shader>
+    <name>hdrMultiplier</name>
+    <value>0.4</value>
+    <type>float</type>
+  </param>
+  <param>
+    <shader>fragment</shader>
+    <name>bumpMap</name>
+    <value>materials/wave_normals.dds</value>
+    <type>texture</type>
+    <arg>0</arg>
+  </param>
+  <param>
+    <shader>fragment</shader>
+    <name>cubeMap</name>
+    <value>materials/skybox_lowres.dds</value>
+    <type>texture_cube</type>
+    <arg>1</arg>
+  </param>
+
+</plugin>
+```
+
+
 ### Hydrodynamics plugin
 
 - The `filename` and `name` attributes for the hydrodynamics plugin have changed.
 - The hydrodynamics parameters are now scoped in an additional `<hydrodynamics>` element.
 - The `<wave_model>` element is not currently used.
-- The `<markers>` element is not currently used (not implemented).
 
 ```xml
 <plugin
@@ -224,6 +342,14 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
     <fSDrag>0.4</fSDrag>
     <vRDrag>1.0</vRDrag>
   </hydrodynamics>
+
+  <!-- Control visibility of markers -->
+  <markers>
+    <update_rate>10</update_rate>
+    <water_patch>1</water_patch>
+    <waterline>1</waterline>
+    <underwater_surface>1</underwater_surface>
+  </markers>
 </plugin>
 ```
 
