@@ -1,0 +1,50 @@
+<?xml version='1.0' ?>
+<sdf version="1.6">
+  <model name="sphere">
+    <static>true</static>
+    <link name="sphere_link">
+      <visual name="sphere_visual">
+        <geometry>
+          <sphere>
+            <radius>0.5</radius>
+          </sphere>
+        </geometry>
+        <plugin
+            filename="ignition-gazebo-shader-param-system"
+            name="ignition::gazebo::systems::ShaderParam">
+          <shader language='glsl'>
+            <vertex>materials/deform_vs.glsl</vertex>
+            <fragment>materials/deform_fs.glsl</fragment>
+          </shader>
+          <shader language='metal'>
+            <vertex>materials/deform_vs.metal</vertex>
+            <fragment>materials/deform_fs.metal</fragment>
+          </shader>
+          <param>
+            <shader>fragment</shader>
+            <name>color</name>
+            <value>1.0 0.0 0.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>t</name>
+            <value>TIME</value>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>worldviewproj_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>worldview_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>inverse_transpose_world_matrix</name>
+          </param>
+        </plugin>
+      </visual>
+    </link>
+  </model>
+</sdf>
