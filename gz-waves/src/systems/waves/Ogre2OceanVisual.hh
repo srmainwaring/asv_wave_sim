@@ -16,17 +16,13 @@
 #ifndef GZ_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 #define GZ_RENDERING_OGRE2_OGRE2OCEANVISUAL_HH_
 
+#include "BaseOceanVisual.hh"
+
 #include "gz/waves/OceanTile.hh"
 
-#include <gz/rendering/base/BaseVisual.hh>
 #include <gz/rendering/ogre2/Ogre2Visual.hh>
 
 #include <memory>
-
-namespace Ogre
-{
-  class MovableObject;
-}
 
 namespace gz
 {
@@ -39,10 +35,9 @@ namespace gz
 
     /// \brief Ogre2.x implementation of an ocean visual class
     class GZ_RENDERING_OGRE2_VISIBLE Ogre2OceanVisual :
-      public Ogre2Visual
+      public BaseOceanVisual<Ogre2Visual>
     {
       /// \brief Constructor
-      // protected: Ogre2OceanVisual();
       public: Ogre2OceanVisual();
 
       /// \brief Destructor
@@ -64,29 +59,30 @@ namespace gz
       public: virtual void SetMaterial(
         MaterialPtr _material, bool _unique) override;
 
-
       /// \brief Load a dynamic cube (example)
-      public: void LoadCube();
+      public: virtual void LoadCube() override;
 
       /// \brief Load from an ocean tile
-      public: void LoadOceanTile(waves::visual::OceanTilePtr _oceanTile);
+      public: virtual void LoadOceanTile(
+          waves::visual::OceanTilePtr _oceanTile) override;
 
       /// \brief Update from an ocean tile
-      public: void UpdateOceanTile(waves::visual::OceanTilePtr _oceanTile);
+      public: virtual void UpdateOceanTile(
+          waves::visual::OceanTilePtr _oceanTile) override;
 
       /// \brief Load from a mesh
-      public: void LoadMesh(gz::common::MeshPtr _mesh);
+      public: virtual void LoadMesh(gz::common::MeshPtr _mesh) override;
 
       /// \brief Update from a mesh
-      public: void UpdateMesh(gz::common::MeshPtr _mesh);
+      public: virtual void UpdateMesh(gz::common::MeshPtr _mesh) override;
 
       /// \brief Set material to geometry.
       /// \param[in] _material Ogre material.
       protected: virtual void SetMaterialImpl(Ogre2MaterialPtr _material);
 
       /// \brief Work-around the protected accessors and protected methods in Scene
-      public: void InitObject(Ogre2ScenePtr _scene,
-          unsigned int _id, const std::string &_name);
+      public: virtual void InitObject(ScenePtr _scene,
+          unsigned int _id, const std::string &_name) override;
 
       private: friend class Ogre2Scene;
 

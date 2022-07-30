@@ -21,6 +21,7 @@
 #include <gz/common.hh>
 #include <gz/common/SubMesh.hh>
 #include <gz/rendering/ogre2/Ogre2Material.hh>
+#include <gz/rendering/ogre2/Ogre2Scene.hh>
 
 #ifdef _MSC_VER
   #pragma warning(push, 0)
@@ -346,12 +347,15 @@ void Ogre2OceanVisual::SetMaterialImpl(Ogre2MaterialPtr _material)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanVisual::InitObject(Ogre2ScenePtr _scene,
+void Ogre2OceanVisual::InitObject(ScenePtr _scene,
     unsigned int _id, const std::string &_name)
 {
+  rendering::Ogre2ScenePtr ogre2Scene =
+      std::dynamic_pointer_cast<rendering::Ogre2Scene>(_scene);
+
   this->id = _id;
   this->name = _name;
-  this->scene = _scene;
+  this->scene = ogre2Scene;
 
   // initialize object
   this->Load();
