@@ -16,7 +16,7 @@ gz_add_system(waves-visual
     gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
     gz-rendering${GZ_RENDERING_VER}-ogre2
     gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
-    IgnOGRE2::IgnOGRE2
+    GzOGRE2::GzOGRE2
     ${FFT_LIBRARIES}
 )
 
