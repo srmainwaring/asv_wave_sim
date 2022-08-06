@@ -10,8 +10,8 @@
           </sphere>
         </geometry>
         <plugin
-            filename="ignition-gazebo-shader-param-system"
-            name="ignition::gazebo::systems::ShaderParam">
+            filename="gz-sim-shader-param-system"
+            name="gz::sim::systems::ShaderParam">
           <shader language='glsl'>
             <vertex>materials/deform_vs.glsl</vertex>
             <fragment>materials/deform_fs.glsl</fragment>
