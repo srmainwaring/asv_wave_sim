@@ -20,6 +20,15 @@ gz_add_system(waves-visual
     ${FFT_LIBRARIES}
 )
 
+gz_add_system(test-visual
+  SOURCES
+    TestVisual.cc
+  PUBLIC_LINK_LIBS
+    ${rendering_target}
+    gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+    gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
+    gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
+)
 
 gz_add_system(waves-model
   SOURCES
