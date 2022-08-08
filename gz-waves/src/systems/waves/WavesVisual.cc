@@ -38,6 +38,12 @@
 #include "Ogre2OceanVisual.hh"
 #include "Ogre2OceanGeometry.hh"
 
+#include "OceanGeometry.hh"
+#include "BaseOceanGeometry.hh"
+
+#include "OceanVisual.hh"
+#include "BaseOceanVisual.hh"
+
 #include "gz/waves/OceanTile.hh"
 #include "gz/waves/Utilities.hh"
 #include "gz/waves/WaveParameters.hh"
@@ -375,8 +381,8 @@ class gz::sim::systems::WavesVisualPrivate
   public: rendering::MaterialPtr oceanMaterial;
 
   /// \brief Pointer to ocean visual
-  public: std::vector<rendering::Ogre2OceanVisualPtr> oceanOgreVisuals;
-  public: std::vector<rendering::VisualPtr> oceanVisuals;
+  public: std::vector<rendering::OceanVisualPtr> oceanVisuals;
+  public: std::vector<rendering::VisualPtr> oceanVisuals2;
   public: std::vector<rendering::Ogre2OceanGeometryPtr> oceanGeometries;
 
   public: MeshDeformationMethod meshDeformationMethod{
@@ -470,11 +476,13 @@ class gz::sim::systems::WavesVisualPrivate
 WavesVisual::WavesVisual()
     : System(), dataPtr(std::make_unique<WavesVisualPrivate>())
 {
+  gzmsg << "WavesVisual: constructing\n";
 }
 
 /////////////////////////////////////////////////
 WavesVisual::~WavesVisual()
 {
+  gzmsg << "WavesVisual: destructing\n";
 }
 
 /////////////////////////////////////////////////
@@ -727,9 +735,8 @@ WavesVisualPrivate::~WavesVisualPrivate()
   }
 
   // Remove visuals
-  for (auto& ogreVisual : this->oceanVisuals)
+  for (auto& vis : this->oceanVisuals2)
   {
-    auto vis = ogreVisual;
     if (vis != nullptr)
     {
       vis->Destroy();
@@ -812,7 +819,7 @@ void WavesVisualPrivate::OnUpdate()
     case MeshDeformationMethod::DYNAMIC_GEOMETRY:
     {
       // Test attaching another visual to the entity
-      if (this->oceanVisuals.empty() && oceanOgreVisuals.empty())
+      if (this->oceanVisuals2.empty() && oceanVisuals.empty())
       {
         gzmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
 
@@ -835,8 +842,8 @@ void WavesVisualPrivate::OnUpdate()
         this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
 
         // scene: use in object initialisation work-around
-        rendering::Ogre2ScenePtr ogre2Scene =
-            std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
+        // rendering::Ogre2ScenePtr ogre2Scene =
+        //     std::dynamic_pointer_cast<rendering::Ogre2Scene>(this->scene);
 
         // Hide the primary visual
         this->visual->SetVisible(false);
@@ -869,19 +876,19 @@ void WavesVisualPrivate::OnUpdate()
             // gzmsg << "Creating visual: tile: ["
             //     << ix << ", " << iy << "]"
             //     << ", name: " << objName << "\n";
-            rendering::Ogre2OceanVisualPtr ogreVisual =
+            rendering::OceanVisualPtr oceanVisual =
                 std::make_shared<rendering::Ogre2OceanVisual>(); 
-            ogreVisual->InitObject(ogre2Scene, objId, objName);
-            ogreVisual->LoadMesh(this->oceanTileMesh);
+            oceanVisual->InitObject(this->scene, objId, objName);
+            oceanVisual->LoadMesh(this->oceanTileMesh);
 
-            ogreVisual->SetLocalPosition(tilePosition);
-            ogreVisual->SetMaterial(this->oceanMaterial, false);
-            ogreVisual->SetVisible(true);
+            oceanVisual->SetLocalPosition(tilePosition);
+            oceanVisual->SetMaterial(this->oceanMaterial, false);
+            oceanVisual->SetVisible(true);
 
             // add visual to parent
             auto parent = this->visual->Parent();
-            parent->AddChild(ogreVisual);
-            this->oceanOgreVisuals.push_back(ogreVisual);
+            parent->AddChild(oceanVisual);
+            this->oceanVisuals.push_back(oceanVisual);
 #else
             // create name
             std::stringstream ss;
@@ -908,14 +915,14 @@ void WavesVisualPrivate::OnUpdate()
             // add visual to parent
             auto parent = this->visual->Parent();
             parent->AddChild(oceanVisual);
-            this->oceanVisuals.push_back(oceanVisual);
+            this->oceanVisuals2.push_back(oceanVisual);
             this->oceanGeometries.push_back(geometry);
 #endif
           }
         }
       }
 
-      if ((this->oceanVisuals.empty() && oceanOgreVisuals.empty()) || this->isStatic)
+      if ((this->oceanVisuals2.empty() && oceanVisuals.empty()) || this->isStatic)
         return;
 
       if (this->waveParamsDirty)
@@ -930,7 +937,7 @@ void WavesVisualPrivate::OnUpdate()
       this->oceanTile->UpdateMesh(simTime, this->oceanTileMesh.get());
 
 #if GZ_WAVES_UPDATE_VISUALS
-      for (auto& vis : this->oceanOgreVisuals)
+      for (auto& vis : this->oceanVisuals)
       {
         vis->UpdateMesh(this->oceanTileMesh);
       }
@@ -945,7 +952,7 @@ void WavesVisualPrivate::OnUpdate()
     case MeshDeformationMethod::DYNAMIC_TEXTURE:
     {
       // Test attaching a gz::common::Mesh to the entity
-      if (this->oceanVisuals.empty())
+      if (this->oceanVisuals2.empty())
       {
         gzmsg << "WavesVisual: creating dynamic texture ocean visual\n";
 
@@ -997,7 +1004,7 @@ void WavesVisualPrivate::OnUpdate()
             // add visual to parent
             auto parent = this->visual->Parent();
             parent->AddChild(oceanVisual);
-            this->oceanVisuals.push_back(oceanVisual);
+            this->oceanVisuals2.push_back(oceanVisual);
          }
         }
 
@@ -1006,7 +1013,7 @@ void WavesVisualPrivate::OnUpdate()
         this->InitTextures();
       }
 
-      if (this->oceanVisuals.empty() || this->isStatic)
+      if (this->oceanVisuals2.empty() || this->isStatic)
         return;
 
       if (this->waveParamsDirty)

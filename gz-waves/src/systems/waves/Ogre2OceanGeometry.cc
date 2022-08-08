@@ -23,7 +23,7 @@
 
 #include <gz/common.hh>
 #include <gz/rendering/ogre2/Ogre2Material.hh>
-
+#include <gz/rendering/ogre2/Ogre2Scene.hh>
 
 /// \brief Private implementation
 class gz::rendering::Ogre2OceanGeometryPrivate
@@ -208,12 +208,15 @@ void Ogre2OceanGeometry::UpdateMesh(gz::common::MeshPtr _mesh)
 }
 
 //////////////////////////////////////////////////
-void Ogre2OceanGeometry::InitObject(Ogre2ScenePtr _scene,
+void Ogre2OceanGeometry::InitObject(ScenePtr _scene,
     unsigned int _id, const std::string &_name)
 {
+  rendering::Ogre2ScenePtr ogre2Scene =
+      std::dynamic_pointer_cast<rendering::Ogre2Scene>(_scene);
+
   this->id = _id;
   this->name = _name;
-  this->scene = _scene;
+  this->scene = ogre2Scene;
 
   // initialize object
   this->Load();

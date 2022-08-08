@@ -18,34 +18,35 @@
 #ifndef GZ_RENDERING_OGRE2_OGRE2OCEANGEOMETRY_HH_
 #define GZ_RENDERING_OGRE2_OGRE2OCEANGEOMETRY_HH_
 
+#include "BaseOceanGeometry.hh"
+
 #include <gz/rendering/ogre2/Export.hh>
 #include <gz/rendering/ogre2/Ogre2Geometry.hh>
 #include <gz/rendering/RenderTypes.hh>
-// #include <gz/rendering/Scene.hh>
 
 #include <memory>
+
+namespace Ogre
+{
+  class MovableObject;
+}
 
 namespace gz
 {
   namespace rendering
   {
     inline namespace GZ_RENDERING_VERSION_NAMESPACE {
-    //
-    // forward declarations
+    // Forward declarations
     class Ogre2OceanGeometryPrivate;
 
-    /*  \class Ogre2OceanGeometry Ogre2OceanGeometry.hh \
-     *  gz/rendering/ogre2/Ogre2OceanGeometry.hh
-     */
     /// \brief Ocean geometry class based on a dynamic mesh
     class GZ_RENDERING_OGRE2_VISIBLE Ogre2OceanGeometry :
-        public Ogre2Geometry
+        public BaseOceanGeometry<Ogre2Geometry>
     {
       /// \brief Constructor
-      /// \param[in] _scene Pointer to scene
       public: explicit Ogre2OceanGeometry();
 
-      /// \brief Virtual destructor
+      /// \brief Destructor
       public: virtual ~Ogre2OceanGeometry();
 
       // Documentation inherited.
@@ -68,14 +69,14 @@ namespace gz
         SetMaterial(MaterialPtr _material, bool _unique) override;
 
       /// \brief Load from a mesh
-      public: void LoadMesh(gz::common::MeshPtr _mesh);
+      public: virtual void LoadMesh(gz::common::MeshPtr _mesh) override;
 
       /// \brief Update from a mesh
-      public: void UpdateMesh(gz::common::MeshPtr _mesh);
+      public: virtual void UpdateMesh(gz::common::MeshPtr _mesh) override;
 
       /// \brief Work-around the protected accessors and protected methods in Scene
-      public: void InitObject(Ogre2ScenePtr _scene,
-          unsigned int _id, const std::string &_name);
+      public: virtual void InitObject(ScenePtr _scene,
+          unsigned int _id, const std::string &_name) override;
 
       /// \brief OceanGeometry should be created by scene.
       private: friend class Ogre2Scene;
