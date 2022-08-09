@@ -50,6 +50,9 @@ namespace gz
           unsigned int _id, const std::string &_name) = 0;
 
     };
+
+    typedef std::shared_ptr<OceanGeometry> OceanGeometryPtr;
+
     }
   }
 }
