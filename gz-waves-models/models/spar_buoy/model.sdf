@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="spar_buoy">        
+    <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+    </plugin>
+    <link name="base_link">
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <length>4.0</length>
+            <radius>0.25</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>1 0 0 1</ambient>
+          <diffuse>1 0 0 1</diffuse>
+          <specular>0.8 0.8 0.8 1</specular>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <length>4.0</length>
+            <radius>0.25</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 -1.5 0 0 0</pose>
+        <mass>589.0</mass>
+        <inertia>
+          <ixx>58.29</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>58.29</iyy>
+          <iyz>0.0</iyz>
+          <izz>18.41</izz>
+        </inertia>
+      </inertial>
+    </link>
+  </model>
+</sdf>
