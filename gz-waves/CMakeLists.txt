@@ -99,6 +99,19 @@ if (OGRE2_FOUND)
   set(HAVE_OGRE2 TRUE)
 endif()
 
+# Plugin install dirs
+# set(GZ_RENDERING_ENGINE_INSTALL_DIR
+#   ${CMAKE_INSTALL_PREFIX}/${IGN_LIB_INSTALL_DIR}/gz-${IGN_DESIGNATION}-${PROJECT_VERSION_MAJOR}/engine-plugins
+# )
+
+#####################################
+# Define compile-time default variables
+if(MSVC)
+  set(GZ_RENDERING_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
+else()
+  set(GZ_RENDERING_PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+endif()
+
 #--------------------------------------
 # Find eigen3
 # gz_find_package(

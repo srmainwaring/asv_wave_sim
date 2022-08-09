@@ -78,7 +78,7 @@ namespace gz
 
       /// \brief Get name of the render-engine.
       /// \return The render-engine name
-      // public: virtual std::string Name() const = 0;
+      public: virtual std::string Name() const = 0;
 
       /// \brief Get the number of scenes actively managed by this
       /// render-engine

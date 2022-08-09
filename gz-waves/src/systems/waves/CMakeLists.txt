@@ -7,13 +7,11 @@ link_directories(${GZ-RENDERING_LIBRARY_DIRS})
 #################################################
 gz_add_component(rendering
   SOURCES
-    OceanScene.cc
+    BaseRenderEngineExtension.cc
     RenderEngineExtensionManager.cc
     RenderEngineExtensionPlugin.cc
-  GET_TARGET_NAME
+GET_TARGET_NAME
     rendering_target
-  DEPENDS_ON_COMPONENTS
-    ${rendering_ogre2_target}
 )
 
 set_property(
@@ -36,11 +34,21 @@ gz_add_component(rendering-ogre2
     Ogre2DynamicMesh.cc
     Ogre2OceanGeometry.cc
     Ogre2OceanVisual.cc
+    Ogre2RenderEngineExtension.cc
+    OceanScene.cc
   GET_TARGET_NAME
     rendering_ogre2_target
-  # DEPENDS_ON_COMPONENTS
-  #   ${rendering_target}
+  DEPENDS_ON_COMPONENTS
+    ${rendering_target}
 )
+
+# set_property(
+#   SOURCE Ogre2RenderEngineExtension.cc
+#   PROPERTY COMPILE_DEFINITIONS
+#   GZ_RENDERING_RESOURCE_PATH="${GZ_RENDERING_RESOURCE_PATH}"
+#   OGRE2_RESOURCE_PATH="${OGRE2_RESOURCE_PATH}"
+#   OGRE2_VERSION="${OGRE2_VERSION}"
+# )
 
 target_link_directories(${rendering_ogre2_target}
   PUBLIC
@@ -53,6 +61,8 @@ target_link_libraries(${rendering_ogre2_target}
     gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
     gz-rendering${GZ_RENDERING_VER}-ogre2
     GzOGRE2::GzOGRE2
+  PRIVATE
+    gz-plugin${GZ_PLUGIN_VER}::register
 )
 
 #################################################

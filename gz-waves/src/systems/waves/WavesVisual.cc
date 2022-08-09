@@ -39,6 +39,9 @@
 #include "OceanGeometry.hh"
 #include "OceanVisual.hh"
 
+#include "RenderEngineExtension.hh"
+#include "RenderEngineExtensionManager.hh"
+
 #include "gz/waves/OceanTile.hh"
 #include "gz/waves/Utilities.hh"
 #include "gz/waves/WaveParameters.hh"
@@ -283,6 +286,10 @@ class gz::sim::systems::WavesVisualPrivate
 
   /// \brief Connection to pre-render event callback
   public: gz::common::ConnectionPtr connection{nullptr};
+
+  /// \brief RenderEngineExtension
+  public: rendering::RenderEngineExtension *extension{nullptr};
+
 };
 
 /////////////////////////////////////////////////
@@ -572,6 +579,16 @@ void WavesVisualPrivate::OnUpdate()
   }
 
   if (!this->scene)
+    return;
+
+  // load extensions
+  if (!this->extension)
+  {
+    extension = rendering::RenderEngineExtensionManager::Instance()->
+        Extension("ogre2");
+  }
+
+  if (!this->extension)
     return;
 
   if (!this->visual)
@@ -1506,9 +1523,9 @@ void WavesVisualPrivate::UpdateTextures()
 
 //////////////////////////////////////////////////
 GZ_ADD_PLUGIN(WavesVisual,
-                    gz::sim::System,
-                    WavesVisual::ISystemConfigure,
-                    WavesVisual::ISystemPreUpdate)
+              gz::sim::System,
+              WavesVisual::ISystemConfigure,
+              WavesVisual::ISystemPreUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(WavesVisual,
   "gz::sim::systems::WavesVisual")

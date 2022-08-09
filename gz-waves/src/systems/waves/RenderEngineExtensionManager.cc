@@ -97,10 +97,6 @@ class gz::rendering::RenderEngineExtensionManagerPrivate
   /// \brief Plugin loader for managing render extension plugin libraries.
   public: gz::plugin::Loader pluginLoader;
 
-  /// \brief Deprecated environment variable which holds paths to look for
-  /// plugins
-  public: std::string pluginPathEnvDeprecated = "IGN_RENDERING_PLUGIN_PATH";
-
   /// \brief Environment variable which holds paths to look for plugins
   public: std::string pluginPathEnv = "GZ_RENDERING_PLUGIN_PATH";
 
@@ -138,24 +134,14 @@ unsigned int RenderEngineExtensionManager::ExtensionCount() const
 //////////////////////////////////////////////////
 bool RenderEngineExtensionManager::HasExtension(const std::string &_name) const
 {
-  // Deprecated: accept ignition-prefixed extensions
-  auto name = _name;
-  auto pos = name.find("ignition");
-  if (pos != std::string::npos)
-  {
-    name.replace(pos, pos + 8, "gz");
-    gzwarn << "Trying to load deprecated plugin [" << _name << "]. Use ["
-           << name << "] instead." << std::endl;
-  }
-
   std::lock_guard<std::recursive_mutex> lock(this->dataPtr->extensionsMutex);
-  auto iter = this->dataPtr->extensions.find(name);
+  auto iter = this->dataPtr->extensions.find(_name);
 
   if (iter == this->dataPtr->extensions.end())
   {
     // Check if the provided name is a name of a default extension, if so,
     // translate the name to the shared library name
-    auto defaultIt = this->dataPtr->defaultExtensions.find(name);
+    auto defaultIt = this->dataPtr->defaultExtensions.find(_name);
     if (defaultIt != this->dataPtr->defaultExtensions.end())
       iter = this->dataPtr->extensions.find(defaultIt->second);
   }
@@ -167,24 +153,14 @@ bool RenderEngineExtensionManager::HasExtension(const std::string &_name) const
 bool RenderEngineExtensionManager::IsExtensionLoaded(
     const std::string &_name) const
 {
-  // Deprecated: accept ignition-prefixed extensions
-  auto name = _name;
-  auto pos = name.find("ignition");
-  if (pos != std::string::npos)
-  {
-    name.replace(pos, pos + 8, "gz");
-    gzwarn << "Trying to load deprecated plugin [" << _name << "]. Use ["
-           << name << "] instead." << std::endl;
-  }
-
   std::lock_guard<std::recursive_mutex> lock(this->dataPtr->extensionsMutex);
-  auto iter = this->dataPtr->extensions.find(name);
+  auto iter = this->dataPtr->extensions.find(_name);
 
   if (iter == this->dataPtr->extensions.end())
   {
     // Check if the provided name is a name of a default extension, if so,
     // translate the name to the shared library name
-    auto defaultIt = this->dataPtr->defaultExtensions.find(name);
+    auto defaultIt = this->dataPtr->defaultExtensions.find(_name);
     if (defaultIt != this->dataPtr->defaultExtensions.end())
     {
       iter = this->dataPtr->extensions.find(defaultIt->second);
@@ -266,32 +242,22 @@ RenderEngineExtension *RenderEngineExtensionManager::ExtensionAt(
 //////////////////////////////////////////////////
 bool RenderEngineExtensionManager::UnloadExtension(const std::string &_name)
 {
-  // Deprecated: accept ignition-prefixed extensions
-  auto name = _name;
-  auto pos = name.find("ignition");
-  if (pos != std::string::npos)
-  {
-    name.replace(pos, pos + 8, "gz");
-    gzwarn << "Trying to load deprecated plugin [" << _name << "]. Use ["
-           << name << "] instead." << std::endl;
-  }
-
   std::lock_guard<std::recursive_mutex> lock(this->dataPtr->extensionsMutex);
   // check in the list of available extensions
-  auto iter = this->dataPtr->extensions.find(name);
+  auto iter = this->dataPtr->extensions.find(_name);
 
   if (iter == this->dataPtr->extensions.end())
   {
     // Check if the provided name is a name of a default extension, if so,
     // translate the name to the shared library name
-    auto defaultIt = this->dataPtr->defaultExtensions.find(name);
+    auto defaultIt = this->dataPtr->defaultExtensions.find(_name);
     if (defaultIt != this->dataPtr->defaultExtensions.end())
       iter = this->dataPtr->extensions.find(defaultIt->second);
 
     if (iter == this->dataPtr->extensions.end())
     {
       gzerr << "No render-extension registered with name: "
-          << name << std::endl;
+          << _name << std::endl;
       return false;
     }
   }
@@ -452,47 +418,38 @@ void RenderEngineExtensionManagerPrivate::RegisterDefaultExtensions()
   // TODO(anyone): Find a cleaner way to get the default extension library name
 
   // cppcheck-suppress unreadVariable
-  std::string libName = "gz-rendering-";
+  // std::string libName = "gz-rendering-";
+  std::string libName = "gz-waves1-rendering-";
 
   // cppcheck-suppress unusedVariable
   std::string extensionName;
 
   std::lock_guard<std::recursive_mutex> lock(this->extensionsMutex);
-#if HAVE_OGRE
-  extensionName = "ogre";
-  this->defaultExtensions[extensionName] = libName + extensionName;
-  if (this->extensions.find(libName + extensionName) == this->extensions.end())
-    this->extensions[libName + extensionName] = nullptr;
-#endif
-#if HAVE_OGRE2
+// #if HAVE_OGRE
+//   extensionName = "ogre";
+//   this->defaultExtensions[extensionName] = libName + extensionName;
+//   if (this->extensions.find(libName + extensionName) == this->extensions.end())
+//     this->extensions[libName + extensionName] = nullptr;
+// #endif
+// #if HAVE_OGRE2
   extensionName = "ogre2";
   this->defaultExtensions[extensionName] = libName + extensionName;
   if (this->extensions.find(libName + extensionName) == this->extensions.end())
     this->extensions[libName + extensionName] = nullptr;
-#endif
-#if HAVE_OPTIX
-  extensionName = "optix";
-  this->defaultExtensions[extensionName] = libName + extensionName;
-  if (this->extensions.find(libName + extensionName) == this->extensions.end())
-    this->extensions[libName + extensionName] = nullptr;
-#endif
+// #endif
+// #if HAVE_OPTIX
+//   extensionName = "optix";
+//   this->defaultExtensions[extensionName] = libName + extensionName;
+//   if (this->extensions.find(libName + extensionName) == this->extensions.end())
+//     this->extensions[libName + extensionName] = nullptr;
+// #endif
 }
 
 //////////////////////////////////////////////////
 bool RenderEngineExtensionManagerPrivate::LoadExtensionPlugin(
     const std::string &_filename, const std::string &_path)
 {
-  // Deprecated: accept ignition-prefixed extensions
-  auto filename = _filename;
-  auto pos = filename.find("ignition");
-  if (pos != std::string::npos)
-  {
-    filename.replace(pos, pos + 8, "gz");
-    gzwarn << "Trying to load deprecated plugin [" << _filename << "]. Use ["
-           << filename << "] instead." << std::endl;
-  }
-
-  gzmsg << "Loading plugin [" << filename << "]" << std::endl;
+  gzmsg << "Loading plugin [" << _filename << "]" << std::endl;
 
   gz::common::SystemPaths systemPaths;
   systemPaths.SetPluginPathEnv(this->pluginPathEnv);
@@ -508,33 +465,13 @@ bool RenderEngineExtensionManagerPrivate::LoadExtensionPlugin(
   // Add extra search path.
   systemPaths.AddPluginPaths(_path);
 
-  auto pathToLib = systemPaths.FindSharedLibrary(filename);
-  if (pathToLib.empty())
-  {
-    // Try deprecated environment variable
-    common::SystemPaths systemPathsDep;
-    systemPathsDep.SetPluginPathEnv(this->pluginPathEnvDeprecated);
-    pathToLib = systemPathsDep.FindSharedLibrary(filename);
-    if (pathToLib.empty())
-    {
-      gzerr << "Failed to load plugin [" << filename <<
-               "] : couldn't find shared library." << std::endl;
-      return false;
-    }
-    else
-    {
-      gzwarn << "Found plugin [" << filename
-             << "] using deprecated environment variable ["
-             << this->pluginPathEnvDeprecated << "]. Please use ["
-             << this->pluginPathEnv << "] instead." << std::endl;
-    }
-  }
+  auto pathToLib = systemPaths.FindSharedLibrary(_filename);
 
   // Load plugin
   auto pluginNames = this->pluginLoader.LoadLib(pathToLib);
   if (pluginNames.empty())
   {
-    gzerr << "Failed to load plugin [" << filename <<
+    gzerr << "Failed to load plugin [" << _filename <<
               "] : couldn't load library on path [" << pathToLib <<
               "]." << std::endl;
     return false;
@@ -547,7 +484,7 @@ bool RenderEngineExtensionManagerPrivate::LoadExtensionPlugin(
   {
     std::stringstream error;
     error << "Found no render extension plugins in ["
-          << filename << "], available interfaces are:"
+          << _filename << "], available interfaces are:"
           << std::endl;
     for (auto pluginName : pluginNames)
     {
@@ -562,7 +499,7 @@ bool RenderEngineExtensionManagerPrivate::LoadExtensionPlugin(
   {
     std::stringstream warn;
     warn << "Found multiple render extension plugins in ["
-          << filename << "]:"
+          << _filename << "]:"
           << std::endl;
     for (auto pluginName : extensionNames)
     {
@@ -593,11 +530,11 @@ bool RenderEngineExtensionManagerPrivate::LoadExtensionPlugin(
   // This triggers the extension to be instantiated
   {
     std::lock_guard<std::recursive_mutex> lock(this->extensionsMutex);
-    this->extensions[filename] = renderPlugin->Extension();
+    this->extensions[_filename] = renderPlugin->Extension();
   }
 
   // store extension plugin data so plugin can be unloaded later
-  this->extensionPlugins[filename] = extensionName;
+  this->extensionPlugins[_filename] = extensionName;
 
   return true;
 }
