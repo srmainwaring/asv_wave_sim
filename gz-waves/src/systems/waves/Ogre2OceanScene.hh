@@ -13,17 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_RENDERING_OCEANSCENE_HH_
-#define GZ_RENDERING_OCEANSCENE_HH_
+#ifndef GZ_RENDERING_OGRE2_OCEANSCENE_HH_
+#define GZ_RENDERING_OGRE2_OCEANSCENE_HH_
 
-#include "OceanGeometry.hh"
-#include "OceanVisual.hh"
+#include "OceanScene.hh"
 
 #include <gz/rendering/config.hh>
 #include <gz/rendering/Scene.hh>
 #include "gz/rendering/Export.hh"
 
-#include <memory>
+#include <gz/rendering/ogre2/Export.hh>
 
 namespace gz
 {
@@ -31,19 +30,25 @@ namespace gz
   {
     inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-    class GZ_RENDERING_VISIBLE OceanScene
+    class GZ_RENDERING_OGRE2_VISIBLE Ogre2OceanScene :
+        public OceanScene
     {
+      /// \brief Constructor
+      public: Ogre2OceanScene();
+
       /// \brief Destructor
-      public: virtual ~OceanScene() = default;
+      public: virtual ~Ogre2OceanScene();
 
       /// \brief Create an ocean visual
-      public: virtual OceanVisualPtr CreateOceanVisual(ScenePtr _scene) = 0;
+      public: virtual OceanVisualPtr CreateOceanVisual(
+          ScenePtr _scene) override;
     
       /// \brief Create an ocean geometry
-      public: virtual OceanGeometryPtr CreateOceanGeometry(ScenePtr _scene) = 0;
-    };
+      public: virtual OceanGeometryPtr CreateOceanGeometry(
+          ScenePtr _scene) override;
 
-    typedef std::shared_ptr<OceanScene> OceanScenePtr;
+      private: unsigned int objId{50000};
+    };
 
     }
   }

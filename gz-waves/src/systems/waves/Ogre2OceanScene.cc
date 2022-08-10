@@ -14,31 +14,29 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "OceanScene.hh"
-
-#include "OceanVisual.hh"
-#include "BaseOceanVisual.hh"
-#include "Ogre2OceanVisual.hh"
+#include "Ogre2OceanScene.hh"
 
 #include "OceanGeometry.hh"
-#include "BaseOceanGeometry.hh"
+#include "OceanVisual.hh"
+
 #include "Ogre2OceanGeometry.hh"
+#include "Ogre2OceanVisual.hh"
 
 using namespace gz;
 using namespace rendering;
 
 //////////////////////////////////////////////////
-OceanScene::OceanScene()
+Ogre2OceanScene::Ogre2OceanScene()
 {
 }
 
 //////////////////////////////////////////////////
-OceanScene::~OceanScene()
+Ogre2OceanScene::~Ogre2OceanScene()
 {
 }
 
 //////////////////////////////////////////////////
-OceanVisualPtr OceanScene::CreateOceanVisual(ScenePtr _scene)
+OceanVisualPtr Ogre2OceanScene::CreateOceanVisual(ScenePtr _scene)
 {
   // create name and increment the object id
   std::stringstream ss;
@@ -54,7 +52,7 @@ OceanVisualPtr OceanScene::CreateOceanVisual(ScenePtr _scene)
 }
 
 //////////////////////////////////////////////////
-OceanGeometryPtr OceanScene::CreateOceanGeometry(ScenePtr _scene)
+OceanGeometryPtr Ogre2OceanScene::CreateOceanGeometry(ScenePtr _scene)
 {
   // create name and increment the object id
   std::stringstream ss;

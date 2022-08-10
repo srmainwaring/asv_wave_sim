@@ -37,6 +37,9 @@ namespace gz
   namespace rendering
   {
     inline namespace GZ_RENDERING_VERSION_NAMESPACE {
+    
+    // Forward declaration
+    class  Ogre2RenderEngineExtensionPrivate;
 
     class GZ_RENDERING_OGRE2_VISIBLE Ogre2RenderEngineExtensionPlugin :
       public RenderEngineExtensionPlugin
@@ -62,6 +65,8 @@ namespace gz
 
       public: virtual std::string Name() const override;
 
+      public: virtual OceanScenePtr OceanScene() const override;
+
       protected: virtual bool LoadImpl(
           const std::map<std::string, std::string> &_params) override;
 
@@ -70,6 +75,9 @@ namespace gz
       private: void LoadAttempt();
 
       private: void InitAttempt();
+
+      /// \brief Pointer to private data
+      private: std::unique_ptr<Ogre2RenderEngineExtensionPrivate> dataPtr;
 
       /// \brief Singleton setup
       private: friend class common::SingletonT<Ogre2RenderEngineExtension>;

@@ -17,6 +17,8 @@
 #ifndef GZ_RENDERING_RENDERENGINEEXTENSION_HH_
 #define GZ_RENDERING_RENDERENGINEEXTENSION_HH_
 
+#include "OceanScene.hh"
+
 #include <map>
 #include <string>
 #include <gz/rendering/config.hh>
@@ -184,6 +186,9 @@ namespace gz
 
       /// \brief Get the render pass system for this engine.
       // public: virtual RenderPassSystemPtr RenderPassSystem() const = 0;
+
+      /// \brief Get an OceanScene.
+      public: virtual OceanScenePtr OceanScene() const = 0;
     };
     }
   }

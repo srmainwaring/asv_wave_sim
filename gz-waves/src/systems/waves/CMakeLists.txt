@@ -33,9 +33,9 @@ gz_add_component(rendering-ogre2
   SOURCES
     Ogre2DynamicMesh.cc
     Ogre2OceanGeometry.cc
+    Ogre2OceanScene.cc
     Ogre2OceanVisual.cc
     Ogre2RenderEngineExtension.cc
-    OceanScene.cc
   GET_TARGET_NAME
     rendering_ogre2_target
   DEPENDS_ON_COMPONENTS

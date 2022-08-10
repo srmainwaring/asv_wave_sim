@@ -15,12 +15,24 @@
 
 #include "Ogre2RenderEngineExtension.hh"
 
+#include "OceanScene.hh"
+#include "Ogre2OceanScene.hh"
+
 #include <gz/common/Console.hh>
 #include <gz/plugin/Register.hh>
+
+
+//////////////////////////////////////////////////
+class GZ_RENDERING_OGRE2_HIDDEN
+    gz::rendering::Ogre2RenderEngineExtensionPrivate
+{
+  public: gz::rendering::OceanScenePtr oceanScene;
+};
 
 using namespace gz;
 using namespace rendering;
 
+//////////////////////////////////////////////////
 //////////////////////////////////////////////////
 Ogre2RenderEngineExtensionPlugin::Ogre2RenderEngineExtensionPlugin()
 {
@@ -43,7 +55,8 @@ RenderEngineExtension *Ogre2RenderEngineExtensionPlugin::Extension() const
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
-Ogre2RenderEngineExtension::Ogre2RenderEngineExtension()
+Ogre2RenderEngineExtension::Ogre2RenderEngineExtension() :
+    dataPtr(std::make_unique<Ogre2RenderEngineExtensionPrivate>())
 {
 }
 
@@ -106,6 +119,13 @@ void Ogre2RenderEngineExtension::LoadAttempt()
 void Ogre2RenderEngineExtension::InitAttempt()
 {
   gzdbg << "Attempting to initialise Ogre2RenderEngineExtension" << std::endl;
+  this->dataPtr->oceanScene = std::make_shared<Ogre2OceanScene>();
+}
+
+//////////////////////////////////////////////////
+OceanScenePtr Ogre2RenderEngineExtension::OceanScene() const
+{
+  return this->dataPtr->oceanScene;
 }
 
 //////////////////////////////////////////////////

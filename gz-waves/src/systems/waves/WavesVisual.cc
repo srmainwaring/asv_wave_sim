@@ -682,7 +682,7 @@ void WavesVisualPrivate::OnUpdate()
         // rather than multiple visuals referencing one mesh and instancing?
 
         // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
-        rendering::OceanScene oceanScene;
+        rendering::OceanScenePtr oceanScene = this->extension->OceanScene();
 
         unsigned int objId = 50000;
         auto position = this->visual->LocalPosition();
@@ -706,7 +706,7 @@ void WavesVisualPrivate::OnUpdate()
 
             // create visual
             rendering::OceanVisualPtr oceanVisual =
-                oceanScene.CreateOceanVisual(this->scene);
+                oceanScene->CreateOceanVisual(this->scene);
 
             oceanVisual->LoadMesh(this->oceanTileMesh);
             oceanVisual->SetLocalPosition(tilePosition);
@@ -729,7 +729,7 @@ void WavesVisualPrivate::OnUpdate()
 
             // create geometry
             rendering::OceanGeometryPtr geometry =
-                oceanScene.CreateOceanGeometry(this->scene);
+                oceanScene->CreateOceanGeometry(this->scene);
 
             geometry->LoadMesh(this->oceanTileMesh);
             geometry->SetMaterial(this->oceanMaterial, false);
