@@ -47,6 +47,14 @@ namespace gz
       public: virtual OceanGeometryPtr CreateOceanGeometry(
           ScenePtr _scene) override;
 
+      /// \brief Create a displacement map
+      public: virtual DisplacementMapPtr CreateDisplacementMap(
+          ScenePtr _scene,
+          MaterialPtr _material,
+          uint64_t _entity,
+          uint32_t _width,
+          uint32_t _height) override;
+
       private: unsigned int objId{50000};
     };
 

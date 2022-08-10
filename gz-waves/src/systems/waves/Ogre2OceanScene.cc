@@ -16,9 +16,11 @@
 
 #include "Ogre2OceanScene.hh"
 
+#include "DisplacementMap.hh"
 #include "OceanGeometry.hh"
 #include "OceanVisual.hh"
 
+#include "Ogre2DisplacementMap.hh"
 #include "Ogre2OceanGeometry.hh"
 #include "Ogre2OceanVisual.hh"
 
@@ -65,4 +67,19 @@ OceanGeometryPtr Ogre2OceanScene::CreateOceanGeometry(ScenePtr _scene)
   geometry->InitObject(_scene, objId, objName);
 
   return geometry;
+}
+
+//////////////////////////////////////////////////
+DisplacementMapPtr Ogre2OceanScene::CreateDisplacementMap(
+    ScenePtr _scene,
+    MaterialPtr _material,
+    uint64_t _entity,
+    uint32_t _width,
+    uint32_t _height)
+{
+  rendering::DisplacementMapPtr displacementMap =
+      std::make_shared<rendering::Ogre2DisplacementMap>(
+          _scene, _material, _entity, _width, _height); 
+
+  return displacementMap;
 }

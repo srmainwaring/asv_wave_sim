@@ -35,7 +35,7 @@
 
 #include "WavesVisual.hh"
 
-#include "Ogre2DisplacementMap.hh"
+#include "DisplacementMap.hh"
 
 #include "OceanGeometry.hh"
 #include "OceanScene.hh"
@@ -723,15 +723,6 @@ void WavesVisualPrivate::OnUpdate()
         // create shader material
         this->CreateShaderMaterial();
 
-        /// \note: replaced with cloned geometry from primary visual 
-        // load mesh
-        // std::string meshPath = gz::common::findFile(
-        //     asFullPath("materials/mesh_256x256.dae", this->modelPath));
-        // rendering::MeshDescriptor descriptor;
-        // descriptor.meshName = meshPath;
-        // gz::common::MeshManager *meshManager = gz::common::MeshManager::Instance();
-        // descriptor.mesh = meshManager->Load(descriptor.meshName);
- 
         // Hide the primary visual
         this->visual->SetVisible(false);
 
@@ -1074,8 +1065,10 @@ void WavesVisualPrivate::InitTextures()
   // ocean tile parameters
   uint32_t N = static_cast<uint32_t>(this->waveParams->CellCount());
 
-  this->displacementMap = std::make_shared<Ogre2DisplacementMap>(
+  rendering::OceanScenePtr oceanScene = this->extension->OceanScene();
+  this->displacementMap = oceanScene->CreateDisplacementMap(
     this->scene, this->oceanMaterial, this->entity, N, N);
+  this->displacementMap->InitTextures();
 }
 
 //////////////////////////////////////////////////

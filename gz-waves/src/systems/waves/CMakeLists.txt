@@ -65,12 +65,8 @@ gz_add_system(waves-visual
     WavesVisual.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
-    # \todo remove Ogre dependency
-    ${rendering_ogre2_target}
     gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
     gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
-    # \todo remove Ogre dependency
-    GzOGRE2::GzOGRE2
 )
 
 #################################################

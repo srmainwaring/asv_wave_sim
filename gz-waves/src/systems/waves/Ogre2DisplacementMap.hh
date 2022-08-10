@@ -13,8 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_RENDERING_OGRE2_DISPLACEMENTMAP_HH_
-#define GZ_RENDERING_OGRE2_DISPLACEMENTMAP_HH_
+#ifndef GZ_RENDERING_OGRE2_OGRE2DISPLACEMENTMAP_HH_
+#define GZ_RENDERING_OGRE2_OGRE2DISPLACEMENTMAP_HH_
+
+#include "DisplacementMap.hh"
 
 #include <gz/rendering/config.hh>
 #include <gz/rendering/Material.hh>
@@ -32,8 +34,8 @@ namespace gz
   {
     inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-    class GZ_RENDERING_OGRE2_VISIBLE Ogre2DisplacementMap //:
-        // public DisplacementMap
+    class GZ_RENDERING_OGRE2_VISIBLE Ogre2DisplacementMap :
+        public DisplacementMap
     {
       public: Ogre2DisplacementMap(
         ScenePtr _scene,
@@ -44,7 +46,7 @@ namespace gz
 
       public: virtual ~Ogre2DisplacementMap();
 
-      public: virtual void InitTextures();
+      public: virtual void InitTextures() override;
 
       public: virtual void UpdateTextures(
         const std::vector<double> &mHeights,
@@ -55,10 +57,10 @@ namespace gz
         const std::vector<double> &mDxdx,
         const std::vector<double> &mDydy,
         const std::vector<double> &mDxdy
-      );
+      ) override;
 
       private: ScenePtr scene;
-      private: MaterialPtr oceanMaterial;
+      private: MaterialPtr material;
       private: uint64_t entity{0};
       private: uint32_t width{0};
       private: uint32_t height{0};
@@ -86,9 +88,8 @@ namespace gz
       uint8_t mTangentMapFrameIdx{0};
     };
 
-    typedef std::shared_ptr<Ogre2DisplacementMap> DisplacementMapPtr;
-
     }
   }
 }
+
 #endif

@@ -13,18 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_RENDERING_OCEANSCENE_HH_
-#define GZ_RENDERING_OCEANSCENE_HH_
-
-#include "DisplacementMap.hh"
-#include "OceanGeometry.hh"
-#include "OceanVisual.hh"
+#ifndef GZ_RENDERING_DISPLACEMENTMAP_HH_
+#define GZ_RENDERING_DISPLACEMENTMAP_HH_
 
 #include <gz/rendering/config.hh>
-#include <gz/rendering/Scene.hh>
 #include "gz/rendering/Export.hh"
 
-#include <memory>
+#include <vector>
 
 namespace gz
 {
@@ -32,27 +27,24 @@ namespace gz
   {
     inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-    class GZ_RENDERING_VISIBLE OceanScene
+    class GZ_RENDERING_VISIBLE DisplacementMap
     {
-      /// \brief Destructor
-      public: virtual ~OceanScene() = default;
+      public: virtual ~DisplacementMap() {};
 
-      /// \brief Create an ocean visual
-      public: virtual OceanVisualPtr CreateOceanVisual(ScenePtr _scene) = 0;
-    
-      /// \brief Create an ocean geometry
-      public: virtual OceanGeometryPtr CreateOceanGeometry(ScenePtr _scene) = 0;
+      public: virtual void InitTextures() = 0;
 
-      /// \brief Create a displacement map
-      public: virtual DisplacementMapPtr CreateDisplacementMap(
-          ScenePtr _scene,
-          MaterialPtr _material,
-          uint64_t _entity,
-          uint32_t _width,
-          uint32_t _height) = 0;
+      public: virtual void UpdateTextures(
+        const std::vector<double> &mHeights,
+        const std::vector<double> &mDhdx,
+        const std::vector<double> &mDhdy,
+        const std::vector<double> &mDisplacementsX,
+        const std::vector<double> &mDisplacementsY,
+        const std::vector<double> &mDxdx,
+        const std::vector<double> &mDydy,
+        const std::vector<double> &mDxdy) = 0;
     };
 
-    typedef std::shared_ptr<OceanScene> OceanScenePtr;
+    typedef std::shared_ptr<DisplacementMap> DisplacementMapPtr;
 
     }
   }

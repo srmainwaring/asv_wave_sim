@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 #include "Ogre2DisplacementMap.hh"
 
 using namespace gz;
@@ -28,7 +27,7 @@ Ogre2DisplacementMap::Ogre2DisplacementMap(
   uint32_t _height) :
   entity(_entity),
   scene(_scene),
-  oceanMaterial(_material),
+  material(_material),
   width(_width),
   height(_height)
 {
@@ -51,7 +50,8 @@ Ogre2DisplacementMap::~Ogre2DisplacementMap()
     if (ogre2SceneManager != nullptr)
     {
       Ogre::TextureGpuManager *ogre2TextureManager =
-          ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
+          ogre2SceneManager->getDestinationRenderSystem()->
+              getTextureGpuManager();
 
       if (ogre2TextureManager != nullptr)
       {
@@ -84,18 +84,9 @@ void Ogre2DisplacementMap::InitTextures()
 {
   gzmsg << "Ogre2DisplacementMap::InitTextures\n";
 
-  // ocean tile parameters
-  // uint32_t N = static_cast<uint32_t>(this->waveParams->CellCount());
-  // double L   = this->waveParams->TileSize();
-  // double ux  = this->waveParams->WindVelocity().X();
-  // double uy  = this->waveParams->WindVelocity().Y();
-  
-  /// \todo remove hardcoded cell size
-  // uint32_t N = 64;
-
-  if (!this->oceanMaterial)
+  if (!this->material)
   {
-    gzerr << "Invalid Ocean Material\n";
+    gzerr << "Invalid Material\n";
     return;
   }
 
@@ -105,7 +96,7 @@ void Ogre2DisplacementMap::InitTextures()
 
   gz::rendering::Ogre2MaterialPtr ogre2Material =
     std::dynamic_pointer_cast<gz::rendering::Ogre2Material>(
-        this->oceanMaterial);
+        this->material);
 
   Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
 
@@ -113,8 +104,6 @@ void Ogre2DisplacementMap::InitTextures()
       ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
 
   // Create empty image
-  // uint32_t width{N};
-  // uint32_t height{N};
   uint32_t depthOrSlices{1};
   Ogre::TextureTypes::TextureTypes textureType{
       Ogre::TextureTypes::TextureTypes::Type2D};
@@ -138,9 +127,10 @@ void Ogre2DisplacementMap::InitTextures()
       textureType, format, numMipmaps);
 
   gzmsg << "Initialising images\n";
-  memset(mHeightMapImage->getRawBuffer(), 0, sizeof(float) * 4 * this->width * this->height);
-  memset(mNormalMapImage->getRawBuffer(), 0, sizeof(float) * 4 * this->width * this->height);
-  memset(mTangentMapImage->getRawBuffer(), 0, sizeof(float) * 4 * this->width * this->height);
+  uint32_t bufLen = sizeof(float) * 4 * this->width * this->height;
+  memset(mHeightMapImage->getRawBuffer(), 0, bufLen);
+  memset(mNormalMapImage->getRawBuffer(), 0, bufLen);
+  memset(mTangentMapImage->getRawBuffer(), 0, bufLen);
 
   // Create displacement texture
   gzmsg << "Create HeightMap texture\n";
@@ -212,11 +202,12 @@ void Ogre2DisplacementMap::InitTextures()
     samplerBlockRef.mW = Ogre::TAM_WRAP;
     texUnit->setSamplerblock(samplerBlockRef);
 
+    /// \todo fix for OpenGL
     if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
         rendering::GraphicsAPI::OPENGL)
     {
       // set the texture map index
-      ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
+      // ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
     }
   }
 
@@ -242,11 +233,12 @@ void Ogre2DisplacementMap::InitTextures()
     samplerBlockRef.mW = Ogre::TAM_WRAP;
     texUnit->setSamplerblock(samplerBlockRef);
 
+    /// \todo fix for OpenGL
     if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
         rendering::GraphicsAPI::OPENGL)
     {
       // set the texture map index
-      ogreParams->setNamedConstant("normalMap", &texIndex, 1, 1);
+      // ogreParams->setNamedConstant("normalMap", &texIndex, 1, 1);
     }
   }
 
@@ -272,11 +264,12 @@ void Ogre2DisplacementMap::InitTextures()
     samplerBlockRef.mW = Ogre::TAM_WRAP;
     texUnit->setSamplerblock(samplerBlockRef);
 
+    /// \todo fix for OpenGL
     if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
         rendering::GraphicsAPI::OPENGL)
     {
       // set the texture map index
-      ogreParams->setNamedConstant("tangentMap", &texIndex, 1, 1);
+      // ogreParams->setNamedConstant("tangentMap", &texIndex, 1, 1);
     }
   }
 }
@@ -381,7 +374,8 @@ void Ogre2DisplacementMap::UpdateTextures(
                 100u);
     }
 
-    Ogre::StagingTexture *stagingTexture = mHeightMapStagingTextures[mHeightMapFrameIdx];
+    Ogre::StagingTexture *stagingTexture =
+      mHeightMapStagingTextures[mHeightMapFrameIdx];
     mHeightMapFrameIdx = (mHeightMapFrameIdx + 1) % 3;
 
     stagingTexture->startMapRegion();
@@ -408,7 +402,8 @@ void Ogre2DisplacementMap::UpdateTextures(
                 100u);
     }
 
-    Ogre::StagingTexture *stagingTexture = mNormalMapStagingTextures[mNormalMapFrameIdx];
+    Ogre::StagingTexture *stagingTexture =
+      mNormalMapStagingTextures[mNormalMapFrameIdx];
     mNormalMapFrameIdx = (mNormalMapFrameIdx + 1) % 3;
     
     stagingTexture->startMapRegion();
@@ -435,7 +430,8 @@ void Ogre2DisplacementMap::UpdateTextures(
                 100u);
     }
 
-    Ogre::StagingTexture *stagingTexture = mTangentMapStagingTextures[mTangentMapFrameIdx];
+    Ogre::StagingTexture *stagingTexture =
+      mTangentMapStagingTextures[mTangentMapFrameIdx];
     mTangentMapFrameIdx = (mTangentMapFrameIdx + 1) % 3;
 
     stagingTexture->startMapRegion();
