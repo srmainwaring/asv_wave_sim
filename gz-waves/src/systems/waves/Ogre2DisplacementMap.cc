@@ -15,6 +15,8 @@
 
 #include "Ogre2DisplacementMap.hh"
 
+#include <gz/rendering/RenderingIFace.hh>
+
 using namespace gz;
 using namespace rendering;
 
@@ -180,6 +182,20 @@ void Ogre2DisplacementMap::InitTextures()
   auto pass = mat->getTechnique(0u)->getPass(0);
   auto ogreParams = pass->getVertexProgramParameters();
 
+  /// \todo understand why using the render engine instance
+  /// directly gives an incorrect result?
+  // {
+  //   auto engine = rendering::Ogre2RenderEngine::Instance();
+  //   auto graphicsAPI = engine->GraphicsAPI();
+  //   gzdbg << "Using graphicsAPI: "
+  //       << GraphicsAPIUtils::Str(graphicsAPI) << "\n";
+  // }
+
+  auto engine = rendering::engine("ogre2");
+  auto graphicsAPI = engine->GraphicsAPI();
+  gzdbg << "Using graphicsAPI: "
+      << GraphicsAPIUtils::Str(graphicsAPI) << "\n";
+
   {
     auto texUnit = pass->getTextureUnitState("heightMap");
     if (!texUnit)
@@ -202,12 +218,10 @@ void Ogre2DisplacementMap::InitTextures()
     samplerBlockRef.mW = Ogre::TAM_WRAP;
     texUnit->setSamplerblock(samplerBlockRef);
 
-    /// \todo fix for OpenGL
-    if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
-        rendering::GraphicsAPI::OPENGL)
+    if (graphicsAPI == rendering::GraphicsAPI::OPENGL)
     {
       // set the texture map index
-      // ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
+      ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
     }
   }
 
@@ -233,12 +247,10 @@ void Ogre2DisplacementMap::InitTextures()
     samplerBlockRef.mW = Ogre::TAM_WRAP;
     texUnit->setSamplerblock(samplerBlockRef);
 
-    /// \todo fix for OpenGL
-    if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
-        rendering::GraphicsAPI::OPENGL)
+    if (graphicsAPI == rendering::GraphicsAPI::OPENGL)
     {
       // set the texture map index
-      // ogreParams->setNamedConstant("normalMap", &texIndex, 1, 1);
+      ogreParams->setNamedConstant("normalMap", &texIndex, 1, 1);
     }
   }
 
@@ -264,12 +276,10 @@ void Ogre2DisplacementMap::InitTextures()
     samplerBlockRef.mW = Ogre::TAM_WRAP;
     texUnit->setSamplerblock(samplerBlockRef);
 
-    /// \todo fix for OpenGL
-    if (rendering::Ogre2RenderEngine::Instance()->GraphicsAPI() ==
-        rendering::GraphicsAPI::OPENGL)
+    if (graphicsAPI == rendering::GraphicsAPI::OPENGL)
     {
       // set the texture map index
-      // ogreParams->setNamedConstant("tangentMap", &texIndex, 1, 1);
+      ogreParams->setNamedConstant("tangentMap", &texIndex, 1, 1);
     }
   }
 }

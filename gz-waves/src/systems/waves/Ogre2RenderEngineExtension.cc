@@ -21,6 +21,9 @@
 #include <gz/common/Console.hh>
 #include <gz/plugin/Register.hh>
 
+#include <gz/rendering/RenderEngine.hh>
+#include <gz/rendering/RenderingIFace.hh>
+
 
 //////////////////////////////////////////////////
 class GZ_RENDERING_OGRE2_HIDDEN
@@ -39,7 +42,8 @@ Ogre2RenderEngineExtensionPlugin::Ogre2RenderEngineExtensionPlugin()
 }
 
 //////////////////////////////////////////////////
-Ogre2RenderEngineExtensionPlugin::~Ogre2RenderEngineExtensionPlugin() = default;
+Ogre2RenderEngineExtensionPlugin::~Ogre2RenderEngineExtensionPlugin()
+    = default;
 
 //////////////////////////////////////////////////
 std::string Ogre2RenderEngineExtensionPlugin::Name() const
@@ -119,6 +123,31 @@ void Ogre2RenderEngineExtension::LoadAttempt()
 void Ogre2RenderEngineExtension::InitAttempt()
 {
   gzdbg << "Attempting to initialise Ogre2RenderEngineExtension" << std::endl;
+
+  std::string engineName("ogre2");
+
+  // Check the render engine is available and loaded
+  if (!rendering::hasEngine(engineName))
+  {
+    gzerr << "Failed to load render-engine extension ["
+        << this->Name() << "] as render-engine [ "
+        << engineName << "] is not available.\n";
+  }
+
+  if (!rendering::isEngineLoaded(engineName))
+  {
+    gzerr << "Failed to load render-engine extension ["
+        << this->Name() << "] as render-engine [ "
+        << engineName << "] is not loaded.\n";
+  }
+
+  // Check which graphics API is being used
+  auto engine = rendering::engine("ogre2");
+  auto graphicsAPI = engine->GraphicsAPI();
+  gzdbg << "Using graphicsAPI: "
+      << GraphicsAPIUtils::Str(graphicsAPI) << "\n";
+
+  // create the scene (well factory interface)
   this->dataPtr->oceanScene = std::make_shared<Ogre2OceanScene>();
 }
 
