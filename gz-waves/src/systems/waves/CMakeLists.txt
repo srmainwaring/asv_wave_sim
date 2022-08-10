@@ -29,8 +29,10 @@ target_link_libraries(${rendering_target}
 )
 
 #################################################
+# this must be the only component that directly depends on ogre2
 gz_add_component(rendering-ogre2
   SOURCES
+    Ogre2DisplacementMap.cc
     Ogre2DynamicMesh.cc
     Ogre2OceanGeometry.cc
     Ogre2OceanScene.cc
@@ -41,14 +43,6 @@ gz_add_component(rendering-ogre2
   DEPENDS_ON_COMPONENTS
     ${rendering_target}
 )
-
-# set_property(
-#   SOURCE Ogre2RenderEngineExtension.cc
-#   PROPERTY COMPILE_DEFINITIONS
-#   GZ_RENDERING_RESOURCE_PATH="${GZ_RENDERING_RESOURCE_PATH}"
-#   OGRE2_RESOURCE_PATH="${OGRE2_RESOURCE_PATH}"
-#   OGRE2_VERSION="${OGRE2_VERSION}"
-# )
 
 target_link_directories(${rendering_ogre2_target}
   PUBLIC
@@ -71,9 +65,11 @@ gz_add_system(waves-visual
     WavesVisual.cc
   PUBLIC_LINK_LIBS
     ${rendering_target}
+    # \todo remove Ogre dependency
     ${rendering_ogre2_target}
     gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
     gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
+    # \todo remove Ogre dependency
     GzOGRE2::GzOGRE2
 )
 
