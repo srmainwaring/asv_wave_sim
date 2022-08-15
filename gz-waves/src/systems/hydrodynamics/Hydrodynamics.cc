@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Hydrodynamics.hh"
+#include "Collision.hh"
 
 #include "gz/waves/Convert.hh"
 #include "gz/waves/Grid.hh"
@@ -59,318 +60,11 @@ namespace gz
 {
 namespace sim
 {
-  /////////////////////////////////////////////////
-  // Collision (similar to sim::Link and sim::Model interfaces)
- 
-  class CollisionPrivate
-  {
-    /// \brief Id of link entity.
-    public: Entity id{kNullEntity};
-  };
-
-  class Collision
-  {
-    /// \brief Destructor
-    public: ~Collision() = default;
-
-    /// \brief Constructor
-    /// \param[in] _entity Collision entity
-    public: explicit Collision(sim::Entity _entity = kNullEntity)
-      : dataPtr(std::make_unique<CollisionPrivate>())
-    {
-      this->dataPtr->id = _entity;
-    }
-
-    /// \brief Copy constructor
-    /// \param[in] _collision Collision to copy.
-    public: Collision(const Collision &_collision)
-      : dataPtr(std::make_unique<CollisionPrivate>(*_collision.dataPtr))
-    {
-    }
-
-    /// \brief Move constructor
-    /// \param[in] _collision Collision to move.
-    public: Collision(Collision &&_collision) noexcept = default;
-
-    /// \brief Move assignment operator.
-    /// \param[in] _collision Collision component to move.
-    /// \return Reference to this.
-    public: Collision &operator=(Collision &&_collision) noexcept = default;
-
-    /// \brief Copy assignment operator.
-    /// \param[in] _collision Collision to copy.
-    /// \return Reference to this.
-    public: Collision &operator=(const Collision &_collision)
-    {
-      *this->dataPtr = (*_collision.dataPtr);
-      return *this;
-    }
-
-    /// \brief Get the entity which this Collision is related to.
-    /// \return Collision entity.
-    public: sim::Entity Entity() const
-    {
-      return this->dataPtr->id;
-    }
-
-    /// \brief Check whether this link correctly refers to an entity that
-    /// has a components::Collision.
-    /// \param[in] _ecm Entity-component manager.
-    /// \return True if it's a valid link in the manager.
-    public: bool Valid(const EntityComponentManager &_ecm) const
-    {
-      return nullptr != _ecm.Component<components::Collision>(
-          this->dataPtr->id);
-    }
-
-    /// \brief Get the link's unscoped name.
-    /// \param[in] _ecm Entity-component manager.
-    /// \return Collision's name or nullopt if the entity does not have a
-    /// components::Name component
-    public: std::optional<std::string> Name(
-        const EntityComponentManager &_ecm) const
-    {
-      return _ecm.ComponentData<components::Name>(this->dataPtr->id);
-    }
-
-    /// \brief Get the parent link
-    /// \param[in] _ecm Entity-component manager.
-    /// \return Parent Model or nullopt if the entity does not have a
-    /// components::ParentEntity component.
-    public: std::optional<Model> ParentLink(
-        const EntityComponentManager &_ecm) const
-    {
-      auto parent = _ecm.Component<components::ParentEntity>(this->dataPtr->id);
-
-      if (!parent)
-        return std::nullopt;
-
-      return std::optional<Model>(parent->Data());
-    }
-
-    /// \brief Pointer to private data.
-    private: std::unique_ptr<CollisionPrivate> dataPtr;
-  };
-
 namespace systems
 {
   /////////////////////////////////////////////////
   // Utilties
   
-  /// \brief Iterate over the links in a model, and create a CGAL SurfaceMesh
-  /// for each collison in each link.
-  ///
-  /// \param[in]  _model    The model being processed. 
-  /// \param[out] _links    A vector holding a copy of pointers to the the model's links. 
-  /// \param[out] _meshes   A vector of vectors containing a surface mesh for each collision in a link.
-  /// \param[out] _collisionElements  A vector of vectors containing the collision entities in a link.
-  void CreateCollisionMeshes(
-    EntityComponentManager &_ecm,
-    sim::Model _model,
-    std::vector<sim::Entity>& _links,
-    std::vector<std::vector<cgal::MeshPtr>>& _meshes,
-    std::vector<std::vector<Entity>>& _collisions)
-  {
-    // There will be more than one mesh per link if the link contains mutiple collisions.
-
-    // Model
-    std::string modelName(_model.Name(_ecm));
-
-    // Links
-    for (auto& linkEntity : _model.Links(_ecm))
-    {
-      GZ_ASSERT(linkEntity != kNullEntity, "Link must be valid");
-      _links.push_back(linkEntity);
-      sim::Link link(linkEntity);
-
-      /// \todo check link has valid name component
-      std::string linkName(link.Name(_ecm).value());
-      std::vector<std::shared_ptr<cgal::Mesh>> linkMeshes;
-      std::vector<Entity> linkCollisions;
-
-      gzmsg << "Hydrodynamics: create collision mesh for link ["
-          << linkName << "]\n";
-      
-      // Collisions
-      for (auto& collisionEntity : link.Collisions(_ecm))
-      {
-        GZ_ASSERT(collisionEntity != kNullEntity, "Collision must be valid");
-  
-        sim::Collision collision(collisionEntity);
-        std::string collisionName(collision.Name(_ecm).value());
-        gzmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
-
-        const components::CollisionElement *coll =
-          _ecm.Component<components::CollisionElement>(collisionEntity);
-
-        if (!coll)
-        {
-          gzerr << "Invalid collision pointer. This shouldn't happen\n";
-          continue;
-        }
-
-        double volume = 0;
-        switch (coll->Data().Geom()->Type())
-        {
-          case sdf::GeometryType::BOX:
-          {
-            // Get shape from the collision component
-            auto& box = coll->Data().Geom()->BoxShape()->Shape();
-
-            // Create the gazebo mesh
-            std::string meshName = std::string(modelName)
-                .append(".").append(linkName)
-                .append(".").append(collisionName)
-                .append(".box");
-            gz::common::MeshManager::Instance()->CreateBox(
-                meshName,
-                box.Size(),
-                gz::math::Vector2d(1, 1));          
-            GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
-                "Failed to create Mesh for Box");
-
-            // Create the CGAL surface mesh
-            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
-            waves::MeshTools::MakeSurfaceMesh(
-                *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
-            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-            linkMeshes.push_back(mesh);
-            linkCollisions.push_back(collisionEntity);
-
-            gzmsg << "Type:       " << "BOX" << std::endl;
-            gzmsg << "Size:       " << box.Size() << std::endl;
-            gzmsg << "MeshName:   " << meshName << std::endl;            
-            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
-            break;
-          }
-          case sdf::GeometryType::SPHERE:
-          {
-            // Get shape from the collision component
-            auto& sphere = coll->Data().Geom()->SphereShape()->Shape();
-
-            // Create the gazebo mesh
-            std::string meshName = std::string(modelName)
-                .append(".").append(linkName)
-                .append(".").append(collisionName)
-                .append(".sphere");
-            gz::common::MeshManager::Instance()->CreateSphere(
-                meshName,
-                sphere.Radius(),        // radius
-                8,                      // rings
-                8);                     // segments
-            GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
-                "Failed to create Mesh for Sphere");
-
-            // Create the CGAL surface mesh
-            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
-            waves::MeshTools::MakeSurfaceMesh(
-                *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
-            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-            linkMeshes.push_back(mesh);
-            linkCollisions.push_back(collisionEntity);
-
-            gzmsg << "Type:       " << "SPHERE" << std::endl;
-            gzmsg << "Radius:     " << sphere.Radius() << std::endl;
-            gzmsg << "MeshName:   " << meshName << std::endl;            
-            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
-            break;
-          }
-          case sdf::GeometryType::CYLINDER:
-          {
-            auto& cylinder = coll->Data().Geom()->CylinderShape()->Shape();
-
-            // Create the gazebo mesh
-            std::string meshName = std::string(modelName)
-                .append(".").append(linkName)
-                .append(".").append(collisionName)
-                .append(".cylinder");
-            gz::common::MeshManager::Instance()->CreateCylinder(
-                meshName,
-                cylinder.Radius(),      // radius
-                cylinder.Length(),      // length,
-                1,                      // rings
-                32);                    // segments
-            GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
-                "Failed to create Mesh for Cylinder");
-
-            // Create the CGAL surface mesh
-            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
-            waves::MeshTools::MakeSurfaceMesh(
-                *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
-            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-            linkMeshes.push_back(mesh);
-            linkCollisions.push_back(collisionEntity);
-
-            gzmsg << "Type:       " << "CYLINDER" << std::endl;
-            gzmsg << "Radius:     " << cylinder.Radius() << std::endl;
-            gzmsg << "Length:     " << cylinder.Length() << std::endl;
-            gzmsg << "MeshName:   " << meshName << std::endl;            
-            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
-            break;
-          }
-          case sdf::GeometryType::PLANE:
-          {
-            // Ignore plane shapes.
-            break;
-          }
-          case sdf::GeometryType::MESH:
-          {
-            // auto& meshShape = coll->Data().Geom()->MeshShape();
-            std::string uri = coll->Data().Geom()->MeshShape()->Uri();
-            std::string filePath = coll->Data().Geom()->MeshShape()->FilePath();
-
-            std::string file = asFullPath(uri, filePath);
-            // if (gz::common::MeshManager::Instance()->IsValidFilename(file))
-            // {
-            //   const gz::common::Mesh *mesh =
-            //     gz::common::MeshManager::Instance()->Load(file);
-            //   if (mesh)
-            //     volume = mesh->Volume();
-            //   else
-            //     gzerr << "Unable to load mesh[" << file << "]\n";
-            // }
-            // else
-            // {
-            //   gzerr << "Invalid mesh filename[" << file << "]\n";
-            // }
-
-            // Mesh
-            if (!gz::common::MeshManager::Instance()->IsValidFilename(file))
-            {
-              gzerr << "Mesh: " << file << " was not loaded"<< std::endl;
-              return;
-            } 
-
-            // Create the CGAL surface mesh
-            std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
-            waves::MeshTools::MakeSurfaceMesh(
-                *gz::common::MeshManager::Instance()->Load(file), *mesh);
-            GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
-            linkMeshes.push_back(mesh);
-            linkCollisions.push_back(collisionEntity);
-
-            gzmsg << "Type:       " << "MESH" << std::endl;
-            gzmsg << "Uri:        " << uri << std::endl;
-            gzmsg << "FilePath:   " << filePath << std::endl;
-            gzmsg << "MeshFile:   " << file << std::endl;
-            gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
-            break;
-          }
-          default:
-          {
-            gzerr << "Unsupported collision geometry["
-              << static_cast<int>(coll->Data().Geom()->Type()) << "]\n";
-            break;
-          }
-        }
-      }
-
-      // Add meshes for this link
-      _meshes.push_back(linkMeshes);
-      _collisions.push_back(linkCollisions);
-    }
-  } 
-
   /////////////////////////////////////////////////
   /// \brief Transform a meshes vertex points in the world frame according to a Pose.
   ///
@@ -536,6 +230,30 @@ class gz::sim::systems::HydrodynamicsPrivate
   private: void UpdatePhysics(const UpdateInfo &_info,
                               EntityComponentManager &_ecm);
 
+  /// \brief Check if an entity is enabled or not.
+  /// \param[in] _entity Target entity
+  /// \param[in] _ecm Entity component manager
+  /// \return True if hydrodynamics should be applied.
+  public: bool IsEnabled(Entity _entity,
+      const EntityComponentManager &_ecm) const;
+
+  /// \brief Iterate over the links in a model, and create a CGAL SurfaceMesh
+  /// for each collison in each link.
+  ///
+  /// \param[in]  _model    The model being processed. 
+  /// \param[out] _links    A vector holding a copy of pointers to
+  ///                       the model's links. 
+  /// \param[out] _meshes   A vector of vectors containing a surface mesh
+  ///                       for each collision in a link.
+  /// \param[out] _collisionElements  A vector of vectors containing the
+  ///                       collision entities in a link.
+  public: void CreateCollisionMeshes(
+    EntityComponentManager &_ecm,
+    sim::Model _model,
+    std::vector<sim::Entity>& _links,
+    std::vector<std::vector<cgal::MeshPtr>>& _meshes,
+    std::vector<std::vector<Entity>>& _collisions);
+
   /// \brief Model interface
   public: sim::Model model{kNullEntity};
 
@@ -565,6 +283,10 @@ class gz::sim::systems::HydrodynamicsPrivate
 
   /// \brief The wave model name. This is used to retrieve a pointer to the wave field.
   // public: std::string waveModelName;
+
+  /// \brief Scoped names of links that hydrodynamics should apply to.
+  /// If empty, apply to all links.
+  public: std::unordered_set<std::string> enabled;
 
   public: bool InitMarkers(EntityComponentManager &_ecm);
   public: void InitWaterPatchMarkers(EntityComponentManager &_ecm);
@@ -674,6 +396,19 @@ void Hydrodynamics::Configure(const Entity &_entity,
 
   // Empty sdf element used as a placeholder for missing elements 
   auto sdfEmpty = std::make_shared<sdf::Element>();
+
+  // Scoped names of entities (links, collisions) to apply hydrodynamics
+  if (this->dataPtr->sdf->HasElement("enable"))
+  {
+    for (auto enableElem = this->dataPtr->sdf->FindElement("enable");
+        enableElem != nullptr;
+        enableElem = enableElem->GetNextElement("enable"))
+    {
+      this->dataPtr->enabled.insert(enableElem->Get<std::string>());
+      gzmsg << "Hydrodynamics enable: "
+          << enableElem->Get<std::string>() << "\n";
+    }
+  }
 
   // Hydrodynamics parameters
   this->dataPtr->hydroParams.reset(new waves::HydrodynamicsParameters());
@@ -791,7 +526,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
   std::vector<sim::Entity> links;
   std::vector<std::vector<cgal::MeshPtr>> meshes;
   std::vector<std::vector<Entity>> collisions;
-  CreateCollisionMeshes(_ecm, this->model, links, meshes, collisions);
+  this->CreateCollisionMeshes(_ecm, this->model, links, meshes, collisions);
   gzmsg << "Hydrodynamics: links:  " << links.size() << std::endl;
   gzmsg << "Hydrodynamics: meshes: " << meshes.size() << std::endl;
 
@@ -1023,6 +758,265 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     }
   }
 }
+
+
+//////////////////////////////////////////////////
+/// \note copied from gz-sim/src/systems/buoyancy/Buoyancy.cc
+bool HydrodynamicsPrivate::IsEnabled(Entity _entity,
+    const EntityComponentManager &_ecm) const
+{
+  // If there's nothing enabled, all entities are enabled
+  if (this->enabled.empty())
+  {
+    // gzdbg << "All collisions for ["
+    //     << this->model.Name(_ecm)
+    //     << "] are enabled\n";
+    return true;
+  }
+
+  auto entity = _entity;
+  while (entity != kNullEntity)
+  {
+    // Fully scoped name
+    auto name = scopedName(entity, _ecm, "::", false);
+    // gzdbg << "Scoped name: " << name << "\n";
+
+    // Remove world name
+    name = removeParentScope(name, "::");
+    // gzdbg << "Remove parent scoped name: " << name << "\n";
+
+    if (this->enabled.find(name) != this->enabled.end())
+    {
+      // gzdbg << "Collision for ["
+      //     << name << "] is enabled\n";
+      return true;
+    }
+
+    // Check parent
+    auto parentComp = _ecm.Component<components::ParentEntity>(entity);
+
+    if (nullptr == parentComp)
+      return false;
+
+    entity = parentComp->Data();
+  }
+
+  return false;
+}
+
+
+/////////////////////////////////////////////////
+void HydrodynamicsPrivate::CreateCollisionMeshes(
+  EntityComponentManager &_ecm,
+  sim::Model _model,
+  std::vector<sim::Entity>& _links,
+  std::vector<std::vector<cgal::MeshPtr>>& _meshes,
+  std::vector<std::vector<Entity>>& _collisions)
+{
+  // There will be more than one mesh per link if the link contains mutiple collisions.
+
+  // Model
+  std::string modelName(_model.Name(_ecm));
+
+  // Links
+  for (auto& linkEntity : _model.Links(_ecm))
+  {
+    GZ_ASSERT(linkEntity != kNullEntity, "Link must be valid");
+    _links.push_back(linkEntity);
+    sim::Link link(linkEntity);
+
+    /// \todo check link has valid name component
+    std::string linkName(link.Name(_ecm).value());
+    std::vector<std::shared_ptr<cgal::Mesh>> linkMeshes;
+    std::vector<Entity> linkCollisions;
+
+    gzmsg << "Hydrodynamics: create collision mesh for link ["
+        << linkName << "]\n";
+    
+    // Collisions
+    for (auto& collisionEntity : link.Collisions(_ecm))
+    {
+      GZ_ASSERT(collisionEntity != kNullEntity, "Collision must be valid");
+
+      sim::Collision collision(collisionEntity);
+      std::string collisionName(collision.Name(_ecm).value());
+      gzmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
+
+      // check this collision has hydrodynamics enabled
+      if (!this->IsEnabled(collisionEntity, _ecm))
+        continue;
+
+      // get the collision element
+      const components::CollisionElement *coll =
+        _ecm.Component<components::CollisionElement>(collisionEntity);
+
+      if (!coll)
+      {
+        gzerr << "Invalid collision pointer. This shouldn't happen\n";
+        continue;
+      }
+
+      double volume = 0;
+      switch (coll->Data().Geom()->Type())
+      {
+        case sdf::GeometryType::BOX:
+        {
+          // Get shape from the collision component
+          auto& box = coll->Data().Geom()->BoxShape()->Shape();
+
+          // Create the gazebo mesh
+          std::string meshName = std::string(modelName)
+              .append(".").append(linkName)
+              .append(".").append(collisionName)
+              .append(".box");
+          gz::common::MeshManager::Instance()->CreateBox(
+              meshName,
+              box.Size(),
+              gz::math::Vector2d(1, 1));          
+          GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
+              "Failed to create Mesh for Box");
+
+          // Create the CGAL surface mesh
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+          waves::MeshTools::MakeSurfaceMesh(
+              *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+          linkMeshes.push_back(mesh);
+          linkCollisions.push_back(collisionEntity);
+
+          gzmsg << "Type:       " << "BOX" << std::endl;
+          gzmsg << "Size:       " << box.Size() << std::endl;
+          gzmsg << "MeshName:   " << meshName << std::endl;            
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          break;
+        }
+        case sdf::GeometryType::SPHERE:
+        {
+          // Get shape from the collision component
+          auto& sphere = coll->Data().Geom()->SphereShape()->Shape();
+
+          // Create the gazebo mesh
+          std::string meshName = std::string(modelName)
+              .append(".").append(linkName)
+              .append(".").append(collisionName)
+              .append(".sphere");
+          gz::common::MeshManager::Instance()->CreateSphere(
+              meshName,
+              sphere.Radius(),        // radius
+              8,                      // rings
+              8);                     // segments
+          GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
+              "Failed to create Mesh for Sphere");
+
+          // Create the CGAL surface mesh
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+          waves::MeshTools::MakeSurfaceMesh(
+              *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+          linkMeshes.push_back(mesh);
+          linkCollisions.push_back(collisionEntity);
+
+          gzmsg << "Type:       " << "SPHERE" << std::endl;
+          gzmsg << "Radius:     " << sphere.Radius() << std::endl;
+          gzmsg << "MeshName:   " << meshName << std::endl;            
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          break;
+        }
+        case sdf::GeometryType::CYLINDER:
+        {
+          auto& cylinder = coll->Data().Geom()->CylinderShape()->Shape();
+
+          // Create the gazebo mesh
+          std::string meshName = std::string(modelName)
+              .append(".").append(linkName)
+              .append(".").append(collisionName)
+              .append(".cylinder");
+          gz::common::MeshManager::Instance()->CreateCylinder(
+              meshName,
+              cylinder.Radius(),      // radius
+              cylinder.Length(),      // length,
+              1,                      // rings
+              32);                    // segments
+          GZ_ASSERT(gz::common::MeshManager::Instance()->HasMesh(meshName),
+              "Failed to create Mesh for Cylinder");
+
+          // Create the CGAL surface mesh
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+          waves::MeshTools::MakeSurfaceMesh(
+              *gz::common::MeshManager::Instance()->MeshByName(meshName), *mesh);
+          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+          linkMeshes.push_back(mesh);
+          linkCollisions.push_back(collisionEntity);
+
+          gzmsg << "Type:       " << "CYLINDER" << std::endl;
+          gzmsg << "Radius:     " << cylinder.Radius() << std::endl;
+          gzmsg << "Length:     " << cylinder.Length() << std::endl;
+          gzmsg << "MeshName:   " << meshName << std::endl;            
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          break;
+        }
+        case sdf::GeometryType::PLANE:
+        {
+          // Ignore plane shapes.
+          break;
+        }
+        case sdf::GeometryType::MESH:
+        {
+          // auto& meshShape = coll->Data().Geom()->MeshShape();
+          std::string uri = coll->Data().Geom()->MeshShape()->Uri();
+          std::string filePath = coll->Data().Geom()->MeshShape()->FilePath();
+
+          std::string file = asFullPath(uri, filePath);
+          // if (gz::common::MeshManager::Instance()->IsValidFilename(file))
+          // {
+          //   const gz::common::Mesh *mesh =
+          //     gz::common::MeshManager::Instance()->Load(file);
+          //   if (mesh)
+          //     volume = mesh->Volume();
+          //   else
+          //     gzerr << "Unable to load mesh[" << file << "]\n";
+          // }
+          // else
+          // {
+          //   gzerr << "Invalid mesh filename[" << file << "]\n";
+          // }
+
+          // Mesh
+          if (!gz::common::MeshManager::Instance()->IsValidFilename(file))
+          {
+            gzerr << "Mesh: " << file << " was not loaded"<< std::endl;
+            return;
+          } 
+
+          // Create the CGAL surface mesh
+          std::shared_ptr<cgal::Mesh> mesh = std::make_shared<cgal::Mesh>();
+          waves::MeshTools::MakeSurfaceMesh(
+              *gz::common::MeshManager::Instance()->Load(file), *mesh);
+          GZ_ASSERT(mesh != nullptr, "Invalid Suface Mesh");
+          linkMeshes.push_back(mesh);
+          linkCollisions.push_back(collisionEntity);
+
+          gzmsg << "Type:       " << "MESH" << std::endl;
+          gzmsg << "Uri:        " << uri << std::endl;
+          gzmsg << "FilePath:   " << filePath << std::endl;
+          gzmsg << "MeshFile:   " << file << std::endl;
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          break;
+        }
+        default:
+        {
+          gzerr << "Unsupported collision geometry["
+            << static_cast<int>(coll->Data().Geom()->Type()) << "]\n";
+          break;
+        }
+      }
+    }
+
+    // Add meshes for this link
+    _meshes.push_back(linkMeshes);
+    _collisions.push_back(linkCollisions);
+  }
+} 
 
 //////////////////////////////////////////////////
 bool HydrodynamicsPrivate::InitMarkers(

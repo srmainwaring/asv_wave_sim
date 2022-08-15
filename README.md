@@ -314,15 +314,29 @@ The waves visual plugin has the same algorithm elements as the model plugin and 
 
 - The `filename` and `name` attributes for the hydrodynamics plugin have changed.
 - The hydrodynamics parameters are now scoped in an additional `<hydrodynamics>` element.
-- The `<wave_model>` element is not currently used.
+- The buoyancy and hydrodynamics forces can be applied to specific entities
+in a model using the `<enable>` element. The parameter should be a fully
+scoped model entity (model, link or collision name).
+- The `<wave_model>` element is not used.
 
 ```xml
 <plugin
   filename="gz-waves1-hydrodynamics-system"
   name="gz::sim::systems::Hydrodynamics">
 
-   <!-- Hydrodynamics -->
-   <hydrodynamics>
+  <!-- Apply hydrodynamics to the entire model (default) -->
+  <enable>model_name</enable>
+
+  <!-- Or apply hydrodynamics to named links -->
+  <enable>model_name::link1</enable>
+  <enable>model_name::link2</enable>
+
+  <!-- Or apply hydrodynamics to named collisions -->
+  <enable>model_name::link1::collision1</enable>
+  <enable>model_name::link1::collision2</enable>
+
+  <!-- Hydrodynamics -->
+  <hydrodynamics>
     <damping_on>1</damping_on>
     <viscous_drag_on>1</viscous_drag_on>
     <pressure_drag_on>1</pressure_drag_on>
