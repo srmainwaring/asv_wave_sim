@@ -323,6 +323,14 @@
     <plugin
         filename="gz-waves1-hydrodynamics-system"
         name="gz::sim::systems::Hydrodynamics">
+        
+        <enable>wam-v::base_link</enable>
+
+        <!-- <enable>wam-v::left_engine_link</enable>
+        <enable>wam-v::left_propeller_link</enable>
+        <enable>wam-v::right_engine_link</enable>
+        <enable>wam-v::right_propeller_link</enable> -->
+
         <hydrodynamics>
           <damping_on>1</damping_on>
           <viscous_drag_on>1</viscous_drag_on>
