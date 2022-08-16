@@ -1,0 +1,486 @@
+<?xml version="1.0" ?>
+<!--
+  This is the Gazebo buoyancy plugin demo from gz-sim adapted to work
+  with gz-waves instead of the buoyancy system with graded buoyancy.
+  
+  This world demonstrates a graded buoyancy world consisting of some
+  basic shapes which should eventually float up.
+
+  Modifications
+
+  - The water plane is replaced with the waves model.
+  - The world level gz-sim-buoyancy-system is replaced with
+    the model level gz-waves1-hydrodynamics-system.
+  - Damping and drag forces are disabled.
+  - The mass and inertia for the models have been recalculated.
+  - The centre of mass has been moved slightly below the centre of
+    volume to improve the stability of each shape.
+  - Materials have been added to each shape to aid identification.
+-->
+<sdf version="1.6">
+  <world name="buoyancy">
+
+    <physics name="1ms" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://waves</uri>
+    </include>
+
+    <model name='lighter_than_water'>
+      <pose>0 0 0 0 0 0</pose>
+      <!-- This red sphere should bob up and down. -->
+      <model name="ball">
+        <plugin
+          filename="gz-waves1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
+          <enable>lighter_than_water::ball</enable>
+          <hydrodynamics>
+              <damping_on>0</damping_on>
+              <viscous_drag_on>0</viscous_drag_on>
+              <pressure_drag_on>0</pressure_drag_on>
+          </hydrodynamics>
+        </plugin>
+        <link name='body'>
+          <pose>0 0 0 0 0 0</pose>
+          <inertial>
+            <mass>15</mass>
+            <inertia>
+              <ixx>0.24</ixx>
+              <ixy>0</ixy>
+              <ixz>0</ixz>
+              <iyy>0.24</iyy>
+              <iyz>0</iyz>
+              <izz>0.24</izz>
+            </inertia>
+          </inertial>
+          <visual name='body_visual'>
+            <geometry>
+              <sphere>
+                <radius>0.2</radius>
+              </sphere>
+            </geometry>
+            <material>
+              <ambient>1 0 0 1</ambient>
+              <diffuse>1 0 0 1</diffuse>
+              <specular>0.8 0.8 0.8 1</specular>
+            </material>
+          </visual>
+          <collision name='body_collision'>
+            <geometry>
+              <sphere>
+                <radius>0.2</radius>
+              </sphere>
+            </geometry>
+          </collision>
+        </link>
+      </model>
+
+      <!-- This green box should float. -->
+      <model name='box'>
+        <plugin
+          filename="gz-waves1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
+          <enable>lighter_than_water::box</enable>
+          <hydrodynamics>
+              <damping_on>0</damping_on>
+              <viscous_drag_on>0</viscous_drag_on>
+              <pressure_drag_on>0</pressure_drag_on>
+          </hydrodynamics>
+        </plugin>
+        <pose>3 3 0 0.3 0.2 0.1</pose>
+        <link name='body'>
+          <inertial>
+            <mass>200</mass>
+            <inertia>
+              <ixx>33.33</ixx>
+              <ixy>0</ixy>
+              <ixz>0</ixz>
+              <iyy>33.33</iyy>
+              <iyz>0</iyz>
+              <izz>33.33</izz>
+            </inertia>
+          </inertial>
+          <visual name='body_visual'>
+            <geometry>
+              <box>
+                <size>1 1 1</size>
+              </box>
+            </geometry>
+            <material>
+              <ambient>0 1 0 1</ambient>
+              <diffuse>0 1 0 1</diffuse>
+              <specular>0.8 0.8 0.8 1</specular>
+            </material>
+          </visual>
+          <collision name='body_collision'>
+            <geometry>
+               <box>
+                <size>1 1 1</size>
+              </box>
+            </geometry>
+          </collision>
+        </link>
+      </model>
+    </model>
+
+    <!-- This yellow balloon should shoot up -->
+    <model name='balloon_lighter_than_air'>
+      <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <enable>balloon_lighter_than_air::body</enable>
+        <hydrodynamics>
+            <damping_on>0</damping_on>
+            <viscous_drag_on>0</viscous_drag_on>
+            <pressure_drag_on>0</pressure_drag_on>
+        </hydrodynamics>
+      </plugin>
+      <pose>0 -3 -0.1 0 0 0</pose>
+      <link name='body'>
+        <pose>0 0 0 0 0 0</pose>
+        <inertial>
+          <mass>0.1</mass>
+          <inertia>
+            <ixx>0.0016</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.0016</iyy>
+            <iyz>0</iyz>
+            <izz>0.0016</izz>
+          </inertia>
+        </inertial>
+        <visual name='body_visual'>
+          <geometry>
+            <sphere>
+              <radius>0.2</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <ambient>1 1 0 1</ambient>
+            <diffuse>1 1 0 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <collision name='body_collision'>
+          <geometry>
+            <sphere>
+              <radius>0.2</radius>
+            </sphere>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- This teal box is neutrally buoyant and therefore should stay still -->
+    <model name='box_neutral_buoyancy'>
+      <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <enable>box_neutral_buoyancy</enable>
+        <hydrodynamics>
+            <damping_on>0</damping_on>
+            <viscous_drag_on>0</viscous_drag_on>
+            <pressure_drag_on>0</pressure_drag_on>
+        </hydrodynamics>
+      </plugin>
+      <pose>0 3 -3 0 0 0</pose>
+      <link name='body'>
+        <inertial>
+          <mass>998.6</mass>
+          <pose>0 0 -0.1 0 0 0</pose>
+          <inertia>
+            <ixx>166.4333333</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>166.4333333</iyy>
+            <iyz>0</iyz>
+            <izz>166.4333333</izz>
+          </inertia>
+        </inertial>
+        <visual name='body_visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 1 1</ambient>
+            <diffuse>0 1 1 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <collision name='body_collision'>
+          <geometry>
+             <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!--
+      This orange box is neutrally buoyant and therefore should stay still.
+      Its link origin is above water, but its collision is below.
+    -->
+    <model name='box_neutral_buoyancy_collision_offset'>
+      <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <enable>box_neutral_buoyancy_collision_offset::body::buoyancy_volume</enable>
+        <hydrodynamics>
+            <damping_on>0</damping_on>
+            <viscous_drag_on>0</viscous_drag_on>
+            <pressure_drag_on>0</pressure_drag_on>
+        </hydrodynamics>
+      </plugin>
+      <pose>-3 3 2 0 0 0</pose>
+      <link name='body'>
+        <inertial>
+          <mass>998.6</mass>
+          <pose>0 0 -5.1 0 0 0</pose>
+          <inertia>
+            <ixx>166.4333333</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>166.4333333</iyy>
+            <iyz>0</iyz>
+            <izz>166.4333333</izz>
+          </inertia>
+        </inertial>
+        <visual name='link_origin'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.25 0 1</ambient>
+            <diffuse>0.8 0.25 0 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <visual name='collision_origin'>
+          <pose>0 0 -5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.25 0 1</ambient>
+            <diffuse>0.8 0.25 0 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <collision name='buoyancy_volume'>
+          <pose>0 0 -5 0 0 0</pose>
+          <geometry>
+             <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!--
+      This purple and yellow box has multiple collision shapes.
+      It is neutrally buoyant if one collision is enabled and will float
+      if both are enabled.
+    -->
+    <model name='multi_collision_neutral_buoyancy'>
+      <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <!-- <enable>multi_collision_neutral_buoyancy::body::collision_1</enable> -->
+        <enable>multi_collision_neutral_buoyancy::body::collision_2</enable>
+        <hydrodynamics>
+            <damping_on>0</damping_on>
+            <viscous_drag_on>0</viscous_drag_on>
+            <pressure_drag_on>0</pressure_drag_on>
+        </hydrodynamics>
+      </plugin>
+      <pose>3 3 -3 0 0 0</pose>
+      <link name='body'>
+        <inertial>
+          <mass>499</mass>
+          <pose>0 0 -0.1 0 0 0</pose>
+          <inertia>
+            <ixx>83.2</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>83.2</iyy>
+            <iyz>0</iyz>
+            <izz>83.2</izz>
+          </inertia>
+        </inertial>
+        <visual name='collision_1_vis'>
+          <pose>0 0 -0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 0.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 0 1</ambient>
+            <diffuse>1 1 0 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <visual name='collision_2_vis'>
+          <pose>0 0 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 0.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 1 1</ambient>
+            <diffuse>1 0 1 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <collision name='collision_1'>
+          <pose>0 0 -0.25 0 0 0</pose>
+          <geometry>
+             <box>
+              <size>1 1 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='collision_2'>
+          <pose>0 0 0.25 0 0 0</pose>
+          <geometry>
+             <box>
+              <size>1 1 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- This purple box is negatively buoyant and therefore should sink -->
+    <model name='box_negative_buoyancy'>
+      <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <enable>box_negative_buoyancy</enable>
+        <hydrodynamics>
+            <damping_on>0</damping_on>
+            <viscous_drag_on>0</viscous_drag_on>
+            <pressure_drag_on>0</pressure_drag_on>
+        </hydrodynamics>
+      </plugin>
+      <pose>-3 -3 0 0 0 0</pose>
+      <link name='body'>
+        <inertial>
+          <mass>998.6</mass>
+          <pose>0 0 -0.1 0 0 0</pose>
+          <inertia>
+            <ixx>166.4333333</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>166.4333333</iyy>
+            <iyz>0</iyz>
+            <izz>166.4333333</izz>
+          </inertia>
+        </inertial>
+        <visual name='body_visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 1 1</ambient>
+            <diffuse>1 0 1 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <collision name='body_collision'>
+          <geometry>
+             <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Not affected by buoyancy - will sink quickly -->
+    <model name='box_no_buoyancy'>
+      <pose>3 -3 0 0 0 0</pose>
+      <link name='body'>
+        <inertial>
+          <mass>998.6</mass>
+          <pose>0 0 -0.1 0 0 0</pose>
+          <inertia>
+            <ixx>166.4333333</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>166.4333333</iyy>
+            <iyz>0</iyz>
+            <izz>166.4333333</izz>
+          </inertia>
+        </inertial>
+        <visual name='body_visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <collision name='body_collision'>
+          <geometry>
+             <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+  </world>
+</sdf>

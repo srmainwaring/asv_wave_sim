@@ -41,6 +41,17 @@ namespace systems
   /// <plugin name="gz::sim::systems::Hydrodynamics"
   ///         filename="gz-waves1-hydrodynamics-system">
   ///
+  ///   <!-- Apply hydrodynamics to the entire model (default) -->
+  ///   <enable>model_name</enable>
+  ///
+  ///   <!-- Or apply hydrodynamics to named links -->
+  ///   <enable>model_name::link1</enable>
+  ///   <enable>model_name::link2</enable>
+  ///
+  ///   <!-- Or apply hydrodynamics to named collisions -->
+  ///   <enable>model_name::link1::collision1</enable>
+  ///   <enable>model_name::link1::collision2</enable>
+  ///
   ///   <!-- Hydrodynamics -->
   ///   <hydrodynamics>
   ///     <damping_on>1</damping_on>
@@ -62,6 +73,15 @@ namespace systems
   ///     <fSDrag>0.4</fSDrag>
   ///     <vRDrag>1.0</vRDrag>
   ///   </hydrodynamics>
+  ///
+  ///   <!-- Control visibility of markers -->
+  ///   <markers>
+  ///     <update_rate>10</update_rate>
+  ///     <water_patch>1</water_patch>
+  ///     <waterline>1</waterline>
+  ///     <underwater_surface>1</underwater_surface>
+  ///   </markers>
+  ///
   /// </plugin>
   /// \endcode
   ///
