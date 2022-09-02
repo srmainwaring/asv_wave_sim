@@ -1,0 +1,152 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="waves_sensor">
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+      <background_color>0.8 0.8 0.8</background_color>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin filename="gz-sim-imu-system"
+            name="gz::sim::systems::Imu">
+    </plugin>
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.6 0.6 0.6 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://waves</uri>
+    </include>
+
+    <!-- ENU axes -->
+    <model name="axes">
+      <static>1</static>
+      <link name="link">
+        <visual name="r">
+          <cast_shadows>0</cast_shadows>
+          <pose>5 0 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>10 0.01 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+            <emissive>1 0 0 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <visual name="g">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 5 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 10 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <emissive>0 1 0 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <visual name="b">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 0 5.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 0.01 10</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 1 1</ambient>
+            <diffuse>0 0 1 1</diffuse>
+            <emissive>0 0 1 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wave_sensor">
+      <static>1</static>
+      <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+        <enable>wave_sensor::sensor_link</enable>
+        <hydrodynamics>
+            <damping_on>0</damping_on>
+            <viscous_drag_on>0</viscous_drag_on>
+            <pressure_drag_on>0</pressure_drag_on>
+        </hydrodynamics>
+      </plugin>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>10</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.175 0.175 0.175 1</ambient>
+            <diffuse>0.175 0.175 0.175 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+      </link>
+      <link name="sensor_link">
+        <pose>0 0 5.1 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.33 0.0 0.5</ambient>
+            <diffuse>0.33 0.0 0.5</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+      </link>
+      <joint name="sensor_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>sensor_link</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>0</lower>
+            <upper>0</upper>
+          </limit>
+          <dynamics>
+            <damping>1</damping>
+          </dynamics>
+        </axis>
+      </joint>
+    </model>
+
+  </world>
+</sdf>
