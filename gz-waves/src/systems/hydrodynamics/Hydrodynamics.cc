@@ -384,7 +384,7 @@ void Hydrodynamics::Configure(const Entity &_entity,
   if (!this->dataPtr->model.Valid(_ecm))
   {
     gzerr << "The Hydrodynamics system should be attached to a model entity. "
-           << "Failed to initialize." << std::endl;
+           << "Failed to initialize." << "\n";
     return;
   }
   this->dataPtr->sdf = _sdf->Clone();
@@ -443,7 +443,7 @@ void Hydrodynamics::PreUpdate(
   {
     gzwarn << "Detected jump back in time ["
         << std::chrono::duration_cast<std::chrono::seconds>(_info.dt).count()
-        << "s]. System may not work properly." << std::endl;
+        << "s]. System may not work properly." << "\n";
   }
 
   if (!this->dataPtr->initialized)
@@ -527,8 +527,9 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
   std::vector<std::vector<cgal::MeshPtr>> meshes;
   std::vector<std::vector<Entity>> collisions;
   this->CreateCollisionMeshes(_ecm, this->model, links, meshes, collisions);
-  gzmsg << "Hydrodynamics: links:  " << links.size() << std::endl;
-  gzmsg << "Hydrodynamics: meshes: " << meshes.size() << std::endl;
+  gzmsg << "Hydrodynamics: links:  " << links.size()
+      << ", meshes: " << meshes.size()
+      << ", collisions: " << collisions.size() << "\n";
 
   for (size_t i=0; i<links.size(); ++i)
   {
@@ -547,8 +548,12 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     hd->link = sim::Link(links[i]);
     hd->link.EnableVelocityChecks(_ecm);
 
+    std::string modelScopedLinkName =
+        removeParentScope(
+            scopedName(hd->link.Entity(), _ecm, "::", false), "::");
+
     gzmsg << "Hydrodynamics: initialising link ["
-        << hd->link.Name(_ecm).value() << "]\n";
+        << modelScopedLinkName << "]\n";
     gzmsg << "Hydrodynamics: link has ["
         << meshCount << "] collision meshes\n";
 
@@ -576,8 +581,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // The link pose is required for the water patch, the CoM pose for dynamics.
     // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
     gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
-    gzmsg << "Hydrodynamics: link world pose\n";
-    gzmsg << linkPose << "\n";
+    gzmsg << "Hydrodynamics: link world pose: " << linkPose << "\n";
 
     /// \todo subtle difference here - inertial pose includes
     /// any rotation of the inertial matrix where CoG pose does not.
@@ -585,8 +589,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // gz::math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();    
     auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
     gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();
-    gzmsg << "Hydrodynamics: link world CoM pose\n";
-    gzmsg << linkCoMPose << "\n";
+    gzmsg << "Hydrodynamics: link world CoM pose: " << linkCoMPose << "\n";
 
     // Water patch grid
     /// \todo fix hardcoded patch size. CollisionBoundingBox is not currently available 
@@ -594,7 +597,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     // double patchSize = 2.2 * boundingBox.Size().Length();
     double patchSize = 20.0;
     gzmsg << "Hydrodynamics: set water patch size: "
-        << patchSize << std::endl;
+        << patchSize << "\n";
     std::shared_ptr<waves::Grid> initWaterPatch(
         new waves::Grid({patchSize, patchSize}, { 4, 4 }));
 
@@ -749,12 +752,12 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       nSubTri += hd->hydrodynamics[j]->GetSubmergedTriangles().size();
 
       // DEBUG_INFO
-      // gzmsg << "Link:         " << hd->link->GetName() << std::endl;
-      // gzmsg << "Position:     " << linkPose.Pos() << std::endl;
-      // gzmsg << "Rotation:     " << linkPose.Rot().Euler() << std::endl;
-      // gzmsg << "SubTriCount:  " << nSubTri << std::endl;
-      // gzmsg << "Force:        " << force << std::endl;
-      // gzmsg << "Torque:       " << torque << std::endl;
+      // gzmsg << "Link:         " << hd->link->GetName() << "\n";
+      // gzmsg << "Position:     " << linkPose.Pos() << "\n";
+      // gzmsg << "Rotation:     " << linkPose.Rot().Euler() << "\n";
+      // gzmsg << "SubTriCount:  " << nSubTri << "\n";
+      // gzmsg << "Force:        " << force << "\n";
+      // gzmsg << "Torque:       " << torque << "\n";
     }
   }
 }
@@ -813,7 +816,8 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
   std::vector<std::vector<cgal::MeshPtr>>& _meshes,
   std::vector<std::vector<Entity>>& _collisions)
 {
-  // There will be more than one mesh per link if the link contains mutiple collisions.
+  // There will be more than one mesh per link if the link contains
+  // mutiple collisions. Links with no collisions enabled are skipped.
 
   // Model
   std::string modelName(_model.Name(_ecm));
@@ -822,16 +826,20 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
   for (auto& linkEntity : _model.Links(_ecm))
   {
     GZ_ASSERT(linkEntity != kNullEntity, "Link must be valid");
-    _links.push_back(linkEntity);
     sim::Link link(linkEntity);
-
-    /// \todo check link has valid name component
     std::string linkName(link.Name(_ecm).value());
+    std::string modelScopedLinkName =
+        removeParentScope(
+            scopedName(linkEntity, _ecm, "::", false), "::");
+
+
+    /// check link has valid name
+    GZ_ASSERT(link.Name(_ecm).has_value(), "Link must be have valid name");
     std::vector<std::shared_ptr<cgal::Mesh>> linkMeshes;
     std::vector<Entity> linkCollisions;
 
-    gzmsg << "Hydrodynamics: create collision mesh for link ["
-        << linkName << "]\n";
+    gzmsg << "Hydrodynamics: checking collision meshes for link ["
+        << modelScopedLinkName << "]\n";
     
     // Collisions
     for (auto& collisionEntity : link.Collisions(_ecm))
@@ -840,11 +848,19 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
 
       sim::Collision collision(collisionEntity);
       std::string collisionName(collision.Name(_ecm).value());
-      gzmsg << "Hydrodynamics: collision name [" << collisionName << "]\n";
+      std::string modelScopedCollisionName =
+          removeParentScope(
+              scopedName(collisionEntity, _ecm, "::", false), "::");
 
       // check this collision has hydrodynamics enabled
       if (!this->IsEnabled(collisionEntity, _ecm))
+      {
+        gzmsg << "Hydrodynamics: skipping collision ["
+            << modelScopedCollisionName << "]\n";
         continue;
+      }
+      gzmsg << "Hydrodynamics: including collision ["
+          << modelScopedCollisionName << "]\n";
 
       // get the collision element
       const components::CollisionElement *coll =
@@ -884,10 +900,10 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
           linkMeshes.push_back(mesh);
           linkCollisions.push_back(collisionEntity);
 
-          gzmsg << "Type:       " << "BOX" << std::endl;
-          gzmsg << "Size:       " << box.Size() << std::endl;
-          gzmsg << "MeshName:   " << meshName << std::endl;            
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          gzmsg << "Type:       " << "BOX" << "\n";
+          gzmsg << "Size:       " << box.Size() << "\n";
+          gzmsg << "MeshName:   " << meshName << "\n";            
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << "\n";
           break;
         }
         case sdf::GeometryType::SPHERE:
@@ -916,10 +932,10 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
           linkMeshes.push_back(mesh);
           linkCollisions.push_back(collisionEntity);
 
-          gzmsg << "Type:       " << "SPHERE" << std::endl;
-          gzmsg << "Radius:     " << sphere.Radius() << std::endl;
-          gzmsg << "MeshName:   " << meshName << std::endl;            
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          gzmsg << "Type:       " << "SPHERE" << "\n";
+          gzmsg << "Radius:     " << sphere.Radius() << "\n";
+          gzmsg << "MeshName:   " << meshName << "\n";            
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << "\n";
           break;
         }
         case sdf::GeometryType::CYLINDER:
@@ -948,11 +964,11 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
           linkMeshes.push_back(mesh);
           linkCollisions.push_back(collisionEntity);
 
-          gzmsg << "Type:       " << "CYLINDER" << std::endl;
-          gzmsg << "Radius:     " << cylinder.Radius() << std::endl;
-          gzmsg << "Length:     " << cylinder.Length() << std::endl;
-          gzmsg << "MeshName:   " << meshName << std::endl;            
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          gzmsg << "Type:       " << "CYLINDER" << "\n";
+          gzmsg << "Radius:     " << cylinder.Radius() << "\n";
+          gzmsg << "Length:     " << cylinder.Length() << "\n";
+          gzmsg << "MeshName:   " << meshName << "\n";            
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << "\n";
           break;
         }
         case sdf::GeometryType::PLANE:
@@ -984,7 +1000,7 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
           // Mesh
           if (!gz::common::MeshManager::Instance()->IsValidFilename(file))
           {
-            gzerr << "Mesh: " << file << " was not loaded"<< std::endl;
+            gzerr << "Mesh: " << file << " was not loaded"<< "\n";
             return;
           } 
 
@@ -996,11 +1012,11 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
           linkMeshes.push_back(mesh);
           linkCollisions.push_back(collisionEntity);
 
-          gzmsg << "Type:       " << "MESH" << std::endl;
-          gzmsg << "Uri:        " << uri << std::endl;
-          gzmsg << "FilePath:   " << filePath << std::endl;
-          gzmsg << "MeshFile:   " << file << std::endl;
-          gzmsg << "Vertex:     " << mesh->number_of_vertices() << std::endl;
+          gzmsg << "Type:       " << "MESH" << "\n";
+          gzmsg << "Uri:        " << uri << "\n";
+          gzmsg << "FilePath:   " << filePath << "\n";
+          gzmsg << "MeshFile:   " << file << "\n";
+          gzmsg << "Vertex:     " << mesh->number_of_vertices() << "\n";
           break;
         }
         default:
@@ -1012,9 +1028,13 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
       }
     }
 
-    // Add meshes for this link
-    _meshes.push_back(linkMeshes);
-    _collisions.push_back(linkCollisions);
+    // Add link and meshes if it contains enabled collisions
+    if (!linkMeshes.empty())
+    {
+      _links.push_back(linkEntity);
+      _meshes.push_back(linkMeshes);
+      _collisions.push_back(linkCollisions);
+    }
   }
 } 
 
