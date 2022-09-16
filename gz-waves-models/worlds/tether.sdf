@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <world name="waves">
+  <world name="tether">
     <plugin filename="gz-sim-physics-system"
             name="gz::sim::systems::Physics">
     </plugin>
@@ -34,23 +34,6 @@
       <pose>0 0 0 0 0 0</pose>
       <uri>model://waves</uri>
     </include>
-
-    <!-- <include>
-      <pose>0 0 -5 0 0 0</pose>
-      <uri>model://Ground Plane</uri>
-    </include> -->
-
-    <!-- <include>
-      <static>0</static>
-      <pose>0 0 0.035 0 -1.570796 0</pose>
-      <uri>model://chain_1m</uri>
-    </include> -->
-
-    <!-- <include> -->
-      <!-- <pose>0 2 2 0 -1.570796 -1.570796</pose> -->
-      <!-- <pose>0 0 0 0 0 0</pose>
-      <uri>model://chain_10m</uri>
-    </include> -->
 
     <model name="tethered_duck">
       <model name="anchor">

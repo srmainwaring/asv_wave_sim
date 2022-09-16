@@ -100,10 +100,10 @@
       <uri>model://spherical_buoy</uri>
     </include>
 
-    <include>
+    <!-- <include>
       <pose>5 0 0 0 0 0</pose>
       <uri>model://wam-v</uri>
-    </include>
+    </include> -->
 
     <!-- <include>
       <pose>5 0 0 0 0 1.51</pose>

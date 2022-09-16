@@ -91,7 +91,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -125,7 +125,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -159,7 +159,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -193,7 +193,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -227,7 +227,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -261,7 +261,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -295,7 +295,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -329,7 +329,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
@@ -363,7 +363,7 @@
       <physics>
         <ode>
           <cfm>0.5</cfm>
-          <erp>0.1</erp>
+          <erp>0.01</erp>
         </ode>
       </physics>
     </joint>
