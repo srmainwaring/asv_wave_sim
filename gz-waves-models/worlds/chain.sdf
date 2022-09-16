@@ -1,0 +1,167 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="waves">
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+      <background_color>0.8 0.8 0.8</background_color>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+    </plugin>
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.6 0.6 0.6 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://waves</uri>
+    </include>
+
+    <!-- <include>
+      <pose>0 0 -5 0 0 0</pose>
+      <uri>model://Ground Plane</uri>
+    </include> -->
+
+    <!-- <include>
+      <static>0</static>
+      <pose>0 0 0.035 0 -1.570796 0</pose>
+      <uri>model://chain_1m</uri>
+    </include> -->
+
+    <!-- <include> -->
+      <!-- <pose>0 2 2 0 -1.570796 -1.570796</pose> -->
+      <!-- <pose>0 0 0 0 0 0</pose>
+      <uri>model://chain_10m</uri>
+    </include> -->
+
+    <model name="tethered_duck">
+      <model name="anchor">
+        <pose>0 0 -5 0 0 0</pose>
+        <link name="base_link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>1 1 1</size>
+              </box>
+            </geometry>
+          </visual>
+          <collision name="collision">
+            <geometry>
+              <box>
+                <size>1 1 1</size>
+              </box>
+            </geometry>
+          </collision>
+          <inertial>
+            <mass>1000</mass>
+            <inertia>
+              <ixx>166.6666667</ixx>
+              <ixy>0.0</ixy>
+              <ixz>0.0</ixz>
+              <iyy>166.6666667</iyy>
+              <iyz>0.0</iyz>
+              <izz>166.6666667</izz>
+            </inertia>
+          </inertial>
+        </link>
+        <joint type="revolute" name="world_joint">
+          <parent>world</parent>
+          <child>base_link</child>
+          <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>0</lower>
+              <upper>0</upper>
+            </limit>
+            <dynamics>
+              <damping>1.0</damping>
+            </dynamics>
+          </axis>
+        </joint>
+      </model>
+
+      <include>
+        <pose>0.5 0 -5 0 1.57 0</pose>
+        <uri>model://chain_10m</uri>
+        <name>chain</name>
+      </include>
+
+      <joint type="universal" name="anchor_joint">
+        <pose>0 0 -0.5 0 0 0</pose>
+        <parent>anchor::base_link</parent>
+        <child>chain::chain0::base_link</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <limit>
+            <lower>-3.141592</lower>
+            <upper>3.141592</upper>
+          </limit>
+          <dynamics>
+            <damping>0.1</damping>
+        </dynamics>
+        </axis>
+        <axis2>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-3.141592</lower>
+            <upper>3.141592</upper>
+          </limit>
+          <dynamics>
+            <damping>1.0</damping>
+          </dynamics>
+        </axis2>
+      </joint>
+
+      <include>
+        <pose>10 0 -5 0 0 0</pose>
+        <uri>model://duck</uri>
+      </include>
+
+      <joint type="universal" name="duck_joint">
+        <pose>0 0 0 0 0 0</pose>
+        <parent>chain::chain9::base_link</parent>
+        <child>duck::base_link</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <limit>
+            <lower>-3.141592</lower>
+            <upper>3.141592</upper>
+          </limit>
+          <dynamics>
+            <damping>1.0</damping>
+        </dynamics>
+        </axis>
+        <axis2>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-3.141592</lower>
+            <upper>3.141592</upper>
+          </limit>
+          <dynamics>
+            <damping>1.0</damping>
+          </dynamics>
+        </axis2>
+      </joint>
+
+    </model>
+
+  </world>
+</sdf>

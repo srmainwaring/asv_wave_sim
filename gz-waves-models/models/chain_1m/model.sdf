@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="chain_1m">
+    <link name="base_link">
+      <!-- <pose>0 0 0 0 -1.570796 0</pose> -->
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.035</radius>
+            <length>1.0</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1.0</ambient>
+          <diffuse>0.1 0.1 0.1 1.0</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.035</radius>
+            <length>1.0</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass>9.8</mass>
+        <inertia>
+          <ixx>0.819667917</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.819667917</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0060025</izz>
+        </inertia>
+      </inertial>
+    </link>
+  </model>
+</sdf>
