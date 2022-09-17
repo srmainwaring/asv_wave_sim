@@ -10,60 +10,61 @@
 
     <include>
       <pose>0 0 1 0 0 0</pose>
+      <pose relative_to="joint1">0 0 0.5 0 0 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain1</name>
     </include>
 
     <include>
-      <pose>0 0 2 0 0 0</pose>
+      <pose relative_to="joint2">0 0 0.5 0 0 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain2</name>
     </include>
 
     <include>
-      <pose>0 0 3 0 0 0</pose>
+      <pose relative_to="joint3">0 0 0.5 0 0 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain3</name>
     </include>
 
     <include>
-      <pose>0 0 4 0 0 0</pose>
+      <pose relative_to="joint4">0 0 0.5 0 0 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain4</name>
     </include>
 
     <include>
-      <pose>0 0 5 0 0 0</pose>
+      <pose relative_to="joint5">0 0 0.5 0 0 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain5</name>
     </include>
 
     <include>
-      <pose>0 0 6 0 0 0</pose>
+      <pose relative_to="joint6">0 0 -0.5 0 3.141592 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain6</name>
     </include>
 
     <include>
-      <pose>0 0 7 0 0 0</pose>
+      <pose relative_to="joint7">0 0 -0.5 0 3.141592 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain7</name>
     </include>
 
     <include>
-      <pose>0 0 8 0 0 0</pose>
+      <pose relative_to="joint8">0 0 -0.5 0 3.141592 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain8</name>
     </include>
 
     <include>
-      <pose>0 0 9 0 0 0</pose>
+      <pose relative_to="joint9">0 0 -0.5 0 3.141592 0</pose>
       <uri>model://chain_1m</uri>
       <name>chain9</name>
     </include>
 
     <joint type="universal" name="joint1">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain0::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain0::base_link</parent>
       <child>chain1::base_link</child>
       <axis>
@@ -74,7 +75,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -85,19 +85,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint2">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain1::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain1::base_link</parent>
       <child>chain2::base_link</child>
       <axis>
@@ -108,7 +107,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -119,19 +117,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint3">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain2::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain2::base_link</parent>
       <child>chain3::base_link</child>
       <axis>
@@ -142,7 +139,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -153,19 +149,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint4">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain3::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain3::base_link</parent>
       <child>chain4::base_link</child>
       <axis>
@@ -176,7 +171,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -187,19 +181,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint5">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain4::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain4::base_link</parent>
       <child>chain5::base_link</child>
       <axis>
@@ -210,7 +203,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -221,19 +213,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint6">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain5::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain5::base_link</parent>
       <child>chain6::base_link</child>
       <axis>
@@ -244,7 +235,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -255,19 +245,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint7">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain6::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain6::base_link</parent>
       <child>chain7::base_link</child>
       <axis>
@@ -278,7 +267,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -289,19 +277,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint8">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain7::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain7::base_link</parent>
       <child>chain8::base_link</child>
       <axis>
@@ -312,7 +299,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -323,19 +309,18 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>
 
     <joint type="universal" name="joint9">
-      <pose>0 0 -0.5 0 0 0</pose>
+      <pose relative_to="chain8::base_link">0 0 0.5 0 0 0</pose>
       <parent>chain8::base_link</parent>
       <child>chain9::base_link</child>
       <axis>
@@ -346,7 +331,6 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis>
       <axis2>
@@ -357,13 +341,12 @@
         </limit>
         <dynamics>
           <damping>1.0</damping>
-          <!-- <spring_stiffness>0.1</spring_stiffness> -->
         </dynamics>
       </axis2>
       <physics>
         <ode>
-          <cfm>0.5</cfm>
-          <erp>0.01</erp>
+          <cfm>10</cfm>
+          <erp>0.0</erp>
         </ode>
       </physics>
     </joint>

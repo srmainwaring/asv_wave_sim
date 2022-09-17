@@ -25,14 +25,14 @@
         </geometry>
       </collision>
       <inertial>
-        <mass>9.8</mass>
+        <mass>908</mass>
         <inertia>
-          <ixx>0.819667917</ixx>
+          <ixx>81.9667917</ixx>
           <ixy>0.0</ixy>
           <ixz>0.0</ixz>
-          <iyy>0.819667917</iyy>
+          <iyy>81.9667917</iyy>
           <iyz>0.0</iyz>
-          <izz>0.0060025</izz>
+          <izz>0.60025</izz>
         </inertia>
       </inertial>
     </link>

@@ -1,4 +1,74 @@
 <?xml version="1.0" ?>
+<!-- 
+tether.sdf
+
+This world models a large ellipsoid buoy moored by a 10 link tether
+to an anchor block.
+
+Models used:
+
+- chain_10m (chain_1m)
+- wec_sim_ellipsoid
+
+
+Issues:
+
+The ellipsoid has a large volume and mass relative to the chain. When the buoy
+extends the chain to it's full extent the ODE engine fails with the error message
+below.
+
+Attemps to resolve:
+
+1. Set the joint CFM = 10 and ERP = 0.0. 
+
+No effect. 
+
+2. Increase the mass of the chain x 10.
+
+No effect
+
+3. Increase the mass of the chain x 100, ellipsoid initially at equilibrium, no waves
+
+No effect
+
+
+
+ODE INTERNAL ERROR 1: assertion "!bSafeNormalize4Fault" failed in dxNormalize4() [./odemath.h:53]
+Stack trace (most recent call last):
+#31   Object "libruby.3.1.dylib", at 0x101e8d894, in rb_vm_exec + 1927
+#30   Object "libruby.3.1.dylib", at 0x101e7e4c4, in vm_exec_core + 6274
+#29   Object "libruby.3.1.dylib", at 0x101e97781, in vm_sendish + 1181
+#28   Object "libruby.3.1.dylib", at 0x101e9553b, in vm_call_cfunc_with_frame + 323
+#27   Object "fiddle.bundle", at 0x105488767, in function_call + 1486
+#26   Object "libruby.3.1.dylib", at 0x101e58d49, in rb_nogvl + 160
+#25   Object "fiddle.bundle", at 0x105488d4f, in nogvl_ffi_call + 26
+#24   Object "libffi.dylib", at 0x7ff825cfc1b2, in ffi_call_int + 704
+#23   Object "libffi.dylib", at 0x7ff825cfc882, in ffi_call_unix64 + 82
+#22   Object "libgz-sim7-gz.7.0.0~pre1.dylib", at 0x1055b433b, in runServer + 5963
+#21   Object "libgz-sim7.7.0.0~pre1.dylib", at 0x1061d223d, in gz::sim::v7::ServerPrivate::Run(unsigned long long, std::__1::optional<std::__1::condition_variable*>) + 557
+#20   Object "libgz-sim7.7.0.0~pre1.dylib", at 0x1061e449b, in gz::sim::v7::SimulationRunner::Run(unsigned long long) + 4299
+#19   Object "libgz-sim7.7.0.0~pre1.dylib", at 0x1061df296, in gz::sim::v7::SimulationRunner::Step(gz::sim::v7::UpdateInfo const&) + 182
+#18   Object "libgz-sim7.7.0.0~pre1.dylib", at 0x1061e2fde, in gz::sim::v7::SimulationRunner::UpdateSystems() + 158
+#17   Object "libgz-sim7-physics-system.7.0.0~pre", at 0x10b32e772, in gz::sim::v7::systems::Physics::Update(gz::sim::v7::UpdateInfo const&, gz::sim::v7::EntityComponentManager&) + 114
+#16   Object "libgz-sim7-physics-system.7.0.0~pre", at 0x10b32f510, in gz::sim::v7::systems::PhysicsPrivate::Step(std::__1::chrono::duration<long long, std::__1::ratio<1l, 1000000000l> > const&) + 480
+#15   Object "libgz-sim7-physics-system.7.0.0~pre", at 0x10b333d93, in gz::physics::ForwardStep::World<gz::physics::FeaturePolicy<double, 3ul>, gz::sim::v7::systems::PhysicsPrivate::MinimumFeatureList>::Step(gz::physics::SpecifyData<gz::physics::RequireData<gz::physics::WorldPoses>, gz::physics::ExpectData<gz::physics::ChangedWorldPoses, gz::physics::Contacts, gz::physics::JointPositions> >&, gz::physics::CompositeData&, gz::physics::ExpectData<gz::physics::ApplyExternalForceTorques, gz::physics::ApplyGeneralizedForces, gz::physics::VelocityControlCommands, gz::physics::ServoControlCommands, std::__1::chrono::duration<long long, std::__1::ratio<1l, 1000000000l> > > const&) + 195
+#14   Object "libgz-physics6-dartsim-plugin.6.0.0", at 0x110ce7591, in gz::physics::dartsim::SimulationFeatures::WorldForwardStep(gz::physics::Identity const&, gz::physics::SpecifyData<gz::physics::RequireData<gz::physics::WorldPoses>, gz::physics::ExpectData<gz::physics::ChangedWorldPoses, gz::physics::Contacts, gz::physics::JointPositions> >&, gz::physics::CompositeData&, gz::physics::ExpectData<gz::physics::ApplyExternalForceTorques, gz::physics::ApplyGeneralizedForces, gz::physics::VelocityControlCommands, gz::physics::ServoControlCommands, std::__1::chrono::duration<long long, std::__1::ratio<1l, 1000000000l> > > const&) + 449
+#13   Object "libdart.6.10.0.dylib", at 0x11189712e, in dart::simulation::World::step(bool) + 88
+#12   Object "libdart.6.10.0.dylib", at 0x11187fe21, in dart::constraint::ConstraintSolver::solve() + 69
+#11   Object "libdart.6.10.0.dylib", at 0x11187ff0f, in dart::constraint::ConstraintSolver::updateConstraints() + 179
+#10   Object "libdart-collision-ode.6.10.0.dylib", at 0x10b9a6245, in dart::collision::OdeCollisionDetector::collide(dart::collision::CollisionGroup*, dart::collision::CollisionOption const&, dart::collision::CollisionResult*) + 37
+#9    Object "libdart.6.10.0.dylib", at 0x11185281d, in dart::collision::CollisionGroup::updateEngineData() + 39
+#8    Object "libdart-collision-ode.6.10.0.dylib", at 0x10b9a8b60, in dart::collision::OdeCollisionObject::updateEngineData() + 166
+#7    Object "libode.8.dylib", at 0x11039337b, in dBodySetLinearVel + 0
+#6    Object "libode.8.dylib", at 0x11037e2c1, in dDebug + 141
+#5    Object "libsystem_c.dylib", at 0x7ff81775cd24, in abort + 123
+#4    Object "libsystem_pthread.dylib", at 0x7ff8178111ff, in pthread_kill + 263
+#3    Object "libsystem_kernel.dylib", at 0x7ff8177db00f, in __pthread_kill + 11
+#2    Object "libsystem_platform.dylib", at 0x7ff817826dfc, in _sigtramp + 28
+#1    Object "libgz-tools2-backward.dylib", at 0x1054db21d, in backward::SignalHandling::sig_handler(int, __siginfo*, void*) + 13
+#0    Object "libgz-tools2-backward.dylib", at 0x1054db286, in backward::SignalHandling::handleSignal(int, __siginfo*, void*) + 70
+
+ -->
 <sdf version="1.6">
   <world name="tether">
     <plugin filename="gz-sim-physics-system"
@@ -35,9 +105,9 @@
       <uri>model://waves</uri>
     </include>
 
-    <model name="tethered_duck">
+    <model name="tethered_buoy">
       <model name="anchor">
-        <pose>0 0 -5 0 0 0</pose>
+        <pose>0 0 -9.5 0 0 0</pose>
         <link name="base_link">
           <visual name="visual">
             <geometry>
@@ -82,13 +152,13 @@
       </model>
 
       <include>
-        <pose>0.5 0 -5 0 1.57 0</pose>
+        <pose relative_to="anchor_joint">0 0 0.5 0 0 0</pose>
         <uri>model://chain_10m</uri>
         <name>chain</name>
       </include>
 
       <joint type="universal" name="anchor_joint">
-        <pose>0 0 -0.5 0 0 0</pose>
+        <pose relative_to="anchor::base_link">0 0 0 0 0 0</pose>
         <parent>anchor::base_link</parent>
         <child>chain::chain0::base_link</child>
         <axis>
@@ -113,15 +183,30 @@
         </axis2>
       </joint>
 
-      <include>
-        <pose>10 0 -5 0 0 0</pose>
+      <!-- <include>
+        <pose relative_to="tether_joint">0 0 0 0 -1.57079632 0</pose>
         <uri>model://duck</uri>
+      </include> -->
+
+      <!-- <enable>wec_sim_ellipsoid::base_link::collision</enable> -->
+      <include>
+        <pose relative_to="tether_joint">0 0 3.5 0 0 0</pose>
+        <uri>model://wec_sim_ellipsoid</uri>
+        <plugin
+            filename="gz-waves1-hydrodynamics-system"
+            name="gz::sim::systems::Hydrodynamics">
+          <hydrodynamics>
+            <damping_on>1</damping_on>
+            <viscous_drag_on>1</viscous_drag_on>
+            <pressure_drag_on>1</pressure_drag_on>
+          </hydrodynamics>
+        </plugin>
       </include>
 
-      <joint type="universal" name="duck_joint">
-        <pose>0 0 0 0 0 0</pose>
+      <joint type="universal" name="tether_joint">
+        <pose relative_to="chain::chain9::base_link">0 0 0.5 0 0 0</pose>
         <parent>chain::chain9::base_link</parent>
-        <child>duck::base_link</child>
+        <child>wec_sim_ellipsoid::base_link</child>
         <axis>
           <xyz>0 1 0</xyz>
           <limit>
