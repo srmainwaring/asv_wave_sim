@@ -1,0 +1,67 @@
+<?xml version='1.0' ?>
+<sdf version="1.6">
+  <model name="monochromatic_waves">
+    <static>true</static>
+
+    <plugin
+        filename="gz-waves1-waves-model-system"
+        name="gz::sim::systems::WavesModel">
+      <static>0</static>
+      <update_rate>30</update_rate>
+      <wave>
+        <algorithm>sinusoid</algorithm>
+        <number>1</number>
+        <amplitude>2.0</amplitude>
+        <period>6.0</period>
+        <direction>1 0</direction>
+      </wave>
+    </plugin>
+
+    <link name="base_link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>models://waves/materials/mesh_L256m_N256.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.0 0.05 0.8 0.92</ambient>
+          <diffuse>0.0 0.1 0.7 0.92</diffuse>
+          <specular>0.7 0.7 0.7 0.92</specular>
+          <pbr>
+            <metal>
+              <albedo_map>models://waves/materials/water.jpg</albedo_map>
+              <normal_map>models://waves/materials/wave_normals.dds</normal_map>
+              <environment_map>models://waves/materials/skybox_lowres.dds</environment_map>
+              <roughness>0.3</roughness>
+              <metalness>0.1</metalness>
+            </metal>
+          </pbr>
+        </material>
+
+        <plugin
+            filename="gz-waves1-waves-visual-system"
+            name="gz::sim::systems::WavesVisual">
+          <static>0</static>
+          <mesh_deformation_method>DYNAMIC_GEOMETRY</mesh_deformation_method>
+          <tiles_x>-0 0</tiles_x>
+          <tiles_y>-0 0</tiles_y>
+          <wave>
+            <algorithm>sinusoid</algorithm>
+            <number>1</number>
+            <amplitude>2.0</amplitude>
+            <period>6.0</period>
+            <direction>1 0</direction>
+          </wave>
+
+          <!-- TODO: should not be required if using PBS shader -->
+          <shader language="metal">
+            <vertex>models://waves/materials/waves_vs.metal</vertex>
+            <fragment>models://waves/materials/waves_fs.metal</fragment>
+          </shader>
+
+        </plugin>
+      </visual>
+    </link>
+  </model>
+</sdf>
