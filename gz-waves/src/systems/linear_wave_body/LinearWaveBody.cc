@@ -51,6 +51,8 @@
 #include <vector>
 #include <string>
 
+#include <mlinterp>
+
 using namespace gz;
 using namespace sim;
 using namespace systems;
@@ -143,7 +145,7 @@ class gz::sim::systems::LinearWaveBodyPrivate
   ///
   /// 2. Improve pose notation to emphasise frame
   ///    (e.g. Peter Corke's notation).
-  ///    Done. Use Kane/monogram (Drake) notation.
+  ///    Use Kane/monogram (Drake) notation. Done
   ///
   /// 3. Set waterplane pose in parameters. Done.
   ///
@@ -171,6 +173,11 @@ class gz::sim::systems::LinearWaveBodyPrivate
   /// 9. Simplify data structures for debugging, publishing forces etc.
   ///       map[forceName] -> { enable, debug, publish, topic, ... }
   ///    and perhaps a bitmasks for switching features on/off
+  ///
+  /// 10. Interpolate hdf5 date for constant coefficient case. Done.
+  ///
+  /// 11. Optimise interpolation to eliminate unnecessary copies.
+  ///
   ///
 
   /// \brief WEC-Sim BEMIO hydro data structure (read from HDF5 file)
@@ -594,6 +601,78 @@ LinearWaveBody::~LinearWaveBody()
 {
 }
 
+namespace
+{
+  /// \todo Optimise to reduce / eliminate copies.
+  ///       The inefficiency is because we read data 
+  ///       in Eigen Vectors and Matrices and represent
+  ///       the coefficients as a vector of matrices rathen
+  ///       a matrix of time series suitable for interpolation.
+  
+  /// \brief Interpolation helpers
+  ///
+  /// \param _Xd data vector
+  /// \param _Xi interpolation point
+  /// \param _Yd data vector of matrix
+  /// \param _Yi interpolation matrix
+  template <typename Matrix>
+  void Interp(
+    const Eigen::VectorXd &_Xd,
+    double _Xi,
+    const std::vector<Matrix> &_Yd,
+    Matrix *_Yi)
+  {
+    // check there is data to interpolate
+    if (_Xd.size() == 0)
+      return;
+
+    // get dimensions
+    size_t nf = _Xd.size();
+    size_t n1 = _Yd[0].rows(); 
+    size_t n2 = _Yd[0].cols(); 
+
+    // convert to std::vector
+    std::vector<double> Xdd;
+    for (size_t k=0; k<nf; ++k)
+    {
+      Xdd.push_back(_Xd[k]);
+    }
+
+    // reshape to (n1 * n2) x 1 x Nf vectors for interpolation
+    std::vector<std::vector<double>> Ydd(n1*n2);
+    for (size_t i=0; i<n1; ++i)
+    {
+      for (size_t j=0; j<n2; ++j)
+      {
+        size_t idx = j*n1 + i;
+        for (size_t k=0; k<nf; ++k)
+        {
+          auto& m = _Yd[k];
+          double val = m(i, j);
+          Ydd[idx].push_back(val);
+        }
+      }
+    }
+
+    // interpolate
+    size_t ni = 1;
+    double yi[] = { 0.0 };
+    double xi[] = { _Xi };
+    for (size_t i=0; i<n1; ++i)
+    {
+      for (size_t j=0; j<n2; ++j)
+      {
+        size_t idx = j*n1 + i;
+        size_t nd[] = { nf };
+        double* xd = Xdd.data();
+        double* yd = Ydd[idx].data();
+        mlinterp::interp(nd, ni, yd, yi, xd, xi);
+        (*_Yi)(i, j) = yi[0];
+      }
+    }
+  };
+}
+
 /////////////////////////////////////////////////
 /// \brief Configure the model
 ///
@@ -784,11 +863,6 @@ void LinearWaveBody::Configure(const Entity &_entity,
   // 5a. interpolate hydro coeffs from hdf5 data.
   if (_sdf->HasElement("hdf5_file"))
   {
-    /// \todo look up omega and interpolate
-    ///       index of nearest value of omega in hydro data
-    size_t iw = 7;
-    double w = this->dataPtr->hydroData.w[iw];
-
     /// \note we allow g and rho to override hdf5 values
     double g = this->dataPtr->simParams.g;
     double rho = this->dataPtr->simParams.rho;
@@ -797,28 +871,69 @@ void LinearWaveBody::Configure(const Entity &_entity,
     this->dataPtr->hydroForceCoeffs.K_hs =
         this->dataPtr->hydroData.K_hs * rho * g;
 
-    // radiation
-    this->dataPtr->hydroForceCoeffs.A =
-        this->dataPtr->hydroData.A[iw] * rho;
+    // interpolate and scale.
+    double w = this->dataPtr->simParams.w;
 
-    this->dataPtr->hydroForceCoeffs.B =
-        this->dataPtr->hydroData.B[iw] * rho * w;
+    // radiation added mass [Ndof, Ndof, Nf]
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.A,             // Yd
+      &this->dataPtr->hydroForceCoeffs.A      // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.A *= rho;
 
-    // excitation
-    this->dataPtr->hydroForceCoeffs.ex_re =
-        this->dataPtr->hydroData.ex_re[iw] * rho * w;
-    this->dataPtr->hydroForceCoeffs.ex_im =
-        this->dataPtr->hydroData.ex_im[iw] * rho * w;
-    
-    this->dataPtr->hydroForceCoeffs.fk_re =
-        this->dataPtr->hydroData.fk_re[iw] * rho * w;
-    this->dataPtr->hydroForceCoeffs.fk_im =
-        this->dataPtr->hydroData.fk_im[iw] * rho * w;
+    // radiation damping [Ndof, Ndof, Nf]
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.B,             // Yd
+      &this->dataPtr->hydroForceCoeffs.B      // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.B *= rho * w;
 
-    this->dataPtr->hydroForceCoeffs.sc_re =
-        this->dataPtr->hydroData.sc_re[iw] * rho * w;
-    this->dataPtr->hydroForceCoeffs.sc_im =
-        this->dataPtr->hydroData.sc_im[iw] * rho * w;
+    // excitation combined [Ndof, Nh, Nf]
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.ex_re,         // Yd
+      &this->dataPtr->hydroForceCoeffs.ex_re  // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.ex_re *= rho * g;
+
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.ex_im,         // Yd
+      &this->dataPtr->hydroForceCoeffs.ex_im  // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.ex_im *= rho * g;
+
+    // excitation Froude-Krylov [Ndof, Nh, Nf]
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.fk_re,         // Yd
+      &this->dataPtr->hydroForceCoeffs.fk_re  // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.fk_re *= rho * g;
+
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.fk_im,         // Yd
+      &this->dataPtr->hydroForceCoeffs.fk_im  // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.fk_im *= rho * g;
+
+    // excitation scattering [Ndof, Nh, Nf]
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.sc_re,         // Yd
+      &this->dataPtr->hydroForceCoeffs.sc_re  // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.sc_re *= rho * g;
+
+    Interp(
+      this->dataPtr->hydroData.w, w,          // Xd, Xi
+      this->dataPtr->hydroData.sc_im,         // Yd
+      &this->dataPtr->hydroForceCoeffs.sc_im  // Yi
+    );
+    this->dataPtr->hydroForceCoeffs.sc_im *= rho * g;
   }
 
   //////////
@@ -1120,9 +1235,8 @@ void LinearWaveBody::Configure(const Entity &_entity,
   }
 
   // display wave parameters
-  if (this->dataPtr->waveOverrideOn)
   {
-    gzmsg << "Wave Overrides\n"
+    gzmsg << "Wave Parameters\n"
           << "<wave_period>: "
           << this->dataPtr->waves.period << "\n"
           << "<wave_height>: "
@@ -1133,10 +1247,22 @@ void LinearWaveBody::Configure(const Entity &_entity,
           << this->dataPtr->waves.phase << "\n";
   }
 
-  // display geometry parameters
-  if (this->dataPtr->geometryOverrideOn)
+  // display simulation parameters
   {
-    gzmsg << "Geometry Overrides\n"
+    gzmsg << "Simulation Parameters\n"
+          << "<gravity>: "
+          << this->dataPtr->simParams.g << "\n"
+          << "<fluid_density>: "
+          << this->dataPtr->simParams.rho << "\n"
+          << "T: "
+          << this->dataPtr->simParams.T << "\n"
+          << "w: "
+          << this->dataPtr->simParams.w << "\n";
+  }
+
+  // display geometry parameters
+  {
+    gzmsg << "Geometry Parameters\n"
           << "<center_of_waterplane>: "
           << this->dataPtr->geometry.p_BoBwp_B << "\n"
           << "<center_of_buoyancy>: "
@@ -1146,17 +1272,15 @@ void LinearWaveBody::Configure(const Entity &_entity,
   }
 
   // display hydrostatic parameters
-  if (this->dataPtr->hydrostaticOverrideOn)
   {
-    gzmsg << "Hydrostatic Coefficient Overrides\n"
+    gzmsg << "Hydrostatic Coefficients\n"
           << "<linear_restoring>:\n"
           << this->dataPtr->hydroForceCoeffs.K_hs << "\n";
   }
 
   // display radiation parameters
-  if (this->dataPtr->radiationOverrideOn)
   {
-    gzmsg << "Radiation Coefficient Overrides\n"
+    gzmsg << "Radiation Coefficients\n"
           << "<added_mass>:\n"
           << this->dataPtr->hydroForceCoeffs.A << "\n"
           << "<damping>:\n"
@@ -1164,21 +1288,20 @@ void LinearWaveBody::Configure(const Entity &_entity,
   }
 
   // display excitation parameters
-  if (this->dataPtr->excitationOverrideOn)
   {
-    gzmsg << "Excitation Coefficient Overrides\n"
+    gzmsg << "Excitation Coefficients\n"
           << "<ex_re>:\n"
-          << this->dataPtr->hydroForceCoeffs.ex_re << "\n"
+          << this->dataPtr->hydroForceCoeffs.ex_re.transpose() << "\n"
           << "<ex_im>:\n"
-          << this->dataPtr->hydroForceCoeffs.ex_im << "\n"
+          << this->dataPtr->hydroForceCoeffs.ex_im.transpose() << "\n"
           << "<fk_re>:\n"
-          << this->dataPtr->hydroForceCoeffs.fk_re << "\n"
+          << this->dataPtr->hydroForceCoeffs.fk_re.transpose() << "\n"
           << "<fk_im>:\n"
-          << this->dataPtr->hydroForceCoeffs.fk_im << "\n"
+          << this->dataPtr->hydroForceCoeffs.fk_im.transpose() << "\n"
           << "<sc_re>:\n"
-          << this->dataPtr->hydroForceCoeffs.sc_re << "\n"
+          << this->dataPtr->hydroForceCoeffs.sc_re.transpose() << "\n"
           << "<sc_im>:\n"
-          << this->dataPtr->hydroForceCoeffs.sc_im << "\n";
+          << this->dataPtr->hydroForceCoeffs.sc_im.transpose() << "\n";
   }
 
   /// Radiation added mass - constant coeffients
