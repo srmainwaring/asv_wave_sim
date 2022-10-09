@@ -218,6 +218,12 @@ class HydrodynamicsParameters
   /// \brief True if pressure drag is enabled.
   bool PressureDragOn() const;
 
+  /// \brief True if hydrostatic restoring force is enabled.
+  bool RestoringOn() const;
+
+  /// \brief True if Nonlinear Froude-Krylov force is enabled.
+  bool FroudeKrylovOn() const;
+
   /// \brief The linear damping coefficient for linear montion.
   double CDampL1() const;
 
@@ -300,24 +306,41 @@ class Hydrodynamics
   /// center of mass must all be specified in the world frame.
   ///
   /// \param[in] _wavefieldSampler  An object for sampling the wave field.
-  /// \param[in] _position          The position of the center of mass.
-  /// \param[in] _linVelocity       The linear velocity of the center of mass.
-  /// \param[in] _angVelocity       The angular velocity of the center of mass.
+  /// \param[in] _X_WBcm            The pose of the body center of mass in
+  ///                               the world frame.
+  /// \param[in] _v_WBcm_W          The linear velocity of the body center
+  ///                               of mass in the world frame.
+  /// \param[in] _w_WB_W            The angular velocity of the body in the
+  ///                               world frame.
   void Update(
     std::shared_ptr<const WavefieldSampler> _wavefieldSampler,
-    const math::Pose3d& _pose,
-    const cgal::Vector3& _linVelocity,
-    const cgal::Vector3& _angVelocity);
+    const math::Pose3d& _X_WBcm,
+    const cgal::Vector3& _v_WBcm_W,
+    const cgal::Vector3& _w_WB_W);
 
   /// \brief Compute the hydrostatic and hydrodynamic forces.
   ///
   /// \return The force in the world frame.
-  const cgal::Vector3& Force() const;
+  const cgal::Vector3& WorldForce() const;
 
   /// \brief Compute the hydrostatic and hydrodynamic torques.
   ///
   /// \return The torque in the world frame.
-  const cgal::Vector3& Torque() const;
+  const cgal::Vector3& WorldTorque() const;
+
+  /// Component forces
+  const cgal::Vector3& WorldHydrostaticRestoringForce() const;
+  const cgal::Vector3& WorldDampingForce() const;
+  const cgal::Vector3& WorldViscousDragForce() const;
+  const cgal::Vector3& WorldPressureDragForce() const;
+  const cgal::Vector3& WorldFroudeKrylovForce() const;
+
+  /// Component torques
+  const cgal::Vector3& WorldHydrostaticRestoringTorque() const;
+  const cgal::Vector3& WorldDampingTorque() const;
+  const cgal::Vector3& WorldViscousDragTorque() const;
+  const cgal::Vector3& WorldPressureDragTorque() const;
+  const cgal::Vector3& WorldFroudeKrylovTorque() const;
 
   /// \brief The current waterline.
   ///
@@ -395,6 +418,10 @@ class Hydrodynamics
   /// internal
   /// \brief 'Pressure drag' force calculation.
   void ComputePressureDragForce();
+
+  /// internal
+  /// \brief Nonlinear Froude-Krylov force calculation.
+  void ComputeNonlinearFroudeKrylovForce();
 
   /// \internal
   /// \brief Pointer to the class private data.

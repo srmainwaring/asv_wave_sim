@@ -29,6 +29,7 @@
 
 #include "gz/waves/CGALTypes.hh"
 #include "gz/waves/Grid.hh"
+#include "gz/waves/PhysicalConstants.hh"
 #include "gz/waves/Utilities.hh"
 #include "gz/waves/Wavefield.hh"
 #include "gz/waves/WaveParameters.hh"
@@ -51,6 +52,8 @@ class WavefieldSamplerPrivate
 
   /// \brief A sample of the wavefield. This copy is updated.
   std::shared_ptr<Grid> patch_;
+
+  double time_{0.0};
 };
 
 //////////////////////////////////////////////////
@@ -105,8 +108,10 @@ void WavefieldSampler::ApplyPose(const gz::math::Pose3d& pose)
 }
 
 //////////////////////////////////////////////////
-void WavefieldSampler::UpdatePatch()
+void WavefieldSampler::UpdatePatch(double time)
 {
+  impl_->time_ = time;
+
   // Update the water patch Mesh
   // gzmsg << "Update water patch..." << std::endl;
   const auto& target = impl_->patch_->GetMesh();
@@ -127,15 +132,61 @@ void WavefieldSampler::UpdatePatch()
   }
 }
 
+/// \todo RESET!
+// #define USE_DIRECT_WAVE_CALC 0
+
 //////////////////////////////////////////////////
 double WavefieldSampler::ComputeDepth(const cgal::Point3& point) const
 {
+  // auto& grid = *impl_->patch_;
+  // return WavefieldSampler::ComputeDepth(grid, point);
   auto& grid = *impl_->patch_;
-  return WavefieldSampler::ComputeDepth(grid, point);
+  double depth = WavefieldSampler::ComputeDepth(grid, point);
 
   // @TODO_EXPERIMENTAL - direct calculation (currently static only)
   // auto& waveParams = *impl_->wavefield_->GetParameters();
   // return WavefieldSampler::ComputeDepthDirectly(waveParams, point, 0.0);
+
+// #if USE_DIRECT_WAVE_CALC
+//     // regular waves for testing FK adjustment
+//     auto params = impl_->wavefield->GetParameters();
+
+//     // physical parameters
+//     double rho = PhysicalConstants::WaterDensity();
+//     double g   = PhysicalConstants::Gravity();
+
+//     // coordinates
+//     double x = point.x();
+//     double y = point.y();
+//     double z = point.z();
+
+//     // assume regular waves
+//     double A = params->Amplitude();
+//     double k = params->Wavenumber();
+//     double w = params->AngularFrequency();
+//     auto   d = params->Direction();
+//     double theta = std::atan2(d.Y(), d.X());
+//     double wt = w * impl_->time_;
+//     double cd = std::cos(theta);
+//     double sd = std::sin(theta);
+//     double a  = k * (x * cd + y * sd) - wt;
+//     double ca = std::cos(a);
+
+//     // wave elevation
+//     double eta = A * ca;
+
+//     // depth
+//     double depth1 = depth;
+//     depth = eta - z;
+
+//     // gzdbg << "Depth (Exact vs Approx):\n"
+//     //   << "x:      " << x << " " << y << " " << z << "\n"
+//     //   << "eta:    " << eta << "\n"
+//     //   << "depth1: " << depth1 << "\n"
+//     //   << "depth2: " << depth << "\n";
+
+// #endif
+  return depth;
 }
 
 //////////////////////////////////////////////////
@@ -279,6 +330,86 @@ double WavefieldSampler::ComputeDepthDirectly(
   const double pz = solver(wave_fdf, p2, p2, time, wp, tol, nmax);
   const double h = pz - point.z();
   return h;
+}
+
+/////////////////////////////////////////////////
+double WavefieldSampler::ComputeFroudeKrylovPressure(
+  const cgal::Point3& point) const
+{
+  auto& grid = *impl_->patch_;
+  double depth = WavefieldSampler::ComputeDepth(grid, point);
+
+  // assume regular waves
+  auto params = impl_->wavefield_->GetParameters();
+  double k = params->Wavenumber();
+
+  // physical parameters
+  double rho = PhysicalConstants::WaterDensity();
+  double g   = PhysicalConstants::Gravity();
+
+  // coordinates
+  // double x = point.x();
+  // double y = point.y();
+  double z = point.z();
+
+  // depth = eta - z
+  double eta = depth + z;
+
+  // shifted elevation
+  double z_prime = -1 * depth;
+
+// #if USE_DIRECT_WAVE_CALC
+//     // assume regular waves
+//     double A = params->Amplitude();
+//     // double k = params->Wavenumber();
+//     double w = params->AngularFrequency();
+//     auto   d = params->Direction();
+//     double theta = std::atan2(d.Y(), d.X());
+//     double wt = w * impl_->time_;
+//     double cd = std::cos(theta);
+//     double sd = std::sin(theta);
+//     double a  = k * (x * cd + y * sd) - wt;
+//     double ca = std::cos(a);
+
+//     // wave elevation
+//     eta = A * ca;
+
+//     // shifted elevation
+//     z_prime = z - eta;
+// #endif
+
+  // ramp to dampen transients
+  double rf = this->ComputeRamp();
+
+  // Froude-Krylov correction
+  double e = std::exp(k * z_prime);
+  double p = -1 * rho * g * (1.0 - e * rf) * eta;
+
+  // no pressure if above the surface
+  if (z > eta)
+    p = 0.0;
+
+  return p;
+}
+
+/////////////////////////////////////////////////
+double WavefieldSampler::ComputeRamp() const
+{
+  /// \todo replace hardcoded constant.
+  // relaxation time in seconds
+  double tr = 10.0;
+
+  if (tr <= 0)
+  {
+    return 0.0;
+  }
+  double tau = impl_->time_ / tr;
+  if (tau < 1.0)
+  {
+    return 0.5 * (1.0 - std::cos(GZ_PI * tau));
+  } else {
+    return 1.0;
+  }
 }
 
 }  // namespace waves

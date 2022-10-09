@@ -1,6 +1,4 @@
-"""
-Publish odometry position and orientation to topics labelled by maritime dofs.
-"""
+"""Publish odometry position and orientation to topics labelled by dofs."""
 
 import rclpy
 from rclpy.node import Node

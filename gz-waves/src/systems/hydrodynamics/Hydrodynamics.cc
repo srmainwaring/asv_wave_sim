@@ -279,6 +279,12 @@ class HydrodynamicsPrivate
   private: void UpdatePhysics(const UpdateInfo &_info,
                               EntityComponentManager &_ecm);
 
+  /// \brief Update the force publishers.
+  /// \param[in] _info Simulation update info.
+  /// \param[in] _ecm Mutable reference to the EntityComponentManager.
+  private: void UpdatePublishers(const UpdateInfo &_info,
+                                 EntityComponentManager &_ecm);
+
   /// \brief Check if an entity is enabled or not.
   /// \param[in] _entity Target entity
   /// \param[in] _ecm Entity component manager
@@ -394,6 +400,42 @@ class HydrodynamicsPrivate
   /// \brief Previous update time (s).
   public: double prevTime;
 
+
+  /// \brief Publishers
+  struct Publishers
+  {
+    double updateRate = 20;
+
+    // Enable / disable force publishers
+    bool restoringOn{false};
+    bool dampingOn{false};
+    bool viscousDragOn{false};
+    bool pressureDragOn{false};
+    bool froudeKrylovOn{false};
+
+    // Topic strings
+    std::string restoringTopic
+        {"/force/restoring"};
+    std::string dampingTopic
+        {"/force/damping"};
+    std::string viscousDragTopic
+        {"/force/viscous_drag"};
+    std::string pressureDragTopic
+        {"/force/pressure_drag"};
+    std::string froudeKrylovTopic
+        {"/force/froude_krylov"};
+
+    // Publishers
+    transport::Node::Publisher restoringPub;
+    transport::Node::Publisher dampingPub;
+    transport::Node::Publisher viscousDragPub;
+    transport::Node::Publisher pressureDragPub;
+    transport::Node::Publisher froudeKrylovPub;
+  };
+
+  /// \brief Publishers
+  public: Publishers publishers;
+
   /// \brief Mutex to protect wave marker updates.
   public: std::recursive_mutex mutex;
 
@@ -479,6 +521,86 @@ void Hydrodynamics::Configure(const Entity &_entity,
     sdfHydro = _sdf->GetElementImpl("hydrodynamics");
   }
   this->dataPtr->hydroParams->SetFromSDF(*sdfHydro);
+
+  // Publishers
+
+  if (_sdf->HasElement("publishers"))
+  {
+    auto sdPub = _sdf->GetElementImpl("publishers");
+
+    if (sdPub->HasElement("update_rate"))
+      this->dataPtr->publishers.updateRate =
+          sdPub->Get<double>("update_rate");
+
+    if (sdPub->HasElement("restoring_on"))
+      this->dataPtr->publishers.restoringOn =
+          sdPub->Get<bool>("restoring_on");
+    if (sdPub->HasElement("restoring_topic"))
+      this->dataPtr->publishers.restoringTopic =
+          sdPub->Get<std::string>("restoring_topic");
+
+    if (sdPub->HasElement("damping_on"))
+      this->dataPtr->publishers.dampingOn =
+          sdPub->Get<bool>("damping_on");
+    if (sdPub->HasElement("damping_topic"))
+      this->dataPtr->publishers.dampingTopic =
+          sdPub->Get<std::string>("damping_topic");
+
+    if (sdPub->HasElement("viscous_drag_on"))
+      this->dataPtr->publishers.viscousDragOn =
+          sdPub->Get<bool>("viscous_drag_on");
+    if (sdPub->HasElement("viscous_drag_topic"))
+      this->dataPtr->publishers.viscousDragTopic =
+          sdPub->Get<std::string>("viscous_drag_topic");
+
+    if (sdPub->HasElement("pressure_drag_on"))
+      this->dataPtr->publishers.pressureDragOn =
+          sdPub->Get<bool>("pressure_drag_on");
+    if (sdPub->HasElement("pressure_drag_topic"))
+      this->dataPtr->publishers.pressureDragTopic =
+          sdPub->Get<std::string>("pressure_drag_topic");
+
+    if (sdPub->HasElement("froude_krylov_on"))
+      this->dataPtr->publishers.froudeKrylovOn =
+          sdPub->Get<bool>("froude_krylov_on");
+    if (sdPub->HasElement("froude_krylov_topic"))
+      this->dataPtr->publishers.froudeKrylovTopic =
+          sdPub->Get<std::string>("froude_krylov_topic");
+  }
+
+  // Create publishers
+  {
+    if (this->dataPtr->publishers.restoringOn)
+    {
+      this->dataPtr->publishers.restoringPub =
+          this->dataPtr->node.Advertise<gz::msgs::Wrench>(
+              this->dataPtr->publishers.restoringTopic);
+    }
+    if (this->dataPtr->publishers.dampingOn)
+    {
+      this->dataPtr->publishers.dampingPub =
+          this->dataPtr->node.Advertise<gz::msgs::Wrench>(
+              this->dataPtr->publishers.dampingTopic);
+    }
+    if (this->dataPtr->publishers.viscousDragOn)
+    {
+      this->dataPtr->publishers.viscousDragPub =
+          this->dataPtr->node.Advertise<gz::msgs::Wrench>(
+              this->dataPtr->publishers.viscousDragTopic);
+    }
+    if (this->dataPtr->publishers.pressureDragOn)
+    {
+      this->dataPtr->publishers.pressureDragPub =
+          this->dataPtr->node.Advertise<gz::msgs::Wrench>(
+              this->dataPtr->publishers.pressureDragTopic);
+    }
+    if (this->dataPtr->publishers.froudeKrylovOn)
+    {
+      this->dataPtr->publishers.froudeKrylovPub =
+          this->dataPtr->node.Advertise<gz::msgs::Wrench>(
+              this->dataPtr->publishers.froudeKrylovTopic);
+    }
+  }
 
   // Markers
   if (_sdf->HasElement("markers"))
@@ -653,27 +775,28 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 
     /// \todo check that the link has valid pose components
     // The link pose is required for the water patch, the CoM pose for dynamics.
-    // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
-    gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
-    gzmsg << "Hydrodynamics: link world pose: " << linkPose << "\n";
+    gz::math::Pose3d X_WB = worldPose(hd->link.Entity(), _ecm);
+    gzmsg << "Hydrodynamics: link world pose: " << X_WB << "\n";
 
     /// \todo subtle difference here - inertial pose includes
     /// any rotation of the inertial matrix where CoG pose does not.
-    // gz::math::Pose3d linkCoMPose = hd->link->WorldCoGPose();
-    // gz::math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
+    // gz::math::Pose3d X_WBcm = hd->link->WorldCoGPose();
+    // gz::math::Pose3d X_WBcm = hd->link.WorldInertialPose(_ecm).value();
     auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
-    gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();
-    gzmsg << "Hydrodynamics: link world CoM pose: " << linkCoMPose << "\n";
+    gz::math::Pose3d X_BBcm = inertial->Data().Pose();
+    gz::math::Pose3d X_WBcm = X_WB * X_BBcm;
+    gzmsg << "Hydrodynamics: link world CoM pose: " << X_WBcm << "\n";
 
     // RigidBody - the pose of the CoM is required for the dynamics.
-    cgal::Vector3 linVelocity = waves::ToVector3(
-        hd->link.WorldLinearVelocity(_ecm).value());
-    cgal::Vector3 angVelocity = waves::ToVector3(
-        hd->link.WorldAngularVelocity(_ecm).value());
-    /// \todo WorldCoGPose is currently not available
-    // cgal::Vector3 linVelocityCoM = waves::ToVector3(
-    //     hd->link.WorldCoGLinearVelocity(_ecm).value());
-    // cgal::Vector3 linVelocityCoM = linVelocity;
+    gz::math::Vector3 v_WB_W = hd->link.WorldLinearVelocity(_ecm).value();
+    gz::math::Vector3 w_WB_W = hd->link.WorldAngularVelocity(_ecm).value();
+
+    gz::math::Vector3 p_BoBcm_B = X_BBcm.Pos();
+    gz::math::Vector3 p_BoBcm_W = X_WB.Rot().RotateVector(p_BoBcm_B);
+    gz::math::Vector3 v_WBcm_W = v_WB_W + p_BoBcm_W.Cross(w_WB_W);
+
+    cgal::Vector3 cg_v_WBcm_W = waves::ToVector3(v_WBcm_W);
+    cgal::Vector3 cg_w_WB_W = waves::ToVector3(w_WB_W);
 
     // First pass - store collisions and create bounding box
     auto bbox = math::AxisAlignedBox();
@@ -725,8 +848,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     /// \todo add checks that the wavefield weak_ptr is valid
     hd->wavefieldSampler.reset(new waves::WavefieldSampler(
         this->wavefield.lock(), initWaterPatch));
-    hd->wavefieldSampler->ApplyPose(linkPose);
-    hd->wavefieldSampler->UpdatePatch();
+    hd->wavefieldSampler->ApplyPose(X_WB);
+    hd->wavefieldSampler->UpdatePatch(0.0);
 
     // Second pass - create hydrodynamics
     for (waves::Index j=0; j < meshCount; ++j)
@@ -738,7 +861,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
           hd->linkMeshes[j],
           hd->wavefieldSampler));
       hd->hydrodynamics[j]->Update(
-        hd->wavefieldSampler, linkCoMPose, linVelocity, angVelocity);
+        hd->wavefieldSampler, X_WBcm, cg_v_WBcm_W, cg_w_WB_W);
     }
   }
 
@@ -751,17 +874,19 @@ void HydrodynamicsPrivate::Update(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
   this->UpdatePhysics(_info, _ecm);
+  this->UpdatePublishers(_info, _ecm);
   this->UpdateMarkers(_info, _ecm);
 }
 
-//////////////////////////////////////////////////
-void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
+/////////////////////////////////////////////////
+void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
+  double simTime = std::chrono::duration<double>(_info.simTime).count();
+
   ////////// BEGIN TESTING
   #if 0
   // Get the wave height at the origin
-  double simTime = std::chrono::duration<double>(_info.simTime).count();
   Eigen::Vector3d point(0.0, 0.0, 0.0);
   double waveHeight{0.0};
   this->wavefield.lock()->Height(point, waveHeight);
@@ -774,36 +899,34 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
   for (auto& hd : this->hydroData)
   {
     // The link pose is required for the water patch, the CoM pose for dynamics.
-    // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
-    gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
+    gz::math::Pose3d X_WB = worldPose(hd->link.Entity(), _ecm);
     // DEBUG_INFO
     // gzmsg << "Hydrodynamics: link world pose\n";
-    // gzmsg << linkPose << "\n";
+    // gzmsg << X_WB << "\n";
 
-    /// \todo WorldCoGPose is currently not available
-    // gz::math::Pose3d linkCoMPose = hd->link.WorldCoGPose(_ecm).value();
-    // gz::math::Pose3d linkCoMPose = hd->link.WorldInertialPose(_ecm).value();
     auto inertial = _ecm.Component<components::Inertial>(hd->link.Entity());
-    gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();;
+    gz::math::Pose3d X_BBcm = inertial->Data().Pose();
+    gz::math::Pose3d X_WBcm = X_WB * X_BBcm;
     // DEBUG_INFO
     // gzmsg << "Hydrodynamics: link world CoM pose\n";
-    // gzmsg << linkCoMPose << "\n";
+    // gzmsg << X_WBcm << "\n";
 
     // Update water patch
-    hd->wavefieldSampler->ApplyPose(linkPose);
-    hd->wavefieldSampler->UpdatePatch();
+    hd->wavefieldSampler->ApplyPose(X_WB);
+    hd->wavefieldSampler->UpdatePatch(simTime);
     // auto waterPatch = hd->wavefieldSampler->GetWaterPatch();
 
     // RigidBody - the pose of the CoM is required for the dynamics.
     /// \todo check the components are available and valid
-    cgal::Vector3 linVelocity = waves::ToVector3(
-        hd->link.WorldLinearVelocity(_ecm).value());
-    cgal::Vector3 angVelocity = waves::ToVector3(
-        hd->link.WorldAngularVelocity(_ecm).value());
-    /// \todo WorldCoGLinearVel is currently not available
-    // cgal::Vector3 linVelocityCoM = waves::ToVector3(
-    //     hd->link.WorldCoGLinearVel(_ecm).value());
-    // cgal::Vector3 linVelocityCoM = linVelocity;
+    gz::math::Vector3 v_WB_W = hd->link.WorldLinearVelocity(_ecm).value();
+    gz::math::Vector3 w_WB_W = hd->link.WorldAngularVelocity(_ecm).value();
+
+    gz::math::Vector3d p_BoBcm_B = X_BBcm.Pos();
+    gz::math::Vector3d p_BoBcm_W = X_WB.Rot().RotateVector(p_BoBcm_B);
+    gz::math::Vector3d v_WBcm_W = v_WB_W + p_BoBcm_W.Cross(w_WB_W);
+
+    cgal::Vector3 cg_v_WBcm_W = waves::ToVector3(v_WBcm_W);
+    cgal::Vector3 cg_w_WB_W = waves::ToVector3(w_WB_W);
 
     // Meshes
     // waves::Index nSubTri = 0;
@@ -820,20 +943,53 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
 
       // Update hydrodynamics
       hd->hydrodynamics[j]->Update(
-        hd->wavefieldSampler, linkCoMPose, linVelocity, angVelocity);
+        hd->wavefieldSampler, X_WBcm, cg_v_WBcm_W, cg_w_WB_W);
+
+      // Retrieve force at CoM and torque
+      auto f_Bcm_W = waves::ToGz(hd->hydrodynamics[j]->WorldForce());
+      auto t_Bcm_W = waves::ToGz(hd->hydrodynamics[j]->WorldTorque());
+
+      // Summary of torque calculation
+      //
+      // 0. Buoyancy is applied at the centre of pressure Bcp
+      // and has by definition zero torque.
+      //
+      // f_Bcp_W = f
+      // t_Bcp_W = 0
+      //
+      // 1. We eventually want the equivalent force and torque
+      //    applied at the body origin Bo, f_Bo_W.
+      // t_Bo_W = t_Bcp_W + f_Bcp_W x p_BcpBo_W
+      //        = p_BoBcp_W x f_Bcp_W (by 0)
+      //
+      // 2. The function calculates
+      // f_Bcm_W = f_Bcp_W (applied at Bcm)
+      // t_Bcm_W = p_BmBcp_W x f_Bcp_W
+      //
+      // 3. AddWorldForce internally accumulates a torque applied at Bo
+      // f_Bo_W += f_Bcm_W = f_Bcp_W (applied at Bo)
+      // t_Bo_W += p_BoBcm_W x f_Bcm_W
+      //
+      // 4. AddWorldWrench accumulates the torque from 2.
+      // t_Bo_W += t_Bcm_W = p_BcmBcp_W x f_Bcp_W
+      //
+      // so the total is
+      //  t_Bo_W = t_Bcp_W + p_BoBcm_W x f_Bcm_W * p_BcmBcp_W x f_Bcp_W
+      //         =       0 + p_BoBcm_W x f_Bcm_W * p_BcmBcp_W x f_Bcm_W
+      //         =          (p_BoBcm_W + p_BcmBcp_W) x f_Bcm_W
+      //         =           p_BoBcp_W x f_Bcm_W
+      // as required.
 
       // Apply forces to the Link
-      auto force = waves::ToGz(hd->hydrodynamics[j]->Force());
-      if (force.IsFinite())
+      if (f_Bcm_W.IsFinite())
       {
-        hd->link.AddWorldForce(_ecm, force);
+        hd->link.AddWorldForce(_ecm, f_Bcm_W);
       }
 
       // Apply torques to the link
-      auto torque = waves::ToGz(hd->hydrodynamics[j]->Torque());
-      if (torque.IsFinite())
+      if (t_Bcm_W.IsFinite())
       {
-        hd->link.AddWorldWrench(_ecm, gz::math::Vector3d::Zero, torque);
+        hd->link.AddWorldWrench(_ecm, gz::math::Vector3d::Zero, t_Bcm_W);
       }
 
       // Info for Markers
@@ -841,15 +997,110 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
 
       // DEBUG_INFO
       // gzmsg << "Link:         " << hd->link->GetName() << "\n";
-      // gzmsg << "Position:     " << linkPose.Pos() << "\n";
-      // gzmsg << "Rotation:     " << linkPose.Rot().Euler() << "\n";
+      // gzmsg << "Position:     " << X_WB.Pos() << "\n";
+      // gzmsg << "Rotation:     " << X_WB.Rot().Euler() << "\n";
       // gzmsg << "SubTriCount:  " << nSubTri << "\n";
-      // gzmsg << "Force:        " << force << "\n";
-      // gzmsg << "Torque:       " << torque << "\n";
+      // gzmsg << "Force:        " << f_Bcm_W << "\n";
+      // gzmsg << "Torque:       " << t_B_W << "\n";
     }
   }
 }
 
+/////////////////////////////////////////////////
+///
+/// \todo - only valid for single body
+///
+void HydrodynamicsPrivate::UpdatePublishers(const UpdateInfo &_info,
+    EntityComponentManager &/*_ecm*/)
+{
+  // publish forces periodically
+  double updatePeriod = 1.0/this->publishers.updateRate;
+  double currentTime = std::chrono::duration<double>(_info.simTime).count();
+  if ((currentTime - this->prevTime) < updatePeriod)
+  {
+
+    // accumulate net forces and torques
+    math::Vector3d fhs_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d ths_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d fdp_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d tdp_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d fvd_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d tvd_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d fpd_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d tpd_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d ffk_Bcm_W = math::Vector3d::Zero;
+    math::Vector3d tfk_Bcm_W = math::Vector3d::Zero;
+
+    for (auto& hd : this->hydroData)
+    {
+      for (size_t j=0; j < hd->linkMeshes.size(); ++j)
+      {
+        fhs_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldHydrostaticRestoringForce());
+        ths_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldHydrostaticRestoringTorque());
+
+        fdp_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->WorldDampingForce());
+        tdp_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->WorldDampingTorque());
+
+        fvd_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldViscousDragForce());
+        tvd_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldViscousDragTorque());
+
+        fpd_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldPressureDragForce());
+        tpd_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldPressureDragTorque());
+
+        ffk_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldFroudeKrylovForce());
+        tfk_Bcm_W += waves::ToGz(hd->hydrodynamics[j]->
+            WorldFroudeKrylovTorque());
+      }
+    }
+
+    if (this->publishers.restoringOn)
+    {
+      gz::msgs::Wrench msg;
+      msgs::Set(msg.mutable_force(), fhs_Bcm_W);
+      msgs::Set(msg.mutable_torque(), ths_Bcm_W);
+      this->publishers.restoringPub.Publish(msg);
+    }
+
+    if (this->publishers.dampingOn)
+    {
+      gz::msgs::Wrench msg;
+      msgs::Set(msg.mutable_force(), fdp_Bcm_W);
+      msgs::Set(msg.mutable_torque(), tdp_Bcm_W);
+      this->publishers.dampingPub.Publish(msg);
+    }
+
+    if (this->publishers.viscousDragOn)
+    {
+      gz::msgs::Wrench msg;
+      msgs::Set(msg.mutable_force(), fvd_Bcm_W);
+      msgs::Set(msg.mutable_torque(), tvd_Bcm_W);
+      this->publishers.viscousDragPub.Publish(msg);
+    }
+
+    if (this->publishers.pressureDragOn)
+    {
+      gz::msgs::Wrench msg;
+      msgs::Set(msg.mutable_force(), fpd_Bcm_W);
+      msgs::Set(msg.mutable_torque(), tpd_Bcm_W);
+      this->publishers.pressureDragPub.Publish(msg);
+    }
+
+    if (this->publishers.froudeKrylovOn)
+    {
+      gz::msgs::Wrench msg;
+      msgs::Set(msg.mutable_force(), ffk_Bcm_W);
+      msgs::Set(msg.mutable_torque(), tfk_Bcm_W);
+      this->publishers.froudeKrylovPub.Publish(msg);
+    }
+  }
+}
 
 //////////////////////////////////////////////////
 /// \note copied from gz-sim/src/systems/buoyancy/Buoyancy.cc

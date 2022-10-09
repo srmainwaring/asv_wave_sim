@@ -9,7 +9,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    model_name = "mbari_buoy"
+    model_name = "box_buoy"
 
     # Bridge to forward tf and joint states to ros2
     # LaunchConfiguration("world_name"),
@@ -18,10 +18,10 @@ def generate_launch_description():
         executable="parameter_bridge",
         arguments=[
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
-            "/world/mbari_buoy/model/mbari_buoy/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
-            "/model/mbari_buoy/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry",
-            "/model/mbari_buoy/pose@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
-            "/model/mbari_buoy/pose_static@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
+            "/world/box_buoy/model/box_buoy/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
+            "/model/box_buoy/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            "/model/box_buoy/pose@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
+            "/model/box_buoy/pose_static@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
             "/force/gravity@geometry_msgs/msg/Wrench[gz.msgs.Wrench",
             "/force/buoyancy@geometry_msgs/msg/Wrench[gz.msgs.Wrench",
             "/force/restoring@geometry_msgs/msg/Wrench[gz.msgs.Wrench",
@@ -38,11 +38,11 @@ def generate_launch_description():
         ],
         remappings=[
             (
-                "/world/mbari_buoy/model/mbari_buoy/joint_state",
+                "/world/box_buoy/model/box_buoy/joint_state",
                 "joint_states",
             ),
-            ("/model/mbari_buoy/pose", "/tf"),
-            ("/model/mbari_buoy/pose_static", "/tf_static"),
+            ("/model/box_buoy/pose", "/tf"),
+            ("/model/box_buoy/pose_static", "/tf_static"),
         ],
         parameters=[
             {"qos_overrides./tf_static.publisher.durability": "transient_local"}
@@ -60,7 +60,7 @@ def generate_launch_description():
         executable="body_response_publisher",
         arguments=[],
         remappings=[
-            ("/odom", "/model/mbari_buoy/odometry"),
+            ("/odom", "/model/box_buoy/odometry"),
             ("/surge", "/model/" + model_name + "/surge"),
             ("/sway", "/model/" + model_name + "/sway"),
             ("/heave", "/model/" + model_name + "/heave"),

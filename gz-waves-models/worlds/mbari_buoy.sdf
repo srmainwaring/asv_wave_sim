@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <world name="waves">
+  <world name="mbari_buoy">
     <physics name="1ms" type="ignore">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
@@ -42,7 +42,7 @@
     </light>
 
     <include>
-      <uri>model://regular_waves_15s_2m</uri>
+      <uri>model://regular_waves_6s_2m</uri>
     </include>
 
     <include>
@@ -69,7 +69,7 @@
         <!-- waves parameter overrides -->
         <waves>
           <regular>
-            <period>15</period>
+            <period>6</period>
             <height>2</height>
             <direction>0</direction>
             <phase>0</phase>
@@ -130,11 +130,11 @@
         <!-- enable / disable forces -->
         <forces>
           <gravity_on>1</gravity_on>
-          <buoyancy_on>1</buoyancy_on>
-          <hydrostatic_restoring_on>1</hydrostatic_restoring_on>
-          <radiation_damping_on>1</radiation_damping_on>
-          <radiation_added_mass_on>1</radiation_added_mass_on>
-          <excitation_on>1</excitation_on>
+          <buoyancy_on>0</buoyancy_on>
+          <hydrostatic_restoring_on>0</hydrostatic_restoring_on>
+          <radiation_damping_on>0</radiation_damping_on>
+          <radiation_added_mass_on>0</radiation_added_mass_on>
+          <excitation_on>0</excitation_on>
           <excitation_froude_krylov_on>0</excitation_froude_krylov_on>
           <excitation_scattering_on>0</excitation_scattering_on>
         </forces>
@@ -153,13 +153,13 @@
           <update_rate>20</update_rate>
 
           <gravity_on>1</gravity_on>
-          <buoyancy_on>1</buoyancy_on>
-          <hydrostatic_restoring_on>1</hydrostatic_restoring_on>
-          <radiation_damping_on>1</radiation_damping_on>
-          <radiation_added_mass_on>1</radiation_added_mass_on>
-          <excitation_on>1</excitation_on>
-          <excitation_froude_krylov_on>1</excitation_froude_krylov_on>
-          <excitation_scattering_on>1</excitation_scattering_on>
+          <buoyancy_on>0</buoyancy_on>
+          <hydrostatic_restoring_on>0</hydrostatic_restoring_on>
+          <radiation_damping_on>0</radiation_damping_on>
+          <radiation_added_mass_on>0</radiation_added_mass_on>
+          <excitation_on>0</excitation_on>
+          <excitation_froude_krylov_on>0</excitation_froude_krylov_on>
+          <excitation_scattering_on>0</excitation_scattering_on>
 
           <gravity_topic>/force/gravity</gravity_topic>
           <buoyancy_topic>/force/buoyancy</buoyancy_topic>
@@ -176,16 +176,34 @@
         To use this plugin for comparison, uncomment and disable all
         forces except gravity in gz-waves1-linear-wave-body-system.
       -->
-      <!-- <plugin
+      <plugin
           filename="gz-waves1-hydrodynamics-system"
           name="gz::sim::systems::Hydrodynamics">
         <enable>mbari_buoy::base_link::collision</enable>
         <hydrodynamics>
+          <restoring_on>1</restoring_on>
+          <damping_on>0</damping_on>
+          <viscous_drag_on>0</viscous_drag_on>
+          <pressure_drag_on>0</pressure_drag_on>
+          <froude_krylov_on>1</froude_krylov_on>
+        </hydrodynamics>
+
+        <publishers>
+          <update_rate>20</update_rate>
+
+          <restoring_on>1</restoring_on>
           <damping_on>1</damping_on>
           <viscous_drag_on>1</viscous_drag_on>
           <pressure_drag_on>1</pressure_drag_on>
-        </hydrodynamics>
-      </plugin> -->
+          <froude_krylov_on>1</froude_krylov_on>
+
+          <restoring_topic>/force/restoring</restoring_topic>
+          <damping_topic>/force/damping</damping_topic>
+          <viscous_drag_topic>/force/viscous_drag</viscous_drag_topic>
+          <pressure_drag_topic>/force/pressure_drag</pressure_drag_topic>
+          <froude_krylov_topic>/force/froude_krylov</froude_krylov_topic>
+        </publishers>
+      </plugin>
 
       <plugin
         filename="gz-sim-joint-state-publisher-system"

@@ -377,6 +377,12 @@ class HydrodynamicsParametersPrivate
 
   // Reference speed for the pressure drag calculation
   double vRDrag;
+
+  // Hydrostatic restoring
+  bool restoringOn{true};
+
+  // Non-linear Froude-Krylov
+  bool froudeKrylovOn{false};
 };
 
 //////////////////////////////////////////////////
@@ -406,6 +412,18 @@ bool HydrodynamicsParameters::ViscousDragOn() const
 bool HydrodynamicsParameters::PressureDragOn() const
 {
   return this->data->pressureDragOn;
+}
+
+//////////////////////////////////////////////////
+bool HydrodynamicsParameters::RestoringOn() const
+{
+  return this->data->restoringOn;
+}
+
+//////////////////////////////////////////////////
+bool HydrodynamicsParameters::FroudeKrylovOn() const
+{
+  return this->data->froudeKrylovOn;
 }
 
 //////////////////////////////////////////////////
@@ -483,7 +501,10 @@ void HydrodynamicsParameters::SetFromMsg(const gz::msgs::Param_V& _msg)
       _msg,  "viscous_drag_on",  this->data->viscousDragOn);
   this->data->pressureDragOn = Utilities::MsgParamBool(
       _msg,  "pressure_drag_on", this->data->pressureDragOn);
-
+  this->data->restoringOn = Utilities::MsgParamBool(
+      _msg,     "restoring_on",     this->data->restoringOn);
+  this->data->froudeKrylovOn = Utilities::MsgParamBool(
+      _msg,  "froude_krylov_on", this->data->froudeKrylovOn);
   this->data->cDampL1 = Utilities::MsgParamDouble(
       _msg, "cDampL1",  this->data->cDampL1);
   this->data->cDampL2 = Utilities::MsgParamDouble(
@@ -517,7 +538,10 @@ void HydrodynamicsParameters::SetFromSDF(sdf::Element& _sdf)
       _sdf,  "viscous_drag_on",  this->data->viscousDragOn);
   this->data->pressureDragOn = Utilities::SdfParamBool(
       _sdf,  "pressure_drag_on", this->data->pressureDragOn);
-
+  this->data->restoringOn = Utilities::SdfParamBool(
+      _sdf,     "restoring_on",     this->data->restoringOn);
+  this->data->froudeKrylovOn = Utilities::SdfParamBool(
+      _sdf,  "froude_krylov_on", this->data->froudeKrylovOn);
   this->data->cDampL1 = Utilities::SdfParamDouble(
       _sdf, "cDampL1",  this->data->cDampL1);
   this->data->cDampL2 = Utilities::SdfParamDouble(
@@ -545,20 +569,24 @@ void HydrodynamicsParameters::SetFromSDF(sdf::Element& _sdf)
 //////////////////////////////////////////////////
 void HydrodynamicsParameters::DebugPrint() const
 {
-  gzmsg << "damping_on:       " << this->data->dampingOn << "\n";
-  gzmsg << "viscous_drag_on:  " << this->data->viscousDragOn << "\n";
-  gzmsg << "pressure_drag_on: " << this->data->pressureDragOn << "\n";
-  gzmsg << "cDampL1:          " << this->data->cDampL1 << "\n";
-  gzmsg << "cDampL2:          " << this->data->cDampL2 << "\n";
-  gzmsg << "cDampR1:          " << this->data->cDampR1 << "\n";
-  gzmsg << "cDampR2:          " << this->data->cDampR2 << "\n";
-  gzmsg << "cPDrag1:          " << this->data->cPDrag1 << "\n";
-  gzmsg << "cPDrag2:          " << this->data->cPDrag2 << "\n";
-  gzmsg << "fPDrag:           " << this->data->fPDrag << "\n";
-  gzmsg << "cSDrag1:          " << this->data->cSDrag1 << "\n";
-  gzmsg << "cSDrag2:          " << this->data->cSDrag2 << "\n";
-  gzmsg << "fSDrag:           " << this->data->fSDrag << "\n";
-  gzmsg << "vRDrag:           " << this->data->vRDrag << "\n";
+  gzmsg << "Hydrodynamic Parameters:\n"
+        << "damping_on:       " << this->data->dampingOn << "\n"
+        << "viscous_drag_on:  " << this->data->viscousDragOn << "\n"
+        << "pressure_drag_on: " << this->data->pressureDragOn << "\n"
+        << "restoring_on:     " << this->data->restoringOn << "\n"
+        << "froude_krylov_on: " << this->data->froudeKrylovOn << "\n"
+        << "cDampL1:          " << this->data->cDampL1 << "\n"
+        << "cDampL2:          " << this->data->cDampL2 << "\n"
+        << "cDampR1:          " << this->data->cDampR1 << "\n"
+        << "cDampR2:          " << this->data->cDampR2 << "\n"
+        << "cPDrag1:          " << this->data->cPDrag1 << "\n"
+        << "cPDrag2:          " << this->data->cPDrag2 << "\n"
+        << "fPDrag:           " << this->data->fPDrag << "\n"
+        << "cSDrag1:          " << this->data->cSDrag1 << "\n"
+        << "cSDrag2:          " << this->data->cSDrag2 << "\n"
+        << "fSDrag:           " << this->data->fSDrag << "\n"
+        << "vRDrag:           " << this->data->vRDrag << "\n"
+        << "\n";
 }
 
 //////////////////////////////////////////////////
@@ -680,17 +708,17 @@ class HydrodynamicsPrivate
   /// \brief The wavefield sampler for this rigid body (linkMesh).
   std::shared_ptr<const WavefieldSampler>  wavefieldSampler;
 
-  /// \brief Pose of the centre of mass.
-  gz::math::Pose3d pose;
+  /// \brief Pose of the body centre of mass in the world frame.
+  gz::math::Pose3d X_WBcm;
 
-  /// \brief Position of the centre of mass (CGAL types).
-  cgal::Point3 position;
+  /// \brief Position of the body centre of mass (CGAL types).
+  cgal::Point3 p_WBcm_W;
 
-  // \brief Linear velocity of the centre of mass.
-  cgal::Vector3 linVelocity;
+  // \brief Linear velocity of the body centre of mass in world frame.
+  cgal::Vector3 v_WBcm_W;
 
-  /// \brief Angular velocity of the centre of mass.
-  cgal::Vector3 angVelocity;
+  /// \brief Angular velocity of the body in world frame.
+  cgal::Vector3 w_WB_W;
 
   /// \brief The calculated waterline length.
   double waterlineLength;
@@ -710,11 +738,31 @@ class HydrodynamicsPrivate
   std::vector<cgal::Vector3> fBuoyancy;
   std::vector<cgal::Point3>  cBuoyancy;
 
-  /// \brief The computed force
-  cgal::Vector3 force;
+  /// \brief The total force applied at CoM in the world frame
+  cgal::Vector3 f_Bcm_W;
 
-  /// \brief The computed torque
-  cgal::Vector3 torque;
+  /// \brief The total torque in the world frame taken about CoM
+  cgal::Vector3 t_Bcm_W;
+
+  // hydrostatic restoring force and torque in world frame
+  cgal::Vector3 fhs_Bcm_W;
+  cgal::Vector3 ths_Bcm_W;
+
+  // damping force and torque in world frame
+  cgal::Vector3 fdp_Bcm_W;
+  cgal::Vector3 tdp_Bcm_W;
+
+  // viscous drag force and torque in world frame
+  cgal::Vector3 fvd_Bcm_W;
+  cgal::Vector3 tvd_Bcm_W;
+
+  // pressure drag force and torque in world frame
+  cgal::Vector3 fpd_Bcm_W;
+  cgal::Vector3 tpd_Bcm_W;
+
+  // Nonlinear Froude-Krylov force and torque in world frame
+  cgal::Vector3 ffk_Bcm_W;
+  cgal::Vector3 tfk_Bcm_W;
 };
 
 //////////////////////////////////////////////////
@@ -728,58 +776,143 @@ Hydrodynamics::Hydrodynamics(
   this->data->params = _params;
   this->data->linkMesh = _linkMesh;
   this->data->wavefieldSampler = _wavefieldSampler;
-  this->data->position = CGAL::ORIGIN;
-  this->data->linVelocity = CGAL::NULL_VECTOR;
-  this->data->angVelocity = CGAL::NULL_VECTOR;
+  this->data->p_WBcm_W = CGAL::ORIGIN;
+  this->data->v_WBcm_W = CGAL::NULL_VECTOR;
+  this->data->w_WB_W = CGAL::NULL_VECTOR;
   this->data->waterlineLength = 0.0;
 }
 
 //////////////////////////////////////////////////
 void Hydrodynamics::Update(
   std::shared_ptr<const WavefieldSampler> _wavefieldSampler,
-  const gz::math::Pose3d& _pose,
-  const cgal::Vector3& _linVelocity,
-  const cgal::Vector3& _angVelocity
+  const gz::math::Pose3d& _X_WBcm,
+  const cgal::Vector3& _v_WBcm_W,
+  const cgal::Vector3& _w_WB_W
 )
 {
   // Set rigid body props.
   this->data->wavefieldSampler = _wavefieldSampler;
-  this->data->pose = _pose;
-  this->data->position = ToPoint3(_pose.Pos());
-  this->data->linVelocity = _linVelocity;
-  this->data->angVelocity = _angVelocity;
+  this->data->X_WBcm = _X_WBcm;
+  this->data->p_WBcm_W = ToPoint3(_X_WBcm.Pos());
+  this->data->v_WBcm_W = _v_WBcm_W;
+  this->data->w_WB_W = _w_WB_W;
 
   // Reset
-  this->data->force = CGAL::NULL_VECTOR;
-  this->data->torque = CGAL::NULL_VECTOR;
+  this->data->f_Bcm_W = CGAL::NULL_VECTOR;
+  this->data->t_Bcm_W = CGAL::NULL_VECTOR;
 
   // Update physics
   this->UpdateSubmergedTriangles();
   this->ComputeAreas();
   this->ComputeWaterlineLength();
   this->ComputePointVelocities();
-  this->ComputeBuoyancyForce();
+
+  if (this->data->params->RestoringOn())
+  {
+    this->data->fhs_Bcm_W = CGAL::NULL_VECTOR;
+    this->data->ths_Bcm_W = CGAL::NULL_VECTOR;
+    this->ComputeBuoyancyForce();
+  }
 
   if (this->data->params->ViscousDragOn())
+  {
+    this->data->fvd_Bcm_W = CGAL::NULL_VECTOR;
+    this->data->tvd_Bcm_W = CGAL::NULL_VECTOR;
     this->ComputeViscousDragForce();
+  }
 
   if (this->data->params->PressureDragOn())
+  {
+    this->data->fpd_Bcm_W = CGAL::NULL_VECTOR;
+    this->data->tpd_Bcm_W = CGAL::NULL_VECTOR;
     this->ComputePressureDragForce();
+  }
 
   if (this->data->params->DampingOn())
+  {
+    this->data->fdp_Bcm_W = CGAL::NULL_VECTOR;
+    this->data->tdp_Bcm_W = CGAL::NULL_VECTOR;
     this->ComputeDampingForce();
+  }
+
+  if (this->data->params->FroudeKrylovOn())
+  {
+    this->data->ffk_Bcm_W = CGAL::NULL_VECTOR;
+    this->data->tfk_Bcm_W = CGAL::NULL_VECTOR;
+    this->ComputeNonlinearFroudeKrylovForce();
+  }
 }
 
 //////////////////////////////////////////////////
-const cgal::Vector3& Hydrodynamics::Force() const
+const cgal::Vector3& Hydrodynamics::WorldForce() const
 {
-  return this->data->force;
+  return this->data->f_Bcm_W;
 }
 
 //////////////////////////////////////////////////
-const cgal::Vector3& Hydrodynamics::Torque() const
+const cgal::Vector3& Hydrodynamics::WorldTorque() const
 {
-  return this->data->torque;
+  return this->data->t_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldHydrostaticRestoringForce() const
+{
+  return this->data->fhs_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldHydrostaticRestoringTorque() const
+{
+  return this->data->ths_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldDampingForce() const
+{
+  return this->data->fdp_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldDampingTorque() const
+{
+  return this->data->tdp_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldViscousDragForce() const
+{
+  return this->data->fvd_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldViscousDragTorque() const
+{
+  return this->data->tvd_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldPressureDragForce() const
+{
+  return this->data->fpd_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldPressureDragTorque() const
+{
+  return this->data->tpd_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldFroudeKrylovForce() const
+{
+  return this->data->ffk_Bcm_W;
+}
+
+//////////////////////////////////////////////////
+const cgal::Vector3& Hydrodynamics::WorldFroudeKrylovTorque() const
+{
+  return this->data->tfk_Bcm_W;
 }
 
 //////////////////////////////////////////////////
@@ -1058,7 +1191,7 @@ void Hydrodynamics::ComputeAreas()
 void Hydrodynamics::ComputeWaterlineLength()
 {
   // Calculate the direction of the x-axis
-  cgal::Vector3 xaxis = ToVector3(this->data->pose.Rot().RotateVector(
+  cgal::Vector3 xaxis = ToVector3(this->data->X_WBcm.Rot().RotateVector(
     gz::math::Vector3d(1, 0, 0)));
 
   // Project the waterline onto the x-axis
@@ -1077,14 +1210,14 @@ void Hydrodynamics::ComputeWaterlineLength()
 // Compute the point velocity at a triangles centroid
 void Hydrodynamics::ComputePointVelocities()
 {
-  auto& position = this->data->position;
-  auto& v = this->data->linVelocity;
-  auto& omega = this->data->angVelocity;
+  auto& p_WBcm_W = this->data->p_WBcm_W;
+  auto& v = this->data->v_WBcm_W;
+  auto& omega = this->data->w_WB_W;
 
   for (auto&& subTriProps : this->data->submergedTriangleProperties)
   {
     // relative position of the centroid wrt CoM
-    subTriProps.xr = subTriProps.centroid - position;
+    subTriProps.xr = subTriProps.centroid - p_WBcm_W;
 
     // vp = v + omega x xr
     subTriProps.vp = v + CGAL::cross_product(omega, subTriProps.xr);
@@ -1122,8 +1255,8 @@ void Hydrodynamics::ComputePointVelocities()
 double Hydrodynamics::ComputeReynoldsNumber() const
 {
   // fluid speed
-  auto& v = this->data->linVelocity;
-  double u = std::sqrt(v.squared_length());
+  auto& v_WBcm_W = this->data->v_WBcm_W;
+  double u = std::sqrt(v_WBcm_W.squared_length());
 
   // characteristic length
   double L = this->data->waterlineLength;
@@ -1145,27 +1278,36 @@ void Hydrodynamics::ComputeBuoyancyForce()
   this->data->cBuoyancy.clear();
 
   // Calculate the buoyancy force for the submerged triangles
-  auto& position  =  this->data->position;
+  auto& p_WBcm_W  =  this->data->p_WBcm_W;
   auto& wavefieldSampler = *this->data->wavefieldSampler;
   for (auto&& subTri : this->data->submergedTriangles)
   {
     // Force and center of pressure.
-    cgal::Point3 center = CGAL::ORIGIN;
-    cgal::Vector3 force = CGAL::NULL_VECTOR;
+    cgal::Point3 p_WBcp_W = CGAL::ORIGIN;
+    cgal::Vector3 f_Bcp_W = CGAL::NULL_VECTOR;
     Physics::BuoyancyForceAtCenterOfPressure(
-      wavefieldSampler, subTri, center, force);
-    this->data->fBuoyancy.push_back(force);
-    this->data->cBuoyancy.push_back(center);
+      wavefieldSampler, subTri, p_WBcp_W, f_Bcp_W);
+    this->data->fBuoyancy.push_back(f_Bcp_W);
+    this->data->cBuoyancy.push_back(p_WBcp_W);
 
     // Torque
-    cgal::Vector3 xr = center - position;
-    cgal::Vector3 torque = CGAL::cross_product(xr, force);
-    sumForce += force;
+    // t_Bcm_W = t_Bcp_W + f_Bcp_W x p_BcpBcm_W
+    //         =       0 - f_Bcp_W x p_BcmBcp_W
+    //         =         + p_BcmBcp_W x f_Bcp_W
+
+    cgal::Vector3 p_BcmBcp_W = p_WBcp_W - p_WBcm_W;
+    cgal::Vector3 torque = CGAL::cross_product(p_BcmBcp_W, f_Bcp_W);
+    sumForce += f_Bcp_W;
     sumTorque += torque;
   }
 
-  this->data->force  += sumForce;
-  this->data->torque += sumTorque;
+  // accumulate to total
+  this->data->f_Bcm_W += sumForce;
+  this->data->t_Bcm_W += sumTorque;
+
+  // accumulate to components
+  this->data->fhs_Bcm_W += sumForce;
+  this->data->ths_Bcm_W += sumTorque;
 }
 
 //////////////////////////////////////////////////
@@ -1186,18 +1328,25 @@ void Hydrodynamics::ComputeDampingForce()
   double rs = subArea / area;
 
   // Force
-  auto& v = this->data->linVelocity;
-  double linSpeed = std::sqrt(v.squared_length());
+  auto& v_WBcm_W = this->data->v_WBcm_W;
+  double linSpeed = std::sqrt(v_WBcm_W.squared_length());
   double cL = - rs * (cDampL1 + cDampL2 * linSpeed);
-  cgal::Vector3 force = v * cL;
+  cgal::Vector3 f_Bcc_W = v_WBcm_W * cL;
 
-  auto& omega = this->data->angVelocity;
-  double angSpeed = std::sqrt(omega.squared_length());
+  auto& w_WB_W = this->data->w_WB_W;
+  double angSpeed = std::sqrt(w_WB_W.squared_length());
   double cR = - rs * (cDampR1 + cDampR2 * angSpeed);
-  cgal::Vector3 torque = omega * cR;
+  cgal::Vector3 torque = w_WB_W * cR;
 
-  this->data->force  += force;
-  this->data->torque += torque;
+  /// \todo - should be additional torque here for application to CoM
+
+  // accumulate to total
+  this->data->f_Bcm_W += f_Bcc_W;
+  this->data->t_Bcm_W += torque;
+
+  // accumulate to components
+  this->data->fdp_Bcm_W += f_Bcc_W;
+  this->data->tdp_Bcm_W += torque;
 
   // @DEBUG_INF0
   // gzmsg << "area:       " << area << "\n";
@@ -1235,8 +1384,13 @@ void Hydrodynamics::ComputeViscousDragForce()
     sumTorque += torque;
   }
 
-  this->data->force  += sumForce;
-  this->data->torque += sumTorque;
+  // accumulate to total
+  this->data->f_Bcm_W += sumForce;
+  this->data->t_Bcm_W += sumTorque;
+
+  // accumulate to components
+  this->data->fvd_Bcm_W += sumForce;
+  this->data->tvd_Bcm_W += sumTorque;
 }
 
 //////////////////////////////////////////////////
@@ -1282,16 +1436,21 @@ void Hydrodynamics::ComputePressureDragForce()
     sumTorque += torque;
   }
 
-  this->data->force  += sumForce;
-  this->data->torque += sumTorque;
+  // accumulate to total
+  this->data->f_Bcm_W += sumForce;
+  this->data->t_Bcm_W += sumTorque;
+
+  // accumulate to components
+  this->data->fpd_Bcm_W += sumForce;
+  this->data->tpd_Bcm_W += sumTorque;
 
   // @DEBUG_INFO
   // if (std::abs(sumForce.z()) > 1.0E+10)
   // {
   //   gzmsg << "Overflow in ComputePressureDragForce..."    << "\n";
-  //   gzmsg << "position:     " << this->data->position     << "\n";
-  //   gzmsg << "linVelocity:  " << this->data->linVelocity  << "\n";
-  //   gzmsg << "angVelocity:  " << this->data->angVelocity  << "\n";
+  //   gzmsg << "p_WBcm_W:     " << this->data->p_WBcm_W     << "\n";
+  //   gzmsg << "v_WBcm_W:     " << this->data->v_WBcm_W     << "\n";
+  //   gzmsg << "w_WB_W:       " << this->data->w_WB_W       << "\n";
   //   gzmsg << "force:        " << sumForce                 << "\n";
   //   gzmsg << "torque:       " << sumTorque                << "\n";
   //   for (auto&& subTriProps : this->data->submergedTriangleProperties)
@@ -1300,6 +1459,58 @@ void Hydrodynamics::ComputePressureDragForce()
   //   }
   // }
 }
+
+void Hydrodynamics::ComputeNonlinearFroudeKrylovForce()
+{
+  auto& wavefieldSampler = *this->data->wavefieldSampler;
+
+  auto& p_WBcm_W  =  this->data->p_WBcm_W;
+
+  cgal::Vector3 sumForce  = CGAL::NULL_VECTOR;
+  cgal::Vector3 sumTorque = CGAL::NULL_VECTOR;
+  size_t i = 0;
+  for (auto&& subTriProps : this->data->submergedTriangleProperties)
+  {
+    // wave fluid pressure at the centroid.
+    double pressure = wavefieldSampler.ComputeFroudeKrylovPressure(
+        subTriProps.centroid);
+
+    // calculate force
+    cgal::Vector3 force = pressure * subTriProps.area * subTriProps.normal;
+    sumForce += force;
+
+    // Torque;
+    // cgal::Vector3 torque = CGAL::cross_product(subTriProps.xr, force);
+    // sumTorque += torque;
+
+    /// \note correction - use the center of pressure to calculate
+    ///       the torque for the F-K force.
+    auto& p_WBcp_W = this->data->cBuoyancy[i++];
+    cgal::Vector3 p_BcmBcp_W = p_WBcp_W - p_WBcm_W;
+    cgal::Vector3 torque = CGAL::cross_product(p_BcmBcp_W, force);
+    sumTorque += torque;
+  }
+
+  // accumulate to total
+  this->data->f_Bcm_W += sumForce;
+  this->data->t_Bcm_W += sumTorque;
+
+  // accumulate to components
+  this->data->ffk_Bcm_W += sumForce;
+  this->data->tfk_Bcm_W += sumTorque;
+
+  /// debug info
+#if 0
+    gzdbg << "Nonlinear Krylov Force:\n"
+          << "p_WBcm_W:     " << this->data->p_WBcm_W << "\n"
+          << "v_WBcm_W:     " << this->data->v_WBcm_W << "\n"
+          << "w_WB_W:       " << this->data->w_WB_W << "\n"
+          << "force:        " << sumForce << "\n"
+          << "torque:       " << sumTorque << "\n"
+          << "\n";
+#endif
+}
+
 
 }  // namespace waves
 }  // namespace gz

@@ -198,7 +198,7 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
   Hydrodynamics hydrodynamics(hydroParams, linkMesh, wavefieldSampler);
   hydrodynamics.Update(wavefieldSampler, linkPose,
       CGAL::NULL_VECTOR, CGAL::NULL_VECTOR);
-  cgal::Vector3 force = hydrodynamics.Force();
+  cgal::Vector3 force = hydrodynamics.WorldForce();
 
   double h = 0.5;
   double A = 1.0;
@@ -239,7 +239,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   Hydrodynamics hydrodynamics(hydroParams, linkMesh, wavefieldSampler);
   hydrodynamics.Update(wavefieldSampler, linkPose,
       CGAL::NULL_VECTOR, CGAL::NULL_VECTOR);
-  cgal::Vector3 force =  hydrodynamics.Force();
+  cgal::Vector3 force =  hydrodynamics.WorldForce();
   double h = 0.5 * 2.0;
   double A = 10.0 * 4.0;
   double f = - PhysicalConstants::WaterDensity()

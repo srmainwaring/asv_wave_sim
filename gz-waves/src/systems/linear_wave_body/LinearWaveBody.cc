@@ -588,10 +588,10 @@ class gz::sim::systems::LinearWaveBodyPrivate
     transport::Node::Publisher gravityPub;
     transport::Node::Publisher buoyancyPub;
     transport::Node::Publisher restoringPub;
-    transport::Node::Publisher radiationDampingPubl;
-    transport::Node::Publisher radiationAddedMassPubl;
+    transport::Node::Publisher radiationDampingPub;
+    transport::Node::Publisher radiationAddedMassPub;
     transport::Node::Publisher excitationPub;
-    transport::Node::Publisher excitationFroudeKrylovPubl;
+    transport::Node::Publisher excitationFroudeKrylovPub;
     transport::Node::Publisher excitationScatteringPub;
   };
 
@@ -1201,13 +1201,13 @@ void LinearWaveBody::Configure(const Entity &_entity,
   }
   if (this->dataPtr->publishers.radiationDampingOn)
   {
-    this->dataPtr->publishers.radiationDampingPubl =
+    this->dataPtr->publishers.radiationDampingPub =
         this->dataPtr->node.Advertise<gz::msgs::Wrench>(
             this->dataPtr->publishers.radiationDampingTopic);
   }
   if (this->dataPtr->publishers.radiationAddedMassOn)
   {
-    this->dataPtr->publishers.radiationAddedMassPubl =
+    this->dataPtr->publishers.radiationAddedMassPub =
         this->dataPtr->node.Advertise<gz::msgs::Wrench>(
             this->dataPtr->publishers.radiationAddedMassTopic);
   }
@@ -1219,7 +1219,7 @@ void LinearWaveBody::Configure(const Entity &_entity,
   }
   if (this->dataPtr->publishers.excitationFroudeKrylovOn)
   {
-    this->dataPtr->publishers.excitationFroudeKrylovPubl =
+    this->dataPtr->publishers.excitationFroudeKrylovPub =
         this->dataPtr->node.Advertise<gz::msgs::Wrench>(
             this->dataPtr->publishers.excitationFroudeKrylovTopic);
   }
@@ -2199,7 +2199,7 @@ void LinearWaveBodyPrivate::UpdateRadiationDampingForces(
     gz::msgs::Wrench msg;
     msgs::Set(msg.mutable_force(), frd_Bwp_W);
     msgs::Set(msg.mutable_torque(), trd_Bwp_W + trd_Bcm_W);
-    this->publishers.radiationDampingPubl.Publish(msg);
+    this->publishers.radiationDampingPub.Publish(msg);
   }
 }
 
@@ -2245,7 +2245,7 @@ void LinearWaveBodyPrivate::UpdateRadiationAddedMassForces(
     gz::msgs::Wrench msg;
     msgs::Set(msg.mutable_force(), fam_Bwp_W);
     msgs::Set(msg.mutable_torque(), tam_Bwp_W);
-    this->publishers.radiationAddedMassPubl.Publish(msg);
+    this->publishers.radiationAddedMassPub.Publish(msg);
   }
 
   // force / moment tests
@@ -2442,7 +2442,7 @@ void LinearWaveBodyPrivate::UpdateExcitationForces(const UpdateInfo &_info,
     gz::msgs::Wrench msg;
     msgs::Set(msg.mutable_force(), ffk_Bwp_W);
     msgs::Set(msg.mutable_torque(), tfk_Bwp_W + tfk_Bcm_W);
-    this->publishers.excitationFroudeKrylovPubl.Publish(msg);
+    this->publishers.excitationFroudeKrylovPub.Publish(msg);
   }
 
   if (this->publishers.excitationScatteringOn &&

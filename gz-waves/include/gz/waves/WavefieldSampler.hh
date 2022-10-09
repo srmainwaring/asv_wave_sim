@@ -61,7 +61,9 @@ class WavefieldSampler
   void ApplyPose(const math::Pose3d& pose);
 
   /// \brief Update the water patch
-  void UpdatePatch();
+  ///
+  /// \param[in] time     The current simulation time.
+  void UpdatePatch(double time);
 
   /// \brief Compute the depth at a point.
   ///
@@ -89,11 +91,19 @@ class WavefieldSampler
   ///
   /// \param[in] wave_params  Gerstner wave parameters.
   /// \param[in] point       The point at which we want the depth.
+  /// \param[in] time        The simulation time.
   /// \return                 The depth 'h' at the point.
   static double ComputeDepthDirectly(
     const WaveParameters& wave_params,
     const cgal::Point3& point,
     double time);
+
+  /// \brief Compute the fluid pressure at a point.
+  double ComputeFroudeKrylovPressure(
+      const cgal::Point3& point) const;
+
+  /// \brief Compute the ramp function to damp transients
+  double ComputeRamp() const;
 
  private:
   /// \internal Private implementation.

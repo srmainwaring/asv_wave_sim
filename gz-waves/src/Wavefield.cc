@@ -119,6 +119,29 @@ bool Wavefield::Height(const Eigen::Vector3d& point, double& height) const
   return impl_->tri_grid_->Height(modulo_point, height);
 }
 
+/////////////////////////////////////////////////
+bool Wavefield::FluidPotential(
+    const cgal::Point3& point, double& /*phi*/) const
+{
+  /// \todo(srmainwaring) the calculation assumes that the tile origin
+  /// is at its center.
+  const double lx = impl_->ocean_tile_->TileSize();
+
+  auto pmod = [&](double x)
+  {
+      if (x < 0.0)
+        return std::fmod(x - lx/2.0, lx) + lx/2.0;
+      else
+        return std::fmod(x + lx/2.0, lx) - lx/2.0;
+  };
+
+  // Obtain the point modulo the tile dimensions
+  cgal::Point3 moduloPoint(pmod(point.x()), pmod(point.y()), point.z());
+
+  /// \todo IMPLEMENT_FLUID_POTENTIAL
+  return 0.0;
+}
+
 //////////////////////////////////////////////////
 std::shared_ptr<const WaveParameters> Wavefield::GetParameters() const
 {

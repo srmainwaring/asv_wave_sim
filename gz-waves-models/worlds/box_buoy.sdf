@@ -1,0 +1,170 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="box_buoy">
+    <physics name="1ms" type="ignore">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+      <background_color>0.8 0.8 0.8</background_color>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin filename="gz-sim-imu-system"
+            name="gz::sim::systems::Imu">
+    </plugin>
+
+    <!-- switch off gravity in physics engine when using added mass -->
+    <gravity>0 0 0</gravity>
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.6 0.6 0.6 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <include>
+      <uri>model://regular_waves_6s_2m</uri>
+    </include>
+
+    <model name="box_buoy">
+      <pose>0 0 0 0 0 0</pose>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <!-- <box>
+              <size>10 10 10</size>
+            </box> -->
+            <mesh>
+              <uri>file://box_f300.stl</uri>
+            </mesh>
+          </geometry>
+          <material>
+            <ambient>1 1 0 1</ambient>
+            <diffuse>1 1 0 1</diffuse>
+            <specular>1 1 0 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <!-- <box>
+              <size>10 10 10</size>
+            </box> -->
+            <mesh>
+              <uri>file://box_f300.stl</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <inertial>
+          <pose>0 0 -4 0 0 0</pose>
+          <mass>512500</mass>
+          <inertia>
+            <ixx>4441667</ixx>
+            <ixy>0.0</ixy>
+            <ixz>0.0</ixz>
+            <iyy>4441667</iyy>
+            <iyz>0.0</iyz>
+            <izz>8541667</izz>
+          </inertia>
+        </inertial>
+      </link>
+
+      <plugin
+          filename="gz-waves1-linear-wave-body-system"
+          name="gz::sim::systems::LinearWaveBody">
+        <forces>
+          <gravity_on>1</gravity_on>
+          <buoyancy_on>0</buoyancy_on>
+          <hydrostatic_restoring_on>0</hydrostatic_restoring_on>
+          <radiation_damping_on>0</radiation_damping_on>
+          <radiation_added_mass_on>0</radiation_added_mass_on>
+          <excitation_on>0</excitation_on>
+          <excitation_froude_krylov_on>0</excitation_froude_krylov_on>
+          <excitation_scattering_on>0</excitation_scattering_on>
+        </forces>
+        <publishers>
+          <update_rate>20</update_rate>
+          <gravity_on>1</gravity_on>
+          <gravity_topic>/force/gravity</gravity_topic>
+        </publishers>
+      </plugin>
+
+      <!--
+        To use this plugin for comparison, uncomment and disable all
+        forces except gravity in gz-waves1-linear-wave-body-system.
+      -->
+      <plugin
+          filename="gz-waves1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
+        <enable>box_buoy::base_link::collision</enable>
+        <hydrodynamics>
+          <restoring_on>1</restoring_on>
+          <damping_on>0</damping_on>
+          <viscous_drag_on>0</viscous_drag_on>
+          <pressure_drag_on>0</pressure_drag_on>
+          <froude_krylov_on>1</froude_krylov_on>
+        </hydrodynamics>
+
+        <publishers>
+          <update_rate>20</update_rate>
+
+          <restoring_on>1</restoring_on>
+          <damping_on>1</damping_on>
+          <viscous_drag_on>1</viscous_drag_on>
+          <pressure_drag_on>1</pressure_drag_on>
+          <froude_krylov_on>1</froude_krylov_on>
+
+          <restoring_topic>/force/restoring</restoring_topic>
+          <damping_topic>/force/damping</damping_topic>
+          <viscous_drag_topic>/force/viscous_drag</viscous_drag_topic>
+          <pressure_drag_topic>/force/pressure_drag</pressure_drag_topic>
+          <froude_krylov_topic>/force/froude_krylov</froude_krylov_topic>
+        </publishers>
+      </plugin>
+
+      <plugin
+        filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+      </plugin>
+
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>odom</odom_frame>
+        <robot_base_frame>base_link</robot_base_frame>
+        <odom_publish_frequency>50</odom_publish_frequency>
+        <odom_topic>model/box_buoy/odometry</odom_topic>
+        <dimensions>3</dimensions>
+      </plugin>
+
+      <plugin
+        filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>true</publish_link_pose>
+        <use_pose_vector_msg>true</use_pose_vector_msg>
+        <static_publisher>true</static_publisher>
+        <static_update_frequency>1</static_update_frequency>
+      </plugin>
+
+    </model>
+
+  </world>
+</sdf>

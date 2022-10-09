@@ -46,6 +46,10 @@ class Wavefield
   /// \brief Compute the height at a point (vertical distance to surface).
   bool Height(const Eigen::Vector3d& point, double& height) const;
 
+  // Compute the fluid potential at a point.
+  bool FluidPotential(
+      const cgal::Point3& point, double& phi) const;
+
   /// \brief Get the wave parameters.
   std::shared_ptr<const WaveParameters> GetParameters() const;
 
