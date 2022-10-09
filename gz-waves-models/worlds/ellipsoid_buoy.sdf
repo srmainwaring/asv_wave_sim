@@ -1,0 +1,323 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="waves">
+    <physics name="1ms" type="ignore">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>-1</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+      <background_color>0.8 0.8 0.8</background_color>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin filename="gz-sim-imu-system"
+            name="gz::sim::systems::Imu">
+    </plugin>
+
+    <!-- switch off gravity in physics engine when using added mass -->
+    <gravity>0 0 0</gravity>
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.6 0.6 0.6 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- ENU axes -->
+    <model name="axes">
+      <static>1</static>
+      <link name="link">
+        <visual name="r">
+          <cast_shadows>0</cast_shadows>
+          <pose>5 0 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>10 0.01 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+            <emissive>1 0 0 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <visual name="g">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 5 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 10 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <emissive>0 1 0 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <visual name="b">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 0 5.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 0.01 10</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 1 1</ambient>
+            <diffuse>0 0 1 1</diffuse>
+            <emissive>0 0 1 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <include>
+      <uri>model://regular_waves_6s_2m</uri>
+    </include>
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://ellipsoid_buoy</uri>
+      <name>ellipsoid_buoy</name>
+      <plugin
+          filename="gz-waves1-linear-wave-body-system"
+          name="gz::sim::systems::LinearWaveBody">
+          <hdf5_file>/Users/rhys/Code/robotics/gz_waves_ws/src/asv_wave_sim/gz-waves-models/models/ellipsoid_buoy/config/hydrodata/ellipsoid_f5244.h5</hdf5_file>
+
+          <!-- waves overrides -->
+          <waves>
+            <regular>
+              <period>6</period>
+              <height>2</height>
+              <direction>0</direction>
+              <phase>0</phase>
+            </regular>
+          </waves>
+
+          <!-- simulation parameter overrides -->
+          <simulation_parameters>
+            <gravity>9.81</gravity>
+            <fluid_density>1025</fluid_density>
+          </simulation_parameters>
+
+          <!-- geometry overrides -->
+          <geometry>
+            <center_of_waterplane>0 0 0</center_of_waterplane>
+            <center_of_buoyancy>0 0 -0.935</center_of_buoyancy>
+            <displaced_volume>129.1381</displaced_volume>
+          </geometry>
+
+          <!-- unscaled hydrodynamics coefficients (overrides) -->
+          <hydro_coeffs>
+            <scaled>0</scaled>
+            <hydrostatic>
+              <linear_restoring>
+                0.        0.        0.        0.        0.        0.
+                0.        0.        0.        0.        0.        0.
+                0.        0.   777494.4      -3.6    -402.7       0.
+                0.        0.       -3.6 6167224.2      -0.1       0.
+                0.        0.     -402.7      -0.1 6179979.4       0.
+                0.        0.        0.        0.        0.        0.
+              </linear_restoring>
+            </hydrostatic>
+            <radiation>
+              <!-- 
+                1. Added mass calculated using Capytaine and converted
+                to WEC-Sim hdf5 with bemio, T = 6.0s, w = 1.0472 rad/s
+              -->
+              <added_mass>
+                52732.7109003133   -0.0461102712478722 5.88390664387022 0.296417351644741 246367.266847758 -1.69953653780694
+                -0.0678279438415122 52944.8240664938 -1.47610970294622 -246974.480351485 -0.376605346811632 34.7833617031108
+                5.56653991122738 0.0361713254775427 197297.142256690 0.802697521049529 -87.4935912381782 -0.0504125898702509
+                0.410840691063419 -247341.339091709 5.02714890072835 1214533.79620113 2.83888902153701 -166.779120688123
+                246734.857503928 -0.346433003966073 -87.1795788996776 2.60143644204397 1215195.98272167 -2.36242713115735
+                -1.30857894347732 34.6478012553392 0.0173325214982212 -165.977540011457 -1.09781377470450 108.258384753611
+              </added_mass>
+              <!--
+                2. Clean version of 1. above. BL and TR blocks skew symmetric,
+                globally symmetrised. Mainly here to check that the warnings
+                raised by DART about lack of zeros and (skew)symmetry do
+                not have a material impact.
+              -->
+              <!-- <added_mass>
+                  52733.       0.       0.       0.  246854.      -2.
+                      0.   52945.       0. -246854.       0.      61.
+                      0.       0.  197297.       2.     -61.       0.
+                      0. -246854.       2. 1214534.       3.    -166.
+                246854.       0.     -61.       3. 1215196.      -2.
+                    -2.      61.       0.    -166.      -2.     108.
+              </added_mass> -->
+              <damping>
+                7209.55521458289 -0.00241865277674112 -0.656452733818339 0.0362151909394597 33068.9436025348 -0.277065103262815
+                -0.00574983097131929 7224.96421786452 0.0739544503252989 -33093.8859951854 -0.0481987286722465 4.65143300682749
+                -0.894991216445364 1.44416946591210 114644.248735475 -6.26262145357765 -57.3651869899508 -0.0632414440092088
+                0.0458640797833837 -33189.4228421519 -2.06423557434899 152022.421220666 0.311347231737735 -21.3664338314253
+                33165.4358604128 -0.0326285489204398 -57.6246853052043 0.264850645030705 152122.332407559 -1.27495177084548
+                -0.231015729667316 4.65422866544508 -0.00392458624416725 -21.3177927485565	-1.06001165595936 0.0259605842341352
+              </damping>
+            </radiation>
+            <excitation>
+              <combined>
+                <re>
+                  3750.27966906368
+                  1.36136318915143
+                  422045.810882563
+                  -12.1223298789796
+                  17026.4196175993
+                  -0.120671686522160
+                </re>
+                <im>
+                  154952.048410117
+                  0.0258067417631121
+                  119022.435012338
+                  -1.48920899489199
+                  712781.363146319
+                  -5.43599198405567
+                </im>
+              </combined>
+              <froude_krylov>
+                <re>
+                  9.23543827040243
+                  0.0162480147898594
+                  622401.014204239
+                  -6.38980408679980
+                  -282.389237456753
+                  -0.000103055222405902
+                </re>
+                <im>
+                  126959.968499544
+                  -0.0166309938157517
+                  -34.6068541762491
+                  0.533226736595381
+                  590993.613169733
+                  -3.78930171294708
+                </im>
+              </froude_krylov>
+              <scattering>
+                <re>
+                  3741.04423079327
+                  1.34511517436157
+                  -200355.203321676
+                  -5.73252579217983
+                  17308.8088550560
+                  -0.120568631299754
+                </re>
+                <im>
+                  27992.0799105738
+                  0.0424377355788638
+                  119057.041866514
+                  -2.02243573148737
+                  121787.749976586
+                  -1.64669027110858
+                </im>
+              </scattering>
+            </excitation>
+          </hydro_coeffs>
+
+          <!-- enable / disable forces -->
+          <forces>
+            <gravity_on>1</gravity_on>
+            <buoyancy_on>1</buoyancy_on>
+            <hydrostatic_restoring_on>1</hydrostatic_restoring_on>
+            <radiation_damping_on>1</radiation_damping_on>
+            <radiation_added_mass_on>1</radiation_added_mass_on>
+            <excitation_on>1</excitation_on>
+            <excitation_froude_krylov_on>1</excitation_froude_krylov_on>
+            <excitation_scattering_on>1</excitation_scattering_on>
+          </forces>
+
+          <!-- enable / disable debug messages -->
+          <debug>
+            <gravity_on>0</gravity_on>
+            <buoyancy_on>0</buoyancy_on>
+            <radiation_damping_on>0</radiation_damping_on>
+            <radiation_added_mass_on>0</radiation_added_mass_on>
+            <excitation_on>0</excitation_on>
+          </debug>
+
+          <!-- publish forces -->
+          <publishers>
+            <update_rate>20</update_rate>
+
+            <gravity_on>1</gravity_on>
+            <buoyancy_on>1</buoyancy_on>
+            <hydrostatic_restoring_on>1</hydrostatic_restoring_on>
+            <radiation_damping_on>1</radiation_damping_on>
+            <radiation_added_mass_on>1</radiation_added_mass_on>
+            <excitation_on>1</excitation_on>
+            <excitation_froude_krylov_on>1</excitation_froude_krylov_on>
+            <excitation_scattering_on>1</excitation_scattering_on>
+
+            <gravity_topic>/force/gravity</gravity_topic>
+            <buoyancy_topic>/force/buoyancy</buoyancy_topic>
+            <hydrostatic_restoring_topic>/force/restoring</hydrostatic_restoring_topic>
+            <radiation_damping_topic>/force/radiation_damping</radiation_damping_topic>
+            <radiation_added_mass_topic>/force/radiation_added_mass</radiation_added_mass_topic>
+            <excitation_topic>/force/excitation</excitation_topic>
+            <excitation_froude_krylov_topic>/force/excitation_froude_krylov</excitation_froude_krylov_topic>
+            <excitation_scattering_topic>/force/excitation_scattering</excitation_scattering_topic>
+          </publishers>
+
+      </plugin>
+
+      <!-- <plugin
+          filename="gz-waves1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
+        <enable>ellipsoid_buoy::base_link::collision</enable>
+        <hydrodynamics>
+          <damping_on>0</damping_on>
+          <viscous_drag_on>0</viscous_drag_on>
+          <pressure_drag_on>0</pressure_drag_on>
+        </hydrodynamics>
+      </plugin> -->
+
+      <plugin
+        filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+      </plugin>
+
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>odom</odom_frame>
+        <robot_base_frame>base_link</robot_base_frame>
+        <odom_publish_frequency>50</odom_publish_frequency>
+        <odom_topic>model/ellipsoid_buoy/odometry</odom_topic>
+        <dimensions>3</dimensions>
+      </plugin>
+
+      <plugin
+        filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>true</publish_link_pose>
+        <use_pose_vector_msg>true</use_pose_vector_msg>
+        <static_publisher>true</static_publisher>
+        <static_update_frequency>1</static_update_frequency>
+      </plugin>
+
+    </include>
+
+  </world>
+</sdf>
