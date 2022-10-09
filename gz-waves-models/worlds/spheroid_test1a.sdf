@@ -1,0 +1,264 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="spheroid_test1a">
+    <physics name="1ms" type="ignore">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+      <background_color>0.8 0.8 0.8</background_color>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin filename="gz-sim-imu-system"
+            name="gz::sim::systems::Imu">
+    </plugin>
+
+    <!-- switch off gravity in physics engine when using added mass -->
+    <gravity>0 0 0</gravity>
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.6 0.6 0.6 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+     <include>
+      <uri>model://regular_waves_6s_2m</uri>
+    </include>
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://spheroid_test1a</uri>
+      <name>spheroid_test1a</name>
+
+      <plugin
+          filename="gz-waves1-linear-wave-body-system"
+          name="gz::sim::systems::LinearWaveBody">
+
+        <!-- BEM HDF5 data file -->
+        <hdf5_file>models://spheroid_test1a/config/hydrodata/spheroid_f3676.h5</hdf5_file>
+
+        <!-- waves parameter overrides -->
+        <waves>
+          <regular>
+            <period>6</period>
+            <height>2</height>
+            <direction>0</direction>
+            <phase>0</phase>
+          </regular>
+        </waves>
+
+        <!-- simulation parameter overrides -->
+        <simulation_parameters>
+          <gravity>9.81</gravity>
+          <fluid_density>1025</fluid_density>
+        </simulation_parameters>
+
+        <!-- geometry overrides -->
+        <geometry>
+          <center_of_waterplane>0.000 -0.000 0</center_of_waterplane>
+          <center_of_buoyancy>0.000 -0.000 -0.186</center_of_buoyancy>
+          <displaced_volume>0.5204</displaced_volume>
+        </geometry>
+
+        <!-- 
+          Dimensioned hydrodynamics coefficients for T=6.0s (w = 1.0472 rad/s)
+          
+          - BEM coefficients calculated using Capytaine
+          - Converted to WEC-Sim hdf5 using bemio
+        -->
+        <hydro_coeffs>
+          <scaled>0</scaled>
+          <hydrostatic>
+            <linear_restoring>
+              0	0	0	0	0	0
+              0	0	0	0	0	0
+              0	0	15770.5352835793	-0.000179775265095523	-0.00564164086904214	0
+              0	0	-0.000179775265095523	13.4841248667165	-0.000548153398607488	0
+              0	0	-0.00564164086904214	-0.000548153398607488	2971.70923342326	0
+              0	0	0	0	0	0
+            </linear_restoring>
+          </hydrostatic>
+          <radiation>
+            <added_mass>
+              117.962328366865	-0.00643138097875486	0.000107134507193463	-0.00253373386642958	66.6042248767914	-0.00100552745178320
+              -0.00195049618761688	394.048830959351	-0.000777662751166715	-0.875102901608123	0.00685622580721342	-0.000523533237841154
+              0.000369503041596098	-7.66100386758192e-05	720.762471246146	-0.000348543268600543	-0.000844309735544994	0.00949490455462257
+              -0.00243241167102902	-0.873539443020041	-0.000343542243939859	0.00909688173745441	-0.00186731164869327	-0.000292586554358150
+              66.6688184404022	0.00258406415603072	-0.000694626031312840	-0.00191682431627694	44.7848522997510	0.000238121671839681
+              -0.000471989582643287	0.00114393892587981	-0.00141114084041007	-0.000296997896730033	0.000625671809735371	32.9252437053187
+            </added_mass>
+            <damping>
+              0.142708917225694	-1.54810883168306e-05	-8.50226705427670e-07	-3.23444731561159e-06	0.0799235017660543	-1.75777084142501e-06
+              -5.08407798112439e-06	0.291869782221198	7.51060580388456e-06	-0.000646742119402389	5.63359698170387e-06	-8.74138938395804e-08
+              0.000126035717777265	0.000191160274628405	124.994255317329	-3.02603880175141e-06	-4.65672994825797e-05	0.00302685483253595
+              -3.06703110312061e-06	-0.000647680943769099	6.69269366902186e-06	1.43523968298466e-06	-1.73653444356224e-06	1.97725056854821e-10
+              0.0801191349107487	-3.55223845837922e-06	-3.51418199158459e-05	-1.82730430222896e-06	0.0448702661496341	-9.87279985534059e-07
+              -2.57108485816196e-07	1.83231862649475e-07	3.10951754235196e-06	-6.05474463319908e-10	-1.43291373997276e-07	2.05659860744388e-05
+            </damping>
+          </radiation>
+          <excitation>
+            <combined>
+              <re>
+                0.133699130979482
+                0.000821492879853752
+                14420.9973753112
+                0.000691474478869388
+                0.0711271206082944
+                0.000323509894426478
+              </re>
+              <im>
+                687.996022048749
+                -0.00209814346815071
+                130.866634048219
+                -0.0148315003908613
+                386.264811931074
+                -0.00120513597183345
+              </im>
+            </combined>
+            <froude_krylov>
+              <re>
+                1.41211662127372e-05
+                3.13880228926762e-06
+                15204.4451040593
+                0.000368945019634488
+                -0.00470236615708030
+                -0.00125471788120319
+              </re>
+              <im>
+                572.264775400861
+                0.000359916205915911
+                -0.000527774332492802
+                -0.0125331014320662
+                322.215874632793
+                -0.000635099695241092
+              </im>
+            </froude_krylov>
+            <scattering>
+              <re>
+                0.133685009813269
+                0.000818354077564484
+                -783.447728748175
+                0.000322529459234900
+                0.0758294867653747
+                0.00157822777562967
+              </re>
+              <im>
+                115.731246647888
+                -0.00245805967406663
+                130.867161822552
+                -0.00229839895879514
+                64.0489372982808
+                -0.000570036276592359
+              </im>
+            </scattering>
+          </excitation>
+        </hydro_coeffs>
+ 
+        <!-- enable / disable forces -->
+        <forces>
+          <gravity_on>1</gravity_on>
+          <buoyancy_on>1</buoyancy_on>
+          <hydrostatic_restoring_on>1</hydrostatic_restoring_on>
+          <radiation_damping_on>1</radiation_damping_on>
+          <radiation_added_mass_on>1</radiation_added_mass_on>
+          <excitation_on>1</excitation_on>
+          <excitation_froude_krylov_on>0</excitation_froude_krylov_on>
+          <excitation_scattering_on>0</excitation_scattering_on>
+        </forces>
+
+        <!-- enable / disable debug messages -->
+        <debug>
+          <gravity_on>0</gravity_on>
+          <buoyancy_on>0</buoyancy_on>
+          <radiation_damping_on>0</radiation_damping_on>
+          <radiation_added_mass_on>0</radiation_added_mass_on>
+          <excitation_on>0</excitation_on>
+        </debug>
+
+        <!-- publish forces -->
+        <publishers>
+          <update_rate>20</update_rate>
+
+          <gravity_on>1</gravity_on>
+          <buoyancy_on>1</buoyancy_on>
+          <hydrostatic_restoring_on>1</hydrostatic_restoring_on>
+          <radiation_damping_on>1</radiation_damping_on>
+          <radiation_added_mass_on>1</radiation_added_mass_on>
+          <excitation_on>1</excitation_on>
+          <excitation_froude_krylov_on>1</excitation_froude_krylov_on>
+          <excitation_scattering_on>1</excitation_scattering_on>
+
+          <gravity_topic>/force/gravity</gravity_topic>
+          <buoyancy_topic>/force/buoyancy</buoyancy_topic>
+          <hydrostatic_restoring_topic>/force/restoring</hydrostatic_restoring_topic>
+          <radiation_damping_topic>/force/radiation_damping</radiation_damping_topic>
+          <radiation_added_mass_topic>/force/radiation_added_mass</radiation_added_mass_topic>
+          <excitation_topic>/force/excitation</excitation_topic>
+          <excitation_froude_krylov_topic>/force/excitation_froude_krylov</excitation_froude_krylov_topic>
+          <excitation_scattering_topic>/force/excitation_scattering</excitation_scattering_topic>
+        </publishers>
+      </plugin>
+
+      <!--
+        To use this plugin for comparison, uncomment and disable all
+        forces except gravity in gz-waves1-linear-wave-body-system.
+      -->
+      <!-- <plugin
+          filename="gz-waves1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
+        <enable>ellipsoid_buoy::base_link::collision</enable>
+        <hydrodynamics>
+          <damping_on>1</damping_on>
+          <viscous_drag_on>1</viscous_drag_on>
+          <pressure_drag_on>1</pressure_drag_on>
+        </hydrodynamics>
+      </plugin> -->
+
+      <plugin
+        filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+      </plugin>
+
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>odom</odom_frame>
+        <robot_base_frame>base_link</robot_base_frame>
+        <odom_publish_frequency>50</odom_publish_frequency>
+        <odom_topic>model/spheroid_test1a/odometry</odom_topic>
+        <dimensions>3</dimensions>
+      </plugin>
+
+      <plugin
+        filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>true</publish_link_pose>
+        <use_pose_vector_msg>true</use_pose_vector_msg>
+        <static_publisher>true</static_publisher>
+        <static_update_frequency>1</static_update_frequency>
+      </plugin>
+
+    </include>
+
+  </world>
+</sdf>

@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="ellipsoid_buoy">
+    <pose>0 0 0 0 0 0</pose>
+    <link name="base_link">
+      <visual name="visual">
+        <pose>0 0 -2.0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://ellipsoid_buoy/meshes/ellipsoid.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1 0 0 1</ambient>
+          <diffuse>1 0 0 1</diffuse>
+          <specular>0.8 0.8 0.8 1</specular>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 -2.0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://ellipsoid_buoy/meshes/ellipsoid.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 -2.0 0 0 0</pose>
+        <mass>134200</mass>
+        <inertia>
+          <ixx>838750</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>838750</iyy>
+          <iyz>0.0</iyz>
+          <izz>1342000</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <!-- <plugin
+        filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+      <enable>ellipsoid_buoy::base_link::collision</enable>
+      <hydrodynamics>
+        <damping_on>0</damping_on>
+        <viscous_drag_on>0</viscous_drag_on>
+        <pressure_drag_on>0</pressure_drag_on>
+      </hydrodynamics>
+    </plugin> -->
+  </model>
+</sdf>

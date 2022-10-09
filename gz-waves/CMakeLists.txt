@@ -35,6 +35,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # Search for project-specific dependencies
 #============================================================================
 
+include(Add_HighFive)
+
 #--------------------------------------
 # Find gnuplot-iostream - the header is used by the examples in test/plots
 include(Add_gnuplot-iostream)

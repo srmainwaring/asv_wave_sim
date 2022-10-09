@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="spheroid_test1a">
+    <pose>0 0 0 0 0 0</pose>
+    <link name="base_link">
+      <visual name="visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://spheroid_test1a/meshes/spheroid_f960.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1.0 1.0 0.0 1</ambient>
+          <diffuse>1.0 1.0 0.0 1</diffuse>
+          <specular>1.0 1.0 0.0 1</specular>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://spheroid_test1a/meshes/spheroid_f960.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>536.69</mass>
+        <inertia>
+          <ixx>53.67</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>134.17</iyy>
+          <iyz>0.0</iyz>
+          <izz>134.17</izz>
+        </inertia>
+      </inertial>
+    </link>
+  </model>
+</sdf>
