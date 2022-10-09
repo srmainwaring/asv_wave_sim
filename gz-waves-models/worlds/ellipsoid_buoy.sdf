@@ -3,7 +3,7 @@
   <world name="waves">
     <physics name="1ms" type="ignore">
       <max_step_size>0.001</max_step_size>
-      <real_time_factor>-1</real_time_factor>
+      <real_time_factor>1</real_time_factor>
     </physics>
 
     <plugin filename="gz-sim-physics-system"
@@ -110,7 +110,7 @@
           <waves>
             <regular>
               <period>6</period>
-              <height>2</height>
+              <height>4</height>
               <direction>0</direction>
               <phase>0</phase>
             </regular>
