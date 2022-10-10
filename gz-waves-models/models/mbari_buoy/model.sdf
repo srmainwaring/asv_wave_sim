@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+  <model name="mbari_buoy">
+    <!--
+      In the orginal model the link origin is located
+      at the bridle articulation point.
+
+      CoM location:       (0 0 2.03) m
+      Waterline location: (0 0 2.27) m
+      CoB:                (0 0 2.05) m
+
+      Vo:                 2.39 m^3
+      S:                  5.47 m^2
+      S11 = S22:          1.37 m^4
+
+      Source: Buoy_Assembly_09-27-2022
+
+      We set the origin at the waterplane, and offset from there.
+    
+      Questions:
+        The inertial data in the data sheet looks like it may be for a
+        coordinate system with y-up as the smallest diagonal element is Iyy
+        and we'd expect the inertia to be approx. symmetric about the z axis.
+    -->
+    <link name="base_link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 -0.24 0 0 0</pose>
+        <!-- <mass>1400</mass> -->
+        <mass>2450</mass>
+        <!-- <inertia>
+          <ixx>1429</ixx>
+          <ixy>6.74</ixy>
+          <ixz>4.70</ixz>
+          <iyy>670.3</iyy>
+          <iyz>30.5</iyz>
+          <izz>1476</izz>
+        </inertia> -->
+        <inertia>
+          <ixx>1429</ixx>
+          <ixy>4.70</ixy>
+          <ixz>6.74</ixz>
+          <iyy>1476</iyy>
+          <iyz>30.5</iyz>
+          <izz>670.3</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual_Buoy">
+        <pose>0 0 -2.27 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://mbari_buoy/meshes/buoy_float.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1.0 1.0 0.0 1</ambient>
+          <diffuse>1.0 1.0 0.0 1</diffuse>
+          <specular>1.0 1.0 0.0 1</specular>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 0.19 0 0 0 </pose>
+        <geometry>
+          <box>
+            <size>2.34 2.34 1</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
