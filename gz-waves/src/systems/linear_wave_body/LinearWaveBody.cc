@@ -16,6 +16,7 @@
 #include "LinearWaveBody.hh"
 
 #include <gz/common/Profiler.hh>
+#include <gz/common/SystemPaths.hh>
 
 #include <gz/msgs/wrench.pb.h>
 
@@ -763,7 +764,12 @@ void LinearWaveBody::Configure(const Entity &_entity,
   // 1a. read WEC-Sim hdf5 BEM file
   if (_sdf->HasElement("hdf5_file"))
   {
-    this->dataPtr->hydroData.hdf5File = _sdf->Get<std::string>("hdf5_file");
+    std::string fileUri = _sdf->Get<std::string>("hdf5_file");
+
+    // Find the file path
+    common::SystemPaths systemPaths;
+    this->dataPtr->hydroData.hdf5File = systemPaths.FindFileURI(fileUri);
+
     this->dataPtr->ReadWECSim(_ecm);
   }
   else

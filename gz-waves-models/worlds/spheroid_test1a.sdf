@@ -53,7 +53,8 @@
       <plugin
           filename="gz-waves1-linear-wave-body-system"
           name="gz::sim::systems::LinearWaveBody">
-        <hdf5_file>/Users/rhys/Code/robotics/gz_waves_ws/src/asv_wave_sim/gz-waves-models/models/spheroid_test1a/config/hydrodata/spheroid_f3676.h5</hdf5_file>
+
+        <hdf5_file>models://spheroid_test1a/config/hydrodata/spheroid_f3676.h5</hdf5_file>
 
         <waves>
           <regular>
