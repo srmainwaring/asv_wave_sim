@@ -9,7 +9,6 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    pkg_ros_gz_sim = get_package_share_directory("ros_gz_sim")
     model_name = "spheroid_test1a"
 
     # Bridge to forward tf and joint states to ros2

@@ -81,7 +81,7 @@
         </geometry>
 
         <!-- 
-          Unscaled hydrodynamics coefficients for T=6.0s (w = 1.0472 rad/s)
+          Dimensioned hydrodynamics coefficients for T=6.0s (w = 1.0472 rad/s)
           
           - BEM coefficients calculated using Capytaine
           - Converted to WEC-Sim hdf5 using bemio

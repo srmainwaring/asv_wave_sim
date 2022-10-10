@@ -189,7 +189,7 @@ class gz::sim::systems::LinearWaveBodyPrivate
   /// This is the raw data loaded from file. It is not accessed directly in
   /// the simulation updates.
   ///
-  /// The hydro coefficients are assumed to be scaled so they are dimensionless.
+  /// The hydro coefficients are assumed to be non-dimensional.
   ///
   struct HydroData
   {
@@ -277,7 +277,9 @@ class gz::sim::systems::LinearWaveBodyPrivate
     /// \brief Fluid density
     double rho{1025.0};
 
-    /// \brief Are quantities scaled? (note: not set correctly in HDF5 by bemio)
+    /// \brief Are quantities non-dimensional?
+    ///
+    /// \note: not set correctly in HDF5 by bemio.
     double scaled{1};
 
     /// \brief Wave temporal angular frequencies [1, Nf]
@@ -952,7 +954,7 @@ void LinearWaveBody::Configure(const Entity &_entity,
     auto sdfHydro = _sdf->GetElementImpl("hydro_coeffs");
 
     /// \todo use the scaled parameter - current assumption is all
-    ///       hydro coeff overrides are scaled.
+    ///       hydro coeff overrides are dimensioned.
     if (sdfHydro->HasElement("scaled"))
       double scaled = sdfHydro->Get<double>("scaled");
 
@@ -1463,63 +1465,90 @@ void LinearWaveBodyPrivate::ReadWECSim(EntityComponentManager &_ecm)
     return;
 
   // Read hdf5 data
-  HighFive::File file(hydro.hdf5File, HighFive::File::ReadWrite);
+  HighFive::File file(hydro.hdf5File, HighFive::File::ReadOnly);
 
   // radiation added mass infinite frequency
-  file.getDataSet("/body1/hydro_coeffs/added_mass/inf_freq")
-      .read(hydro.Ainf);
+  if (file.exist("/body1/hydro_coeffs/added_mass/inf_freq"))
+    file.getDataSet("/body1/hydro_coeffs/added_mass/inf_freq")
+        .read(hydro.Ainf);
 
   // radiation added mass has dimension 6 x 6 x Nf
-  ReadDataSet(file, "/body1/hydro_coeffs/added_mass/all", &hydro.A);
+  if (file.exist("/body1/hydro_coeffs/added_mass/all"))
+    ReadDataSet(file, "/body1/hydro_coeffs/added_mass/all", &hydro.A);
 
   // radiation damping has dimension 6 x 6 x Nf
-  ReadDataSet(file, "/body1/hydro_coeffs/radiation_damping/all", &hydro.B);
+  if (file.exist("/body1/hydro_coeffs/radiation_damping/all"))
+    ReadDataSet(file, "/body1/hydro_coeffs/radiation_damping/all", &hydro.B);
 
   // radiation IRF has dimension 6 x 6 x len(ra_t)
   std::string dsetpath;
   dsetpath = "/body1/hydro_coeffs/radiation_damping/impulse_response_fun";
-  ReadDataSet(file, dsetpath + "/K", &hydro.ra_K);
-  file.getDataSet(dsetpath + "/t").read(hydro.ra_t);
-  file.getDataSet(dsetpath + "/w").read(hydro.ra_w);
+  if (file.exist(dsetpath + "/K"))
+    ReadDataSet(file, dsetpath + "/K", &hydro.ra_K);
+  if (file.exist(dsetpath + "/t"))
+    file.getDataSet(dsetpath + "/t").read(hydro.ra_t);
+  if (file.exist(dsetpath + "/w"))
+    file.getDataSet(dsetpath + "/w").read(hydro.ra_w);
 
   // excitation force has dimension 6 x Nh x Nf
   //
   dsetpath = "/body1/hydro_coeffs/excitation";
-  ReadDataSet(file, dsetpath + "/re", &hydro.ex_re);
-  ReadDataSet(file, dsetpath + "/im", &hydro.ex_im);
-  ReadDataSet(file, dsetpath + "/mag", &hydro.ex_ma);
-  ReadDataSet(file, dsetpath + "/phase", &hydro.ex_ph);
+  if (file.exist(dsetpath + "/re"))
+    ReadDataSet(file, dsetpath + "/re", &hydro.ex_re);
+  if (file.exist(dsetpath + "/im"))
+    ReadDataSet(file, dsetpath + "/im", &hydro.ex_im);
+  if (file.exist(dsetpath + "/mag"))
+    ReadDataSet(file, dsetpath + "/mag", &hydro.ex_ma);
+  if (file.exist(dsetpath + "/phase"))
+    ReadDataSet(file, dsetpath + "/phase", &hydro.ex_ph);
 
   // excitation froude-krylov force has dimension 6 x Nh x Nf
   //
   dsetpath = "/body1/hydro_coeffs/excitation/froude-krylov";
-  ReadDataSet(file, dsetpath + "/re", &hydro.fk_re);
-  ReadDataSet(file, dsetpath + "/im", &hydro.fk_im);
-  ReadDataSet(file, dsetpath + "/mag", &hydro.fk_ma);
-  ReadDataSet(file, dsetpath + "/phase", &hydro.fk_ph);
+  if (file.exist(dsetpath + "/re"))
+    ReadDataSet(file, dsetpath + "/re", &hydro.fk_re);
+  if (file.exist(dsetpath + "/im"))
+    ReadDataSet(file, dsetpath + "/im", &hydro.fk_im);
+  if (file.exist(dsetpath + "/mag"))
+    ReadDataSet(file, dsetpath + "/mag", &hydro.fk_ma);
+  if (file.exist(dsetpath + "/phase"))
+    ReadDataSet(file, dsetpath + "/phase", &hydro.fk_ph);
 
   // excitation scattering force has dimension 6 x Nh x Nf
   //
   dsetpath = "/body1/hydro_coeffs/excitation/scattering";
-  ReadDataSet(file, dsetpath + "/re", &hydro.sc_re);
-  ReadDataSet(file, dsetpath + "/im", &hydro.sc_im);
-  ReadDataSet(file, dsetpath + "/mag", &hydro.sc_ma);
-  ReadDataSet(file, dsetpath + "/phase", &hydro.sc_ph);
+  if (file.exist(dsetpath + "/re"))
+    ReadDataSet(file, dsetpath + "/re", &hydro.sc_re);
+  if (file.exist(dsetpath + "/im"))
+    ReadDataSet(file, dsetpath + "/im", &hydro.sc_im);
+  if (file.exist(dsetpath + "/mag"))
+    ReadDataSet(file, dsetpath + "/mag", &hydro.sc_ma);
+  if (file.exist(dsetpath + "/phase"))
+    ReadDataSet(file, dsetpath + "/phase", &hydro.sc_ph);
 
   // excitation IRF has dimension 6 x Nh x len(ra_t)
   dsetpath = "/body1/hydro_coeffs/excitation/impulse_response_fun";
-  ReadDataSet(file, dsetpath + "/f", &hydro.ex_K);
-  file.getDataSet(dsetpath + "/t").read(hydro.ex_t);
-  file.getDataSet(dsetpath + "/w").read(hydro.ex_w);
+  if (file.exist(dsetpath + "/f"))
+    ReadDataSet(file, dsetpath + "/f", &hydro.ex_K);
+  if (file.exist(dsetpath + "/t"))
+    file.getDataSet(dsetpath + "/t").read(hydro.ex_t);
+  if (file.exist(dsetpath + "/w"))
+    file.getDataSet(dsetpath + "/w").read(hydro.ex_w);
 
-  file.getDataSet("/body1/hydro_coeffs/linear_restoring_stiffness")
-      .read(hydro.K_hs);
+  if (file.exist("/body1/hydro_coeffs/linear_restoring_stiffness"))
+    file.getDataSet("/body1/hydro_coeffs/linear_restoring_stiffness")
+        .read(hydro.K_hs);
 
   // properties
-  file.getDataSet("/body1/properties/body_number").read(hydro.Nb);
-  file.getDataSet("/body1/properties/cb").read(hydro.cb);
-  file.getDataSet("/body1/properties/cg").read(hydro.cg);
-  file.getDataSet("/body1/properties/disp_vol").read(hydro.Vo);
+  dsetpath = "/body1/properties";
+  if (file.exist(dsetpath + "/body_number"))
+    file.getDataSet(dsetpath + "/body_number").read(hydro.Nb);
+  if (file.exist(dsetpath + "/cb"))
+    file.getDataSet(dsetpath + "/cb").read(hydro.cb);
+  if (file.exist(dsetpath + "/cg"))
+    file.getDataSet(dsetpath + "/cg").read(hydro.cg);
+  if (file.exist(dsetpath + "/disp_vol"))
+    file.getDataSet(dsetpath + "/disp_vol").read(hydro.Vo);
 
   /// \todo issue reading fixed length strings
   /// https://github.com/BlueBrain/HighFive/issues/94
@@ -1528,96 +1557,135 @@ void LinearWaveBodyPrivate::ReadWECSim(EntityComponentManager &_ecm)
   // file.getDataSet("body1/properties/name").read(name);
 
   // simulation_parameters
-  file.getDataSet("simulation_parameters/T").read(hydro.T);
-  file.getDataSet("simulation_parameters/g").read(hydro.g);
-  file.getDataSet("simulation_parameters/rho").read(hydro.rho);
-  file.getDataSet("simulation_parameters/scaled").read(hydro.scaled);
-  file.getDataSet("simulation_parameters/w").read(hydro.w);
-  file.getDataSet("simulation_parameters/wave_dir").read(hydro.theta);
+  dsetpath = "/simulation_parameters";
+  if (file.exist(dsetpath + "/T"))
+    file.getDataSet(dsetpath + "/T").read(hydro.T);
+  if (file.exist(dsetpath + "/g"))
+    file.getDataSet(dsetpath + "/g").read(hydro.g);
+  if (file.exist(dsetpath + "/rho"))
+    file.getDataSet(dsetpath + "/rho").read(hydro.rho);
+  if (file.exist(dsetpath + "/scaled"))
+    file.getDataSet(dsetpath + "/scaled").read(hydro.scaled);
+  if (file.exist(dsetpath + "/w"))
+    file.getDataSet(dsetpath + "/w").read(hydro.w);
+  if (file.exist(dsetpath + "/wave_dir"))
+    file.getDataSet(dsetpath + "/wave_dir").read(hydro.theta);
 
   // set number of wave frequencies
   hydro.Nf = hydro.w.size();
 
   gzmsg << "Loaded HDF5 data:\n"
-        << "hdf5_file: " << hydro.hdf5File << "\n"
+        << "hdf5_file: " << hydro.hdf5File << "\n";
 
-        // radiation damping
-        << "/body1/hydro_coeffs/added_mass/inf_freq\n"
-        << "Ainf_00: " << hydro.Ainf(0, 0) << "\n"
-        << "Ainf_11: " << hydro.Ainf(1, 1) << "\n"
-        << "Ainf_22: " << hydro.Ainf(2, 2) << "\n"
+  // radiation added mass
+  {
+    gzmsg << "HDF5 Added Mass Inf Freq:\n"
+          << "/body1/hydro_coeffs/added_mass/inf_freq\n"
+          << "Ainf_00: " << hydro.Ainf(0, 0) << "\n"
+          << "Ainf_11: " << hydro.Ainf(1, 1) << "\n"
+          << "Ainf_22: " << hydro.Ainf(2, 2) << "\n";
+  }
 
-        << "/body1/hydro_coeffs/added_mass/all\n"
-        << "A.size(): " << hydro.A.size() << "\n"
-        << "A_000: " << hydro.A[0](0, 0) << "\n"
-        << "A_011: " << hydro.A[0](1, 1) << "\n"
-        << "A_022: " << hydro.A[0](2, 2) << "\n"
+  // radiation added mass
+  if (!hydro.A.empty())
+  {
+    gzmsg << "HDF5 Added Mass Coefficients:\n"
+          << "/body1/hydro_coeffs/added_mass/all\n"
+          << "A.size(): " << hydro.A.size() << "\n"
+          << "A_000: " << hydro.A[0](0, 0) << "\n"
+          << "A_011: " << hydro.A[0](1, 1) << "\n"
+          << "A_022: " << hydro.A[0](2, 2) << "\n";
+  }
 
-        << "/body1/hydro_coeffs/radiation_damping/all\n"
-        << "B.size(): " << hydro.B.size() << "\n"
-        << "B_000: " << hydro.B[0](0, 0) << "\n"
-        << "B_011: " << hydro.B[0](1, 1) << "\n"
-        << "B_022: " << hydro.B[0](2, 2) << "\n"
+  // radiation damping
+  if (!hydro.B.empty())
+  {
+    gzmsg << "HDF5 Radiation Damping Coefficients:\n"
+          << "/body1/hydro_coeffs/radiation_damping/all\n"
+          << "B.size(): " << hydro.B.size() << "\n"
+          << "B_000: " << hydro.B[0](0, 0) << "\n"
+          << "B_011: " << hydro.B[0](1, 1) << "\n"
+          << "B_022: " << hydro.B[0](2, 2) << "\n";
+  }
 
-        << "/body1/hydro_coeffs/radiation_damping/impulse_response_fun/K\n"
-        << "ra_K.size(): " << hydro.ra_K.size() << "\n"
-        << "ra_K_000: " << hydro.ra_K[0](0, 0) << "\n"
-        << "ra_K_011: " << hydro.ra_K[0](1, 1) << "\n"
-        << "ra_K_022: " << hydro.ra_K[0](2, 2) << "\n"
+  // radiation IRF
+  if (!hydro.ra_K.empty() && !hydro.ra_t.empty() && !hydro.ra_t.empty())
+  {
+    gzmsg << "HDF5 Radiation IRF Coefficients:\n"
+          << "/body1/hydro_coeffs/radiation_damping/impulse_response_fun/K\n"
+          << "ra_K.size(): " << hydro.ra_K.size() << "\n"
+          << "ra_K_000: " << hydro.ra_K[0](0, 0) << "\n"
+          << "ra_K_011: " << hydro.ra_K[0](1, 1) << "\n"
+          << "ra_K_022: " << hydro.ra_K[0](2, 2) << "\n"
 
-        << "/body1/hydro_coeffs/radiation_damping/impulse_response_fun/t\n"
-        << "ra_t.size(): " << hydro.ra_t.size() << "\n"
-        << "ra_t_0: " << hydro.ra_t[0] << "\n"
-        << "ra_t_n: " << hydro.ra_t[hydro.ra_t.size()-1] << "\n"
+          << "/body1/hydro_coeffs/radiation_damping/impulse_response_fun/t\n"
+          << "ra_t.size(): " << hydro.ra_t.size() << "\n"
+          << "ra_t_0: " << hydro.ra_t[0] << "\n"
+          << "ra_t_n: " << hydro.ra_t[hydro.ra_t.size()-1] << "\n"
 
-        << "/body1/hydro_coeffs/radiation_damping/impulse_response_fun/w\n"
-        << "ra_w.size(): " << hydro.ra_w.size() << "\n"
-        << "ra_w_0: " << hydro.ra_w[0] << "\n"
-        << "ra_w_n: " << hydro.ra_w[hydro.ra_w.size()-1] << "\n"
+          << "/body1/hydro_coeffs/radiation_damping/impulse_response_fun/w\n"
+          << "ra_w.size(): " << hydro.ra_w.size() << "\n"
+          << "ra_w_0: " << hydro.ra_w[0] << "\n"
+          << "ra_w_n: " << hydro.ra_w[hydro.ra_w.size()-1] << "\n";
+  }
 
-        // excitation
-        << "/body1/hydro_coeffs/excitation/re\n"
-        << "ex_re.size(): " << hydro.ex_re.size() << "\n"
-        << "ex_re_000: " << hydro.ex_re[0](0, 0) << "\n"
-        << "ex_re_001: " << hydro.ex_re[0](1, 0) << "\n"
+  // combined excitation
+  if (!hydro.ex_re.empty() && !hydro.ex_im.empty() &&
+      !hydro.ex_ma.empty() && !hydro.ex_ph.empty())
+  {
+    gzmsg << "HDF5 Combined Excitation Coefficients:\n"
+          << "/body1/hydro_coeffs/excitation/re\n"
+          << "ex_re.size(): " << hydro.ex_re.size() << "\n"
+          << "ex_re_000: " << hydro.ex_re[0](0, 0) << "\n"
+          << "ex_re_001: " << hydro.ex_re[0](1, 0) << "\n"
 
-        << "/body1/hydro_coeffs/excitation/im\n"
-        << "ex_im.size(): " << hydro.ex_im.size() << "\n"
-        << "ex_im_000: " << hydro.ex_im[0](0, 0) << "\n"
-        << "ex_im_001: " << hydro.ex_im[0](1, 0) << "\n"
+          << "/body1/hydro_coeffs/excitation/im\n"
+          << "ex_im.size(): " << hydro.ex_im.size() << "\n"
+          << "ex_im_000: " << hydro.ex_im[0](0, 0) << "\n"
+          << "ex_im_001: " << hydro.ex_im[0](1, 0) << "\n"
 
-        << "/body1/hydro_coeffs/excitation/ma\n"
-        << "ex_ma.size(): " << hydro.ex_ma.size() << "\n"
-        << "ex_ma_000: " << hydro.ex_ma[0](0, 0) << "\n"
-        << "ex_ma_001: " << hydro.ex_ma[0](1, 0) << "\n"
+          << "/body1/hydro_coeffs/excitation/ma\n"
+          << "ex_ma.size(): " << hydro.ex_ma.size() << "\n"
+          << "ex_ma_000: " << hydro.ex_ma[0](0, 0) << "\n"
+          << "ex_ma_001: " << hydro.ex_ma[0](1, 0) << "\n"
 
-        << "/body1/hydro_coeffs/excitation/ph\n"
-        << "ex_ph.size(): " << hydro.ex_ph.size() << "\n"
-        << "ex_ph_000: " << hydro.ex_ph[0](0, 0) << "\n"
-        << "ex_ph_001: " << hydro.ex_ph[0](1, 0) << "\n"
+          << "/body1/hydro_coeffs/excitation/ph\n"
+          << "ex_ph.size(): " << hydro.ex_ph.size() << "\n"
+          << "ex_ph_000: " << hydro.ex_ph[0](0, 0) << "\n"
+          << "ex_ph_001: " << hydro.ex_ph[0](1, 0) << "\n";
+  }
 
-        // froude-krylov
-        << "/body1/hydro_coeffs/excitation/froude-krylov/re\n"
-        << "fk_re.size(): " << hydro.fk_re.size() << "\n"
-        << "fk_re_000: " << hydro.fk_re[0](0, 0) << "\n"
-        << "fk_re_001: " << hydro.fk_re[0](1, 0) << "\n"
+  // froude-krylov
+  if (!hydro.fk_re.empty() && !hydro.fk_im.empty() &&
+      !hydro.fk_ma.empty() && !hydro.fk_ph.empty())
+  {
+    gzmsg << "HDF5 Excitation Froude-Krylov Coefficients:\n"
+          << "/body1/hydro_coeffs/excitation/froude-krylov/re\n"
+          << "fk_re.size(): " << hydro.fk_re.size() << "\n"
+          << "fk_re_000: " << hydro.fk_re[0](0, 0) << "\n"
+          << "fk_re_001: " << hydro.fk_re[0](1, 0) << "\n"
 
-        << "/body1/hydro_coeffs/excitation/froude-krylov/im\n"
-        << "fk_im.size(): " << hydro.fk_im.size() << "\n"
-        << "fk_im_000: " << hydro.fk_im[0](0, 0) << "\n"
-        << "fk_im_001: " << hydro.fk_im[0](1, 0) << "\n"
+          << "/body1/hydro_coeffs/excitation/froude-krylov/im\n"
+          << "fk_im.size(): " << hydro.fk_im.size() << "\n"
+          << "fk_im_000: " << hydro.fk_im[0](0, 0) << "\n"
+          << "fk_im_001: " << hydro.fk_im[0](1, 0) << "\n"
 
-        << "/body1/hydro_coeffs/excitation/froude-krylov/ma\n"
-        << "fk_ma.size(): " << hydro.fk_ma.size() << "\n"
-        << "fk_ma_000: " << hydro.fk_ma[0](0, 0) << "\n"
-        << "fk_ma_001: " << hydro.fk_ma[0](1, 0) << "\n"
+          << "/body1/hydro_coeffs/excitation/froude-krylov/ma\n"
+          << "fk_ma.size(): " << hydro.fk_ma.size() << "\n"
+          << "fk_ma_000: " << hydro.fk_ma[0](0, 0) << "\n"
+          << "fk_ma_001: " << hydro.fk_ma[0](1, 0) << "\n"
 
-        << "/body1/hydro_coeffs/excitation/froude-krylov/ph\n"
-        << "fk_ph.size(): " << hydro.fk_ph.size() << "\n"
-        << "fk_ph_000: " << hydro.fk_ph[0](0, 0) << "\n"
-        << "fk_ph_001: " << hydro.fk_ph[0](1, 0) << "\n"
+          << "/body1/hydro_coeffs/excitation/froude-krylov/ph\n"
+          << "fk_ph.size(): " << hydro.fk_ph.size() << "\n"
+          << "fk_ph_000: " << hydro.fk_ph[0](0, 0) << "\n"
+          << "fk_ph_001: " << hydro.fk_ph[0](1, 0) << "\n";
+  }
 
-        // scattering
+  // scattering
+  if (!hydro.sc_re.empty() && !hydro.sc_im.empty() &&
+      !hydro.sc_ma.empty() && !hydro.sc_ph.empty())
+  {
+    gzmsg << "HDF5 Excitation Scattering Coefficients:\n"
         << "/body1/hydro_coeffs/excitation/scattering/re\n"
         << "sc_re.size(): " << hydro.sc_re.size() << "\n"
         << "sc_re_000: " << hydro.sc_re[0](0, 0) << "\n"
@@ -1636,66 +1704,81 @@ void LinearWaveBodyPrivate::ReadWECSim(EntityComponentManager &_ecm)
         << "/body1/hydro_coeffs/excitation/scattering/ph\n"
         << "sc_ph.size(): " << hydro.sc_ph.size() << "\n"
         << "sc_ph_000: " << hydro.sc_ph[0](0, 0) << "\n"
-        << "sc_ph_001: " << hydro.sc_ph[0](1, 0) << "\n"
+        << "sc_ph_001: " << hydro.sc_ph[0](1, 0) << "\n";
+  }
 
-        << "body1/hydro_coeffs/excitation/impulse_response_fun/f\n"
-        << "ex_K.size(): " << hydro.ex_K.size() << "\n"
-        << "ex_K_000: " << hydro.ex_K[0](0, 0) << "\n"
-        << "ex_K_011: " << hydro.ex_K[0](1, 1) << "\n"
-        << "ex_K_022: " << hydro.ex_K[0](2, 2) << "\n"
+  // excitation IRF
+  if (!hydro.ex_K.empty() && !hydro.ex_t.empty() && !hydro.ex_w.empty())
+  {
+    gzmsg << "HDF5 Excitation IRF Coefficients:\n"
+          << "body1/hydro_coeffs/excitation/impulse_response_fun/f\n"
+          << "ex_K.size(): " << hydro.ex_K.size() << "\n"
+          << "ex_K_000: " << hydro.ex_K[0](0, 0) << "\n"
+          << "ex_K_011: " << hydro.ex_K[0](1, 1) << "\n"
+          << "ex_K_022: " << hydro.ex_K[0](2, 2) << "\n"
 
-        << "body1/hydro_coeffs/excitation/impulse_response_fun/t\n"
-        << "ex_t.size(): " << hydro.ex_t.size() << "\n"
-        << "ex_t_0: " << hydro.ex_t[0] << "\n"
-        << "ex_t_n: " << hydro.ex_t[hydro.ex_t.size()-1] << "\n"
+          << "body1/hydro_coeffs/excitation/impulse_response_fun/t\n"
+          << "ex_t.size(): " << hydro.ex_t.size() << "\n"
+          << "ex_t_0: " << hydro.ex_t[0] << "\n"
+          << "ex_t_n: " << hydro.ex_t[hydro.ex_t.size()-1] << "\n"
 
-        << "body1/hydro_coeffs/excitation/impulse_response_fun/w\n"
-        << "ex_w.size(): " << hydro.ex_w.size() << "\n"
-        << "ex_w_0: " << hydro.ex_w[0] << "\n"
-        << "ex_w_n: " << hydro.ex_w[hydro.ex_w.size()-1] << "\n"
+          << "body1/hydro_coeffs/excitation/impulse_response_fun/w\n"
+          << "ex_w.size(): " << hydro.ex_w.size() << "\n"
+          << "ex_w_0: " << hydro.ex_w[0] << "\n"
+          << "ex_w_n: " << hydro.ex_w[hydro.ex_w.size()-1] << "\n";
+  }
 
-        // linear hydrostatic restoring
-        << "body1/hydro_coeffs/linear_restoring_stiffness\n"
-        << "K_hs_22: " << hydro.K_hs(2, 2) << "\n"
-        << "K_hs_33: " << hydro.K_hs(3, 3) << "\n"
-        << "K_hs_44: " << hydro.K_hs(4, 4) << "\n"
+  // linear hydrostatic restoring coefficients
+  {
+    gzmsg << "HDF5 Hydrostatic Coefficients:\n"
+          << "body1/hydro_coeffs/linear_restoring_stiffness\n"
+          << "K_hs_22: " << hydro.K_hs(2, 2) << "\n"
+          << "K_hs_33: " << hydro.K_hs(3, 3) << "\n"
+          << "K_hs_44: " << hydro.K_hs(4, 4) << "\n";
+  }
 
-        // properties
-        << "body1/properties/body_number\n"
-        << "body_number: " << hydro.Nb << "\n"
+  // body properties
+  {
+    gzmsg << "HDF5 Body Properties:\n"
+          << "body1/properties/body_number\n"
+          << "body_number: " << hydro.Nb << "\n"
 
-        << "body1/properties/cb\n"
-        << "cb: " << hydro.cb(0) << ", "
-                  << hydro.cb(1) << ", "
-                  << hydro.cb(2) << "\n"
+          << "body1/properties/cb\n"
+          << "cb: " << hydro.cb(0) << ", "
+                    << hydro.cb(1) << ", "
+                    << hydro.cb(2) << "\n"
 
-        << "body1/properties/cg\n"
-        << "cb: " << hydro.cg(0) << ", "
-                  << hydro.cg(1) << ", "
-                  << hydro.cg(2) << "\n"
+          << "body1/properties/cg\n"
+          << "cb: " << hydro.cg(0) << ", "
+                    << hydro.cg(1) << ", "
+                    << hydro.cg(2) << "\n"
 
-        << "body1/properties/disp_vol\n"
-        << "disp_vol: " << hydro.Vo << "\n"
+          << "body1/properties/disp_vol\n"
+          << "disp_vol: " << hydro.Vo << "\n";
+  }
 
-        // simulation properties
-        << "simulation_parameters/T\n"
-        << "T.size(): " << hydro.T.size() << "\n"
+  // simulation properties
+  {
+    gzmsg << "HDF5 Simulation Parameters:\n"
+          << "simulation_parameters/T\n"
+          << "T.size(): " << hydro.T.size() << "\n"
 
-        << "simulation_parameters/g\n"
-        << "g: " << hydro.g << "\n"
+          << "simulation_parameters/g\n"
+          << "g: " << hydro.g << "\n"
 
-        << "simulation_parameters/rho\n"
-        << "rho: " << hydro.rho << "\n"
+          << "simulation_parameters/rho\n"
+          << "rho: " << hydro.rho << "\n"
 
-        << "simulation_parameters/scaled\n"
-        << "scaled: " << hydro.scaled << "\n"
+          << "simulation_parameters/scaled\n"
+          << "scaled: " << hydro.scaled << "\n"
 
-        << "simulation_parameters/w\n"
-        << "Nf: " << hydro.Nf << "\n"
+          << "simulation_parameters/w\n"
+          << "Nf: " << hydro.Nf << "\n"
 
-        << "simulation_parameters/wave_dir\n"
-        << "Nh: " << hydro.Nh << "\n"
-        << "\n";
+          << "simulation_parameters/wave_dir\n"
+          << "Nh: " << hydro.Nh << "\n"
+          << "\n";
+  }
 }
 
 /////////////////////////////////////////////////
