@@ -417,10 +417,16 @@ class gz::sim::systems::LinearWaveBodyPrivate
   public: void UpdateRadiationForces(
       const UpdateInfo &_info, EntityComponentManager &_ecm);
 
-  /// \brief Update the radiation forces.
+  /// \brief Update the radiation damping forces.
   /// \param[in] _info Simulation update info.
   /// \param[in] _ecm Mutable reference to the EntityComponentManager.
-  public: void RadiationForcesConstantCoefficients(
+  public: void UpdateRadiationDampingForces(
+      const UpdateInfo &_info, EntityComponentManager &_ecm);
+
+  /// \brief Update the radiation added mass forces.
+  /// \param[in] _info Simulation update info.
+  /// \param[in] _ecm Mutable reference to the EntityComponentManager.
+  public: void UpdateRadiationAddedMassForces(
       const UpdateInfo &_info, EntityComponentManager &_ecm);
 
   /// \brief Update the radiation forces.
@@ -2101,11 +2107,12 @@ void LinearWaveBodyPrivate::UpdateHydrostaticForces(const UpdateInfo &_info,
 void LinearWaveBodyPrivate::UpdateRadiationForces(const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
-  RadiationForcesConstantCoefficients(_info, _ecm);
+  this->UpdateRadiationDampingForces(_info, _ecm);
+  this->UpdateRadiationAddedMassForces(_info, _ecm);
 }
 
 /////////////////////////////////////////////////
-void LinearWaveBodyPrivate::RadiationForcesConstantCoefficients(
+void LinearWaveBodyPrivate::UpdateRadiationDampingForces(
     const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
@@ -2118,10 +2125,6 @@ void LinearWaveBodyPrivate::RadiationForcesConstantCoefficients(
 
   // link properties
   gz::sim::Link baseLink(this->linkEntity);
-
-  //
-  // Damping
-  //
 
   // velocity in world frame
   auto v_WB_W = baseLink.WorldLinearVelocity(_ecm).value();
@@ -2195,16 +2198,61 @@ void LinearWaveBodyPrivate::RadiationForcesConstantCoefficients(
     msgs::Set(msg.mutable_torque(), trd_Bwp_W + trd_Bcm_W);
     this->publishers.radiationDampingPubl.Publish(msg);
   }
+}
+
+/////////////////////////////////////////////////
+void LinearWaveBodyPrivate::UpdateRadiationAddedMassForces(
+    const UpdateInfo &_info,
+    EntityComponentManager &_ecm)
+{
+  // short circuit if forces disabled
+  if (!this->forceFlags.radiationAddedMassOn)
+    return;
+
+  // Estimate the added mass forces for publishing
+
+  // publish forces periodically
+  double updatePeriod = 1.0/this->publishers.updateRate;
+  double currentTime = std::chrono::duration<double>(_info.simTime).count();
+  if (this->publishers.radiationAddedMassOn &&
+      (currentTime - this->prevTime) < updatePeriod)
+  {
+    // parameters
+    auto& A = this->hydroForceCoeffs.A;
+
+    // link properties
+    gz::sim::Link baseLink(this->linkEntity);
+
+    // acceleration in world frame
+    auto a_WB_W = baseLink.WorldLinearAcceleration(_ecm).value();
+    auto alpha_WB_W = baseLink.WorldAngularAcceleration(_ecm).value();
+
+    // spatial acceleration
+    Eigen::Vector6d A_WB_W;
+    A_WB_W << a_WB_W.X(), a_WB_W.Y(), a_WB_W.Z(),
+              alpha_WB_W.X(), alpha_WB_W.Y(), alpha_WB_W.Z();
+
+    // added mass force in world frame
+    Eigen::Vector6d F_Bwp_W = -1 * A * A_WB_W;
+    gz::math::Vector3d fam_Bwp_W(F_Bwp_W(0), F_Bwp_W(1), F_Bwp_W(2));
+    gz::math::Vector3d tam_Bwp_W(F_Bwp_W(3), F_Bwp_W(4), F_Bwp_W(5));
+    // gz::math::Vector3d trd_Bcm_W =
+    //    this->linkState.p_BcmBwp_W.Cross(frd_Bwp_W);
+
+    gz::msgs::Wrench msg;
+    msgs::Set(msg.mutable_force(), fam_Bwp_W);
+    msgs::Set(msg.mutable_torque(), tam_Bwp_W);
+    this->publishers.radiationAddedMassPubl.Publish(msg);
+  }
 
   // force / moment tests
-#if 0  
-
+#if 0
   // 0. pose of CoM in world frame.
-  auto X_WBcm = X_WB * X_BBcm;
-  auto f_Bcm_Bcm = gz::math::Vector3d::Zero;
-  auto f_Bcm_W = gz::math::Vector3d::Zero;
-  auto t_Bcm_Bcm    = gz::math::Vector3d::Zero;
-  auto t_Bcm_W    = gz::math::Vector3d::Zero;
+  // auto X_WBcm = X_WB * X_BBcm;
+  // auto f_Bcm_Bcm = gz::math::Vector3d::Zero;
+  // auto f_Bcm_W = gz::math::Vector3d::Zero;
+  // auto t_Bcm_Bcm    = gz::math::Vector3d::Zero;
+  // auto t_Bcm_W    = gz::math::Vector3d::Zero;
 
   // 1. constant force along x-axis applied at CoM in world frame.
   // f_Bcm_W = gz::math::Vector3d(10000, 0 , 0);
@@ -2233,8 +2281,8 @@ void LinearWaveBodyPrivate::RadiationForcesConstantCoefficients(
   // t_Bcm_W = X_WBcm.Rot().RotateVector(t_Bcm_Bcm);
 
   // apply force and torque
-  baseLink.AddWorldForce(_ecm, f_Bcm_W);
-  baseLink.AddWorldWrench(_ecm, gz::math::Vector3d::Zero, t_Bcm_W);
+  // baseLink.AddWorldForce(_ecm, f_Bcm_W);
+  // baseLink.AddWorldWrench(_ecm, gz::math::Vector3d::Zero, t_Bcm_W);
 #endif
 }
 
