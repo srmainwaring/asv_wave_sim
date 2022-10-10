@@ -1,6 +1,6 @@
 <?xml version='1.0' ?>
 <sdf version="1.6">
-  <model name="regular_waves_6s_0m">
+  <model name="regular_waves_20s_0m">
     <static>true</static>
     <plugin
         filename="gz-waves1-waves-model-system"
@@ -11,7 +11,7 @@
         <algorithm>sinusoid</algorithm>
         <number>1</number>
         <amplitude>0.0</amplitude>
-        <period>6.0</period>
+        <period>20.0</period>
         <direction>1 0</direction>
       </wave>
     </plugin>
@@ -47,7 +47,7 @@
             <algorithm>sinusoid</algorithm>
             <number>1</number>
             <amplitude>0.0</amplitude>
-            <period>6.0</period>
+            <period>20.0</period>
             <direction>1 0</direction>
           </wave>
           <shader language="metal">

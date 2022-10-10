@@ -105,13 +105,14 @@
           filename="gz-waves1-linear-wave-body-system"
           name="gz::sim::systems::LinearWaveBody">
 
+        <!-- BEM HDF5 data file -->
         <hdf5_file>model://ellipsoid_buoy/config/hydrodata/ellipsoid_f5244.h5</hdf5_file>
 
-        <!-- waves overrides -->
+        <!-- waves parameter overrides -->
         <waves>
           <regular>
             <period>6</period>
-            <height>4</height>
+            <height>2</height>
             <direction>0</direction>
             <phase>0</phase>
           </regular>
@@ -130,7 +131,12 @@
           <displaced_volume>129.1381</displaced_volume>
         </geometry>
 
-        <!-- unscaled hydrodynamics coefficients (overrides) -->
+        <!-- 
+          Unscaled hydrodynamics coefficients for T=6.0s (w = 1.0472 rad/s)
+          
+          - BEM coefficients calculated using Capytaine
+          - Converted to WEC-Sim hdf5 using bemio
+        -->
         <hydro_coeffs>
           <scaled>0</scaled>
           <hydrostatic>
@@ -144,10 +150,6 @@
             </linear_restoring>
           </hydrostatic>
           <radiation>
-            <!-- 
-              1. Added mass calculated using Capytaine and converted
-              to WEC-Sim hdf5 with bemio, T = 6.0s, w = 1.0472 rad/s
-            -->
             <added_mass>
               52732.7109003133   -0.0461102712478722 5.88390664387022 0.296417351644741 246367.266847758 -1.69953653780694
               -0.0678279438415122 52944.8240664938 -1.47610970294622 -246974.480351485 -0.376605346811632 34.7833617031108
@@ -156,20 +158,6 @@
               246734.857503928 -0.346433003966073 -87.1795788996776 2.60143644204397 1215195.98272167 -2.36242713115735
               -1.30857894347732 34.6478012553392 0.0173325214982212 -165.977540011457 -1.09781377470450 108.258384753611
             </added_mass>
-            <!--
-              2. Clean version of 1. above. BL and TR blocks skew symmetric,
-              globally symmetrised. Mainly here to check that the warnings
-              raised by DART about lack of zeros and (skew)symmetry do
-              not have a material impact.
-            -->
-            <!-- <added_mass>
-                52733.       0.       0.       0.  246854.      -2.
-                    0.   52945.       0. -246854.       0.      61.
-                    0.       0.  197297.       2.     -61.       0.
-                    0. -246854.       2. 1214534.       3.    -166.
-              246854.       0.     -61.       3. 1215196.      -2.
-                  -2.      61.       0.    -166.      -2.     108.
-            </added_mass> -->
             <damping>
               7209.55521458289 -0.00241865277674112 -0.656452733818339 0.0362151909394597 33068.9436025348 -0.277065103262815
               -0.00574983097131929 7224.96421786452 0.0739544503252989 -33093.8859951854 -0.0481987286722465 4.65143300682749
@@ -280,17 +268,20 @@
           <excitation_froude_krylov_topic>/force/excitation_froude_krylov</excitation_froude_krylov_topic>
           <excitation_scattering_topic>/force/excitation_scattering</excitation_scattering_topic>
         </publishers>
-
       </plugin>
 
+      <!--
+        To use this plugin for comparison, uncomment and disable all
+        forces except gravity in gz-waves1-linear-wave-body-system.
+      -->
       <!-- <plugin
           filename="gz-waves1-hydrodynamics-system"
           name="gz::sim::systems::Hydrodynamics">
         <enable>ellipsoid_buoy::base_link::collision</enable>
         <hydrodynamics>
-          <damping_on>0</damping_on>
-          <viscous_drag_on>0</viscous_drag_on>
-          <pressure_drag_on>0</pressure_drag_on>
+          <damping_on>1</damping_on>
+          <viscous_drag_on>1</viscous_drag_on>
+          <pressure_drag_on>1</pressure_drag_on>
         </hydrodynamics>
       </plugin> -->
 
