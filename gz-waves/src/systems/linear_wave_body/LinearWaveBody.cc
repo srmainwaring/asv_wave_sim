@@ -189,7 +189,7 @@ class gz::sim::systems::LinearWaveBodyPrivate
   /// This is the raw data loaded from file. It is not accessed directly in
   /// the simulation updates.
   ///
-  /// The hydro coefficients are assumed to be scaled so they are dimensionless.
+  /// The hydro coefficients are assumed to be non-dimensional.
   ///
   struct HydroData
   {
@@ -277,7 +277,9 @@ class gz::sim::systems::LinearWaveBodyPrivate
     /// \brief Fluid density
     double rho{1025.0};
 
-    /// \brief Are quantities scaled? (note: not set correctly in HDF5 by bemio)
+    /// \brief Are quantities non-dimensional?
+    ///
+    /// \note: not set correctly in HDF5 by bemio.
     double scaled{1};
 
     /// \brief Wave temporal angular frequencies [1, Nf]
@@ -952,7 +954,7 @@ void LinearWaveBody::Configure(const Entity &_entity,
     auto sdfHydro = _sdf->GetElementImpl("hydro_coeffs");
 
     /// \todo use the scaled parameter - current assumption is all
-    ///       hydro coeff overrides are scaled.
+    ///       hydro coeff overrides are dimensioned.
     if (sdfHydro->HasElement("scaled"))
       double scaled = sdfHydro->Get<double>("scaled");
 
