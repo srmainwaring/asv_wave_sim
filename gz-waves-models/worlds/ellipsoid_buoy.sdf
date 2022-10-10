@@ -94,7 +94,7 @@
     </model>
 
     <include>
-      <uri>model://regular_waves_6s_2m</uri>
+      <uri>model://regular_waves_6s_4m</uri>
     </include>
 
     <include>

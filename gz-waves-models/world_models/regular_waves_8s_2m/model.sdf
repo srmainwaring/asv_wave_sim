@@ -10,7 +10,7 @@
       <wave>
         <algorithm>sinusoid</algorithm>
         <number>1</number>
-        <amplitude>2.0</amplitude>
+        <amplitude>1.0</amplitude>
         <period>8.0</period>
         <direction>1 0</direction>
       </wave>
@@ -46,7 +46,7 @@
           <wave>
             <algorithm>sinusoid</algorithm>
             <number>1</number>
-            <amplitude>2.0</amplitude>
+            <amplitude>1.0</amplitude>
             <period>8.0</period>
             <direction>1 0</direction>
           </wave>

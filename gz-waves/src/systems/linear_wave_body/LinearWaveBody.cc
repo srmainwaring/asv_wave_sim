@@ -152,7 +152,7 @@ class gz::sim::systems::LinearWaveBodyPrivate
   ///
   /// 4. Remove hardcoding of 1 heading for excitation data.
   ///
-  /// 5. Add support for finding file in model:// or package:// dirs.
+  /// 5. Add support for finding file in model:// or package:// dirs. Done.
   ///
   /// 6. Refactor code to read HDF5 files. Removing duplicated code. Done.
   ///

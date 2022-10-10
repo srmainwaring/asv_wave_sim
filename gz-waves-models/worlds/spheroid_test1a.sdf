@@ -42,7 +42,7 @@
     </light>
 
      <include>
-      <uri>model://regular_waves_6s_1m</uri>
+      <uri>model://regular_waves_6s_2m</uri>
     </include>
 
     <include>
