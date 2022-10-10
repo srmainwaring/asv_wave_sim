@@ -54,8 +54,10 @@
           filename="gz-waves1-linear-wave-body-system"
           name="gz::sim::systems::LinearWaveBody">
 
+        <!-- BEM HDF5 data file -->
         <hdf5_file>models://spheroid_test1a/config/hydrodata/spheroid_f3676.h5</hdf5_file>
 
+        <!-- waves parameter overrides -->
         <waves>
           <regular>
             <period>6</period>
@@ -65,17 +67,25 @@
           </regular>
         </waves>
 
+        <!-- simulation parameter overrides -->
         <simulation_parameters>
           <gravity>9.81</gravity>
           <fluid_density>1025</fluid_density>
         </simulation_parameters>
 
+        <!-- geometry overrides -->
         <geometry>
           <center_of_waterplane>0.000 -0.000 0</center_of_waterplane>
           <center_of_buoyancy>0.000 -0.000 -0.186</center_of_buoyancy>
           <displaced_volume>0.5204</displaced_volume>
         </geometry>
 
+        <!-- 
+          Unscaled hydrodynamics coefficients for T=6.0s (w = 1.0472 rad/s)
+          
+          - BEM coefficients calculated using Capytaine
+          - Converted to WEC-Sim hdf5 using bemio
+        -->
         <hydro_coeffs>
           <scaled>0</scaled>
           <hydrostatic>
@@ -164,6 +174,7 @@
           </excitation>
         </hydro_coeffs>
  
+        <!-- enable / disable forces -->
         <forces>
           <gravity_on>1</gravity_on>
           <buoyancy_on>1</buoyancy_on>
@@ -175,6 +186,7 @@
           <excitation_scattering_on>0</excitation_scattering_on>
         </forces>
 
+        <!-- enable / disable debug messages -->
         <debug>
           <gravity_on>0</gravity_on>
           <buoyancy_on>0</buoyancy_on>
@@ -183,8 +195,10 @@
           <excitation_on>0</excitation_on>
         </debug>
 
+        <!-- publish forces -->
         <publishers>
           <update_rate>20</update_rate>
+
           <gravity_on>1</gravity_on>
           <buoyancy_on>1</buoyancy_on>
           <hydrostatic_restoring_on>1</hydrostatic_restoring_on>
@@ -193,6 +207,7 @@
           <excitation_on>1</excitation_on>
           <excitation_froude_krylov_on>1</excitation_froude_krylov_on>
           <excitation_scattering_on>1</excitation_scattering_on>
+
           <gravity_topic>/force/gravity</gravity_topic>
           <buoyancy_topic>/force/buoyancy</buoyancy_topic>
           <hydrostatic_restoring_topic>/force/restoring</hydrostatic_restoring_topic>
@@ -203,6 +218,21 @@
           <excitation_scattering_topic>/force/excitation_scattering</excitation_scattering_topic>
         </publishers>
       </plugin>
+
+      <!--
+        To use this plugin for comparison, uncomment and disable all
+        forces except gravity in gz-waves1-linear-wave-body-system.
+      -->
+      <!-- <plugin
+          filename="gz-waves1-hydrodynamics-system"
+          name="gz::sim::systems::Hydrodynamics">
+        <enable>ellipsoid_buoy::base_link::collision</enable>
+        <hydrodynamics>
+          <damping_on>1</damping_on>
+          <viscous_drag_on>1</viscous_drag_on>
+          <pressure_drag_on>1</pressure_drag_on>
+        </hydrodynamics>
+      </plugin> -->
 
       <plugin
         filename="gz-sim-joint-state-publisher-system"
