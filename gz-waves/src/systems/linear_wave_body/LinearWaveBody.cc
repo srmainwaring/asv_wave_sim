@@ -2339,7 +2339,7 @@ void LinearWaveBodyPrivate::UpdateExcitationForces(const UpdateInfo &_info,
     double tau = t/tr;
 
     if (tau < 1)
-      return 0.5*(1.0 + std::cos(GZ_PI*(1.0 + tau));
+      return 0.5*(1.0 + std::cos(GZ_PI*(1.0 + tau)));
     else
       return 1.0;
   };
