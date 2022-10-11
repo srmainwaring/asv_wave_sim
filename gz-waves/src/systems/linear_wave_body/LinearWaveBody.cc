@@ -179,6 +179,9 @@ class gz::sim::systems::LinearWaveBodyPrivate
   ///
   /// 11. Optimise interpolation to eliminate unnecessary copies.
   ///
+  /// 12. Use math::eigen3::convert for converting Matrix and Vector types.
+  ///
+  ///
   ///
 
   /// \brief WEC-Sim BEMIO hydro data structure (read from HDF5 file)
@@ -2336,7 +2339,7 @@ void LinearWaveBodyPrivate::UpdateExcitationForces(const UpdateInfo &_info,
     double tau = t/tr;
 
     if (tau < 1)
-      return 0.5*(1.0 + std::sin(3.0/2.0*GZ_PI + GZ_PI*tau));
+      return 0.5*(1.0 + std::cos(GZ_PI*(1.0 + tau));
     else
       return 1.0;
   };
