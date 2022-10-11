@@ -42,7 +42,7 @@
     </light>
 
     <include>
-      <uri>model://regular_waves_6s_2m</uri>
+      <uri>model://regular_waves_15s_2m</uri>
     </include>
 
     <include>
@@ -54,12 +54,22 @@
           name="gz::sim::systems::LinearWaveBody">
 
         <!-- BEM HDF5 data file -->
-        <hdf5_file>model://mbari_buoy/config/hydrodata/mbari_buoy.h5</hdf5_file>
+        <!--
+            TODO: check the generation of HDF5 from WAMIT data - there is a
+            sign difference in the excitation data. May be different conventions
+            used in Capytaine vs WAMIT. Testing in WEC-Sim suggests that
+            mbari_buoy.h5 excitation coefficients have the wrong sign.
+        -->
+        <!-- generated from WAMIT data: BuoyA5.1, BuoyA5.3 -->
+        <!-- <hdf5_file>model://mbari_buoy/config/hydrodata/mbari_buoy.h5</hdf5_file> -->
+
+        <!-- independently generated using Capytaine and WEC-Sim bemio -->
+        <hdf5_file>model://mbari_buoy/config/hydrodata/buoy_float_collision_wp_f5548.h5</hdf5_file>
 
         <!-- waves parameter overrides -->
         <waves>
           <regular>
-            <period>6</period>
+            <period>15</period>
             <height>2</height>
             <direction>0</direction>
             <phase>0</phase>
@@ -82,19 +92,40 @@
         <!-- 
           Dimensioned hydrodynamics coefficients for T=6.0s (w = 1.0472 rad/s)
         -->
-        <!-- <hydro_coeffs>
+        <hydro_coeffs>
           <scaled>0</scaled>
           <hydrostatic>
+            <!-- cleaned coefficients for testing
             <linear_restoring>
-              0.      0.      0.      0.      0.      0.
-              0.      0.      0.      0.      0.      0.
-              0.      0.  34690.6     0.      0.      0.
-              0.      0.      0.  14256.3     0.      0.
-              0.      0.      0.      0.  14256.3     0.
-              0.      0.      0.      0.      0.      0.
-            </linear_restoring>
+                0       0       0       0       0      0
+                0       0       0       0       0      0
+                0       0   34690       0       0      0
+                0       0       0   14256       0      0
+                0       0       0       0   14256      0
+                0       0       0       0       0      0
+            </linear_restoring> -->
           </hydrostatic>
-        </hydro_coeffs> -->
+          <radiation>
+            <!-- symmetrised data for T=6s, H=2m - for testing
+            <added_mass>
+              704       0       0       0     343       0
+                0     704       0    -343       0       0
+                0       0    4592       0       0       0
+                0    -343       0     510       0       0
+              343       0       0       0     510       0
+                0       0       0       0       0       0
+            </added_mass> -->
+            <!-- as above, diagonals only - for testing
+            <added_mass>
+              704       0       0       0       0       0
+                0     704       0       0       0       0
+                0       0    4592       0       0       0
+                0       0       0     510       0       0
+                0       0       0       0     510       0
+                0       0       0       0       0       0
+            </added_mass> -->
+          </radiation>
+        </hydro_coeffs>
 
         <!-- enable / disable forces -->
         <forces>
