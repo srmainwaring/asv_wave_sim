@@ -21,6 +21,17 @@
         The inertial data in the data sheet looks like it may be for a
         coordinate system with y-up as the smallest diagonal element is Iyy
         and we'd expect the inertia to be approx. symmetric about the z axis.
+
+      Collision mesh:
+
+      The collision mesh buoy_float_collision_wp_f316.stl was generated
+      in Blender from a simple bevelled cylinder created in FreeCAD.
+      - The bevel at the base of 45 deg does not quite align with the visual
+        which has a slightly different angle (shallower).
+      - The collision mesh has the origin set 0.41m above the base, which is
+        less than the 0.5m from the engineering diagram, but is set to align
+        with the visual buoy_float.stl which is offset -2.27m below the
+        waterplane (= base_link origin)
     -->
     <link name="base_link">
       <pose>0 0 0 0 0 0</pose>
@@ -59,11 +70,15 @@
         </material>
       </visual>
       <collision name="collision">
-        <pose>0 0 0.19 0 0 0 </pose>
+        <!-- <pose>0 0 0.19 0 0 0 </pose> -->
+        <pose>0 0 0 0 0 0 </pose>
         <geometry>
-          <box>
+          <mesh>
+            <uri>model://mbari_buoy/meshes/buoy_float_collision_wp_f316.stl</uri>
+          </mesh>
+          <!-- <box>
             <size>2.34 2.34 1</size>
-          </box>
+          </box> -->
         </geometry>
       </collision>
     </link>
