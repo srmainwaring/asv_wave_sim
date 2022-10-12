@@ -121,37 +121,35 @@ class WaveSimulationSinusoidTestSuite : public ::testing::Test
 {
 protected:
   void SetUp() override
-  {        
-    double time = 0.0;
+  {
   }
 
   void TearDown() override
-  {        
+  {
   }
 
-  double time = 0.0;
-
   // Grid dimensions
-  const int N = 4;
-  const int N2 = N*N;
-  const double L = 10.0;
-  const double dir_x = 1.0;
-  const double dir_y = 0.0;
+  const int N{8};
+  const int N2{N*N};
+  const double L{10.0};
 
   // Parameters
-  const double amplitude = 1.0;
-  const double period = 10.0;
+  const double amplitude{2.0};
+  const double period{10.0};
 
   // Wave spectrum
-  const double omega = 2.0 * M_PI / period;
-  const double k = omega * omega / 9.8;
+  const double w{2.0 * M_PI / period};
+  const double k{w * w / 9.8};
 };
 
-TEST_F(WaveSimulationSinusoidTestSuite, testHeights)
+TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
 { 
+  double time = 5.0;
+
   // Wave simulation
-  std::unique_ptr<WaveSimulationSinusoid> waveSim(new WaveSimulationSinusoid(N, L));
-  waveSim->SetDirection(dir_x, dir_y);
+  std::unique_ptr<WaveSimulationSinusoid> waveSim(
+      new WaveSimulationSinusoid(N, L));
+  waveSim->SetDirection(1.0, 0.0);
   waveSim->SetAmplitude(amplitude);
   waveSim->SetPeriod(period);
   waveSim->SetTime(time);
@@ -166,25 +164,27 @@ TEST_F(WaveSimulationSinusoidTestSuite, testHeights)
 
   for (size_t iy=0, idx=0; iy<N; ++iy)
   {
-    double vy = iy * dl + lm;
+    double y = iy * dl + lm;
     for (size_t ix=0; ix<N; ++ix, ++idx)
     {
-      double vx = ix * dl + lm;
-      double theta = k * vx - omega * time;
-      double c = std::cos(theta);
-      double sz = amplitude * c;
+      double x = ix * dl + lm;
+      double a = k * x - w * time;
+      double c = std::cos(a);
+      double hh = amplitude * c;
       
-      // size_t idx = iy * N + ix;
-      EXPECT_DOUBLE_EQ(h[idx], sz);
+      EXPECT_DOUBLE_EQ(h[idx], hh);
     }
   }
 }
 
-TEST_F(WaveSimulationSinusoidTestSuite, testDisplacements)
-{
+TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
+{ 
+  double time = 5.0;
+
   // Wave simulation
-  std::unique_ptr<WaveSimulationSinusoid> waveSim(new WaveSimulationSinusoid(N, L));
-  waveSim->SetDirection(dir_x, dir_y);
+  std::unique_ptr<WaveSimulationSinusoid> waveSim(
+      new WaveSimulationSinusoid(N, L));
+  waveSim->SetDirection(2.0, -1.0);
   waveSim->SetAmplitude(amplitude);
   waveSim->SetPeriod(period);
   waveSim->SetTime(time);
@@ -192,6 +192,39 @@ TEST_F(WaveSimulationSinusoidTestSuite, testDisplacements)
   // Grid spacing and offset
   double lm = - L / 2.0;
   double dl = L / N;
+  double wt = w * time;
+  double theta = std::atan2(-1.0, 2.0);
+  double cd = std::cos(theta);
+  double sd = std::sin(theta);
+
+  // Verify heights
+  std::vector<double> h(N2);
+  waveSim->ComputeHeights(h);
+
+  for (size_t iy=0, idx=0; iy<N; ++iy)
+  {
+    double y = iy * dl + lm;
+    for (size_t ix=0; ix<N; ++ix, ++idx)
+    {
+      double x = ix * dl + lm;
+      double a = k * (x * cd + y * sd) - wt;
+      double c = std::cos(a);
+      double hh = amplitude * c;
+      
+      EXPECT_DOUBLE_EQ(h[idx], hh);
+    }
+  }
+}
+
+TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
+{
+  // Wave simulation
+  std::unique_ptr<WaveSimulationSinusoid> waveSim(
+      new WaveSimulationSinusoid(N, L));
+  waveSim->SetDirection(1.0, 0.0);
+  waveSim->SetAmplitude(amplitude);
+  waveSim->SetPeriod(period);
+  waveSim->SetTime(5.0);
 
   // Verify displacements (expect zero for sinusoid waves)
   std::vector<double> sx(N2);
