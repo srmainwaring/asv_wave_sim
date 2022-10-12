@@ -22,9 +22,47 @@ namespace gz
 {
 namespace waves
 {
+  /// \todo Proposed changes
+  ///
+  /// 1. set wind velocity as magnitude v (m/s) and direction theta (rad).
+  ///
+  /// 2. set wave height H or amplitude A = H/2
+  ///
+  /// 4. allow the dispersion relation to be configured - or set depth
+  ///
 
   ///////////////////////////////////////////////////////////////////////////////
   // WaveSimulationSinusoid::Impl
+
+  /// model description
+  ///
+  /// waves are defined on a Lx x Ly mesh with Nx x Ny samples
+  /// where Lx = Ly = L and Nx = Ny = N. 
+  ///
+  /// H       - wave height
+  /// A       - wave amplitide = H/2
+  /// T       - wave period
+  /// w       - wave angular frequency = 2 pi / T
+  /// k       - wave number = w^2 / g for infinite depth
+  /// (x, y)  - position
+  /// eta     - wave height
+  ///
+  /// eta(x, y, t) = A cos(k (x cos(theta) + y sin(theta)) - w t)
+  ///
+  /// cd = cos(theta) - projection of wave direction on x-axis
+  /// sd = sin(theta) - projection of wave direction on y-axis
+  ///
+  /// a = k (x cd + y sd) - w t
+  /// sa = sin(a)
+  /// ca = cos(a)
+  ///
+  /// da/dx = k cd
+  /// da/dy = k sd
+  /// 
+  /// h = eta(x, y, y) = A ca
+  /// dh/dx = - da/dx A sa
+  /// dh/dx = - da/dy A sa
+  ///
 
   class WaveSimulationSinusoid::Impl
   {
@@ -74,15 +112,15 @@ namespace waves
 
     private: void ComputeCurrentAmplitudes(double _time);
     
-    private: int N;
-    private: int N2;
-    private: int NOver2;
-    private: double L;
-    private: double wave_angle;
-    private: double dir_x, dir_y;
-    private: double amplitude;
-    private: double period;
-    private: double time;
+    private: int N{2};
+    private: int N2{2};
+    private: int NOver2{1};
+    private: double L{1.0};
+    private: double wave_angle{0.0};
+    private: double dir_x{1.0}, dir_y{0.0};
+    private: double amplitude{1.0};
+    private: double period{1.0};
+    private: double time{0.0};
   };
 
   WaveSimulationSinusoid::Impl::~Impl()
@@ -95,11 +133,7 @@ namespace waves
     N(_N),
     N2(_N * _N),
     NOver2(_N / 2),
-    L(_L),
-    wave_angle(0.0),
-    amplitude(2.5),
-    period(8.0),
-    time(0.0)
+    L(_L)
   {
   }
 
@@ -112,6 +146,7 @@ namespace waves
   {
     this->dir_x = _dir_x;
     this->dir_y = _dir_y;
+    this->wave_angle = std::atan2(_dir_y, _dir_x);
   }
 
   void WaveSimulationSinusoid::Impl::SetAmplitude(double _amplitude)
@@ -133,8 +168,11 @@ namespace waves
     std::vector<double>& _heights)
   {
     // Derived wave properties
-    double omega = 2.0 * M_PI / this->period;
-    double k = Physics::DeepWaterDispersionToWavenumber(omega);
+    double w = 2.0 * M_PI / this->period;
+    double wt = w * this->time;
+    double k = Physics::DeepWaterDispersionToWavenumber(w);
+    double cd = std::cos(this->wave_angle);
+    double sd = std::sin(this->wave_angle);
 
     // Wave update
     double LOverN = this->L / this->N;
@@ -142,7 +180,7 @@ namespace waves
     for (size_t iy=0; iy<this->N; ++iy)
     {
       // Regular grid
-      double vy = iy * LOverN - LOver2;
+      double y = iy * LOverN - LOver2;
 
       for (size_t ix=0; ix<this->N; ++ix)
       {
@@ -150,12 +188,12 @@ namespace waves
         size_t idx = iy * this->N + ix;
 
         // Regular grid
-        double vx = ix * LOverN - LOver2;
+        double x = ix * LOverN - LOver2;
 
         // Single wave
-        double angle  = k * vx - omega * time;
-        double c = std::cos(angle);
-        double h = this->amplitude * c;
+        double a  = k * (x * cd + y * sd) - wt;
+        double ca = std::cos(a);
+        double h = this->amplitude * ca;
 
         _heights[idx] = h;
       }
@@ -167,8 +205,11 @@ namespace waves
     std::vector<double>& _dhdy)
   {
     // Derived wave properties
-    double omega = 2.0 * M_PI / this->period;
-    double k = Physics::DeepWaterDispersionToWavenumber(omega);
+    double w = 2.0 * M_PI / this->period;
+    double wt = w * this->time;
+    double k = Physics::DeepWaterDispersionToWavenumber(w);
+    double cd = std::cos(this->wave_angle);
+    double sd = std::sin(this->wave_angle);
 
     // Wave update
     double LOverN = this->L / this->N;
@@ -176,7 +217,7 @@ namespace waves
     for (size_t iy=0; iy<this->N; ++iy)
     {
       // Regular grid
-      double vy = iy * LOverN - LOver2;
+      double y = iy * LOverN - LOver2;
 
       for (size_t ix=0; ix<this->N; ++ix)
       {
@@ -184,16 +225,15 @@ namespace waves
         size_t idx = iy * this->N + ix;
 
         // Regular grid
-        double vx = ix * LOverN - LOver2;
-        double vy = iy * LOverN - LOver2;
+        double x = ix * LOverN - LOver2;
 
         // Single wave
-        double angle  = k * vx - omega * time;
-        double dangle = k;
-
-        double s = std::sin(angle);
-        double dhdx = - dangle * this->amplitude * s;
-        double dhdy = 0.0;
+        double a  = k * (x * cd + y * sd) - wt;
+        double dadx = k * cd;
+        double dady = k * sd;
+        double sa = std::sin(a);
+        double dhdx = - dadx * this->amplitude * sa;
+        double dhdy = - dady * this->amplitude * sa;
 
         _dhdx[idx] = dhdx;
         _dhdy[idx] = dhdy;
@@ -227,15 +267,18 @@ namespace waves
     std::vector<double>& _dsxdy)
   {
     // Derived wave properties
-    double omega = 2.0 * M_PI / this->period;
-    double k = Physics::DeepWaterDispersionToWavenumber(omega);
+    double w = 2.0 * M_PI / this->period;
+    double wt = w * this->time;
+    double k = Physics::DeepWaterDispersionToWavenumber(w);
+    double cd = std::cos(this->wave_angle);
+    double sd = std::sin(this->wave_angle);
 
     // Wave update
     double LOverN = this->L / this->N;
     double LOver2 = this->L / 2.0;
     for (size_t iy=0; iy<this->N; ++iy)
     {
-      // double vy = iy * LOverN - LOver2;
+      double y = iy * LOverN - LOver2;
 
       for (size_t ix=0; ix<this->N; ++ix)
       {
@@ -243,23 +286,23 @@ namespace waves
         size_t idx = iy * this->N + ix;
 
         // Regular grid
-        double vx = ix * LOverN - LOver2;
+        double x = ix * LOverN - LOver2;
 
         // Single wave
-        double angle  = k * vx - omega * time;
-        double dangle = k;
-        double c = std::cos(angle);
-        double s = std::sin(angle);
-        double h = this->amplitude * c;
-        double dhdx = - dangle * this->amplitude * s;
-        double dhdy = 0.0;
+        double a  = k * (x * cd + y * sd) - wt;
+        double dadx = k * cd;
+        double dady = k * sd;
+        double ca = std::cos(a);
+        double sa = std::sin(a);
+        double h = this->amplitude * ca;
+        double dhdx = - dadx * this->amplitude * sa;
+        double dhdy = - dady * this->amplitude * sa;
 
         _h[idx] = h;
         _dhdx[idx] = dhdx;
         _dhdy[idx] = dhdy;
       }
     }
-
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -304,21 +347,21 @@ namespace waves
   void WaveSimulationSinusoid::ComputeHeights(
     std::vector<double>& _h)
   {
-    impl->ComputeHeights(_h);    
+    impl->ComputeHeights(_h);
   }
 
   void WaveSimulationSinusoid::ComputeHeightDerivatives(
     std::vector<double>& _dhdx,
     std::vector<double>& _dhdy)
   {
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);  
+    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
   }
 
   void WaveSimulationSinusoid::ComputeDisplacements(
     std::vector<double>& _sx,
     std::vector<double>& _sy)
   {
-    impl->ComputeDisplacements(_sx, _sy);    
+    impl->ComputeDisplacements(_sx, _sy);
   }
 
   void WaveSimulationSinusoid::ComputeDisplacementDerivatives(
@@ -326,7 +369,7 @@ namespace waves
     std::vector<double>& _dsydy,
     std::vector<double>& _dsxdy)
   {
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);      
+    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
   }
 
   void WaveSimulationSinusoid::ComputeDisplacementsAndDerivatives(
@@ -339,7 +382,8 @@ namespace waves
     std::vector<double>& _dsydy,
     std::vector<double>& _dsxdy)
   {
-    impl->ComputeDisplacementsAndDerivatives(_h, _dhdx, _dhdy, _sx, _sy, _dsxdx, _dsydy, _dsxdy);    
+    impl->ComputeDisplacementsAndDerivatives(
+        _h, _dhdx, _dhdy, _sx, _sy, _dsxdx, _dsydy, _dsxdy);
   }
 
 }
