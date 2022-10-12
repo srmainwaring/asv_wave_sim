@@ -1,6 +1,6 @@
 <?xml version='1.0' ?>
 <sdf version="1.6">
-  <model name="monochromatic_waves">
+  <model name="regular_waves">
     <static>true</static>
 
     <plugin
