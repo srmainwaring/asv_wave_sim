@@ -181,7 +181,7 @@ class gz::sim::systems::LinearWaveBodyPrivate
   ///
   /// 12. Use math::eigen3::convert for converting Matrix and Vector types.
   ///
-  ///
+  /// 13. Review use of Eigen.
   ///
 
   /// \brief WEC-Sim BEMIO hydro data structure (read from HDF5 file)
@@ -1344,7 +1344,7 @@ void LinearWaveBody::Configure(const Entity &_entity,
   if (this->dataPtr->forceFlags.radiationAddedMassOn)
   {
     // parameters
-    auto& A = this->dataPtr->hydroForceCoeffs.A;
+    Eigen::Matrix6d& A = this->dataPtr->hydroForceCoeffs.A;
 
     // convert from Eigen to gz
     gz::math::Matrix6d gzA;
@@ -1843,9 +1843,9 @@ void LinearWaveBodyPrivate::UpdateLinkState(const UpdateInfo &_info,
       this->linkState.X_WBcm.Rot().RotateVector(this->linkState.p_BcmBwp_Bcm);
 
   // position vector of body center of buoyancy  
-  auto& cb = this->hydroData.cb;
-  auto& cg = this->hydroData.cg;
-  auto p_BcmBcb = cb - cg;
+  Eigen::Vector3d& cb = this->hydroData.cb;
+  Eigen::Vector3d& cg = this->hydroData.cg;
+  Eigen::Vector3d p_BcmBcb = cb - cg;
 
   // position vector of body CoB wrt body CoM in body/world frame  
   this->linkState.p_BcmBcb_B =
@@ -1990,7 +1990,7 @@ void LinearWaveBodyPrivate::UpdateHydrostaticForces(const UpdateInfo &_info,
   double g = this->simParams.g;
   double rho = this->simParams.rho;
   double Vo = this->geometry.Vo;
-  auto& K_hs = this->hydroForceCoeffs.K_hs;
+  Eigen::Matrix6d& K_hs = this->hydroForceCoeffs.K_hs;
 
   /// \todo check whether to add correction - in WEC-Sim buoyancy force is
   ///       applied at CoB not CoM, so there is an additional moment. This
@@ -1998,9 +1998,9 @@ void LinearWaveBodyPrivate::UpdateHydrostaticForces(const UpdateInfo &_info,
   ///       which seems to apply all forces at the origin of the waterplane?
 
   // center of buoyancy in link frame (i.e. wrt link origin)
-  // auto& cb = this->hydroData.cb;
-  // auto& cg = this->hydroData.cg;
-  // auto p_BcmBcb = cb - cg;
+  // Eigen::Vector3d& cb = this->hydroData.cb;
+  // Eigen::Vector3d& cg = this->hydroData.cg;
+  // Eigen::Vector3d p_BcmBcb = cb - cg;
 
   // link properties
   gz::sim::Link baseLink(this->linkEntity);
@@ -2124,7 +2124,7 @@ void LinearWaveBodyPrivate::UpdateRadiationDampingForces(
     return;
 
   // parameters
-  auto& B = this->hydroForceCoeffs.B;
+  Eigen::Matrix6d& B = this->hydroForceCoeffs.B;
 
   // link properties
   gz::sim::Link baseLink(this->linkEntity);
@@ -2221,7 +2221,7 @@ void LinearWaveBodyPrivate::UpdateRadiationAddedMassForces(
       (currentTime - this->prevTime) < updatePeriod)
   {
     // parameters
-    auto& A = this->hydroForceCoeffs.A;
+    Eigen::Matrix6d& A = this->hydroForceCoeffs.A;
 
     // link properties
     gz::sim::Link baseLink(this->linkEntity);
@@ -2320,12 +2320,12 @@ void LinearWaveBodyPrivate::UpdateExcitationForces(const UpdateInfo &_info,
   double height = this->waves.height;
   double phase = this->waves.phase;
   double omega = this->simParams.w;
-  auto& ex_re = this->hydroForceCoeffs.ex_re;
-  auto& ex_im = this->hydroForceCoeffs.ex_im;
-  auto& fk_re = this->hydroForceCoeffs.fk_re;
-  auto& fk_im = this->hydroForceCoeffs.fk_im;
-  auto& sc_re = this->hydroForceCoeffs.sc_re;
-  auto& sc_im = this->hydroForceCoeffs.sc_im;
+  Eigen::Vector6d& ex_re = this->hydroForceCoeffs.ex_re;
+  Eigen::Vector6d& ex_im = this->hydroForceCoeffs.ex_im;
+  Eigen::Vector6d& fk_re = this->hydroForceCoeffs.fk_re;
+  Eigen::Vector6d& fk_im = this->hydroForceCoeffs.fk_im;
+  Eigen::Vector6d& sc_re = this->hydroForceCoeffs.sc_re;
+  Eigen::Vector6d& sc_im = this->hydroForceCoeffs.sc_im;
 
   // link properties
   gz::sim::Link baseLink(this->linkEntity);
