@@ -394,17 +394,18 @@ namespace waves
           if (this->use_symmetric_spreading_fn)
           {
             // standing waves - symmetric spreading function
-            cap_psi = this->ECKVSpreadingFunction(
+            cap_psi = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
                 k, phi - this->phi10, this->u10, this->cap_omega_c);
           }
           else
           {
             // travelling waves - asymmetric spreading function
-            cap_psi = this->Cos2SSpreadingFunction(
+            cap_psi = WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
                 this->s_param, phi - this->phi10, this->u10, this->cap_omega_c);
           }
-          const double cap_s = this->ECKVOmniDirectionalSpectrum(
-              k, this->u10, this->cap_omega_c);
+          const double cap_s =
+              WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
+                  k, this->u10, this->cap_omega_c);
           cap_psi_2s_math[idx] = cap_s * cap_psi / k;
         }
       }
@@ -724,16 +725,16 @@ namespace waves
           if (this->use_symmetric_spreading_fn)
           {
             // standing waves - symmetric spreading function
-            cap_psi = this->ECKVSpreadingFunction(
+            cap_psi = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
                 k, phi - this->phi10, this->u10, this->cap_omega_c);
           }
           else
           {
             // travelling waves - asymmetric spreading function
-            cap_psi = this->Cos2SSpreadingFunction(
+            cap_psi = WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
                 this->s_param, phi - this->phi10, this->u10, this->cap_omega_c);
           }
-          double cap_s = this->ECKVOmniDirectionalSpectrum(
+          double cap_s = WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
               k, this->u10, this->cap_omega_c);
           cap_psi_2s_math[ikx][iky] = cap_s * cap_psi / k;
         }
@@ -948,6 +949,11 @@ namespace waves
   double WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
       double k, double u10, double cap_omega_c)
   {
+    if (std::abs(k) < 1.0E-8 || std::abs(u10) < 1.0E-8)
+    {
+      return 0.0;
+    }
+
     double alpha = 0.0081;
     double beta = 1.25;
     double g = 9.82;

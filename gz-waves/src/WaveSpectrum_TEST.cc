@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/WaveSpectrum.hh"
+#include "WaveSimulationFFT2Impl.hh"
 
 #include <memory>
 #include <vector>
@@ -278,6 +279,64 @@ TEST(WaveSpectrum, ECKVSpectrumVectorised)
       for (int j=0; j<ny; ++j)
       {
         double cap_s_test = spectrum.Evaluate(k(i, j));
+        EXPECT_NEAR(cap_s(i, j), cap_s_test, tolerance);
+      }
+    }
+  }
+}
+
+TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
+{
+  constexpr double u10 = 5.0;
+  constexpr double cap_omega_c = 0.84;
+
+  { // Eigen vectorised version
+    double tolerance = 1.0e-16;
+
+    double lx = 200.0;
+    double ly = 100.0;
+    size_t nx = 32;
+    size_t ny = 16;
+
+    double kx_nyquist = M_PI * nx / lx;
+    double ky_nyquist = M_PI * ny / ly;
+
+    // create wavenumber vectors
+    Eigen::VectorXd kx_v(nx);
+    Eigen::VectorXd ky_v(ny);
+
+    for (size_t i=0; i<nx; ++i)
+    {
+      kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
+    }
+    for (size_t i=0; i<ny; ++i)
+    {
+      ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
+    }
+
+    // broadcast to matrices (aka meshgrid)
+    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    kx.colwise() += kx_v;
+    
+    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    ky.rowwise() += ky_v.transpose();
+
+    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
+    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
+    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
+
+    ECKVWaveSpectrum spectrum(u10, cap_omega_c);
+
+    Eigen::MatrixXd cap_s = Eigen::MatrixXd::Zero(nx, ny);
+    spectrum.Evaluate(cap_s, k);
+
+    for (int i=0; i<nx; ++i)
+    {
+      for (int j=0; j<ny; ++j)
+      {
+        double cap_s_test =
+            WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
+                k(i, j), u10, cap_omega_c);
         EXPECT_NEAR(cap_s(i, j), cap_s_test, tolerance);
       }
     }

@@ -211,9 +211,9 @@ namespace waves
     // angular temporal frequency
     std::vector<std::vector<double>> omega_k_ref;
 
-    double ECKVOmniDirectionalSpectrum(double k, double u10, double cap_omega_c=0.84);
-    double ECKVSpreadingFunction(double k, double phi, double u10, double cap_omega_c=0.84);
-    double Cos2SSpreadingFunction(double s_param, double phi, double u10, double cap_omega_c=0.84);
+    static double ECKVOmniDirectionalSpectrum(double k, double u10, double cap_omega_c=0.84);
+    static double ECKVSpreadingFunction(double k, double phi, double u10, double cap_omega_c=0.84);
+    static double Cos2SSpreadingFunction(double s_param, double phi, double u10, double cap_omega_c=0.84);
 
     /// \brief For testing
     friend class TestFixtureWaveSimulationFFT2;

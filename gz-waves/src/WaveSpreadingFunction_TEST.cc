@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/WaveSpreadingFunction.hh"
+#include "WaveSimulationFFT2Impl.hh"
 
 #include <memory>
 #include <vector>
@@ -178,6 +179,40 @@ TEST(WaveSpreadingFunction, Cos2sVectorisedVirtual)
     {
       double phi_test = spreadingFn->Evaluate(theta(i, 0), theta_mean);
       EXPECT_DOUBLE_EQ(phi(i, 0), phi_test);
+    }
+  }
+}
+
+TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
+{
+  constexpr double spread = 10.0;
+
+  // not used in calc, required for regression function interface only.
+  constexpr double u10 = 5.0;
+  constexpr double cap_omega_c = 0.84;
+
+  { // Eigen vectorised version
+    Cos2sSpreadingFunction spreadingFn(spread);
+
+    double theta_mean = 0.0;
+
+    Eigen::VectorXd theta(21);
+    theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
+      1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
+      3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
+      5.65486678, 5.96902604, 6.28318531;
+
+    EXPECT_EQ(theta.size(), 21);
+
+    Eigen::VectorXd phi(21);
+    spreadingFn.Evaluate(phi, theta, theta_mean);
+
+    for (int i=0; i<21; ++i)
+    {
+      double dtheta = theta(i) - theta_mean;
+      double phi_test = WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
+          spread, dtheta, u10, cap_omega_c);
+      EXPECT_DOUBLE_EQ(phi(i), phi_test);
     }
   }
 }
@@ -404,6 +439,40 @@ TEST(WaveSpreadingFunction, ECKVVectorisedMatrix)
   }
 }
 
+TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
+{
+  // not used in calc, required for regression function interface only.
+  constexpr double spread = 10.0;
+
+  // coefficients
+  constexpr double u10 = 5.0;
+  constexpr double cap_omega_c = 0.84;
+
+  { // Eigen vectorised version
+    ECKVSpreadingFunction spreadingFn(u10, cap_omega_c);
+
+    double theta_mean = 0.0;
+
+    Eigen::VectorXd theta(21);
+    theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
+      1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
+      3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
+      5.65486678, 5.96902604, 6.28318531;
+
+    EXPECT_EQ(theta.size(), 21);
+
+    Eigen::VectorXd phi(21);
+    spreadingFn.Evaluate(phi, theta, theta_mean);
+
+    for (int i=0; i<21; ++i)
+    {
+      double dtheta = theta(i) - theta_mean;
+      double phi_test = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
+          spread, dtheta, u10, cap_omega_c);
+      EXPECT_DOUBLE_EQ(phi(i), phi_test);
+    }
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
