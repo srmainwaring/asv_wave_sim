@@ -28,6 +28,7 @@ set(sources
   WaveSimulationSinusoid.cc
   WaveSimulationTrochoid.cc
   WaveSpectrum.cc
+  WaveSpreadingFunction.cc
 )
 
 set(gtest_sources
@@ -42,6 +43,7 @@ set(gtest_sources
   Wavefield_TEST.cc
   WaveSimulation_TEST.cc
   WaveSimulationFFT2_TEST.cc
+  WaveSpreadingFunction_TEST.cc
 )
 
 # Create the library target
