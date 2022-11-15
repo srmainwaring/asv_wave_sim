@@ -18,7 +18,6 @@
 
 #include <Eigen/Dense>
  
-using Eigen::VectorXd;
 using Eigen::MatrixXd;
  
 namespace gz
@@ -34,10 +33,10 @@ namespace waves
           double _theta, double _theta_mean, double _k=1.0) const = 0;
 
       virtual void Evaluate(
-          Eigen::Ref<Eigen::VectorXd> _phi,
-          const Eigen::Ref<const Eigen::VectorXd> &_theta,
+          Eigen::Ref<Eigen::MatrixXd> _phi,
+          const Eigen::Ref<const Eigen::MatrixXd> &_theta,
           double _theta_mean,
-          const Eigen::Ref<const Eigen::VectorXd> &_k=Eigen::VectorXd())
+          const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
           const = 0;
   };
 
@@ -52,10 +51,10 @@ namespace waves
           double _theta, double _theta_mean, double _k=1.0) const override;
 
       virtual void Evaluate(
-          Eigen::Ref<Eigen::VectorXd> _phi,
-          const Eigen::Ref<const Eigen::VectorXd> &_theta,
+          Eigen::Ref<Eigen::MatrixXd> _phi,
+          const Eigen::Ref<const Eigen::MatrixXd> &_theta,
           double _theta_mean,
-          const Eigen::Ref<const Eigen::VectorXd> &_k=Eigen::VectorXd())
+          const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
           const override;
 
       double Spread() const;
@@ -83,10 +82,10 @@ namespace waves
           double _theta, double _theta_mean, double _k=1.0) const override;
 
       virtual void Evaluate(
-          Eigen::Ref<Eigen::VectorXd> _phi,
-          const Eigen::Ref<const Eigen::VectorXd> &_theta,
+          Eigen::Ref<Eigen::MatrixXd> _phi,
+          const Eigen::Ref<const Eigen::MatrixXd> &_theta,
           double _theta_mean,
-          const Eigen::Ref<const Eigen::VectorXd> &_k=Eigen::VectorXd())
+          const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
           const override;
 
       double U10() const;

@@ -53,7 +53,7 @@ TEST(WaveSpreadingFunction, Cos2sRegression)
     for (int i=0; i<21; ++i)
     {
       double phi_test = spreadingFn.Evaluate(theta[i], theta_mean);
-      EXPECT_NEAR(phi_test, phi[i], tolerance);
+      EXPECT_NEAR(phi[i], phi_test, tolerance);
     }
   }
 }
@@ -78,8 +78,8 @@ TEST(WaveSpreadingFunction, Cos2sVectorised)
 
     for (int i=0; i<21; ++i)
     {
-      double phi_test = spreadingFn.Evaluate(theta[i], theta_mean);
-      EXPECT_DOUBLE_EQ(phi_test, phi(i));
+      double phi_test = spreadingFn.Evaluate(theta(i), theta_mean);
+      EXPECT_DOUBLE_EQ(phi(i), phi_test);
     }
   }
 }
@@ -104,8 +104,8 @@ TEST(WaveSpreadingFunction, Cos2sVectorisedNonZeroMean)
 
     for (int i=0; i<21; ++i)
     {
-      double phi_test = spreadingFn.Evaluate(theta[i], theta_mean);
-      EXPECT_DOUBLE_EQ(phi_test, phi(i));
+      double phi_test = spreadingFn.Evaluate(theta(i), theta_mean);
+      EXPECT_DOUBLE_EQ(phi(i), phi_test);
     }
   }
 }
@@ -159,21 +159,25 @@ TEST(WaveSpreadingFunction, Cos2sVectorisedVirtual)
 
     double theta_mean = 1.5;
 
-    Eigen::VectorXd theta(21);
+    Eigen::MatrixXd theta(21, 1);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
       5.65486678, 5.96902604, 6.28318531;
 
-    EXPECT_EQ(theta.size(), 21);
+    EXPECT_EQ(theta.rows(), 21);
+    EXPECT_EQ(theta.cols(), 1);
 
-    Eigen::VectorXd phi(21);
+    Eigen::MatrixXd phi(21, 1);
     spreadingFn->Evaluate(phi, theta, theta_mean);
+
+    EXPECT_EQ(phi.rows(), 21);
+    EXPECT_EQ(phi.cols(), 1);
 
     for (int i=0; i<21; ++i)
     {
-      double phi_test = spreadingFn->Evaluate(theta[i], theta_mean);
-      EXPECT_DOUBLE_EQ(phi_test, phi(i));
+      double phi_test = spreadingFn->Evaluate(theta(i, 0), theta_mean);
+      EXPECT_DOUBLE_EQ(phi(i, 0), phi_test);
     }
   }
 }
@@ -279,6 +283,127 @@ TEST(WaveSpreadingFunction, WaveNumberMatrix)
 
   }
 }
+
+TEST(WaveSpreadingFunction, ECKVRegression)
+{
+  { // Regress against values generate from Python reference version
+    double tolerance = 1.0e-8;
+    ECKVSpreadingFunction spreadingFn;
+
+    double theta_mean = 0.0;
+    double k = 1.24;
+
+    double theta[] {
+      0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
+      1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
+      3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
+      5.65486678, 5.96902604, 6.28318531
+    };
+
+    double phi[] = {
+      0.26371613, 0.24374672, 0.19146613, 0.12684376, 0.07456316, 0.05459375,
+      0.07456316, 0.12684376, 0.19146613, 0.24374672, 0.26371613, 0.24374672,
+      0.19146613, 0.12684376, 0.07456316, 0.05459375, 0.07456316, 0.12684376,
+      0.19146613, 0.24374672, 0.26371613
+    };
+
+    for (int i=0; i<21; ++i)
+    {
+      double phi_test = spreadingFn.Evaluate(theta[i], theta_mean, k);
+      EXPECT_NEAR(phi[i], phi_test, tolerance);
+    }
+  }
+}
+
+TEST(WaveSpreadingFunction, ECKVVectorisedColVector)
+{
+  { // Eigen vectorised version
+    ECKVSpreadingFunction spreadingFn;
+
+    double theta_mean = 0.0;
+    Eigen::MatrixXd k = Eigen::MatrixXd::Zero(21, 1);
+    k.array() += 1.24;
+
+    Eigen::MatrixXd theta(21, 1);
+    theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
+      1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
+      3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
+      5.65486678, 5.96902604, 6.28318531;
+
+
+    EXPECT_EQ(theta.rows(), 21);
+    EXPECT_EQ(theta.cols(), 1);
+
+    Eigen::MatrixXd phi(21, 1);
+    spreadingFn.Evaluate(phi, theta, theta_mean, k);
+    EXPECT_EQ(phi.rows(), 21);
+    EXPECT_EQ(phi.cols(), 1);
+
+    for (int i=0; i<21; ++i)
+    {
+      double phi_test = spreadingFn.Evaluate(theta(i, 0), theta_mean, k(i, 0));
+      EXPECT_DOUBLE_EQ(phi(i, 0), phi_test);
+    }
+  }
+}
+
+TEST(WaveSpreadingFunction, ECKVVectorisedMatrix)
+{
+  { // Eigen vectorised version
+    double lx = 200.0;
+    double ly = 100.0;
+    size_t nx = 32;
+    size_t ny = 16;
+
+    double kx_nyquist = M_PI * nx / lx;
+    double ky_nyquist = M_PI * ny / ly;
+
+    // create wavenumber vectors
+    Eigen::VectorXd kx_v(nx);
+    Eigen::VectorXd ky_v(ny);
+
+    for (size_t i=0; i<nx; ++i)
+    {
+      kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
+    }
+    for (size_t i=0; i<ny; ++i)
+    {
+      ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
+    }
+
+    // broadcast to matrices (aka meshgrid)
+    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    kx.colwise() += kx_v;
+    
+    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    ky.rowwise() += ky_v.transpose();
+
+    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
+    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
+    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
+    Eigen::MatrixXd theta = ky.binaryExpr(
+        kx, [] (double y, double x) { return std::atan2(y, x);}
+    );
+
+    ECKVSpreadingFunction spreadingFn;
+
+    double theta_mean = 0.0;
+
+    Eigen::MatrixXd phi(nx, ny);
+    spreadingFn.Evaluate(phi, theta, theta_mean, k);
+
+    for (int i=0; i<nx; ++i)
+    {
+      for (int j=0; j<ny; ++j)
+      {
+        double phi_test =
+            spreadingFn.Evaluate(theta(i, j), theta_mean, k(i, j));
+        EXPECT_DOUBLE_EQ(phi(i, j), phi_test);
+      }
+    }
+  }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests

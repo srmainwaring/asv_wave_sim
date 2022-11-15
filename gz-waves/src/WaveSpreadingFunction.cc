@@ -16,6 +16,9 @@
 #include "gz/waves/WaveSpreadingFunction.hh"
 #include <cmath>
 
+/// \todo REMOVE
+#include <iostream>
+
 using namespace gz; 
 using namespace waves; 
 
@@ -52,16 +55,16 @@ double Cos2sSpreadingFunction::Evaluate(
 
 ///////////////////////////////////////////////////////////////////////////////
 void Cos2sSpreadingFunction::Evaluate(
-    Eigen::Ref<Eigen::VectorXd> _phi,
-    const Eigen::Ref<const Eigen::VectorXd> &_theta,
+    Eigen::Ref<Eigen::MatrixXd> _phi,
+    const Eigen::Ref<const Eigen::MatrixXd> &_theta,
     double _theta_mean,
-    const Eigen::Ref<const Eigen::VectorXd> &_k) const
+    const Eigen::Ref<const Eigen::MatrixXd> &_k) const
 {
   double s = this->_spread;
-  Eigen::VectorXd phi = _theta.array() - _theta_mean;
-  Eigen::VectorXd cp = Eigen::cos(phi.array() / 2.0);
-  Eigen::VectorXd p1 = Eigen::pow(cp.array(), 2.0 * s);
-  _phi = this->_cap_c_s * p1;
+  Eigen::MatrixXd phi = _theta.array() - _theta_mean;
+  Eigen::MatrixXd cp = Eigen::cos(phi.array() / 2.0);
+  Eigen::MatrixXd p1 = Eigen::pow(cp.array(), 2.0 * s);
+  _phi = this->_cap_c_s * p1.array();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -134,10 +137,10 @@ double ECKVSpreadingFunction::Evaluate(
 
 ///////////////////////////////////////////////////////////////////////////////
 void ECKVSpreadingFunction::Evaluate(
-    Eigen::Ref<Eigen::VectorXd> _phi,
-    const Eigen::Ref<const Eigen::VectorXd> &_theta,
+    Eigen::Ref<Eigen::MatrixXd> _phi,
+    const Eigen::Ref<const Eigen::MatrixXd> &_theta,
     double _theta_mean,
-    const Eigen::Ref<const Eigen::VectorXd> &_k) const
+    const Eigen::Ref<const Eigen::MatrixXd> &_k) const
 {
   /// \todo check the size of _phi,  _theta and _k match
 
@@ -156,13 +159,13 @@ void ECKVSpreadingFunction::Evaluate(
   double kp = ko * cap_omega_c * cap_omega_c;
   double cp = std::sqrt(g / kp);
 
-  Eigen::VectorXd phi = _theta.array() - _theta_mean;
-  Eigen::VectorXd c = Eigen::sqrt((g / _k.array())
+  Eigen::MatrixXd phi = _theta.array() - _theta_mean;
+  Eigen::MatrixXd c = Eigen::sqrt((g / _k.array())
                     * (1.0 + Eigen::pow(_k.array() / km, 2.0)));
-  Eigen::VectorXd p1 = Eigen::pow(c.array() / cp, 2.5);
-  Eigen::VectorXd p2 = Eigen::pow(cm / c.array(), 2.5);
-  Eigen::VectorXd t1 = Eigen::tanh(ao + ap * p1.array() + am * p2.array());
-  Eigen::VectorXd c2p = Eigen::cos(2.0 * phi.array());
+  Eigen::MatrixXd p1 = Eigen::pow(c.array() / cp, 2.5);
+  Eigen::MatrixXd p2 = Eigen::pow(cm / c.array(), 2.5);
+  Eigen::MatrixXd t1 = Eigen::tanh(ao + ap * p1.array() + am * p2.array());
+  Eigen::MatrixXd c2p = Eigen::cos(2.0 * phi.array());
   _phi = (1.0 + t1.array() * c2p.array()) / 2.0 / M_PI;
 }
 
