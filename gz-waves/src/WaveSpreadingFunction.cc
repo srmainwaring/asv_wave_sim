@@ -45,11 +45,11 @@ Cos2sSpreadingFunction::Cos2sSpreadingFunction(double _spread) :
 double Cos2sSpreadingFunction::Evaluate(
     double _theta, double _theta_mean, double _k) const
 {
-  double s = this->_spread;
-  double phi = _theta - _theta_mean;
-  double cp = std::cos(phi / 2.0);
-  double p1 = std::pow(cp, 2.0 * s);
-  double cap_phi = this->_cap_c_s * p1;
+  const double s = this->_spread;
+  const double phi = _theta - _theta_mean;
+  const double cp = std::cos(phi / 2.0);
+  const double p1 = std::pow(cp, 2.0 * s);
+  const double cap_phi = this->_cap_c_s * p1;
   return cap_phi;
 }
 
@@ -60,10 +60,10 @@ void Cos2sSpreadingFunction::Evaluate(
     double _theta_mean,
     const Eigen::Ref<const Eigen::MatrixXd> &_k) const
 {
-  double s = this->_spread;
-  Eigen::MatrixXd phi = _theta.array() - _theta_mean;
-  Eigen::MatrixXd cp = Eigen::cos(phi.array() / 2.0);
-  Eigen::MatrixXd p1 = Eigen::pow(cp.array(), 2.0 * s);
+  const double s = this->_spread;
+  const Eigen::MatrixXd phi = _theta.array() - _theta_mean;
+  const Eigen::MatrixXd cp = Eigen::cos(phi.array() / 2.0);
+  const Eigen::MatrixXd p1 = Eigen::pow(cp.array(), 2.0 * s);
   _phi = this->_cap_c_s * p1.array();
 }
 
@@ -83,9 +83,9 @@ void Cos2sSpreadingFunction::SetSpread(double _value)
 ///////////////////////////////////////////////////////////////////////////////
 void Cos2sSpreadingFunction::_RecalcCoeffs()
 {
-    double s = this->_spread;
-    double g1 = std::tgamma(s + 1.0);
-    double g2 = std::tgamma(s + 0.5);
+    const double s = this->_spread;
+    const double g1 = std::tgamma(s + 1.0);
+    const double g2 = std::tgamma(s + 0.5);
     this->_cap_c_s = g1 / g2 / 2.0 / std::sqrt(M_PI);
 }
 
@@ -111,27 +111,27 @@ ECKVSpreadingFunction::ECKVSpreadingFunction(
 double ECKVSpreadingFunction::Evaluate(
     double _theta, double _theta_mean, double _k) const
 {
-  double phi = _theta - _theta_mean;
-  double g = this->_gravity;
-  double u10 = this->_u10;
-  double cap_omega_c = this->_cap_omega_c;
+  const double phi = _theta - _theta_mean;
+  const double g = this->_gravity;
+  const double u10 = this->_u10;
+  const double cap_omega_c = this->_cap_omega_c;
   
-  double cd_10n = 0.00144;
-  double u_star = std::sqrt(cd_10n) * u10;
-  double ao = 0.1733;
-  double ap = 4.0;
-  double km = 370.0;
-  double cm = 0.23;
-  double am = 0.13 * u_star / cm;
-  double ko = g / u10 / u10;
-  double kp = ko * cap_omega_c * cap_omega_c;
-  double cp = std::sqrt(g / kp);
-  double c = std::sqrt((g / _k) * (1.0 + std::pow(_k / km, 2.0)));
-  double p1 = std::pow(c / cp, 2.5);
-  double p2 = std::pow(cm / c, 2.5);
-  double t1 = std::tanh(ao + ap * p1 + am * p2);
-  double c2p = std::cos(2.0 * phi);
-  double cap_phi = (1.0 + t1 * c2p) / 2.0 / M_PI;
+  constexpr double cd_10n = 0.00144;
+  const double u_star = std::sqrt(cd_10n) * u10;
+  constexpr double ao = 0.1733;
+  constexpr double ap = 4.0;
+  constexpr double km = 370.0;
+  constexpr double cm = 0.23;
+  const double am = 0.13 * u_star / cm;
+  const double ko = g / u10 / u10;
+  const double kp = ko * cap_omega_c * cap_omega_c;
+  const double cp = std::sqrt(g / kp);
+  const double c = std::sqrt((g / _k) * (1.0 + std::pow(_k / km, 2.0)));
+  const double p1 = std::pow(c / cp, 2.5);
+  const double p2 = std::pow(cm / c, 2.5);
+  const double t1 = std::tanh(ao + ap * p1 + am * p2);
+  const double c2p = std::cos(2.0 * phi);
+  const double cap_phi = (1.0 + t1 * c2p) / 2.0 / M_PI;
   return cap_phi;
 }
 
@@ -144,29 +144,41 @@ void ECKVSpreadingFunction::Evaluate(
 {
   /// \todo check the size of _phi,  _theta and _k match
 
-  double g = this->_gravity;
-  double u10 = this->_u10;
-  double cap_omega_c = this->_cap_omega_c;
+  const double g = this->_gravity;
+  const double u10 = this->_u10;
+  const double cap_omega_c = this->_cap_omega_c;
   
-  double cd_10n = 0.00144;
-  double u_star = std::sqrt(cd_10n) * u10;
-  double ao = 0.1733;
-  double ap = 4.0;
-  double km = 370.0;
-  double cm = 0.23;
-  double am = 0.13 * u_star / cm;
-  double ko = g / u10 / u10;
-  double kp = ko * cap_omega_c * cap_omega_c;
-  double cp = std::sqrt(g / kp);
+  constexpr double cd_10n = 0.00144;
+  const double u_star = std::sqrt(cd_10n) * u10;
+  constexpr double ao = 0.1733;
+  constexpr double ap = 4.0;
+  constexpr double km = 370.0;
+  constexpr double cm = 0.23;
+  const double am = 0.13 * u_star / cm;
+  const double ko = g / u10 / u10;
+  const double kp = ko * cap_omega_c * cap_omega_c;
+  const double cp = std::sqrt(g / kp);
 
-  Eigen::MatrixXd phi = _theta.array() - _theta_mean;
-  Eigen::MatrixXd c = Eigen::sqrt((g / _k.array())
+  const Eigen::MatrixXd phi = _theta.array() - _theta_mean;
+  const Eigen::MatrixXd c = Eigen::sqrt((g / _k.array())
                     * (1.0 + Eigen::pow(_k.array() / km, 2.0)));
-  Eigen::MatrixXd p1 = Eigen::pow(c.array() / cp, 2.5);
-  Eigen::MatrixXd p2 = Eigen::pow(cm / c.array(), 2.5);
-  Eigen::MatrixXd t1 = Eigen::tanh(ao + ap * p1.array() + am * p2.array());
-  Eigen::MatrixXd c2p = Eigen::cos(2.0 * phi.array());
+  const Eigen::MatrixXd p1 = Eigen::pow(c.array() / cp, 2.5);
+  const Eigen::MatrixXd p2 = Eigen::pow(cm / c.array(), 2.5);
+  const Eigen::MatrixXd t1 = Eigen::tanh(ao + ap * p1.array() + am * p2.array());
+  const Eigen::MatrixXd c2p = Eigen::cos(2.0 * phi.array());
   _phi = (1.0 + t1.array() * c2p.array()) / 2.0 / M_PI;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+double ECKVSpreadingFunction::Gravity() const
+{
+  return this->_gravity;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void ECKVSpreadingFunction::SetGravity(double _value)
+{
+  this->_gravity = _value;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,18 +203,6 @@ double ECKVSpreadingFunction::CapOmegaC() const
 void ECKVSpreadingFunction::SetCapOmegaC(double _value)
 {
   this->_cap_omega_c = _value;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-double ECKVSpreadingFunction::Gravity() const
-{
-  return this->_gravity;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void ECKVSpreadingFunction::SetGravity(double _value)
-{
-  this->_gravity = _value;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

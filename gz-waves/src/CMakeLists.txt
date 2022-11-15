@@ -43,6 +43,7 @@ set(gtest_sources
   Wavefield_TEST.cc
   WaveSimulation_TEST.cc
   WaveSimulationFFT2_TEST.cc
+  WaveSpectrum_TEST.cc
   WaveSpreadingFunction_TEST.cc
 )
 

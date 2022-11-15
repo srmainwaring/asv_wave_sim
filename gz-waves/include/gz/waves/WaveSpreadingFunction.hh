@@ -24,6 +24,8 @@ namespace gz
 {
 namespace waves
 {
+inline namespace v2
+{
   class DirectionalSpreadingFunction
   {
     public:
@@ -88,6 +90,10 @@ namespace waves
           const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
           const override;
 
+      double Gravity() const;
+
+      void SetGravity(double _value);
+
       double U10() const;
 
       void SetU10(double _value);
@@ -96,15 +102,12 @@ namespace waves
 
       void SetCapOmegaC(double _value);
 
-      double Gravity() const;
-
-      void SetGravity(double _value);
-
     private:
-      double _gravity{5.0};
+      double _gravity{9.81};
       double _u10{5.0};
       double _cap_omega_c{0.84};
   };
+}
 }
 }
 
