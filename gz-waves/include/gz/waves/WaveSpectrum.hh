@@ -63,7 +63,7 @@ inline namespace v2
 
       virtual double Evaluate(double _k) const = 0;
 
-      virtual double Evaluate(
+      virtual void Evaluate(
           Eigen::Ref<Eigen::MatrixXd> _spectrum,
           const Eigen::Ref<const Eigen::MatrixXd> &_k) const = 0;
   };
@@ -77,7 +77,7 @@ inline namespace v2
 
       virtual double Evaluate(double _k) const override;
 
-      virtual double Evaluate(
+      virtual void Evaluate(
           Eigen::Ref<Eigen::MatrixXd> _spectrum,
           const Eigen::Ref<const Eigen::MatrixXd> &_k) const override;
 
@@ -106,7 +106,7 @@ inline namespace v2
 
       virtual double Evaluate(double _k) const override;
 
-      virtual double Evaluate(
+      virtual void Evaluate(
           Eigen::Ref<Eigen::MatrixXd> _spectrum,
           const Eigen::Ref<const Eigen::MatrixXd> &_k) const override;
 

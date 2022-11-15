@@ -26,7 +26,7 @@ using namespace waves;
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests
 
-TEST(WaveSpreadingFunction, PiersonMoskowitzRegression)
+TEST(WaveSpectrum, PiersonMoskowitzSpectrumRegression)
 {
   double k[] {
     0.,         0.06283185, 0.12566371, 0.18849556,
@@ -102,7 +102,7 @@ TEST(WaveSpreadingFunction, PiersonMoskowitzRegression)
   }
 }
 
-TEST(WaveSpectrum, PiersonMoskowitzVectorised)
+TEST(WaveSpectrum, PiersonMoskowitzSpectrumVectorised)
 {
   { // Eigen vectorised version
     double tolerance = 1.0e-16;
@@ -141,7 +141,7 @@ TEST(WaveSpectrum, PiersonMoskowitzVectorised)
 
     PiersonMoskowitzWaveSpectrum spectrum;
 
-    Eigen::MatrixXd cap_s(nx, ny);
+    Eigen::MatrixXd cap_s = Eigen::MatrixXd::Zero(nx, ny);
     spectrum.Evaluate(cap_s, k);
 
     for (int i=0; i<nx; ++i)
@@ -155,6 +155,134 @@ TEST(WaveSpectrum, PiersonMoskowitzVectorised)
   }
 }
 
+TEST(WaveSpectrum, ECKVSpectrumRegression)
+{
+  double k[] {
+    0.,         0.06283185, 0.12566371, 0.18849556,
+    0.25132741, 0.31415927, 0.37699112, 0.43982297
+  };
+
+  { // Regress against values generate from Python reference version
+    double tolerance = 1.0e-15;
+    double u19 = 0.0;
+    ECKVWaveSpectrum spectrum(u19);
+
+    double cap_s[] = {
+      0., 0., 0., 0.,
+      0., 0., 0., 0.
+    };
+
+    for (int i=0; i<8; ++i)
+    {
+      double cap_s_test = spectrum.Evaluate(k[i]);
+      EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
+    }
+  }
+
+  {
+    double tolerance = 1.0e-8;
+    double u10 = 5.0;
+    ECKVWaveSpectrum spectrum(u10);
+
+    double cap_s[] = {
+      0.0,            2.60276926e-10, 3.85980085e-03, 4.11638703e-02,
+      6.43908578e-02, 6.17616606e-02, 5.05207166e-02, 3.91055100e-02
+    };
+
+    for (int i=0; i<8; ++i)
+    {
+      double cap_s_test = spectrum.Evaluate(k[i]);
+      EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
+    }
+  }
+
+  {
+    double tolerance = 1.5e-7;
+    double u10 = 10.0;
+    ECKVWaveSpectrum spectrum(u10);
+
+    double cap_s[] = {
+      0.0,        4.21641049, 1.95535142, 0.70164121,
+      0.30549674, 0.15782445, 0.0924573,  0.05921628
+    };
+
+    for (int i=0; i<8; ++i)
+    {
+      double cap_s_test = spectrum.Evaluate(k[i]);
+      EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
+    }
+  }
+
+  {
+    double tolerance = 5.0e-6;
+    double u10 = 15.0;
+    ECKVWaveSpectrum spectrum(u10);
+
+    double cap_s[] = {
+      0.0,         16.9746576,  2.45350994,  0.74821723,
+      0.32892719,  0.17409368,  0.10300532,  0.06576126
+    };
+
+    for (int i=0; i<8; ++i)
+    {
+      double cap_s_test = spectrum.Evaluate(k[i]);
+      EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
+    }
+  }
+}
+
+TEST(WaveSpectrum, ECKVSpectrumVectorised)
+{
+  { // Eigen vectorised version
+    double tolerance = 1.0e-16;
+
+    double lx = 200.0;
+    double ly = 100.0;
+    size_t nx = 32;
+    size_t ny = 16;
+
+    double kx_nyquist = M_PI * nx / lx;
+    double ky_nyquist = M_PI * ny / ly;
+
+    // create wavenumber vectors
+    Eigen::VectorXd kx_v(nx);
+    Eigen::VectorXd ky_v(ny);
+
+    for (size_t i=0; i<nx; ++i)
+    {
+      kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
+    }
+    for (size_t i=0; i<ny; ++i)
+    {
+      ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
+    }
+
+    // broadcast to matrices (aka meshgrid)
+    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    kx.colwise() += kx_v;
+    
+    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    ky.rowwise() += ky_v.transpose();
+
+    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
+    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
+    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
+
+    ECKVWaveSpectrum spectrum;
+
+    Eigen::MatrixXd cap_s = Eigen::MatrixXd::Zero(nx, ny);
+    spectrum.Evaluate(cap_s, k);
+
+    for (int i=0; i<nx; ++i)
+    {
+      for (int j=0; j<ny; ++j)
+      {
+        double cap_s_test = spectrum.Evaluate(k(i, j));
+        EXPECT_NEAR(cap_s(i, j), cap_s_test, tolerance);
+      }
+    }
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Run tests
