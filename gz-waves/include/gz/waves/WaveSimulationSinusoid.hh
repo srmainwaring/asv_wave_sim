@@ -55,23 +55,23 @@ namespace waves
 
     public: void SetTime(double _time) override;
 
-    public: void ComputeHeights(
+    public: virtual void ComputeHeights(
       std::vector<double>& _h) override;
 
-    public: void ComputeHeightDerivatives(
+    public: virtual void ComputeHeightDerivatives(
       std::vector<double>& _dhdx,
       std::vector<double>& _dhdy) override;
 
-    public: void ComputeDisplacements(
+    public: virtual void ComputeDisplacements(
       std::vector<double>& _sx,
       std::vector<double>& _sy) override;
 
-    public: void ComputeDisplacementDerivatives(
+    public: virtual void ComputeDisplacementDerivatives(
       std::vector<double>& _dsxdx,
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
-    public: void ComputeDisplacementsAndDerivatives(
+    public: virtual void ComputeDisplacementsAndDerivatives(
       std::vector<double>& _h,
       std::vector<double>& _sx,
       std::vector<double>& _sy,
@@ -80,6 +80,38 @@ namespace waves
       std::vector<double>& _dsxdx,
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
+
+    public: virtual void ComputeFluidPotentialXY(
+      std::vector<double>& _phiXY) override;
+
+    public: virtual double ComputeFluidPotential(
+      double _z, double _phiXY) override;
+
+    public: virtual void ComputeHeights(
+      Eigen::Ref<Eigen::MatrixXd> _h) override;
+
+    public: virtual void ComputeHeightDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
+
+    public: virtual void ComputeDisplacements(
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy) override;
+
+    public: virtual void ComputeDisplacementDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+
+    public: virtual void ComputeDisplacementsAndDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _h,
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy,
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
 
     class Impl;
     private: std::unique_ptr<Impl> impl;

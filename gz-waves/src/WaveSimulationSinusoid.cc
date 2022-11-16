@@ -112,8 +112,8 @@ namespace waves
 
     private: void ComputeCurrentAmplitudes(double _time);
     
-    private: int N{2};
-    private: int N2{2};
+    public:  int N{2};
+    public:  int N2{2};
     private: int NOver2{1};
     private: double L{1.0};
     private: double wave_angle{0.0};
@@ -384,6 +384,97 @@ namespace waves
   {
     impl->ComputeDisplacementsAndDerivatives(
         _h, _dhdx, _dhdy, _sx, _sy, _dsxdx, _dsydy, _dsxdy);
+  }
+
+  void WaveSimulationSinusoid::ComputeFluidPotentialXY(
+    std::vector<double>& _phiXY)
+  {
+    impl->ComputeFluidPotentialXY(_phiXY);
+  }
+
+  double WaveSimulationSinusoid::ComputeFluidPotential(
+    double _z, double _phiXY)
+  {
+    return impl->ComputeFluidPotential(_z, _phiXY);
+  }
+
+  void WaveSimulationSinusoid::ComputeHeights(
+    Eigen::Ref<Eigen::MatrixXd> _h)
+  {
+    auto size = impl->N2;
+    std::vector<double> h(size);
+    this->ComputeHeights(h);
+    _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
+  }
+
+  void WaveSimulationSinusoid::ComputeHeightDerivatives(
+    Eigen::Ref<Eigen::MatrixXd> _dhdx,
+    Eigen::Ref<Eigen::MatrixXd> _dhdy)
+  {
+    auto size = impl->N2;
+    std::vector<double> dhdx(size);
+    std::vector<double> dhdy(size);
+    this->ComputeHeightDerivatives(dhdx, dhdy);
+    _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
+    _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
+  }
+
+  void WaveSimulationSinusoid::ComputeDisplacements(
+    Eigen::Ref<Eigen::MatrixXd> _sx,
+    Eigen::Ref<Eigen::MatrixXd> _sy)
+  {
+    auto size = impl->N2;
+    std::vector<double> sx(size);
+    std::vector<double> sy(size);
+    this->ComputeDisplacements(sx, sy);
+    _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
+    _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
+  }
+
+  void WaveSimulationSinusoid::ComputeDisplacementDerivatives(
+    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> _dsydy,
+    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+  {
+    auto size = impl->N2;
+    std::vector<double> dsxdx(size);
+    std::vector<double> dsydy(size);
+    std::vector<double> dsxdy(size);
+    this->ComputeDisplacementDerivatives(dsxdx, dsxdy, dsxdy);
+    _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
+    _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
+    _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
+  }
+
+  void WaveSimulationSinusoid::ComputeDisplacementsAndDerivatives(
+    Eigen::Ref<Eigen::MatrixXd> _h,
+    Eigen::Ref<Eigen::MatrixXd> _sx,
+    Eigen::Ref<Eigen::MatrixXd> _sy,
+    Eigen::Ref<Eigen::MatrixXd> _dhdx,
+    Eigen::Ref<Eigen::MatrixXd> _dhdy,
+    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> _dsydy,
+    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+  {
+    auto size = impl->N2;
+    std::vector<double> h(size);
+    std::vector<double> sx(size);
+    std::vector<double> sy(size);
+    std::vector<double> dhdx(size);
+    std::vector<double> dhdy(size);
+    std::vector<double> dsxdx(size);
+    std::vector<double> dsydy(size);
+    std::vector<double> dsxdy(size);
+    this->ComputeDisplacementsAndDerivatives(
+        h, sx, sy, dhdx, dhdy, dsxdx, dsydy, dsxdy);
+    _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
+    _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
+    _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
+    _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
+    _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
+    _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
+    _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
+    _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
   }
 
 }

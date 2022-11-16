@@ -1,4 +1,4 @@
-// Copyright (C) 2019  Rhys Mainwaring
+// Copyright (C) 2019-2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,36 +24,6 @@ namespace gz
 {
 namespace waves
 {
-inline namespace v1
-{
-  class WaveSpectrum
-  {
-    public: virtual ~WaveSpectrum();
-
-    public: WaveSpectrum();
-
-    public: void SetWindVelocity(double _ux, double _uy);
-    
-    public: static double Dispersion(double _k);
-
-    public: static double InvDispersion(double _omega);
-
-    public: static double QuantisedDispersion(double _k);
-
-    public: static double SignificantWaveHeight(double _u);
-
-    public: static double Spectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
-
-    public: static double PiersonMoskowitzK0(double _u);
-
-    public: static double PiersonMoskowitzSpectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
-
-    private: double ux;
-    private: double uy;
-    private: double u;
-  };
-}
-
 inline namespace v2
 {
   class OmniDirectionalWaveSpectrum

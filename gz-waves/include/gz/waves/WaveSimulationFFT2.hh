@@ -64,6 +64,32 @@ namespace waves
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
+    public: virtual void ComputeHeights(
+      Eigen::Ref<Eigen::MatrixXd> _h) override;
+
+    public: virtual void ComputeHeightDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
+
+    public: virtual void ComputeDisplacements(
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy) override;
+
+    public: virtual void ComputeDisplacementDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+
+    public: virtual void ComputeDisplacementsAndDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _h,
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy,
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+
     /// \brief Set lambda, a scaling factor controlling the horizontal wave displacement.
     public: void SetLambda(double _lambda);
 

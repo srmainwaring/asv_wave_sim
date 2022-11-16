@@ -16,7 +16,11 @@
 #ifndef GZ_WAVES_WAVESIMULATION_HH_
 #define GZ_WAVES_WAVESIMULATION_HH_
 
+#include <Eigen/Dense>
+
 #include <vector>
+
+using Eigen::MatrixXd;
 
 namespace gz
 {
@@ -58,8 +62,40 @@ namespace waves
       std::vector<double>& _dsxdx,
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) = 0;
-  };
 
+    public: virtual void ComputeFluidPotentialXY(
+      std::vector<double>& _phiXY);
+
+    public: virtual double ComputeFluidPotential(
+      double _z, double _phiXY);
+
+    public: virtual void ComputeHeights(
+      Eigen::Ref<Eigen::MatrixXd> _h) = 0;
+
+    public: virtual void ComputeHeightDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy) = 0;
+
+    public: virtual void ComputeDisplacements(
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy) = 0;
+
+    public: virtual void ComputeDisplacementDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy) = 0;
+
+    public: virtual void ComputeDisplacementsAndDerivatives(
+      Eigen::Ref<Eigen::MatrixXd> _h,
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy,
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy) = 0;
+
+  };
 }
 }
 
