@@ -19,8 +19,6 @@
 #include "gz/waves/WavefieldSampler.hh"
 #include "gz/waves/WaveParameters.hh"
 #include "gz/waves/WaveSimulation.hh"
-#include "gz/waves/WaveSimulationFFTW.hh"
-#include "gz/waves/WaveSimulationOpenCL.hh"
 #include "gz/waves/WaveSimulationSinusoid.hh"
 #include "gz/waves/WaveSimulationTrochoid.hh"
 #include "gz/waves/WaveSpectrum.hh"
@@ -46,38 +44,6 @@ std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Define tests
-
-#if 0
-TEST(WaveSimulation, WaveSimulationOpenCL)
-{
-  // Configure the wave spectrum.
-  std::unique_ptr<WaveSpectrum> waveSpectrum(new WaveSpectrum());
-  waveSpectrum->SetWindVelocity(20.0, 20.0);
-  
-  // Create the wave simulation.
-  int N = 4;
-  double L = 4.0;
-  std::unique_ptr<WaveSimulation> waveSim(new WaveSimulationOpenCL(N, L));
-
-  // Compute the initial height field.
-  std::vector<double> h;
-  waveSim->SetTime(0.0);
-  waveSim->ComputeHeights(h);
-
-  // Wave heights should be zero. 
-  // std::cout << h << std::endl;
-
-  waveSim->SetWindVelocity(20.0, 20.0);
-  waveSim->SetTime(0.0);
-  waveSim->ComputeHeights(h);
-
-  // Wave heights should be non-zero. 
-  // std::cout << h << std::endl;
-
-  EXPECT_EQ(h.size(), N*N);
-  // EXPECT_DOUBLE_EQ(1.0, 1.0);
-}
-#endif
 
 TEST(WaveSimulation, WaveSimulationTrochoid)
 {
@@ -115,7 +81,6 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
 
   EXPECT_EQ(h.size(), N*N);
 }
-
 
 class WaveSimulationSinusoidTestSuite : public ::testing::Test
 {
