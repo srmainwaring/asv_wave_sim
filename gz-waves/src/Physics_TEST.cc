@@ -81,7 +81,10 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
     EXPECT_NEAR(center[1], 0.0, eps);
     EXPECT_NEAR(center[2], -1.5, eps);
     EXPECT_NEAR(force[0], 0, eps);
-    EXPECT_NEAR(force[1], 130483.73333333334, eps);
+    // rho =  998.6, g = -9.8
+    // EXPECT_NEAR(force[1], 130483.73333333334, eps);
+    // rho = 1025.0, g = -9.81
+    EXPECT_NEAR(force[1], 134070.0, eps);
     EXPECT_NEAR(force[2], 0, eps);
   }  
 
@@ -99,7 +102,10 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
     EXPECT_NEAR(center[1], 0.0, eps);
     EXPECT_NEAR(center[2], -10.35483871, eps);
     EXPECT_NEAR(force[0], 0, eps);
-    EXPECT_NEAR(force[1], 1011248.9333333335, eps);
+    // rho =  998.6, g = -9.8
+    // EXPECT_NEAR(force[1], 1011248.9333333335, eps);
+    // rho = 1025.0, g = -9.81
+    EXPECT_NEAR(force[1], 1039042.5000000001, eps);
     EXPECT_NEAR(force[2], 0, eps);
   }
 
@@ -117,7 +123,10 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
     EXPECT_NEAR(center[1],  0.0, eps);
     EXPECT_NEAR(center[2], -1.0, eps);
     EXPECT_NEAR(force[0], 0, eps);
-    EXPECT_NEAR(force[1], 65241.866666666, eps);
+    // rho =  998.6, g = -9.8
+    // EXPECT_NEAR(force[1], 65241.866666666, eps);
+    // rho = 1025.0, g = -9.81
+    EXPECT_NEAR(force[1], 67035.0, eps);
     EXPECT_NEAR(force[2], 0, eps);
   }
 
@@ -135,7 +144,10 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
     EXPECT_NEAR(center[1], 0.0, eps);
     EXPECT_NEAR(center[2], -9.689655172, eps);
     EXPECT_NEAR(force[0], 0, eps);
-    EXPECT_NEAR(force[1], 946007.0666666666, eps);
+    // rho =  998.6, g = -9.8
+    // EXPECT_NEAR(force[1], 946007.0666666666, eps);
+    // rho = 1025.0, g = -9.81
+    EXPECT_NEAR(force[1], 972007.49999999988, eps);
     EXPECT_NEAR(force[2], 0, eps);
   }
 }

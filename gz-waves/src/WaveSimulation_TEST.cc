@@ -104,7 +104,7 @@ protected:
 
   // Wave spectrum
   const double w{2.0 * M_PI / period};
-  const double k{w * w / 9.8};
+  const double k{w * w / 9.81};
 };
 
 TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)

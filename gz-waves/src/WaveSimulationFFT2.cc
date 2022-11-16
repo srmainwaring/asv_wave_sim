@@ -346,7 +346,7 @@ namespace waves
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
     // gravity acceleration [m/s^2] 
-    const double g = 9.82;
+    const double g = 9.81;
 
     // storage for Fourier coefficients
     mH.resize(mN2, complex(0.0, 0.0));
@@ -803,7 +803,7 @@ namespace waves
     }
 
     // gravity acceleration [m/s^2] 
-    double g = 9.82;
+    double g = 9.81;
 
     // angular temporal frequency for time-dependent (from dispersion)
     for (int ikx = 0; ikx < this->Nx; ++ikx)
@@ -956,7 +956,7 @@ namespace waves
 
     double alpha = 0.0081;
     double beta = 1.25;
-    double g = 9.82;
+    double g = 9.81;
     double Cd_10N = 0.00144;
     double u_star = sqrt(Cd_10N) * u10;
     double ao = 0.1733;
@@ -1043,7 +1043,7 @@ namespace waves
   double WaveSimulationFFT2Impl::ECKVSpreadingFunction(
       double k, double phi, double u10, double cap_omega_c)
   {
-    double g = 9.82;
+    double g = 9.81;
     double Cd_10N = 0.00144;
     double u_star = sqrt(Cd_10N) * u10;
     double ao = 0.1733;
