@@ -386,18 +386,6 @@ namespace waves
         _h, _dhdx, _dhdy, _sx, _sy, _dsxdx, _dsydy, _dsxdy);
   }
 
-  void WaveSimulationSinusoid::ComputeFluidPotentialXY(
-    std::vector<double>& _phiXY)
-  {
-    impl->ComputeFluidPotentialXY(_phiXY);
-  }
-
-  double WaveSimulationSinusoid::ComputeFluidPotential(
-    double _z, double _phiXY)
-  {
-    return impl->ComputeFluidPotential(_z, _phiXY);
-  }
-
   void WaveSimulationSinusoid::ComputeHeights(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {

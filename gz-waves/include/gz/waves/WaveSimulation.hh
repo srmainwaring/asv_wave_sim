@@ -63,12 +63,6 @@ namespace waves
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) = 0;
 
-    public: virtual void ComputeFluidPotentialXY(
-      std::vector<double>& _phiXY);
-
-    public: virtual double ComputeFluidPotential(
-      double _z, double _phiXY);
-
     public: virtual void ComputeHeights(
       Eigen::Ref<Eigen::MatrixXd> _h) = 0;
 

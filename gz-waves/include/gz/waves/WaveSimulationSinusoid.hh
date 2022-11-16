@@ -81,12 +81,6 @@ namespace waves
       std::vector<double>& _dsydy,
       std::vector<double>& _dsxdy) override;
 
-    public: virtual void ComputeFluidPotentialXY(
-      std::vector<double>& _phiXY) override;
-
-    public: virtual double ComputeFluidPotential(
-      double _z, double _phiXY) override;
-
     public: virtual void ComputeHeights(
       Eigen::Ref<Eigen::MatrixXd> _h) override;
 
