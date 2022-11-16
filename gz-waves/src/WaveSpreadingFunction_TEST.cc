@@ -441,9 +441,6 @@ TEST(WaveSpreadingFunction, ECKVVectorisedMatrix)
 
 TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
 {
-  // not used in calc, required for regression function interface only.
-  constexpr double spread = 10.0;
-
   // coefficients
   constexpr double u10 = 5.0;
   constexpr double cap_omega_c = 0.84;
@@ -461,14 +458,15 @@ TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
 
     EXPECT_EQ(theta.size(), 21);
 
+    Eigen::VectorXd k = Eigen::VectorXd::Ones(21);
     Eigen::VectorXd phi(21);
-    spreadingFn.Evaluate(phi, theta, theta_mean);
+    spreadingFn.Evaluate(phi, theta, theta_mean, k);
 
     for (int i=0; i<21; ++i)
     {
       double dtheta = theta(i) - theta_mean;
       double phi_test = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
-          spread, dtheta, u10, cap_omega_c);
+          k(i), dtheta, u10, cap_omega_c);
       EXPECT_DOUBLE_EQ(phi(i), phi_test);
     }
   }
