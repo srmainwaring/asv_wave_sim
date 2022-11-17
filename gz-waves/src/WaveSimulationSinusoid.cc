@@ -391,7 +391,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsxdy, _dsxdy);
+    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
   }
 
   //////////////////////////////////////////////////
@@ -407,6 +407,10 @@ namespace waves
   {
     impl->ComputeDisplacementsAndDerivatives(
         _h, _sx, _sy, _dhdx, _dhdy, _dsxdx, _dsydy, _dsxdy);
+
+    /// \note this was incorrect in original version 
+    // impl->ComputeDisplacementsAndDerivatives(
+    //     _h, _dhdx, _dhdy, _sx, _sy, _dsxdx, _dsydy, _dsxdy);
   }
 }
 }

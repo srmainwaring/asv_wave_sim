@@ -905,6 +905,16 @@ void WavesVisualPrivate::InitWaveSim()
   waveSim->SetWindVelocity(ux, uy);
   waveSim->SetLambda(s);
 
+  int N2 = N * N;
+  this->mHeights = Eigen::VectorXd::Zero(N2);
+  this->mDisplacementsX = Eigen::VectorXd::Zero(N2);
+  this->mDisplacementsY = Eigen::VectorXd::Zero(N2);
+  this->mDhdx = Eigen::VectorXd::Zero(N2);
+  this->mDhdy = Eigen::VectorXd::Zero(N2);
+  this->mDxdx = Eigen::VectorXd::Zero(N2);
+  this->mDydy = Eigen::VectorXd::Zero(N2);
+  this->mDxdy = Eigen::VectorXd::Zero(N2);
+
   // move
   this->mWaveSim = std::move(waveSim);
 }
