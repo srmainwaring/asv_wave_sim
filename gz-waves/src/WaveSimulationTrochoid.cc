@@ -40,20 +40,20 @@ namespace waves
     public: void SetTime(double _time);
 
     public: void ComputeHeights(
-      std::vector<double>& _heights);
+      Eigen::Ref<Eigen::MatrixXd> _heights);
 
     public: void ComputeHeightDerivatives(
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy);
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
     public: void ComputeDisplacements(
-      std::vector<double>& _sx,
-      std::vector<double>& _sy);
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy);
 
     public: void ComputeDisplacementDerivatives(
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy);
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy);
 
     private: void ComputeBaseAmplitudes();
 
@@ -100,7 +100,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeHeights(
-    std::vector<double>& _heights)
+    Eigen::Ref<Eigen::MatrixXd> _heights)
   {
     // Multiple wave params
     const auto  number     = this->params->Number();
@@ -111,14 +111,8 @@ namespace waves
     const auto& q          = this->params->Steepness_V();
     const auto& direction  = this->params->Direction_V();
 
-    // Resize output if necessary
-    if (_heights.size() != this->N2)
-    {
-      _heights.resize(this->N2, 0.0);
-    }
-
     // Multiple wave update 
-    _heights.assign(this->N2, 0.0);
+    _heights = Eigen::MatrixXd::Zero(this->N2, 0);
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -148,7 +142,7 @@ namespace waves
           // double sy = - direction_i.Y() * q_i * amplitude_i * s;
           double h = amplitude_i * c;
 
-          _heights[idx] += h;
+          _heights(idx, 0) += h;
         }
       }
     }
@@ -156,16 +150,16 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeHeightDerivatives(
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy)
+    Eigen::Ref<Eigen::MatrixXd> _dhdx,
+    Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
     // @TODO NO IMPLEMENTATION
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeDisplacements(
-    std::vector<double>& _sx,
-    std::vector<double>& _sy)
+    Eigen::Ref<Eigen::MatrixXd> _sx,
+    Eigen::Ref<Eigen::MatrixXd> _sy)
   {
     // Multiple wave params
     const auto  number     = this->params->Number();
@@ -176,19 +170,9 @@ namespace waves
     const auto& q          = this->params->Steepness_V();
     const auto& direction  = this->params->Direction_V();
 
-    // Resize output if necessary
-    if (_sx.size() != this->N2)
-    {
-      _sx.resize(this->N2, 0.0);
-    }
-    if (_sy.size() != this->N2)
-    {
-      _sy.resize(this->N2, 0.0);
-    }
-
     // Multiple wave update
-    _sx.assign(this->N2, 0.0);
-    _sy.assign(this->N2, 0.0);
+    _sx = Eigen::MatrixXd::Zero(this->N2, 0);
+    _sy = Eigen::MatrixXd::Zero(this->N2, 0);
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -218,8 +202,8 @@ namespace waves
           double sy = - direction_i.Y() * q_i * amplitude_i * s;
           // double h = amplitude_i * c;
 
-          _sx[idx] += sx;
-          _sy[idx] += sy;
+          _sx(idx, 0) += sx;
+          _sy(idx, 0) += sy;
         }
       }
     }
@@ -227,9 +211,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeDisplacementDerivatives(
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> _dsydy,
+    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
     // @TODO NO IMPLEMENTATION
   }
@@ -264,10 +248,7 @@ namespace waves
   void WaveSimulationTrochoid::ComputeHeights(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {
-    auto size = impl->N2;
-    std::vector<double> h(size);
-    impl->ComputeHeights(h);
-    _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
+    impl->ComputeHeights(_h);
   }
 
   //////////////////////////////////////////////////
@@ -275,12 +256,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
-    auto size = impl->N2;
-    std::vector<double> dhdx(size);
-    std::vector<double> dhdy(size);
-    impl->ComputeHeightDerivatives(dhdx, dhdy);
-    _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
-    _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
+    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
   }
 
   //////////////////////////////////////////////////
@@ -288,12 +264,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _sx,
     Eigen::Ref<Eigen::MatrixXd> _sy)
   {
-    auto size = impl->N2;
-    std::vector<double> sx(size);
-    std::vector<double> sy(size);
-    impl->ComputeDisplacements(sx, sy);
-    _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
-    _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
+    impl->ComputeDisplacements(_sx, _sy);
   }
 
   //////////////////////////////////////////////////
@@ -302,14 +273,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    auto size = impl->N2;
-    std::vector<double> dsxdx(size);
-    std::vector<double> dsydy(size);
-    std::vector<double> dsxdy(size);
-    impl->ComputeDisplacementDerivatives(dsxdx, dsxdy, dsxdy);
-    _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
-    _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
-    _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
+    impl->ComputeDisplacementDerivatives(_dsxdx, _dsxdy, _dsxdy);
   }
 
   //////////////////////////////////////////////////
@@ -323,28 +287,10 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    auto size = impl->N2;
-    std::vector<double> h(size);
-    std::vector<double> sx(size);
-    std::vector<double> sy(size);
-    std::vector<double> dhdx(size);
-    std::vector<double> dhdy(size);
-    std::vector<double> dsxdx(size);
-    std::vector<double> dsydy(size);
-    std::vector<double> dsxdy(size);
-    impl->ComputeHeights(h);
-    impl->ComputeHeightDerivatives(dhdx, dhdy);
-    impl->ComputeDisplacements(sx, sy);
-    impl->ComputeDisplacementDerivatives(dsxdx, dsydy, dsxdy);    
-    _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
-    _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
-    _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
-    _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
-    _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
-    _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
-    _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
-    _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
+    impl->ComputeHeights(_h);
+    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeDisplacements(_sx, _sy);
+    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);    
   }
-
 }
 }

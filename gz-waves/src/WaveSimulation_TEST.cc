@@ -64,7 +64,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
       new WaveSimulationTrochoid(N, L, waveParams));
 
   // Compute the initial height field.
-  Eigen::VectorXd h(N * N);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(N * N);
   waveSim->SetTime(0.0);
   waveSim->ComputeHeights(h);
 
@@ -131,7 +131,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
   double dl = L / N;
 
   // Verify heights
-  Eigen::VectorXd h(N2);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(N2);
   waveSim->ComputeHeights(h);
 
   for (size_t iy=0, idx=0; iy<N; ++iy)
@@ -171,7 +171,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
   double sd = std::sin(theta);
 
   // Verify heights
-  Eigen::VectorXd h(N2);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(N2);
   waveSim->ComputeHeights(h);
 
   for (size_t iy=0, idx=0; iy<N; ++iy)
@@ -201,8 +201,8 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
   waveSim->SetTime(5.0);
 
   // Verify displacements (expect zero for sinusoid waves)
-  Eigen::VectorXd sx(N2);
-  Eigen::VectorXd sy(N2);
+  Eigen::VectorXd sx = Eigen::VectorXd::Zero(N2);
+  Eigen::VectorXd sy = Eigen::VectorXd::Zero(N2);
   waveSim->ComputeDisplacements(sx, sy);
 
   for (size_t iy=0, idx=0; iy<N; ++iy)

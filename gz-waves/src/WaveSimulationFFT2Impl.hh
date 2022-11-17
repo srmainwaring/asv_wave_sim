@@ -18,10 +18,14 @@
 
 #include "gz/waves/WaveSimulation.hh"
 
+#include <Eigen/Dense>
+
 #include <fftw3.h>
 
 #include <complex>
 #include <vector>
+
+using Eigen::MatrixXd;
 
 namespace gz
 {
@@ -54,23 +58,23 @@ namespace waves
 
     /// \brief Calculate the sea surface elevation
     void ComputeHeights(
-      std::vector<double>& _heights);
+      Eigen::Ref<Eigen::MatrixXd> _heights);
 
     /// \brief Calculate the derivative of the elevation wrt x and y
     void ComputeHeightDerivatives(
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy);
+      Eigen::Ref<Eigen::MatrixXd> _dhdx,
+      Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
     /// \brief Calculate the sea surface horizontal displacements
     void ComputeDisplacements(
-      std::vector<double>& _sx,
-      std::vector<double>& _sy);
+      Eigen::Ref<Eigen::MatrixXd> _sx,
+      Eigen::Ref<Eigen::MatrixXd> _sy);
 
     /// \brief Calculate the derivative of the horizontal displacements wrt x and y
     void ComputeDisplacementDerivatives(
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy);
+      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+      Eigen::Ref<Eigen::MatrixXd> _dsydy,
+      Eigen::Ref<Eigen::MatrixXd> _dsxdy);
 
     /// \brief Calculate the base (time-independent) Fourier amplitudes
     void ComputeBaseAmplitudes();

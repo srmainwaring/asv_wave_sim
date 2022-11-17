@@ -32,6 +32,8 @@
 
 #include "WaveSimulationFFT2Impl.hh"
 
+#include <Eigen/Dense>
+
 #include <gz/common.hh>
 
 #include <fftw3.h>
@@ -39,6 +41,8 @@
 #include <complex>
 #include <random>
 #include <vector>
+
+using Eigen::MatrixXd;
 
 namespace gz
 {
@@ -148,7 +152,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeHeights(
-    std::vector<double>& _heights)
+    Eigen::Ref<Eigen::MatrixXd> _heights)
   {
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
@@ -159,12 +163,6 @@ namespace waves
 
     // Run the FFT
     fftw_execute(mFFTPlan0);
-
-    // Resize output if necessary
-    if (_heights.size() != mN2)
-    {
-      _heights.resize(mN2, 0.0);
-    }
 
     // for (size_t i=0; i<mN2; ++i)
     // {
@@ -178,15 +176,15 @@ namespace waves
       {
         int ij = ikx * this->Ny + iky;
         int xy = iky * this->Nx + ikx;
-        _heights[xy] = mOut0[ij][0];
+        _heights(xy, 0) = mOut0[ij][0];
       }
     }
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeHeightDerivatives(
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy)
+    Eigen::Ref<Eigen::MatrixXd> _dhdx,
+    Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
@@ -201,16 +199,6 @@ namespace waves
     // Run the FFTs
     fftw_execute(mFFTPlan1);
     fftw_execute(mFFTPlan2);
-
-    // Resize output if necessary
-    if (_dhdx.size() != mN2)
-    {
-      _dhdx.resize(mN2, 0.0);
-    }
-    if (_dhdy.size() != mN2)
-    {
-      _dhdy.resize(mN2, 0.0);
-    }
 
     // for (size_t i=0; i<mN2; ++i)
     // {
@@ -227,16 +215,16 @@ namespace waves
       {
         int ij = ikx * this->Ny + iky;
         int xy = iky * this->Nx + ikx;
-        _dhdy[xy] = mOut1[ij][0];
-        _dhdx[xy] = mOut2[ij][0];
+        _dhdy(xy, 0) = mOut1[ij][0];
+        _dhdx(xy, 0) = mOut2[ij][0];
       }
     }
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeDisplacements(
-    std::vector<double>& _sx,
-    std::vector<double>& _sy)
+    Eigen::Ref<Eigen::MatrixXd> _sx,
+    Eigen::Ref<Eigen::MatrixXd> _sy)
   {
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
@@ -252,16 +240,6 @@ namespace waves
     fftw_execute(mFFTPlan3);
     fftw_execute(mFFTPlan4);
 
-    // Resize output if necessary
-    if (_sx.size() != mN2)
-    {
-      _sx.resize(mN2, 0.0);
-    }
-    if (_sy.size() != mN2)
-    {
-      _sy.resize(mN2, 0.0);
-    }
-
     // for (size_t i=0; i<mN2; ++i)
     // {
     //   _sx[i] = mOut3[i][0] * mLambda;
@@ -276,17 +254,17 @@ namespace waves
       {
         int ij = ikx * this->Ny + iky;
         int xy = iky * this->Nx + ikx;
-        _sy[xy] = mOut3[ij][0] * mLambda * -1.0;
-        _sx[xy] = mOut4[ij][0] * mLambda * -1.0;
+        _sy(xy, 0) = mOut3[ij][0] * mLambda * -1.0;
+        _sx(xy, 0) = mOut4[ij][0] * mLambda * -1.0;
       }
     }
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeDisplacementDerivatives(
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> _dsydy,
+    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
@@ -306,20 +284,6 @@ namespace waves
     fftw_execute(mFFTPlan6);
     fftw_execute(mFFTPlan7);
 
-    // Resize output if necessary
-    if (_dsxdx.size() != mN2)
-    {
-      _dsxdx.resize(mN2, 0.0);
-    }
-    if (_dsydy.size() != mN2)
-    {
-      _dsydy.resize(mN2, 0.0);
-    }
-    if (_dsxdy.size() != mN2)
-    {
-      _dsxdy.resize(mN2, 0.0);
-    }
-
     // for (size_t i=0; i<mN2; ++i)
     // {
     //   _dsxdx[i] = mOut5[i][0] * mLambda;
@@ -335,9 +299,9 @@ namespace waves
       {
         int ij = ikx * this->Ny + iky;
         int xy = iky * this->Nx + ikx;
-        _dsydy[xy] = mOut5[ij][0] * mLambda * -1.0;
-        _dsxdx[xy] = mOut6[ij][0] * mLambda * -1.0;
-        _dsxdy[xy] = mOut7[ij][0] * mLambda *  1.0;
+        _dsydy(xy, 0) = mOut5[ij][0] * mLambda * -1.0;
+        _dsxdx(xy, 0) = mOut6[ij][0] * mLambda * -1.0;
+        _dsxdy(xy, 0) = mOut7[ij][0] * mLambda *  1.0;
       }
     }
   }
@@ -1105,10 +1069,7 @@ namespace waves
   void WaveSimulationFFT2::ComputeHeights(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {
-    auto size = impl->mN2;
-    std::vector<double> h(size);
-    impl->ComputeHeights(h);
-    _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
+    impl->ComputeHeights(_h);
   }
 
   //////////////////////////////////////////////////
@@ -1116,12 +1077,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
-    auto size = impl->mN2;
-    std::vector<double> dhdx(size);
-    std::vector<double> dhdy(size);
-    impl->ComputeHeightDerivatives(dhdx, dhdy);
-    _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
-    _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
+    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
   }
 
   //////////////////////////////////////////////////
@@ -1129,12 +1085,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _sx,
     Eigen::Ref<Eigen::MatrixXd> _sy)
   {
-    auto size = impl->mN2;
-    std::vector<double> sx(size);
-    std::vector<double> sy(size);
-    impl->ComputeDisplacements(sx, sy);
-    _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
-    _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
+    impl->ComputeDisplacements(_sx, _sy);
   }
 
   //////////////////////////////////////////////////
@@ -1143,14 +1094,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    auto size = impl->mN2;
-    std::vector<double> dsxdx(size);
-    std::vector<double> dsydy(size);
-    std::vector<double> dsxdy(size);
-    impl->ComputeDisplacementDerivatives(dsxdx, dsxdy, dsxdy);
-    _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
-    _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
-    _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
+    impl->ComputeDisplacementDerivatives(_dsxdx, _dsxdy, _dsxdy);
   }
 
   //////////////////////////////////////////////////
@@ -1164,27 +1108,10 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    auto size = impl->mN2;
-    std::vector<double> h(size);
-    std::vector<double> sx(size);
-    std::vector<double> sy(size);
-    std::vector<double> dhdx(size);
-    std::vector<double> dhdy(size);
-    std::vector<double> dsxdx(size);
-    std::vector<double> dsydy(size);
-    std::vector<double> dsxdy(size);
-    impl->ComputeHeights(h);
-    impl->ComputeHeightDerivatives(dhdx, dhdy);
-    impl->ComputeDisplacements(sx, sy);
-    impl->ComputeDisplacementDerivatives(dsxdx, dsydy, dsxdy);
-    _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
-    _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
-    _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
-    _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
-    _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
-    _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
-    _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
-    _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
+    impl->ComputeHeights(_h);
+    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeDisplacements(_sx, _sy);
+    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
   }
 
   //////////////////////////////////////////////////
@@ -1192,6 +1119,5 @@ namespace waves
   {
     impl->SetLambda(_lambda);
   }
-
 }
 }

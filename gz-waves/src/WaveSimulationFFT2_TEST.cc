@@ -19,9 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include <Eigen/Dense>
+
 #include <iostream>
 #include <memory>
 #include <string>
+
+using Eigen::MatrixXd;
 
 using namespace gz;
 using namespace waves;
@@ -180,7 +184,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(0.0);
 
-  std::vector<double> z;
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeHeights(z);
 
   EXPECT_EQ(z.size(), N2);
@@ -189,7 +193,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
   double sum_h2 = 0.0;
   for (int i=0; i<N2; ++i)
   {
-    sum_z2 += z[i]*z[i];
+    sum_z2 += z(i, 0) * z(i, 0);
     sum_h2 += norm(model.mH[i]);
   }
 
@@ -204,7 +208,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(25.3);
 
-  std::vector<double> z;
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeHeights(z);
 
   EXPECT_EQ(z.size(), N2);
@@ -213,7 +217,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
   double sum_h2 = 0.0;
   for (int i=0; i<N2; ++i)
   {
-    sum_z2 += z[i]*z[i];
+    sum_z2 += z(i, 0) * z(i, 0);
     sum_h2 += norm(model.mH[i]);
   }
 
@@ -231,7 +235,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZeroReference
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(10.0);
 
-  std::vector<double> sx, sy;
+  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeDisplacements(sx, sy);
 
   EXPECT_EQ(sx.size(), N2);
@@ -239,8 +244,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZeroReference
 
   for (int i=0; i<N2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx[i], 0.0);
-    ASSERT_DOUBLE_EQ(sy[i], 0.0);
+    ASSERT_DOUBLE_EQ(sx(i, 0), 0.0);
+    ASSERT_DOUBLE_EQ(sy(i, 0), 0.0);
   }
 }
 
@@ -331,7 +336,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  std::vector<double> z;
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeHeights(z);
 
   EXPECT_EQ(z.size(), N2);
@@ -340,7 +345,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
   double sum_h2 = 0.0;
   for (int i=0; i<N2; ++i)
   {
-    sum_z2 += z[i]*z[i];
+    sum_z2 += z(i, 0) * z(i, 0);
     sum_h2 += norm(model.mH[i]);
   }
 
@@ -355,7 +360,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(25.3);
 
-  std::vector<double> z;
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeHeights(z);
 
   EXPECT_EQ(z.size(), N2);
@@ -364,7 +369,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
   double sum_h2 = 0.0;
   for (int i=0; i<N2; ++i)
   {
-    sum_z2 += z[i]*z[i];
+    sum_z2 += z(i, 0) * z(i, 0);
     sum_h2 += norm(model.mH[i]);
   }
 
@@ -382,7 +387,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(10.0);
 
-  std::vector<double> sx, sy;
+  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeDisplacements(sx, sy);
 
   EXPECT_EQ(sx.size(), N2);
@@ -390,8 +396,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
 
   for (int i=0; i<N2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx[i], 0.0);
-    ASSERT_DOUBLE_EQ(sy[i], 0.0);
+    ASSERT_DOUBLE_EQ(sx(i, 0), 0.0);
+    ASSERT_DOUBLE_EQ(sy(i, 0), 0.0);
   }
 }
 
@@ -406,14 +412,14 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeZero)
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(0.0);
 
-  std::vector<double> ref_z;
+  Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(N2, 1);
   ref_model.ComputeHeights(ref_z);
 
   WaveSimulationFFT2Impl model(this->N, this->L);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  std::vector<double> z;
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeHeights(z);
 
   EXPECT_EQ(ref_z.size(), N2);
@@ -421,7 +427,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeZero)
 
   for (int i=0; i<N2; ++i)
   {
-    ASSERT_DOUBLE_EQ(z[i], ref_z[i]);
+    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
   }
 }
 
@@ -433,14 +439,14 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeNonZero)
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(31.7);
 
-  std::vector<double> ref_z;
+  Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(N2, 1);
   ref_model.ComputeHeights(ref_z);
 
   WaveSimulationFFT2Impl model(this->N, this->L);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(31.7);
 
-  std::vector<double> z;
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeHeights(z);
 
   EXPECT_EQ(ref_z.size(), N2);
@@ -448,7 +454,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeNonZero)
 
   for (int i=0; i<N2; ++i)
   {
-    ASSERT_DOUBLE_EQ(z[i], ref_z[i]);
+    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
   }
 }
 
@@ -460,14 +466,16 @@ TEST_F(TestFixtureWaveSimulationFFT2, Displacement)
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(12.2);
 
-  std::vector<double> ref_sx, ref_sy;
+  Eigen::MatrixXd ref_sx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd ref_sy = Eigen::MatrixXd::Zero(N2, 1);
   ref_model.ComputeDisplacements(ref_sx, ref_sy);
 
   WaveSimulationFFT2Impl model(this->N, this->L);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
-  std::vector<double> sx, sy;
+  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(N2, 1);
   model.ComputeDisplacements(sx, sy);
 
   EXPECT_EQ(ref_sx.size(), N2);
@@ -477,8 +485,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, Displacement)
 
   for (int i=0; i<N2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx[i], ref_sx[i]);
-    ASSERT_DOUBLE_EQ(sy[i], ref_sy[i]);
+    ASSERT_DOUBLE_EQ(sx(i, 0), ref_sx(i, 0));
+    ASSERT_DOUBLE_EQ(sy(i, 0), ref_sy(i, 0));
   }
 }
 
@@ -490,14 +498,16 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightDerivatives)
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(12.2);
 
-  std::vector<double> ref_dhdx, ref_dhdy;
+  Eigen::MatrixXd ref_dhdx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd ref_dhdy = Eigen::MatrixXd::Zero(N2, 1);
   ref_model.ComputeHeightDerivatives(ref_dhdx, ref_dhdy);
 
   WaveSimulationFFT2Impl model(this->N, this->L);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
-  std::vector<double> dhdx, dhdy;
+  Eigen::MatrixXd dhdx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd dhdy = Eigen::MatrixXd::Zero(N2, 1);
   ref_model.ComputeHeightDerivatives(dhdx, dhdy);
 
   EXPECT_EQ(ref_dhdx.size(), N2);
@@ -507,8 +517,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightDerivatives)
 
   for (int i=0; i<N2; ++i)
   {
-    ASSERT_DOUBLE_EQ(dhdx[i], ref_dhdx[i]);
-    ASSERT_DOUBLE_EQ(dhdy[i], ref_dhdy[i]);
+    ASSERT_DOUBLE_EQ(dhdx(i, 0), ref_dhdx(i, 0));
+    ASSERT_DOUBLE_EQ(dhdy(i, 0), ref_dhdy(i, 0));
   }
 }
 
@@ -520,14 +530,18 @@ TEST_F(TestFixtureWaveSimulationFFT2, DisplacementDerivatives)
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(12.2);
 
-  std::vector<double> ref_dsxdx, ref_dsydy, ref_dsxdy;
+  Eigen::MatrixXd ref_dsxdx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd ref_dsydy = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd ref_dsxdy = Eigen::MatrixXd::Zero(N2, 1);
   ref_model.ComputeDisplacementDerivatives(ref_dsxdx, ref_dsydy, ref_dsxdy);
 
   WaveSimulationFFT2Impl model(this->N, this->L);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
-  std::vector<double> dsxdx, dsydy, dsxdy;
+  Eigen::MatrixXd dsxdx = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd dsydy = Eigen::MatrixXd::Zero(N2, 1);
+  Eigen::MatrixXd dsxdy = Eigen::MatrixXd::Zero(N2, 1);
   ref_model.ComputeDisplacementDerivatives(dsxdx, dsydy, dsxdy);
 
   EXPECT_EQ(ref_dsxdx.size(), N2);
@@ -539,9 +553,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, DisplacementDerivatives)
 
   for (int i=0; i<N2; ++i)
   {
-    ASSERT_DOUBLE_EQ(dsxdx[i], ref_dsxdx[i]);
-    ASSERT_DOUBLE_EQ(dsydy[i], ref_dsydy[i]);
-    ASSERT_DOUBLE_EQ(dsxdy[i], ref_dsxdy[i]);
+    ASSERT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
+    ASSERT_DOUBLE_EQ(dsydy(i, 0), ref_dsydy(i, 0));
+    ASSERT_DOUBLE_EQ(dsxdy(i, 0), ref_dsxdy(i, 0));
   }
 }
 
