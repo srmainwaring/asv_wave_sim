@@ -210,14 +210,14 @@ class gz::sim::systems::WavesVisualPrivate
   public: DisplacementMapPtr displacementMap;
 
   std::unique_ptr<gz::waves::WaveSimulation> mWaveSim;
-  std::vector<double> mHeights;
-  std::vector<double> mDhdx;
-  std::vector<double> mDhdy;
-  std::vector<double> mDisplacementsX;
-  std::vector<double> mDisplacementsY;
-  std::vector<double> mDxdx;
-  std::vector<double> mDydy;
-  std::vector<double> mDxdy;
+  Eigen::VectorXd mHeights;
+  Eigen::VectorXd mDhdx;
+  Eigen::VectorXd mDhdy;
+  Eigen::VectorXd mDisplacementsX;
+  Eigen::VectorXd mDisplacementsY;
+  Eigen::VectorXd mDxdx;
+  Eigen::VectorXd mDydy;
+  Eigen::VectorXd mDxdy;
 
   public: void CreateShaderMaterial();
 

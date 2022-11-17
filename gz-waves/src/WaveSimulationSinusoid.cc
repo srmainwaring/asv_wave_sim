@@ -31,7 +31,7 @@ namespace waves
   /// 4. allow the dispersion relation to be configured - or set depth
   ///
 
-  ///////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   // WaveSimulationSinusoid::Impl
 
   /// model description
@@ -64,6 +64,7 @@ namespace waves
   /// dh/dx = - da/dy A sa
   ///
 
+  //////////////////////////////////////////////////
   class WaveSimulationSinusoid::Impl
   {
     public: ~Impl();
@@ -123,10 +124,12 @@ namespace waves
     private: double time{0.0};
   };
 
+  //////////////////////////////////////////////////
   WaveSimulationSinusoid::Impl::~Impl()
   {
   }
 
+  //////////////////////////////////////////////////
   WaveSimulationSinusoid::Impl::Impl(
     int _N,
     double _L) :
@@ -137,11 +140,13 @@ namespace waves
   {
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::SetWindVelocity(double _ux, double _uy)
   {
     // @TODO NO IMPLEMENTATION
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::SetDirection(double _dir_x, double _dir_y)
   {
     this->dir_x = _dir_x;
@@ -149,21 +154,25 @@ namespace waves
     this->wave_angle = std::atan2(_dir_y, _dir_x);
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::SetAmplitude(double _amplitude)
   {
     this->amplitude = _amplitude;
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::SetPeriod(double _period)
   {
     this->period = _period;
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::SetTime(double _time)
   {
     this->time = _time;
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeHeights(
     std::vector<double>& _heights)
   {
@@ -200,6 +209,7 @@ namespace waves
     }
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeHeightDerivatives(
     std::vector<double>& _dhdx,
     std::vector<double>& _dhdy)
@@ -241,6 +251,7 @@ namespace waves
     }
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeDisplacements(
     std::vector<double>& _sx,
     std::vector<double>& _sy)
@@ -248,6 +259,7 @@ namespace waves
     // No xy-displacement
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeDisplacementDerivatives(
     std::vector<double>& _dsxdx,
     std::vector<double>& _dsydy,
@@ -256,6 +268,7 @@ namespace waves
     // No xy-displacement
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeDisplacementsAndDerivatives(
     std::vector<double>& _h,
     std::vector<double>& _sx,
@@ -305,13 +318,13 @@ namespace waves
     }
   }
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // WaveSimulationSinusoid
-
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   WaveSimulationSinusoid::~WaveSimulationSinusoid()
   {
   }
 
+  //////////////////////////////////////////////////
   WaveSimulationSinusoid::WaveSimulationSinusoid(
     int _N,
     double _L) :
@@ -319,82 +332,47 @@ namespace waves
   {
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::SetWindVelocity(double _ux, double _uy)
   {
     impl->SetWindVelocity(_ux, _uy);
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::SetDirection(double _dir_x, double _dir_y)
   {
     impl->SetDirection(_dir_x, _dir_y);
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::SetAmplitude(double _amplitude)
   {
     impl->SetAmplitude(_amplitude);
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::SetPeriod(double _period)
   {
     impl->SetPeriod(_period);
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::SetTime(double _time)
   {
     impl->SetTime(_time);
   }
 
-  void WaveSimulationSinusoid::ComputeHeights(
-    std::vector<double>& _h)
-  {
-    impl->ComputeHeights(_h);
-  }
-
-  void WaveSimulationSinusoid::ComputeHeightDerivatives(
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy)
-  {
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
-  }
-
-  void WaveSimulationSinusoid::ComputeDisplacements(
-    std::vector<double>& _sx,
-    std::vector<double>& _sy)
-  {
-    impl->ComputeDisplacements(_sx, _sy);
-  }
-
-  void WaveSimulationSinusoid::ComputeDisplacementDerivatives(
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
-  {
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
-  }
-
-  void WaveSimulationSinusoid::ComputeDisplacementsAndDerivatives(
-    std::vector<double>& _h,
-    std::vector<double>& _sx,
-    std::vector<double>& _sy,
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy,
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
-  {
-    impl->ComputeDisplacementsAndDerivatives(
-        _h, _dhdx, _dhdy, _sx, _sy, _dsxdx, _dsydy, _dsxdy);
-  }
-
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::ComputeHeights(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {
     auto size = impl->N2;
     std::vector<double> h(size);
-    this->ComputeHeights(h);
+    impl->ComputeHeights(h);
     _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::ComputeHeightDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
@@ -402,11 +380,12 @@ namespace waves
     auto size = impl->N2;
     std::vector<double> dhdx(size);
     std::vector<double> dhdy(size);
-    this->ComputeHeightDerivatives(dhdx, dhdy);
+    impl->ComputeHeightDerivatives(dhdx, dhdy);
     _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
     _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::ComputeDisplacements(
     Eigen::Ref<Eigen::MatrixXd> _sx,
     Eigen::Ref<Eigen::MatrixXd> _sy)
@@ -414,11 +393,12 @@ namespace waves
     auto size = impl->N2;
     std::vector<double> sx(size);
     std::vector<double> sy(size);
-    this->ComputeDisplacements(sx, sy);
+    impl->ComputeDisplacements(sx, sy);
     _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
     _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::ComputeDisplacementDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
@@ -428,12 +408,13 @@ namespace waves
     std::vector<double> dsxdx(size);
     std::vector<double> dsydy(size);
     std::vector<double> dsxdy(size);
-    this->ComputeDisplacementDerivatives(dsxdx, dsxdy, dsxdy);
+    impl->ComputeDisplacementDerivatives(dsxdx, dsxdy, dsxdy);
     _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
     _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
     _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::ComputeDisplacementsAndDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _h,
     Eigen::Ref<Eigen::MatrixXd> _sx,
@@ -453,7 +434,7 @@ namespace waves
     std::vector<double> dsxdx(size);
     std::vector<double> dsydy(size);
     std::vector<double> dsxdy(size);
-    this->ComputeDisplacementsAndDerivatives(
+    impl->ComputeDisplacementsAndDerivatives(
         h, sx, sy, dhdx, dhdy, dsxdx, dsydy, dsxdy);
     _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
     _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());

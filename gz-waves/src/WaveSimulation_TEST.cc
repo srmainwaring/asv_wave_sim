@@ -23,6 +23,8 @@
 #include "gz/waves/WaveSimulationTrochoid.hh"
 #include "gz/waves/WaveSpectrum.hh"
 
+#include <Eigen/Dense>
+
 #include <gtest/gtest.h>
 
 #include <iostream>
@@ -32,7 +34,10 @@
 using namespace gz;
 using namespace waves;
 
-///////////////////////////////////////////////////////////////////////////////
+using Eigen::MatrixXd;
+
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Utilities
 
 std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
@@ -42,7 +47,8 @@ std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
   return os;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Define tests
 
 TEST(WaveSimulation, WaveSimulationTrochoid)
@@ -54,16 +60,16 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   // Create the wave simulation.
   int N = 4;
   double L = 4.0;
-  std::unique_ptr<WaveSimulation> waveSim(new WaveSimulationTrochoid(N, L, waveParams));
+  std::unique_ptr<WaveSimulation> waveSim(
+      new WaveSimulationTrochoid(N, L, waveParams));
 
   // Compute the initial height field.
-  std::vector<double> h;
+  Eigen::VectorXd h(N * N);
   waveSim->SetTime(0.0);
   waveSim->ComputeHeights(h);
 
   // Wave heights should be zero. 
-  // std::cout << h << std::endl;
-
+  // std::cerr << h << std::endl;
 
   waveParams->SetNumber(3);
   waveParams->SetAngle(0.6);
@@ -77,7 +83,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   waveSim->ComputeHeights(h);
 
   // Wave heights should be non-zero. 
-  // std::cout << h << std::endl;
+  // std::cerr << h << std::endl;
 
   EXPECT_EQ(h.size(), N*N);
 }
@@ -107,6 +113,7 @@ protected:
   const double k{w * w / 9.81};
 };
 
+//////////////////////////////////////////////////
 TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
 { 
   double time = 5.0;
@@ -124,7 +131,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
   double dl = L / N;
 
   // Verify heights
-  std::vector<double> h(N2);
+  Eigen::VectorXd h(N2);
   waveSim->ComputeHeights(h);
 
   for (size_t iy=0, idx=0; iy<N; ++iy)
@@ -142,6 +149,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
   }
 }
 
+//////////////////////////////////////////////////
 TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
 { 
   double time = 5.0;
@@ -163,7 +171,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
   double sd = std::sin(theta);
 
   // Verify heights
-  std::vector<double> h(N2);
+  Eigen::VectorXd h(N2);
   waveSim->ComputeHeights(h);
 
   for (size_t iy=0, idx=0; iy<N; ++iy)
@@ -181,6 +189,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
   }
 }
 
+//////////////////////////////////////////////////
 TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
 {
   // Wave simulation
@@ -192,8 +201,8 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
   waveSim->SetTime(5.0);
 
   // Verify displacements (expect zero for sinusoid waves)
-  std::vector<double> sx(N2);
-  std::vector<double> sy(N2);
+  Eigen::VectorXd sx(N2);
+  Eigen::VectorXd sy(N2);
   waveSim->ComputeDisplacements(sx, sy);
 
   for (size_t iy=0, idx=0; iy<N; ++iy)
@@ -206,6 +215,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
   }
 }
 
+//////////////////////////////////////////////////
 // This test fails because it assumes the OceanTile is using 
 // a WaveSimulationSinusoid (which it isnt)
 #if 0
@@ -284,7 +294,8 @@ TEST(OceanTile, WaveSimulationSinusoid)
 }
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Run tests
 
 int main(int argc, char **argv)

@@ -18,14 +18,16 @@
 
 #include "WaveSimulation.hh"
 
+#include <Eigen/Dense>
+
 #include <memory>
-#include <vector>
+
+using Eigen::MatrixXd;
 
 namespace gz
 {
 namespace waves
 {
-
   class WaveParameters;
   class WaveSimulationTrochoidImpl;
 
@@ -41,32 +43,6 @@ namespace waves
     public: virtual void SetWindVelocity(double _ux, double _uy) override;
 
     public: virtual void SetTime(double _time) override;
-
-    public: virtual void ComputeHeights(
-      std::vector<double>& _h) override;
-
-    public: virtual void ComputeHeightDerivatives(
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy) override;
-
-    public: virtual void ComputeDisplacements(
-      std::vector<double>& _sx,
-      std::vector<double>& _sy) override;
-
-    public: virtual void ComputeDisplacementDerivatives(
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) override;
-
-    public: virtual void ComputeDisplacementsAndDerivatives(
-      std::vector<double>& _h,
-      std::vector<double>& _sx,
-      std::vector<double>& _sy,
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy,
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) override;
 
     public: virtual void ComputeHeights(
       Eigen::Ref<Eigen::MatrixXd> _h) override;
@@ -96,7 +72,6 @@ namespace waves
 
     private: std::unique_ptr<WaveSimulationTrochoidImpl> impl;
   };
-
 }
 }
 

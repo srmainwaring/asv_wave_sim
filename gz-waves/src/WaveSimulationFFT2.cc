@@ -44,7 +44,7 @@ namespace gz
 {
 namespace waves
 {
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   WaveSimulationFFT2Impl::~WaveSimulationFFT2Impl()
   {
     fftw_destroy_plan(mFFTPlan0);
@@ -75,7 +75,7 @@ namespace waves
     fftw_free(mIn7);
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   WaveSimulationFFT2Impl::WaveSimulationFFT2Impl(int _N, double _L) :
     mN(_N),
     mN2(_N * _N),
@@ -123,7 +123,7 @@ namespace waves
     mFFTPlan7 = fftw_plan_dft_2d(mN, mN, mIn7, mOut7, FFTW_BACKWARD, FFTW_ESTIMATE);
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
   {
     // Update wind velocity and recompute base amplitudes.
@@ -133,20 +133,20 @@ namespace waves
     ComputeBaseAmplitudes();
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::SetTime(double _time)
   {
     ComputeCurrentAmplitudes(_time);
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::SetLambda(double _lambda)
   {
     mLambda = _lambda;
     ComputeBaseAmplitudes();
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeHeights(
     std::vector<double>& _heights)
   {
@@ -183,7 +183,7 @@ namespace waves
     }
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeHeightDerivatives(
     std::vector<double>& _dhdx,
     std::vector<double>& _dhdy)
@@ -233,7 +233,7 @@ namespace waves
     }
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeDisplacements(
     std::vector<double>& _sx,
     std::vector<double>& _sy)
@@ -282,7 +282,7 @@ namespace waves
     }
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeDisplacementDerivatives(
     std::vector<double>& _dsxdx,
     std::vector<double>& _dsydy,
@@ -342,7 +342,7 @@ namespace waves
     }
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
     // gravity acceleration [m/s^2] 
@@ -468,7 +468,7 @@ namespace waves
     }
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
   {
     // alias
@@ -611,7 +611,7 @@ namespace waves
     }
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudesReference()
   {
     // storage for Fourier coefficients
@@ -821,7 +821,7 @@ namespace waves
 
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesReference(double _time)
   {
     // alias
@@ -945,7 +945,7 @@ namespace waves
 
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   double WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
       double k, double u10, double cap_omega_c)
   {
@@ -1039,7 +1039,7 @@ namespace waves
     return S;
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   double WaveSimulationFFT2Impl::ECKVSpreadingFunction(
       double k, double phi, double u10, double cap_omega_c)
   {
@@ -1060,7 +1060,7 @@ namespace waves
     return cap_phi;
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   double WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
       double s, double phi, double u10, double cap_omega_c)
   {
@@ -1077,90 +1077,41 @@ namespace waves
     return cap_phi;
   }
 
-  /////////////////////////////////////////////////
-  // WaveSimulationFFT2
-
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   WaveSimulationFFT2::~WaveSimulationFFT2()
   {
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   WaveSimulationFFT2::WaveSimulationFFT2(int _N, double _L) :
     impl(new WaveSimulationFFT2Impl(_N, _L))
   {
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::SetWindVelocity(double _ux, double _uy)
   {
     impl->SetWindVelocity(_ux, _uy);
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::SetTime(double _time)
   {
     impl->SetTime(_time);
   }
 
-  /////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeHeights(
-    std::vector<double>& _h)
-  {
-    impl->ComputeHeights(_h);    
-  }
-
-  /////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeHeightDerivatives(
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy)
-  {
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);  
-  }
-
-  /////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeDisplacements(
-    std::vector<double>& _sx,
-    std::vector<double>& _sy)
-  {
-    impl->ComputeDisplacements(_sx, _sy);    
-  }
-
-  /////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeDisplacementDerivatives(
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
-  {
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);      
-  }
-
-  /////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeDisplacementsAndDerivatives(
-    std::vector<double>& _h,
-    std::vector<double>& _sx,
-    std::vector<double>& _sy,
-    std::vector<double>& _dhdx,
-    std::vector<double>& _dhdy,
-    std::vector<double>& _dsxdx,
-    std::vector<double>& _dsydy,
-    std::vector<double>& _dsxdy)
-  {
-    impl->ComputeHeights(_h);
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
-    impl->ComputeDisplacements(_sx, _sy);
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);    
-  }
-
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeHeights(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {
     auto size = impl->mN2;
     std::vector<double> h(size);
-    this->ComputeHeights(h);
+    impl->ComputeHeights(h);
     _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeHeightDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
@@ -1168,11 +1119,12 @@ namespace waves
     auto size = impl->mN2;
     std::vector<double> dhdx(size);
     std::vector<double> dhdy(size);
-    this->ComputeHeightDerivatives(dhdx, dhdy);
+    impl->ComputeHeightDerivatives(dhdx, dhdy);
     _dhdx = Eigen::Map<Eigen::VectorXd>(dhdx.data(), dhdx.size());
     _dhdy = Eigen::Map<Eigen::VectorXd>(dhdy.data(), dhdy.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeDisplacements(
     Eigen::Ref<Eigen::MatrixXd> _sx,
     Eigen::Ref<Eigen::MatrixXd> _sy)
@@ -1180,11 +1132,12 @@ namespace waves
     auto size = impl->mN2;
     std::vector<double> sx(size);
     std::vector<double> sy(size);
-    this->ComputeDisplacements(sx, sy);
+    impl->ComputeDisplacements(sx, sy);
     _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
     _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeDisplacementDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
@@ -1194,12 +1147,13 @@ namespace waves
     std::vector<double> dsxdx(size);
     std::vector<double> dsydy(size);
     std::vector<double> dsxdy(size);
-    this->ComputeDisplacementDerivatives(dsxdx, dsxdy, dsxdy);
+    impl->ComputeDisplacementDerivatives(dsxdx, dsxdy, dsxdy);
     _dsxdx = Eigen::Map<Eigen::VectorXd>(dsxdx.data(), dsxdx.size());
     _dsydy = Eigen::Map<Eigen::VectorXd>(dsydy.data(), dsydy.size());
     _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
   }
 
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeDisplacementsAndDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _h,
     Eigen::Ref<Eigen::MatrixXd> _sx,
@@ -1219,8 +1173,10 @@ namespace waves
     std::vector<double> dsxdx(size);
     std::vector<double> dsydy(size);
     std::vector<double> dsxdy(size);
-    this->ComputeDisplacementsAndDerivatives(
-        h, sx, sy, dhdx, dhdy, dsxdx, dsydy, dsxdy);
+    impl->ComputeHeights(h);
+    impl->ComputeHeightDerivatives(dhdx, dhdy);
+    impl->ComputeDisplacements(sx, sy);
+    impl->ComputeDisplacementDerivatives(dsxdx, dsydy, dsxdy);
     _h = Eigen::Map<Eigen::VectorXd>(h.data(), h.size());
     _sx = Eigen::Map<Eigen::VectorXd>(sx.data(), sx.size());
     _sy = Eigen::Map<Eigen::VectorXd>(sy.data(), sy.size());
@@ -1231,7 +1187,7 @@ namespace waves
     _dsxdy = Eigen::Map<Eigen::VectorXd>(dsxdy.data(), dsxdy.size());
   }
 
-  /////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::SetLambda(double _lambda)
   {
     impl->SetLambda(_lambda);
