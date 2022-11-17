@@ -23,9 +23,11 @@
 #include <fftw3.h>
 
 #include <complex>
-#include <vector>
 
+using Eigen::MatrixXcd;
 using Eigen::MatrixXd;
+using Eigen::VectorXcd;
+using Eigen::VectorXd;
 
 namespace gz
 {
@@ -98,14 +100,14 @@ namespace waves
     /// \brief Horizontal displacement scaling factor. Zero for no displacement
     double mLambda;
 
-    std::vector<complex> mH;      // FFT0 - height
-    std::vector<complex> mHikx;   // FFT1 - d height / dx
-    std::vector<complex> mHiky;   // FFT1 - d height / dy
-    std::vector<complex> mDx;     // FFT3 - displacement x
-    std::vector<complex> mDy;     // FFT4 - displacement y
-    std::vector<complex> mHkxkx;  // FFT5 - d displacement x / dx
-    std::vector<complex> mHkyky;  // FFT6 - d displacement y / dy
-    std::vector<complex> mHkxky;  // FFT7 - d displacement x / dy = d displacement y / dx
+    Eigen::VectorXcd mH;      // FFT0 - height
+    Eigen::VectorXcd mHikx;   // FFT1 - d height / dx
+    Eigen::VectorXcd mHiky;   // FFT1 - d height / dy
+    Eigen::VectorXcd mDx;     // FFT3 - displacement x
+    Eigen::VectorXcd mDy;     // FFT4 - displacement y
+    Eigen::VectorXcd mHkxkx;  // FFT5 - d displacement x / dx
+    Eigen::VectorXcd mHkyky;  // FFT6 - d displacement y / dy
+    Eigen::VectorXcd mHkxky;  // FFT7 - d displacement x / dy = d displacement y / dx
 
     fftw_complex* mIn0;
     fftw_complex* mIn1;
@@ -177,10 +179,10 @@ namespace waves
     double  ky_Ny = this->ky_f * this->Ny / 2.0;
 
     // angular spatial frequencies in fft and math order
-    std::vector<double> kx_fft  = std::vector<double>(this->Nx, 0.0);
-    std::vector<double> ky_fft  = std::vector<double>(this->Ny, 0.0);
-    std::vector<double> kx_math = std::vector<double>(this->Nx, 0.0);
-    std::vector<double> ky_math = std::vector<double>(this->Ny, 0.0);
+    Eigen::VectorXd kx_fft  = Eigen::VectorXd::Zero(this->Nx);
+    Eigen::VectorXd ky_fft  = Eigen::VectorXd::Zero(this->Ny);
+    Eigen::VectorXd kx_math = Eigen::VectorXd::Zero(this->Nx);
+    Eigen::VectorXd ky_math = Eigen::VectorXd::Zero(this->Ny);
 
     // set to 1 to use a symmetric spreading function (=> standing waves)
     bool use_symmetric_spreading_fn = false;
@@ -189,40 +191,39 @@ namespace waves
     /// \note: use flattened array storage for optimised version
 
     // square-root of two-sided discrete elevation variance spectrum
-    std::vector<double> cap_psi_2s_root =
-        std::vector<double>(this->Nx * this->Ny, 0.0);
+    Eigen::VectorXd cap_psi_2s_root =
+        Eigen::VectorXd::Zero(this->Nx * this->Ny);
 
     // iid random normals for real and imaginary parts of the amplitudes
-    std::vector<double> rho =
-        std::vector<double>(this->Nx * this->Ny, 0.0);
-    std::vector<double> sigma =
-        std::vector<double>(this->Nx * this->Ny, 0.0);
+    Eigen::VectorXd rho = Eigen::VectorXd::Zero(this->Nx * this->Ny);
+    Eigen::VectorXd sigma = Eigen::VectorXd::Zero(this->Nx * this->Ny);
 
     // angular temporal frequency
-    std::vector<double> omega_k =
-        std::vector<double>(this->Nx * this->Ny, 0.0);
+    Eigen::VectorXd omega_k = Eigen::VectorXd::Zero(this->Nx * this->Ny);
 
     //////////////////////////////////////////////////
     /// \note: use 2d array storage for reference version, resized if required
 
     // square-root of two-sided discrete elevation variance spectrum
-    std::vector<std::vector<double>> cap_psi_2s_root_ref;
+    Eigen::MatrixXd cap_psi_2s_root_ref;
 
     // iid random normals for real and imaginary parts of the amplitudes
-    std::vector<std::vector<double>> rho_ref;
-    std::vector<std::vector<double>> sigma_ref;
+    Eigen::MatrixXd rho_ref;
+    Eigen::MatrixXd sigma_ref;
 
     // angular temporal frequency
-    std::vector<std::vector<double>> omega_k_ref;
+    Eigen::MatrixXd omega_k_ref;
 
-    static double ECKVOmniDirectionalSpectrum(double k, double u10, double cap_omega_c=0.84);
-    static double ECKVSpreadingFunction(double k, double phi, double u10, double cap_omega_c=0.84);
-    static double Cos2SSpreadingFunction(double s_param, double phi, double u10, double cap_omega_c=0.84);
+    static double ECKVOmniDirectionalSpectrum(
+        double k, double u10, double cap_omega_c=0.84);
+    static double ECKVSpreadingFunction(
+        double k, double phi, double u10, double cap_omega_c=0.84);
+    static double Cos2SSpreadingFunction(
+        double s_param, double phi, double u10, double cap_omega_c=0.84);
 
     /// \brief For testing
     friend class TestFixtureWaveSimulationFFT2;
   };
-
 }
 }
 

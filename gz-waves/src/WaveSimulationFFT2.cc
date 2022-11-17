@@ -40,9 +40,11 @@
 
 #include <complex>
 #include <random>
-#include <vector>
 
+using Eigen::MatrixXcd;
 using Eigen::MatrixXd;
+using Eigen::VectorXcd;
+using Eigen::VectorXd;
 
 namespace gz
 {
@@ -313,17 +315,18 @@ namespace waves
     const double g = 9.81;
 
     // storage for Fourier coefficients
-    mH.resize(mN2, complex(0.0, 0.0));
-    mHikx.resize(mN2, complex(0.0, 0.0));
-    mHiky.resize(mN2, complex(0.0, 0.0));
-    mDx.resize(mN2, complex(0.0, 0.0));
-    mDy.resize(mN2, complex(0.0, 0.0));
-    mHkxkx.resize(mN2, complex(0.0, 0.0));
-    mHkyky.resize(mN2, complex(0.0, 0.0));
-    mHkxky.resize(mN2, complex(0.0, 0.0));
+    mH = Eigen::VectorXcd::Zero(mN2);
+    mHikx = Eigen::VectorXcd::Zero(mN2);
+    mHiky = Eigen::VectorXcd::Zero(mN2);
+    mDx = Eigen::VectorXcd::Zero(mN2);
+    mDy = Eigen::VectorXcd::Zero(mN2);
+    mHkxkx = Eigen::VectorXcd::Zero(mN2);
+    mHkyky = Eigen::VectorXcd::Zero(mN2);
+    mHkxky = Eigen::VectorXcd::Zero(mN2);
 
     // continuous two-sided elevation variance spectrum
-    std::vector<double> cap_psi_2s_math(this->Nx * this->Ny, 0.0);
+    Eigen::VectorXd cap_psi_2s_math =
+        Eigen::VectorXd::Zero(this->Nx * this->Ny);
 
     // calculate spectrum in math-order (not vectorised)
     for (int ikx = 0; ikx < this->Nx; ++ikx)
@@ -376,7 +379,7 @@ namespace waves
     }
 
     // convert to fft-order
-    std::vector<double> cap_psi_2s_fft(this->Nx * this->Ny, 0.0);
+    Eigen::VectorXd cap_psi_2s_fft = Eigen::VectorXd::Zero(this->Nx * this->Ny);
     for (int ikx = 0; ikx < this->Nx; ++ikx)
     {
       int ikx_fft = (ikx + Nx/2) % Nx;
@@ -443,8 +446,8 @@ namespace waves
     auto& psi_root = this->cap_psi_2s_root;
 
     // time update
-    std::vector<double> cos_omega_k(Nx * Ny, 0.0);
-    std::vector<double> sin_omega_k(Nx * Ny, 0.0);
+    Eigen::VectorXd cos_omega_k = Eigen::VectorXd::Zero(Nx * Ny);
+    Eigen::VectorXd sin_omega_k = Eigen::VectorXd::Zero(Nx * Ny);
     for (int ikx = 0; ikx < Nx; ++ikx)
     {
       for (int iky = 0; iky < Ny; ++iky)
@@ -453,28 +456,28 @@ namespace waves
         int idx = ikx * this->Ny + iky;
 
         double omega_t = this->omega_k[idx] * _time;
-        cos_omega_k[idx] = cos(omega_t);
-        sin_omega_k[idx] = sin(omega_t);
+        cos_omega_k(idx) = cos(omega_t);
+        sin_omega_k(idx) = sin(omega_t);
       }
     }
 
     // non-vectorised reference version
-    std::vector<complex> zhat(Nx * Ny, complex(0.0, 0.0));
+    Eigen::VectorXcd zhat = Eigen::VectorXcd::Zero(Nx * Ny);
     for (int ikx = 1; ikx < Nx; ++ikx)
     {
       for (int iky = 1; iky < Ny; ++iky)
       {
-        // index for flattened array [ikx][iky]
+        // index for flattened array (ikx, iky)
         int idx = ikx * this->Ny + iky;
 
-        // index for conjugate [Nx-ikx][Ny-iky]
+        // index for conjugate (Nx-ikx, Ny-iky)
         int cdx = (Nx-ikx) * this->Ny + (Ny-iky);
 
         zhat[idx] = complex(
-            + ( r[idx] * psi_root[idx] + r[cdx] * psi_root[cdx] ) * cos_omega_k[idx]
-            + ( s[idx] * psi_root[idx] + s[cdx] * psi_root[cdx] ) * sin_omega_k[idx],
-            - ( r[idx] * psi_root[idx] - r[cdx] * psi_root[cdx] ) * sin_omega_k[idx]
-            + ( s[idx] * psi_root[idx] - s[cdx] * psi_root[cdx] ) * cos_omega_k[idx]);
+            + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_omega_k(idx)
+            + ( s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx) ) * sin_omega_k(idx),
+            - ( r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx) ) * sin_omega_k(idx)
+            + ( s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx) ) * cos_omega_k(idx));
       }
     }
 
@@ -482,17 +485,17 @@ namespace waves
     {
       int ikx = 0;
 
-      // index for flattened array [ikx][iky]
+      // index for flattened array (ikx, iky)
       int idx = ikx * this->Ny + iky;
 
-      // index for conjugate [ikx][Ny-iky]
+      // index for conjugate (ikx, Ny-iky)
       int cdx = ikx * this->Ny + (Ny-iky);
 
       zhat[idx] = complex(
-          + ( r[idx] * psi_root[idx] + r[cdx] * psi_root[cdx] ) * cos_omega_k[idx]
-          + ( s[idx] * psi_root[idx] + s[cdx] * psi_root[cdx] ) * sin_omega_k[idx],
-          - ( r[idx] * psi_root[idx] - r[cdx] * psi_root[cdx] ) * sin_omega_k[idx]
-          + ( s[idx] * psi_root[idx] - s[cdx] * psi_root[cdx] ) * cos_omega_k[idx]);
+          + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_omega_k(idx)
+          + ( s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx) ) * sin_omega_k(idx),
+          - ( r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx) ) * sin_omega_k(idx)
+          + ( s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx) ) * cos_omega_k(idx));
       zhat[cdx] = std::conj(zhat[idx]);
     }
 
@@ -500,17 +503,17 @@ namespace waves
     {
       int iky = 0;
 
-      // index for flattened array [ikx][iky]
+      // index for flattened array (ikx, iky)
       int idx = ikx * this->Ny + iky;
 
-      // index for conjugate [Nx-ikx][iky]
+      // index for conjugate (Nx-ikx, iky)
       int cdx = (Nx-ikx) * this->Ny + iky;
 
       zhat[idx] = complex(
-          + ( r[idx] * psi_root[idx] + r[cdx] * psi_root[cdx] ) * cos_omega_k[idx]
-          + ( s[idx] * psi_root[idx] + s[cdx] * psi_root[cdx] ) * sin_omega_k[idx],
-          - ( r[idx] * psi_root[idx] - r[cdx] * psi_root[cdx] ) * sin_omega_k[idx]
-          + ( s[idx] * psi_root[idx] - s[cdx] * psi_root[cdx] ) * cos_omega_k[idx]);
+          + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_omega_k(idx)
+          + ( s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx) ) * sin_omega_k(idx),
+          - ( r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx) ) * sin_omega_k(idx)
+          + ( s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx) ) * cos_omega_k(idx));
       zhat[cdx] = std::conj(zhat[idx]);
     }
 
@@ -579,28 +582,24 @@ namespace waves
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudesReference()
   {
     // storage for Fourier coefficients
-    mH.resize(mN2, complex(0.0, 0.0));
-    mHikx.resize(mN2, complex(0.0, 0.0));
-    mHiky.resize(mN2, complex(0.0, 0.0));
-    mDx.resize(mN2, complex(0.0, 0.0));
-    mDy.resize(mN2, complex(0.0, 0.0));
-    mHkxkx.resize(mN2, complex(0.0, 0.0));
-    mHkyky.resize(mN2, complex(0.0, 0.0));
-    mHkxky.resize(mN2, complex(0.0, 0.0));
+    mH = Eigen::VectorXcd::Zero(mN2);
+    mHikx = Eigen::VectorXcd::Zero(mN2);
+    mHiky = Eigen::VectorXcd::Zero(mN2);
+    mDx = Eigen::VectorXcd::Zero(mN2);
+    mDy = Eigen::VectorXcd::Zero(mN2);
+    mHkxkx = Eigen::VectorXcd::Zero(mN2);
+    mHkyky = Eigen::VectorXcd::Zero(mN2);
+    mHkxky = Eigen::VectorXcd::Zero(mN2);
 
     // arrays for reference version
-    if (cap_psi_2s_root_ref.empty() || 
-        this->cap_psi_2s_root_ref.size() != this->Nx ||
-        this->cap_psi_2s_root_ref[0].size() != this->Ny)
+    if (this->cap_psi_2s_root_ref.size() == 0 || 
+        this->cap_psi_2s_root_ref.rows() != this->Nx ||
+        this->cap_psi_2s_root_ref.cols() != this->Ny)
     {
-      this->cap_psi_2s_root_ref = std::vector<std::vector<double>>(
-          this->Nx, std::vector<double>(this->Ny, 0.0));
-      this->rho_ref = std::vector<std::vector<double>>(
-          this->Nx, std::vector<double>(this->Ny, 0.0));
-      this->sigma_ref = std::vector<std::vector<double>>(
-          this->Nx, std::vector<double>(this->Ny, 0.0));
-      this->omega_k_ref = std::vector<std::vector<double>>(
-          this->Nx, std::vector<double>(this->Ny, 0.0));
+      this->cap_psi_2s_root_ref = Eigen::MatrixXd::Zero(this->Nx, this->Ny);
+      this->rho_ref = Eigen::MatrixXd::Zero(this->Nx, this->Ny);
+      this->sigma_ref = Eigen::MatrixXd::Zero(this->Nx, this->Ny);
+      this->omega_k_ref = Eigen::MatrixXd::Zero(this->Nx, this->Ny);
     }
 
     // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
@@ -667,8 +666,7 @@ namespace waves
     #endif
 
     // continuous two-sided elevation variance spectrum
-    std::vector<std::vector<double>> cap_psi_2s_math(
-        this->Nx, std::vector<double>(this->Ny, 0.0));
+    Eigen::MatrixXd cap_psi_2s_math = Eigen::MatrixXd::Zero(this->Nx, this->Ny);
 
     // calculate spectrum in math-order (not vectorised)
     for (int ikx = 0; ikx < this->Nx; ++ikx)
@@ -681,7 +679,7 @@ namespace waves
 
         if (k == 0.0)
         {
-          cap_psi_2s_math[ikx][iky] = 0.0;
+          cap_psi_2s_math(ikx, iky) = 0.0;
         }
         else
         {
@@ -700,7 +698,7 @@ namespace waves
           }
           double cap_s = WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
               k, this->u10, this->cap_omega_c);
-          cap_psi_2s_math[ikx][iky] = cap_s * cap_psi / k;
+          cap_psi_2s_math(ikx, iky) = cap_s * cap_psi / k;
         }
       }
     }
@@ -726,15 +724,14 @@ namespace waves
     #endif
 
     // convert to fft-order
-    std::vector<std::vector<double>> cap_psi_2s_fft(
-        this->Nx, std::vector<double>(this->Ny, 0.0));
+    Eigen::MatrixXd cap_psi_2s_fft = Eigen::MatrixXd::Zero(this->Nx, this->Ny);
     for (int ikx = 0; ikx < this->Nx; ++ikx)
     {
       int ikx_fft = (ikx + Nx/2) % Nx;
       for (int iky = 0; iky < this->Ny; ++iky)
       {
         int iky_fft = (iky + Ny/2) % Ny;
-        cap_psi_2s_fft[ikx_fft][iky_fft] = cap_psi_2s_math[ikx][iky];
+        cap_psi_2s_fft(ikx_fft, iky_fft) = cap_psi_2s_math(ikx, iky);
       }
     }
 
@@ -747,8 +744,8 @@ namespace waves
     {
       for (int iky = 0; iky < this->Ny; ++iky)
       {
-        this->cap_psi_2s_root_ref[ikx][iky] =
-            cap_psi_norm * sqrt(cap_psi_2s_fft[ikx][iky] * delta_kx * delta_ky);
+        this->cap_psi_2s_root_ref(ikx, iky) =
+            cap_psi_norm * sqrt(cap_psi_2s_fft(ikx, iky) * delta_kx * delta_ky);
       }
     }
 
@@ -761,8 +758,8 @@ namespace waves
     {
       for (int iky = 0; iky < this->Ny; ++iky)
       {
-        this->rho_ref[ikx][iky] = distribution(generator);
-        this->sigma_ref[ikx][iky] = distribution(generator);
+        this->rho_ref(ikx, iky) = distribution(generator);
+        this->sigma_ref(ikx, iky) = distribution(generator);
       }
     }
 
@@ -779,10 +776,9 @@ namespace waves
         double ky = this->ky_fft[iky];
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
-        this->omega_k_ref[ikx][iky] = sqrt(g * k);
+        this->omega_k_ref(ikx, iky) = sqrt(g * k);
       }
     }
-
   }
 
   //////////////////////////////////////////////////
@@ -796,56 +792,54 @@ namespace waves
     auto& psi_root = this->cap_psi_2s_root_ref;
 
     // time update
-    std::vector<std::vector<double>> cos_omega_k(
-        Nx, std::vector<double>(Ny, 0.0));
-    std::vector<std::vector<double>> sin_omega_k(
-        Nx, std::vector<double>(Ny, 0.0));
+    Eigen::MatrixXd cos_omega_k = Eigen::MatrixXd::Zero(Nx, Ny);
+    Eigen::MatrixXd sin_omega_k = Eigen::MatrixXd::Zero(Nx, Ny);
     for (int ikx = 0; ikx < Nx; ++ikx)
     {
       for (int iky = 0; iky < Ny; ++iky)
       {
-        cos_omega_k[ikx][iky] = cos(this->omega_k_ref[ikx][iky] * _time);
-        sin_omega_k[ikx][iky] = sin(this->omega_k_ref[ikx][iky] * _time);
+        cos_omega_k(ikx, iky) = cos(this->omega_k_ref(ikx, iky) * _time);
+        sin_omega_k(ikx, iky) = sin(this->omega_k_ref(ikx, iky) * _time);
       }
     }
 
     // non-vectorised reference version
-    std::vector<std::vector<complex>> zhat(Nx, std::vector<complex>(Ny, complex(0.0, 0.0)));
+    Eigen::MatrixXcd zhat = Eigen::MatrixXcd::Zero(Nx, Ny);
     for (int ikx = 1; ikx < Nx; ++ikx)
     {
       for (int iky = 1; iky < Ny; ++iky)
       {
-        zhat[ikx][iky] = complex(
-            + ( r[ikx][iky] * psi_root[ikx][iky] + r[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * cos_omega_k[ikx][iky]
-            + ( s[ikx][iky] * psi_root[ikx][iky] + s[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * sin_omega_k[ikx][iky],
-            - ( r[ikx][iky] * psi_root[ikx][iky] - r[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * sin_omega_k[ikx][iky]
-            + ( s[ikx][iky] * psi_root[ikx][iky] - s[Nx-ikx][Ny-iky] * psi_root[Nx-ikx][Ny-iky] ) * cos_omega_k[ikx][iky]);
+        zhat(ikx, iky) = complex(
+            + ( r(ikx, iky) * psi_root(ikx, iky) + r(Nx-ikx, Ny-iky) * psi_root(Nx-ikx, Ny-iky) ) * cos_omega_k(ikx, iky)
+            + ( s(ikx, iky) * psi_root(ikx, iky) + s(Nx-ikx, Ny-iky) * psi_root(Nx-ikx, Ny-iky) ) * sin_omega_k(ikx, iky),
+            - ( r(ikx, iky) * psi_root(ikx, iky) - r(Nx-ikx, Ny-iky) * psi_root(Nx-ikx, Ny-iky) ) * sin_omega_k(ikx, iky)
+            + ( s(ikx, iky) * psi_root(ikx, iky) - s(Nx-ikx, Ny-iky) * psi_root(Nx-ikx, Ny-iky) ) * cos_omega_k(ikx, iky));
       }
     }
 
     for (int iky = 1; iky < Ny/2+1; ++iky)
     {
       int ikx = 0;
-      zhat[ikx][iky] = complex(
-          + ( r[ikx][iky] * psi_root[ikx][iky] + r[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * cos_omega_k[ikx][iky]
-          + ( s[ikx][iky] * psi_root[ikx][iky] + s[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * sin_omega_k[ikx][iky],
-          - ( r[ikx][iky] * psi_root[ikx][iky] - r[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * sin_omega_k[ikx][iky]
-          + ( s[ikx][iky] * psi_root[ikx][iky] - s[ikx][Ny-iky] * psi_root[ikx][Ny-iky] ) * cos_omega_k[ikx][iky]);
-      zhat[ikx][Ny-iky] = std::conj(zhat[ikx][iky]);
+      zhat(ikx, iky) = complex(
+          + ( r(ikx, iky) * psi_root(ikx, iky) + r(ikx, Ny-iky) * psi_root(ikx, Ny-iky) ) * cos_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) + s(ikx, Ny-iky) * psi_root(ikx, Ny-iky) ) * sin_omega_k(ikx, iky),
+          - ( r(ikx, iky) * psi_root(ikx, iky) - r(ikx, Ny-iky) * psi_root(ikx, Ny-iky) ) * sin_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) - s(ikx, Ny-iky) * psi_root(ikx, Ny-iky) ) * cos_omega_k(ikx, iky));
+      zhat(ikx, Ny-iky) = std::conj(zhat(ikx, iky));
     }
 
     for (int ikx = 1; ikx < Nx/2+1; ++ikx)
     {
       int iky = 0;
-      zhat[ikx][iky] = complex(
-          + ( r[ikx][iky] * psi_root[ikx][iky] + r[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * cos_omega_k[ikx][iky]
-          + ( s[ikx][iky] * psi_root[ikx][iky] + s[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * sin_omega_k[ikx][iky],
-          - ( r[ikx][iky] * psi_root[ikx][iky] - r[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * sin_omega_k[ikx][iky]
-          + ( s[ikx][iky] * psi_root[ikx][iky] - s[Nx-ikx][iky] * psi_root[Nx-ikx][iky] ) * cos_omega_k[ikx][iky]);
-      zhat[Nx-ikx][iky] = std::conj(zhat[ikx][iky]);
+      zhat(ikx, iky) = complex(
+          + ( r(ikx, iky) * psi_root(ikx, iky) + r(Nx-ikx, iky) * psi_root(Nx-ikx, iky) ) * cos_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) + s(Nx-ikx, iky) * psi_root(Nx-ikx, iky) ) * sin_omega_k(ikx, iky),
+          - ( r(ikx, iky) * psi_root(ikx, iky) - r(Nx-ikx, iky) * psi_root(Nx-ikx, iky) ) * sin_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) - s(Nx-ikx, iky) * psi_root(Nx-ikx, iky) ) * cos_omega_k(ikx, iky));
+      zhat(Nx-ikx, iky) = std::conj(zhat(ikx, iky));
     }
 
-    zhat[0][0] = complex(0.0, 0.0);
+    zhat(0, 0) = complex(0.0, 0.0);
 
     /// \todo: change zhat to 1D array and use directly
 
@@ -866,7 +860,7 @@ namespace waves
         // index for flattened arrays
         int idx = ikx * Ny + iky;
 
-        complex h  = zhat[ikx][iky];
+        complex h  = zhat(ikx, iky);
         complex hi = h * iunit;
         complex hok = h * ook;
         complex hiok = hi * ook;
@@ -906,7 +900,6 @@ namespace waves
         }
       }
     }
-
   }
 
   //////////////////////////////////////////////////
