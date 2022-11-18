@@ -126,7 +126,7 @@ namespace waves
       {
         for (size_t ix=0; ix<this->N; ++ix)
         {
-          // Row major index
+          // Col major index
           size_t idx = iy * this->N + ix;
 
           // Regular grid
@@ -186,7 +186,7 @@ namespace waves
       {
         for (size_t ix=0; ix<this->N; ++ix)
         {
-          // Row major index
+          // Col major index
           size_t idx = iy * this->N + ix;
 
           // Regular grid

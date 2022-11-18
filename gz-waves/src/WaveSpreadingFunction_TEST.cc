@@ -185,11 +185,11 @@ TEST(WaveSpreadingFunction, Cos2sVectorisedVirtual)
 
 TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
 {
-  constexpr double spread = 10.0;
+  const double spread = 10.0;
 
   // not used in calc, required for regression function interface only.
-  constexpr double u10 = 5.0;
-  constexpr double cap_omega_c = 0.84;
+  const double u10 = 5.0;
+  const double cap_omega_c = 0.84;
 
   { // Eigen vectorised version
     Cos2sSpreadingFunction spreadingFn(spread);
@@ -442,8 +442,8 @@ TEST(WaveSpreadingFunction, ECKVVectorisedMatrix)
 TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
 {
   // coefficients
-  constexpr double u10 = 5.0;
-  constexpr double cap_omega_c = 0.84;
+  const double u10 = 5.0;
+  const double cap_omega_c = 0.84;
 
   { // Eigen vectorised version
     ECKVSpreadingFunction spreadingFn(u10, cap_omega_c);

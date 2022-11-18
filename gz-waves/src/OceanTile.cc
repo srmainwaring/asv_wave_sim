@@ -211,7 +211,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       double amplitude = 3.0;
       double period = 10.0;
       std::unique_ptr<WaveSimulationSinusoid> waveSim(
-          new WaveSimulationSinusoid(_N, _L));
+          new WaveSimulationSinusoid(_L, _L, _N, _N));
       waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);
@@ -306,7 +306,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       double amplitude = _params->Amplitude();
       double period = _params->Period();
       std::unique_ptr<WaveSimulationSinusoid> waveSim(
-          new WaveSimulationSinusoid(_N, _L));
+          new WaveSimulationSinusoid(_L, _L, _N, _N));
       waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);

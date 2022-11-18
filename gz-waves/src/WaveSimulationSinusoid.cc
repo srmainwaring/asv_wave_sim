@@ -36,8 +36,7 @@ namespace waves
 
   /// model description
   ///
-  /// waves are defined on a Lx x Ly mesh with Nx x Ny samples
-  /// where Lx = Ly = L and Nx = Ny = N. 
+  /// Waves are defined on a lx x ly mesh with nx x ny samples.
   ///
   /// H       - wave height
   /// A       - wave amplitide = H/2
@@ -67,61 +66,68 @@ namespace waves
   //////////////////////////////////////////////////
   class WaveSimulationSinusoid::Impl
   {
-    public: ~Impl();
+    public:
+      ~Impl();
 
-    public: Impl(
-      int _N,
-      double _L);
+      Impl(double _lx, double _ly, int _nx, int _ny);
 
-    public: void SetWindVelocity(double _ux, double _uy);
+      void SetUseVectorised(bool _value);
 
-    public: void SetDirection(double _dir_x, double _dir_y);
+      void SetWindVelocity(double _ux, double _uy);
 
-    public: void SetAmplitude(double _amplitude);
+      void SetDirection(double _dir_x, double _dir_y);
 
-    public: void SetPeriod(double _period);
+      void SetAmplitude(double _value);
 
-    public: void SetTime(double _time);
+      void SetPeriod(double _value);
 
-    public: void ComputeHeights(
-      Eigen::Ref<Eigen::MatrixXd> _h);
+      void SetTime(double _value);
 
-    public: void ComputeHeightDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dhdx,
-      Eigen::Ref<Eigen::MatrixXd> _dhdy);
+      void ComputeHeights(
+          Eigen::Ref<Eigen::MatrixXd> _h);
 
-    public: void ComputeDisplacements(
-      Eigen::Ref<Eigen::MatrixXd> _sx,
-      Eigen::Ref<Eigen::MatrixXd> _sy);
+      void ComputeHeightDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _dhdx,
+          Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
-    public: void ComputeDisplacementDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> _dsydy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdy);
+      void ComputeDisplacements(
+          Eigen::Ref<Eigen::MatrixXd> _sx,
+          Eigen::Ref<Eigen::MatrixXd> _sy);
 
-    public: void ComputeDisplacementsAndDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _h,
-      Eigen::Ref<Eigen::MatrixXd> _sx,
-      Eigen::Ref<Eigen::MatrixXd> _sy,
-      Eigen::Ref<Eigen::MatrixXd> _dhdx,
-      Eigen::Ref<Eigen::MatrixXd> _dhdy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> _dsydy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdy);
+      void ComputeDisplacementDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> _dsydy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdy);
 
-    private: void ComputeBaseAmplitudes();
+      void ComputeDisplacementsAndDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _h,
+          Eigen::Ref<Eigen::MatrixXd> _sx,
+          Eigen::Ref<Eigen::MatrixXd> _sy,
+          Eigen::Ref<Eigen::MatrixXd> _dhdx,
+          Eigen::Ref<Eigen::MatrixXd> _dhdy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> _dsydy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdy);
 
-    private: void ComputeCurrentAmplitudes(double _time);
+      void ComputeBaseAmplitudes();
+
+      void ComputeCurrentAmplitudes(double _time);
     
-    public:  int N{2};
-    public:  int N2{2};
-    private: int NOver2{1};
-    private: double L{1.0};
-    private: double wave_angle{0.0};
-    private: double dir_x{1.0}, dir_y{0.0};
-    private: double amplitude{1.0};
-    private: double period{1.0};
-    private: double time{0.0};
+      bool use_vectorised{true};
+
+      int nx{2};
+      int ny{2};
+      double lx{1.0};
+      double ly{1.0};
+      double wave_angle{0.0};
+      double amplitude{1.0};
+      double period{1.0};
+      double time{0.0};
+      
+      Eigen::VectorXd x_v;
+      Eigen::VectorXd y_v;
+      Eigen::MatrixXd x_grid;
+      Eigen::MatrixXd y_grid;
   };
 
   //////////////////////////////////////////////////
@@ -131,13 +137,37 @@ namespace waves
 
   //////////////////////////////////////////////////
   WaveSimulationSinusoid::Impl::Impl(
-    int _N,
-    double _L) :
-    N(_N),
-    N2(_N * _N),
-    NOver2(_N / 2),
-    L(_L)
+      double _lx, double _ly, int _nx, int _ny) :
+    nx(_nx),
+    ny(_ny),
+    lx(_lx),
+    ly(_ly)
   {
+    // grid spacing
+    double dx = this->lx / this->nx;
+    double dy = this->ly / this->ny;
+
+    // x and y coordinates
+    double lx_min = - this->lx / 2.0;
+    double lx_max =   this->lx / 2.0;
+    double ly_min = - this->ly / 2.0;
+    double ly_max =   this->ly / 2.0;
+
+    // linspaced is on closed interval (unlike Python which is open to right)
+    this->x_v = Eigen::VectorXd::LinSpaced(nx, lx_min, lx_max - dx);
+    this->y_v = Eigen::VectorXd::LinSpaced(ny, ly_min, ly_max - dy);
+
+    // broadcast to matrices (aka meshgrid)
+    this->x_grid = Eigen::MatrixXd::Zero(this->nx, this->ny);
+    this->y_grid = Eigen::MatrixXd::Zero(this->nx, this->ny);
+    this->x_grid.colwise() += this->x_v;
+    this->y_grid.rowwise() += this->y_v.transpose();
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationSinusoid::Impl::SetUseVectorised(bool _value)
+  {
+    this->use_vectorised = _value;
   }
 
   //////////////////////////////////////////////////
@@ -149,62 +179,63 @@ namespace waves
   //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::SetDirection(double _dir_x, double _dir_y)
   {
-    this->dir_x = _dir_x;
-    this->dir_y = _dir_y;
     this->wave_angle = std::atan2(_dir_y, _dir_x);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetAmplitude(double _amplitude)
+  void WaveSimulationSinusoid::Impl::SetAmplitude(double _value)
   {
-    this->amplitude = _amplitude;
+    this->amplitude = _value;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetPeriod(double _period)
+  void WaveSimulationSinusoid::Impl::SetPeriod(double _value)
   {
-    this->period = _period;
+    this->period = _value;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetTime(double _time)
+  void WaveSimulationSinusoid::Impl::SetTime(double _value)
   {
-    this->time = _time;
+    this->time = _value;
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeHeights(
     Eigen::Ref<Eigen::MatrixXd> _heights)
   {
-    // Derived wave properties
+    // derived wave properties
     double w = 2.0 * M_PI / this->period;
     double wt = w * this->time;
     double k = Physics::DeepWaterDispersionToWavenumber(w);
     double cd = std::cos(this->wave_angle);
     double sd = std::sin(this->wave_angle);
 
-    // Wave update
-    double LOverN = this->L / this->N;
-    double LOver2 = this->L / 2.0;
-    for (size_t iy=0; iy<this->N; ++iy)
+    if (this->use_vectorised)
     {
-      // Regular grid
-      double y = iy * LOverN - LOver2;
-
-      for (size_t ix=0; ix<this->N; ++ix)
+      Eigen::MatrixXd a = k * (this->x_grid.array() * cd
+          + this->y_grid.array() * sd) - wt;
+      Eigen::MatrixXd ca = Eigen::cos(a.array());
+      Eigen::MatrixXd h = this->amplitude * ca.array();
+      _heights = h.reshaped();
+    }
+    else
+    {
+      double dx = this->lx / this->nx;
+      double dy = this->ly / this->ny;
+      double lx_min = - this->lx / 2.0;
+      double ly_min = - this->ly / 2.0;
+      for (size_t iy=0, idx=0; iy<this->ny; ++iy)
       {
-        // Row major index
-        size_t idx = iy * this->N + ix;
-
-        // Regular grid
-        double x = ix * LOverN - LOver2;
-
-        // Single wave
-        double a  = k * (x * cd + y * sd) - wt;
-        double ca = std::cos(a);
-        double h = this->amplitude * ca;
-
-        _heights(idx, 0) = h;
+        double y = iy * dy + ly_min;
+        for (size_t ix=0; ix<this->nx; ++ix, ++idx)
+        {
+          double x = ix * dx + lx_min;
+          double a  = k * (x * cd + y * sd) - wt;
+          double ca = std::cos(a);
+          double h = this->amplitude * ca;
+          _heights(idx, 0) = h;
+        }
       }
     }
   }
@@ -214,39 +245,44 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
-    // Derived wave properties
+    // derived wave properties
     double w = 2.0 * M_PI / this->period;
     double wt = w * this->time;
     double k = Physics::DeepWaterDispersionToWavenumber(w);
     double cd = std::cos(this->wave_angle);
     double sd = std::sin(this->wave_angle);
+    double dadx = k * cd;
+    double dady = k * sd;
 
-    // Wave update
-    double LOverN = this->L / this->N;
-    double LOver2 = this->L / 2.0;
-    for (size_t iy=0; iy<this->N; ++iy)
+    if (this->use_vectorised)
     {
-      // Regular grid
-      double y = iy * LOverN - LOver2;
-
-      for (size_t ix=0; ix<this->N; ++ix)
+      Eigen::MatrixXd a = k * (this->x_grid.array() * cd
+          + this->y_grid.array() * sd) - wt;
+      Eigen::MatrixXd sa = Eigen::sin(a.array());
+      Eigen::MatrixXd dhdx = - dadx * this->amplitude * sa.array();
+      Eigen::MatrixXd dhdy = - dady * this->amplitude * sa.array();
+      _dhdx = dhdx.reshaped();
+      _dhdy = dhdy.reshaped();
+    }
+    else
+    {
+      double dx = this->lx / this->nx;
+      double dy = this->ly / this->ny;
+      double lx_min = - this->lx / 2.0;
+      double ly_min = - this->ly / 2.0;
+      for (size_t iy=0, idx=0; iy<this->ny; ++iy)
       {
-        // Row major index
-        size_t idx = iy * this->N + ix;
-
-        // Regular grid
-        double x = ix * LOverN - LOver2;
-
-        // Single wave
-        double a  = k * (x * cd + y * sd) - wt;
-        double dadx = k * cd;
-        double dady = k * sd;
-        double sa = std::sin(a);
-        double dhdx = - dadx * this->amplitude * sa;
-        double dhdy = - dady * this->amplitude * sa;
-
-        _dhdx(idx, 0) = dhdx;
-        _dhdy(idx, 0) = dhdy;
+        double y = iy * dy + ly_min;
+        for (size_t ix=0; ix<this->nx; ++ix, ++idx)
+        {
+          double x = ix * dx + lx_min;
+          double a  = k * (x * cd + y * sd) - wt;
+          double sa = std::sin(a);
+          double dhdx = - dadx * this->amplitude * sa;
+          double dhdy = - dady * this->amplitude * sa;
+          _dhdx(idx, 0) = dhdx;
+          _dhdy(idx, 0) = dhdy;
+        }
       }
     }
   }
@@ -279,41 +315,50 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    // Derived wave properties
+    // derived wave properties
     double w = 2.0 * M_PI / this->period;
     double wt = w * this->time;
     double k = Physics::DeepWaterDispersionToWavenumber(w);
     double cd = std::cos(this->wave_angle);
     double sd = std::sin(this->wave_angle);
+    double dadx = k * cd;
+    double dady = k * sd;
 
-    // Wave update
-    double LOverN = this->L / this->N;
-    double LOver2 = this->L / 2.0;
-    for (size_t iy=0; iy<this->N; ++iy)
+    if (this->use_vectorised)
     {
-      double y = iy * LOverN - LOver2;
-
-      for (size_t ix=0; ix<this->N; ++ix)
+      Eigen::MatrixXd a = k * (this->x_grid.array() * cd
+          + this->y_grid.array() * sd) - wt;
+      Eigen::MatrixXd ca = Eigen::cos(a.array());
+      Eigen::MatrixXd sa = Eigen::sin(a.array());
+      Eigen::MatrixXd h = this->amplitude * ca.array();
+      Eigen::MatrixXd dhdx = - dadx * this->amplitude * sa.array();
+      Eigen::MatrixXd dhdy = - dady * this->amplitude * sa.array();
+      _h = h.reshaped();
+      _dhdx = dhdx.reshaped();
+      _dhdy = dhdy.reshaped();
+    }
+    else
+    {
+      double dx = this->lx / this->nx;
+      double dy = this->ly / this->ny;
+      double lx_min = - this->lx / 2.0;
+      double ly_min = - this->ly / 2.0;
+      for (size_t iy=0, idx=0; iy<this->ny; ++iy)
       {
-        // Row major index
-        size_t idx = iy * this->N + ix;
-
-        // Regular grid
-        double x = ix * LOverN - LOver2;
-
-        // Single wave
-        double a  = k * (x * cd + y * sd) - wt;
-        double dadx = k * cd;
-        double dady = k * sd;
-        double ca = std::cos(a);
-        double sa = std::sin(a);
-        double h = this->amplitude * ca;
-        double dhdx = - dadx * this->amplitude * sa;
-        double dhdy = - dady * this->amplitude * sa;
-
-        _h(idx, 0) = h;
-        _dhdx(idx, 0) = dhdx;
-        _dhdy(idx, 0) = dhdy;
+        double y = iy * dy + ly_min;
+        for (size_t ix=0; ix<this->nx; ++ix, ++idx)
+        {
+          double x = ix * dx + lx_min;
+          double a  = k * (x * cd + y * sd) - wt;
+          double ca = std::cos(a);
+          double sa = std::sin(a);
+          double h = this->amplitude * ca;
+          double dhdx = - dadx * this->amplitude * sa;
+          double dhdy = - dady * this->amplitude * sa;
+          _h(idx, 0) = h;
+          _dhdx(idx, 0) = dhdx;
+          _dhdy(idx, 0) = dhdy;
+        }
       }
     }
   }
@@ -326,10 +371,15 @@ namespace waves
 
   //////////////////////////////////////////////////
   WaveSimulationSinusoid::WaveSimulationSinusoid(
-    int _N,
-    double _L) :
-    impl(new WaveSimulationSinusoid::Impl(_N, _L))
+      double _lx, double _ly, int _nx, int _ny) :
+    impl(new WaveSimulationSinusoid::Impl(_lx, _ly, _nx, _ny))
   {
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationSinusoid::SetUseVectorised(bool _value)
+  {
+    impl->SetUseVectorised(_value);
   }
 
   //////////////////////////////////////////////////
@@ -345,21 +395,21 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetAmplitude(double _amplitude)
+  void WaveSimulationSinusoid::SetAmplitude(double _value)
   {
-    impl->SetAmplitude(_amplitude);
+    impl->SetAmplitude(_value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetPeriod(double _period)
+  void WaveSimulationSinusoid::SetPeriod(double _value)
   {
-    impl->SetPeriod(_period);
+    impl->SetPeriod(_value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetTime(double _time)
+  void WaveSimulationSinusoid::SetTime(double _value)
   {
-    impl->SetTime(_time);
+    impl->SetTime(_value);
   }
 
   //////////////////////////////////////////////////
@@ -374,10 +424,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
-    // impl->ComputeHeightDerivatives(_dhdx, _dhdy);
-
-    /// \todo have to switch x <-> y derivs for lighting?
-    impl->ComputeHeightDerivatives(_dhdy, _dhdx);
+    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
   }
 
   //////////////////////////////////////////////////
@@ -408,12 +455,8 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    // impl->ComputeDisplacementsAndDerivatives(
-    //     _h, _sx, _sy, _dhdx, _dhdy, _dsxdx, _dsydy, _dsxdy);
-
-    /// \todo have to switch x <-> y derivs for lighting?
     impl->ComputeDisplacementsAndDerivatives(
-        _h, _sx, _sy, _dhdy, _dhdx, _dsxdx, _dsydy, _dsxdy);
+        _h, _sx, _sy, _dhdx, _dhdy, _dsxdx, _dsydy, _dsxdy);
   }
 }
 }

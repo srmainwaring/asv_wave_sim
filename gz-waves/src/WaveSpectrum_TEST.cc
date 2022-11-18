@@ -287,8 +287,8 @@ TEST(WaveSpectrum, ECKVSpectrumVectorised)
 
 TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
 {
-  constexpr double u10 = 5.0;
-  constexpr double cap_omega_c = 0.84;
+  const double u10 = 5.0;
+  const double cap_omega_c = 0.84;
 
   { // Eigen vectorised version
     double tolerance = 1.0e-16;

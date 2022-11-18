@@ -49,21 +49,21 @@ double PiersonMoskowitzWaveSpectrum::Evaluate(double _k) const
   }
 
   // aliases
-  const double g = this->_gravity;
-  const double u = this->_u19;
+  double g = this->_gravity;
+  double u = this->_u19;
 
   // constants
-  constexpr double alpha = 0.0081;
-  constexpr double beta = 0.74;
+  const double alpha = 0.0081;
+  const double beta = 0.74;
 
   // intermediates
-  const double g2 = g * g;
-  const double k2 = _k * _k;
-  const double k3 = _k * k2;
-  const double u2 = u * u;
-  const double u4 = u2 * u2;
+  double g2 = g * g;
+  double k2 = _k * _k;
+  double k3 = _k * k2;
+  double u2 = u * u;
+  double u4 = u2 * u2;
 
-  const double cap_s = alpha / 2.0 / k3 * std::exp(-beta * g2 / k2 / u4);
+  double cap_s = alpha / 2.0 / k3 * std::exp(-beta * g2 / k2 / u4);
   return cap_s;
 }
 
@@ -85,23 +85,23 @@ void PiersonMoskowitzWaveSpectrum::Evaluate(
       Eigen::MatrixXd::Ones(rows, cols), _k);
 
   // aliases
-  const double g = this->_gravity;
-  const double u = this->_u19;
+  double g = this->_gravity;
+  double u = this->_u19;
 
   // constants
-  constexpr double alpha = 0.0081;
-  constexpr double beta = 0.74;
+  const double alpha = 0.0081;
+  const double beta = 0.74;
 
   // intermediates
-  const double g2 = g * g;
-  const double u2 = u * u;
-  const double u4 = u2 * u2;
-  const Eigen::MatrixXd k2 = Eigen::pow(k.array(), 2.0);
-  const Eigen::MatrixXd k3 = Eigen::pow(k.array(), 3.0);
+  double g2 = g * g;
+  double u2 = u * u;
+  double u4 = u2 * u2;
+  Eigen::MatrixXd k2 = Eigen::pow(k.array(), 2.0);
+  Eigen::MatrixXd k3 = Eigen::pow(k.array(), 3.0);
 
   // evaluate for k
-  const Eigen::MatrixXd cap_s = alpha / 2.0 / k3.array()
-                              * Eigen::exp(-beta * g2 / k2.array() / u4);
+  Eigen::MatrixXd cap_s = alpha / 2.0 / k3.array()
+      * Eigen::exp(-beta * g2 / k2.array() / u4);
 
   // apply filter
   _spectrum = (_k.array() == 0).select(
@@ -156,25 +156,25 @@ double ECKVWaveSpectrum::Evaluate(double _k) const
     return 0.0;
   }
 
-  const double k = _k;
+  double k = _k;
 
   // aliases
-  const double g = this->_gravity;
-  const double u10 = this->_u10;
-  const double cap_omega_c = this->_cap_omega_c;
+  double g = this->_gravity;
+  double u10 = this->_u10;
+  double cap_omega_c = this->_cap_omega_c;
 
   // constants
-  constexpr double alpha = 0.0081;
-  constexpr double beta = 1.25;
-  constexpr double cd_10n = 0.00144;
-  constexpr double ao = 0.1733;
-  constexpr double ap = 4.0;
-  constexpr double km = 370.0;
-  constexpr double cm = 0.23;
+  const double alpha = 0.0081;
+  const double beta = 1.25;
+  const double cd_10n = 0.00144;
+  const double ao = 0.1733;
+  const double ap = 4.0;
+  const double km = 370.0;
+  const double cm = 0.23;
 
   // intermediates
-  const double u_star = std::sqrt(cd_10n) * u10;
-  const double am = 0.13 * u_star / cm;
+  double u_star = std::sqrt(cd_10n) * u10;
+  double am = 0.13 * u_star / cm;
   
   double gamma = 1.7;
   if (cap_omega_c < 1.0)
@@ -186,8 +186,8 @@ double ECKVWaveSpectrum::Evaluate(double _k) const
     gamma = 1.7 + 6.0 * std::log10(cap_omega_c);
   }
 
-  const double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c, -3.0));
-  const double alpha_p = 0.006 * std::pow(cap_omega_c, 0.55);
+  double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c, -3.0));
+  double alpha_p = 0.006 * std::pow(cap_omega_c, 0.55);
 
   double alpha_m; 
   if (u_star <= cm)
@@ -199,34 +199,34 @@ double ECKVWaveSpectrum::Evaluate(double _k) const
     alpha_m = 0.01 * (1.0 + 3.0 * std::log(u_star / cm));
   }
 
-  const double ko = g / u10 / u10;
-  const double kp = ko * cap_omega_c * cap_omega_c;
+  double ko = g / u10 / u10;
+  double kp = ko * cap_omega_c * cap_omega_c;
 
-  const double cp = std::sqrt(g / kp);
-  const double c  = std::sqrt((g / k) * (1.0 + std::pow(k / km, 2.0)));
+  double cp = std::sqrt(g / kp);
+  double c  = std::sqrt((g / k) * (1.0 + std::pow(k / km, 2.0)));
 
-  const double l_pm = std::exp(-1.25 * std::pow(kp / k, 2.0));
+  double l_pm = std::exp(-1.25 * std::pow(kp / k, 2.0));
   
-  const double cap_gamma = std::exp(
+  double cap_gamma = std::exp(
       -1.0/(2.0 * std::pow(sigma, 2.0))
       * std::pow(std::sqrt(k / kp) - 1.0, 2.0)
   );
   
-  const double j_p = std::pow(gamma, cap_gamma);
+  double j_p = std::pow(gamma, cap_gamma);
   
-  const double f_p = l_pm * j_p * std::exp(
+  double f_p = l_pm * j_p * std::exp(
       -0.3162 * cap_omega_c * (std::sqrt(k / kp) - 1.0)
   );
 
-  const double f_m = l_pm * j_p * std::exp(
+  double f_m = l_pm * j_p * std::exp(
       -0.25 * std::pow(k / km - 1.0, 2.0)
   );
 
-  const double b_l = 0.5 * alpha_p * (cp / c) * f_p;
-  const double b_h = 0.5 * alpha_m * (cm / c) * f_m;
+  double b_l = 0.5 * alpha_p * (cp / c) * f_p;
+  double b_h = 0.5 * alpha_m * (cm / c) * f_m;
   
-  const double k3 = k * k * k;
-  const double cap_s = (b_l + b_h) / k3;
+  double k3 = k * k * k;
+  double cap_s = (b_l + b_h) / k3;
   
   return cap_s;
 }
@@ -249,22 +249,22 @@ void ECKVWaveSpectrum::Evaluate(
       Eigen::MatrixXd::Ones(rows, cols), _k);
 
   // aliases
-  const double g = this->_gravity;
-  const double u10 = this->_u10;
-  const double cap_omega_c = this->_cap_omega_c;
+  double g = this->_gravity;
+  double u10 = this->_u10;
+  double cap_omega_c = this->_cap_omega_c;
 
   // constants
-  constexpr double alpha = 0.0081;
-  constexpr double beta = 1.25;
-  constexpr double cd_10n = 0.00144;
-  constexpr double ao = 0.1733;
-  constexpr double ap = 4.0;
-  constexpr double km = 370.0;
-  constexpr double cm = 0.23;
+  const double alpha = 0.0081;
+  const double beta = 1.25;
+  const double cd_10n = 0.00144;
+  const double ao = 0.1733;
+  const double ap = 4.0;
+  const double km = 370.0;
+  const double cm = 0.23;
 
   // intermediates
-  const double u_star = std::sqrt(cd_10n) * u10;
-  const double am = 0.13 * u_star / cm;
+  double u_star = std::sqrt(cd_10n) * u10;
+  double am = 0.13 * u_star / cm;
   
   double gamma = 1.7;
   if (cap_omega_c < 1.0)
@@ -276,8 +276,8 @@ void ECKVWaveSpectrum::Evaluate(
     gamma = 1.7 + 6.0 * std::log10(cap_omega_c);
   }
 
-  const double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c, -3.0));
-  const double alpha_p = 0.006 * std::pow(cap_omega_c, 0.55);
+  double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c, -3.0));
+  double alpha_p = 0.006 * std::pow(cap_omega_c, 0.55);
 
   double alpha_m; 
   if (u_star <= cm)
@@ -289,38 +289,38 @@ void ECKVWaveSpectrum::Evaluate(
     alpha_m = 0.01 * (1.0 + 3.0 * std::log(u_star / cm));
   }
 
-  const double ko = g / u10 / u10;
-  const double kp = ko * cap_omega_c * cap_omega_c;
-  const double cp = std::sqrt(g / kp);
+  double ko = g / u10 / u10;
+  double kp = ko * cap_omega_c * cap_omega_c;
+  double cp = std::sqrt(g / kp);
 
-  const Eigen::MatrixXd c  = Eigen::sqrt(
+  Eigen::MatrixXd c  = Eigen::sqrt(
       (g / k.array()) * (1.0 + Eigen::pow(k.array() / km, 2.0))
   );
 
-  const Eigen::MatrixXd l_pm = Eigen::exp(
+  Eigen::MatrixXd l_pm = Eigen::exp(
       -1.25 * Eigen::pow(kp / k.array(), 2.0)
   );
   
-  const Eigen::MatrixXd cap_gamma = Eigen::exp(
+  Eigen::MatrixXd cap_gamma = Eigen::exp(
       -1.0/(2.0 * std::pow(sigma, 2.0))
       * Eigen::pow(Eigen::sqrt(k.array() / kp) - 1.0, 2.0)
   );
   
-  const Eigen::MatrixXd j_p = Eigen::pow(gamma, cap_gamma.array());
+  Eigen::MatrixXd j_p = Eigen::pow(gamma, cap_gamma.array());
   
-  const Eigen::MatrixXd f_p = l_pm.array() * j_p.array() * Eigen::exp(
+  Eigen::MatrixXd f_p = l_pm.array() * j_p.array() * Eigen::exp(
       -0.3162 * cap_omega_c * (Eigen::sqrt(k.array() / kp) - 1.0)
   );
 
-  const Eigen::MatrixXd f_m = l_pm.array() * j_p.array() * Eigen::exp(
+  Eigen::MatrixXd f_m = l_pm.array() * j_p.array() * Eigen::exp(
       -0.25 * Eigen::pow(k.array() / km - 1.0, 2.0)
   );
 
-  const Eigen::MatrixXd b_l = 0.5 * alpha_p * (cp / c.array()) * f_p.array();
-  const Eigen::MatrixXd b_h = 0.5 * alpha_m * (cm / c.array()) * f_m.array();
+  Eigen::MatrixXd b_l = 0.5 * alpha_p * (cp / c.array()) * f_p.array();
+  Eigen::MatrixXd b_h = 0.5 * alpha_m * (cm / c.array()) * f_m.array();
   
-  const Eigen::MatrixXd k3 = Eigen::pow(k.array(), 3.0);
-  const Eigen::MatrixXd cap_s = (b_l.array() + b_h.array()) / k3.array();
+  Eigen::MatrixXd k3 = Eigen::pow(k.array(), 3.0);
+  Eigen::MatrixXd cap_s = (b_l.array() + b_h.array()) / k3.array();
 
    // apply filter
   _spectrum = (_k.array() == 0).select(
