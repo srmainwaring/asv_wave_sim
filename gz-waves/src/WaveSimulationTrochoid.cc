@@ -28,39 +28,40 @@ namespace waves
   //////////////////////////////////////////////////
   class WaveSimulationTrochoidImpl
   {
-    public: ~WaveSimulationTrochoidImpl();
+  public:
+    ~WaveSimulationTrochoidImpl();
 
-    public: WaveSimulationTrochoidImpl(
-      int _N,
-      double _L,
-      std::shared_ptr<WaveParameters> _params);
+    WaveSimulationTrochoidImpl(
+        int _N,
+        double _L,
+        std::shared_ptr<WaveParameters> _params);
 
-    public: void SetWindVelocity(double _ux, double _uy);
+    void SetWindVelocity(double _ux, double _uy);
 
-    public: void SetTime(double _time);
+    void SetTime(double _time);
 
-    public: void ComputeElevation(
-      Eigen::Ref<Eigen::MatrixXd> _heights);
+    void ComputeElevation(
+        Eigen::Ref<Eigen::MatrixXd> _heights);
 
-    public: void ComputeElevationDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dhdx,
-      Eigen::Ref<Eigen::MatrixXd> _dhdy);
+    void ComputeElevationDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dhdx,
+        Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
-    public: void ComputeDisplacements(
-      Eigen::Ref<Eigen::MatrixXd> _sx,
-      Eigen::Ref<Eigen::MatrixXd> _sy);
+    void ComputeDisplacements(
+        Eigen::Ref<Eigen::MatrixXd> _sx,
+        Eigen::Ref<Eigen::MatrixXd> _sy);
 
-    public: void ComputeDisplacementsDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> _dsydy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdy);
-   
-    public:  int N;
-    public:  int N2;
-    private: int NOver2;
-    private: double L;
-    private: double time;
-    private: std::shared_ptr<WaveParameters> params;
+    void ComputeDisplacementsDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> _dsydy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdy);
+  
+    int N;
+    int N2;
+    int NOver2;
+    double L;
+    double time;
+    std::shared_ptr<WaveParameters> params;
   };
 
   //////////////////////////////////////////////////

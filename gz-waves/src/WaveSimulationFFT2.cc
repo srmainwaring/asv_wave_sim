@@ -130,6 +130,20 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::SetUseVectorised(bool _value)
+  {
+    this->use_vectorised = _value;
+    ComputeBaseAmplitudes();
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::SetLambda(double _value)
+  {
+    mLambda = _value;
+    ComputeBaseAmplitudes();
+  }
+
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
   {
     // Update wind velocity and recompute base amplitudes.
@@ -146,15 +160,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetLambda(double _lambda)
-  {
-    mLambda = _lambda;
-    ComputeBaseAmplitudes();
-  }
-
-  //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> _heights)
+    Eigen::Ref<Eigen::MatrixXd> _h)
   {
     // Populate input array
     for (size_t i=0; i<mN2; ++i)
@@ -178,7 +185,7 @@ namespace waves
       {
         int ij = ikx * this->Ny + iky;
         int xy = iky * this->Nx + ikx;
-        _heights(xy, 0) = mOut0[ij][0];
+        _h(xy, 0) = mOut0[ij][0];
       }
     }
   }
@@ -1047,15 +1054,27 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  void WaveSimulationFFT2::SetUseVectorised(bool _value)
+  {
+    impl->SetUseVectorised(_value);
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2::SetLambda(double _value)
+  {
+    impl->SetLambda(_value);
+  }
+
+  //////////////////////////////////////////////////
   void WaveSimulationFFT2::SetWindVelocity(double _ux, double _uy)
   {
     impl->SetWindVelocity(_ux, _uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetTime(double _time)
+  void WaveSimulationFFT2::SetTime(double _value)
   {
-    impl->SetTime(_time);
+    impl->SetTime(_value);
   }
 
   //////////////////////////////////////////////////
@@ -1105,12 +1124,6 @@ namespace waves
     impl->ComputeElevationDerivatives(_dhdx, _dhdy);
     impl->ComputeDisplacements(_sx, _sy);
     impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetLambda(double _lambda)
-  {
-    impl->SetLambda(_lambda);
   }
 }
 }

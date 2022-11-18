@@ -69,64 +69,64 @@ namespace waves
   //////////////////////////////////////////////////
   class WaveSimulationSinusoid::Impl
   {
-    public:
-      ~Impl();
+  public:
+    ~Impl();
 
-      Impl(double _lx, double _ly, int _nx, int _ny);
+    Impl(double _lx, double _ly, int _nx, int _ny);
 
-      void SetUseVectorised(bool _value);
+    void SetUseVectorised(bool _value);
 
-      void SetWindVelocity(double _ux, double _uy);
+    void SetDirection(double _dir_x, double _dir_y);
 
-      void SetDirection(double _dir_x, double _dir_y);
+    void SetAmplitude(double _value);
 
-      void SetAmplitude(double _value);
+    void SetPeriod(double _value);
 
-      void SetPeriod(double _value);
+    void SetWindVelocity(double _ux, double _uy);
 
-      void SetTime(double _value);
+    void SetTime(double _value);
 
-      void ComputeElevation(
-          Eigen::Ref<Eigen::MatrixXd> _h);
+    void ComputeElevation(
+        Eigen::Ref<Eigen::MatrixXd> _h);
 
-      void ComputeElevationDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> _dhdx,
-          Eigen::Ref<Eigen::MatrixXd> _dhdy);
+    void ComputeElevationDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dhdx,
+        Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
-      void ComputeDisplacements(
-          Eigen::Ref<Eigen::MatrixXd> _sx,
-          Eigen::Ref<Eigen::MatrixXd> _sy);
+    void ComputeDisplacements(
+        Eigen::Ref<Eigen::MatrixXd> _sx,
+        Eigen::Ref<Eigen::MatrixXd> _sy);
 
-      void ComputeDisplacementsDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-          Eigen::Ref<Eigen::MatrixXd> _dsydy,
-          Eigen::Ref<Eigen::MatrixXd> _dsxdy);
+    void ComputeDisplacementsDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> _dsydy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdy);
 
-      void ComputeDisplacementsAndDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> _h,
-          Eigen::Ref<Eigen::MatrixXd> _sx,
-          Eigen::Ref<Eigen::MatrixXd> _sy,
-          Eigen::Ref<Eigen::MatrixXd> _dhdx,
-          Eigen::Ref<Eigen::MatrixXd> _dhdy,
-          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-          Eigen::Ref<Eigen::MatrixXd> _dsydy,
-          Eigen::Ref<Eigen::MatrixXd> _dsxdy);
-   
-      bool use_vectorised{true};
+    void ComputeDisplacementsAndDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _h,
+        Eigen::Ref<Eigen::MatrixXd> _sx,
+        Eigen::Ref<Eigen::MatrixXd> _sy,
+        Eigen::Ref<Eigen::MatrixXd> _dhdx,
+        Eigen::Ref<Eigen::MatrixXd> _dhdy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> _dsydy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdy);
+  
+    bool use_vectorised{true};
 
-      int nx{2};
-      int ny{2};
-      double lx{1.0};
-      double ly{1.0};
-      double wave_angle{0.0};
-      double amplitude{1.0};
-      double period{1.0};
-      double time{0.0};
-      
-      Eigen::VectorXd x_v;
-      Eigen::VectorXd y_v;
-      Eigen::MatrixXd x_grid;
-      Eigen::MatrixXd y_grid;
+    int nx{2};
+    int ny{2};
+    double lx{1.0};
+    double ly{1.0};
+    double wave_angle{0.0};
+    double amplitude{1.0};
+    double period{1.0};
+    double time{0.0};
+    
+    Eigen::VectorXd x_v;
+    Eigen::VectorXd y_v;
+    Eigen::MatrixXd x_grid;
+    Eigen::MatrixXd y_grid;
   };
 
   //////////////////////////////////////////////////
@@ -170,12 +170,6 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetWindVelocity(double _ux, double _uy)
-  {
-    // @TODO NO IMPLEMENTATION
-  }
-
-  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::SetDirection(double _dir_x, double _dir_y)
   {
     this->wave_angle = std::atan2(_dir_y, _dir_x);
@@ -191,6 +185,12 @@ namespace waves
   void WaveSimulationSinusoid::Impl::SetPeriod(double _value)
   {
     this->period = _value;
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationSinusoid::Impl::SetWindVelocity(double _ux, double _uy)
+  {
+    // @TODO NO IMPLEMENTATION
   }
 
   //////////////////////////////////////////////////
@@ -382,12 +382,6 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetWindVelocity(double _ux, double _uy)
-  {
-    impl->SetWindVelocity(_ux, _uy);
-  }
-
-  //////////////////////////////////////////////////
   void WaveSimulationSinusoid::SetDirection(double _dir_x, double _dir_y)
   {
     impl->SetDirection(_dir_x, _dir_y);
@@ -403,6 +397,12 @@ namespace waves
   void WaveSimulationSinusoid::SetPeriod(double _value)
   {
     impl->SetPeriod(_value);
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationSinusoid::SetWindVelocity(double _ux, double _uy)
+  {
+    impl->SetWindVelocity(_ux, _uy);
   }
 
   //////////////////////////////////////////////////

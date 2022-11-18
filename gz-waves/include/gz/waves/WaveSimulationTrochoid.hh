@@ -33,44 +33,46 @@ namespace waves
 
   class WaveSimulationTrochoid : public WaveSimulation
   {
-    public: virtual ~WaveSimulationTrochoid();
+  public:
+    virtual ~WaveSimulationTrochoid();
 
-    public: WaveSimulationTrochoid(
+    WaveSimulationTrochoid(
       int _N,
       double _L,
       std::shared_ptr<WaveParameters> _params);
 
-    public: virtual void SetWindVelocity(double _ux, double _uy) override;
+    virtual void SetWindVelocity(double _ux, double _uy) override;
 
-    public: virtual void SetTime(double _time) override;
+    virtual void SetTime(double _time) override;
 
-    public: virtual void ComputeElevation(
-      Eigen::Ref<Eigen::MatrixXd> _h) override;
+    virtual void ComputeElevation(
+        Eigen::Ref<Eigen::MatrixXd> _h) override;
 
-    public: virtual void ComputeElevationDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dhdx,
-      Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
+    virtual void ComputeElevationDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dhdx,
+        Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
 
-    public: virtual void ComputeDisplacements(
-      Eigen::Ref<Eigen::MatrixXd> _sx,
-      Eigen::Ref<Eigen::MatrixXd> _sy) override;
+    virtual void ComputeDisplacements(
+        Eigen::Ref<Eigen::MatrixXd> _sx,
+        Eigen::Ref<Eigen::MatrixXd> _sy) override;
 
-    public: virtual void ComputeDisplacementsDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> _dsydy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+    virtual void ComputeDisplacementsDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> _dsydy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
 
-    public: virtual void ComputeDisplacementsAndDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _h,
-      Eigen::Ref<Eigen::MatrixXd> _sx,
-      Eigen::Ref<Eigen::MatrixXd> _sy,
-      Eigen::Ref<Eigen::MatrixXd> _dhdx,
-      Eigen::Ref<Eigen::MatrixXd> _dhdy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> _dsydy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+    virtual void ComputeDisplacementsAndDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _h,
+        Eigen::Ref<Eigen::MatrixXd> _sx,
+        Eigen::Ref<Eigen::MatrixXd> _sy,
+        Eigen::Ref<Eigen::MatrixXd> _dhdx,
+        Eigen::Ref<Eigen::MatrixXd> _dhdy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> _dsydy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
 
-    private: std::unique_ptr<WaveSimulationTrochoidImpl> impl;
+  private:
+    std::unique_ptr<WaveSimulationTrochoidImpl> impl;
   };
 }
 }

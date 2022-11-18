@@ -49,15 +49,15 @@ namespace waves
 
       void SetUseVectorised(bool _value);
 
-      void SetWindVelocity(double _ux, double _uy) override;
-
       void SetDirection(double _dir_x, double _dir_y);
 
       void SetAmplitude(double _value);
 
       void SetPeriod(double _value);
 
-      void SetTime(double _value) override;
+      virtual void SetWindVelocity(double _ux, double _uy) override;
+
+      virtual void SetTime(double _value) override;
 
       virtual void ComputeElevation(
           Eigen::Ref<Eigen::MatrixXd> _h) override;

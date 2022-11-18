@@ -28,84 +28,84 @@ inline namespace v2
 {
   class DirectionalSpreadingFunction
   {
-    public:
-      virtual ~DirectionalSpreadingFunction();
+  public:
+    virtual ~DirectionalSpreadingFunction();
 
-      virtual double Evaluate(
-          double _theta, double _theta_mean, double _k=1.0) const = 0;
+    virtual double Evaluate(
+        double _theta, double _theta_mean, double _k=1.0) const = 0;
 
-      virtual void Evaluate(
-          Eigen::Ref<Eigen::MatrixXd> _phi,
-          const Eigen::Ref<const Eigen::MatrixXd> &_theta,
-          double _theta_mean,
-          const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
-          const = 0;
+    virtual void Evaluate(
+        Eigen::Ref<Eigen::MatrixXd> _phi,
+        const Eigen::Ref<const Eigen::MatrixXd> &_theta,
+        double _theta_mean,
+        const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
+        const = 0;
   };
 
   class Cos2sSpreadingFunction : public DirectionalSpreadingFunction
   {
-    public:
-      virtual ~Cos2sSpreadingFunction();
+  public:
+    virtual ~Cos2sSpreadingFunction();
 
-      Cos2sSpreadingFunction(double _spread=10.0);
+    Cos2sSpreadingFunction(double _spread=10.0);
 
-      virtual double Evaluate(
-          double _theta, double _theta_mean, double _k=1.0) const override;
+    virtual double Evaluate(
+        double _theta, double _theta_mean, double _k=1.0) const override;
 
-      virtual void Evaluate(
-          Eigen::Ref<Eigen::MatrixXd> _phi,
-          const Eigen::Ref<const Eigen::MatrixXd> &_theta,
-          double _theta_mean,
-          const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
-          const override;
+    virtual void Evaluate(
+        Eigen::Ref<Eigen::MatrixXd> _phi,
+        const Eigen::Ref<const Eigen::MatrixXd> &_theta,
+        double _theta_mean,
+        const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
+        const override;
 
-      double Spread() const;
+    double Spread() const;
 
-      void SetSpread(double _value);
+    void SetSpread(double _value);
 
-    private:
-      void _RecalcCoeffs();
+  private:
+    void _RecalcCoeffs();
 
-      double _spread{10.0};
-      double _cap_c_s{0.0};
+    double _spread{10.0};
+    double _cap_c_s{0.0};
   };
 
   class ECKVSpreadingFunction : public DirectionalSpreadingFunction
   {
-    public:
-      virtual ~ECKVSpreadingFunction();
+  public:
+    virtual ~ECKVSpreadingFunction();
 
-      ECKVSpreadingFunction(
-          double _u10=5.0,
-          double _cap_omega_c=0.84,
-          double _gravity=9.81);
+    ECKVSpreadingFunction(
+        double _u10=5.0,
+        double _cap_omega_c=0.84,
+        double _gravity=9.81);
 
-      virtual double Evaluate(
-          double _theta, double _theta_mean, double _k=1.0) const override;
+    virtual double Evaluate(
+        double _theta, double _theta_mean, double _k=1.0) const override;
 
-      virtual void Evaluate(
-          Eigen::Ref<Eigen::MatrixXd> _phi,
-          const Eigen::Ref<const Eigen::MatrixXd> &_theta,
-          double _theta_mean,
-          const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
-          const override;
+    virtual void Evaluate(
+        Eigen::Ref<Eigen::MatrixXd> _phi,
+        const Eigen::Ref<const Eigen::MatrixXd> &_theta,
+        double _theta_mean,
+        const Eigen::Ref<const Eigen::MatrixXd> &_k=Eigen::MatrixXd())
+        const override;
 
-      double Gravity() const;
+    double Gravity() const;
 
-      void SetGravity(double _value);
+    void SetGravity(double _value);
 
-      double U10() const;
+    double U10() const;
 
-      void SetU10(double _value);
+    void SetU10(double _value);
 
-      double CapOmegaC() const;
+    double CapOmegaC() const;
 
-      void SetCapOmegaC(double _value);
+    void SetCapOmegaC(double _value);
 
-    private:
-      double _gravity{9.81};
-      double _u10{5.0};
-      double _cap_omega_c{0.84};
+  private:
+    double _gravity{9.81};
+    double _u10{5.0};
+    double _cap_omega_c{0.84};
   };
 }
 }

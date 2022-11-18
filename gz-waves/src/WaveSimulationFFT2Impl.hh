@@ -49,18 +49,20 @@ namespace waves
     /// \brief Construct a wave simulation model
     WaveSimulationFFT2Impl(int _N, double _L);
 
+    void SetUseVectorised(bool _value);
+
     /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double _ux, double _uy);
 
     /// \brief Set the current time in seconds
-    void SetTime(double _time);
+    void SetTime(double _value);
 
     /// \brief Set the horizontal displacement scaling factor
-    void SetLambda(double _lambda);
+    void SetLambda(double _value);
 
     /// \brief Calculate the sea surface elevation
     void ComputeElevation(
-      Eigen::Ref<Eigen::MatrixXd> _heights);
+      Eigen::Ref<Eigen::MatrixXd> _h);
 
     /// \brief Calculate the derivative of the elevation wrt x and y
     void ComputeElevationDerivatives(
@@ -89,6 +91,8 @@ namespace waves
 
     /// \brief Reference implementation of time-dependent amplitude calculation
     void ComputeCurrentAmplitudesReference(double _time);
+
+    bool use_vectorised{false};
 
     /// \brief Number of samples in each direction. Must be a multiple of 2
     int mN;

@@ -32,44 +32,48 @@ namespace waves
 
   class WaveSimulationFFT2 : public WaveSimulation
   {
-    public: virtual ~WaveSimulationFFT2();
+    public:
+      virtual ~WaveSimulationFFT2();
 
-    public: WaveSimulationFFT2(int _N, double _L);
+      WaveSimulationFFT2(int _N, double _L);
 
-    public: virtual void SetWindVelocity(double _ux, double _uy) override;
+      void SetUseVectorised(bool _value);
 
-    public: virtual void SetTime(double _time) override;
+      /// \brief Set lambda which controls the horizontal wave displacement.
+      void SetLambda(double _lambda);
 
-    public: virtual void ComputeElevation(
-      Eigen::Ref<Eigen::MatrixXd> _h) override;
+      virtual void SetWindVelocity(double _ux, double _uy) override;
 
-    public: virtual void ComputeElevationDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dhdx,
-      Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
+      virtual void SetTime(double _value) override;
 
-    public: virtual void ComputeDisplacements(
-      Eigen::Ref<Eigen::MatrixXd> _sx,
-      Eigen::Ref<Eigen::MatrixXd> _sy) override;
+      virtual void ComputeElevation(
+          Eigen::Ref<Eigen::MatrixXd> _h) override;
 
-    public: virtual void ComputeDisplacementsDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> _dsydy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+      virtual void ComputeElevationDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _dhdx,
+          Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
 
-    public: virtual void ComputeDisplacementsAndDerivatives(
-      Eigen::Ref<Eigen::MatrixXd> _h,
-      Eigen::Ref<Eigen::MatrixXd> _sx,
-      Eigen::Ref<Eigen::MatrixXd> _sy,
-      Eigen::Ref<Eigen::MatrixXd> _dhdx,
-      Eigen::Ref<Eigen::MatrixXd> _dhdy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> _dsydy,
-      Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+      virtual void ComputeDisplacements(
+          Eigen::Ref<Eigen::MatrixXd> _sx,
+          Eigen::Ref<Eigen::MatrixXd> _sy) override;
 
-    /// \brief Set lambda, a scaling factor controlling the horizontal wave displacement.
-    public: void SetLambda(double _lambda);
+      virtual void ComputeDisplacementsDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> _dsydy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
 
-    private: std::unique_ptr<WaveSimulationFFT2Impl> impl;
+      virtual void ComputeDisplacementsAndDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _h,
+          Eigen::Ref<Eigen::MatrixXd> _sx,
+          Eigen::Ref<Eigen::MatrixXd> _sy,
+          Eigen::Ref<Eigen::MatrixXd> _dhdx,
+          Eigen::Ref<Eigen::MatrixXd> _dhdy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> _dsydy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+
+    private:
+      std::unique_ptr<WaveSimulationFFT2Impl> impl;
   };
 }
 }
