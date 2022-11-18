@@ -108,11 +108,7 @@ namespace waves
           Eigen::Ref<Eigen::MatrixXd> _dsxdx,
           Eigen::Ref<Eigen::MatrixXd> _dsydy,
           Eigen::Ref<Eigen::MatrixXd> _dsxdy);
-
-      void ComputeBaseAmplitudes();
-
-      void ComputeCurrentAmplitudes(double _time);
-    
+   
       bool use_vectorised{true};
 
       int nx{2};
