@@ -454,8 +454,12 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
+    // impl->ComputeDisplacementsAndDerivatives(
+    //     _h, _sx, _sy, _dhdx, _dhdy, _dsxdx, _dsydy, _dsxdy);
+
+    /// \todo undo flip of dhdx <---> dhdy once render plugin fixed
     impl->ComputeDisplacementsAndDerivatives(
-        _h, _sx, _sy, _dhdx, _dhdy, _dsxdx, _dsydy, _dsxdy);
+        _h, _sx, _sy, _dhdy, _dhdx, _dsxdx, _dsydy, _dsxdy);
   }
 }
 }
