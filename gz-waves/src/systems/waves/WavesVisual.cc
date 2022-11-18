@@ -210,14 +210,14 @@ class gz::sim::systems::WavesVisualPrivate
   public: DisplacementMapPtr displacementMap;
 
   std::unique_ptr<gz::waves::WaveSimulation> mWaveSim;
-  std::vector<double> mHeights;
-  std::vector<double> mDhdx;
-  std::vector<double> mDhdy;
-  std::vector<double> mDisplacementsX;
-  std::vector<double> mDisplacementsY;
-  std::vector<double> mDxdx;
-  std::vector<double> mDydy;
-  std::vector<double> mDxdy;
+  Eigen::VectorXd mHeights;
+  Eigen::VectorXd mDhdx;
+  Eigen::VectorXd mDhdy;
+  Eigen::VectorXd mDisplacementsX;
+  Eigen::VectorXd mDisplacementsY;
+  Eigen::VectorXd mDxdx;
+  Eigen::VectorXd mDydy;
+  Eigen::VectorXd mDxdy;
 
   public: void CreateShaderMaterial();
 
@@ -899,11 +899,21 @@ void WavesVisualPrivate::InitWaveSim()
 
   // create wave model
   std::unique_ptr<gz::waves::WaveSimulationFFT2> waveSim(
-      new gz::waves::WaveSimulationFFT2(N, L));
+      new gz::waves::WaveSimulationFFT2(L, L, N, N));
 
   // set params
   waveSim->SetWindVelocity(ux, uy);
   waveSim->SetLambda(s);
+
+  int N2 = N * N;
+  this->mHeights = Eigen::VectorXd::Zero(N2);
+  this->mDisplacementsX = Eigen::VectorXd::Zero(N2);
+  this->mDisplacementsY = Eigen::VectorXd::Zero(N2);
+  this->mDhdx = Eigen::VectorXd::Zero(N2);
+  this->mDhdy = Eigen::VectorXd::Zero(N2);
+  this->mDxdx = Eigen::VectorXd::Zero(N2);
+  this->mDydy = Eigen::VectorXd::Zero(N2);
+  this->mDxdy = Eigen::VectorXd::Zero(N2);
 
   // move
   this->mWaveSim = std::move(waveSim);

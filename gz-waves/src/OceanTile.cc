@@ -27,8 +27,14 @@
 #include <gz/common/Mesh.hh>
 #include <gz/common/SubMesh.hh>
 
+#include <Eigen/Dense>
+
 #include <cmath>
 #include <iostream>
+#include <vector>
+
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 namespace gz
 {
@@ -81,15 +87,15 @@ public:
   std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
 
   std::unique_ptr<WaveSimulation> mWaveSim;
-  std::vector<double>         mHeights;
-  std::vector<double>         mDhdx;
-  std::vector<double>         mDhdy;
 
-  std::vector<double>         mDisplacementsX;
-  std::vector<double>         mDisplacementsY;
-  std::vector<double>         mDxdx;
-  std::vector<double>         mDydy;
-  std::vector<double>         mDxdy;
+  Eigen::VectorXd             mHeights;
+  Eigen::VectorXd             mDhdx;
+  Eigen::VectorXd             mDhdy;
+  Eigen::VectorXd             mDisplacementsX;
+  Eigen::VectorXd             mDisplacementsY;
+  Eigen::VectorXd             mDxdx;
+  Eigen::VectorXd             mDydy;
+  Eigen::VectorXd             mDxdy;
 
   void Create();
 
@@ -177,16 +183,18 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     mNumVertices((_N + 1) * (_N + 1)),
     mNumFaces(2 * _N * _N),
     mTileSize(_L),
-    mSpacing(_L / static_cast<double>(_N)),
-    mHeights(_N * _N, 0.0),
-    mDhdx(_N * _N, 0.0),
-    mDhdy(_N * _N, 0.0),
-    mDisplacementsX(_N * _N, 0.0),
-    mDisplacementsY(_N * _N, 0.0),
-    mDxdx(_N * _N, 0.0),
-    mDydy(_N * _N, 0.0),
-    mDxdy(_N * _N, 0.0)
+    mSpacing(_L / static_cast<double>(_N))
 {
+  auto size = _N * _N;
+  mHeights = Eigen::VectorXd::Zero(size);
+  mDhdx = Eigen::VectorXd::Zero(size);
+  mDhdy = Eigen::VectorXd::Zero(size);
+  mDisplacementsX = Eigen::VectorXd::Zero(size);
+  mDisplacementsY = Eigen::VectorXd::Zero(size);
+  mDxdx = Eigen::VectorXd::Zero(size);
+  mDydy = Eigen::VectorXd::Zero(size);
+  mDxdy = Eigen::VectorXd::Zero(size);
+
   // Different types of wave simulator are supported...
   // 0 - WaveSimulationSinusoid
   // 1 - WaveSimulationTrochoid
@@ -203,7 +211,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       double amplitude = 3.0;
       double period = 10.0;
       std::unique_ptr<WaveSimulationSinusoid> waveSim(
-          new WaveSimulationSinusoid(_N, _L));
+          new WaveSimulationSinusoid(_L, _L, _N, _N));
       waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);
@@ -228,7 +236,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     {
       // FFT2
       std::unique_ptr<WaveSimulationFFT2> waveSim(
-          new WaveSimulationFFT2(_N, _L));
+          new WaveSimulationFFT2(_L, _L, _N, _N));
       waveSim->SetLambda(1.0);   // larger lambda => steeper waves.
       mWaveSim = std::move(waveSim);
       break;
@@ -249,18 +257,20 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     mNumVertices((_params->CellCount() + 1) * (_params->CellCount() + 1)),
     mNumFaces(2 * _params->CellCount() * _params->CellCount()),
     mTileSize(_params->TileSize()),
-    mSpacing(_params->TileSize() / static_cast<double>(_params->CellCount())),
-    mHeights(_params->CellCount() * _params->CellCount(), 0.0),
-    mDhdx(_params->CellCount() * _params->CellCount(), 0.0),
-    mDhdy(_params->CellCount() * _params->CellCount(), 0.0),
-    mDisplacementsX(_params->CellCount() * _params->CellCount(), 0.0),
-    mDisplacementsY(_params->CellCount() * _params->CellCount(), 0.0),
-    mDxdx(_params->CellCount() * _params->CellCount(), 0.0),
-    mDydy(_params->CellCount() * _params->CellCount(), 0.0),
-    mDxdy(_params->CellCount() * _params->CellCount(), 0.0)
+    mSpacing(_params->TileSize() / static_cast<double>(_params->CellCount()))
 {
   size_t _N = _params->CellCount();
   double _L = _params->TileSize();
+
+  auto size = _N * _N;
+  mHeights = Eigen::VectorXd::Zero(size);
+  mDhdx = Eigen::VectorXd::Zero(size);
+  mDhdy = Eigen::VectorXd::Zero(size);
+  mDisplacementsX = Eigen::VectorXd::Zero(size);
+  mDisplacementsY = Eigen::VectorXd::Zero(size);
+  mDxdx = Eigen::VectorXd::Zero(size);
+  mDydy = Eigen::VectorXd::Zero(size);
+  mDxdy = Eigen::VectorXd::Zero(size);
 
   // Different types of wave simulator are supported...
   // 0 - WaveSimulationSinusoid
@@ -296,7 +306,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       double amplitude = _params->Amplitude();
       double period = _params->Period();
       std::unique_ptr<WaveSimulationSinusoid> waveSim(
-          new WaveSimulationSinusoid(_N, _L));
+          new WaveSimulationSinusoid(_L, _L, _N, _N));
       waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);
@@ -313,7 +323,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     {
       // FFT2
       std::unique_ptr<WaveSimulationFFT2> waveSim(
-          new WaveSimulationFFT2(_N, _L));
+          new WaveSimulationFFT2(_L, _L, _N, _N));
       waveSim->SetLambda(_params->Steepness());  // larger lambda => steeper waves.
       mWaveSim = std::move(waveSim);
       break;
@@ -797,7 +807,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
   }
   else
   {
-    mWaveSim->ComputeHeights(mHeights);
+    mWaveSim->ComputeElevation(mHeights);
     mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
 
     const size_t N = mResolution;

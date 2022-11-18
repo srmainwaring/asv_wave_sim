@@ -1,4 +1,4 @@
-// Copyright (C) 2019  Rhys Mainwaring
+// Copyright (C) 2019-2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,38 +16,89 @@
 #ifndef GZ_WAVES_WAVESPECTRUM_HH_
 #define GZ_WAVES_WAVESPECTRUM_HH_
 
+#include <Eigen/Dense>
+ 
+using Eigen::MatrixXd;
+
 namespace gz
 {
 namespace waves
 {
-
-  class WaveSpectrum
+inline namespace v2
+{
+  class OmniDirectionalWaveSpectrum
   {
-    public: virtual ~WaveSpectrum();
+  public:
+    virtual ~OmniDirectionalWaveSpectrum();
 
-    public: WaveSpectrum();
+    virtual double Evaluate(double _k) const = 0;
 
-    public: void SetWindVelocity(double _ux, double _uy);
-    
-    public: static double Dispersion(double _k);
-
-    public: static double InvDispersion(double _omega);
-
-    public: static double QuantisedDispersion(double _k);
-
-    public: static double SignificantWaveHeight(double _u);
-
-    public: static double Spectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
-
-    public: static double PiersonMoskowitzK0(double _u);
-
-    public: static double PiersonMoskowitzSpectrum(double _k, double _kx, double _ky, double _u, double _ux, double _uy);
-
-    private: double ux;
-    private: double uy;
-    private: double u;
+    virtual void Evaluate(
+        Eigen::Ref<Eigen::MatrixXd> _spectrum,
+        const Eigen::Ref<const Eigen::MatrixXd> &_k) const = 0;
   };
 
+  class PiersonMoskowitzWaveSpectrum : public OmniDirectionalWaveSpectrum
+  {
+  public:
+    virtual ~PiersonMoskowitzWaveSpectrum();
+
+    PiersonMoskowitzWaveSpectrum(double _u19=5.0, double _gravity=9.81);
+
+    virtual double Evaluate(double _k) const override;
+
+    virtual void Evaluate(
+        Eigen::Ref<Eigen::MatrixXd> _spectrum,
+        const Eigen::Ref<const Eigen::MatrixXd> &_k) const override;
+
+    double Gravity() const;
+
+    void SetGravity(double _value);
+
+    double U19() const;
+
+    void SetU19(double _value);
+
+  private:
+    double _gravity{9.81};
+    double _u19{5.0};
+  };
+
+  class ECKVWaveSpectrum : public OmniDirectionalWaveSpectrum
+  {
+  public:
+    virtual ~ECKVWaveSpectrum();
+
+    ECKVWaveSpectrum(
+        double _u10=5.0,
+        double _cap_omega_c=0.84,
+        double _gravity=9.81);
+
+    virtual double Evaluate(double _k) const override;
+
+    virtual void Evaluate(
+        Eigen::Ref<Eigen::MatrixXd> _spectrum,
+        const Eigen::Ref<const Eigen::MatrixXd> &_k) const override;
+
+    double Gravity() const;
+
+    void SetGravity(double _value);
+
+    double U10() const;
+
+    void SetU10(double _value);
+
+    double CapOmegaC() const;
+
+    void SetCapOmegaC(double _value);
+
+  private:
+    double _gravity{9.81};
+    double _u10{5.0};
+    double _cap_omega_c{0.84};
+  };
+
+}
 }
 }
 

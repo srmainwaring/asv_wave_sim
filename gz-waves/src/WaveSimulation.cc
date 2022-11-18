@@ -20,10 +20,12 @@ namespace gz
 namespace waves
 {
 
+  //////////////////////////////////////////////////
   WaveSimulation::~WaveSimulation()
   {
   }
 
+  //////////////////////////////////////////////////
   WaveSimulation::WaveSimulation()
   {
   }
