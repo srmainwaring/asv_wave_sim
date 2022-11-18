@@ -18,73 +18,77 @@
 
 #include "WaveSimulation.hh"
 
+#include <Eigen/Dense>
+
 #include <memory>
-#include <vector>
+
+using Eigen::MatrixXd;
 
 namespace gz
 {
 namespace waves
 {
-  /// L is the length of each side of a square tile.
+  /// The grid has sides with lengths lx and ly.
   ///
-  /// There are N + 1 vertices in each direction, the additional vertex
-  /// in each direction defines the tile skirt.
+  /// There are nx, ny vertices in each direction.
   ///
-  /// The simulation updates N x N vertices
+  /// The simulation updates nx x ny vertices.
   ///
-  /// The distance between vertices is N / L (because there
-  /// are N+1 vertices in each direction including the skirt).
+  /// The distance between vertices is dx = lx / nx and dy = ly / ny.
   ///
-  /// All storage is assumed to be sized to N x N and the
-  /// vertices are traversed in row major order:
+  /// All storage is assumed to be sized to nx x ny and the
+  /// vertices are traversed in column major order:
   /// i.e. the innermost loop is over the x direction.
   ///
   class WaveSimulationSinusoid : public WaveSimulation
   {
-    public: ~WaveSimulationSinusoid();
+    public:
+      ~WaveSimulationSinusoid();
 
-    public: WaveSimulationSinusoid(int _N, double _L);
+      WaveSimulationSinusoid(double _lx, double _ly, int _nx, int _ny);
 
-    public: void SetWindVelocity(double _ux, double _uy) override;
+      void SetUseVectorised(bool _value);
 
-    public: void SetDirection(double _dir_x, double _dir_y);
+      void SetDirection(double _dir_x, double _dir_y);
 
-    public: void SetAmplitude(double _amplitude);
+      void SetAmplitude(double _value);
 
-    public: void SetPeriod(double _period);
+      void SetPeriod(double _value);
 
-    public: void SetTime(double _time) override;
+      virtual void SetWindVelocity(double _ux, double _uy) override;
 
-    public: void ComputeHeights(
-      std::vector<double>& _h) override;
+      virtual void SetTime(double _value) override;
 
-    public: void ComputeHeightDerivatives(
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy) override;
+      virtual void ComputeElevation(
+          Eigen::Ref<Eigen::MatrixXd> _h) override;
 
-    public: void ComputeDisplacements(
-      std::vector<double>& _sx,
-      std::vector<double>& _sy) override;
+      virtual void ComputeElevationDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _dhdx,
+          Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
 
-    public: void ComputeDisplacementDerivatives(
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) override;
+      virtual void ComputeDisplacements(
+          Eigen::Ref<Eigen::MatrixXd> _sx,
+          Eigen::Ref<Eigen::MatrixXd> _sy) override;
 
-    public: void ComputeDisplacementsAndDerivatives(
-      std::vector<double>& _h,
-      std::vector<double>& _sx,
-      std::vector<double>& _sy,
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy,
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) override;
+      virtual void ComputeDisplacementsDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> _dsydy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
 
-    class Impl;
-    private: std::unique_ptr<Impl> impl;
+      virtual void ComputeDisplacementsAndDerivatives(
+          Eigen::Ref<Eigen::MatrixXd> _h,
+          Eigen::Ref<Eigen::MatrixXd> _sx,
+          Eigen::Ref<Eigen::MatrixXd> _sy,
+          Eigen::Ref<Eigen::MatrixXd> _dhdx,
+          Eigen::Ref<Eigen::MatrixXd> _dhdy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> _dsydy,
+          Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+
+    private:
+      class Impl;
+      std::unique_ptr<Impl> impl;
   };
-
 }
 }
 

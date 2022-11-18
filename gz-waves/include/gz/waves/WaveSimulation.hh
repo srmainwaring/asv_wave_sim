@@ -16,50 +16,51 @@
 #ifndef GZ_WAVES_WAVESIMULATION_HH_
 #define GZ_WAVES_WAVESIMULATION_HH_
 
-#include <vector>
+#include <Eigen/Dense>
+
+using Eigen::MatrixXd;
 
 namespace gz
 {
 namespace waves
 {
-
   class WaveSimulation
   {
-    public: virtual ~WaveSimulation();
+  public:
+    virtual ~WaveSimulation();
 
-    public: WaveSimulation();
+    WaveSimulation();
 
-    public: virtual void SetWindVelocity(double _ux, double _uy) = 0;
+    virtual void SetWindVelocity(double _ux, double _uy) = 0;
 
-    public: virtual void SetTime(double _time) = 0;
+    virtual void SetTime(double _value) = 0;
 
-    public: virtual void ComputeHeights(
-      std::vector<double>& _h) = 0;
+    virtual void ComputeElevation(
+        Eigen::Ref<Eigen::MatrixXd> _h) = 0;
 
-    public: virtual void ComputeHeightDerivatives(
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy) = 0;
+    virtual void ComputeElevationDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dhdx,
+        Eigen::Ref<Eigen::MatrixXd> _dhdy) = 0;
 
-    public: virtual void ComputeDisplacements(
-      std::vector<double>& _sx,
-      std::vector<double>& _sy) = 0;
+    virtual void ComputeDisplacements(
+        Eigen::Ref<Eigen::MatrixXd> _sx,
+        Eigen::Ref<Eigen::MatrixXd> _sy) = 0;
 
-    public: virtual void ComputeDisplacementDerivatives(
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) = 0;
+    virtual void ComputeDisplacementsDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> _dsydy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdy) = 0;
 
-    public: virtual void ComputeDisplacementsAndDerivatives(
-      std::vector<double>& _h,
-      std::vector<double>& _sx,
-      std::vector<double>& _sy,
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy,
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) = 0;
+    virtual void ComputeDisplacementsAndDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> _h,
+        Eigen::Ref<Eigen::MatrixXd> _sx,
+        Eigen::Ref<Eigen::MatrixXd> _sy,
+        Eigen::Ref<Eigen::MatrixXd> _dhdx,
+        Eigen::Ref<Eigen::MatrixXd> _dhdy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> _dsydy,
+        Eigen::Ref<Eigen::MatrixXd> _dsxdy) = 0;
   };
-
 }
 }
 

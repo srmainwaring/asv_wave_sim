@@ -286,14 +286,14 @@ void Ogre2DisplacementMap::InitTextures()
 
 //////////////////////////////////////////////////
 void Ogre2DisplacementMap::UpdateTextures(
-  const std::vector<double> &mHeights,
-  const std::vector<double> &mDhdx,
-  const std::vector<double> &mDhdy,
-  const std::vector<double> &mDisplacementsX,
-  const std::vector<double> &mDisplacementsY,
-  const std::vector<double> &mDxdx,
-  const std::vector<double> &mDydy,
-  const std::vector<double> &mDxdy
+  const Eigen::Ref<const Eigen::MatrixXd> &mHeights,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDhdx,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDhdy,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsX,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsY,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDxdx,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDydy,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDxdy
 )
 {
   gz::rendering::Ogre2ScenePtr ogre2Scene =
@@ -329,14 +329,14 @@ void Ogre2DisplacementMap::UpdateTextures(
           float Nx{0.0}, Ny{0.0}, Nz{1.0};
 
           int32_t idx = iy * width + ix;
-          double h  = mHeights[idx];
-          double sx = mDisplacementsX[idx];
-          double sy = mDisplacementsY[idx];
-          double dhdx  = mDhdx[idx]; 
-          double dhdy  = mDhdy[idx]; 
-          double dsxdx = mDxdx[idx]; 
-          double dsydy = mDydy[idx]; 
-          double dsxdy = mDxdy[idx]; 
+          double h  = mHeights(idx, 0);
+          double sx = mDisplacementsX(idx, 0);
+          double sy = mDisplacementsY(idx, 0);
+          double dhdx  = mDhdx(idx, 0); 
+          double dhdy  = mDhdy(idx, 0); 
+          double dsxdx = mDxdx(idx, 0); 
+          double dsydy = mDydy(idx, 0); 
+          double dsxdy = mDxdy(idx, 0); 
 
           // vertex displacements
           Dx += sy;

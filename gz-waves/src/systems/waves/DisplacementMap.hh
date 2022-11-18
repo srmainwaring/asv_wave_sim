@@ -17,10 +17,13 @@
 #define GZ_RENDERING_DISPLACEMENTMAP_HH_
 
 #include <gz/rendering/config.hh>
-#include "gz/rendering/Export.hh"
+#include <gz/rendering/Export.hh>
+
+#include <Eigen/Dense>
 
 #include <memory>
-#include <vector>
+
+using Eigen::MatrixXf;
 
 namespace gz
 {
@@ -35,14 +38,14 @@ namespace gz
       public: virtual void InitTextures() = 0;
 
       public: virtual void UpdateTextures(
-        const std::vector<double> &mHeights,
-        const std::vector<double> &mDhdx,
-        const std::vector<double> &mDhdy,
-        const std::vector<double> &mDisplacementsX,
-        const std::vector<double> &mDisplacementsY,
-        const std::vector<double> &mDxdx,
-        const std::vector<double> &mDydy,
-        const std::vector<double> &mDxdy) = 0;
+        const Eigen::Ref<const Eigen::MatrixXd> &mHeights,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDhdx,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDhdy,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsX,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsY,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDxdx,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDydy,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDxdy) = 0;
     };
 
     typedef std::shared_ptr<DisplacementMap> DisplacementMapPtr;
