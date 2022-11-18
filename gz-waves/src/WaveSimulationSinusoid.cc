@@ -16,7 +16,10 @@
 #include "gz/waves/WaveSimulationSinusoid.hh"
 #include "gz/waves/Physics.hh"
 
-#include <vector>
+#include <Eigen/Dense>
+
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 namespace gz
 {
