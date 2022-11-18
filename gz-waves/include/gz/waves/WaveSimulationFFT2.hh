@@ -35,7 +35,7 @@ namespace waves
     public:
       virtual ~WaveSimulationFFT2();
 
-      WaveSimulationFFT2(int _N, double _L);
+      WaveSimulationFFT2(double _lx, double _ly, int _nx, int _ny);
 
       void SetUseVectorised(bool _value);
 

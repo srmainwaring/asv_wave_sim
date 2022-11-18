@@ -899,7 +899,7 @@ void WavesVisualPrivate::InitWaveSim()
 
   // create wave model
   std::unique_ptr<gz::waves::WaveSimulationFFT2> waveSim(
-      new gz::waves::WaveSimulationFFT2(N, L));
+      new gz::waves::WaveSimulationFFT2(L, L, N, N));
 
   // set params
   waveSim->SetWindVelocity(ux, uy);
