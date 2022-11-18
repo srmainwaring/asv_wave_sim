@@ -86,10 +86,10 @@ namespace waves
 
       void SetTime(double _value);
 
-      void ComputeHeights(
+      void ComputeElevation(
           Eigen::Ref<Eigen::MatrixXd> _h);
 
-      void ComputeHeightDerivatives(
+      void ComputeElevationDerivatives(
           Eigen::Ref<Eigen::MatrixXd> _dhdx,
           Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
@@ -97,7 +97,7 @@ namespace waves
           Eigen::Ref<Eigen::MatrixXd> _sx,
           Eigen::Ref<Eigen::MatrixXd> _sy);
 
-      void ComputeDisplacementDerivatives(
+      void ComputeDisplacementsDerivatives(
           Eigen::Ref<Eigen::MatrixXd> _dsxdx,
           Eigen::Ref<Eigen::MatrixXd> _dsydy,
           Eigen::Ref<Eigen::MatrixXd> _dsxdy);
@@ -200,7 +200,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeHeights(
+  void WaveSimulationSinusoid::Impl::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> _heights)
   {
     // derived wave properties
@@ -240,7 +240,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeHeightDerivatives(
+  void WaveSimulationSinusoid::Impl::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
@@ -295,7 +295,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeDisplacementDerivatives(
+  void WaveSimulationSinusoid::Impl::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
@@ -412,18 +412,18 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeHeights(
+  void WaveSimulationSinusoid::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {
-    impl->ComputeHeights(_h);
+    impl->ComputeElevation(_h);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeHeightDerivatives(
+  void WaveSimulationSinusoid::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
   }
 
   //////////////////////////////////////////////////
@@ -435,12 +435,12 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeDisplacementDerivatives(
+  void WaveSimulationSinusoid::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
+    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
   }
 
   //////////////////////////////////////////////////

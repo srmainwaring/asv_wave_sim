@@ -59,11 +59,11 @@ namespace waves
     void SetLambda(double _lambda);
 
     /// \brief Calculate the sea surface elevation
-    void ComputeHeights(
+    void ComputeElevation(
       Eigen::Ref<Eigen::MatrixXd> _heights);
 
     /// \brief Calculate the derivative of the elevation wrt x and y
-    void ComputeHeightDerivatives(
+    void ComputeElevationDerivatives(
       Eigen::Ref<Eigen::MatrixXd> _dhdx,
       Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
@@ -73,7 +73,7 @@ namespace waves
       Eigen::Ref<Eigen::MatrixXd> _sy);
 
     /// \brief Calculate the derivative of the horizontal displacements wrt x and y
-    void ComputeDisplacementDerivatives(
+    void ComputeDisplacementsDerivatives(
       Eigen::Ref<Eigen::MatrixXd> _dsxdx,
       Eigen::Ref<Eigen::MatrixXd> _dsydy,
       Eigen::Ref<Eigen::MatrixXd> _dsxdy);

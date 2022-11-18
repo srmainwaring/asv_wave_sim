@@ -39,10 +39,10 @@ namespace waves
 
     public: void SetTime(double _time);
 
-    public: void ComputeHeights(
+    public: void ComputeElevation(
       Eigen::Ref<Eigen::MatrixXd> _heights);
 
-    public: void ComputeHeightDerivatives(
+    public: void ComputeElevationDerivatives(
       Eigen::Ref<Eigen::MatrixXd> _dhdx,
       Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
@@ -50,15 +50,11 @@ namespace waves
       Eigen::Ref<Eigen::MatrixXd> _sx,
       Eigen::Ref<Eigen::MatrixXd> _sy);
 
-    public: void ComputeDisplacementDerivatives(
+    public: void ComputeDisplacementsDerivatives(
       Eigen::Ref<Eigen::MatrixXd> _dsxdx,
       Eigen::Ref<Eigen::MatrixXd> _dsydy,
       Eigen::Ref<Eigen::MatrixXd> _dsxdy);
-
-    private: void ComputeBaseAmplitudes();
-
-    private: void ComputeCurrentAmplitudes(double _time);
-    
+   
     public:  int N;
     public:  int N2;
     private: int NOver2;
@@ -99,7 +95,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::ComputeHeights(
+  void WaveSimulationTrochoidImpl::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> _heights)
   {
     // Multiple wave params
@@ -149,7 +145,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::ComputeHeightDerivatives(
+  void WaveSimulationTrochoidImpl::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
@@ -210,7 +206,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::ComputeDisplacementDerivatives(
+  void WaveSimulationTrochoidImpl::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
@@ -245,18 +241,18 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeHeights(
+  void WaveSimulationTrochoid::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {
-    impl->ComputeHeights(_h);
+    impl->ComputeElevation(_h);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeHeightDerivatives(
+  void WaveSimulationTrochoid::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
   }
 
   //////////////////////////////////////////////////
@@ -268,12 +264,12 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeDisplacementDerivatives(
+  void WaveSimulationTrochoid::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
+    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
   }
 
   //////////////////////////////////////////////////
@@ -287,10 +283,10 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    impl->ComputeHeights(_h);
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeElevation(_h);
+    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
     impl->ComputeDisplacements(_sx, _sy);
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
+    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
   }
 }
 }

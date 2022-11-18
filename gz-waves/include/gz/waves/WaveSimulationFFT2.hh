@@ -40,10 +40,10 @@ namespace waves
 
     public: virtual void SetTime(double _time) override;
 
-    public: virtual void ComputeHeights(
+    public: virtual void ComputeElevation(
       Eigen::Ref<Eigen::MatrixXd> _h) override;
 
-    public: virtual void ComputeHeightDerivatives(
+    public: virtual void ComputeElevationDerivatives(
       Eigen::Ref<Eigen::MatrixXd> _dhdx,
       Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
 
@@ -51,7 +51,7 @@ namespace waves
       Eigen::Ref<Eigen::MatrixXd> _sx,
       Eigen::Ref<Eigen::MatrixXd> _sy) override;
 
-    public: virtual void ComputeDisplacementDerivatives(
+    public: virtual void ComputeDisplacementsDerivatives(
       Eigen::Ref<Eigen::MatrixXd> _dsxdx,
       Eigen::Ref<Eigen::MatrixXd> _dsydy,
       Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;

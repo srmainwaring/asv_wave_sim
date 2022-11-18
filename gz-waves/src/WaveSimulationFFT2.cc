@@ -153,7 +153,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeHeights(
+  void WaveSimulationFFT2Impl::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> _heights)
   {
     // Populate input array
@@ -184,7 +184,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeHeightDerivatives(
+  void WaveSimulationFFT2Impl::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
@@ -263,7 +263,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeDisplacementDerivatives(
+  void WaveSimulationFFT2Impl::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
@@ -1059,18 +1059,18 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeHeights(
+  void WaveSimulationFFT2::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> _h)
   {
-    impl->ComputeHeights(_h);
+    impl->ComputeElevation(_h);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeHeightDerivatives(
+  void WaveSimulationFFT2::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dhdx,
     Eigen::Ref<Eigen::MatrixXd> _dhdy)
   {
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
   }
 
   //////////////////////////////////////////////////
@@ -1082,12 +1082,12 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeDisplacementDerivatives(
+  void WaveSimulationFFT2::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> _dsxdx,
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsxdy, _dsxdy);
+    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsxdy, _dsxdy);
   }
 
   //////////////////////////////////////////////////
@@ -1101,10 +1101,10 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> _dsydy,
     Eigen::Ref<Eigen::MatrixXd> _dsxdy)
   {
-    impl->ComputeHeights(_h);
-    impl->ComputeHeightDerivatives(_dhdx, _dhdy);
+    impl->ComputeElevation(_h);
+    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
     impl->ComputeDisplacements(_sx, _sy);
-    impl->ComputeDisplacementDerivatives(_dsxdx, _dsydy, _dsxdy);
+    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
   }
 
   //////////////////////////////////////////////////

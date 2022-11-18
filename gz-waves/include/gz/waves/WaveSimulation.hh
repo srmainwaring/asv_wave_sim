@@ -35,10 +35,10 @@ namespace waves
 
       virtual void SetTime(double _value) = 0;
 
-      virtual void ComputeHeights(
+      virtual void ComputeElevation(
           Eigen::Ref<Eigen::MatrixXd> _h) = 0;
 
-      virtual void ComputeHeightDerivatives(
+      virtual void ComputeElevationDerivatives(
           Eigen::Ref<Eigen::MatrixXd> _dhdx,
           Eigen::Ref<Eigen::MatrixXd> _dhdy) = 0;
 
@@ -46,7 +46,7 @@ namespace waves
           Eigen::Ref<Eigen::MatrixXd> _sx,
           Eigen::Ref<Eigen::MatrixXd> _sy) = 0;
 
-      virtual void ComputeDisplacementDerivatives(
+      virtual void ComputeDisplacementsDerivatives(
           Eigen::Ref<Eigen::MatrixXd> _dsxdx,
           Eigen::Ref<Eigen::MatrixXd> _dsydy,
           Eigen::Ref<Eigen::MatrixXd> _dsxdy) = 0;

@@ -67,7 +67,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   // Compute the initial height field.
   Eigen::VectorXd h = Eigen::VectorXd::Zero(nx * ny);
   wave_sim->SetTime(0.0);
-  wave_sim->ComputeHeights(h);
+  wave_sim->ComputeElevation(h);
 
   // Wave heights should be zero. 
   // std::cerr << h << std::endl;
@@ -81,7 +81,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
   wave_params->SetDirection(gz::math::Vector2d(1.0, 0.0));
   
   wave_sim->SetTime(0.0);
-  wave_sim->ComputeHeights(h);
+  wave_sim->ComputeElevation(h);
 
   // Wave heights should be non-zero. 
   // std::cerr << h << std::endl;
@@ -140,7 +140,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
 
   // Verify heights
   Eigen::VectorXd h = Eigen::VectorXd::Zero(nx * ny);
-  wave_sim->ComputeHeights(h);
+  wave_sim->ComputeElevation(h);
 
   for (size_t iy=0, idx=0; iy<ny; ++iy)
   {
@@ -182,7 +182,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
 
   // Verify heights
   Eigen::VectorXd h = Eigen::VectorXd::Zero(nx * ny);
-  wave_sim->ComputeHeights(h);
+  wave_sim->ComputeElevation(h);
 
   for (size_t iy=0, idx=0; iy<ny; ++iy)
   {
@@ -289,12 +289,12 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirX)
   // vectorised
   Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx * ny);
   wave_sim->SetUseVectorised(true);
-  wave_sim->ComputeHeights(h1);
+  wave_sim->ComputeElevation(h1);
  
   // non-vectorised
   Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx * ny);
   wave_sim->SetUseVectorised(false);
-  wave_sim->ComputeHeights(h2);
+  wave_sim->ComputeElevation(h2);
 
   for (size_t iy=0, idx=0; iy<ny; ++iy)
   {
@@ -319,12 +319,12 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirXY)
   // vectorised
   Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx * ny);
   wave_sim->SetUseVectorised(true);
-  wave_sim->ComputeHeights(h1);
+  wave_sim->ComputeElevation(h1);
  
   // non-vectorised
   Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx * ny);
   wave_sim->SetUseVectorised(false);
-  wave_sim->ComputeHeights(h2);
+  wave_sim->ComputeElevation(h2);
 
   for (size_t iy=0, idx=0; iy<ny; ++iy)
   {
@@ -383,13 +383,13 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightDerivatives)
   Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx * ny);
   Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx * ny);
   wave_sim->SetUseVectorised(true);
-  wave_sim->ComputeHeightDerivatives(dhdx1, dhdy1);
+  wave_sim->ComputeElevationDerivatives(dhdx1, dhdy1);
  
   // non-vectorised
   Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx * ny);
   Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx * ny);
   wave_sim->SetUseVectorised(false);
-  wave_sim->ComputeHeightDerivatives(dhdx2, dhdy2);
+  wave_sim->ComputeElevationDerivatives(dhdx2, dhdy2);
 
   for (size_t iy=0, idx=0; iy<ny; ++iy)
   {

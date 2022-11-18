@@ -807,7 +807,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
   }
   else
   {
-    mWaveSim->ComputeHeights(mHeights);
+    mWaveSim->ComputeElevation(mHeights);
     mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
 
     const size_t N = mResolution;
