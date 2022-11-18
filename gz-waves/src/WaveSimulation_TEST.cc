@@ -102,21 +102,21 @@ protected:
   }
 
   // simulation parameters
-  const double gravity{9.81};
+  const double gravity_{9.81};
 
   // grid dimensions
-  const int nx{8};
-  const int ny{4};
-  const double lx{10.0};
-  const double ly{5.0};
+  const int nx_{8};
+  const int ny_{4};
+  const double lx_{10.0};
+  const double ly_{5.0};
 
   // wave parameters
-  const double amplitude{2.0};
-  const double period{10.0};
+  const double amplitude_{2.0};
+  const double period_{10.0};
 
   // derived parameters
-  const double w{2.0 * M_PI / period};
-  const double k{w * w / gravity};
+  const double w_{2.0 * M_PI / period_};
+  const double k_{w_ * w_ / gravity_};
 };
 
 //////////////////////////////////////////////////
@@ -126,31 +126,31 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(1.0, 0.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(time);
 
   // Grid spacing and offset
-  double lx_min = - lx / 2.0;
-  double ly_min = - ly / 2.0;
-  double dx = lx / nx;
-  double dy = ly / ny;
+  double lx_min = - lx_ / 2.0;
+  double ly_min = - ly_ / 2.0;
+  double dx = lx_ / nx_;
+  double dy = ly_ / ny_;
 
   // Verify heights
-  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->ComputeElevation(h);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
     double y = iy * dy + ly_min;
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       double x = ix * dx + lx_min;
-      double a = k * x - w * time;
+      double a = k_ * x - w_ * time;
       double c = std::cos(a);
-      double h_test = amplitude * c;
+      double h_test = amplitude_ * c;
       
       EXPECT_DOUBLE_EQ(h(idx), h_test);
     }
@@ -164,35 +164,35 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(2.0, -1.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(time);
 
   // Grid spacing and offset
-  double lx_min = - lx / 2.0;
-  double ly_min = - ly / 2.0;
-  double dx = lx / nx;
-  double dy = ly / ny;
-  double wt = w * time;
+  double lx_min = - lx_ / 2.0;
+  double ly_min = - ly_ / 2.0;
+  double dx = lx_ / nx_;
+  double dy = ly_ / ny_;
+  double wt = w_ * time;
   double theta = std::atan2(-1.0, 2.0);
   double cd = std::cos(theta);
   double sd = std::sin(theta);
 
   // Verify heights
-  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->ComputeElevation(h);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
     double y = iy * dy + ly_min;
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       double x = ix * dx + lx_min;
-      double a = k * (x * cd + y * sd) - wt;
+      double a = k_ * (x * cd + y * sd) - wt;
       double c = std::cos(a);
-      double h_test = amplitude * c;
+      double h_test = amplitude_ * c;
       
       EXPECT_DOUBLE_EQ(h(idx), h_test);
     }
@@ -204,20 +204,20 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
 {
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(1.0, 0.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
 
   // Verify displacements (expect zero for sinusoid waves)
-  Eigen::VectorXd sx = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd sy = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd sx = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->ComputeDisplacements(sx, sy);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(sx(idx), 0.0);
       EXPECT_DOUBLE_EQ(sy(idx), 0.0);
@@ -231,40 +231,40 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedGrid)
   // check the behaviour of Eigen meshgrid
 
   // grid spacing
-  double dx = this->lx / this->nx;
-  double dy = this->ly / this->ny;
+  double dx = lx_ / nx_;
+  double dy = ly_ / ny_;
 
   // create coordinate grids
-  double lx_min = - lx / 2.0;
-  double lx_max =   lx / 2.0;
-  double ly_min = - ly / 2.0;
-  double ly_max =   ly / 2.0;
+  double lx_min = - lx_ / 2.0;
+  double lx_max =   lx_ / 2.0;
+  double ly_min = - ly_ / 2.0;
+  double ly_max =   ly_ / 2.0;
 
   // linspaced is on closed interval (unlike Python which is open to right)
-  Eigen::VectorXd x_v = Eigen::VectorXd::LinSpaced(nx, lx_min, lx_max - dx);
-  Eigen::VectorXd y_v = Eigen::VectorXd::LinSpaced(ny, ly_min, ly_max - dy);
+  Eigen::VectorXd x_v = Eigen::VectorXd::LinSpaced(nx_, lx_min, lx_max - dx);
+  Eigen::VectorXd y_v = Eigen::VectorXd::LinSpaced(ny_, ly_min, ly_max - dy);
 
   // broadcast to matrices (aka meshgrid)
-  Eigen::MatrixXd x_grid = Eigen::MatrixXd::Zero(this->nx, this->ny);
-  Eigen::MatrixXd y_grid = Eigen::MatrixXd::Zero(this->nx, this->ny);
+  Eigen::MatrixXd x_grid = Eigen::MatrixXd::Zero(nx_, ny_);
+  Eigen::MatrixXd y_grid = Eigen::MatrixXd::Zero(nx_, ny_);
   x_grid.colwise() += x_v;
   y_grid.rowwise() += y_v.transpose();
 
-  for (size_t ix=0; ix<nx; ++ix)
+  for (size_t ix=0; ix<nx_; ++ix)
   {
     double x_test = ix * dx + lx_min;
     EXPECT_DOUBLE_EQ(x_v(ix), x_test);
   }
 
-  for (size_t iy=0; iy<ny; ++iy)
+  for (size_t iy=0; iy<ny_; ++iy)
   {
     double y_test = iy * dy + ly_min;
     EXPECT_DOUBLE_EQ(y_v(iy), y_test);
   }
 
-  for (size_t ix=0; ix<nx; ++ix)
+  for (size_t ix=0; ix<nx_; ++ix)
   {
-    for (size_t iy=0; iy<ny; ++iy)
+    for (size_t iy=0; iy<ny_; ++iy)
     {
       double x_test = ix * dx + lx_min;
       double y_test = iy * dy + ly_min;
@@ -280,25 +280,25 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirX)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(1.0, 0.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
   // vectorised
-  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeElevation(h1);
  
   // non-vectorised
-  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevation(h2);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
     }
@@ -310,25 +310,25 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirXY)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(2.0, -1.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
   // vectorised
-  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeElevation(h1);
  
   // non-vectorised
-  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevation(h2);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
     }
@@ -340,27 +340,27 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedDisplacments)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(2.0, -1.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
   // vectorised
-  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeDisplacements(sx1, sy1);
  
   // non-vectorised
-  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeDisplacements(sx2, sy2);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));
       EXPECT_DOUBLE_EQ(sy1(idx), sy2(idx));
@@ -373,27 +373,27 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightDerivatives)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(2.0, -1.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
   // vectorised
-  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeElevationDerivatives(dhdx1, dhdy1);
  
   // non-vectorised
-  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevationDerivatives(dhdx2, dhdy2);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(dhdx1(idx), dhdx2(idx));
       EXPECT_DOUBLE_EQ(dhdy1(idx), dhdy2(idx));
@@ -407,41 +407,41 @@ TEST_F(WaveSimulationSinusoidTestSuite,
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
-      new WaveSimulationSinusoid(lx, ly, nx, ny));
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
   wave_sim->SetDirection(2.0, -1.0);
-  wave_sim->SetAmplitude(amplitude);
-  wave_sim->SetPeriod(period);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
   // vectorised
-  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dsxdx1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dsydy1 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dsxdy1 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsydy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeDisplacementsAndDerivatives(
     h1, sx1, sy1, dhdx1, dhdy1, dsxdx1, dsydy1, dsxdy1);
  
   // non-vectorised
-  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dsxdx2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dsydy2 = Eigen::VectorXd::Zero(nx * ny);
-  Eigen::VectorXd dsxdy2 = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsydy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeDisplacementsAndDerivatives(
     h2, sx2, sy2, dhdx2, dhdy2, dsxdx2, dsydy2, dsxdy2);
 
-  for (size_t iy=0, idx=0; iy<ny; ++iy)
+  for (size_t iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx; ++ix, ++idx)
+    for (size_t ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
       EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));

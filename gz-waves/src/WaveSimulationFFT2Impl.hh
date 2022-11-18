@@ -97,7 +97,7 @@ namespace waves
     /// \brief Reference implementation of time-dependent amplitude calculation
     void ComputeCurrentAmplitudesReference(double time);
 
-    bool use_vectorised{false};
+    bool use_vectorised_{false};
 
     /// \brief Horizontal displacement scaling factor. Zero for no displacement
     double lambda_;

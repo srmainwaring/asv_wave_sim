@@ -58,10 +58,10 @@ public:
   }
 
   // put in any custom data members that you need 
-  double lx = 200.0;
-  double ly = 100.0;
-  int    nx = 16;
-  int    ny = 8;
+  double lx_ = 200.0;
+  double ly_ = 100.0;
+  int    nx_ = 16;
+  int    ny_ = 8;
 };
 
 //////////////////////////////////////////////////
@@ -69,13 +69,13 @@ public:
  
 TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
 {
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
 
   // check array dimensions
-  EXPECT_EQ(model.kx_fft_.size(), this->nx);
-  EXPECT_EQ(model.ky_fft_.size(), this->ny);
-  EXPECT_EQ(model.kx_math_.size(), this->nx);
-  EXPECT_EQ(model.ky_math_.size(), this->ny);
+  EXPECT_EQ(model.kx_fft_.size(), nx_);
+  EXPECT_EQ(model.ky_fft_.size(), ny_);
+  EXPECT_EQ(model.kx_math_.size(), nx_);
+  EXPECT_EQ(model.ky_math_.size(), ny_);
 
   std::vector<double> ikx_math = {
     -8.0, -7.0, -6.0, -5.0, -4.0, -3.0, -2.0, -1.0,
@@ -93,23 +93,23 @@ TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
   };
 
   // check kx math-ordering
-  for (int i=0; i<this->nx; ++i)
+  for (int i=0; i<nx_; ++i)
   {
     ASSERT_DOUBLE_EQ(model.kx_math_[i] / model.kx_f_, ikx_math[i]);
   }
   // check ky math-ordering
-  for (int i=0; i<this->ny; ++i)
+  for (int i=0; i<ny_; ++i)
   {
     ASSERT_DOUBLE_EQ(model.ky_math_[i] / model.ky_f_, iky_math[i]);
   }
 
   // check kx fft-ordering
-  for (int i=0; i<this->nx; ++i)
+  for (int i=0; i<nx_; ++i)
   {
     ASSERT_DOUBLE_EQ(model.kx_fft_[i] / model.kx_f_, ikx_fft[i]);
   }
   // check ky fft-ordering
-  for (int i=0; i<this->ny; ++i)
+  for (int i=0; i<ny_; ++i)
   {
     ASSERT_DOUBLE_EQ(model.ky_fft_[i] / model.ky_f_, iky_fft[i]);
   }
@@ -119,21 +119,21 @@ TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
 // Reference version checks
 TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZeroReference)
 {
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(0.0);
 
-  for (int ikx=0, idx=0; ikx<this->nx; ++ikx)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<this->ny; ++iky, ++idx)
+    for (int iky=0; iky<ny_; ++iky, ++idx)
     {
       // index for conjugate
       int cdx = 0;
       if (ikx != 0)
-        cdx += (this->nx - ikx) * this->ny;
+        cdx += (nx_ - ikx) * ny_;
 
       if (iky != 0)
-        cdx += (this->ny - iky);
+        cdx += (ny_ - iky);
 
       // std::cerr << "iky: " << iky
       //   << ", ikx: " << ikx
@@ -157,21 +157,21 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZeroReference)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZeroReference)
 {
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(11.2);
 
-  for (int ikx=0, idx=0; ikx<this->nx; ++ikx)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<this->ny; ++iky, ++idx)
+    for (int iky=0; iky<ny_; ++iky, ++idx)
     {
       // index for conjugate
       int cdx = 0;
       if (ikx != 0)
-        cdx += (this->nx - ikx) * this->ny;
+        cdx += (nx_ - ikx) * ny_;
 
       if (iky != 0)
-        cdx += (this->ny - iky);
+        cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
       complex h  = model.fft_h_[idx];
@@ -189,9 +189,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZeroReference)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(0.0);
 
@@ -214,9 +214,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(25.3);
 
@@ -239,9 +239,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZeroReference)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
 
   // displacements should be zero when lamda = 0
   model.SetLambda(0.0);
@@ -266,21 +266,21 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZeroReference
 // Optimised version checks
 TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZero)
 {
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0, idx=0; ikx<this->nx; ++ikx)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<this->ny; ++iky, ++idx)
+    for (int iky=0; iky<ny_; ++iky, ++idx)
     {
       // index for conjugate
       int cdx = 0;
       if (ikx != 0)
-        cdx += (this->nx - ikx) * this->ny;
+        cdx += (nx_ - ikx) * ny_;
 
       if (iky != 0)
-        cdx += (this->ny - iky);
+        cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
       complex h  = model.fft_h_[idx];
@@ -298,21 +298,21 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZero)
 {
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(11.2);
 
-  for (int ikx=0, idx=0; ikx<this->nx; ++ikx)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<this->ny; ++iky, ++idx)
+    for (int iky=0; iky<ny_; ++iky, ++idx)
     {
       // index for conjugate
       int cdx = 0;
       if (ikx != 0)
-        cdx += (this->nx - ikx) * this->ny;
+        cdx += (nx_ - ikx) * ny_;
 
       if (iky != 0)
-        cdx += (this->ny - iky);
+        cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
       complex h  = model.fft_h_[idx];
@@ -330,9 +330,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
@@ -355,9 +355,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(25.3);
 
@@ -380,9 +380,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
 {
-  int n2 = this->nx * this->nx;
+  int n2 = nx_ * nx_;
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
 
   // displacements should be zero when lamda = 0
   model.SetLambda(0.0);
@@ -408,16 +408,16 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
 
 TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeZero)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl ref_model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(0.0);
 
   Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(n2, 1);
   ref_model.ComputeElevation(ref_z);
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
@@ -436,16 +436,16 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeNonZero)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl ref_model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(31.7);
 
   Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(n2, 1);
   ref_model.ComputeElevation(ref_z);
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(31.7);
 
@@ -464,9 +464,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeNonZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, Displacement)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl ref_model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(12.2);
 
@@ -474,7 +474,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, Displacement)
   Eigen::MatrixXd ref_sy = Eigen::MatrixXd::Zero(n2, 1);
   ref_model.ComputeDisplacements(ref_sx, ref_sy);
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
@@ -497,9 +497,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, Displacement)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, HeightDerivatives)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl ref_model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(12.2);
 
@@ -507,7 +507,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightDerivatives)
   Eigen::MatrixXd ref_dhdy = Eigen::MatrixXd::Zero(n2, 1);
   ref_model.ComputeElevationDerivatives(ref_dhdx, ref_dhdy);
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
@@ -530,9 +530,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightDerivatives)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, DisplacementDerivatives)
 {
-  int n2 = this->nx * this->ny;
+  int n2 = nx_ * ny_;
 
-  WaveSimulationFFT2Impl ref_model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudesReference();
   ref_model.ComputeCurrentAmplitudesReference(12.2);
 
@@ -541,7 +541,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, DisplacementDerivatives)
   Eigen::MatrixXd ref_dsxdy = Eigen::MatrixXd::Zero(n2, 1);
   ref_model.ComputeDisplacementsDerivatives(ref_dsxdx, ref_dsydy, ref_dsxdy);
 
-  WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
