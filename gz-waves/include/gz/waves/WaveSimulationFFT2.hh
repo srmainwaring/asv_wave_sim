@@ -16,11 +16,9 @@
 #ifndef GZ_WAVES_WAVESIMULATIONFFT2_HH_
 #define GZ_WAVES_WAVESIMULATIONFFT2_HH_
 
-#include "WaveSimulation.hh"
-
-using Eigen::MatrixXd;
-
 #include <memory>
+
+#include "WaveSimulation.hh"
 
 using Eigen::MatrixXd;
 
@@ -35,45 +33,45 @@ namespace waves
     public:
       virtual ~WaveSimulationFFT2();
 
-      WaveSimulationFFT2(double _lx, double _ly, int _nx, int _ny);
+      WaveSimulationFFT2(double lx, double ly, int nx, int ny);
 
-      void SetUseVectorised(bool _value);
+      void SetUseVectorised(bool value);
 
       /// \brief Set lambda which controls the horizontal wave displacement.
-      void SetLambda(double _lambda);
+      void SetLambda(double lambda);
 
-      virtual void SetWindVelocity(double _ux, double _uy) override;
+      virtual void SetWindVelocity(double ux, double uy) override;
 
-      virtual void SetTime(double _value) override;
+      virtual void SetTime(double value) override;
 
       virtual void ComputeElevation(
-          Eigen::Ref<Eigen::MatrixXd> _h) override;
+          Eigen::Ref<Eigen::MatrixXd> h) override;
 
       virtual void ComputeElevationDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> _dhdx,
-          Eigen::Ref<Eigen::MatrixXd> _dhdy) override;
+          Eigen::Ref<Eigen::MatrixXd> dhdx,
+          Eigen::Ref<Eigen::MatrixXd> dhdy) override;
 
       virtual void ComputeDisplacements(
-          Eigen::Ref<Eigen::MatrixXd> _sx,
-          Eigen::Ref<Eigen::MatrixXd> _sy) override;
+          Eigen::Ref<Eigen::MatrixXd> sx,
+          Eigen::Ref<Eigen::MatrixXd> sy) override;
 
       virtual void ComputeDisplacementsDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-          Eigen::Ref<Eigen::MatrixXd> _dsydy,
-          Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+          Eigen::Ref<Eigen::MatrixXd> dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> dsydy,
+          Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
       virtual void ComputeDisplacementsAndDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> _h,
-          Eigen::Ref<Eigen::MatrixXd> _sx,
-          Eigen::Ref<Eigen::MatrixXd> _sy,
-          Eigen::Ref<Eigen::MatrixXd> _dhdx,
-          Eigen::Ref<Eigen::MatrixXd> _dhdy,
-          Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-          Eigen::Ref<Eigen::MatrixXd> _dsydy,
-          Eigen::Ref<Eigen::MatrixXd> _dsxdy) override;
+          Eigen::Ref<Eigen::MatrixXd> h,
+          Eigen::Ref<Eigen::MatrixXd> sx,
+          Eigen::Ref<Eigen::MatrixXd> sy,
+          Eigen::Ref<Eigen::MatrixXd> dhdx,
+          Eigen::Ref<Eigen::MatrixXd> dhdy,
+          Eigen::Ref<Eigen::MatrixXd> dsxdx,
+          Eigen::Ref<Eigen::MatrixXd> dsydy,
+          Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
     private:
-      std::unique_ptr<WaveSimulationFFT2Impl> impl;
+      std::unique_ptr<WaveSimulationFFT2Impl> impl_;
   };
 }
 }

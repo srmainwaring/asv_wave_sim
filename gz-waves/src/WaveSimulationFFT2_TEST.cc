@@ -72,10 +72,10 @@ TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
   WaveSimulationFFT2Impl model(this->lx, this->ly, this->nx, this->ny);
 
   // check array dimensions
-  EXPECT_EQ(model.kx_fft.size(), this->nx);
-  EXPECT_EQ(model.ky_fft.size(), this->ny);
-  EXPECT_EQ(model.kx_math.size(), this->nx);
-  EXPECT_EQ(model.ky_math.size(), this->ny);
+  EXPECT_EQ(model.kx_fft_.size(), this->nx);
+  EXPECT_EQ(model.ky_fft_.size(), this->ny);
+  EXPECT_EQ(model.kx_math_.size(), this->nx);
+  EXPECT_EQ(model.ky_math_.size(), this->ny);
 
   std::vector<double> ikx_math = {
     -8.0, -7.0, -6.0, -5.0, -4.0, -3.0, -2.0, -1.0,
@@ -95,23 +95,23 @@ TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
   // check kx math-ordering
   for (int i=0; i<this->nx; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.kx_math[i] / model.kx_f, ikx_math[i]);
+    ASSERT_DOUBLE_EQ(model.kx_math_[i] / model.kx_f_, ikx_math[i]);
   }
   // check ky math-ordering
   for (int i=0; i<this->ny; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.ky_math[i] / model.ky_f, iky_math[i]);
+    ASSERT_DOUBLE_EQ(model.ky_math_[i] / model.ky_f_, iky_math[i]);
   }
 
   // check kx fft-ordering
   for (int i=0; i<this->nx; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.kx_fft[i] / model.kx_f, ikx_fft[i]);
+    ASSERT_DOUBLE_EQ(model.kx_fft_[i] / model.kx_f_, ikx_fft[i]);
   }
   // check ky fft-ordering
   for (int i=0; i<this->ny; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.ky_fft[i] / model.ky_f, iky_fft[i]);
+    ASSERT_DOUBLE_EQ(model.ky_fft_[i] / model.ky_f_, iky_fft[i]);
   }
 }
 
@@ -142,8 +142,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZeroReference)
       //   << "\n";
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h[idx];
-      complex hc = model.fft_h[cdx];
+      complex h  = model.fft_h_[idx];
+      complex hc = model.fft_h_[cdx];
 
       // real part symmetric
       ASSERT_DOUBLE_EQ(h.real(), hc.real());
@@ -174,8 +174,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZeroReference)
         cdx += (this->ny - iky);
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h[idx];
-      complex hc = model.fft_h[cdx];
+      complex h  = model.fft_h_[idx];
+      complex hc = model.fft_h_[cdx];
 
       // real part symmetric
       ASSERT_DOUBLE_EQ(h.real(), hc.real());
@@ -205,7 +205,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h[i]);
+    sum_h2 += norm(model.fft_h_[i]);
   }
 
   ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -230,7 +230,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h[i]);
+    sum_h2 += norm(model.fft_h_[i]);
   }
 
   ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -283,8 +283,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZero)
         cdx += (this->ny - iky);
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h[idx];
-      complex hc = model.fft_h[cdx];
+      complex h  = model.fft_h_[idx];
+      complex hc = model.fft_h_[cdx];
 
       // real part symmetric
       ASSERT_DOUBLE_EQ(h.real(), hc.real());
@@ -315,8 +315,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZero)
         cdx += (this->ny - iky);
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h[idx];
-      complex hc = model.fft_h[cdx];
+      complex h  = model.fft_h_[idx];
+      complex hc = model.fft_h_[cdx];
 
       // real part symmetric
       ASSERT_DOUBLE_EQ(h.real(), hc.real());
@@ -346,7 +346,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h[i]);
+    sum_h2 += norm(model.fft_h_[i]);
   }
 
   ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -371,7 +371,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h[i]);
+    sum_h2 += norm(model.fft_h_[i]);
   }
 
   ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
