@@ -406,7 +406,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
 //////////////////////////////////////////////////
 // Cross-check optimised version against reference 
 
-TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeZero)
+TEST_F(TestFixtureWaveSimulationFFT2, ElevationTimeZero)
 {
   int n2 = nx_ * ny_;
 
@@ -434,7 +434,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT2, HeightTimeNonZero)
+TEST_F(TestFixtureWaveSimulationFFT2, ElevationTimeNonZero)
 {
   int n2 = nx_ * ny_;
 
@@ -495,7 +495,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, Displacement)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT2, HeightDerivatives)
+TEST_F(TestFixtureWaveSimulationFFT2, ElevationDerivatives)
 {
   int n2 = nx_ * ny_;
 
