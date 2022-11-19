@@ -91,6 +91,9 @@ namespace waves
     /// \brief Calculate the time-independent Fourier amplitudes
     void ComputeCurrentAmplitudes(double time);
     
+    void ComputeBaseAmplitudesVectorised();
+    void ComputeCurrentAmplitudesVectorised(double time);
+
     /// \brief Reference implementation of base amplitude calculation
     void ComputeBaseAmplitudesReference();
 
@@ -98,6 +101,8 @@ namespace waves
     void ComputeCurrentAmplitudesReference(double time);
 
     bool use_vectorised_{false};
+
+    double gravity_{9.81};
 
     /// \brief Horizontal displacement scaling factor. Zero for no displacement
     double lambda_;
@@ -216,11 +221,14 @@ namespace waves
     Eigen::MatrixXd omega_k_ref_;
 
     static double ECKVOmniDirectionalSpectrum(
-        double k, double u10, double cap_omega_c=0.84);
+        double k, double u10, double cap_omega_c=0.84,
+        double gravity=9.81);
     static double ECKVSpreadingFunction(
-        double k, double phi, double u10, double cap_omega_c=0.84);
+        double k, double phi, double u10, double cap_omega_c=0.84,
+        double gravity=9.81);
     static double Cos2SSpreadingFunction(
-        double s_param, double phi, double u10, double cap_omega_c=0.84);
+        double s_param, double phi, double u10, double cap_omega_c=0.84,
+        double gravity=9.81);
 
     /// \brief For testing
     friend class TestFixtureWaveSimulationFFT2;
