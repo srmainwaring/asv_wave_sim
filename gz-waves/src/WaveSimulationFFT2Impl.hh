@@ -103,12 +103,19 @@ namespace waves
     /// \brief Reference implementation of time-dependent amplitude calculation
     void ComputeCurrentAmplitudesReference(double time);
 
+    void InitFFTCoeffStorage();
+    void InitWaveNumbers();
+
+    void CreateFFTWPlans();
+    void DestroyFFTWPlans();
+
+
     bool use_vectorised_{false};
 
     double gravity_{9.81};
 
     /// \brief Horizontal displacement scaling factor. Zero for no displacement
-    double lambda_;
+    double lambda_{0.0};
 
     Eigen::VectorXcd fft_h_;       // FFT0 - height
     Eigen::VectorXcd fft_h_ikx_;   // FFT1 - d height / dx
@@ -169,46 +176,61 @@ namespace waves
     double  lambda_y_f_{ly_};
 
     // nyquist wavelength [m]
-    double  lambda_x_ny_{2.0 * delta_x_};
-    double  lambda_y_ny_{2.0 * delta_y_};
+    double  lambda_x_nyquist_{2.0 * delta_x_};
+    double  lambda_y_nyquist_{2.0 * delta_y_};
 
     // fundamental spatial frequency [1/m]
     double  nu_x_f_{1.0 / lx_};
     double  nu_y_f_{1.0 / ly_};
 
     // nyquist spatial frequency [1/m]
-    double  nu_x_ny_{1.0 / (2.0 * delta_x_)};
-    double  nu_y_ny_{1.0 / (2.0 * delta_y_)};
+    double  nu_x_nyquist_{1.0 / (2.0 * delta_x_)};
+    double  nu_y_nyquist_{1.0 / (2.0 * delta_y_)};
 
     // fundamental angular spatial frequency [rad/m]
     double  kx_f_{2.0 * M_PI / lx_};
     double  ky_f_{2.0 * M_PI / ly_};
 
     // nyquist angular spatial frequency [rad/m]
-    double  kx_ny_{kx_f_ * nx_ / 2.0};
-    double  ky_ny_{ky_f_ * ny_ / 2.0};
+    double  kx_nyquist_{kx_f_ * nx_ / 2.0};
+    double  ky_nyquist_{ky_f_ * ny_ / 2.0};
 
     // angular spatial frequencies in fft and math order
-    Eigen::VectorXd kx_fft_{Eigen::VectorXd::Zero(nx_)};
-    Eigen::VectorXd ky_fft_{Eigen::VectorXd::Zero(ny_)};
-    Eigen::VectorXd kx_math_{Eigen::VectorXd::Zero(nx_)};
-    Eigen::VectorXd ky_math_{Eigen::VectorXd::Zero(ny_)};
+    Eigen::VectorXd kx_fft_;
+    Eigen::VectorXd ky_fft_;
+    Eigen::VectorXd kx_math_;
+    Eigen::VectorXd ky_math_;
 
     // set to 1 to use a symmetric spreading function (=> standing waves)
     bool use_symmetric_spreading_fn_{false};
 
+    /// \todo consolidate different storage structures when checked correct
+     
     //////////////////////////////////////////////////
-    /// \note: use flattened array storage for optimised version
+    /// \note: flattened array storage for non-vectorised version
 
     // square-root of two-sided discrete elevation variance spectrum
-    Eigen::VectorXd cap_psi_2s_root_{Eigen::VectorXd::Zero(nx_ * ny_)};
+    Eigen::VectorXd cap_psi_2s_root_;
 
     // iid random normals for real and imaginary parts of the amplitudes
-    Eigen::VectorXd rho_{Eigen::VectorXd::Zero(nx_ * ny_)};
-    Eigen::VectorXd sigma_{Eigen::VectorXd::Zero(nx_ * ny_)};
+    Eigen::VectorXd rho_;
+    Eigen::VectorXd sigma_;
 
     // angular temporal frequency
-    Eigen::VectorXd omega_k_{Eigen::VectorXd::Zero(nx_ * ny_)};
+    Eigen::VectorXd omega_k_;
+
+    //////////////////////////////////////////////////
+    /// \note: array storage for vectorised version
+
+    // square-root of two-sided discrete elevation variance spectrum
+    Eigen::MatrixXd cap_psi_2s_root_vec_;
+
+    // iid random normals for real and imaginary parts of the amplitudes
+    Eigen::MatrixXd rho_vec_;
+    Eigen::MatrixXd sigma_vec_;
+
+    // angular temporal frequency
+    Eigen::MatrixXd omega_k_vec_;
 
     //////////////////////////////////////////////////
     /// \note: use 2d array storage for reference version, resized if required
@@ -229,7 +251,7 @@ namespace waves
     static double ECKVSpreadingFunction(
         double k, double phi, double u10, double cap_omega_c=0.84,
         double gravity=9.81);
-    static double Cos2SSpreadingFunction(
+    static double Cos2sSpreadingFunction(
         double s_param, double phi, double u10, double cap_omega_c=0.84,
         double gravity=9.81);
 

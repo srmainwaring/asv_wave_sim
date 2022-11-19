@@ -93,23 +93,23 @@ TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
   // check kx math-ordering
   for (int i=0; i<nx_; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.kx_math_[i] / model.kx_f_, ikx_math[i]);
+    EXPECT_DOUBLE_EQ(model.kx_math_[i] / model.kx_f_, ikx_math[i]);
   }
   // check ky math-ordering
   for (int i=0; i<ny_; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.ky_math_[i] / model.ky_f_, iky_math[i]);
+    EXPECT_DOUBLE_EQ(model.ky_math_[i] / model.ky_f_, iky_math[i]);
   }
 
   // check kx fft-ordering
   for (int i=0; i<nx_; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.kx_fft_[i] / model.kx_f_, ikx_fft[i]);
+    EXPECT_DOUBLE_EQ(model.kx_fft_[i] / model.kx_f_, ikx_fft[i]);
   }
   // check ky fft-ordering
   for (int i=0; i<ny_; ++i)
   {
-    ASSERT_DOUBLE_EQ(model.ky_fft_[i] / model.ky_f_, iky_fft[i]);
+    EXPECT_DOUBLE_EQ(model.ky_fft_[i] / model.ky_f_, iky_fft[i]);
   }
 }
 
@@ -144,10 +144,10 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZeroReference)
       complex hc = model.fft_h_[cdx];
 
       // real part symmetric
-      ASSERT_DOUBLE_EQ(h.real(), hc.real());
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
       
       // imaginary part anti-symmetric
-      ASSERT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
     }
   }
 }
@@ -176,10 +176,10 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZeroReference)
       complex hc = model.fft_h_[cdx];
 
       // real part symmetric
-      ASSERT_DOUBLE_EQ(h.real(), hc.real());
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
       
       // imaginary part anti-symmetric
-      ASSERT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
     }
   }
 }
@@ -206,7 +206,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
     sum_h2 += norm(model.fft_h_[i]);
   }
 
-  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
 }
 
 //////////////////////////////////////////////////
@@ -231,7 +231,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
     sum_h2 += norm(model.fft_h_[i]);
   }
 
-  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
 }
 
 //////////////////////////////////////////////////
@@ -255,8 +255,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZeroReference
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx(i, 0), 0.0);
-    ASSERT_DOUBLE_EQ(sy(i, 0), 0.0);
+    EXPECT_DOUBLE_EQ(sx(i, 0), 0.0);
+    EXPECT_DOUBLE_EQ(sy(i, 0), 0.0);
   }
 }
 
@@ -285,10 +285,10 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZero)
       complex hc = model.fft_h_[cdx];
 
       // real part symmetric
-      ASSERT_DOUBLE_EQ(h.real(), hc.real());
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
       
       // imaginary part anti-symmetric
-      ASSERT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
     }
   }
 }
@@ -317,10 +317,10 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZero)
       complex hc = model.fft_h_[cdx];
 
       // real part symmetric
-      ASSERT_DOUBLE_EQ(h.real(), hc.real());
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
       
       // imaginary part anti-symmetric
-      ASSERT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
     }
   }
 }
@@ -347,7 +347,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
     sum_h2 += norm(model.fft_h_[i]);
   }
 
-  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
 }
 
 //////////////////////////////////////////////////
@@ -372,7 +372,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
     sum_h2 += norm(model.fft_h_[i]);
   }
 
-  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
 }
 
 //////////////////////////////////////////////////
@@ -396,8 +396,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx(i, 0), 0.0);
-    ASSERT_DOUBLE_EQ(sy(i, 0), 0.0);
+    EXPECT_DOUBLE_EQ(sx(i, 0), 0.0);
+    EXPECT_DOUBLE_EQ(sy(i, 0), 0.0);
   }
 }
 
@@ -426,7 +426,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ElevationTimeZero)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+    EXPECT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
   }
 }
 
@@ -454,7 +454,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ElevationTimeNonZero)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+    EXPECT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
   }
 }
 
@@ -486,8 +486,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, Displacement)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx(i, 0), ref_sx(i, 0));
-    ASSERT_DOUBLE_EQ(sy(i, 0), ref_sy(i, 0));
+    EXPECT_DOUBLE_EQ(sx(i, 0), ref_sx(i, 0));
+    EXPECT_DOUBLE_EQ(sy(i, 0), ref_sy(i, 0));
   }
 }
 
@@ -519,8 +519,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, ElevationDerivatives)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(dhdx(i, 0), ref_dhdx(i, 0));
-    ASSERT_DOUBLE_EQ(dhdy(i, 0), ref_dhdy(i, 0));
+    EXPECT_DOUBLE_EQ(dhdx(i, 0), ref_dhdx(i, 0));
+    EXPECT_DOUBLE_EQ(dhdy(i, 0), ref_dhdy(i, 0));
   }
 }
 
@@ -556,9 +556,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, DisplacementDerivatives)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
-    ASSERT_DOUBLE_EQ(dsydy(i, 0), ref_dsydy(i, 0));
-    ASSERT_DOUBLE_EQ(dsxdy(i, 0), ref_dsxdy(i, 0));
+    EXPECT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
+    EXPECT_DOUBLE_EQ(dsydy(i, 0), ref_dsydy(i, 0));
+    EXPECT_DOUBLE_EQ(dsxdy(i, 0), ref_dsxdy(i, 0));
   }
 }
 
@@ -651,16 +651,16 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeZero)
       complex hc2 = model2.fft_h_[cdx];
 
       // consistency: real part symmetric
-      ASSERT_DOUBLE_EQ(h2.real(), hc2.real());
+      EXPECT_DOUBLE_EQ(h2.real(), hc2.real());
       
       // consistency: imaginary part anti-symmetric
-      ASSERT_DOUBLE_EQ(h2.imag(), -1.0 * hc2.imag());
+      EXPECT_DOUBLE_EQ(h2.imag(), -1.0 * hc2.imag());
 
       // cross-check: real part
-      ASSERT_DOUBLE_EQ(h2.real(), h1.real());
+      EXPECT_DOUBLE_EQ(h2.real(), h1.real());
       
       // cross-check: imaginary part
-      ASSERT_DOUBLE_EQ(h2.imag(), h1.imag());
+      EXPECT_DOUBLE_EQ(h2.imag(), h1.imag());
     }
   }
 }
@@ -698,16 +698,18 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeNonZero)
       complex hc2 = model2.fft_h_[cdx];
 
       // consistency: real part symmetric
-      ASSERT_DOUBLE_EQ(h2.real(), hc2.real());
+      EXPECT_DOUBLE_EQ(h2.real(), hc2.real());
       
       // consistency: imaginary part anti-symmetric
-      ASSERT_DOUBLE_EQ(h2.imag(), -1.0 * hc2.imag());
+      EXPECT_DOUBLE_EQ(h2.imag(), -1.0 * hc2.imag());
 
       // cross-check: real part
-      ASSERT_DOUBLE_EQ(h2.real(), h1.real());
+      // EXPECT_DOUBLE_EQ(h2.real(), h1.real());
+      EXPECT_NEAR(h2.real(), h1.real(), 1.0E-14);
       
       // cross-check: imaginary part
-      ASSERT_DOUBLE_EQ(h2.imag(), h1.imag());
+      // EXPECT_DOUBLE_EQ(h2.imag(), h1.imag());
+      EXPECT_NEAR(h2.imag(), h1.imag(), 1.0E-14);
     }
   }
 }
@@ -735,7 +737,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeZero)
     sum_h2 += norm(model.fft_h_[i]);
   }
 
-  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
 }
 
 //////////////////////////////////////////////////
@@ -761,7 +763,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeNonZero)
     sum_h2 += norm(model.fft_h_[i]);
   }
 
-  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
 }
 
 //////////////////////////////////////////////////
@@ -786,8 +788,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHorizontalDisplacementsLambdaZer
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx(i, 0), 0.0);
-    ASSERT_DOUBLE_EQ(sy(i, 0), 0.0);
+    EXPECT_DOUBLE_EQ(sx(i, 0), 0.0);
+    EXPECT_DOUBLE_EQ(sy(i, 0), 0.0);
   }
 }
 
@@ -817,7 +819,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationTimeZero)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+    // EXPECT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+    EXPECT_NEAR(z(i, 0), ref_z(i, 0), 1.0E-14);
   }
 }
 //////////////////////////////////////////////////
@@ -846,7 +849,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationTimeNonZero)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+    // EXPECT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+    EXPECT_NEAR(z(i, 0), ref_z(i, 0), 1.0E-14);
   }
 }
 
@@ -880,8 +884,11 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedDisplacement)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(sx(i, 0), ref_sx(i, 0));
-    ASSERT_DOUBLE_EQ(sy(i, 0), ref_sy(i, 0));
+    // EXPECT_DOUBLE_EQ(sx(i, 0), ref_sx(i, 0));
+    EXPECT_NEAR(sx(i, 0), ref_sx(i, 0), 1.0E-14);
+
+    // EXPECT_DOUBLE_EQ(sy(i, 0), ref_sy(i, 0));
+    EXPECT_NEAR(sy(i, 0), ref_sy(i, 0), 1.0E-14);
   }
 }
 
@@ -915,8 +922,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationDerivatives)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(dhdx(i, 0), ref_dhdx(i, 0));
-    ASSERT_DOUBLE_EQ(dhdy(i, 0), ref_dhdy(i, 0));
+    EXPECT_DOUBLE_EQ(dhdx(i, 0), ref_dhdx(i, 0));
+    EXPECT_DOUBLE_EQ(dhdy(i, 0), ref_dhdy(i, 0));
   }
 }
 
@@ -954,9 +961,9 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedDisplacementDerivatives)
 
   for (int i=0; i<n2; ++i)
   {
-    ASSERT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
-    ASSERT_DOUBLE_EQ(dsydy(i, 0), ref_dsydy(i, 0));
-    ASSERT_DOUBLE_EQ(dsxdy(i, 0), ref_dsxdy(i, 0));
+    EXPECT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
+    EXPECT_DOUBLE_EQ(dsydy(i, 0), ref_dsydy(i, 0));
+    EXPECT_DOUBLE_EQ(dsxdy(i, 0), ref_dsxdy(i, 0));
   }
 }
 

@@ -76,7 +76,7 @@ void PiersonMoskowitzWaveSpectrum::Evaluate(
     spectrum.setZero();
   }
 
-  // array k has no zero elements
+  // array1 k has no zero elements
   Eigen::MatrixXd k1 = (k.array() == 0).select(
       Eigen::MatrixXd::Ones(rows, cols), k);
 
@@ -91,11 +91,11 @@ void PiersonMoskowitzWaveSpectrum::Evaluate(
   Eigen::MatrixXd k2 = Eigen::pow(k1.array(), 2.0);
   Eigen::MatrixXd k3 = Eigen::pow(k1.array(), 3.0);
 
-  // evaluate for k
+  // evaluate for k1
   Eigen::MatrixXd cap_s = alpha / 2.0 / k3.array()
       * Eigen::exp(-beta * g2 / k2.array() / u4);
 
-  // apply filter
+  // apply filter for k
   spectrum = (k.array() == 0).select(
       Eigen::MatrixXd::Zero(rows, cols), cap_s);
 }
@@ -229,7 +229,7 @@ void ECKVWaveSpectrum::Evaluate(
     spectrum.setZero();
   }
 
-  // array k has no zero elements
+  // array k1 has no zero elements
   Eigen::MatrixXd k1 = (k.array() == 0).select(
       Eigen::MatrixXd::Ones(rows, cols), k);
 

@@ -210,7 +210,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
     for (int i=0; i<21; ++i)
     {
       double dtheta = theta(i) - theta_mean;
-      double phi_test = WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
+      double phi_test = WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
           spread, dtheta, u10, cap_omega_c);
       EXPECT_DOUBLE_EQ(phi(i), phi_test);
     }
