@@ -34,6 +34,7 @@ set(gtest_sources
   ${gtest_sources}
   Algorithm_TEST.cc
   CGAL_TEST.cc
+  EigenFFTW_TEST.cc
   Geometry_TEST.cc
   Grid_TEST.cc
   MeshTools_TEST.cc
