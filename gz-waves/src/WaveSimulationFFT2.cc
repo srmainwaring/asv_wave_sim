@@ -552,7 +552,6 @@ namespace waves
     InitWaveNumbers();
 
     // initialise arrays
-    size_t n2 = nx_ * ny_;
     if (cap_psi_2s_root_vec_.size() == 0)
     {
       cap_psi_2s_root_vec_ = Eigen::MatrixXd::Zero(nx_, ny_);
@@ -577,11 +576,11 @@ namespace waves
     gz::waves::Cos2sSpreadingFunction spreadingFn2;
     spreadingFn2.SetSpread(s_param_);
 
-    // broadcast wavenumbers to arrays (aka meshgrid)
+    // broadcast (fft) wavenumbers to arrays (aka meshgrid)
     Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx_, ny_);
     Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx_, ny_);
-    kx.colwise() += kx_math_;
-    ky.rowwise() += ky_math_.transpose();
+    kx.colwise() += kx_fft_;
+    ky.rowwise() += ky_fft_.transpose();
 
     // wavenumber and wave angle arrays
     Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
@@ -601,31 +600,17 @@ namespace waves
     else
       spreadingFn2.Evaluate(cap_psi, theta, phi10_, k);
 
-    // continuous two-sided elevation variance spectrum
-    Eigen::MatrixXd cap_psi_2s_math = Eigen::MatrixXd::Zero(nx_, ny_);
-
     // array k1 has no zero elements
     Eigen::MatrixXd k1 = (k.array() == 0).select(
         Eigen::MatrixXd::Ones(nx_, ny_), k);
 
-    // evaluate for k1 != 0
-    cap_psi_2s_math = cap_s.array() * cap_psi.array() / k1.array();
+    // evaluate continuous two-sided elevation variance spectrum for k1 != 0
+    Eigen::MatrixXd cap_psi_2s_fft =
+        cap_s.array() * cap_psi.array() / k1.array();
 
-    // apply filter for k
-    cap_psi_2s_math = (k.array() == 0).select(
-        Eigen::MatrixXd::Zero(nx_, ny_), cap_psi_2s_math);
-
-    // convert to fft-order
-    Eigen::MatrixXd cap_psi_2s_fft = Eigen::MatrixXd::Zero(nx_, ny_);
-    for (int ikx = 0; ikx < nx_; ++ikx)
-    {
-      int ikx_fft = (ikx + nx_/2) % nx_;
-      for (int iky = 0; iky < ny_; ++iky)
-      {
-        int iky_fft = (iky + ny_/2) % ny_;
-        cap_psi_2s_fft(ikx_fft, iky_fft) = cap_psi_2s_math(ikx, iky);
-      }
-    }
+    // apply filter for k == 0
+    cap_psi_2s_fft = (k.array() == 0).select(
+        Eigen::MatrixXd::Zero(nx_, ny_), cap_psi_2s_fft);
 
     // square-root of two-sided discrete elevation variance spectrum
     double cap_psi_norm = 0.5;
@@ -634,6 +619,8 @@ namespace waves
     cap_psi_2s_root_vec_ = cap_psi_norm * Eigen::sqrt(
         cap_psi_2s_fft.array() * delta_kx * delta_ky);
 
+    /// \note vectorising the initialisation of rho and sigma will
+    ///       alter the order, and break the cross checks.
     // iid random normals for real and imaginary parts of the amplitudes
     auto seed = std::default_random_engine::default_seed;
     std::default_random_engine generator(seed);
@@ -648,19 +635,7 @@ namespace waves
     }
 
     // angular temporal frequency for time-dependent (from dispersion)
-    // omega_k_vec_ = Eigen::sqrt(gravity_ * k.array());
-    for (int ikx = 0; ikx < nx_; ++ikx)
-    {
-      double kx = kx_fft_[ikx];
-      double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_; ++iky)
-      {
-        double ky = ky_fft_[iky];
-        double ky2 = ky*ky;
-        double k = sqrt(kx2 + ky2);
-        omega_k_vec_(ikx, iky) = sqrt(gravity_ * k);
-      }
-    }
+    omega_k_vec_ = Eigen::sqrt(gravity_ * k.array());
   }
 
   //////////////////////////////////////////////////
