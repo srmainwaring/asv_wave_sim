@@ -15,24 +15,132 @@
 
 #include <gtest/gtest.h>
 
-#include <Eigen/Dense>
-
+#include <complex>
 #include <iostream>
 #include <memory>
 #include <string>
 
-using Eigen::MatrixXd;
+#include <Eigen/Dense>
+
+#include <fftw3.h>
+
+using Eigen::MatrixXcd;
+using Eigen::VectorXcd;
 
 //////////////////////////////////////////////////
 TEST(EigenFFWT, EigenFFT1D)
 {
+  // Python code to generate test data
+  //
+  // x = [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+  // xhat = fft.ifft(x, 8, norm="forward")
+  // 
+  // with np.printoptions(precision=16, suppress=True):
+  //     print(f"x: {x}")
+  //     print(f"xhat: {xhat.real}")
+  //     print(f"xhat: {xhat.imag}")
 
-  // Eigen::MatrixXd dsxdx = Eigen::MatrixXd::Zero(n2, 1);
-  // Eigen::MatrixXd dsydy = Eigen::MatrixXd::Zero(n2, 1);
-  // Eigen::MatrixXd dsxdy = Eigen::MatrixXd::Zero(n2, 1);
+  int n = 8;
 
-  // EXPECT_EQ(dsxdy.size(), n2);
-  // EXPECT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
+  // expected inputs and outputs
+  Eigen::VectorXcd x = Eigen::VectorXcd::Zero(n);
+  x.real() << 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0;
+
+  Eigen::VectorXcd xhat = Eigen::VectorXcd::Zero(n);
+  xhat.real() <<   2.,  -1.7071067811865475,    1.,   -0.2928932188134524,
+                   0.,  -0.2928932188134524,    1.,   -1.7071067811865475;
+  xhat.imag() <<   0.,   0.7071067811865475,   -1.,    0.7071067811865475,
+                   0.,  -0.7071067811865475,    1.,   -0.7071067811865475;
+  
+  { // using fftw_complex
+    fftw_complex* in = (fftw_complex*)fftw_malloc(n * sizeof(fftw_complex));
+    fftw_complex* out = (fftw_complex*)fftw_malloc(n * sizeof(fftw_complex));
+
+    // create plan
+    fftw_plan plan = fftw_plan_dft_1d(n, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    // populate input
+    for (int i=0; i<n; ++i)
+    {
+      in[i][0] = x(i).real();
+      in[i][1] = x(i).imag();
+    }
+
+    // run fft
+    fftw_execute(plan);
+
+    // check output
+    for (int i=0; i<n; ++i)
+    {
+      // std::cerr << "[" << i << "] "
+      //   << out[i][0] << " + " << out[i][1]
+      //   << "\n";  
+      EXPECT_DOUBLE_EQ(out[i][0], xhat(i).real());
+      EXPECT_DOUBLE_EQ(out[i][1], xhat(i).imag());
+    }
+
+    // cleanup
+    fftw_destroy_plan(plan);
+    fftw_free(out);
+    fftw_free(in);
+  }
+
+  { // using std::vector<std::complex>
+    std::vector<std::complex<double>> in(n, 0.0);
+    std::vector<std::complex<double>> out(n, 0.0);
+
+    // create plan
+    // https://stackoverflow.com/questions/4214400/problem-casting-stl-complexdouble-to-fftw-complex
+    fftw_plan plan = fftw_plan_dft_1d(
+      n,
+      reinterpret_cast<fftw_complex*>(&in[0]),
+      reinterpret_cast<fftw_complex*>(&out[0]),
+      FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    // populate input
+    for (int i=0; i<n; ++i)
+    {
+      in[i] = x(i);
+    }
+
+    // run fft
+    fftw_execute(plan);
+
+    // check output
+    for (int i=0; i<n; ++i)
+    {
+      EXPECT_DOUBLE_EQ(out[i].real(), xhat(i).real());
+      EXPECT_DOUBLE_EQ(out[i].imag(), xhat(i).imag());
+    }
+  }
+
+  { // using Eigen::VectorXcd
+    Eigen::VectorXcd in = Eigen::VectorXcd::Zero(n, 0.0);
+    Eigen::VectorXcd out = Eigen::VectorXcd::Zero(n, 0.0);
+
+    // create plan
+    fftw_plan plan = fftw_plan_dft_1d(
+      n,
+      reinterpret_cast<fftw_complex*>(&in(0)),
+      reinterpret_cast<fftw_complex*>(&out(0)),
+      FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    // populate input
+    for (int i=0; i<n; ++i)
+    {
+      in(i) = x(i);
+    }
+
+    // run fft
+    fftw_execute(plan);
+
+    // check output
+    for (int i=0; i<n; ++i)
+    {
+      EXPECT_DOUBLE_EQ(out(i).real(), xhat(i).real());
+      EXPECT_DOUBLE_EQ(out(i).imag(), xhat(i).imag());
+    }
+  }
 }
 
 //////////////////////////////////////////////////
