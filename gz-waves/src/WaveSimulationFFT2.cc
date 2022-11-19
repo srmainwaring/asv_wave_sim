@@ -327,6 +327,24 @@ namespace waves
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
+    if (use_vectorised_)
+      ComputeBaseAmplitudesVectorised();
+    else
+      ComputeBaseAmplitudesNonVectorised();
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double time)
+  {
+    if (use_vectorised_)
+      ComputeCurrentAmplitudesVectorised(time);
+    else
+      ComputeCurrentAmplitudesNonVectorised(time);
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesNonVectorised()
+  {
     // gravity acceleration [m/s^2] 
     const double g = gravity_;
 
@@ -453,7 +471,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double time)
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesNonVectorised(
+      double time)
   {
     // alias
     auto& r = rho_;
@@ -722,7 +741,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesVectorised(double time)
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesVectorised(
+      double time)
   {
     // alias
     auto& r = rho_;
@@ -1068,7 +1088,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesReference(double time)
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesReference(
+      double time)
   {
     // alias
     auto& r = rho_ref_;

@@ -91,6 +91,9 @@ namespace waves
     /// \brief Calculate the time-independent Fourier amplitudes
     void ComputeCurrentAmplitudes(double time);
     
+    void ComputeBaseAmplitudesNonVectorised();
+    void ComputeCurrentAmplitudesNonVectorised(double time);
+
     void ComputeBaseAmplitudesVectorised();
     void ComputeCurrentAmplitudesVectorised(double time);
 

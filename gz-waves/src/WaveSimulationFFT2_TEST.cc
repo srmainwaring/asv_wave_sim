@@ -32,7 +32,6 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-
 class TestFixtureWaveSimulationFFT2: public ::testing::Test
 { 
 public: 
@@ -66,7 +65,6 @@ public:
 
 //////////////////////////////////////////////////
 // Define tests
- 
 TEST_F(TestFixtureWaveSimulationFFT2, AngularSpatialWavenumber)
 {
   WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
@@ -405,7 +403,6 @@ TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
 
 //////////////////////////////////////////////////
 // Cross-check optimised version against reference 
-
 TEST_F(TestFixtureWaveSimulationFFT2, ElevationTimeZero)
 {
   int n2 = nx_ * ny_;
@@ -618,6 +615,349 @@ TEST_F(TestFixtureWaveSimulationFFT2, Indexing)
     }
   }
 
+}
+
+//////////////////////////////////////////////////
+// Cross-check vectorised version 
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeZero)
+{
+  WaveSimulationFFT2Impl model1(lx_, ly_, nx_, ny_);
+  model1.SetUseVectorised(false);
+  model1.ComputeBaseAmplitudes();
+  model1.ComputeCurrentAmplitudes(0.0);
+
+  WaveSimulationFFT2Impl model2(lx_, ly_, nx_, ny_);
+  model2.SetUseVectorised(true);
+  model2.ComputeBaseAmplitudes();
+  model2.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      // index for conjugate
+      int cdx = 0;
+      if (ikx != 0)
+        cdx += (nx_ - ikx) * ny_;
+
+      if (iky != 0)
+        cdx += (ny_ - iky);
+
+      // look up amplitude and conjugate
+      complex h1  = model1.fft_h_[idx];
+      complex hc1 = model1.fft_h_[cdx];
+
+      complex h2  = model2.fft_h_[idx];
+      complex hc2 = model2.fft_h_[cdx];
+
+      // consistency: real part symmetric
+      ASSERT_DOUBLE_EQ(h2.real(), hc2.real());
+      
+      // consistency: imaginary part anti-symmetric
+      ASSERT_DOUBLE_EQ(h2.imag(), -1.0 * hc2.imag());
+
+      // cross-check: real part
+      ASSERT_DOUBLE_EQ(h2.real(), h1.real());
+      
+      // cross-check: imaginary part
+      ASSERT_DOUBLE_EQ(h2.imag(), h1.imag());
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeNonZero)
+{
+  WaveSimulationFFT2Impl model1(lx_, ly_, nx_, ny_);
+  model1.SetUseVectorised(false);
+  model1.ComputeBaseAmplitudes();
+  model1.ComputeCurrentAmplitudes(13.6);
+
+  WaveSimulationFFT2Impl model2(lx_, ly_, nx_, ny_);
+  model2.SetUseVectorised(true);
+  model2.ComputeBaseAmplitudes();
+  model2.ComputeCurrentAmplitudes(13.6);
+
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      // index for conjugate
+      int cdx = 0;
+      if (ikx != 0)
+        cdx += (nx_ - ikx) * ny_;
+
+      if (iky != 0)
+        cdx += (ny_ - iky);
+
+      // look up amplitude and conjugate
+      complex h1  = model1.fft_h_[idx];
+      complex hc1 = model1.fft_h_[cdx];
+
+      complex h2  = model2.fft_h_[idx];
+      complex hc2 = model2.fft_h_[cdx];
+
+      // consistency: real part symmetric
+      ASSERT_DOUBLE_EQ(h2.real(), hc2.real());
+      
+      // consistency: imaginary part anti-symmetric
+      ASSERT_DOUBLE_EQ(h2.imag(), -1.0 * hc2.imag());
+
+      // cross-check: real part
+      ASSERT_DOUBLE_EQ(h2.real(), h1.real());
+      
+      // cross-check: imaginary part
+      ASSERT_DOUBLE_EQ(h2.imag(), h1.imag());
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeZero)
+{
+  int n2 = nx_ * ny_;
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  model.ComputeElevation(z);
+
+  EXPECT_EQ(z.size(), n2);
+
+  double sum_z2 = 0.0;
+  double sum_h2 = 0.0;
+  for (int i=0; i<n2; ++i)
+  {
+    sum_z2 += z(i, 0) * z(i, 0);
+    sum_h2 += norm(model.fft_h_[i]);
+  }
+
+  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeNonZero)
+{
+  int n2 = nx_ * ny_;
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(25.3);
+
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  model.ComputeElevation(z);
+
+  EXPECT_EQ(z.size(), n2);
+
+  double sum_z2 = 0.0;
+  double sum_h2 = 0.0;
+  for (int i=0; i<n2; ++i)
+  {
+    sum_z2 += z(i, 0) * z(i, 0);
+    sum_h2 += norm(model.fft_h_[i]);
+  }
+
+  ASSERT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHorizontalDisplacementsLambdaZero)
+{
+  int n2 = nx_ * nx_;
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+
+  // displacements should be zero when lamda = 0
+  model.SetUseVectorised(true);
+  model.SetLambda(0.0);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(10.0);
+
+  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(n2, 1);
+  model.ComputeDisplacements(sx, sy);
+
+  EXPECT_EQ(sx.size(), n2);
+  EXPECT_EQ(sy.size(), n2);
+
+  for (int i=0; i<n2; ++i)
+  {
+    ASSERT_DOUBLE_EQ(sx(i, 0), 0.0);
+    ASSERT_DOUBLE_EQ(sy(i, 0), 0.0);
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationTimeZero)
+{
+  int n2 = nx_ * ny_;
+
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
+  ref_model.SetUseVectorised(false);
+  ref_model.ComputeBaseAmplitudesReference();
+  ref_model.ComputeCurrentAmplitudesReference(0.0);
+
+  Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(n2, 1);
+  ref_model.ComputeElevation(ref_z);
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  model.ComputeElevation(z);
+
+  EXPECT_EQ(ref_z.size(), n2);
+  EXPECT_EQ(z.size(), n2);
+
+  for (int i=0; i<n2; ++i)
+  {
+    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+  }
+}
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationTimeNonZero)
+{
+  int n2 = nx_ * ny_;
+
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
+  ref_model.SetUseVectorised(false);
+  ref_model.ComputeBaseAmplitudesReference();
+  ref_model.ComputeCurrentAmplitudesReference(31.7);
+
+  Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(n2, 1);
+  ref_model.ComputeElevation(ref_z);
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(31.7);
+
+  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  model.ComputeElevation(z);
+
+  EXPECT_EQ(ref_z.size(), n2);
+  EXPECT_EQ(z.size(), n2);
+
+  for (int i=0; i<n2; ++i)
+  {
+    ASSERT_DOUBLE_EQ(z(i, 0), ref_z(i, 0));
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedDisplacement)
+{
+  int n2 = nx_ * ny_;
+
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
+  ref_model.SetUseVectorised(false);
+  ref_model.ComputeBaseAmplitudesReference();
+  ref_model.ComputeCurrentAmplitudesReference(12.2);
+
+  Eigen::MatrixXd ref_sx = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd ref_sy = Eigen::MatrixXd::Zero(n2, 1);
+  ref_model.ComputeDisplacements(ref_sx, ref_sy);
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(12.2);
+
+  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(n2, 1);
+  model.ComputeDisplacements(sx, sy);
+
+  EXPECT_EQ(ref_sx.size(), n2);
+  EXPECT_EQ(ref_sy.size(), n2);
+  EXPECT_EQ(sx.size(), n2);
+  EXPECT_EQ(sy.size(), n2);
+
+  for (int i=0; i<n2; ++i)
+  {
+    ASSERT_DOUBLE_EQ(sx(i, 0), ref_sx(i, 0));
+    ASSERT_DOUBLE_EQ(sy(i, 0), ref_sy(i, 0));
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationDerivatives)
+{
+  int n2 = nx_ * ny_;
+
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
+  ref_model.SetUseVectorised(false);
+  ref_model.ComputeBaseAmplitudesReference();
+  ref_model.ComputeCurrentAmplitudesReference(12.2);
+
+  Eigen::MatrixXd ref_dhdx = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd ref_dhdy = Eigen::MatrixXd::Zero(n2, 1);
+  ref_model.ComputeElevationDerivatives(ref_dhdx, ref_dhdy);
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(12.2);
+
+  Eigen::MatrixXd dhdx = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd dhdy = Eigen::MatrixXd::Zero(n2, 1);
+  ref_model.ComputeElevationDerivatives(dhdx, dhdy);
+
+  EXPECT_EQ(ref_dhdx.size(), n2);
+  EXPECT_EQ(ref_dhdy.size(), n2);
+  EXPECT_EQ(dhdx.size(), n2);
+  EXPECT_EQ(dhdy.size(), n2);
+
+  for (int i=0; i<n2; ++i)
+  {
+    ASSERT_DOUBLE_EQ(dhdx(i, 0), ref_dhdx(i, 0));
+    ASSERT_DOUBLE_EQ(dhdy(i, 0), ref_dhdy(i, 0));
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(TestFixtureWaveSimulationFFT2, VectorisedDisplacementDerivatives)
+{
+  int n2 = nx_ * ny_;
+
+  WaveSimulationFFT2Impl ref_model(lx_, ly_, nx_, ny_);
+  ref_model.SetUseVectorised(false);
+  ref_model.ComputeBaseAmplitudesReference();
+  ref_model.ComputeCurrentAmplitudesReference(12.2);
+
+  Eigen::MatrixXd ref_dsxdx = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd ref_dsydy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd ref_dsxdy = Eigen::MatrixXd::Zero(n2, 1);
+  ref_model.ComputeDisplacementsDerivatives(ref_dsxdx, ref_dsydy, ref_dsxdy);
+
+  WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(12.2);
+
+  Eigen::MatrixXd dsxdx = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd dsydy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::MatrixXd dsxdy = Eigen::MatrixXd::Zero(n2, 1);
+  ref_model.ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+
+  EXPECT_EQ(ref_dsxdx.size(), n2);
+  EXPECT_EQ(ref_dsydy.size(), n2);
+  EXPECT_EQ(ref_dsxdy.size(), n2);
+  EXPECT_EQ(dsxdx.size(), n2);
+  EXPECT_EQ(dsydy.size(), n2);
+  EXPECT_EQ(dsxdy.size(), n2);
+
+  for (int i=0; i<n2; ++i)
+  {
+    ASSERT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
+    ASSERT_DOUBLE_EQ(dsydy(i, 0), ref_dsydy(i, 0));
+    ASSERT_DOUBLE_EQ(dsxdy(i, 0), ref_dsxdy(i, 0));
+  }
 }
 
 //////////////////////////////////////////////////
