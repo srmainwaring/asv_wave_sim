@@ -32,13 +32,13 @@ namespace waves
     ~WaveSimulationTrochoidImpl();
 
     WaveSimulationTrochoidImpl(
-        int _N,
-        double _L,
-        std::shared_ptr<WaveParameters> _params);
+        int N,
+        double L,
+        std::shared_ptr<WaveParameters> params);
 
-    void SetWindVelocity(double _ux, double _uy);
+    void SetWindVelocity(double ux, double uy);
 
-    void SetTime(double _time);
+    void SetTime(double time);
 
     void ComputeElevation(
         Eigen::Ref<Eigen::MatrixXd> _heights);
@@ -56,12 +56,12 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> _dsydy,
         Eigen::Ref<Eigen::MatrixXd> _dsxdy);
   
-    int N;
-    int N2;
-    int NOver2;
-    double L;
-    double time;
-    std::shared_ptr<WaveParameters> params;
+    int N_;
+    int N2_;
+    int NOver2_;
+    double L_;
+    double time_;
+    std::shared_ptr<WaveParameters> params_;
   };
 
   //////////////////////////////////////////////////
@@ -71,45 +71,45 @@ namespace waves
 
   //////////////////////////////////////////////////
   WaveSimulationTrochoidImpl::WaveSimulationTrochoidImpl(
-    int _N,
-    double _L,
-    std::shared_ptr<WaveParameters> _params) :
-    N(_N),
-    N2(_N * _N),
-    NOver2(_N / 2),
-    L(_L),
-    params(_params)
+    int N,
+    double L,
+    std::shared_ptr<WaveParameters> params) :
+    N_(N),
+    N2_(N * N),
+    NOver2_(N / 2),
+    L_(L),
+    params_(params)
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationTrochoidImpl::SetWindVelocity(double ux, double uy)
   {
     // @TODO NO IMPLEMENTATION
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::SetTime(double _time)
+  void WaveSimulationTrochoidImpl::SetTime(double time)
   {
     // @TODO NO IMPLEMENTATION
-    this->time = _time;
+    this->time_ = time;
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> _heights)
+    Eigen::Ref<Eigen::MatrixXd> h)
   {
     // Multiple wave params
-    const auto  number     = this->params->Number();
-    const auto& amplitude  = this->params->Amplitude_V();
-    const auto& wavenumber = this->params->Wavenumber_V();
-    const auto& omega      = this->params->AngularFrequency_V();
-    const auto& phase      = this->params->Phase_V();
-    const auto& q          = this->params->Steepness_V();
-    const auto& direction  = this->params->Direction_V();
+    const auto  number     = this->params_->Number();
+    const auto& amplitude  = this->params_->Amplitude_V();
+    const auto& wavenumber = this->params_->Wavenumber_V();
+    const auto& omega      = this->params_->AngularFrequency_V();
+    const auto& phase      = this->params_->Phase_V();
+    const auto& q          = this->params_->Steepness_V();
+    const auto& direction  = this->params_->Direction_V();
 
     // Multiple wave update 
-    _heights = Eigen::MatrixXd::Zero(this->N2, 0);
+    h = Eigen::MatrixXd::Zero(this->N2_, 0);
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -119,27 +119,27 @@ namespace waves
       const auto& direction_i = direction[i];
       const auto& q_i = q[i];
 
-      for (size_t iy=0; iy<this->N; ++iy)
+      for (size_t iy=0; iy<this->N_; ++iy)
       {
-        for (size_t ix=0; ix<this->N; ++ix)
+        for (size_t ix=0; ix<this->N_; ++ix)
         {
           // Col major index
-          size_t idx = iy * this->N + ix;
+          size_t idx = iy * this->N_ + ix;
 
           // Regular grid
-          double vx = ix * this->L / this->N - this->L / 2.0;
-          double vy = iy * this->L / this->N - this->L / 2.0;
+          double vx = ix * this->L_ / this->N_ - this->L_ / 2.0;
+          double vy = iy * this->L_ / this->N_ - this->L_ / 2.0;
 
           // Multiple waves
           double ddotx = direction_i.X() * vx + direction_i.Y() * vy;
-          double angle  = ddotx * wavenumber_i - omega_i * time + phase_i;
+          double angle  = ddotx * wavenumber_i - omega_i * time_ + phase_i;
           // double s = std::sin(angle);
           double c = std::cos(angle);
           // double sx = - direction_i.X() * q_i * amplitude_i * s;
           // double sy = - direction_i.Y() * q_i * amplitude_i * s;
-          double h = amplitude_i * c;
+          double h1 = amplitude_i * c;
 
-          _heights(idx, 0) += h;
+          h(idx, 0) += h1;
         }
       }
     }
@@ -147,29 +147,29 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeElevationDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dhdx,
-    Eigen::Ref<Eigen::MatrixXd> _dhdy)
+    Eigen::Ref<Eigen::MatrixXd> dhdx,
+    Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
     // @TODO NO IMPLEMENTATION
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> _sx,
-    Eigen::Ref<Eigen::MatrixXd> _sy)
+    Eigen::Ref<Eigen::MatrixXd> sx,
+    Eigen::Ref<Eigen::MatrixXd> sy)
   {
     // Multiple wave params
-    const auto  number     = this->params->Number();
-    const auto& amplitude  = this->params->Amplitude_V();
-    const auto& wavenumber = this->params->Wavenumber_V();
-    const auto& omega      = this->params->AngularFrequency_V();
-    const auto& phase      = this->params->Phase_V();
-    const auto& q          = this->params->Steepness_V();
-    const auto& direction  = this->params->Direction_V();
+    const auto  number     = this->params_->Number();
+    const auto& amplitude  = this->params_->Amplitude_V();
+    const auto& wavenumber = this->params_->Wavenumber_V();
+    const auto& omega      = this->params_->AngularFrequency_V();
+    const auto& phase      = this->params_->Phase_V();
+    const auto& q          = this->params_->Steepness_V();
+    const auto& direction  = this->params_->Direction_V();
 
     // Multiple wave update
-    _sx = Eigen::MatrixXd::Zero(this->N2, 0);
-    _sy = Eigen::MatrixXd::Zero(this->N2, 0);
+    sx = Eigen::MatrixXd::Zero(this->N2_, 0);
+    sy = Eigen::MatrixXd::Zero(this->N2_, 0);
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -179,28 +179,28 @@ namespace waves
       const auto& direction_i = direction[i];
       const auto& q_i = q[i];
 
-      for (size_t iy=0; iy<this->N; ++iy)
+      for (size_t iy=0; iy<this->N_; ++iy)
       {
-        for (size_t ix=0; ix<this->N; ++ix)
+        for (size_t ix=0; ix<this->N_; ++ix)
         {
           // Col major index
-          size_t idx = iy * this->N + ix;
+          size_t idx = iy * this->N_ + ix;
 
           // Regular grid
-          double vx = ix * this->L / this->N - this->L / 2.0;
-          double vy = iy * this->L / this->N - this->L / 2.0;
+          double vx = ix * this->L_ / this->N_ - this->L_ / 2.0;
+          double vy = iy * this->L_ / this->N_ - this->L_ / 2.0;
 
           // Multiple waves
           double ddotx = direction_i.X() * vx + direction_i.Y() * vy;
-          double angle  = ddotx * wavenumber_i - omega_i * time + phase_i;
+          double angle  = ddotx * wavenumber_i - omega_i * time_ + phase_i;
           double s = std::sin(angle);
           // double c = std::cos(angle);
-          double sx = - direction_i.X() * q_i * amplitude_i * s;
-          double sy = - direction_i.Y() * q_i * amplitude_i * s;
+          double sx1 = - direction_i.X() * q_i * amplitude_i * s;
+          double sy1 = - direction_i.Y() * q_i * amplitude_i * s;
           // double h = amplitude_i * c;
 
-          _sx(idx, 0) += sx;
-          _sy(idx, 0) += sy;
+          sx(idx, 0) += sx1;
+          sy(idx, 0) += sy1;
         }
       }
     }
@@ -208,9 +208,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> _dsydy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> dsydy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
     // @TODO NO IMPLEMENTATION
   }
@@ -222,72 +222,72 @@ namespace waves
 
   //////////////////////////////////////////////////
   WaveSimulationTrochoid::WaveSimulationTrochoid(
-    int _N,
-    double _L,
-    std::shared_ptr<WaveParameters> _params) :
-    impl(new WaveSimulationTrochoidImpl(_N, _L, _params))
+    int N,
+    double L,
+    std::shared_ptr<WaveParameters> params) :
+    impl_(new WaveSimulationTrochoidImpl(N, L, params))
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationTrochoid::SetWindVelocity(double ux, double uy)
   {
-    impl->SetWindVelocity(_ux, _uy);
+    impl_->SetWindVelocity(ux, uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::SetTime(double _time)
+  void WaveSimulationTrochoid::SetTime(double time)
   {
-    impl->SetTime(_time);
+    impl_->SetTime(time);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoid::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> _h)
+    Eigen::Ref<Eigen::MatrixXd> h)
   {
-    impl->ComputeElevation(_h);
+    impl_->ComputeElevation(h);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoid::ComputeElevationDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dhdx,
-    Eigen::Ref<Eigen::MatrixXd> _dhdy)
+    Eigen::Ref<Eigen::MatrixXd> dhdx,
+    Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
-    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
+    impl_->ComputeElevationDerivatives(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoid::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> _sx,
-    Eigen::Ref<Eigen::MatrixXd> _sy)
+    Eigen::Ref<Eigen::MatrixXd> sx,
+    Eigen::Ref<Eigen::MatrixXd> sy)
   {
-    impl->ComputeDisplacements(_sx, _sy);
+    impl_->ComputeDisplacements(sx, sy);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoid::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> _dsydy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> dsydy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
+    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoid::ComputeDisplacementsAndDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _h,
-    Eigen::Ref<Eigen::MatrixXd> _sx,
-    Eigen::Ref<Eigen::MatrixXd> _sy,
-    Eigen::Ref<Eigen::MatrixXd> _dhdx,
-    Eigen::Ref<Eigen::MatrixXd> _dhdy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> _dsydy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> h,
+    Eigen::Ref<Eigen::MatrixXd> sx,
+    Eigen::Ref<Eigen::MatrixXd> sy,
+    Eigen::Ref<Eigen::MatrixXd> dhdx,
+    Eigen::Ref<Eigen::MatrixXd> dhdy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> dsydy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl->ComputeElevation(_h);
-    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
-    impl->ComputeDisplacements(_sx, _sy);
-    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
+    impl_->ComputeElevation(h);
+    impl_->ComputeElevationDerivatives(dhdx, dhdy);
+    impl_->ComputeDisplacements(sx, sy);
+    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
   }
 }
 }

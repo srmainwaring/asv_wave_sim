@@ -58,6 +58,8 @@ template <typename Vector3>
 class OceanTilePrivate
 {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  
   ~OceanTilePrivate();
 
   OceanTilePrivate(unsigned int _N, double _L, bool _hasVisuals=true);
@@ -324,7 +326,10 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       // FFT2
       std::unique_ptr<WaveSimulationFFT2> waveSim(
           new WaveSimulationFFT2(_L, _L, _N, _N));
-      waveSim->SetLambda(_params->Steepness());  // larger lambda => steeper waves.
+      
+      waveSim->SetUseVectorised(true);
+      // larger lambda => steeper waves.
+      waveSim->SetLambda(_params->Steepness());
       mWaveSim = std::move(waveSim);
       break;
     }

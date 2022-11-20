@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/WaveSpreadingFunction.hh"
+
 #include <cmath>
 
 using namespace gz; 
@@ -31,59 +32,56 @@ Cos2sSpreadingFunction::~Cos2sSpreadingFunction()
 }
 
 //////////////////////////////////////////////////
-Cos2sSpreadingFunction::Cos2sSpreadingFunction(double _spread) :
+Cos2sSpreadingFunction::Cos2sSpreadingFunction(double spread) :
     DirectionalSpreadingFunction(),
-    _spread(_spread)
+    spread_(spread)
 {
-  this->_RecalcCoeffs();
+  RecalcCoeffs();
 }
 
 //////////////////////////////////////////////////
 double Cos2sSpreadingFunction::Evaluate(
-    double _theta, double _theta_mean, double _k) const
+    double theta, double theta_mean, double k) const
 {
-  double s = this->_spread;
-  double phi = _theta - _theta_mean;
+  double phi = theta - theta_mean;
   double cp = std::cos(phi / 2.0);
-  double p1 = std::pow(cp, 2.0 * s);
-  double cap_phi = this->_cap_c_s * p1;
+  double p1 = std::pow(cp, 2.0 * spread_);
+  double cap_phi = cap_c_s_ * p1;
   return cap_phi;
 }
 
 //////////////////////////////////////////////////
 void Cos2sSpreadingFunction::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> _phi,
-    const Eigen::Ref<const Eigen::MatrixXd> &_theta,
-    double _theta_mean,
-    const Eigen::Ref<const Eigen::MatrixXd> &_k) const
+    Eigen::Ref<Eigen::MatrixXd> phi,
+    const Eigen::Ref<const Eigen::MatrixXd> &theta,
+    double theta_mean,
+    const Eigen::Ref<const Eigen::MatrixXd> &k) const
 {
-  double s = this->_spread;
-  Eigen::MatrixXd phi = _theta.array() - _theta_mean;
-  Eigen::MatrixXd cp = Eigen::cos(phi.array() / 2.0);
-  Eigen::MatrixXd p1 = Eigen::pow(cp.array(), 2.0 * s);
-  _phi = this->_cap_c_s * p1.array();
+  Eigen::MatrixXd angle = theta.array() - theta_mean;
+  Eigen::MatrixXd cp = Eigen::cos(angle.array() / 2.0);
+  Eigen::MatrixXd p1 = Eigen::pow(cp.array(), 2.0 * spread_);
+  phi = cap_c_s_ * p1.array();
 }
 
 //////////////////////////////////////////////////
 double Cos2sSpreadingFunction::Spread() const
 {
-  return this->_spread;
+  return spread_;
 }
 
 //////////////////////////////////////////////////
-void Cos2sSpreadingFunction::SetSpread(double _value)
+void Cos2sSpreadingFunction::SetSpread(double value)
 {
-    this->_spread = _value;
-    this->_RecalcCoeffs();
+    spread_ = value;
+    RecalcCoeffs();
 }
 
 //////////////////////////////////////////////////
-void Cos2sSpreadingFunction::_RecalcCoeffs()
+void Cos2sSpreadingFunction::RecalcCoeffs()
 {
-    double s = this->_spread;
-    double g1 = std::tgamma(s + 1.0);
-    double g2 = std::tgamma(s + 0.5);
-    this->_cap_c_s = g1 / g2 / 2.0 / std::sqrt(M_PI);
+    double g1 = std::tgamma(spread_ + 1.0);
+    double g2 = std::tgamma(spread_ + 0.5);
+    cap_c_s_ = g1 / g2 / 2.0 / std::sqrt(M_PI);
 }
 
 //////////////////////////////////////////////////
@@ -94,111 +92,104 @@ ECKVSpreadingFunction::~ECKVSpreadingFunction()
 
 //////////////////////////////////////////////////
 ECKVSpreadingFunction::ECKVSpreadingFunction(
-    double _u10,
-    double _cap_omega_c,
-    double _gravity) :
+    double u10,
+    double cap_omega_c,
+    double gravity) :
     DirectionalSpreadingFunction(),
-    _u10(_u10),
-    _cap_omega_c(_cap_omega_c),
-    _gravity(_gravity)
+    u10_(u10),
+    cap_omega_c_(cap_omega_c),
+    gravity_(gravity)
 {
 }
 
 //////////////////////////////////////////////////
 double ECKVSpreadingFunction::Evaluate(
-    double _theta, double _theta_mean, double _k) const
+    double theta, double theta_mean, double k) const
 {
-  double phi = _theta - _theta_mean;
-  double g = this->_gravity;
-  double u10 = this->_u10;
-  double cap_omega_c = this->_cap_omega_c;
+  double angle = theta - theta_mean;
   
   const double cd_10n = 0.00144;
   const double ao = 0.1733;
   const double ap = 4.0;
   const double km = 370.0;
   const double cm = 0.23;
-  double u_star = std::sqrt(cd_10n) * u10;
+  double u_star = std::sqrt(cd_10n) * u10_;
   double am = 0.13 * u_star / cm;
-  double ko = g / u10 / u10;
-  double kp = ko * cap_omega_c * cap_omega_c;
-  double cp = std::sqrt(g / kp);
-  double c = std::sqrt((g / _k) * (1.0 + std::pow(_k / km, 2.0)));
+  double ko = gravity_ / u10_ / u10_;
+  double kp = ko * cap_omega_c_ * cap_omega_c_;
+  double cp = std::sqrt(gravity_ / kp);
+  double c = std::sqrt((gravity_ / k) * (1.0 + std::pow(k / km, 2.0)));
   double p1 = std::pow(c / cp, 2.5);
   double p2 = std::pow(cm / c, 2.5);
   double t1 = std::tanh(ao + ap * p1 + am * p2);
-  double c2p = std::cos(2.0 * phi);
+  double c2p = std::cos(2.0 * angle);
   double cap_phi = (1.0 + t1 * c2p) / 2.0 / M_PI;
   return cap_phi;
 }
 
 //////////////////////////////////////////////////
 void ECKVSpreadingFunction::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> _phi,
-    const Eigen::Ref<const Eigen::MatrixXd> &_theta,
-    double _theta_mean,
-    const Eigen::Ref<const Eigen::MatrixXd> &_k) const
+    Eigen::Ref<Eigen::MatrixXd> phi,
+    const Eigen::Ref<const Eigen::MatrixXd> &theta,
+    double theta_mean,
+    const Eigen::Ref<const Eigen::MatrixXd> &k) const
 {
-  /// \todo check the size of _phi, _theta and _k match
-
-  double g = this->_gravity;
-  double u10 = this->_u10;
-  double cap_omega_c = this->_cap_omega_c;
+  /// \todo check the size of phi, theta and k match
   
   const double cd_10n = 0.00144;
   const double ao = 0.1733;
   const double ap = 4.0;
   const double km = 370.0;
   const double cm = 0.23;
-  double u_star = std::sqrt(cd_10n) * u10;
+  double u_star = std::sqrt(cd_10n) * u10_;
   double am = 0.13 * u_star / cm;
-  double ko = g / u10 / u10;
-  double kp = ko * cap_omega_c * cap_omega_c;
-  double cp = std::sqrt(g / kp);
+  double ko = gravity_ / u10_ / u10_;
+  double kp = ko * cap_omega_c_ * cap_omega_c_;
+  double cp = std::sqrt(gravity_ / kp);
 
-  Eigen::MatrixXd phi = _theta.array() - _theta_mean;
-  Eigen::MatrixXd c = Eigen::sqrt((g / _k.array())
-                    * (1.0 + Eigen::pow(_k.array() / km, 2.0)));
+  Eigen::MatrixXd angle = theta.array() - theta_mean;
+  Eigen::MatrixXd c = Eigen::sqrt((gravity_ / k.array())
+                    * (1.0 + Eigen::pow(k.array() / km, 2.0)));
   Eigen::MatrixXd p1 = Eigen::pow(c.array() / cp, 2.5);
   Eigen::MatrixXd p2 = Eigen::pow(cm / c.array(), 2.5);
   Eigen::MatrixXd t1 = Eigen::tanh(ao + ap * p1.array() + am * p2.array());
-  Eigen::MatrixXd c2p = Eigen::cos(2.0 * phi.array());
-  _phi = (1.0 + t1.array() * c2p.array()) / 2.0 / M_PI;
+  Eigen::MatrixXd c2p = Eigen::cos(2.0 * angle.array());
+  phi = (1.0 + t1.array() * c2p.array()) / 2.0 / M_PI;
 }
 
 //////////////////////////////////////////////////
 double ECKVSpreadingFunction::Gravity() const
 {
-  return this->_gravity;
+  return gravity_;
 }
 
 //////////////////////////////////////////////////
-void ECKVSpreadingFunction::SetGravity(double _value)
+void ECKVSpreadingFunction::SetGravity(double value)
 {
-  this->_gravity = _value;
+  gravity_ = value;
 }
 
 //////////////////////////////////////////////////
 double ECKVSpreadingFunction::U10() const
 {
-  return this->_u10;
+  return u10_;
 }
 
 //////////////////////////////////////////////////
-void ECKVSpreadingFunction::SetU10(double _value)
+void ECKVSpreadingFunction::SetU10(double value)
 {
-  this->_u10 = _value;
+  u10_ = value;
 }
 
 //////////////////////////////////////////////////
 double ECKVSpreadingFunction::CapOmegaC() const
 {
-  return this->_cap_omega_c;
+  return cap_omega_c_;
 }
 
 //////////////////////////////////////////////////
-void ECKVSpreadingFunction::SetCapOmegaC(double _value)
+void ECKVSpreadingFunction::SetCapOmegaC(double value)
 {
-  this->_cap_omega_c = _value;
+  cap_omega_c_ = value;
 }
 

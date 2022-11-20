@@ -28,23 +28,19 @@
 //***************************************************************************************************
 
 #include "gz/waves/WaveSimulationFFT2.hh"
-#include "gz/waves/WaveSpectrum.hh"
-
-#include "WaveSimulationFFT2Impl.hh"
-
-#include <Eigen/Dense>
-
-#include <gz/common.hh>
-
-#include <fftw3.h>
 
 #include <complex>
 #include <random>
 
-using Eigen::MatrixXcd;
-using Eigen::MatrixXd;
-using Eigen::VectorXcd;
-using Eigen::VectorXd;
+#include <Eigen/Dense>
+
+#include <fftw3.h>
+
+#include <gz/common.hh>
+
+#include "gz/waves/WaveSpectrum.hh"
+#include "gz/waves/WaveSpreadingFunction.hh"
+#include "WaveSimulationFFT2Impl.hh"
 
 namespace gz
 {
@@ -53,321 +49,167 @@ namespace waves
   //////////////////////////////////////////////////
   WaveSimulationFFT2Impl::~WaveSimulationFFT2Impl()
   {
-    fftw_destroy_plan(fft_plan0);
-    fftw_destroy_plan(fft_plan1);
-    fftw_destroy_plan(fft_plan2);
-    fftw_destroy_plan(fft_plan3);
-    fftw_destroy_plan(fft_plan4);
-    fftw_destroy_plan(fft_plan5);
-    fftw_destroy_plan(fft_plan6);
-    fftw_destroy_plan(fft_plan7);
-
-    fftw_free(fft_out0);
-    fftw_free(fft_out1);
-    fftw_free(fft_out2);
-    fftw_free(fft_out3);
-    fftw_free(fft_out4);
-    fftw_free(fft_out5);
-    fftw_free(fft_out6);
-    fftw_free(fft_out7);
-
-    fftw_free(fft_in0);
-    fftw_free(fft_in1);
-    fftw_free(fft_in2);
-    fftw_free(fft_in3);
-    fftw_free(fft_in4);
-    fftw_free(fft_in5);
-    fftw_free(fft_in6);
-    fftw_free(fft_in7);
+    DestroyFFTWPlans();
   }
 
   //////////////////////////////////////////////////
   WaveSimulationFFT2Impl::WaveSimulationFFT2Impl(
-    double _lx, double _ly, int _nx, int _ny) :
-    nx(_nx),
-    ny(_ny),
-    lx(_lx),
-    ly(_ly),
-    lambda(0.6)
+    double lx, double ly, int nx, int ny) :
+    nx_(nx),
+    ny_(ny),
+    lx_(lx),
+    ly_(ly),
+    lambda_(0.6)
   {
     ComputeBaseAmplitudes();
-
-    // FFT 2D.
-    size_t n2 = this->nx * this->ny;
-
-    // For height
-    fft_in0  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-    fft_in1  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-    fft_in2  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-
-    // For xy-displacements
-    fft_in3  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-    fft_in4  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-    fft_in5  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-    fft_in6  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-    fft_in7  = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));
-
-    // For height
-    fft_out0 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-    fft_out1 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-    fft_out2 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-
-    // For xy-displacements
-    fft_out3 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-    fft_out4 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-    fft_out5 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-    fft_out6 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-    fft_out7 = (fftw_complex*)fftw_malloc(n2 * sizeof(fftw_complex));  
-
-    // For height
-    fft_plan0 = fftw_plan_dft_2d(nx, ny, fft_in0, fft_out0, FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan1 = fftw_plan_dft_2d(nx, ny, fft_in1, fft_out1, FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan2 = fftw_plan_dft_2d(nx, ny, fft_in2, fft_out2, FFTW_BACKWARD, FFTW_ESTIMATE);
-
-    // For xy-displacements
-    fft_plan3 = fftw_plan_dft_2d(nx, ny, fft_in3, fft_out3, FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan4 = fftw_plan_dft_2d(nx, ny, fft_in4, fft_out4, FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan5 = fftw_plan_dft_2d(nx, ny, fft_in5, fft_out5, FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan6 = fftw_plan_dft_2d(nx, ny, fft_in6, fft_out6, FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan7 = fftw_plan_dft_2d(nx, ny, fft_in7, fft_out7, FFTW_BACKWARD, FFTW_ESTIMATE);
+    CreateFFTWPlans();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetUseVectorised(bool _value)
+  void WaveSimulationFFT2Impl::SetUseVectorised(bool value)
   {
-    this->use_vectorised = _value;
+    use_vectorised_ = value;
     ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetLambda(double _value)
+  void WaveSimulationFFT2Impl::SetLambda(double value)
   {
-    lambda = _value;
+    lambda_ = value;
     ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationFFT2Impl::SetWindVelocity(double ux, double uy)
   {
     // Update wind velocity and recompute base amplitudes.
-    this->u10 = sqrt(_ux*_ux + _uy *_uy);
-    this->phi10 = atan2(_uy, _ux);
+    u10_ = sqrt(ux*ux + uy *uy);
+    phi10_ = atan2(uy, ux);
 
     ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetTime(double _time)
+  void WaveSimulationFFT2Impl::SetTime(double time)
   {
-    ComputeCurrentAmplitudes(_time);
+    ComputeCurrentAmplitudes(time);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> _h)
+    Eigen::Ref<Eigen::MatrixXd> h)
   {
-    // Populate input array
-    for (size_t i=0; i<this->nx * this->ny; ++i)
-    {
-      fft_in0[i][0] = fft_h[i].real();
-      fft_in0[i][1] = fft_h[i].imag();
-    }
+    // run the FFT
+    fftw_execute(fft_plan0_);
 
-    // Run the FFT
-    fftw_execute(fft_plan0);
-
-    // for (size_t i=0; i<n2; ++i)
-    // {
-    //   _heights[i] = fft_out0[i][0];
-    // }
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // z(i,j) => z(x, y): x = j, y = i
-    for (size_t ikx = 0; ikx < this->nx; ++ikx)
-    {
-      for (size_t iky = 0; iky < this->ny; ++iky)
-      {
-        int ij = ikx * this->ny + iky;
-        int xy = iky * this->nx + ikx;
-        _h(xy, 0) = fft_out0[ij][0];
-      }
-    }
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    h = fft_out0_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeElevationDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dhdx,
-    Eigen::Ref<Eigen::MatrixXd> _dhdy)
+    Eigen::Ref<Eigen::MatrixXd> dhdx,
+    Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
-    size_t n2 = this->nx * this->ny;
+    // run the FFTs
+    fftw_execute(fft_plan1_);
+    fftw_execute(fft_plan2_);
 
-    // Populate input array
-    for (size_t i=0; i<n2; ++i)
-    {
-      fft_in1[i][0] = fft_h_ikx[i].real();
-      fft_in1[i][1] = fft_h_ikx[i].imag();
-
-      fft_in2[i][0] = fft_h_iky[i].real();
-      fft_in2[i][1] = fft_h_iky[i].imag();
-    }
-
-    // Run the FFTs
-    fftw_execute(fft_plan1);
-    fftw_execute(fft_plan2);
-
-    // for (size_t i=0; i<n2; ++i)
-    // {
-    //   _dhdx[i] = fft_out1[i][0];
-    //   _dhdy[i] = fft_out2[i][0];
-    // }
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // z(i,j) => z(x, y): x = j, y = i
-    // dz(i,j)/di => dz(x, y)/dy: x = j, y = i
-    // dz(i,j)/dj => dz(x, y)/dx: x = j, y = i
-    for (size_t ikx = 0; ikx < this->nx; ++ikx)
-    {
-      for (size_t iky = 0; iky < this->ny; ++iky)
-      {
-        int ij = ikx * this->ny + iky;
-        int xy = iky * this->nx + ikx;
-        _dhdy(xy, 0) = fft_out1[ij][0];
-        _dhdx(xy, 0) = fft_out2[ij][0];
-      }
-    }
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1).real();
+    dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> _sx,
-    Eigen::Ref<Eigen::MatrixXd> _sy)
+    Eigen::Ref<Eigen::MatrixXd> sx,
+    Eigen::Ref<Eigen::MatrixXd> sy)
   {
-    size_t n2 = this->nx * this->ny;
+    // run the FFTs
+    fftw_execute(fft_plan3_);
+    fftw_execute(fft_plan4_);
 
-    // Populate input array
-    for (size_t i=0; i<n2; ++i)
-    {
-      fft_in3[i][0] = fft_sx[i].real();
-      fft_in3[i][1] = fft_sx[i].imag();
-
-      fft_in4[i][0] = fft_sy[i].real();
-      fft_in4[i][1] = fft_sy[i].imag();
-    }
-
-    // Run the FFTs
-    fftw_execute(fft_plan3);
-    fftw_execute(fft_plan4);
-
-    // for (size_t i=0; i<n2; ++i)
-    // {
-    //   _sx[i] = fft_out3[i][0] * lambda;
-    //   _sy[i] = fft_out4[i][0] * lambda;
-    // }
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // sy(i,j) => si(x, y): x = j, y = i
-    // sx(i,j) => sj(x, y): x = j, y = i
-    for (size_t ikx = 0; ikx < this->nx; ++ikx)
-    {
-      for (size_t iky = 0; iky < this->ny; ++iky)
-      {
-        int ij = ikx * this->ny + iky;
-        int xy = iky * this->nx + ikx;
-        _sy(xy, 0) = fft_out3[ij][0] * lambda * -1.0;
-        _sx(xy, 0) = fft_out4[ij][0] * lambda * -1.0;
-      }
-    }
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
+    sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> _dsydy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> dsydy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    size_t n2 = this->nx * this->ny;
+    // run the FFTs
+    fftw_execute(fft_plan5_);
+    fftw_execute(fft_plan6_);
+    fftw_execute(fft_plan7_);
 
-    // Populate input array
-    for (size_t i=0; i<n2; ++i)
-    {
-      fft_in5[i][0] = fft_h_kxkx[i].real();
-      fft_in5[i][1] = fft_h_kxkx[i].imag();
-
-      fft_in6[i][0] = fft_h_kyky[i].real();
-      fft_in6[i][1] = fft_h_kyky[i].imag();
-
-      fft_in7[i][0] = fft_h_kxky[i].real();
-      fft_in7[i][1] = fft_h_kxky[i].imag();
-    }
-
-    // Run the FFTs
-    fftw_execute(fft_plan5);
-    fftw_execute(fft_plan6);
-    fftw_execute(fft_plan7);
-
-    // for (size_t i=0; i<n2; ++i)
-    // {
-    //   _dsxdx[i] = fft_out5[i][0] * lambda;
-    //   _dsydy[i] = fft_out6[i][0] * lambda;
-    //   _dsxdy[i] = fft_out7[i][0] * lambda;
-    // }
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // sy(i,j) => si(x, y): x = j, y = i
-    // sx(i,j) => sj(x, y): x = j, y = i
-    for (size_t ikx = 0; ikx < this->nx; ++ikx)
-    {
-      for (size_t iky = 0; iky < this->ny; ++iky)
-      {
-        int ij = ikx * this->ny + iky;
-        int xy = iky * this->nx + ikx;
-        _dsydy(xy, 0) = fft_out5[ij][0] * lambda * -1.0;
-        _dsxdx(xy, 0) = fft_out6[ij][0] * lambda * -1.0;
-        _dsxdy(xy, 0) = fft_out7[ij][0] * lambda *  1.0;
-      }
-    }
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
+    dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
+    dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ *  1.0;
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
   {
-    // gravity acceleration [m/s^2] 
-    const double g = 9.81;
+    if (use_vectorised_)
+      ComputeBaseAmplitudesVectorised();
+    else
+      ComputeBaseAmplitudesNonVectorised();
+  }
 
-    size_t n2 = this->nx * this->ny;
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double time)
+  {
+    if (use_vectorised_)
+      ComputeCurrentAmplitudesVectorised(time);
+    else
+      ComputeCurrentAmplitudesNonVectorised(time);
+  }
 
-    // storage for Fourier coefficients
-    fft_h = Eigen::VectorXcd::Zero(n2);
-    fft_h_ikx = Eigen::VectorXcd::Zero(n2);
-    fft_h_iky = Eigen::VectorXcd::Zero(n2);
-    fft_sx = Eigen::VectorXcd::Zero(n2);
-    fft_sy = Eigen::VectorXcd::Zero(n2);
-    fft_h_kxkx = Eigen::VectorXcd::Zero(n2);
-    fft_h_kyky = Eigen::VectorXcd::Zero(n2);
-    fft_h_kxky = Eigen::VectorXcd::Zero(n2);
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesNonVectorised()
+  {
+    InitFFTCoeffStorage();
+    InitWaveNumbers();
+
+    // initialise arrays
+    size_t n2 = nx_ * ny_;
+    if (cap_psi_2s_root_.size() == 0)
+    {
+      cap_psi_2s_root_  = Eigen::VectorXd::Zero(n2);
+      rho_              = Eigen::VectorXd::Zero(n2);
+      sigma_            = Eigen::VectorXd::Zero(n2);
+      omega_k_          = Eigen::VectorXd::Zero(n2);
+    }
 
     // continuous two-sided elevation variance spectrum
-    Eigen::VectorXd cap_psi_2s_math =
-        Eigen::VectorXd::Zero(this->nx * this->ny);
+    Eigen::VectorXd cap_psi_2s_math = Eigen::VectorXd::Zero(nx_ * ny_);
 
     // calculate spectrum in math-order (not vectorised)
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
       // kx: fftfreq and ifftshift
-      const double kx = (ikx - this->nx/2) * this->kx_f;
+      const double kx = (ikx - nx_/2) * kx_f_;
       const double kx2 = kx*kx;
-      this->kx_math[ikx] = kx;
-      this->kx_fft[(ikx + nx/2) % nx] = kx;
 
-      for (int iky = 0; iky < this->ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
         // ky: fftfreq and ifftshift
-        const double ky = (iky - this->ny/2) * this->ky_f;
+        const double ky = (iky - ny_/2) * ky_f_;
         const double ky2 = ky*ky;
-        this->ky_math[iky] = ky;
-        this->ky_fft[(iky + ny/2) % ny] = ky;
         
         const double k = sqrt(kx2 + ky2);
         const double phi = atan2(ky, kx);
 
         // index for flattened array
-        int idx = ikx * this->ny + iky;
+        int idx = ikx * ny_ + iky;
 
         if (k == 0.0)
         {
@@ -376,38 +218,38 @@ namespace waves
         else
         {
           double cap_psi = 0.0;
-          if (this->use_symmetric_spreading_fn)
+          if (use_symmetric_spreading_fn_)
           {
             // standing waves - symmetric spreading function
             cap_psi = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
-                k, phi - this->phi10, this->u10, this->cap_omega_c);
+                k, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           else
           {
             // travelling waves - asymmetric spreading function
-            cap_psi = WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
-                this->s_param, phi - this->phi10, this->u10, this->cap_omega_c);
+            cap_psi = WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
+                s_param_, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           const double cap_s =
               WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
-                  k, this->u10, this->cap_omega_c);
+                  k, u10_, cap_omega_c_, gravity_);
           cap_psi_2s_math[idx] = cap_s * cap_psi / k;
         }
       }
     }
 
     // convert to fft-order
-    Eigen::VectorXd cap_psi_2s_fft = Eigen::VectorXd::Zero(this->nx * this->ny);
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    Eigen::VectorXd cap_psi_2s_fft = Eigen::VectorXd::Zero(nx_ * ny_);
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      int ikx_fft = (ikx + nx/2) % nx;
-      for (int iky = 0; iky < this->ny; ++iky)
+      int ikx_fft = (ikx + nx_/2) % nx_;
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        int iky_fft = (iky + ny/2) % ny;
+        int iky_fft = (iky + ny_/2) % ny_;
 
         // index for flattened array
-        int idx = ikx * this->ny + iky;
-        int idx_fft = ikx_fft * this->ny + iky_fft;
+        int idx = ikx * ny_ + iky;
+        int idx_fft = ikx_fft * ny_ + iky_fft;
 
         cap_psi_2s_fft[idx_fft] = cap_psi_2s_math[idx];
       }
@@ -415,8 +257,8 @@ namespace waves
 
     // square-root of two-sided discrete elevation variance spectrum
     double cap_psi_norm = 0.5;
-    double delta_kx = this->kx_f;
-    double delta_ky = this->ky_f;
+    double delta_kx = kx_f_;
+    double delta_ky = ky_f_;
     // double c1 = cap_psi_norm * sqrt(delta_kx * delta_ky);
 
     // iid random normals for real and imaginary parts of the amplitudes
@@ -426,70 +268,68 @@ namespace waves
 
     for (int i = 0; i < n2; ++i)
     {
-      // this->cap_psi_2s_root[i] = c1 * sqrt(cap_psi_2s_fft[i]);
-      this->cap_psi_2s_root[i] =
+      // cap_psi_2s_root[i] = c1 * sqrt(cap_psi_2s_fft[i]);
+      cap_psi_2s_root_[i] =
           cap_psi_norm * sqrt(cap_psi_2s_fft[i] * delta_kx * delta_ky);
 
-      this->rho[i] = distribution(generator);
-      this->sigma[i] = distribution(generator);
+      rho_[i] = distribution(generator);
+      sigma_[i] = distribution(generator);
     }
 
-
     // angular temporal frequency for time-dependent (from dispersion)
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      double kx = this->kx_fft[ikx];
+      double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < this->ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        double ky = this->ky_fft[iky];
+        double ky = ky_fft_[iky];
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
 
         // index for flattened array
-        int idx = ikx * this->ny + iky;
-        this->omega_k[idx] = sqrt(g * k);
+        int idx = ikx * ny_ + iky;
+        omega_k_[idx] = sqrt(gravity_ * k);
       }
     }
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double _time)
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesNonVectorised(
+      double time)
   {
     // alias
-    auto& nx = this->nx;
-    auto& ny = this->ny;
-    auto& r = this->rho;
-    auto& s = this->sigma;
-    auto& psi_root = this->cap_psi_2s_root;
+    const Eigen::Ref<const Eigen::VectorXd>& r = rho_;
+    const Eigen::Ref<const Eigen::VectorXd>& s = sigma_;
+    const Eigen::Ref<const Eigen::VectorXd>& psi_root = cap_psi_2s_root_;
 
     // time update
-    Eigen::VectorXd cos_omega_k = Eigen::VectorXd::Zero(nx * ny);
-    Eigen::VectorXd sin_omega_k = Eigen::VectorXd::Zero(nx * ny);
-    for (int ikx = 0; ikx < nx; ++ikx)
+    Eigen::VectorXd cos_omega_k = Eigen::VectorXd::Zero(nx_ * ny_);
+    Eigen::VectorXd sin_omega_k = Eigen::VectorXd::Zero(nx_ * ny_);
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
         // index for flattened array
-        int idx = ikx * this->ny + iky;
+        int idx = ikx * ny_ + iky;
 
-        double omega_t = this->omega_k[idx] * _time;
+        double omega_t = omega_k_[idx] * time;
         cos_omega_k(idx) = cos(omega_t);
         sin_omega_k(idx) = sin(omega_t);
       }
     }
 
-    // non-vectorised reference version
-    Eigen::VectorXcd zhat = Eigen::VectorXcd::Zero(nx * ny);
-    for (int ikx = 1; ikx < nx; ++ikx)
+    // flattened index version
+    Eigen::VectorXcd zhat = Eigen::VectorXcd::Zero(nx_ * ny_);
+    for (int ikx = 1; ikx < nx_; ++ikx)
     {
-      for (int iky = 1; iky < ny; ++iky)
+      for (int iky = 1; iky < ny_; ++iky)
       {
         // index for flattened array (ikx, iky)
-        int idx = ikx * this->ny + iky;
+        int idx = ikx * ny_ + iky;
 
-        // index for conjugate (nx-ikx, ny-iky)
-        int cdx = (nx-ikx) * this->ny + (ny-iky);
+        // index for conjugate (nx_-ikx, ny_-iky)
+        int cdx = (nx_-ikx) * ny_ + (ny_-iky);
 
         zhat[idx] = complex(
             + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_omega_k(idx)
@@ -499,15 +339,15 @@ namespace waves
       }
     }
 
-    for (int iky = 1; iky < ny/2+1; ++iky)
+    for (int iky = 1; iky < ny_/2+1; ++iky)
     {
       int ikx = 0;
 
       // index for flattened array (ikx, iky)
-      int idx = ikx * this->ny + iky;
+      int idx = ikx * ny_ + iky;
 
-      // index for conjugate (ikx, ny-iky)
-      int cdx = ikx * this->ny + (ny-iky);
+      // index for conjugate (ikx, ny_-iky)
+      int cdx = ikx * ny_ + (ny_-iky);
 
       zhat[idx] = complex(
           + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_omega_k(idx)
@@ -517,15 +357,15 @@ namespace waves
       zhat[cdx] = std::conj(zhat[idx]);
     }
 
-    for (int ikx = 1; ikx < nx/2+1; ++ikx)
+    for (int ikx = 1; ikx < nx_/2+1; ++ikx)
     {
       int iky = 0;
 
       // index for flattened array (ikx, iky)
-      int idx = ikx * this->ny + iky;
+      int idx = ikx * ny_ + iky;
 
-      // index for conjugate (nx-ikx, iky)
-      int cdx = (nx-ikx) * this->ny + iky;
+      // index for conjugate (nx_-ikx, iky)
+      int cdx = (nx_-ikx) * ny_ + iky;
 
       zhat[idx] = complex(
           + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_omega_k(idx)
@@ -537,22 +377,22 @@ namespace waves
 
     zhat[0] = complex(0.0, 0.0);
 
-    // write into fft_h, fft_h_ikx, fft_h_iky, etc.
+    // write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
-    for (int ikx = 0; ikx < nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      double kx = this->kx_fft[ikx];
+      double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        double ky = this->ky_fft[iky];
+        double ky = ky_fft_[iky];
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
         double ook = 1.0 / k;
 
         // index for flattened arrays
-        int idx = ikx * ny + iky;
+        int idx = ikx * ny_ + iky;
 
         complex h  = zhat[idx];
         complex hi = h * iunit;
@@ -560,23 +400,23 @@ namespace waves
         complex hiok = hi * ook;
 
         // height (amplitude)
-        this->fft_h[idx] = h;
+        fft_h_(ikx, iky) = h;
 
         // height derivatives
         complex hikx = hi * kx;
         complex hiky = hi * ky;
 
-        this->fft_h_ikx[idx] = hi * kx;
-        this->fft_h_iky[idx] = hi * ky;
+        fft_h_ikx_(ikx, iky) = hi * kx;
+        fft_h_iky_(ikx, iky) = hi * ky;
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
         {          
-          fft_sx[idx]    = czero;
-          fft_sy[idx]    = czero;
-          fft_h_kxkx[idx] = czero;
-          fft_h_kyky[idx] = czero;
-          fft_h_kxky[idx] = czero;
+          fft_sx_(ikx, iky)     = czero;
+          fft_sy_(ikx, iky)     = czero;
+          fft_h_kxkx_(ikx, iky) = czero;
+          fft_h_kyky_(ikx, iky) = czero;
+          fft_h_kxky_(ikx, iky) = czero;
         }
         else
         {
@@ -586,11 +426,217 @@ namespace waves
           complex hkyky = hok * ky2;
           complex hkxky = hok * kx * ky;
           
-          fft_sx[idx]    = dx;
-          fft_sy[idx]    = dy;
-          fft_h_kxkx[idx] = hkxkx;
-          fft_h_kyky[idx] = hkyky;
-          fft_h_kxky[idx] = hkxky;
+          fft_sx_(ikx, iky)     = dx;
+          fft_sy_(ikx, iky)     = dy;
+          fft_h_kxkx_(ikx, iky) = hkxkx;
+          fft_h_kyky_(ikx, iky) = hkyky;
+          fft_h_kxky_(ikx, iky) = hkxky;
+        }
+      }
+    }
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesVectorised()
+  {
+    // initialise storage
+    InitFFTCoeffStorage();
+    InitWaveNumbers();
+
+    // initialise arrays
+    if (cap_psi_2s_root_vec_.size() == 0)
+    {
+      cap_psi_2s_root_vec_ = Eigen::MatrixXd::Zero(nx_, ny_);
+      rho_vec_             = Eigen::MatrixXd::Zero(nx_, ny_);
+      sigma_vec_           = Eigen::MatrixXd::Zero(nx_, ny_);
+      omega_k_vec_         = Eigen::MatrixXd::Zero(nx_, ny_);
+    }
+
+    // spectrum and spreading functions
+    gz::waves::ECKVWaveSpectrum spectrum;
+    spectrum.SetGravity(gravity_);
+    spectrum.SetU10(u10_);
+    spectrum.SetCapOmegaC(cap_omega_c_);
+
+    // standing waves - symmetric spreading function
+    gz::waves::ECKVSpreadingFunction spreadingFn1;
+    spreadingFn1.SetGravity(gravity_);
+    spreadingFn1.SetU10(u10_);
+    spreadingFn1.SetCapOmegaC(cap_omega_c_);
+
+    // travelling waves - asymmetric spreading function
+    gz::waves::Cos2sSpreadingFunction spreadingFn2;
+    spreadingFn2.SetSpread(s_param_);
+
+    // broadcast (fft) wavenumbers to arrays (aka meshgrid)
+    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx_, ny_);
+    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx_, ny_);
+    kx.colwise() += kx_fft_;
+    ky.rowwise() += ky_fft_.transpose();
+
+    // wavenumber and wave angle arrays
+    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
+    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
+    Eigen::MatrixXd k   = Eigen::sqrt(kx2.array() + ky2.array());
+    Eigen::MatrixXd theta = ky.binaryExpr(
+        kx, [] (double y, double x) { return std::atan2(y, x);}
+    );
+
+    // evaluate spectrum
+    Eigen::MatrixXd cap_s = Eigen::MatrixXd::Zero(nx_, ny_);
+    spectrum.Evaluate(cap_s, k);
+
+    Eigen::MatrixXd cap_psi = Eigen::MatrixXd::Zero(nx_, ny_);
+    if (use_symmetric_spreading_fn_)
+      spreadingFn1.Evaluate(cap_psi, theta, phi10_, k);
+    else
+      spreadingFn2.Evaluate(cap_psi, theta, phi10_, k);
+
+    // array k1 has no zero elements
+    Eigen::MatrixXd k1 = (k.array() == 0).select(
+        Eigen::MatrixXd::Ones(nx_, ny_), k);
+
+    // evaluate continuous two-sided elevation variance spectrum for k1 != 0
+    Eigen::MatrixXd cap_psi_2s_fft =
+        cap_s.array() * cap_psi.array() / k1.array();
+
+    // apply filter for k == 0
+    cap_psi_2s_fft = (k.array() == 0).select(
+        Eigen::MatrixXd::Zero(nx_, ny_), cap_psi_2s_fft);
+
+    // square-root of two-sided discrete elevation variance spectrum
+    double cap_psi_norm = 0.5;
+    double delta_kx = kx_f_;
+    double delta_ky = ky_f_;
+    cap_psi_2s_root_vec_ = cap_psi_norm * Eigen::sqrt(
+        cap_psi_2s_fft.array() * delta_kx * delta_ky);
+
+    /// \note vectorising the initialisation of rho and sigma will
+    ///       alter the order, and break the cross checks.
+    // iid random normals for real and imaginary parts of the amplitudes
+    auto seed = std::default_random_engine::default_seed;
+    std::default_random_engine generator(seed);
+    std::normal_distribution<double> distribution(0.0, 1.0);
+    for (int ikx = 0; ikx < nx_; ++ikx)
+    {
+      for (int iky = 0; iky < ny_; ++iky)
+      {
+        rho_vec_(ikx, iky) = distribution(generator);
+        sigma_vec_(ikx, iky) = distribution(generator);
+      }
+    }
+
+    // angular temporal frequency for time-dependent (from dispersion)
+    omega_k_vec_ = Eigen::sqrt(gravity_ * k.array());
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesVectorised(
+      double time)
+  {
+    // alias
+    const Eigen::Ref<const Eigen::MatrixXd>& r = rho_vec_;
+    const Eigen::Ref<const Eigen::MatrixXd>& s = sigma_vec_;
+    const Eigen::Ref<const Eigen::MatrixXd>& psi_root = cap_psi_2s_root_vec_;
+
+    // // time update
+    Eigen::MatrixXd wt = omega_k_vec_.array() * time;
+    Eigen::MatrixXd cos_omega_k = Eigen::cos(wt.array());
+    Eigen::MatrixXd sin_omega_k = Eigen::sin(wt.array());
+
+    // non-vectorised reference version
+    Eigen::MatrixXcd zhat = Eigen::MatrixXcd::Zero(nx_, ny_);
+    for (int ikx = 1; ikx < nx_; ++ikx)
+    {
+      for (int iky = 1; iky < ny_; ++iky)
+      {
+        zhat(ikx, iky) = complex(
+            + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
+            + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * sin_omega_k(ikx, iky),
+            - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * sin_omega_k(ikx, iky)
+            + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * cos_omega_k(ikx, iky));
+      }
+    }
+
+    for (int iky = 1; iky < ny_/2+1; ++iky)
+    {
+      int ikx = 0;
+      zhat(ikx, iky) = complex(
+          + ( r(ikx, iky) * psi_root(ikx, iky) + r(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) + s(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * sin_omega_k(ikx, iky),
+          - ( r(ikx, iky) * psi_root(ikx, iky) - r(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * sin_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) - s(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * cos_omega_k(ikx, iky));
+      zhat(ikx, ny_-iky) = std::conj(zhat(ikx, iky));
+    }
+
+    for (int ikx = 1; ikx < nx_/2+1; ++ikx)
+    {
+      int iky = 0;
+      zhat(ikx, iky) = complex(
+          + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * cos_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * sin_omega_k(ikx, iky),
+          - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * sin_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * cos_omega_k(ikx, iky));
+      zhat(nx_-ikx, iky) = std::conj(zhat(ikx, iky));
+    }
+
+    zhat(0, 0) = complex(0.0, 0.0);
+
+    /// \todo: change zhat to 1D array and use directly
+    // zhat = zhat.reshaped<Eigen::RowMajor>();
+    // zhat = zhat.reshaped<Eigen::ColMajor>();
+
+    // write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
+    const complex iunit(0.0, 1.0);
+    const complex czero(0.0, 0.0);
+    for (int ikx = 0; ikx < nx_; ++ikx)
+    {
+      double kx = kx_fft_[ikx];
+      double kx2 = kx*kx;
+      for (int iky = 0; iky < ny_; ++iky)
+      {
+        double ky = ky_fft_[iky];
+        double ky2 = ky*ky;
+        double k = sqrt(kx2 + ky2);
+        double ook = 1.0 / k;
+
+        complex h  = zhat(ikx, iky);
+        complex hi = h * iunit;
+        complex hok = h * ook;
+        complex hiok = hi * ook;
+
+        // height (amplitude)
+        fft_h_(ikx, iky) = h;
+
+        // height derivatives
+        complex hikx = hi * kx;
+        complex hiky = hi * ky;
+
+        fft_h_ikx_(ikx, iky) = hi * kx;
+        fft_h_iky_(ikx, iky) = hi * ky;
+
+        // displacement and derivatives
+        if (std::abs(k) < 1.0E-8)
+        {          
+          fft_sx_(ikx, iky)     = czero;
+          fft_sy_(ikx, iky)     = czero;
+          fft_h_kxkx_(ikx, iky) = czero;
+          fft_h_kyky_(ikx, iky) = czero;
+          fft_h_kxky_(ikx, iky) = czero;
+        }
+        else
+        {
+          complex dx  = - hiok * kx;
+          complex dy  = - hiok * ky;
+          complex hkxkx = hok * kx2;
+          complex hkyky = hok * ky2;
+          complex hkxky = hok * kx * ky;
+          
+          fft_sx_(ikx, iky)     = dx;
+          fft_sy_(ikx, iky)     = dy;
+          fft_h_kxkx_(ikx, iky) = hkxkx;
+          fft_h_kyky_(ikx, iky) = hkyky;
+          fft_h_kxky_(ikx, iky) = hkxky;
         }
       }
     }
@@ -599,27 +645,18 @@ namespace waves
   //////////////////////////////////////////////////
   void WaveSimulationFFT2Impl::ComputeBaseAmplitudesReference()
   {
-    size_t n2 = this->nx * this->ny;
+    InitFFTCoeffStorage();
+    InitWaveNumbers();
 
-    // storage for Fourier coefficients
-    fft_h = Eigen::VectorXcd::Zero(n2);
-    fft_h_ikx = Eigen::VectorXcd::Zero(n2);
-    fft_h_iky = Eigen::VectorXcd::Zero(n2);
-    fft_sx = Eigen::VectorXcd::Zero(n2);
-    fft_sy = Eigen::VectorXcd::Zero(n2);
-    fft_h_kxkx = Eigen::VectorXcd::Zero(n2);
-    fft_h_kyky = Eigen::VectorXcd::Zero(n2);
-    fft_h_kxky = Eigen::VectorXcd::Zero(n2);
+    size_t n2 = nx_ * ny_;
 
     // arrays for reference version
-    if (this->cap_psi_2s_root_ref.size() == 0 || 
-        this->cap_psi_2s_root_ref.rows() != this->nx ||
-        this->cap_psi_2s_root_ref.cols() != this->ny)
+    if (cap_psi_2s_root_ref_.size() == 0)
     {
-      this->cap_psi_2s_root_ref = Eigen::MatrixXd::Zero(this->nx, this->ny);
-      this->rho_ref = Eigen::MatrixXd::Zero(this->nx, this->ny);
-      this->sigma_ref = Eigen::MatrixXd::Zero(this->nx, this->ny);
-      this->omega_k_ref = Eigen::MatrixXd::Zero(this->nx, this->ny);
+      cap_psi_2s_root_ref_ = Eigen::MatrixXd::Zero(nx_, ny_);
+      rho_ref_             = Eigen::MatrixXd::Zero(nx_, ny_);
+      sigma_ref_           = Eigen::MatrixXd::Zero(nx_, ny_);
+      omega_k_ref_         = Eigen::MatrixXd::Zero(nx_, ny_);
     }
 
     // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
@@ -629,73 +666,59 @@ namespace waves
     // 3.                 [ 0,  1,  2,  3, -4, -3, -2, -3]
     // 
 
-    // fftfreq and ifftshift
-    for(int ikx = 0; ikx < this->nx; ++ikx)
-    {
-      const double kx = (ikx - this->nx/2) * this->kx_f;
-      kx_math[ikx] = kx;
-      kx_fft[(ikx + nx/2) % nx] = kx;
-    }
-
-    for(int iky = 0; iky < this->ny; ++iky)
-    {
-      const double ky = (iky - this->ny/2) * this->ky_f;
-      ky_math[iky] = ky;
-      ky_fft[(iky + ny/2) % ny] = ky;
-    }
-
     // debug
     gzmsg << "WaveSimulationFFT2" << "\n";
-    gzmsg << "Lx:          " << this->lx << "\n";
-    gzmsg << "Ly:          " << this->ly << "\n";
-    gzmsg << "nx:          " << this->nx << "\n";
-    gzmsg << "ny:          " << this->ny << "\n";
-    gzmsg << "delta_x:     " << this->delta_x << "\n";
-    gzmsg << "delta_x:     " << this->delta_y << "\n";
-    gzmsg << "lambda_x_f:  " << this->lambda_x_f << "\n";
-    gzmsg << "lambda_y_f:  " << this->lambda_y_f << "\n";
-    gzmsg << "nu_x_f:      " << this->nu_x_f << "\n";
-    gzmsg << "nu_y_f:      " << this->nu_y_f << "\n";
-    gzmsg << "nu_x_ny:     " << this->nu_x_ny << "\n";
-    gzmsg << "nu_y_ny:     " << this->nu_y_ny << "\n";
-    gzmsg << "kx_f:        " << this->kx_f << "\n";
-    gzmsg << "ky_f:        " << this->ky_f << "\n";
-    gzmsg << "kx_ny:       " << this->kx_ny << "\n";
-    gzmsg << "ky_ny:       " << this->ky_ny << "\n";
-    #if 0
+    gzmsg << "lx:           " << lx_ << "\n";
+    gzmsg << "ly:           " << ly_ << "\n";
+    gzmsg << "nx:           " << nx_ << "\n";
+    gzmsg << "ny:           " << ny_ << "\n";
+    gzmsg << "delta_x:      " << delta_x_ << "\n";
+    gzmsg << "delta_y:      " << delta_y_ << "\n";
+    gzmsg << "lambda_x_f:   " << lambda_x_f_ << "\n";
+    gzmsg << "lambda_y_f:   " << lambda_y_f_ << "\n";
+    gzmsg << "nu_x_f:       " << nu_x_f_ << "\n";
+    gzmsg << "nu_y_f:       " << nu_y_f_ << "\n";
+    gzmsg << "nu_x_nyquist: " << nu_x_nyquist_ << "\n";
+    gzmsg << "nu_y_nyquist: " << nu_y_nyquist_ << "\n";
+    gzmsg << "kx_f:         " << kx_f_ << "\n";
+    gzmsg << "ky_f:         " << ky_f_ << "\n";
+    gzmsg << "kx_nyquist:   " << kx_nyquist_ << "\n";
+    gzmsg << "ky_nyquist:   " << ky_nyquist_ << "\n";
+
+#if 0
     {
       std::ostringstream os;
-      os << "[ "; for (auto& v : this->kx_fft) os << v << " "; os << "]\n";
+      os << "[ "; for (auto& v : kx_fft_) os << v << " "; os << "]\n";
       gzmsg << "kx_fft:      " << os.str();
     }
     {
       std::ostringstream os;
-      os << "[ "; for (auto& v : this->ky_fft) os << v << " "; os << "]\n";
+      os << "[ "; for (auto& v : ky_fft_) os << v << " "; os << "]\n";
       gzmsg << "ky_fft:      " << os.str();
     }
     {
       std::ostringstream os;
-      os << "[ "; for (auto& v : this->kx_math) os << v << " "; os << "]\n";
+      os << "[ "; for (auto& v : kx_math_) os << v << " "; os << "]\n";
       gzmsg << "kx_math:     " << os.str();
     }
     {
       std::ostringstream os;
-      os << "[ "; for (auto& v : this->ky_math) os << v << " "; os << "]\n";
+      os << "[ "; for (auto& v : ky_math_) os << v << " "; os << "]\n";
       gzmsg << "ky_math:     " << os.str();
     }
-    #endif
+#endif
 
     // continuous two-sided elevation variance spectrum
-    Eigen::MatrixXd cap_psi_2s_math = Eigen::MatrixXd::Zero(this->nx, this->ny);
+    Eigen::MatrixXd cap_psi_2s_math = Eigen::MatrixXd::Zero(nx_, ny_);
 
     // calculate spectrum in math-order (not vectorised)
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < this->ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        double k = sqrt(this->kx_math[ikx]*this->kx_math[ikx]
-            + this->ky_math[iky]*this->ky_math[iky]);
-        double phi = atan2(this->ky_math[iky], this->kx_math[ikx]);
+        double k = sqrt(kx_math_[ikx]*kx_math_[ikx]
+            + ky_math_[iky]*ky_math_[iky]);
+        double phi = atan2(ky_math_[iky], kx_math_[ikx]);
 
         if (k == 0.0)
         {
@@ -704,31 +727,31 @@ namespace waves
         else
         {
           double cap_psi = 0.0;
-          if (this->use_symmetric_spreading_fn)
+          if (use_symmetric_spreading_fn_)
           {
             // standing waves - symmetric spreading function
             cap_psi = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
-                k, phi - this->phi10, this->u10, this->cap_omega_c);
+                k, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           else
           {
             // travelling waves - asymmetric spreading function
-            cap_psi = WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
-                this->s_param, phi - this->phi10, this->u10, this->cap_omega_c);
+            cap_psi = WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
+                s_param_, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           double cap_s = WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
-              k, this->u10, this->cap_omega_c);
+              k, u10_, cap_omega_c_, gravity_);
           cap_psi_2s_math(ikx, iky) = cap_s * cap_psi / k;
         }
       }
     }
 
     // debug
-    #if 0
+#if 0
     {
       std::ostringstream os;
       os << "[\n";
-      for (int ikx = 0; ikx < this->nx; ++ikx)
+      for (int ikx = 0; ikx < nx_; ++ikx)
       {
         os << " [ ";
         for (auto& v : cap_psi_2s_math[ikx])
@@ -741,30 +764,30 @@ namespace waves
 
       gzmsg << "cap_psi_2s:  " << os.str();
     }
-    #endif
+#endif
 
     // convert to fft-order
-    Eigen::MatrixXd cap_psi_2s_fft = Eigen::MatrixXd::Zero(this->nx, this->ny);
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    Eigen::MatrixXd cap_psi_2s_fft = Eigen::MatrixXd::Zero(nx_, ny_);
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      int ikx_fft = (ikx + nx/2) % nx;
-      for (int iky = 0; iky < this->ny; ++iky)
+      int ikx_fft = (ikx + nx_/2) % nx_;
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        int iky_fft = (iky + ny/2) % ny;
+        int iky_fft = (iky + ny_/2) % ny_;
         cap_psi_2s_fft(ikx_fft, iky_fft) = cap_psi_2s_math(ikx, iky);
       }
     }
 
     // square-root of two-sided discrete elevation variance spectrum
     double cap_psi_norm = 0.5;
-    double delta_kx = this->kx_f;
-    double delta_ky = this->ky_f;
+    double delta_kx = kx_f_;
+    double delta_ky = ky_f_;
 
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < this->ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        this->cap_psi_2s_root_ref(ikx, iky) =
+        cap_psi_2s_root_ref_(ikx, iky) =
             cap_psi_norm * sqrt(cap_psi_2s_fft(ikx, iky) * delta_kx * delta_ky);
       }
     }
@@ -774,111 +797,102 @@ namespace waves
     std::default_random_engine generator(seed);
     std::normal_distribution<double> distribution(0.0, 1.0);
 
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < this->ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        this->rho_ref(ikx, iky) = distribution(generator);
-        this->sigma_ref(ikx, iky) = distribution(generator);
+        rho_ref_(ikx, iky) = distribution(generator);
+        sigma_ref_(ikx, iky) = distribution(generator);
       }
     }
 
-    // gravity acceleration [m/s^2] 
-    double g = 9.81;
-
     // angular temporal frequency for time-dependent (from dispersion)
-    for (int ikx = 0; ikx < this->nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      double kx = this->kx_fft[ikx];
+      double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < this->ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        double ky = this->ky_fft[iky];
+        double ky = ky_fft_[iky];
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
-        this->omega_k_ref(ikx, iky) = sqrt(g * k);
+        omega_k_ref_(ikx, iky) = sqrt(gravity_ * k);
       }
     }
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesReference(double _time)
+  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesReference(
+      double time)
   {
     // alias
-    auto& nx = this->nx;
-    auto& ny = this->ny;
-    auto& r = this->rho_ref;
-    auto& s = this->sigma_ref;
-    auto& psi_root = this->cap_psi_2s_root_ref;
+    const Eigen::Ref<const Eigen::MatrixXd>& r = rho_ref_;
+    const Eigen::Ref<const Eigen::MatrixXd>& s = sigma_ref_;
+    const Eigen::Ref<const Eigen::MatrixXd>& psi_root = cap_psi_2s_root_ref_;
 
     // time update
-    Eigen::MatrixXd cos_omega_k = Eigen::MatrixXd::Zero(nx, ny);
-    Eigen::MatrixXd sin_omega_k = Eigen::MatrixXd::Zero(nx, ny);
-    for (int ikx = 0; ikx < nx; ++ikx)
+    Eigen::MatrixXd cos_omega_k = Eigen::MatrixXd::Zero(nx_, ny_);
+    Eigen::MatrixXd sin_omega_k = Eigen::MatrixXd::Zero(nx_, ny_);
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        cos_omega_k(ikx, iky) = cos(this->omega_k_ref(ikx, iky) * _time);
-        sin_omega_k(ikx, iky) = sin(this->omega_k_ref(ikx, iky) * _time);
+        cos_omega_k(ikx, iky) = cos(omega_k_ref_(ikx, iky) * time);
+        sin_omega_k(ikx, iky) = sin(omega_k_ref_(ikx, iky) * time);
       }
     }
 
     // non-vectorised reference version
-    Eigen::MatrixXcd zhat = Eigen::MatrixXcd::Zero(nx, ny);
-    for (int ikx = 1; ikx < nx; ++ikx)
+    Eigen::MatrixXcd zhat = Eigen::MatrixXcd::Zero(nx_, ny_);
+    for (int ikx = 1; ikx < nx_; ++ikx)
     {
-      for (int iky = 1; iky < ny; ++iky)
+      for (int iky = 1; iky < ny_; ++iky)
       {
         zhat(ikx, iky) = complex(
-            + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx-ikx, ny-iky) * psi_root(nx-ikx, ny-iky) ) * cos_omega_k(ikx, iky)
-            + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx-ikx, ny-iky) * psi_root(nx-ikx, ny-iky) ) * sin_omega_k(ikx, iky),
-            - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx-ikx, ny-iky) * psi_root(nx-ikx, ny-iky) ) * sin_omega_k(ikx, iky)
-            + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx-ikx, ny-iky) * psi_root(nx-ikx, ny-iky) ) * cos_omega_k(ikx, iky));
+            + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
+            + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * sin_omega_k(ikx, iky),
+            - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * sin_omega_k(ikx, iky)
+            + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * cos_omega_k(ikx, iky));
       }
     }
 
-    for (int iky = 1; iky < ny/2+1; ++iky)
+    for (int iky = 1; iky < ny_/2+1; ++iky)
     {
       int ikx = 0;
       zhat(ikx, iky) = complex(
-          + ( r(ikx, iky) * psi_root(ikx, iky) + r(ikx, ny-iky) * psi_root(ikx, ny-iky) ) * cos_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) + s(ikx, ny-iky) * psi_root(ikx, ny-iky) ) * sin_omega_k(ikx, iky),
-          - ( r(ikx, iky) * psi_root(ikx, iky) - r(ikx, ny-iky) * psi_root(ikx, ny-iky) ) * sin_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) - s(ikx, ny-iky) * psi_root(ikx, ny-iky) ) * cos_omega_k(ikx, iky));
-      zhat(ikx, ny-iky) = std::conj(zhat(ikx, iky));
+          + ( r(ikx, iky) * psi_root(ikx, iky) + r(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) + s(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * sin_omega_k(ikx, iky),
+          - ( r(ikx, iky) * psi_root(ikx, iky) - r(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * sin_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) - s(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * cos_omega_k(ikx, iky));
+      zhat(ikx, ny_-iky) = std::conj(zhat(ikx, iky));
     }
 
-    for (int ikx = 1; ikx < nx/2+1; ++ikx)
+    for (int ikx = 1; ikx < nx_/2+1; ++ikx)
     {
       int iky = 0;
       zhat(ikx, iky) = complex(
-          + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx-ikx, iky) * psi_root(nx-ikx, iky) ) * cos_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx-ikx, iky) * psi_root(nx-ikx, iky) ) * sin_omega_k(ikx, iky),
-          - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx-ikx, iky) * psi_root(nx-ikx, iky) ) * sin_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx-ikx, iky) * psi_root(nx-ikx, iky) ) * cos_omega_k(ikx, iky));
-      zhat(nx-ikx, iky) = std::conj(zhat(ikx, iky));
+          + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * cos_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * sin_omega_k(ikx, iky),
+          - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * sin_omega_k(ikx, iky)
+          + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * cos_omega_k(ikx, iky));
+      zhat(nx_-ikx, iky) = std::conj(zhat(ikx, iky));
     }
 
     zhat(0, 0) = complex(0.0, 0.0);
 
-    /// \todo: change zhat to 1D array and use directly
-
-    // write into fft_h, fft_h_ikx, fft_h_iky, etc.
+    // write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
-    for (int ikx = 0; ikx < nx; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      double kx = this->kx_fft[ikx];
+      double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny; ++iky)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        double ky = this->ky_fft[iky];
+        double ky = ky_fft_[iky];
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
         double ook = 1.0 / k;
-
-        // index for flattened arrays
-        int idx = ikx * ny + iky;
 
         complex h  = zhat(ikx, iky);
         complex hi = h * iunit;
@@ -886,23 +900,23 @@ namespace waves
         complex hiok = hi * ook;
 
         // height (amplitude)
-        this->fft_h[idx] = h;
+        fft_h_(ikx, iky) = h;
 
         // height derivatives
         complex hikx = hi * kx;
         complex hiky = hi * ky;
 
-        this->fft_h_ikx[idx] = hi * kx;
-        this->fft_h_iky[idx] = hi * ky;
+        fft_h_ikx_(ikx, iky) = hi * kx;
+        fft_h_iky_(ikx, iky) = hi * ky;
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
         {          
-          fft_sx[idx]    = czero;
-          fft_sy[idx]    = czero;
-          fft_h_kxkx[idx] = czero;
-          fft_h_kyky[idx] = czero;
-          fft_h_kxky[idx] = czero;
+          fft_sx_(ikx, iky)     = czero;
+          fft_sy_(ikx, iky)     = czero;
+          fft_h_kxkx_(ikx, iky) = czero;
+          fft_h_kyky_(ikx, iky) = czero;
+          fft_h_kxky_(ikx, iky) = czero;
         }
         else
         {
@@ -912,19 +926,123 @@ namespace waves
           complex hkyky = hok * ky2;
           complex hkxky = hok * kx * ky;
           
-          fft_sx[idx]    = dx;
-          fft_sy[idx]    = dy;
-          fft_h_kxkx[idx] = hkxkx;
-          fft_h_kyky[idx] = hkyky;
-          fft_h_kxky[idx] = hkxky;
+          fft_sx_(ikx, iky)     = dx;
+          fft_sy_(ikx, iky)     = dy;
+          fft_h_kxkx_(ikx, iky) = hkxkx;
+          fft_h_kyky_(ikx, iky) = hkyky;
+          fft_h_kxky_(ikx, iky) = hkxky;
         }
       }
     }
   }
 
   //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::InitFFTCoeffStorage()
+  {
+    // initialise storage for Fourier coefficients
+    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::InitWaveNumbers()
+  {
+    kx_fft_  = Eigen::VectorXd::Zero(nx_);
+    ky_fft_  = Eigen::VectorXd::Zero(ny_);
+    kx_math_ = Eigen::VectorXd::Zero(nx_);
+    ky_math_ = Eigen::VectorXd::Zero(ny_);
+
+    // wavenumbers in fft and math ordering
+    for(int ikx = 0; ikx < nx_; ++ikx)
+    {
+      double kx = (ikx - nx_/2) * kx_f_;
+      kx_math_(ikx) = kx;
+      kx_fft_((ikx + nx_/2) % nx_) = kx;
+    }
+
+    for(int iky = 0; iky < ny_; ++iky)
+    {
+      double ky = (iky - ny_/2) * ky_f_;
+      ky_math_(iky) = ky;
+      ky_fft_((iky + ny_/2) % ny_) = ky;
+    }
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::CreateFFTWPlans()
+  {
+    // elevation
+    fft_out0_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out1_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out2_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+
+    // xy-displacements
+    fft_out3_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out4_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out5_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out6_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out7_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+
+    // elevation
+    fft_plan0_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_h_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out0_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+    fft_plan1_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_h_ikx_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out1_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+    fft_plan2_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_h_iky_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out2_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    // xy-displacements
+    fft_plan3_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_sx_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out3_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+    fft_plan4_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_sy_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out4_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+    fft_plan5_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_h_kxkx_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out5_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+    fft_plan6_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_h_kyky_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out6_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+    fft_plan7_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<fftw_complex*>(fft_h_kxky_.data()),
+        reinterpret_cast<fftw_complex*>(fft_out7_.data()),
+        FFTW_BACKWARD, FFTW_ESTIMATE);
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationFFT2Impl::DestroyFFTWPlans()
+  {
+    fftw_destroy_plan(fft_plan0_);
+    fftw_destroy_plan(fft_plan1_);
+    fftw_destroy_plan(fft_plan2_);
+    fftw_destroy_plan(fft_plan3_);
+    fftw_destroy_plan(fft_plan4_);
+    fftw_destroy_plan(fft_plan5_);
+    fftw_destroy_plan(fft_plan6_);
+    fftw_destroy_plan(fft_plan7_);
+  }
+
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   double WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
-      double k, double u10, double cap_omega_c)
+      double k, double u10, double cap_omega_c, double gravity)
   {
     if (std::abs(k) < 1.0E-8 || std::abs(u10) < 1.0E-8)
     {
@@ -933,7 +1051,7 @@ namespace waves
 
     double alpha = 0.0081;
     double beta = 1.25;
-    double g = 9.81;
+    double g = gravity;
     double Cd_10N = 0.00144;
     double u_star = sqrt(Cd_10N) * u10;
     double ao = 0.1733;
@@ -1018,9 +1136,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   double WaveSimulationFFT2Impl::ECKVSpreadingFunction(
-      double k, double phi, double u10, double cap_omega_c)
+      double k, double phi, double u10, double cap_omega_c, double gravity)
   {
-    double g = 9.81;
+    double g = gravity;
     double Cd_10N = 0.00144;
     double u_star = sqrt(Cd_10N) * u10;
     double ao = 0.1733;
@@ -1038,8 +1156,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  double WaveSimulationFFT2Impl::Cos2SSpreadingFunction(
-      double s, double phi, double u10, double cap_omega_c)
+  double WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
+      double s, double phi, double u10, double cap_omega_c, double gravity)
   {
     // Longuet-Higgins et al. 'cosine-2S' spreading function
     //
@@ -1062,82 +1180,82 @@ namespace waves
 
   //////////////////////////////////////////////////
   WaveSimulationFFT2::WaveSimulationFFT2(
-    double _lx, double _ly, int _nx, int _ny) :
-    impl(new WaveSimulationFFT2Impl(_lx, _ly, _nx, _ny))
+    double lx, double ly, int nx, int ny) :
+    impl_(new WaveSimulationFFT2Impl(lx, ly, nx, ny))
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetUseVectorised(bool _value)
+  void WaveSimulationFFT2::SetUseVectorised(bool value)
   {
-    impl->SetUseVectorised(_value);
+    impl_->SetUseVectorised(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetLambda(double _value)
+  void WaveSimulationFFT2::SetLambda(double value)
   {
-    impl->SetLambda(_value);
+    impl_->SetLambda(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationFFT2::SetWindVelocity(double ux, double uy)
   {
-    impl->SetWindVelocity(_ux, _uy);
+    impl_->SetWindVelocity(ux, uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetTime(double _value)
+  void WaveSimulationFFT2::SetTime(double value)
   {
-    impl->SetTime(_value);
+    impl_->SetTime(value);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> _h)
+    Eigen::Ref<Eigen::MatrixXd> h)
   {
-    impl->ComputeElevation(_h);
+    impl_->ComputeElevation(h);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeElevationDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dhdx,
-    Eigen::Ref<Eigen::MatrixXd> _dhdy)
+    Eigen::Ref<Eigen::MatrixXd> dhdx,
+    Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
-    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
+    impl_->ComputeElevationDerivatives(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> _sx,
-    Eigen::Ref<Eigen::MatrixXd> _sy)
+    Eigen::Ref<Eigen::MatrixXd> sx,
+    Eigen::Ref<Eigen::MatrixXd> sy)
   {
-    impl->ComputeDisplacements(_sx, _sy);
+    impl_->ComputeDisplacements(sx, sy);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> _dsydy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> dsydy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsxdy, _dsxdy);
+    impl_->ComputeDisplacementsDerivatives(dsxdx, dsxdy, dsxdy);
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationFFT2::ComputeDisplacementsAndDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> _h,
-    Eigen::Ref<Eigen::MatrixXd> _sx,
-    Eigen::Ref<Eigen::MatrixXd> _sy,
-    Eigen::Ref<Eigen::MatrixXd> _dhdx,
-    Eigen::Ref<Eigen::MatrixXd> _dhdy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> _dsydy,
-    Eigen::Ref<Eigen::MatrixXd> _dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> h,
+    Eigen::Ref<Eigen::MatrixXd> sx,
+    Eigen::Ref<Eigen::MatrixXd> sy,
+    Eigen::Ref<Eigen::MatrixXd> dhdx,
+    Eigen::Ref<Eigen::MatrixXd> dhdy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdx,
+    Eigen::Ref<Eigen::MatrixXd> dsydy,
+    Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl->ComputeElevation(_h);
-    impl->ComputeElevationDerivatives(_dhdx, _dhdy);
-    impl->ComputeDisplacements(_sx, _sy);
-    impl->ComputeDisplacementsDerivatives(_dsxdx, _dsydy, _dsxdy);
+    impl_->ComputeElevation(h);
+    impl_->ComputeElevationDerivatives(dhdx, dhdy);
+    impl_->ComputeDisplacements(sx, sy);
+    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
   }
 }
 }
