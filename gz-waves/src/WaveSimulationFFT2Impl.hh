@@ -155,6 +155,12 @@ namespace waves
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
 
+    // precalculated amplitudes (t=0)
+    Eigen::MatrixXd zhat0_rc_;
+    Eigen::MatrixXd zhat0_rs_;
+    Eigen::MatrixXd zhat0_ic_;
+    Eigen::MatrixXd zhat0_is_;
+
     /// \brief Flag to select whether to use vectorised calculations. 
     bool use_vectorised_{false};
 
@@ -217,6 +223,14 @@ namespace waves
     Eigen::VectorXd ky_fft_;
     Eigen::VectorXd kx_math_;
     Eigen::VectorXd ky_math_;
+    Eigen::MatrixXd kx_;
+    Eigen::MatrixXd ky_;
+    Eigen::MatrixXd kx2_;
+    Eigen::MatrixXd ky2_;
+    Eigen::MatrixXd k_;
+    Eigen::MatrixXd k_plus_;
+    Eigen::MatrixXd theta_;
+    Eigen::MatrixXd ook_;
 
     /// \brief Set to 1 to use a symmetric spreading function (standing waves).
     bool use_symmetric_spreading_fn_{false};
