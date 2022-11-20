@@ -58,6 +58,8 @@ template <typename Vector3>
 class OceanTilePrivate
 {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  
   ~OceanTilePrivate();
 
   OceanTilePrivate(unsigned int _N, double _L, bool _hasVisuals=true);

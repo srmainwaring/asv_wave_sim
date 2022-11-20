@@ -48,6 +48,8 @@ namespace waves
   class WaveSimulationFFT2Impl
   {
   public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    
     /// \brief Destructor 
     ~WaveSimulationFFT2Impl();
 

@@ -70,6 +70,8 @@ namespace waves
   class WaveSimulationSinusoid::Impl
   {
   public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     ~Impl();
 
     Impl(double lx, double ly, int nx, int ny);
