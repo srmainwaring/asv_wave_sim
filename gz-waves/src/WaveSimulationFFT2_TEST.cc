@@ -121,27 +121,22 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZeroReference)
   model.ComputeBaseAmplitudesReference();
   model.ComputeCurrentAmplitudesReference(0.0);
 
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (int ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (int iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int cdx = 0;
+      int ckx = 0;
       if (ikx != 0)
-        cdx += (nx_ - ikx) * ny_;
+        ckx = nx_ - ikx;
 
+      int cky = 0;
       if (iky != 0)
-        cdx += (ny_ - iky);
-
-      // std::cerr << "iky: " << iky
-      //   << ", ikx: " << ikx
-      //   << ", idx: " << idx
-      //   << ", cdx: " << cdx
-      //   << "\n";
+        cky = ny_ - iky;
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_(idx, 0);
-      complex hc = model.fft_h_(cdx, 0);
+      complex h  = model.fft_h_(ikx, iky);
+      complex hc = model.fft_h_(ckx, cky);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -165,15 +160,22 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZeroReference)
     {
       // index for conjugate
       int cdx = 0;
+      int ckx = 0;
       if (ikx != 0)
-        cdx += (nx_ - ikx) * ny_;
-
+      {
+        ckx = nx_ - ikx;
+        cdx += ckx * ny_;
+      }
+      int cky = 0;
       if (iky != 0)
-        cdx += (ny_ - iky);
+      {
+        cky = ny_ - iky;
+        cdx += cky;
+      }
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_(idx, 0);
-      complex hc = model.fft_h_(cdx, 0);
+      complex h  = model.fft_h_(ikx, iky);
+      complex hc = model.fft_h_(ckx, cky);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -200,12 +202,14 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int i=0; i<n2; ++i)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_(i, 0));
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      sum_z2 += z(idx, 0) * z(idx, 0);
+      sum_h2 += norm(model.fft_h_(ikx, iky));
+    }
   }
-
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
 }
 
@@ -225,10 +229,13 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int i=0; i<n2; ++i)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_(i, 0));
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      sum_z2 += z(idx, 0) * z(idx, 0);
+      sum_h2 += norm(model.fft_h_(ikx, iky));
+    }
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -268,21 +275,25 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (int ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (int iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int cdx = 0;
+      int ckx = 0;
       if (ikx != 0)
-        cdx += (nx_ - ikx) * ny_;
-
+      {
+        ckx = nx_ - ikx;
+      }
+      int cky = 0;
       if (iky != 0)
-        cdx += (ny_ - iky);
+      {
+        cky = ny_ - iky;
+      }
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_(idx, 0);
-      complex hc = model.fft_h_(cdx, 0);
+      complex h  = model.fft_h_(ikx, iky);
+      complex hc = model.fft_h_(ckx, cky);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -306,15 +317,22 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZero)
     {
       // index for conjugate
       int cdx = 0;
+      int ckx = 0;
       if (ikx != 0)
-        cdx += (nx_ - ikx) * ny_;
-
+      {
+        ckx = nx_ - ikx;
+        cdx += ckx * ny_;
+      }
+      int cky = 0;
       if (iky != 0)
-        cdx += (ny_ - iky);
+      {
+        cky = ny_ - iky;
+        cdx += cky;
+      }
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_(idx, 0);
-      complex hc = model.fft_h_(cdx, 0);
+      complex h  = model.fft_h_(ikx, iky);
+      complex hc = model.fft_h_(ckx, cky);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -341,10 +359,13 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int i=0; i<n2; ++i)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_(i, 0));
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      sum_z2 += z(idx, 0) * z(idx, 0);
+      sum_h2 += norm(model.fft_h_(ikx, iky));
+    }
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -366,10 +387,13 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int i=0; i<n2; ++i)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_(i, 0));
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      sum_z2 += z(idx, 0) * z(idx, 0);
+      sum_h2 += norm(model.fft_h_(ikx, iky));
+    }
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -637,18 +661,25 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeZero)
     {
       // index for conjugate
       int cdx = 0;
+      int ckx = 0;
       if (ikx != 0)
-        cdx += (nx_ - ikx) * ny_;
-
+      {
+        ckx = nx_ - ikx;
+        cdx += ckx * ny_;
+      }
+      int cky = 0;
       if (iky != 0)
-        cdx += (ny_ - iky);
+      {
+        cky = ny_ - iky;
+        cdx += cky;
+      }
 
       // look up amplitude and conjugate
-      complex h1  = model1.fft_h_(idx, 0);
-      complex hc1 = model1.fft_h_(cdx, 0);
+      complex h1  = model1.fft_h_(ikx, iky);
+      complex hc1 = model1.fft_h_(ckx, cky);
 
-      complex h2  = model2.fft_h_(idx, 0);
-      complex hc2 = model2.fft_h_(cdx, 0);
+      complex h2  = model2.fft_h_(ikx, iky);
+      complex hc2 = model2.fft_h_(ckx, cky);
 
       // consistency: real part symmetric
       EXPECT_DOUBLE_EQ(h2.real(), hc2.real());
@@ -684,18 +715,25 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeNonZero)
     {
       // index for conjugate
       int cdx = 0;
+      int ckx = 0;
       if (ikx != 0)
-        cdx += (nx_ - ikx) * ny_;
-
+      {
+        ckx = nx_ - ikx;
+        cdx += ckx * ny_;
+      }
+      int cky = 0;
       if (iky != 0)
-        cdx += (ny_ - iky);
+      {
+        cky = ny_ - iky;
+        cdx += cky;
+      }
 
       // look up amplitude and conjugate
-      complex h1  = model1.fft_h_(idx, 0);
-      complex hc1 = model1.fft_h_(cdx, 0);
+      complex h1  = model1.fft_h_(ikx, iky);
+      complex hc1 = model1.fft_h_(ckx, cky);
 
-      complex h2  = model2.fft_h_(idx, 0);
-      complex hc2 = model2.fft_h_(cdx, 0);
+      complex h2  = model2.fft_h_(ikx, iky);
+      complex hc2 = model2.fft_h_(ckx, cky);
 
       // consistency: real part symmetric
       EXPECT_DOUBLE_EQ(h2.real(), hc2.real());
@@ -731,10 +769,13 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeZero)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int i=0; i<n2; ++i)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_(i, 0));
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      sum_z2 += z(idx, 0) * z(idx, 0);
+      sum_h2 += norm(model.fft_h_(ikx, iky));
+    }
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -757,10 +798,13 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeNonZero)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int i=0; i<n2; ++i)
+  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_(i, 0));
+    for (int iky=0; iky<ny_; ++iky, ++idx)
+    {
+      sum_z2 += z(idx, 0) * z(idx, 0);
+      sum_h2 += norm(model.fft_h_(ikx, iky));
+    }
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -823,6 +867,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationTimeZero)
     EXPECT_NEAR(z(i, 0), ref_z(i, 0), 1.0E-14);
   }
 }
+
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, VectorisedElevationTimeNonZero)
 {
