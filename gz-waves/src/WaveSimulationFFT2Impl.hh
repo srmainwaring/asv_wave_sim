@@ -111,13 +111,6 @@ namespace waves
     void CreateFFTWPlans();
     void DestroyFFTWPlans();
 
-    bool use_vectorised_{false};
-
-    double gravity_{9.81};
-
-    /// \brief Horizontal displacement scaling factor. Zero for no displacement
-    double lambda_{0.0};
-
     Eigen::VectorXcd fft_h_;       // FFT0 - height
     Eigen::VectorXcd fft_h_ikx_;   // FFT1 - d height / dx
     Eigen::VectorXcd fft_h_iky_;   // FFT1 - d height / dy
@@ -126,15 +119,6 @@ namespace waves
     Eigen::VectorXcd fft_h_kxkx_;  // FFT5 - d displacement x / dx
     Eigen::VectorXcd fft_h_kyky_;  // FFT6 - d displacement y / dy
     Eigen::VectorXcd fft_h_kxky_;  // FFT7 - d displacement x / dy = d displacement y / dx
-
-    // Eigen::VectorXcd fft_in0_;
-    // Eigen::VectorXcd fft_in1_;
-    // Eigen::VectorXcd fft_in2_;
-    // Eigen::VectorXcd fft_in3_;
-    // Eigen::VectorXcd fft_in4_;
-    // Eigen::VectorXcd fft_in5_;
-    // Eigen::VectorXcd fft_in6_;
-    // Eigen::VectorXcd fft_in7_;
 
     Eigen::VectorXcd fft_out0_;
     Eigen::VectorXcd fft_out1_;
@@ -148,7 +132,16 @@ namespace waves
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
 
-    // parameters
+    /// \brief Flag to select whether to use vectorised calculations. 
+    bool use_vectorised_{false};
+
+    /// \brief Gravity acceleration [m/s^2]
+    double gravity_{9.81};
+
+    /// \brief Horizontal displacement scaling factor. Zero for no displacement
+    double lambda_{0.0};
+
+    // grid parameters
     double  lx_{1.0};
     double  ly_{1.0};
     int     nx_{2};
@@ -202,7 +195,7 @@ namespace waves
     Eigen::VectorXd kx_math_;
     Eigen::VectorXd ky_math_;
 
-    // set to 1 to use a symmetric spreading function (=> standing waves)
+    /// \brief Set to 1 to use a symmetric spreading function (standing waves).
     bool use_symmetric_spreading_fn_{false};
 
     /// \todo consolidate different storage structures when checked correct
