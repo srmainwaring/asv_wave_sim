@@ -111,7 +111,6 @@ namespace waves
     void CreateFFTWPlans();
     void DestroyFFTWPlans();
 
-
     bool use_vectorised_{false};
 
     double gravity_{9.81};
@@ -128,23 +127,23 @@ namespace waves
     Eigen::VectorXcd fft_h_kyky_;  // FFT6 - d displacement y / dy
     Eigen::VectorXcd fft_h_kxky_;  // FFT7 - d displacement x / dy = d displacement y / dx
 
-    fftw_complex* fft_in0_;
-    fftw_complex* fft_in1_;
-    fftw_complex* fft_in2_;
-    fftw_complex* fft_in3_;
-    fftw_complex* fft_in4_;
-    fftw_complex* fft_in5_;
-    fftw_complex* fft_in6_;
-    fftw_complex* fft_in7_;
+    // Eigen::VectorXcd fft_in0_;
+    // Eigen::VectorXcd fft_in1_;
+    // Eigen::VectorXcd fft_in2_;
+    // Eigen::VectorXcd fft_in3_;
+    // Eigen::VectorXcd fft_in4_;
+    // Eigen::VectorXcd fft_in5_;
+    // Eigen::VectorXcd fft_in6_;
+    // Eigen::VectorXcd fft_in7_;
 
-    fftw_complex* fft_out0_;
-    fftw_complex* fft_out1_;
-    fftw_complex* fft_out2_;
-    fftw_complex* fft_out3_;
-    fftw_complex* fft_out4_;
-    fftw_complex* fft_out5_;
-    fftw_complex* fft_out6_;
-    fftw_complex* fft_out7_;
+    Eigen::VectorXcd fft_out0_;
+    Eigen::VectorXcd fft_out1_;
+    Eigen::VectorXcd fft_out2_;
+    Eigen::VectorXcd fft_out3_;
+    Eigen::VectorXcd fft_out4_;
+    Eigen::VectorXcd fft_out5_;
+    Eigen::VectorXcd fft_out6_;
+    Eigen::VectorXcd fft_out7_;
 
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
@@ -207,7 +206,7 @@ namespace waves
     bool use_symmetric_spreading_fn_{false};
 
     /// \todo consolidate different storage structures when checked correct
-     
+
     //////////////////////////////////////////////////
     /// \note: flattened array storage for non-vectorised version
 
