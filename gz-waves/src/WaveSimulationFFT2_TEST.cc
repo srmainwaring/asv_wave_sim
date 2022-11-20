@@ -238,7 +238,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
     }
   }
 
-  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_NEAR(sum_z2, sum_h2 * n2, 1.0E-14);
 }
 
 //////////////////////////////////////////////////
@@ -396,7 +396,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
     }
   }
 
-  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_NEAR(sum_z2, sum_h2 * n2, 1.0E-14);
 }
 
 //////////////////////////////////////////////////

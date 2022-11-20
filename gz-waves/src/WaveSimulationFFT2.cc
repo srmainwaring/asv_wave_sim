@@ -42,8 +42,6 @@
 #include "gz/waves/WaveSpreadingFunction.hh"
 #include "WaveSimulationFFT2Impl.hh"
 
-#define USE_LOOP_FOR_OUTPUT_MAPPING 1
-
 namespace gz
 {
 namespace waves
@@ -104,22 +102,9 @@ namespace waves
     // run the FFT
     fftw_execute(fft_plan0_);
 
-#if USE_LOOP_FOR_OUTPUT_MAPPING
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // z(i,j) => z(x, y): x = j, y = i
-    for (size_t ikx = 0; ikx < nx_; ++ikx)
-    {
-      for (size_t iky = 0; iky < ny_; ++iky)
-      {
-        int ij = ikx * ny_ + iky;
-        int xy = iky * nx_ + ikx;
-        h(xy, 0) = fft_out0_(ikx, iky).real();
-      }
-    }
-#else
-    Eigen::MatrixXcdRowMajor rm0 = fft_out0_;
-    h = rm0.real();
-#endif
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    h = fft_out0_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
 
   //////////////////////////////////////////////////
@@ -131,27 +116,10 @@ namespace waves
     fftw_execute(fft_plan1_);
     fftw_execute(fft_plan2_);
 
-#if USE_LOOP_FOR_OUTPUT_MAPPING
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // z(i,j) => z(x, y): x = j, y = i
-    // dz(i,j)/di => dz(x, y)/dy: x = j, y = i
-    // dz(i,j)/dj => dz(x, y)/dx: x = j, y = i
-    for (size_t ikx = 0; ikx < nx_; ++ikx)
-    {
-      for (size_t iky = 0; iky < ny_; ++iky)
-      {
-        int ij = ikx * ny_ + iky;
-        int xy = iky * nx_ + ikx;
-        dhdy(xy, 0) = fft_out1_(ikx, iky).real();
-        dhdx(xy, 0) = fft_out2_(ikx, iky).real();
-      }
-    }
-#else
-    Eigen::MatrixXcdRowMajor rm1 = fft_out1_;
-    Eigen::MatrixXcdRowMajor rm2 = fft_out2_;
-    dhdy = rm1.real();
-    dhdx = rm2.real();
-#endif
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1).real();
+    dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
 
   //////////////////////////////////////////////////
@@ -163,31 +131,10 @@ namespace waves
     fftw_execute(fft_plan3_);
     fftw_execute(fft_plan4_);
 
-    // for (size_t i=0; i<n2; ++i)
-    // {
-    //   sx[i] = fft_out3_[i][0] * lambda_;
-    //   sy[i] = fft_out4_[i][0] * lambda_;
-    // }
-#if USE_LOOP_FOR_OUTPUT_MAPPING
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // sy(i,j) => si(x, y): x = j, y = i
-    // sx(i,j) => sj(x, y): x = j, y = i
-    for (size_t ikx = 0; ikx < nx_; ++ikx)
-    {
-      for (size_t iky = 0; iky < ny_; ++iky)
-      {
-        int ij = ikx * ny_ + iky;
-        int xy = iky * nx_ + ikx;
-        sy(xy, 0) = fft_out3_(ikx, iky).real() * lambda_ * -1.0;
-        sx(xy, 0) = fft_out4_(ikx, iky).real() * lambda_ * -1.0;
-      }
-    }
-#else
-    Eigen::MatrixXcdRowMajor rm3 = fft_out3_.array() * lambda_ * -1.0;
-    Eigen::MatrixXcdRowMajor rm4 = fft_out4_.array() * lambda_ * -1.0;
-    sy = rm3.real();
-    sx = rm4.real();
-#endif
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
+    sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
   }
 
   //////////////////////////////////////////////////
@@ -201,29 +148,11 @@ namespace waves
     fftw_execute(fft_plan6_);
     fftw_execute(fft_plan7_);
 
-#if USE_LOOP_FOR_OUTPUT_MAPPING
-    // change from matrix 'ij' to cartesian 'xy' coordinates
-    // sy(i,j) => si(x, y): x = j, y = i
-    // sx(i,j) => sj(x, y): x = j, y = i
-    for (size_t ikx = 0; ikx < nx_; ++ikx)
-    {
-      for (size_t iky = 0; iky < ny_; ++iky)
-      {
-        int ij = ikx * ny_ + iky;
-        int xy = iky * nx_ + ikx;
-        dsydy(xy, 0) = fft_out5_(ikx, iky).real() * lambda_ * -1.0;
-        dsxdx(xy, 0) = fft_out6_(ikx, iky).real() * lambda_ * -1.0;
-        dsxdy(xy, 0) = fft_out7_(ikx, iky).real() * lambda_ *  1.0;
-      }
-    }
-#else
-    Eigen::MatrixXcdRowMajor rm5 = fft_out5_.array() * lambda_ * -1.0;
-    Eigen::MatrixXcdRowMajor rm6 = fft_out6_.array() * lambda_ * -1.0;
-    Eigen::MatrixXcdRowMajor rm7 = fft_out7_.array() * lambda_ *  1.0;
-    dsydy = rm5.real();
-    dsxdx = rm6.real();
-    dsxdy = rm7.real();
-#endif
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
+    dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
+    dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ *  1.0;
   }
 
   //////////////////////////////////////////////////
