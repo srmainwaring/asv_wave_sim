@@ -42,28 +42,6 @@
 #include "gz/waves/WaveSpreadingFunction.hh"
 #include "WaveSimulationFFT2Impl.hh"
 
-using Eigen::MatrixXcd;
-using Eigen::MatrixXd;
-using Eigen::VectorXcd;
-using Eigen::VectorXd;
-
-namespace Eigen
-{ 
-  typedef Eigen::Matrix<
-    std::complex<double>,
-    Eigen::Dynamic,
-    Eigen::Dynamic,
-    Eigen::RowMajor
-  > MatrixXcdRowMajor;
-
-  typedef Eigen::Matrix<
-    double,
-    Eigen::Dynamic,
-    Eigen::Dynamic,
-    Eigen::RowMajor
-  > MatrixXdRowMajor;
-}
-
 #define USE_LOOP_FOR_OUTPUT_MAPPING 1
 
 namespace gz
@@ -135,7 +113,7 @@ namespace waves
       {
         int ij = ikx * ny_ + iky;
         int xy = iky * nx_ + ikx;
-        h(xy, 0) = fft_out0_[ij].real();
+        h(xy, 0) = fft_out0_(ij, 0).real();
       }
     }
 #else
@@ -164,8 +142,8 @@ namespace waves
       {
         int ij = ikx * ny_ + iky;
         int xy = iky * nx_ + ikx;
-        dhdy(xy, 0) = fft_out1_[ij].real();
-        dhdx(xy, 0) = fft_out2_[ij].real();
+        dhdy(xy, 0) = fft_out1_(ij, 0).real();
+        dhdx(xy, 0) = fft_out2_(ij, 0).real();
       }
     }
 #else
@@ -200,8 +178,8 @@ namespace waves
       {
         int ij = ikx * ny_ + iky;
         int xy = iky * nx_ + ikx;
-        sy(xy, 0) = fft_out3_[ij].real() * lambda_ * -1.0;
-        sx(xy, 0) = fft_out4_[ij].real() * lambda_ * -1.0;
+        sy(xy, 0) = fft_out3_(ij, 0).real() * lambda_ * -1.0;
+        sx(xy, 0) = fft_out4_(ij, 0).real() * lambda_ * -1.0;
       }
     }
 #else
@@ -233,9 +211,9 @@ namespace waves
       {
         int ij = ikx * ny_ + iky;
         int xy = iky * nx_ + ikx;
-        dsydy(xy, 0) = fft_out5_[ij].real() * lambda_ * -1.0;
-        dsxdx(xy, 0) = fft_out6_[ij].real() * lambda_ * -1.0;
-        dsxdy(xy, 0) = fft_out7_[ij].real() * lambda_ *  1.0;
+        dsydy(xy, 0) = fft_out5_(ij, 0).real() * lambda_ * -1.0;
+        dsxdx(xy, 0) = fft_out6_(ij, 0).real() * lambda_ * -1.0;
+        dsxdy(xy, 0) = fft_out7_(ij, 0).real() * lambda_ *  1.0;
       }
     }
 #else
@@ -493,23 +471,23 @@ namespace waves
         complex hiok = hi * ook;
 
         // height (amplitude)
-        fft_h_[idx] = h;
+        fft_h_(idx, 0) = h;
 
         // height derivatives
         complex hikx = hi * kx;
         complex hiky = hi * ky;
 
-        fft_h_ikx_[idx] = hi * kx;
-        fft_h_iky_[idx] = hi * ky;
+        fft_h_ikx_(idx, 0) = hi * kx;
+        fft_h_iky_(idx, 0) = hi * ky;
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
         {          
-          fft_sx_[idx]    = czero;
-          fft_sy_[idx]    = czero;
-          fft_h_kxkx_[idx] = czero;
-          fft_h_kyky_[idx] = czero;
-          fft_h_kxky_[idx] = czero;
+          fft_sx_(idx, 0)     = czero;
+          fft_sy_(idx, 0)     = czero;
+          fft_h_kxkx_(idx, 0) = czero;
+          fft_h_kyky_(idx, 0) = czero;
+          fft_h_kxky_(idx, 0) = czero;
         }
         else
         {
@@ -519,11 +497,11 @@ namespace waves
           complex hkyky = hok * ky2;
           complex hkxky = hok * kx * ky;
           
-          fft_sx_[idx]    = dx;
-          fft_sy_[idx]    = dy;
-          fft_h_kxkx_[idx] = hkxkx;
-          fft_h_kyky_[idx] = hkyky;
-          fft_h_kxky_[idx] = hkxky;
+          fft_sx_(idx, 0)     = dx;
+          fft_sy_(idx, 0)     = dy;
+          fft_h_kxkx_(idx, 0) = hkxkx;
+          fft_h_kyky_(idx, 0) = hkyky;
+          fft_h_kxky_(idx, 0) = hkxky;
         }
       }
     }
@@ -702,23 +680,23 @@ namespace waves
         complex hiok = hi * ook;
 
         // height (amplitude)
-        fft_h_[idx] = h;
+        fft_h_(idx, 0) = h;
 
         // height derivatives
         complex hikx = hi * kx;
         complex hiky = hi * ky;
 
-        fft_h_ikx_[idx] = hi * kx;
-        fft_h_iky_[idx] = hi * ky;
+        fft_h_ikx_(idx, 0) = hi * kx;
+        fft_h_iky_(idx, 0) = hi * ky;
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
         {          
-          fft_sx_[idx]     = czero;
-          fft_sy_[idx]     = czero;
-          fft_h_kxkx_[idx] = czero;
-          fft_h_kyky_[idx] = czero;
-          fft_h_kxky_[idx] = czero;
+          fft_sx_(idx, 0)     = czero;
+          fft_sy_(idx, 0)     = czero;
+          fft_h_kxkx_(idx, 0) = czero;
+          fft_h_kyky_(idx, 0) = czero;
+          fft_h_kxky_(idx, 0) = czero;
         }
         else
         {
@@ -728,11 +706,11 @@ namespace waves
           complex hkyky = hok * ky2;
           complex hkxky = hok * kx * ky;
           
-          fft_sx_[idx]     = dx;
-          fft_sy_[idx]     = dy;
-          fft_h_kxkx_[idx] = hkxkx;
-          fft_h_kyky_[idx] = hkyky;
-          fft_h_kxky_[idx] = hkxky;
+          fft_sx_(idx, 0)     = dx;
+          fft_sy_(idx, 0)     = dy;
+          fft_h_kxkx_(idx, 0) = hkxkx;
+          fft_h_kyky_(idx, 0) = hkyky;
+          fft_h_kxky_(idx, 0) = hkxky;
         }
       }
     }
@@ -999,23 +977,23 @@ namespace waves
         complex hiok = hi * ook;
 
         // height (amplitude)
-        fft_h_[idx] = h;
+        fft_h_(idx, 0) = h;
 
         // height derivatives
         complex hikx = hi * kx;
         complex hiky = hi * ky;
 
-        fft_h_ikx_[idx] = hi * kx;
-        fft_h_iky_[idx] = hi * ky;
+        fft_h_ikx_(idx, 0) = hi * kx;
+        fft_h_iky_(idx, 0) = hi * ky;
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
         {          
-          fft_sx_[idx]     = czero;
-          fft_sy_[idx]     = czero;
-          fft_h_kxkx_[idx] = czero;
-          fft_h_kyky_[idx] = czero;
-          fft_h_kxky_[idx] = czero;
+          fft_sx_(idx, 0)     = czero;
+          fft_sy_(idx, 0)     = czero;
+          fft_h_kxkx_(idx, 0) = czero;
+          fft_h_kyky_(idx, 0) = czero;
+          fft_h_kxky_(idx, 0) = czero;
         }
         else
         {
@@ -1025,11 +1003,11 @@ namespace waves
           complex hkyky = hok * ky2;
           complex hkxky = hok * kx * ky;
           
-          fft_sx_[idx]     = dx;
-          fft_sy_[idx]     = dy;
-          fft_h_kxkx_[idx] = hkxkx;
-          fft_h_kyky_[idx] = hkyky;
-          fft_h_kxky_[idx] = hkxky;
+          fft_sx_(idx, 0)     = dx;
+          fft_sy_(idx, 0)     = dy;
+          fft_h_kxkx_(idx, 0) = hkxkx;
+          fft_h_kyky_(idx, 0) = hkyky;
+          fft_h_kxky_(idx, 0) = hkxky;
         }
       }
     }
@@ -1041,14 +1019,14 @@ namespace waves
     size_t n2 = nx_ * ny_;
 
     // initialise storage for Fourier coefficients
-    fft_h_      = Eigen::VectorXcd::Zero(n2);
-    fft_h_ikx_  = Eigen::VectorXcd::Zero(n2);
-    fft_h_iky_  = Eigen::VectorXcd::Zero(n2);
-    fft_sx_     = Eigen::VectorXcd::Zero(n2);
-    fft_sy_     = Eigen::VectorXcd::Zero(n2);
-    fft_h_kxkx_ = Eigen::VectorXcd::Zero(n2);
-    fft_h_kyky_ = Eigen::VectorXcd::Zero(n2);
-    fft_h_kxky_ = Eigen::VectorXcd::Zero(n2);
+    fft_h_      = Eigen::VectorXcd::Zero(n2, 1);
+    fft_h_ikx_  = Eigen::VectorXcd::Zero(n2, 1);
+    fft_h_iky_  = Eigen::VectorXcd::Zero(n2, 1);
+    fft_sx_     = Eigen::VectorXcd::Zero(n2, 1);
+    fft_sy_     = Eigen::VectorXcd::Zero(n2, 1);
+    fft_h_kxkx_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_h_kyky_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_h_kxky_ = Eigen::VectorXcd::Zero(n2, 1);
   }
 
   //////////////////////////////////////////////////
@@ -1081,16 +1059,16 @@ namespace waves
     size_t n2 = nx_ * ny_;
 
     // elevation
-    fft_out0_ = Eigen::VectorXcd::Zero(n2);
-    fft_out1_ = Eigen::VectorXcd::Zero(n2);
-    fft_out2_ = Eigen::VectorXcd::Zero(n2);
+    fft_out0_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_out1_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_out2_ = Eigen::VectorXcd::Zero(n2, 1);
 
     // xy-displacements
-    fft_out3_ = Eigen::VectorXcd::Zero(n2);
-    fft_out4_ = Eigen::VectorXcd::Zero(n2);
-    fft_out5_ = Eigen::VectorXcd::Zero(n2);
-    fft_out6_ = Eigen::VectorXcd::Zero(n2);
-    fft_out7_ = Eigen::VectorXcd::Zero(n2);
+    fft_out3_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_out4_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_out5_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_out6_ = Eigen::VectorXcd::Zero(n2, 1);
+    fft_out7_ = Eigen::VectorXcd::Zero(n2, 1);
 
     // elevation
     fft_plan0_ = fftw_plan_dft_2d(nx_, ny_,

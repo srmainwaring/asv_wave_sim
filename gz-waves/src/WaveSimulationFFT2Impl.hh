@@ -29,6 +29,23 @@ using Eigen::MatrixXd;
 using Eigen::VectorXcd;
 using Eigen::VectorXd;
 
+namespace Eigen
+{ 
+  typedef Eigen::Matrix<
+    std::complex<double>,
+    Eigen::Dynamic,
+    Eigen::Dynamic,
+    Eigen::RowMajor
+  > MatrixXcdRowMajor;
+
+  typedef Eigen::Matrix<
+    double,
+    Eigen::Dynamic,
+    Eigen::Dynamic,
+    Eigen::RowMajor
+  > MatrixXdRowMajor;
+}
+
 namespace gz
 {
 namespace waves
@@ -111,23 +128,29 @@ namespace waves
     void CreateFFTWPlans();
     void DestroyFFTWPlans();
 
-    Eigen::VectorXcd fft_h_;       // FFT0 - height
-    Eigen::VectorXcd fft_h_ikx_;   // FFT1 - d height / dx
-    Eigen::VectorXcd fft_h_iky_;   // FFT1 - d height / dy
-    Eigen::VectorXcd fft_sx_;      // FFT3 - displacement x
-    Eigen::VectorXcd fft_sy_;      // FFT4 - displacement y
-    Eigen::VectorXcd fft_h_kxkx_;  // FFT5 - d displacement x / dx
-    Eigen::VectorXcd fft_h_kyky_;  // FFT6 - d displacement y / dy
-    Eigen::VectorXcd fft_h_kxky_;  // FFT7 - d displacement x / dy = d displacement y / dx
+    /// \note FFTW expects the multi-dimensional arrays to be in row-major
+    ///       format. Eigen::MatrixXcd is column-major, so here we
+    ///       explicity set the storage type.
+    ///
+    /// https://www.fftw.org/fftw3_doc/Row_002dmajor-Format.html 
+    ///
+    Eigen::MatrixXcdRowMajor fft_h_;       // FFT0 - height
+    Eigen::MatrixXcdRowMajor fft_h_ikx_;   // FFT1 - d height / dx
+    Eigen::MatrixXcdRowMajor fft_h_iky_;   // FFT1 - d height / dy
+    Eigen::MatrixXcdRowMajor fft_sx_;      // FFT3 - displacement x
+    Eigen::MatrixXcdRowMajor fft_sy_;      // FFT4 - displacement y
+    Eigen::MatrixXcdRowMajor fft_h_kxkx_;  // FFT5 - d displacement x / dx
+    Eigen::MatrixXcdRowMajor fft_h_kyky_;  // FFT6 - d displacement y / dy
+    Eigen::MatrixXcdRowMajor fft_h_kxky_;  // FFT7 - d displacement x / dy
 
-    Eigen::VectorXcd fft_out0_;
-    Eigen::VectorXcd fft_out1_;
-    Eigen::VectorXcd fft_out2_;
-    Eigen::VectorXcd fft_out3_;
-    Eigen::VectorXcd fft_out4_;
-    Eigen::VectorXcd fft_out5_;
-    Eigen::VectorXcd fft_out6_;
-    Eigen::VectorXcd fft_out7_;
+    Eigen::MatrixXcdRowMajor fft_out0_;
+    Eigen::MatrixXcdRowMajor fft_out1_;
+    Eigen::MatrixXcdRowMajor fft_out2_;
+    Eigen::MatrixXcdRowMajor fft_out3_;
+    Eigen::MatrixXcdRowMajor fft_out4_;
+    Eigen::MatrixXcdRowMajor fft_out5_;
+    Eigen::MatrixXcdRowMajor fft_out6_;
+    Eigen::MatrixXcdRowMajor fft_out7_;
 
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;

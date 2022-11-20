@@ -140,8 +140,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZeroReference)
       //   << "\n";
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_[idx];
-      complex hc = model.fft_h_[cdx];
+      complex h  = model.fft_h_(idx, 0);
+      complex hc = model.fft_h_(cdx, 0);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -172,8 +172,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZeroReference)
         cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_[idx];
-      complex hc = model.fft_h_[cdx];
+      complex h  = model.fft_h_(idx, 0);
+      complex hc = model.fft_h_(cdx, 0);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -203,7 +203,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_[i]);
+    sum_h2 += norm(model.fft_h_(i, 0));
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -228,7 +228,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZeroReference)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_[i]);
+    sum_h2 += norm(model.fft_h_(i, 0));
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -281,8 +281,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeZero)
         cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_[idx];
-      complex hc = model.fft_h_[cdx];
+      complex h  = model.fft_h_(idx, 0);
+      complex hc = model.fft_h_(cdx, 0);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -313,8 +313,8 @@ TEST_F(TestFixtureWaveSimulationFFT2, HermitianTimeNonZero)
         cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
-      complex h  = model.fft_h_[idx];
-      complex hc = model.fft_h_[cdx];
+      complex h  = model.fft_h_(idx, 0);
+      complex hc = model.fft_h_(cdx, 0);
 
       // real part symmetric
       EXPECT_DOUBLE_EQ(h.real(), hc.real());
@@ -344,7 +344,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_[i]);
+    sum_h2 += norm(model.fft_h_(i, 0));
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -369,7 +369,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_[i]);
+    sum_h2 += norm(model.fft_h_(i, 0));
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -644,11 +644,11 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeZero)
         cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
-      complex h1  = model1.fft_h_[idx];
-      complex hc1 = model1.fft_h_[cdx];
+      complex h1  = model1.fft_h_(idx, 0);
+      complex hc1 = model1.fft_h_(cdx, 0);
 
-      complex h2  = model2.fft_h_[idx];
-      complex hc2 = model2.fft_h_[cdx];
+      complex h2  = model2.fft_h_(idx, 0);
+      complex hc2 = model2.fft_h_(cdx, 0);
 
       // consistency: real part symmetric
       EXPECT_DOUBLE_EQ(h2.real(), hc2.real());
@@ -691,11 +691,11 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeNonZero)
         cdx += (ny_ - iky);
 
       // look up amplitude and conjugate
-      complex h1  = model1.fft_h_[idx];
-      complex hc1 = model1.fft_h_[cdx];
+      complex h1  = model1.fft_h_(idx, 0);
+      complex hc1 = model1.fft_h_(cdx, 0);
 
-      complex h2  = model2.fft_h_[idx];
-      complex hc2 = model2.fft_h_[cdx];
+      complex h2  = model2.fft_h_(idx, 0);
+      complex hc2 = model2.fft_h_(cdx, 0);
 
       // consistency: real part symmetric
       EXPECT_DOUBLE_EQ(h2.real(), hc2.real());
@@ -734,7 +734,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeZero)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_[i]);
+    sum_h2 += norm(model.fft_h_(i, 0));
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
@@ -760,7 +760,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeNonZero)
   for (int i=0; i<n2; ++i)
   {
     sum_z2 += z(i, 0) * z(i, 0);
-    sum_h2 += norm(model.fft_h_[i]);
+    sum_h2 += norm(model.fft_h_(i, 0));
   }
 
   EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
