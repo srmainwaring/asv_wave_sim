@@ -93,8 +93,8 @@ TEST(EigenFFWT, EigenFFT1D)
     // https://stackoverflow.com/questions/4214400/problem-casting-stl-complexdouble-to-fftw-complex
     fftw_plan plan = fftw_plan_dft_1d(
       n,
-      reinterpret_cast<fftw_complex*>(&in[0]),
-      reinterpret_cast<fftw_complex*>(&out[0]),
+      reinterpret_cast<fftw_complex*>(in.data()),
+      reinterpret_cast<fftw_complex*>(out.data()),
       FFTW_BACKWARD, FFTW_ESTIMATE);
 
     // populate input
@@ -121,8 +121,8 @@ TEST(EigenFFWT, EigenFFT1D)
     // create plan
     fftw_plan plan = fftw_plan_dft_1d(
       n,
-      reinterpret_cast<fftw_complex*>(&in(0)),
-      reinterpret_cast<fftw_complex*>(&out(0)),
+      reinterpret_cast<fftw_complex*>(in.data()),
+      reinterpret_cast<fftw_complex*>(out.data()),
       FFTW_BACKWARD, FFTW_ESTIMATE);
 
     // populate input
@@ -142,6 +142,74 @@ TEST(EigenFFWT, EigenFFT1D)
     }
   }
 }
+
+namespace Eigen
+{ 
+  typedef Eigen::Matrix<
+    double,
+    Eigen::Dynamic,
+    Eigen::Dynamic,
+    Eigen::RowMajor
+  > MatrixXdRowMajor;
+}
+
+//////////////////////////////////////////////////
+/// This test demonstrates changing storage order and accessing
+/// the flattened data in either row major or column major format.
+///
+TEST(EigenFFWT, EigenStorageOrdering)
+{
+  {
+    std::cerr << "MatrixXd" << "\n";
+
+    Eigen::MatrixXd col_maj(2, 3);
+    col_maj << 1, 2, 3,
+               4, 5, 6;
+
+    std::cerr << "col-major:" << "\n";
+    std::cerr << col_maj << "\n";
+
+    std::cerr << "in memory (col-major):" << "\n";
+    for (int i = 0; i < col_maj.size(); i++)
+      std::cerr << *(col_maj.data() + i) << " ";
+    std::cerr << "\n";
+    std::cerr << col_maj.reshaped().transpose() << "\n";
+
+    Eigen::MatrixXdRowMajor row_maj = col_maj;
+
+    std::cerr << "in memory (row-major):" << "\n";
+    for (int i = 0; i < row_maj.size(); i++)
+      std::cerr << *(row_maj.data() + i) << " ";
+    std::cerr << "\n";
+    std::cerr << row_maj.reshaped<Eigen::RowMajor>().transpose() << "\n";
+  }
+
+  {
+    std::cerr << "Matrix2x3d" << "\n";
+
+    Eigen::Matrix<double, 2, 3, Eigen::ColMajor> col_maj;
+    col_maj << 1, 2, 3,
+               4, 5, 6;
+
+    std::cerr << "col-major:" << "\n";
+    std::cerr << col_maj << "\n";
+
+    std::cerr << "in memory (col-major):" << "\n";
+    for (int i = 0; i < col_maj.size(); i++)
+      std::cerr << *(col_maj.data() + i) << " ";
+    std::cerr << "\n";
+    std::cerr << col_maj.reshaped().transpose() << "\n";
+    
+    Eigen::Matrix<double, 2, 3, Eigen::RowMajor> row_maj = col_maj;
+
+    std::cerr << "in memory (row-major):" << "\n";
+    for (int i = 0; i < row_maj.size(); i++)
+      std::cerr << *(row_maj.data() + i) << " ";
+    std::cerr << "\n";
+    std::cerr << row_maj.reshaped<Eigen::RowMajor>().transpose() << "\n";
+  }
+}
+
 
 //////////////////////////////////////////////////
 // Run tests
