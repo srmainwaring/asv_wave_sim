@@ -30,8 +30,8 @@ jobs:
 
       - name: Install Build Tools
         run: |
-          python3 -m pip install -U vcstool
-          python3 -m pip install -U colcon-common-extensions
+          python3 -m pip install --user vcstool
+          python3 -m pip install --user colcon-common-extensions
 
       - name: Build Wave Sim
         run: |
