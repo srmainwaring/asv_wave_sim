@@ -156,8 +156,8 @@ public:
   /// \param idx0 is the index for the (N + 1) x (N + 1) mesh vertices,
   ///             including skirt
   /// \param idx1 is the index for the N x N simulated vertices
-  void UpdateVertex(size_t idx0, size_t idx1);
-  void UpdateVertexAndTangents(size_t idx0, size_t idx1);
+  void UpdateVertex(size_t v_idx, size_t w_idx);
+  void UpdateVertexAndTangents(size_t v_idx, size_t w_idx);
   void UpdateVertices(double _time);
 
   gz::common::Mesh * CreateMesh(const std::string &_name, double _offsetZ,
@@ -327,7 +327,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       std::unique_ptr<WaveSimulationFFT2> waveSim(
           new WaveSimulationFFT2(_L, _L, _N, _N));
       
-      waveSim->SetUseVectorised(true);
+      waveSim->SetUseVectorised(false);
       // larger lambda => steeper waves.
       waveSim->SetLambda(_params->Steepness());
       mWaveSim = std::move(waveSim);
@@ -584,9 +584,9 @@ void OceanTilePrivate<gz::math::Vector3d>::ComputeTBN(
     auto idx2 = face[2];
 
     // Face vertex points.
-    auto&& p0 = _vertices[idx0];    
-    auto&& p1 = _vertices[idx1];    
-    auto&& p2 = _vertices[idx2];    
+    auto&& p0 = _vertices[idx0];
+    auto&& p1 = _vertices[idx1];
+    auto&& p2 = _vertices[idx2];
 
     // Face vertex texture coordinates.
     auto&& uv0 = _texCoords[idx0];
@@ -649,15 +649,15 @@ void OceanTilePrivate<Vector3>::Update(double _time)
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<gz::math::Vector3d>::UpdateVertex(
-  size_t idx0, size_t idx1)
+  size_t v_idx, size_t w_idx)
 {
   // 1. Update vertex
-  double h  = mHeights[idx1];
-  double sx = mDisplacementsX[idx1];
-  double sy = mDisplacementsY[idx1];
+  double h  = mHeights[w_idx];
+  double sx = mDisplacementsX[w_idx];
+  double sy = mDisplacementsY[w_idx];
 
-  auto&& v0 = mVertices0[idx0];
-  auto&& v  = mVertices[idx0];
+  auto&& v0 = mVertices0[v_idx];
+  auto&& v  = mVertices[v_idx];
   v.X() = v0.X() + sy;
   v.Y() = v0.Y() + sx;
   v.Z() = v0.Z() + h;
@@ -665,15 +665,15 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateVertex(
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t idx0, size_t idx1)
+void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t v_idx, size_t w_idx)
 {
   // 1. Update vertex
-  double h  = mHeights[idx1];
-  double sx = mDisplacementsX[idx1];
-  double sy = mDisplacementsY[idx1];
+  double h  = mHeights[w_idx];
+  double sx = mDisplacementsX[w_idx];
+  double sy = mDisplacementsY[w_idx];
 
-  auto&& v0 = mVertices0[idx0];
-  mVertices[idx0] = cgal::Point3(
+  auto&& v0 = mVertices0[v_idx];
+  mVertices[v_idx] = cgal::Point3(
     v0.x() + sy,
     v0.y() + sx,
     v0.z() + h);
@@ -682,38 +682,38 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t idx0, size_t idx1)
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<gz::math::Vector3d>::UpdateVertexAndTangents(
-    size_t idx0, size_t idx1)
+    size_t v_idx, size_t w_idx)
 {
   // 1. Update vertex
-  double h  = mHeights[idx1];
-  double sx = mDisplacementsX[idx1];
-  double sy = mDisplacementsY[idx1];
+  double h  = mHeights[w_idx];
+  double sx = mDisplacementsX[w_idx];
+  double sy = mDisplacementsY[w_idx];
 
-  auto&& v0 = mVertices0[idx0];
-  auto&& v  = mVertices[idx0];
+  auto&& v0 = mVertices0[v_idx];
+  auto&& v  = mVertices[v_idx];
   v.X() = v0.X() + sy;
   v.Y() = v0.Y() + sx;
   v.Z() = v0.Z() + h;
 
   // 2. Update tangent and bitangent vectors (not normalised).
   // @TODO Check sign for displacement terms
-  double dhdx  = mDhdx[idx1]; 
-  double dhdy  = mDhdy[idx1]; 
-  double dsxdx = mDxdx[idx1]; 
-  double dsydy = mDydy[idx1]; 
-  double dsxdy = mDxdy[idx1]; 
+  double dhdx  = mDhdx[w_idx]; 
+  double dhdy  = mDhdy[w_idx]; 
+  double dsxdx = mDxdx[w_idx]; 
+  double dsydy = mDydy[w_idx]; 
+  double dsxdy = mDxdy[w_idx]; 
 
-  auto&& t = mTangents[idx0];
+  auto&& t = mTangents[v_idx];
   t.X() = dsydy + 1.0;
   t.Y() = dsxdy;
   t.Z() = dhdy;
 
-  auto&& b = mBitangents[idx0];
+  auto&& b = mBitangents[v_idx];
   b.X() = dsxdy;
   b.Y() = dsxdx + 1.0;
   b.Z() = dhdx;
 
-  auto&& n = mNormals[idx0];
+  auto&& n = mNormals[v_idx];
   auto normal =  t.Cross(b);
   n.X() = normal.X();
   n.Y() = normal.Y();
@@ -730,33 +730,33 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateVertexAndTangents(
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(
-    size_t idx0, size_t idx1)
+    size_t v_idx, size_t w_idx)
 {
   // 1. Update vertex
-  double h  = mHeights[idx1];
-  double sx = mDisplacementsX[idx1];
-  double sy = mDisplacementsY[idx1];
+  double h  = mHeights[w_idx];
+  double sx = mDisplacementsX[w_idx];
+  double sy = mDisplacementsY[w_idx];
 
-  auto&& v0 = mVertices0[idx0];
-  auto&& v  = mVertices[idx0] = cgal::Point3(
+  auto&& v0 = mVertices0[v_idx];
+  auto&& v  = mVertices[v_idx] = cgal::Point3(
     v0.x() + sy,
     v0.y() + sx,
     v0.z() + h);
 
   // 2. Update tangent and bitangent vectors (not normalised).
   // @TODO Check sign for displacement terms
-  double dhdx  = mDhdx[idx1]; 
-  double dhdy  = mDhdy[idx1]; 
-  double dsxdx = mDxdx[idx1]; 
-  double dsydy = mDydy[idx1]; 
-  double dsxdy = mDxdy[idx1]; 
+  double dhdx  = mDhdx[w_idx]; 
+  double dhdy  = mDhdy[w_idx]; 
+  double dsxdx = mDxdx[w_idx]; 
+  double dsydy = mDydy[w_idx]; 
+  double dsxdy = mDxdy[w_idx]; 
 
-  mTangents[idx0] = cgal::Point3(
+  mTangents[v_idx] = cgal::Point3(
     dsydy + 1.0,
     dsxdy,
     dhdy);
   
-  mBitangents[idx0] = cgal::Point3(
+  mBitangents[v_idx] = cgal::Point3(
     dsxdy,
     dsxdx + 1.0,
     dhdx);
@@ -781,9 +781,10 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
     {
       for (size_t ix=0; ix<N; ++ix)
       {
-        size_t idx0 = iy * NPlus1 + ix;
-        size_t idx1 = iy * N + ix;
-        UpdateVertexAndTangents(idx0, idx1);
+        size_t v_idx_cm = iy * NPlus1 + ix;
+        size_t w_idx_cm = iy * N + ix;
+        size_t w_idx_rm = ix * N + iy;
+        UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
     }
 
@@ -792,22 +793,25 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
     {
       // Top row (iy = N) periodic with bottom row (iy = 0)
       {
-        size_t idx0 = N * NPlus1 + i;
-        size_t idx1 = i;
-        UpdateVertexAndTangents(idx0, idx1);
+        size_t v_idx_cm = N * NPlus1 + i;
+        size_t w_idx_cm = i;
+        size_t w_idx_rm = i * N;
+        UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
       // Right column (ix = N) periodic with left column (ix = 0)
       {
-        size_t idx0 = i * NPlus1 + N;
-        size_t idx1 = i * N;
-        UpdateVertexAndTangents(idx0, idx1);
+        size_t v_idx_cm = i * NPlus1 + N;
+        size_t w_idx_cm = i * N;
+        size_t w_idx_rm = i;
+        UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
     }
     {
       // Top right corner period with bottom right corner.
-      size_t idx0 = NPlus1 * NPlus1 - 1;
-      size_t idx1 = 0;
-      UpdateVertexAndTangents(idx0, idx1);
+      size_t v_idx_cm = NPlus1 * NPlus1 - 1;
+      size_t w_idx_cm = 0;
+      size_t w_idx_rm = 0;
+      UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
     }  
   }
   else
@@ -822,9 +826,10 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
     {
       for (size_t ix=0; ix<N; ++ix)
       {
-        size_t idx0 = iy * NPlus1 + ix;
-        size_t idx1 = iy * N + ix;
-        UpdateVertex(idx0, idx1);
+        size_t v_idx_cm = iy * NPlus1 + ix;
+        size_t w_idx_cm = iy * N + ix;
+        size_t w_idx_rm = ix * N + iy;
+        UpdateVertex(v_idx_cm, w_idx_cm);
       }
     }
 
@@ -833,22 +838,25 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
     {
       // Top row (iy = N) periodic with bottom row (iy = 0)
       {
-        size_t idx0 = N * NPlus1 + i;
-        size_t idx1 = i;
-        UpdateVertex(idx0, idx1);
+        size_t v_idx_cm = N * NPlus1 + i;
+        size_t w_idx_cm = i;
+        size_t w_idx_rm = i * N;
+        UpdateVertex(v_idx_cm, w_idx_cm);
       }
       // Right column (ix = N) periodic with left column (ix = 0)
       {
-        size_t idx0 = i * NPlus1 + N;
-        size_t idx1 = i * N;
-        UpdateVertex(idx0, idx1);
+        size_t v_idx_cm = i * NPlus1 + N;
+        size_t w_idx_cm = i * N;
+        size_t w_idx_rm = i;
+        UpdateVertex(v_idx_cm, w_idx_cm);
       }
     }
     {
       // Top right corner period with bottom right corner.
-      size_t idx0 = NPlus1 * NPlus1 - 1;
-      size_t idx1 = 0;
-      UpdateVertex(idx0, idx1);
+      size_t v_idx_cm = NPlus1 * NPlus1 - 1;
+      size_t w_idx_cm = 0;
+      size_t w_idx_rm = 0;
+      UpdateVertex(v_idx_cm, w_idx_cm);
     }
   }
 }
