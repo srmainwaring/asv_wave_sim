@@ -238,20 +238,13 @@ namespace waves
           {
             // standing waves - symmetric spreading function
             cap_psi = spreadingFn1.Evaluate(phi, phi10_, k);
-            // cap_psi = WaveSimulationFFTImpl::ECKVSpreadingFunction(
-            //     k, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           else
           {
             // travelling waves - asymmetric spreading function
             cap_psi = spreadingFn2.Evaluate(phi, phi10_, k);
-            // cap_psi = WaveSimulationFFTImpl::Cos2sSpreadingFunction(
-            //     s_param_, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           double cap_s = spectrum.Evaluate(k);
-          // double cap_s =
-          //     WaveSimulationFFTImpl::ECKVOmniDirectionalSpectrum(
-          //         k, u10_, cap_omega_c_, gravity_);
           cap_psi_2s_math[idx] = cap_s * cap_psi / k;
         }
       }
