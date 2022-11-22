@@ -210,7 +210,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZeroReference)
       sum_h2 += norm(model.fft_h_(ikx, iky));
     }
   }
-  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_NEAR(sum_z2, sum_h2 * n2, 1.0E-14);
 }
 
 //////////////////////////////////////////////////
@@ -368,7 +368,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeZero)
     }
   }
 
-  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_NEAR(sum_z2, sum_h2 * n2, 1.0E-14);
 }
 
 //////////////////////////////////////////////////
@@ -402,7 +402,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, ParsevalsIdentityTimeNonZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, HorizontalDisplacementsLambdaZero)
 {
-  int n2 = nx_ * nx_;
+  int n2 = nx_ * ny_;
 
   WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
 
@@ -691,7 +691,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHermitianTimeZero)
       EXPECT_DOUBLE_EQ(h2.real(), h1.real());
       
       // cross-check: imaginary part
-      EXPECT_DOUBLE_EQ(h2.imag(), h1.imag());
+      EXPECT_NEAR(h2.imag(), h1.imag(), 1.0E-14);
     }
   }
 }
@@ -778,7 +778,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeZero)
     }
   }
 
-  EXPECT_DOUBLE_EQ(sum_z2, sum_h2 * n2);
+  EXPECT_NEAR(sum_z2, sum_h2 * n2, 1.0E-14);
 }
 
 //////////////////////////////////////////////////
@@ -813,7 +813,7 @@ TEST_F(TestFixtureWaveSimulationFFT2, VectorisedParsevalsIdentityTimeNonZero)
 //////////////////////////////////////////////////
 TEST_F(TestFixtureWaveSimulationFFT2, VectorisedHorizontalDisplacementsLambdaZero)
 {
-  int n2 = nx_ * nx_;
+  int n2 = nx_ * ny_;
 
   WaveSimulationFFT2Impl model(lx_, ly_, nx_, ny_);
 

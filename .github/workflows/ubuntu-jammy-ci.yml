@@ -1,0 +1,46 @@
+name: Ubuntu Jammy CI
+
+on: [push, pull_request]
+
+jobs:
+  ubuntu-jammy-ci:
+    runs-on: ubuntu-22.04
+    name: Ubuntu Jammy CI
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: src
+
+      - name: Install Build Essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget lsb-release gnupg curl
+
+      - name: Install Build Tools
+        run: |
+          sudo sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros2-latest.list'
+          curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install python3-pip python3-vcstool python3-colcon-common-extensions
+
+      - name: Install Gazebo Garden
+        run: |
+          sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install gz-garden
+
+      - name: Install Wave Sim Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libcgal-dev libfftw3-dev libtbb-dev
+
+      - name: Build Wave Sim
+        run: |
+          colcon build --symlink-install --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_STANDARD=17 -DBUILD_TESTING=ON
+
+      - name: Test Wave Sim
+        run: |
+          colcon test --merge-install
+          colcon test-result --all --verbose

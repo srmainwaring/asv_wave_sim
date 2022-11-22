@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 // Define tests
-
+#if 0
 TEST(WaveSimulation, WaveSimulationTrochoid)
 {
   // Configure the wave parameters.
@@ -88,7 +88,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
 
   EXPECT_EQ(h.size(), nx * ny);
 }
-
+#endif
 //////////////////////////////////////////////////
 class WaveSimulationSinusoidTestSuite : public ::testing::Test
 {

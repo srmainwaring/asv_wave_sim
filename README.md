@@ -1,5 +1,9 @@
 # Gazebo Waves
 
+<!-- [![Ubuntu Focus CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focus-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focus-ci.yml) -->
+[![Ubuntu Jammy CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-jammy-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-jammy-ci.yml)
+[![macOS Monterey CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos-monterey-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos-monterey-ci.yml)
+
 This package contains plugins that support the simulation of waves and surface vessels in [Gazebo](https://gazebosim.org/home).
 
 ![Gazebo Waves](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-waves-v5b.jpg)
@@ -388,22 +392,6 @@ $ mkdir build && cd build
 $ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
 $ make && make test
 ```
-
-## Build Status
-
-### Develop Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.com/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.com/srmainwaring/asv_wave_sim) |
-
-
-### Release Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.com/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.com/srmainwaring/asv_wave_sim) |
-
 
 ## License
 
