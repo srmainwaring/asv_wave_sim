@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/WaveSpreadingFunction.hh"
-#include "WaveSimulationFFT2Impl.hh"
+#include "WaveSimulationFFTImpl.hh"
 
 #include <memory>
 #include <vector>
@@ -210,7 +210,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
     for (int i=0; i<21; ++i)
     {
       double dtheta = theta(i) - theta_mean;
-      double phi_test = WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
+      double phi_test = WaveSimulationFFTImpl::Cos2sSpreadingFunction(
           spread, dtheta, u10, cap_omega_c);
       EXPECT_DOUBLE_EQ(phi(i), phi_test);
     }
@@ -465,7 +465,7 @@ TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
     for (int i=0; i<21; ++i)
     {
       double dtheta = theta(i) - theta_mean;
-      double phi_test = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
+      double phi_test = WaveSimulationFFTImpl::ECKVSpreadingFunction(
           k(i), dtheta, u10, cap_omega_c);
       EXPECT_DOUBLE_EQ(phi(i), phi_test);
     }

@@ -23,7 +23,7 @@ set(sources
   WavefieldSampler.cc
   WaveParameters.cc
   WaveSimulation.cc
-  WaveSimulationFFT2.cc
+  WaveSimulationFFT.cc
   WaveSimulationSinusoid.cc
   WaveSimulationTrochoid.cc
   WaveSpectrum.cc
@@ -42,7 +42,7 @@ set(gtest_sources
   TriangulatedGrid_TEST.cc
   Wavefield_TEST.cc
   WaveSimulation_TEST.cc
-  WaveSimulationFFT2_TEST.cc
+  WaveSimulationFFT_TEST.cc
   WaveSpectrum_TEST.cc
   WaveSpreadingFunction_TEST.cc
 )

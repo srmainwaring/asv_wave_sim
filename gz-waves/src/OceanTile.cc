@@ -18,7 +18,7 @@
 #include "gz/common/SubMeshWithTangents.hh"
 #include "gz/waves/Geometry.hh"
 #include "gz/waves/WaveSimulation.hh"
-#include "gz/waves/WaveSimulationFFT2.hh"
+#include "gz/waves/WaveSimulationFFT.hh"
 #include "gz/waves/WaveSimulationSinusoid.hh"
 #include "gz/waves/WaveSimulationTrochoid.hh"
 #include "gz/waves/WaveParameters.hh"
@@ -200,7 +200,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   // Different types of wave simulator are supported...
   // 0 - WaveSimulationSinusoid
   // 1 - WaveSimulationTrochoid
-  // 2 - WaveSimulationFFT2
+  // 2 - WaveSimulationFFT
 
   const int wave_sim_type = 2;
   switch (wave_sim_type)
@@ -237,8 +237,8 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     case 2:
     {
       // FFT2
-      std::unique_ptr<WaveSimulationFFT2> waveSim(
-          new WaveSimulationFFT2(_L, _L, _N, _N));
+      std::unique_ptr<WaveSimulationFFT> waveSim(
+          new WaveSimulationFFT(_L, _L, _N, _N));
       waveSim->SetLambda(1.0);   // larger lambda => steeper waves.
       mWaveSim = std::move(waveSim);
       break;
@@ -277,7 +277,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   // Different types of wave simulator are supported...
   // 0 - WaveSimulationSinusoid
   // 1 - WaveSimulationTrochoid
-  // 2 - WaveSimulationFFT2
+  // 2 - WaveSimulationFFT
 
   int wave_sim_type = 0;
   if (_params->Algorithm() == "sinusoid")
@@ -324,8 +324,8 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     case 2:
     {
       // FFT2
-      std::unique_ptr<WaveSimulationFFT2> waveSim(
-          new WaveSimulationFFT2(_L, _L, _N, _N));
+      std::unique_ptr<WaveSimulationFFT> waveSim(
+          new WaveSimulationFFT(_L, _L, _N, _N));
       
       waveSim->SetUseVectorised(false);
       // larger lambda => steeper waves.

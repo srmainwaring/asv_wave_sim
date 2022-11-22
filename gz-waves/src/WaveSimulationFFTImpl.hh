@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATIONFFT2_IMPL_HH_
-#define GZ_WAVES_WAVESIMULATIONFFT2_IMPL_HH_
+#ifndef GZ_WAVES_WAVESIMULATIONFFT_IMPL_HH_
+#define GZ_WAVES_WAVESIMULATIONFFT_IMPL_HH_
 
 #include <complex>
 
@@ -51,7 +51,7 @@ namespace gz
 namespace waves
 {
   //////////////////////////////////////////////////
-  // WaveSimulationFFT2Impl
+  // WaveSimulationFFTImpl
 
   typedef double fftw_data_type;
   typedef std::complex<fftw_data_type> complex;
@@ -62,16 +62,16 @@ namespace waves
   ///       must be made consistent and should be column major
   ///       which is the Eigen default..
   ///
-  class WaveSimulationFFT2Impl
+  class WaveSimulationFFTImpl
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     
     /// \brief Destructor 
-    ~WaveSimulationFFT2Impl();
+    ~WaveSimulationFFTImpl();
 
     /// \brief Construct a wave simulation model
-    WaveSimulationFFT2Impl(double lx, double ly, int nx, int ny);
+    WaveSimulationFFTImpl(double lx, double ly, int nx, int ny);
 
     void SetUseVectorised(bool value);
 
@@ -287,7 +287,7 @@ namespace waves
         double gravity=9.81);
 
     /// \brief For testing
-    friend class TestFixtureWaveSimulationFFT2;
+    friend class TestFixtureWaveSimulationFFT;
   };
 }
 }

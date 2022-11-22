@@ -15,7 +15,7 @@
 
 
 // The non-vectorised time-dependent update step labelled 'non-vectorised reference version'
-// in WaveSimulationFFT2Impl.ComputeCurrentAmplitudesReference is based on the Curtis Mobley's
+// in WaveSimulationFFTImpl.ComputeCurrentAmplitudesReference is based on the Curtis Mobley's
 // IDL code cgAnimate_2D_SeaSurface.py
 
 //***************************************************************************************************
@@ -27,7 +27,7 @@
 //* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
 //***************************************************************************************************
 
-#include "gz/waves/WaveSimulationFFT2.hh"
+#include "gz/waves/WaveSimulationFFT.hh"
 
 #include <complex>
 #include <random>
@@ -40,20 +40,20 @@
 
 #include "gz/waves/WaveSpectrum.hh"
 #include "gz/waves/WaveSpreadingFunction.hh"
-#include "WaveSimulationFFT2Impl.hh"
+#include "WaveSimulationFFTImpl.hh"
 
 namespace gz
 {
 namespace waves
 {
   //////////////////////////////////////////////////
-  WaveSimulationFFT2Impl::~WaveSimulationFFT2Impl()
+  WaveSimulationFFTImpl::~WaveSimulationFFTImpl()
   {
     DestroyFFTWPlans();
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationFFT2Impl::WaveSimulationFFT2Impl(
+  WaveSimulationFFTImpl::WaveSimulationFFTImpl(
     double lx, double ly, int nx, int ny) :
     nx_(nx),
     ny_(ny),
@@ -66,21 +66,21 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetUseVectorised(bool value)
+  void WaveSimulationFFTImpl::SetUseVectorised(bool value)
   {
     use_vectorised_ = value;
     ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetLambda(double value)
+  void WaveSimulationFFTImpl::SetLambda(double value)
   {
     lambda_ = value;
     ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetWindVelocity(double ux, double uy)
+  void WaveSimulationFFTImpl::SetWindVelocity(double ux, double uy)
   {
     // Update wind velocity and recompute base amplitudes.
     u10_ = sqrt(ux*ux + uy *uy);
@@ -90,13 +90,13 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::SetTime(double time)
+  void WaveSimulationFFTImpl::SetTime(double time)
   {
     ComputeCurrentAmplitudes(time);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeElevation(
+  void WaveSimulationFFTImpl::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> h)
   {
     // run the FFT
@@ -108,7 +108,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeElevationDerivatives(
+  void WaveSimulationFFTImpl::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
@@ -123,7 +123,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeDisplacements(
+  void WaveSimulationFFTImpl::ComputeDisplacements(
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy)
   {
@@ -138,7 +138,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeDisplacementsDerivatives(
+  void WaveSimulationFFTImpl::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> dsxdx,
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
@@ -156,7 +156,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeBaseAmplitudes()
+  void WaveSimulationFFTImpl::ComputeBaseAmplitudes()
   {
     if (use_vectorised_)
       ComputeBaseAmplitudesVectorised();
@@ -165,7 +165,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudes(double time)
+  void WaveSimulationFFTImpl::ComputeCurrentAmplitudes(double time)
   {
     if (use_vectorised_)
       ComputeCurrentAmplitudesVectorised(time);
@@ -174,7 +174,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesNonVectorised()
+  void WaveSimulationFFTImpl::ComputeBaseAmplitudesNonVectorised()
   {
     InitFFTCoeffStorage();
     InitWaveNumbers();
@@ -221,17 +221,17 @@ namespace waves
           if (use_symmetric_spreading_fn_)
           {
             // standing waves - symmetric spreading function
-            cap_psi = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
+            cap_psi = WaveSimulationFFTImpl::ECKVSpreadingFunction(
                 k, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           else
           {
             // travelling waves - asymmetric spreading function
-            cap_psi = WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
+            cap_psi = WaveSimulationFFTImpl::Cos2sSpreadingFunction(
                 s_param_, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           const double cap_s =
-              WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
+              WaveSimulationFFTImpl::ECKVOmniDirectionalSpectrum(
                   k, u10_, cap_omega_c_, gravity_);
           cap_psi_2s_math[idx] = cap_s * cap_psi / k;
         }
@@ -295,7 +295,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesNonVectorised(
+  void WaveSimulationFFTImpl::ComputeCurrentAmplitudesNonVectorised(
       double time)
   {
     // alias
@@ -437,7 +437,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesVectorised()
+  void WaveSimulationFFTImpl::ComputeBaseAmplitudesVectorised()
   {
     // initialise storage
     InitFFTCoeffStorage();
@@ -571,7 +571,7 @@ namespace waves
 #define VECTORISE_ZHAT_CALCS 0
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesVectorised(
+  void WaveSimulationFFTImpl::ComputeCurrentAmplitudesVectorised(
       double time)
   {
     // // time update
@@ -692,7 +692,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeBaseAmplitudesReference()
+  void WaveSimulationFFTImpl::ComputeBaseAmplitudesReference()
   {
     InitFFTCoeffStorage();
     InitWaveNumbers();
@@ -716,7 +716,7 @@ namespace waves
     // 
 
     // debug
-    gzmsg << "WaveSimulationFFT2" << "\n";
+    gzmsg << "WaveSimulationFFT" << "\n";
     gzmsg << "lx:           " << lx_ << "\n";
     gzmsg << "ly:           " << ly_ << "\n";
     gzmsg << "nx:           " << nx_ << "\n";
@@ -779,16 +779,16 @@ namespace waves
           if (use_symmetric_spreading_fn_)
           {
             // standing waves - symmetric spreading function
-            cap_psi = WaveSimulationFFT2Impl::ECKVSpreadingFunction(
+            cap_psi = WaveSimulationFFTImpl::ECKVSpreadingFunction(
                 k, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
           else
           {
             // travelling waves - asymmetric spreading function
-            cap_psi = WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
+            cap_psi = WaveSimulationFFTImpl::Cos2sSpreadingFunction(
                 s_param_, phi - phi10_, u10_, cap_omega_c_, gravity_);
           }
-          double cap_s = WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
+          double cap_s = WaveSimulationFFTImpl::ECKVOmniDirectionalSpectrum(
               k, u10_, cap_omega_c_, gravity_);
           cap_psi_2s_math(ikx, iky) = cap_s * cap_psi / k;
         }
@@ -871,7 +871,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::ComputeCurrentAmplitudesReference(
+  void WaveSimulationFFTImpl::ComputeCurrentAmplitudesReference(
       double time)
   {
     // alias
@@ -986,7 +986,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::InitFFTCoeffStorage()
+  void WaveSimulationFFTImpl::InitFFTCoeffStorage()
   {
     // initialise storage for Fourier coefficients
     fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
@@ -1000,7 +1000,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::InitWaveNumbers()
+  void WaveSimulationFFTImpl::InitWaveNumbers()
   {
     kx_fft_  = Eigen::VectorXd::Zero(nx_);
     ky_fft_  = Eigen::VectorXd::Zero(ny_);
@@ -1049,7 +1049,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::CreateFFTWPlans()
+  void WaveSimulationFFTImpl::CreateFFTWPlans()
   {
     // elevation
     fft_out0_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
@@ -1101,7 +1101,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2Impl::DestroyFFTWPlans()
+  void WaveSimulationFFTImpl::DestroyFFTWPlans()
   {
     fftw_destroy_plan(fft_plan0_);
     fftw_destroy_plan(fft_plan1_);
@@ -1115,7 +1115,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   //////////////////////////////////////////////////
-  double WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
+  double WaveSimulationFFTImpl::ECKVOmniDirectionalSpectrum(
       double k, double u10, double cap_omega_c, double gravity)
   {
     if (std::abs(k) < 1.0E-8 || std::abs(u10) < 1.0E-8)
@@ -1209,7 +1209,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  double WaveSimulationFFT2Impl::ECKVSpreadingFunction(
+  double WaveSimulationFFTImpl::ECKVSpreadingFunction(
       double k, double phi, double u10, double cap_omega_c, double gravity)
   {
     double g = gravity;
@@ -1230,7 +1230,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  double WaveSimulationFFT2Impl::Cos2sSpreadingFunction(
+  double WaveSimulationFFTImpl::Cos2sSpreadingFunction(
       double s, double phi, double u10, double cap_omega_c, double gravity)
   {
     // Longuet-Higgins et al. 'cosine-2S' spreading function
@@ -1248,50 +1248,50 @@ namespace waves
 
   //////////////////////////////////////////////////
   //////////////////////////////////////////////////
-  WaveSimulationFFT2::~WaveSimulationFFT2()
+  WaveSimulationFFT::~WaveSimulationFFT()
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationFFT2::WaveSimulationFFT2(
+  WaveSimulationFFT::WaveSimulationFFT(
     double lx, double ly, int nx, int ny) :
-    impl_(new WaveSimulationFFT2Impl(lx, ly, nx, ny))
+    impl_(new WaveSimulationFFTImpl(lx, ly, nx, ny))
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetUseVectorised(bool value)
+  void WaveSimulationFFT::SetUseVectorised(bool value)
   {
     impl_->SetUseVectorised(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetLambda(double value)
+  void WaveSimulationFFT::SetLambda(double value)
   {
     impl_->SetLambda(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetWindVelocity(double ux, double uy)
+  void WaveSimulationFFT::SetWindVelocity(double ux, double uy)
   {
     impl_->SetWindVelocity(ux, uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::SetTime(double value)
+  void WaveSimulationFFT::SetTime(double value)
   {
     impl_->SetTime(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeElevation(
+  void WaveSimulationFFT::ComputeElevation(
     Eigen::Ref<Eigen::MatrixXd> h)
   {
     impl_->ComputeElevation(h);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeElevationDerivatives(
+  void WaveSimulationFFT::ComputeElevationDerivatives(
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
@@ -1299,7 +1299,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeDisplacements(
+  void WaveSimulationFFT::ComputeDisplacements(
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy)
   {
@@ -1307,7 +1307,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeDisplacementsDerivatives(
+  void WaveSimulationFFT::ComputeDisplacementsDerivatives(
     Eigen::Ref<Eigen::MatrixXd> dsxdx,
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
@@ -1316,7 +1316,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT2::ComputeDisplacementsAndDerivatives(
+  void WaveSimulationFFT::ComputeDisplacementsAndDerivatives(
     Eigen::Ref<Eigen::MatrixXd> h,
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy,
