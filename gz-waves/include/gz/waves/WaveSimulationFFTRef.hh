@@ -35,9 +35,6 @@ namespace waves
 
       WaveSimulationFFTRef(double lx, double ly, int nx, int ny);
 
-      void SetUseVectorised(bool value);
-
-      /// \brief Set lambda which controls the horizontal wave displacement.
       void SetLambda(double lambda);
 
       virtual void SetWindVelocity(double ux, double uy) override;

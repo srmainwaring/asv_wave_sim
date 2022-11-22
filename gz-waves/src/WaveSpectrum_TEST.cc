@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/WaveSpectrum.hh"
-#include "WaveSimulationFFTImpl.hh"
+#include "WaveSimulationFFTRefImpl.hh"
 
 #include <memory>
 #include <vector>
@@ -335,7 +335,7 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
       for (int j=0; j<ny; ++j)
       {
         double cap_s_test =
-            WaveSimulationFFTImpl::ECKVOmniDirectionalSpectrum(
+            WaveSimulationFFTRefImpl::ECKVOmniDirectionalSpectrum(
                 k(i, j), u10, cap_omega_c);
         EXPECT_NEAR(cap_s(i, j), cap_s_test, tolerance);
       }

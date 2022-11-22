@@ -116,12 +116,6 @@ namespace waves
     void ComputeBaseAmplitudesVectorised();
     void ComputeCurrentAmplitudesVectorised(double time);
 
-    /// \brief Reference implementation of base amplitude calculation
-    void ComputeBaseAmplitudesReference();
-
-    /// \brief Reference implementation of time-dependent amplitude calculation
-    void ComputeCurrentAmplitudesReference(double time);
-
     void InitFFTCoeffStorage();
     void InitWaveNumbers();
 
@@ -188,35 +182,13 @@ namespace waves
     /// \brief Parameter controlling the maturity of the sea state.
     double  cap_omega_c_{0.84};
 
-    // derived quantities
-
     // sample spacing [m]
     double  delta_x_{lx_ / nx_};
     double  delta_y_{ly_ / ny_};
 
-    // fundamental wavelength [m]
-    double  lambda_x_f_{lx_};
-    double  lambda_y_f_{ly_};
-
-    // nyquist wavelength [m]
-    double  lambda_x_nyquist_{2.0 * delta_x_};
-    double  lambda_y_nyquist_{2.0 * delta_y_};
-
-    // fundamental spatial frequency [1/m]
-    double  nu_x_f_{1.0 / lx_};
-    double  nu_y_f_{1.0 / ly_};
-
-    // nyquist spatial frequency [1/m]
-    double  nu_x_nyquist_{1.0 / (2.0 * delta_x_)};
-    double  nu_y_nyquist_{1.0 / (2.0 * delta_y_)};
-
     // fundamental angular spatial frequency [rad/m]
     double  kx_f_{2.0 * M_PI / lx_};
     double  ky_f_{2.0 * M_PI / ly_};
-
-    // nyquist angular spatial frequency [rad/m]
-    double  kx_nyquist_{kx_f_ * nx_ / 2.0};
-    double  ky_nyquist_{ky_f_ * ny_ / 2.0};
 
     // angular spatial frequencies in fft and math order
     Eigen::VectorXd kx_fft_;
@@ -262,29 +234,6 @@ namespace waves
 
     // angular temporal frequency
     Eigen::MatrixXd omega_k_vec_;
-
-    //////////////////////////////////////////////////
-    /// \note: use 2d array storage for reference version, resized if required
-
-    // square-root of two-sided discrete elevation variance spectrum
-    Eigen::MatrixXd cap_psi_2s_root_ref_;
-
-    // iid random normals for real and imaginary parts of the amplitudes
-    Eigen::MatrixXd rho_ref_;
-    Eigen::MatrixXd sigma_ref_;
-
-    // angular temporal frequency
-    Eigen::MatrixXd omega_k_ref_;
-
-    static double ECKVOmniDirectionalSpectrum(
-        double k, double u10, double cap_omega_c=0.84,
-        double gravity=9.81);
-    static double ECKVSpreadingFunction(
-        double k, double phi, double u10, double cap_omega_c=0.84,
-        double gravity=9.81);
-    static double Cos2sSpreadingFunction(
-        double s_param, double phi, double u10, double cap_omega_c=0.84,
-        double gravity=9.81);
 
     /// \brief For testing
     friend class TestFixtureWaveSimulationFFT;
