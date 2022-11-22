@@ -643,8 +643,8 @@ TEST_F(TestFixtureWaveSimulationFFT, Indexing)
 }
 
 //////////////////////////////////////////////////
-// Cross-check vectorised version 
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedHermitianTimeZero)
+// Cross-check array version 
+TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeZeroMatrixXd)
 {
   WaveSimulationFFTImpl model1(lx_, ly_, nx_, ny_);
   model1.SetUseVectorised(false);
@@ -698,7 +698,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedHermitianTimeZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedHermitianTimeNonZero)
+TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeNonZeroMatrixXd)
 {
   WaveSimulationFFTImpl model1(lx_, ly_, nx_, ny_);
   model1.SetUseVectorised(false);
@@ -754,7 +754,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedHermitianTimeNonZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedParsevalsIdentityTimeZero)
+TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -783,7 +783,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedParsevalsIdentityTimeZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedParsevalsIdentityTimeNonZero)
+TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeNonZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -812,7 +812,8 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedParsevalsIdentityTimeNonZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedHorizontalDisplacementsLambdaZero)
+TEST_F(TestFixtureWaveSimulationFFT,
+  HorizontalDisplacementsLambdaZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -839,7 +840,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedHorizontalDisplacementsLambdaZero
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedElevationTimeZero)
+TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -869,7 +870,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedElevationTimeZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedElevationTimeNonZero)
+TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeNonZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -899,7 +900,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedElevationTimeNonZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedDisplacement)
+TEST_F(TestFixtureWaveSimulationFFT, DisplacementMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -936,7 +937,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedDisplacement)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedElevationDerivatives)
+TEST_F(TestFixtureWaveSimulationFFT, ElevationDerivativesMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -970,7 +971,7 @@ TEST_F(TestFixtureWaveSimulationFFT, VectorisedElevationDerivatives)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, VectorisedDisplacementDerivatives)
+TEST_F(TestFixtureWaveSimulationFFT, DisplacementDerivativesMatrixXd)
 {
   int n2 = nx_ * ny_;
 

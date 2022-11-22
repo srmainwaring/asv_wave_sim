@@ -59,9 +59,9 @@ TEST(WaveSpreadingFunction, Cos2sRegression)
   }
 }
 
-TEST(WaveSpreadingFunction, Cos2sVectorised)
+TEST(WaveSpreadingFunction, Cos2sVectorXd)
 {
-  { // Eigen vectorised version
+  { // Eigen array version
     Cos2sSpreadingFunction spreadingFn;
 
     double theta_mean = 0.0;
@@ -85,9 +85,9 @@ TEST(WaveSpreadingFunction, Cos2sVectorised)
   }
 }
 
-TEST(WaveSpreadingFunction, Cos2sVectorisedNonZeroMean)
+TEST(WaveSpreadingFunction, Cos2sNonZeroMeanVectorXd)
 {
-  { // Eigen vectorised version - non-zero mean
+  { // Eigen array version - non-zero mean
     Cos2sSpreadingFunction spreadingFn;
 
     double theta_mean = 1.5;
@@ -151,7 +151,7 @@ TEST(WaveSpreadingFunction, Cos2sAccessors)
   }
 }
 
-TEST(WaveSpreadingFunction, Cos2sVectorisedVirtual)
+TEST(WaveSpreadingFunction, Cos2sVirtualVectorXd)
 {
   { // Call virtually from base class ptr.
     auto derivedSpreadingFn = std::make_unique<Cos2sSpreadingFunction>();
@@ -191,7 +191,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
   const double u10 = 5.0;
   const double cap_omega_c = 0.84;
 
-  { // Eigen vectorised version
+  { // Eigen array version
     Cos2sSpreadingFunction spreadingFn(spread);
 
     double theta_mean = 0.0;
@@ -217,7 +217,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
   }
 }
 
-TEST(WaveSpreadingFunction, WaveNumberMatrix)
+TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
 {
   { // componentwise operations
     double lx = 200.0;
@@ -350,9 +350,9 @@ TEST(WaveSpreadingFunction, ECKVRegression)
   }
 }
 
-TEST(WaveSpreadingFunction, ECKVVectorisedColVector)
+TEST(WaveSpreadingFunction, ECKVVectorXd)
 {
-  { // Eigen vectorised version
+  { // Eigen array version
     ECKVSpreadingFunction spreadingFn;
 
     double theta_mean = 0.0;
@@ -382,9 +382,9 @@ TEST(WaveSpreadingFunction, ECKVVectorisedColVector)
   }
 }
 
-TEST(WaveSpreadingFunction, ECKVVectorisedMatrix)
+TEST(WaveSpreadingFunction, ECKVMatrixXd)
 {
-  { // Eigen vectorised version
+  { // Eigen array version
     double lx = 200.0;
     double ly = 100.0;
     size_t nx = 32;
@@ -445,7 +445,7 @@ TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
   const double u10 = 5.0;
   const double cap_omega_c = 0.84;
 
-  { // Eigen vectorised version
+  { // Eigen array version
     ECKVSpreadingFunction spreadingFn(u10, cap_omega_c);
 
     double theta_mean = 0.0;
