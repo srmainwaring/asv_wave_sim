@@ -33,15 +33,15 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class TestFixtureWaveSimulationFFT: public ::testing::Test
+class WaveSimulationFFTFixture: public ::testing::Test
 { 
 public: 
-  virtual ~TestFixtureWaveSimulationFFT()
+  virtual ~WaveSimulationFFTFixture()
   {
     // cleanup any pending stuff, but no exceptions allowed
   }
 
-  TestFixtureWaveSimulationFFT()
+  WaveSimulationFFTFixture()
   {
     // initialization code here
   } 
@@ -66,7 +66,7 @@ public:
 
 //////////////////////////////////////////////////
 // Define tests
-TEST_F(TestFixtureWaveSimulationFFT, AngularSpatialWavenumber)
+TEST_F(WaveSimulationFFTFixture, AngularSpatialWavenumber)
 {
   WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
 
@@ -116,7 +116,7 @@ TEST_F(TestFixtureWaveSimulationFFT, AngularSpatialWavenumber)
 
 //////////////////////////////////////////////////
 // Reference version checks
-TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeZeroReference)
+TEST_F(WaveSimulationFFTFixture, HermitianTimeZeroReference)
 {
   WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -149,7 +149,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeZeroReference)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeNonZeroReference)
+TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZeroReference)
 {
   WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -188,7 +188,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeNonZeroReference)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeZeroReference)
+TEST_F(WaveSimulationFFTFixture, ParsevalsIdentityTimeZeroReference)
 {
   int n2 = nx_ * ny_;
 
@@ -215,7 +215,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeZeroReference)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeNonZeroReference)
+TEST_F(WaveSimulationFFTFixture, ParsevalsIdentityTimeNonZeroReference)
 {
   int n2 = nx_ * ny_;
 
@@ -243,7 +243,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeNonZeroReference)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, HorizontalDisplacementsLambdaZeroReference)
+TEST_F(WaveSimulationFFTFixture, HorizontalDisplacementsLambdaZeroReference)
 {
   int n2 = nx_ * ny_;
 
@@ -270,7 +270,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HorizontalDisplacementsLambdaZeroReference)
 
 //////////////////////////////////////////////////
 // Optimised version checks
-TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeZero)
+TEST_F(WaveSimulationFFTFixture, HermitianTimeZero)
 {
   WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -306,7 +306,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeNonZero)
+TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZero)
 {
   WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -345,7 +345,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeNonZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeZero)
+TEST_F(WaveSimulationFFTFixture, ParsevalsIdentityTimeZero)
 {
   int n2 = nx_ * ny_;
 
@@ -373,7 +373,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeNonZero)
+TEST_F(WaveSimulationFFTFixture, ParsevalsIdentityTimeNonZero)
 {
   int n2 = nx_ * ny_;
 
@@ -401,7 +401,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeNonZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, HorizontalDisplacementsLambdaZero)
+TEST_F(WaveSimulationFFTFixture, HorizontalDisplacementsLambdaZero)
 {
   int n2 = nx_ * ny_;
 
@@ -428,7 +428,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HorizontalDisplacementsLambdaZero)
 
 //////////////////////////////////////////////////
 // Cross-check optimised version against reference 
-TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeZero)
+TEST_F(WaveSimulationFFTFixture, ElevationTimeZero)
 {
   int n2 = nx_ * ny_;
 
@@ -456,7 +456,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeNonZero)
+TEST_F(WaveSimulationFFTFixture, ElevationTimeNonZero)
 {
   int n2 = nx_ * ny_;
 
@@ -484,7 +484,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeNonZero)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, Displacement)
+TEST_F(WaveSimulationFFTFixture, Displacement)
 {
   int n2 = nx_ * ny_;
 
@@ -517,7 +517,7 @@ TEST_F(TestFixtureWaveSimulationFFT, Displacement)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ElevationDerivatives)
+TEST_F(WaveSimulationFFTFixture, ElevationDerivatives)
 {
   int n2 = nx_ * ny_;
 
@@ -550,7 +550,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ElevationDerivatives)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, DisplacementDerivatives)
+TEST_F(WaveSimulationFFTFixture, DisplacementDerivatives)
 {
   int n2 = nx_ * ny_;
 
@@ -589,7 +589,7 @@ TEST_F(TestFixtureWaveSimulationFFT, DisplacementDerivatives)
 
 //////////////////////////////////////////////////
 // check we're the indexing / stride rules used in the FFT routines
-TEST_F(TestFixtureWaveSimulationFFT, Indexing)
+TEST_F(WaveSimulationFFTFixture, Indexing)
 {
   int nxx = 4;
   int nyy = 3;
@@ -644,7 +644,7 @@ TEST_F(TestFixtureWaveSimulationFFT, Indexing)
 
 //////////////////////////////////////////////////
 // Cross-check array version 
-TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeZeroMatrixXd)
+TEST_F(WaveSimulationFFTFixture, HermitianTimeZeroMatrixXd)
 {
   WaveSimulationFFTImpl model1(lx_, ly_, nx_, ny_);
   model1.SetUseVectorised(false);
@@ -698,7 +698,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeZeroMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeNonZeroMatrixXd)
+TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZeroMatrixXd)
 {
   WaveSimulationFFTImpl model1(lx_, ly_, nx_, ny_);
   model1.SetUseVectorised(false);
@@ -754,7 +754,7 @@ TEST_F(TestFixtureWaveSimulationFFT, HermitianTimeNonZeroMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeZeroMatrixXd)
+TEST_F(WaveSimulationFFTFixture, ParsevalsIdentityTimeZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -783,7 +783,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeZeroMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeNonZeroMatrixXd)
+TEST_F(WaveSimulationFFTFixture, ParsevalsIdentityTimeNonZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -812,7 +812,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ParsevalsIdentityTimeNonZeroMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT,
+TEST_F(WaveSimulationFFTFixture,
   HorizontalDisplacementsLambdaZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
@@ -840,7 +840,7 @@ TEST_F(TestFixtureWaveSimulationFFT,
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeZeroMatrixXd)
+TEST_F(WaveSimulationFFTFixture, ElevationTimeZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -870,7 +870,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeZeroMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeNonZeroMatrixXd)
+TEST_F(WaveSimulationFFTFixture, ElevationTimeNonZeroMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -900,7 +900,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ElevationTimeNonZeroMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, DisplacementMatrixXd)
+TEST_F(WaveSimulationFFTFixture, DisplacementMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -937,7 +937,7 @@ TEST_F(TestFixtureWaveSimulationFFT, DisplacementMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, ElevationDerivativesMatrixXd)
+TEST_F(WaveSimulationFFTFixture, ElevationDerivativesMatrixXd)
 {
   int n2 = nx_ * ny_;
 
@@ -971,7 +971,7 @@ TEST_F(TestFixtureWaveSimulationFFT, ElevationDerivativesMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(TestFixtureWaveSimulationFFT, DisplacementDerivativesMatrixXd)
+TEST_F(WaveSimulationFFTFixture, DisplacementDerivativesMatrixXd)
 {
   int n2 = nx_ * ny_;
 

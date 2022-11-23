@@ -190,29 +190,29 @@ namespace waves
     bool use_symmetric_spreading_fn_{false};
 
     //////////////////////////////////////////////////
-    /// \note: flattened array storage
-
-    // square-root of two-sided discrete elevation variance spectrum
-    Eigen::VectorXd cap_psi_2s_root_;
-
-    // iid random normals for real and imaginary parts of the amplitudes
-    Eigen::VectorXd rho_;
-    Eigen::VectorXd sigma_;
-
-    // angular temporal frequency
-    Eigen::VectorXd omega_k_;
+    // storage for current amplitudes - shape depends on algo
+    Eigen::MatrixXcd zhat_;
+    Eigen::MatrixXd  cos_wt_;
+    Eigen::MatrixXd  sin_wt_;
 
     //////////////////////////////////////////////////
-    /// \note: array storage for alternative implementation
+    // storage for base amplitudes - shape depends on algo
+
+    // square-root of two-sided discrete elevation variance spectrum
+    Eigen::MatrixXd cap_psi_2s_root_;
+
+    // iid random normals for real and imaginary parts of the amplitudes
+    Eigen::MatrixXd rho_;
+    Eigen::MatrixXd sigma_;
+
+    // angular temporal frequency - shape depends on algo
+    Eigen::MatrixXd omega_k_;
 
     // precalculated amplitudes (t=0): _rc = real cos, etc.
     Eigen::MatrixXd zhat0_rc_;
     Eigen::MatrixXd zhat0_rs_;
     Eigen::MatrixXd zhat0_ic_;
     Eigen::MatrixXd zhat0_is_;
-
-    // angular temporal frequency
-    Eigen::MatrixXd omega_k_vec_;
 
     /// \brief For testing
     friend class TestFixtureWaveSimulationFFT;
