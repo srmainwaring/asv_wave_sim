@@ -315,11 +315,11 @@ namespace waves
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
 
-    for (int ikx = 0, idx = 0; ikx < nx_; ++ikx)
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_ / 2 + 1; ++iky, ++idx)
+      for (int iky = 0; iky < ny_/2+1; ++iky)
       {
         double ky = ky_fft_[iky];
         double ky2 = ky*ky;
