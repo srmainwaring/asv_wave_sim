@@ -33,13 +33,14 @@ TEST(EigenFFWT, EigenFFT1D)
   // Python code to generate test data
   //
   // x = [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0]
-  // xhat = fft.ifft(x, 8, norm="forward")
-  // 
+  // xhat = fft.fft(x, 8, norm="forward")
+  // xx = fft.ifft(xhat, 8, norm="forward")
+  //
   // with np.printoptions(precision=16, suppress=True):
-  //     print(f"x: {x}")
-  //     print(f"xhat: {xhat.real}")
-  //     print(f"xhat: {xhat.imag}")
-
+  //     print(f"x:\n{x}")
+  //     print(f"xhat:\n{xhat.real}\n{xhat.imag}")
+  //     print(f"xx:\n{xx.real}\n{xx.imag}")
+  //
   int n = 8;
 
   // expected inputs and outputs
@@ -47,13 +48,13 @@ TEST(EigenFFWT, EigenFFT1D)
   x.real() << 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0;
 
   Eigen::VectorXcd xhat = Eigen::VectorXcd::Zero(n);
-  xhat.real() <<   2.,  -1.7071067811865475,    1.,   -0.2928932188134524,
-                   0.,  -0.2928932188134524,    1.,   -1.7071067811865475;
-  xhat.imag() <<   0.,   0.7071067811865475,   -1.,    0.7071067811865475,
-                   0.,  -0.7071067811865475,    1.,   -0.7071067811865475;
+  xhat.real() <<  0.25,   -0.2133883476483184,  0.125,  -0.0366116523516816,
+                  0.,     -0.0366116523516816,  0.125,  -0.2133883476483184;
+  xhat.imag() <<  0.,     -0.0883883476483184,  0.125,  -0.0883883476483184,
+                  0.,      0.0883883476483184, -0.125,   0.0883883476483184;
   
   { // using fftw_complex
-    fftw_complex* in = (fftw_complex*)fftw_malloc(n * sizeof(fftw_complex));
+    fftw_complex* in  = (fftw_complex*)fftw_malloc(n * sizeof(fftw_complex));
     fftw_complex* out = (fftw_complex*)fftw_malloc(n * sizeof(fftw_complex));
 
     // create plan
@@ -62,8 +63,8 @@ TEST(EigenFFWT, EigenFFT1D)
     // populate input
     for (int i=0; i<n; ++i)
     {
-      in[i][0] = x(i).real();
-      in[i][1] = x(i).imag();
+      in[i][0] = xhat(i).real();
+      in[i][1] = xhat(i).imag();
     }
 
     // run fft
@@ -74,9 +75,9 @@ TEST(EigenFFWT, EigenFFT1D)
     {
       // std::cerr << "[" << i << "] "
       //   << out[i][0] << " + " << out[i][1]
-      //   << "\n";  
-      EXPECT_DOUBLE_EQ(out[i][0], xhat(i).real());
-      EXPECT_DOUBLE_EQ(out[i][1], xhat(i).imag());
+      //   << "\n";
+      EXPECT_NEAR(out[i][0], x(i).real(), 1.0E-15);
+      EXPECT_NEAR(out[i][1], 0.0, 1.0E-15);
     }
 
     // cleanup
@@ -100,7 +101,7 @@ TEST(EigenFFWT, EigenFFT1D)
     // populate input
     for (int i=0; i<n; ++i)
     {
-      in[i] = x(i);
+      in[i] = xhat(i);
     }
 
     // run fft
@@ -109,8 +110,8 @@ TEST(EigenFFWT, EigenFFT1D)
     // check output
     for (int i=0; i<n; ++i)
     {
-      EXPECT_DOUBLE_EQ(out[i].real(), xhat(i).real());
-      EXPECT_DOUBLE_EQ(out[i].imag(), xhat(i).imag());
+      EXPECT_NEAR(out[i].real(), x(i).real(), 1.0E-15);
+      EXPECT_NEAR(out[i].imag(), 0.0, 1.0E-15);
     }
   }
 
@@ -128,7 +129,7 @@ TEST(EigenFFWT, EigenFFT1D)
     // populate input
     for (int i=0; i<n; ++i)
     {
-      in(i) = x(i);
+      in(i) = xhat(i);
     }
 
     // run fft
@@ -137,8 +138,8 @@ TEST(EigenFFWT, EigenFFT1D)
     // check output
     for (int i=0; i<n; ++i)
     {
-      EXPECT_DOUBLE_EQ(out(i).real(), xhat(i).real());
-      EXPECT_DOUBLE_EQ(out(i).imag(), xhat(i).imag());
+      EXPECT_NEAR(out(i).real(), x(i).real(), 1.0E-15);
+      EXPECT_NEAR(out(i).imag(), 0.0, 1.0E-15);
     }
   }
 }
