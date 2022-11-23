@@ -26,7 +26,7 @@
 //* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
 //***************************************************************************************************
 
-#include "gz/waves/WaveSimulationFFTRef.hh"
+#include "WaveSimulationFFTRef.hh"
 
 #include <complex>
 #include <random>

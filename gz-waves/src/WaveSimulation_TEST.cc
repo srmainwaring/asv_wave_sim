@@ -90,7 +90,7 @@ TEST(WaveSimulation, WaveSimulationTrochoid)
 }
 #endif
 //////////////////////////////////////////////////
-class WaveSimulationSinusoidTestSuite : public ::testing::Test
+class WaveSimulationSinusoidFixture : public ::testing::Test
 {
 protected:
   void SetUp() override
@@ -120,7 +120,7 @@ protected:
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirX)
 { 
   double time = 5.0;
 
@@ -158,7 +158,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXY)
 { 
   double time = 5.0;
 
@@ -200,7 +200,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
+TEST_F(WaveSimulationSinusoidFixture, TestDisplacementsDirX)
 {
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -226,7 +226,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestEigenMeshGrid)
+TEST_F(WaveSimulationSinusoidFixture, TestEigenMeshGrid)
 {
   // check the behaviour of Eigen meshgrid
 
@@ -276,7 +276,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestEigenMeshGrid)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXMatrixXd)
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -306,7 +306,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXYMatrixXd)
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXYMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -336,7 +336,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXYMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacmentsMatrixXd)
+TEST_F(WaveSimulationSinusoidFixture, TestDisplacmentsMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -369,7 +369,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacmentsMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestHeightDerivativesMatrixXd)
+TEST_F(WaveSimulationSinusoidFixture, TestHeightDerivativesMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -402,7 +402,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestHeightDerivativesMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsAndDerivativesMatrixXd)
+TEST_F(WaveSimulationSinusoidFixture, TestDisplacementsAndDerivativesMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(

@@ -73,8 +73,6 @@ namespace waves
     /// \brief Construct a wave simulation model
     WaveSimulationFFTImpl(double lx, double ly, int nx, int ny);
 
-    void SetUseVectorised(bool value);
-
     /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double ux, double uy);
 
@@ -103,18 +101,12 @@ namespace waves
       Eigen::Ref<Eigen::MatrixXd> dsxdx,
       Eigen::Ref<Eigen::MatrixXd> dsydy,
       Eigen::Ref<Eigen::MatrixXd> dsxdy);
-
+   
     /// \brief Calculate the base (time-independent) Fourier amplitudes
     void ComputeBaseAmplitudes();
 
     /// \brief Calculate the time-independent Fourier amplitudes
     void ComputeCurrentAmplitudes(double time);
-    
-    void ComputeBaseAmplitudesNonVectorised();
-    void ComputeCurrentAmplitudesNonVectorised(double time);
-
-    void ComputeBaseAmplitudesVectorised();
-    void ComputeCurrentAmplitudesVectorised(double time);
 
     void InitFFTCoeffStorage();
     void InitWaveNumbers();
@@ -149,15 +141,6 @@ namespace waves
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
 
-    // precalculated amplitudes (t=0)
-    Eigen::MatrixXd zhat0_rc_;
-    Eigen::MatrixXd zhat0_rs_;
-    Eigen::MatrixXd zhat0_ic_;
-    Eigen::MatrixXd zhat0_is_;
-
-    /// \brief Flag to select whether to use vectorised calculations. 
-    bool use_vectorised_{false};
-
     /// \brief Gravity acceleration [m/s^2]
     double gravity_{9.81};
 
@@ -182,35 +165,25 @@ namespace waves
     /// \brief Parameter controlling the maturity of the sea state.
     double  cap_omega_c_{0.84};
 
-    // sample spacing [m]
-    double  delta_x_{lx_ / nx_};
-    double  delta_y_{ly_ / ny_};
-
     // fundamental angular spatial frequency [rad/m]
     double  kx_f_{2.0 * M_PI / lx_};
     double  ky_f_{2.0 * M_PI / ly_};
 
-    // angular spatial frequencies in fft and math order
+    // angular spatial frequencies in fft order (nx, ny)
     Eigen::VectorXd kx_fft_;
     Eigen::VectorXd ky_fft_;
-    Eigen::VectorXd kx_math_;
-    Eigen::VectorXd ky_math_;
-    Eigen::MatrixXd kx_;
-    Eigen::MatrixXd ky_;
-    Eigen::MatrixXd kx2_;
-    Eigen::MatrixXd ky2_;
-    Eigen::MatrixXd k_;
-    Eigen::MatrixXd k_plus_;
-    Eigen::MatrixXd theta_;
-    Eigen::MatrixXd ook_;
 
     /// \brief Set to 1 to use a symmetric spreading function (standing waves).
     bool use_symmetric_spreading_fn_{false};
 
-    /// \todo consolidate different storage structures when checked correct
+    //////////////////////////////////////////////////
+    // storage for current amplitudes (nx * ny)
+    Eigen::VectorXcd zhat_;
+    Eigen::VectorXd  cos_wt_;
+    Eigen::VectorXd  sin_wt_;
 
     //////////////////////////////////////////////////
-    /// \note: flattened array storage for non-vectorised version
+    // storage for base amplitudes (fft order)
 
     // square-root of two-sided discrete elevation variance spectrum
     Eigen::VectorXd cap_psi_2s_root_;
@@ -219,21 +192,8 @@ namespace waves
     Eigen::VectorXd rho_;
     Eigen::VectorXd sigma_;
 
-    // angular temporal frequency
+    // angular temporal frequency   
     Eigen::VectorXd omega_k_;
-
-    //////////////////////////////////////////////////
-    /// \note: array storage for vectorised version
-
-    // square-root of two-sided discrete elevation variance spectrum
-    Eigen::MatrixXd cap_psi_2s_root_vec_;
-
-    // iid random normals for real and imaginary parts of the amplitudes
-    Eigen::MatrixXd rho_vec_;
-    Eigen::MatrixXd sigma_vec_;
-
-    // angular temporal frequency
-    Eigen::MatrixXd omega_k_vec_;
 
     /// \brief For testing
     friend class TestFixtureWaveSimulationFFT;

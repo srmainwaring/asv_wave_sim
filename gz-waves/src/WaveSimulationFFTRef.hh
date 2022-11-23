@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include "WaveSimulation.hh"
+#include "gz/waves/WaveSimulation.hh"
 
 using Eigen::MatrixXd;
 

@@ -43,226 +43,222 @@ using std::chrono::duration_cast;
 using namespace gz;
 using namespace waves;
 
-TEST(WaveSpectrumPerf, ECKV)
-{
-  double lx = 200.0;
-  double ly = 100.0;
-  int    nx = 256;
-  int    ny = 126;
-
-  double kx_nyquist = M_PI * nx / lx;
-  double ky_nyquist = M_PI * ny / ly;
-
-  // create wavenumber vectors
-  Eigen::VectorXd kx_v(nx);
-  Eigen::VectorXd ky_v(ny);
-
-  for (size_t i=0; i<nx; ++i)
+//////////////////////////////////////////////////
+// Define fixture
+class WaveSpectrumECKVPerfFixture: public ::testing::Test
+{ 
+public: 
+  virtual ~WaveSpectrumECKVPerfFixture()
   {
-    kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
-  }
-  for (size_t i=0; i<ny; ++i)
-  {
-    ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
   }
 
-  // broadcast to matrices (aka meshgrid)
-  Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
-  kx.colwise() += kx_v;
-  
-  Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
-  ky.rowwise() += ky_v.transpose();
+  WaveSpectrumECKVPerfFixture()
+  {
+    double kx_nyquist = M_PI * nx_ / lx_;
+    double ky_nyquist = M_PI * ny_ / ly_;
 
-  Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
-  Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
-  Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
+    Eigen::VectorXd kx_v(nx_);
+    Eigen::VectorXd ky_v(ny_);
+
+    for (size_t i=0; i<nx_; ++i)
+    {
+      kx_v(i) = (i * 2.0 / nx_ - 1.0) * kx_nyquist;
+    }
+    for (size_t i=0; i<ny_; ++i)
+    {
+      ky_v(i) = (i * 2.0 / ny_ - 1.0) * ky_nyquist;
+    }
+
+    // broadcast to matrices (aka meshgrid)
+    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx_, ny_);
+    kx.colwise() += kx_v;
+    
+    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx_, ny_);
+    ky.rowwise() += ky_v.transpose();
+
+    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
+    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
+    k_ = Eigen::sqrt(kx2.array() + ky2.array());
+
+    // create spectrum
+    spectrum_ = ECKVWaveSpectrum(u19_);
+  } 
+
+  virtual void SetUp() override
+  { 
+    cap_s_ = Eigen::MatrixXd::Zero(nx_, ny_);
+  }
+
+  virtual void TearDown() override
+  {
+  }
+
+  // number of evaluations
+  int num_runs_ = 10000;
+
+  // wave number grid (nx_, ny_)
+  double lx_{200.0};
+  double ly_{100.0};
+  int    nx_{256};
+  int    ny_{128};
+  Eigen::MatrixXd k_;
 
   // spectrum
-  double u19 = 0.0;
-  ECKVWaveSpectrum spectrum(u19);
+  double u19_{0.0};
+  ECKVWaveSpectrum spectrum_;
 
-  int num_runs = 1000;
+  // workspace - reset each test
+  Eigen::MatrixXd cap_s_;
+};
 
-#if 1
-  { // non-vector version
-    std::cerr << "Eigen::MatrixXd double loop\n";
-    Eigen::MatrixXd cap_s(nx, ny);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
+//////////////////////////////////////////////////
+TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdDoubleLoopColMajor)
+{
+  // non-vector version
+  std::cerr << "Eigen::MatrixXd double loop\n";
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int ikx = 0; ikx < nx; ++ikx)
+      for (int iky = 0; iky < ny_; ++iky)
       {
-        for (int iky = 0; iky < ny; ++iky)
-        {
-          cap_s(ikx, iky) = spectrum.Evaluate(k(ikx, iky));
-        }
+        cap_s_(ikx, iky) = spectrum_.Evaluate(k_(ikx, iky));
       }
     }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
   }
-#endif
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs_:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
 
-#if 1
-  { // loop in 'wrong' order
-    std::cerr << "Eigen::MatrixXd double loop, 'wrong' order\n";
-    Eigen::MatrixXd cap_s(nx, ny);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
+//////////////////////////////////////////////////
+TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdDoubleLoopRowMajor)
+{
+  // loop in 'wrong' order
+  std::cerr << "Eigen::MatrixXd double loop, 'wrong' order\n";
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    for (int iky = 0; iky < ny_; ++iky)
     {
-      for (int iky = 0; iky < ny; ++iky)
+      for (int ikx = 0; ikx < nx_; ++ikx)
       {
-        for (int ikx = 0; ikx < nx; ++ikx)
-        {
-          cap_s(ikx, iky) = spectrum.Evaluate(k(ikx, iky));
-        }
+        cap_s_(ikx, iky) = spectrum_.Evaluate(k_(ikx, iky));
       }
     }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
   }
-#endif
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_run_:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
 
-#if 1
-  { // reshaped
-    std::cerr << "Eigen::MatrixXd reshaped iterator\n";
-    Eigen::MatrixXd cap_s(nx, ny);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
+//////////////////////////////////////////////////
+TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdReshapedIterator)
+{
+  // reshaped
+  std::cerr << "Eigen::MatrixXd reshaped iterator\n";
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    Eigen::VectorXd k_view = k_.reshaped();
+    Eigen::VectorXd cap_s_view = cap_s_.reshaped();
+    for (
+      auto it1 = cap_s_view.begin(), it2 = k_view.begin();
+      it1 != cap_s_view.end() && it2 != k_view.end();
+      ++it1, ++it2
+    )
     {
-      Eigen::VectorXd k_view = k.reshaped();
-      Eigen::VectorXd cap_s_view = cap_s.reshaped();
-      for (
-        auto it1 = cap_s_view.begin(), it2 = k_view.begin();
-        it1 != cap_s_view.end() && it2 != k_view.end();
-        ++it1, ++it2
-      )
-      {
-        *it1 = spectrum.Evaluate(*it2);
-      }
+      *it1 = spectrum_.Evaluate(*it2);
     }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
   }
-#endif
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
 
-#if 1
-  { // using row major std::vector
-    std::cerr << "std::vector double loop\n";
-    std::vector<double> kv(nx * ny);
-    for (int iky = 0, idx = 0; iky < ny; ++iky)
+//////////////////////////////////////////////////
+TEST_F(WaveSpectrumECKVPerfFixture, StdVectorDoubleLoop)
+{
+  // using row major std::vector
+  std::cerr << "std::vector double loop\n";
+  std::vector<double> kv(nx_ * ny_);
+  for (int iky = 0, idx = 0; iky < ny_; ++iky)
+  {
+    for (int ikx = 0; ikx < nx_; ++ikx, ++idx)
     {
-      for (int ikx = 0; ikx < nx; ++ikx, ++idx)
-      {
-        kv[idx] = k(ikx, iky);
-      }
+      kv[idx] = k_(ikx, iky);
     }
-
-    std::vector<double> cap_s(nx * ny);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
-    {
-      for (int iky = 0, idx = 0; iky < ny; ++iky)
-      {
-        for (int ikx = 0; ikx < nx; ++ikx, ++idx)
-        {
-          cap_s[idx] = spectrum.Evaluate(kv[idx]);
-        }
-      }
-    }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
   }
-#endif
 
-#if 1
-  { // using row major std::vector
-    std::cerr << "std::vector single loop\n";
-    std::vector<double> kv(nx * ny);
-    for (int iky = 0, idx = 0; iky < ny; ++iky)
+  auto cap_s_view = cap_s_.reshaped();
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    for (int iky = 0, idx = 0; iky < ny_; ++iky)
     {
-      for (int ikx = 0; ikx < nx; ++ikx, ++idx)
+      for (int ikx = 0; ikx < nx_; ++ikx, ++idx)
       {
-        kv[idx] = k(ikx, iky);
+        cap_s_view(idx) = spectrum_.Evaluate(kv[idx]);
       }
     }
-
-    std::vector<double> cap_s(nx * ny);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
-    {
-      for (int idx = 0; idx < nx * ny; ++idx)
-      {
-        cap_s[idx] = spectrum.Evaluate(kv[idx]);
-      }
-    }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
   }
-#endif
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
 
-#if 1
-  { // using row major std::vector iterators
-    std::cerr << "std::vector iterators\n";
-    std::vector<double> kv(nx * ny);
-    for (int iky = 0, idx = 0; iky < ny; ++iky)
+//////////////////////////////////////////////////
+TEST_F(WaveSpectrumECKVPerfFixture, StdVectorSingleLoop)
+{
+  // using row major std::vector
+  std::cerr << "std::vector single loop\n";
+  std::vector<double> kv(nx_ * ny_);
+  for (int iky = 0, idx = 0; iky < ny_; ++iky)
+  {
+    for (int ikx = 0; ikx < nx_; ++ikx, ++idx)
     {
-      for (int ikx = 0; ikx < nx; ++ikx, ++idx)
-      {
-        kv[idx] = k(ikx, iky);
-      }
+      kv[idx] = k_(ikx, iky);
     }
-
-    std::vector<double> cap_s(nx * ny);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
-    {
-      for (
-        auto it1 = cap_s.begin(), it2 = kv.begin();
-        it1 != cap_s.end() && it2 != kv.end();
-        ++it1, ++it2
-      )
-      {
-        *it1 = spectrum.Evaluate(*it2);
-      }
-    }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
   }
-#endif
 
-#if 1
-  { // Eigen cwise-array calc
-    std::cerr << "Eigen cwise-array\n";
-    Eigen::MatrixXd cap_s(nx, ny);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
+  auto cap_s_view = cap_s_.reshaped();
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    for (int idx = 0; idx < nx_ * ny_; ++idx)
     {
-      spectrum.Evaluate(cap_s, k);
+      cap_s_view(idx) = spectrum_.Evaluate(kv[idx]);
     }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
   }
-#endif
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdCWise)
+{
+  // Eigen cwise-array calc
+  std::cerr << "Eigen cwise-array\n";
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    spectrum_.Evaluate(cap_s_, k_);
+  }
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
 }
