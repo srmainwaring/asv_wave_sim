@@ -98,7 +98,7 @@ TEST_F(WaveSimulationFFTFixture, AngularSpatialWavenumber)
 
 //////////////////////////////////////////////////
 // Reference version checks
-TEST_F(WaveSimulationFFTFixture, HermitianTimeZeroReference)
+TEST_F(WaveSimulationFFTFixture, HermitianHTimeZeroReference)
 {
   WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -130,6 +130,74 @@ TEST_F(WaveSimulationFFTFixture, HermitianTimeZeroReference)
   }
 }
 
+//////////////////////////////////////////////////
+#if 0
+TEST_F(WaveSimulationFFTFixture, HermitianDhDxTimeZeroReference)
+{
+  WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky)
+    {
+      // index for conjugate
+      int ckx = 0;
+      if (ikx != 0)
+        ckx = nx_ - ikx;
+
+      int cky = 0;
+      if (iky != 0)
+        cky = ny_ - iky;
+
+      // look up amplitude and conjugate
+      complex h  = model.fft_h_ikx_(ikx, iky);
+      complex hc = model.fft_h_ikx_(ckx, cky);
+
+      // real part symmetric
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+#endif
+//////////////////////////////////////////////////
+#if 0
+TEST_F(WaveSimulationFFTFixture, HermitianDhDyTimeZeroReference)
+{
+  WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky)
+    {
+      // index for conjugate
+      int ckx = 0;
+      if (ikx != 0)
+        ckx = nx_ - ikx;
+
+      int cky = 0;
+      if (iky != 0)
+        cky = ny_ - iky;
+
+      // look up amplitude and conjugate
+      complex h  = model.fft_h_iky_(ikx, iky);
+      complex hc = model.fft_h_iky_(ckx, cky);
+
+      // real part symmetric
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+#endif
 //////////////////////////////////////////////////
 TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZeroReference)
 {
