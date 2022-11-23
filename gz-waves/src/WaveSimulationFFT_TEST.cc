@@ -250,6 +250,8 @@ TEST_F(WaveSimulationFFTFixture, HorizontalDisplacementsLambdaZeroReference)
 
 //////////////////////////////////////////////////
 // Optimised version checks
+#if 0
+/// \note test disabled - optimised version does not store HC 
 TEST_F(WaveSimulationFFTFixture, HermitianTimeZero)
 {
   WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
@@ -284,8 +286,11 @@ TEST_F(WaveSimulationFFTFixture, HermitianTimeZero)
     }
   }
 }
+#endif
 
 //////////////////////////////////////////////////
+#if 0
+/// \note test disabled - optimised version does not store HC 
 TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZero)
 {
   WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
@@ -323,6 +328,7 @@ TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZero)
     }
   }
 }
+#endif
 
 //////////////////////////////////////////////////
 TEST_F(WaveSimulationFFTFixture, ParsevalsIdentityTimeZero)
