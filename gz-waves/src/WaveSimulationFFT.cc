@@ -97,7 +97,7 @@ namespace waves
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
-    h = fft_out0_.reshaped<Eigen::ColMajor>(n2, 1).real();
+    h = fft_out0_.reshaped<Eigen::ColMajor>(n2, 1);
   }
 
   //////////////////////////////////////////////////
@@ -111,8 +111,8 @@ namespace waves
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
-    dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1).real();
-    dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1).real();
+    dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
+    dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1);
   }
 
   //////////////////////////////////////////////////
@@ -126,8 +126,8 @@ namespace waves
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
-    sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
-    sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
+    sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+    sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
   }
 
   //////////////////////////////////////////////////
@@ -143,9 +143,9 @@ namespace waves
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
-    dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
-    dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
-    dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ *  1.0;
+    dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+    dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+    dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
   }
 
   //////////////////////////////////////////////////
@@ -309,7 +309,9 @@ namespace waves
 
     zhat_(0, 0) = complex(0.0, 0.0);
 
-    // write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
+    /// write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
+    /// \note the inner loop has iky < ny_ / 2 + 1
+    ///       as we exploit the Hermitian symmetry in the FFT 
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
 
@@ -317,7 +319,7 @@ namespace waves
     {
       double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_; ++iky, ++idx)
+      for (int iky = 0; iky < ny_ / 2 + 1; ++iky, ++idx)
       {
         double ky = ky_fft_[iky];
         double ky2 = ky*ky;
@@ -394,62 +396,62 @@ namespace waves
     ///       https://www.fftw.org/fftw3_doc/Complex-DFTs.html
 
     // allocate storage for Fourier coefficients
-    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
 
     // elevation
-    fft_out0_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out1_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out2_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out0_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out1_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out2_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
 
     // xy-displacements
-    fft_out3_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out4_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out5_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out6_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out7_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out3_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out4_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out5_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out6_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out7_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
 
     // elevation
-    fft_plan0_ = fftw_plan_dft_2d(nx_, ny_,
+    fft_plan0_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_h_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out0_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan1_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<double*>(fft_out0_.data()),
+        FFTW_ESTIMATE);
+    fft_plan1_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_h_ikx_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out1_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan2_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<double*>(fft_out1_.data()),
+        FFTW_ESTIMATE);
+    fft_plan2_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_h_iky_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out2_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
+        reinterpret_cast<double*>(fft_out2_.data()),
+        FFTW_ESTIMATE);
 
     // xy-displacements
-    fft_plan3_ = fftw_plan_dft_2d(nx_, ny_,
+    fft_plan3_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_sx_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out3_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan4_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<double*>(fft_out3_.data()),
+        FFTW_ESTIMATE);
+    fft_plan4_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_sy_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out4_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan5_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<double*>(fft_out4_.data()),
+        FFTW_ESTIMATE);
+    fft_plan5_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_h_kxkx_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out5_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan6_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<double*>(fft_out5_.data()),
+        FFTW_ESTIMATE);
+    fft_plan6_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_h_kyky_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out6_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
-    fft_plan7_ = fftw_plan_dft_2d(nx_, ny_,
+        reinterpret_cast<double*>(fft_out6_.data()),
+        FFTW_ESTIMATE);
+    fft_plan7_ = fftw_plan_dft_c2r_2d(nx_, ny_,
         reinterpret_cast<fftw_complex*>(fft_h_kxky_.data()),
-        reinterpret_cast<fftw_complex*>(fft_out7_.data()),
-        FFTW_BACKWARD, FFTW_ESTIMATE);
+        reinterpret_cast<double*>(fft_out7_.data()),
+        FFTW_ESTIMATE);
   }
 
   //////////////////////////////////////////////////

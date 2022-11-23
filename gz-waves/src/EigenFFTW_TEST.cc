@@ -27,8 +27,18 @@
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 
+namespace Eigen
+{ 
+  typedef Eigen::Matrix<
+    double,
+    Eigen::Dynamic,
+    Eigen::Dynamic,
+    Eigen::RowMajor
+  > MatrixXdRowMajor;
+}
+
 //////////////////////////////////////////////////
-TEST(EigenFFWT, EigenFFT1D)
+TEST(EigenFFWT, DFT_C2C_1D)
 {
   // Python code to generate test data
   //
@@ -144,14 +154,51 @@ TEST(EigenFFWT, EigenFFT1D)
   }
 }
 
-namespace Eigen
-{ 
-  typedef Eigen::Matrix<
-    double,
-    Eigen::Dynamic,
-    Eigen::Dynamic,
-    Eigen::RowMajor
-  > MatrixXdRowMajor;
+//////////////////////////////////////////////////
+TEST(EigenFFWT, DFT_C2R_1D)
+{
+  // Python code to generate test data
+  int n = 8;
+
+  // expected inputs and outputs
+  Eigen::VectorXcd x = Eigen::VectorXcd::Zero(n);
+  x.real() << 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0;
+
+  Eigen::VectorXcd xhat = Eigen::VectorXcd::Zero(n/2+1);
+  xhat.real() <<  0.25,   -0.2133883476483184,  0.125,  -0.0366116523516816,
+                  0.;
+  xhat.imag() <<  0.,     -0.0883883476483184,  0.125,  -0.0883883476483184,
+                  0.;
+  
+  {
+    std::vector<std::complex<double>> in(n/2+1, 0.0);
+    std::vector<double> out(n, 0.0);
+
+    // create plan
+    fftw_plan plan = fftw_plan_dft_c2r_1d(
+        n,
+        reinterpret_cast<fftw_complex*>(in.data()),
+        reinterpret_cast<double*>(out.data()),
+        FFTW_ESTIMATE);
+
+    // populate input
+    for (int i=0; i<n/2+1; ++i)
+    {
+      in[i] = xhat(i);
+    }
+
+    // run fft
+    fftw_execute(plan);
+
+    // check output
+    for (int i=0; i<n; ++i)
+    {
+      EXPECT_NEAR(out[i], x(i).real(), 1.0E-15);
+    }
+
+    // cleanup
+    fftw_destroy_plan(plan);
+  }
 }
 
 //////////////////////////////////////////////////
