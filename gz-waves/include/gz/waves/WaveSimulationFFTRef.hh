@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATIONFFT2_HH_
-#define GZ_WAVES_WAVESIMULATIONFFT2_HH_
+#ifndef GZ_WAVES_WAVESIMULATIONFFT_HH_
+#define GZ_WAVES_WAVESIMULATIONFFT_HH_
 
 #include <memory>
 
@@ -26,18 +26,15 @@ namespace gz
 {
 namespace waves
 {
-  class WaveSimulationFFT2Impl;
+  class WaveSimulationFFTRefImpl;
 
-  class WaveSimulationFFT2 : public WaveSimulation
+  class WaveSimulationFFTRef : public WaveSimulation
   {
     public:
-      virtual ~WaveSimulationFFT2();
+      virtual ~WaveSimulationFFTRef();
 
-      WaveSimulationFFT2(double lx, double ly, int nx, int ny);
+      WaveSimulationFFTRef(double lx, double ly, int nx, int ny);
 
-      void SetUseVectorised(bool value);
-
-      /// \brief Set lambda which controls the horizontal wave displacement.
       void SetLambda(double lambda);
 
       virtual void SetWindVelocity(double ux, double uy) override;
@@ -71,7 +68,7 @@ namespace waves
           Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
     private:
-      std::unique_ptr<WaveSimulationFFT2Impl> impl_;
+      std::unique_ptr<WaveSimulationFFTRefImpl> impl_;
   };
 }
 }

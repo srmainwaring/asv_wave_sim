@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/WaveSpectrum.hh"
-#include "WaveSimulationFFT2Impl.hh"
+#include "WaveSimulationFFTRefImpl.hh"
 
 #include <memory>
 #include <vector>
@@ -103,9 +103,9 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumRegression)
   }
 }
 
-TEST(WaveSpectrum, PiersonMoskowitzSpectrumVectorised)
+TEST(WaveSpectrum, PiersonMoskowitzSpectrumMatrixXd)
 {
-  { // Eigen vectorised version
+  { // Eigen array version
     double tolerance = 1.0e-16;
 
     double lx = 200.0;
@@ -232,9 +232,9 @@ TEST(WaveSpectrum, ECKVSpectrumRegression)
   }
 }
 
-TEST(WaveSpectrum, ECKVSpectrumVectorised)
+TEST(WaveSpectrum, ECKVSpectrumMatrixXd)
 {
-  { // Eigen vectorised version
+  { // Eigen array version
     double tolerance = 1.0e-16;
 
     double lx = 200.0;
@@ -290,7 +290,7 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
   const double u10 = 5.0;
   const double cap_omega_c = 0.84;
 
-  { // Eigen vectorised version
+  { // Eigen array version
     double tolerance = 1.0e-16;
 
     double lx = 200.0;
@@ -335,7 +335,7 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
       for (int j=0; j<ny; ++j)
       {
         double cap_s_test =
-            WaveSimulationFFT2Impl::ECKVOmniDirectionalSpectrum(
+            WaveSimulationFFTRefImpl::ECKVOmniDirectionalSpectrum(
                 k(i, j), u10, cap_omega_c);
         EXPECT_NEAR(cap_s(i, j), cap_s_test, tolerance);
       }

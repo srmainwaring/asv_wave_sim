@@ -15,6 +15,7 @@
 
 #include "gz/waves/WaveSpreadingFunction.hh"
 
+#include <algorithm>
 #include <cmath>
 
 using namespace gz; 
@@ -57,10 +58,16 @@ void Cos2sSpreadingFunction::Evaluate(
     double theta_mean,
     const Eigen::Ref<const Eigen::MatrixXd> &k) const
 {
-  Eigen::MatrixXd angle = theta.array() - theta_mean;
-  Eigen::MatrixXd cp = Eigen::cos(angle.array() / 2.0);
-  Eigen::MatrixXd p1 = Eigen::pow(cp.array(), 2.0 * spread_);
-  phi = cap_c_s_ * p1.array();
+  auto theta_view = theta.reshaped();
+  std::transform(
+    theta_view.cbegin(),
+    theta_view.cend(),
+    phi.reshaped().begin(),
+    [&, this] (double theta_i) -> double
+    {
+      return this->Evaluate(theta_i, theta_mean);
+    }
+  );
 }
 
 //////////////////////////////////////////////////
@@ -79,9 +86,9 @@ void Cos2sSpreadingFunction::SetSpread(double value)
 //////////////////////////////////////////////////
 void Cos2sSpreadingFunction::RecalcCoeffs()
 {
-    double g1 = std::tgamma(spread_ + 1.0);
-    double g2 = std::tgamma(spread_ + 0.5);
-    cap_c_s_ = g1 / g2 / 2.0 / std::sqrt(M_PI);
+  double g1 = std::tgamma(spread_ + 1.0);
+  double g2 = std::tgamma(spread_ + 0.5);
+  cap_c_s_ = g1 / g2 / 2.0 / std::sqrt(M_PI);
 }
 
 //////////////////////////////////////////////////
@@ -95,10 +102,10 @@ ECKVSpreadingFunction::ECKVSpreadingFunction(
     double u10,
     double cap_omega_c,
     double gravity) :
-    DirectionalSpreadingFunction(),
-    u10_(u10),
-    cap_omega_c_(cap_omega_c),
-    gravity_(gravity)
+  DirectionalSpreadingFunction(),
+  u10_(u10),
+  cap_omega_c_(cap_omega_c),
+  gravity_(gravity)
 {
 }
 
@@ -107,7 +114,7 @@ double ECKVSpreadingFunction::Evaluate(
     double theta, double theta_mean, double k) const
 {
   double angle = theta - theta_mean;
-  
+
   const double cd_10n = 0.00144;
   const double ao = 0.1733;
   const double ap = 4.0;
@@ -134,27 +141,17 @@ void ECKVSpreadingFunction::Evaluate(
     double theta_mean,
     const Eigen::Ref<const Eigen::MatrixXd> &k) const
 {
-  /// \todo check the size of phi, theta and k match
-  
-  const double cd_10n = 0.00144;
-  const double ao = 0.1733;
-  const double ap = 4.0;
-  const double km = 370.0;
-  const double cm = 0.23;
-  double u_star = std::sqrt(cd_10n) * u10_;
-  double am = 0.13 * u_star / cm;
-  double ko = gravity_ / u10_ / u10_;
-  double kp = ko * cap_omega_c_ * cap_omega_c_;
-  double cp = std::sqrt(gravity_ / kp);
-
-  Eigen::MatrixXd angle = theta.array() - theta_mean;
-  Eigen::MatrixXd c = Eigen::sqrt((gravity_ / k.array())
-                    * (1.0 + Eigen::pow(k.array() / km, 2.0)));
-  Eigen::MatrixXd p1 = Eigen::pow(c.array() / cp, 2.5);
-  Eigen::MatrixXd p2 = Eigen::pow(cm / c.array(), 2.5);
-  Eigen::MatrixXd t1 = Eigen::tanh(ao + ap * p1.array() + am * p2.array());
-  Eigen::MatrixXd c2p = Eigen::cos(2.0 * angle.array());
-  phi = (1.0 + t1.array() * c2p.array()) / 2.0 / M_PI;
+  auto theta_view = theta.reshaped();
+  std::transform(
+    theta_view.cbegin(),
+    theta_view.cend(),
+    k.reshaped().cbegin(),
+    phi.reshaped().begin(),
+    [&, this] (double theta_i, double k_i) -> double
+    {
+      return this->Evaluate(theta_i, theta_mean, k_i);
+    }
+  );
 }
 
 //////////////////////////////////////////////////

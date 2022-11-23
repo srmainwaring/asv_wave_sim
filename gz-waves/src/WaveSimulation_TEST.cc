@@ -226,7 +226,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedGrid)
+TEST_F(WaveSimulationSinusoidTestSuite, TestEigenMeshGrid)
 {
   // check the behaviour of Eigen meshgrid
 
@@ -276,7 +276,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedGrid)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirX)
+TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -286,12 +286,12 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirX)
   wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
-  // vectorised
+  // array
   Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeElevation(h1);
  
-  // non-vectorised
+  // non-array
   Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevation(h2);
@@ -306,7 +306,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirX)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirXY)
+TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXYMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -316,12 +316,12 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirXY)
   wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
-  // vectorised
+  // array
   Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeElevation(h1);
  
-  // non-vectorised
+  // non-array
   Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevation(h2);
@@ -336,7 +336,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightsDirXY)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedDisplacments)
+TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacmentsMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -346,13 +346,13 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedDisplacments)
   wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
-  // vectorised
+  // array
   Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeDisplacements(sx1, sy1);
  
-  // non-vectorised
+  // non-array
   Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
@@ -369,7 +369,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedDisplacments)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightDerivatives)
+TEST_F(WaveSimulationSinusoidTestSuite, TestHeightDerivativesMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -379,13 +379,13 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightDerivatives)
   wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
-  // vectorised
+  // array
   Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ComputeElevationDerivatives(dhdx1, dhdy1);
  
-  // non-vectorised
+  // non-array
   Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
@@ -402,8 +402,7 @@ TEST_F(WaveSimulationSinusoidTestSuite, TestVectorisedHeightDerivatives)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationSinusoidTestSuite,
-    TestVectorisedDisplacementsAndDerivatives)
+TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsAndDerivativesMatrixXd)
 { 
   // Wave simulation
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
@@ -413,7 +412,7 @@ TEST_F(WaveSimulationSinusoidTestSuite,
   wave_sim->SetPeriod(period_);
   wave_sim->SetTime(5.0);
   
-  // vectorised
+  // array
   Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
@@ -426,7 +425,7 @@ TEST_F(WaveSimulationSinusoidTestSuite,
   wave_sim->ComputeDisplacementsAndDerivatives(
     h1, sx1, sy1, dhdx1, dhdy1, dsxdx1, dsydy1, dsxdy1);
  
-  // non-vectorised
+  // non-array
   Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
   Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
