@@ -213,14 +213,11 @@ namespace waves
     // calculate spectrum in math-order (not vectorised)
     for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      // kx: fftfreq and ifftshift
-      double kx = (ikx - nx_/2) * kx_f_;
+      double kx = kx_math_(ikx);
       double kx2 = kx*kx;
-
       for (int iky = 0; iky < ny_; ++iky)
       {
-        // ky: fftfreq and ifftshift
-        double ky = (iky - ny_/2) * ky_f_;
+        double ky = ky_math_(iky);
         double ky2 = ky*ky;
         
         double k = sqrt(kx2 + ky2);
