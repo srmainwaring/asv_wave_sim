@@ -108,7 +108,6 @@ namespace waves
     /// \brief Calculate the time-independent Fourier amplitudes
     void ComputeCurrentAmplitudes(double time);
 
-    void InitFFTCoeffStorage();
     void InitWaveNumbers();
 
     void CreateFFTWPlans();

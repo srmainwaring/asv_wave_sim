@@ -61,8 +61,8 @@ namespace waves
     ly_(ly),
     lambda_(0.6)
   {
-    ComputeBaseAmplitudes();
     CreateFFTWPlans();
+    ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
@@ -151,7 +151,6 @@ namespace waves
   //////////////////////////////////////////////////
   void WaveSimulationFFTImpl::ComputeBaseAmplitudes()
   {
-    InitFFTCoeffStorage();
     InitWaveNumbers();
 
     // initialise arrays - always update as algo switch may change shape.
@@ -368,20 +367,6 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::InitFFTCoeffStorage()
-  {
-    // initialise storage for Fourier coefficients
-    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-  }
-
-  //////////////////////////////////////////////////
   void WaveSimulationFFTImpl::InitWaveNumbers()
   {
     kx_fft_  = Eigen::VectorXd::Zero(nx_);
@@ -404,6 +389,20 @@ namespace waves
   //////////////////////////////////////////////////
   void WaveSimulationFFTImpl::CreateFFTWPlans()
   {
+    /// \note the input and output arrays may be overridden during
+    ///       planning, so allocate here before initialising.
+    ///       https://www.fftw.org/fftw3_doc/Complex-DFTs.html
+
+    // allocate storage for Fourier coefficients
+    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+
     // elevation
     fft_out0_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
     fft_out1_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
