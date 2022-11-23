@@ -32,46 +32,67 @@ using std::chrono::duration_cast;
 using namespace gz;
 using namespace waves;
 
-TEST(WaveSimulationFFTPerf, BaseAmplitudes)
+//////////////////////////////////////////////////
+// Define fixture
+class WaveSimulationFFTBaseAmplitudesPerfFixture: public ::testing::Test
+{ 
+public: 
+  virtual ~WaveSimulationFFTBaseAmplitudesPerfFixture()
+  {
+  }
+
+  WaveSimulationFFTBaseAmplitudesPerfFixture()
+  {
+  } 
+
+  virtual void SetUp() override
+  { 
+  }
+
+  virtual void TearDown() override
+  {
+  }
+
+  // number of evaluations
+  int num_runs_ = 100;
+
+  // wave number grid (nx_, ny_)
+  double lx_{200.0};
+  double ly_{100.0};
+  int    nx_{256};
+  int    ny_{128};
+};
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationFFTBaseAmplitudesPerfFixture, MatrixXdCWise)
 {
-  double lx = 200.0;
-  double ly = 100.0;
-  int    nx = 256;
-  int    ny = 126;
-
-  WaveSimulationFFTImpl model(lx, ly, nx, ny);
-
-  int num_runs = 100;
-
-#if 1
+  WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(false);
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
   {
-    model.SetUseVectorised(false);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
-    {
-      model.ComputeBaseAmplitudes();
-    }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
+    model.ComputeBaseAmplitudes();
   }
-#endif
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
 
-#if 1
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationFFTBaseAmplitudesPerfFixture, MatrixXdDoubleLoop)
+{
+  WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
   {
-    model.SetUseVectorised(true);
-    auto start = steady_clock::now();
-    for (int i = 0; i < num_runs; ++i)
-    {
-      model.ComputeBaseAmplitudes();
-    }
-    auto end = steady_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    std::cerr << "num_runs:         " << num_runs << "\n";
-    std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-    std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs << "\n";
+    model.ComputeBaseAmplitudes();
   }
-#endif
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
 }
