@@ -149,12 +149,6 @@ namespace waves
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
 
-    // precalculated amplitudes (t=0)
-    Eigen::MatrixXd zhat0_rc_;
-    Eigen::MatrixXd zhat0_rs_;
-    Eigen::MatrixXd zhat0_ic_;
-    Eigen::MatrixXd zhat0_is_;
-
     /// \brief Flag to select whether to use vectorised calculations. 
     bool use_vectorised_{false};
 
@@ -182,10 +176,6 @@ namespace waves
     /// \brief Parameter controlling the maturity of the sea state.
     double  cap_omega_c_{0.84};
 
-    // sample spacing [m]
-    double  delta_x_{lx_ / nx_};
-    double  delta_y_{ly_ / ny_};
-
     // fundamental angular spatial frequency [rad/m]
     double  kx_f_{2.0 * M_PI / lx_};
     double  ky_f_{2.0 * M_PI / ly_};
@@ -195,14 +185,6 @@ namespace waves
     Eigen::VectorXd ky_fft_;
     Eigen::VectorXd kx_math_;
     Eigen::VectorXd ky_math_;
-    Eigen::MatrixXd kx_;
-    Eigen::MatrixXd ky_;
-    Eigen::MatrixXd kx2_;
-    Eigen::MatrixXd ky2_;
-    Eigen::MatrixXd k_;
-    Eigen::MatrixXd k_plus_;
-    Eigen::MatrixXd theta_;
-    Eigen::MatrixXd ook_;
 
     /// \brief Set to 1 to use a symmetric spreading function (standing waves).
     bool use_symmetric_spreading_fn_{false};
@@ -225,12 +207,11 @@ namespace waves
     //////////////////////////////////////////////////
     /// \note: array storage for vectorised version
 
-    // square-root of two-sided discrete elevation variance spectrum
-    Eigen::MatrixXd cap_psi_2s_root_vec_;
-
-    // iid random normals for real and imaginary parts of the amplitudes
-    Eigen::MatrixXd rho_vec_;
-    Eigen::MatrixXd sigma_vec_;
+    // precalculated amplitudes (t=0): _rc = real cos, etc.
+    Eigen::MatrixXd zhat0_rc_;
+    Eigen::MatrixXd zhat0_rs_;
+    Eigen::MatrixXd zhat0_ic_;
+    Eigen::MatrixXd zhat0_is_;
 
     // angular temporal frequency
     Eigen::MatrixXd omega_k_vec_;
