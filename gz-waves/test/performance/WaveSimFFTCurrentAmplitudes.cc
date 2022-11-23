@@ -64,7 +64,7 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationFFTCurrentAmplitudesPerfFixture, MatrixXdDoubleLoop)
+TEST_F(WaveSimulationFFTCurrentAmplitudesPerfFixture, CurrentAmplitudes)
 {
   WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
