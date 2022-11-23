@@ -73,8 +73,6 @@ namespace waves
     /// \brief Construct a wave simulation model
     WaveSimulationFFTImpl(double lx, double ly, int nx, int ny);
 
-    void SetUseVectorised(bool value);
-
     /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double ux, double uy);
 
@@ -103,18 +101,12 @@ namespace waves
       Eigen::Ref<Eigen::MatrixXd> dsxdx,
       Eigen::Ref<Eigen::MatrixXd> dsydy,
       Eigen::Ref<Eigen::MatrixXd> dsxdy);
-
+   
     /// \brief Calculate the base (time-independent) Fourier amplitudes
     void ComputeBaseAmplitudes();
 
     /// \brief Calculate the time-independent Fourier amplitudes
     void ComputeCurrentAmplitudes(double time);
-    
-    void ComputeBaseAmplitudesNonVectorised();
-    void ComputeCurrentAmplitudesNonVectorised(double time);
-
-    void ComputeBaseAmplitudesVectorised();
-    void ComputeCurrentAmplitudesVectorised(double time);
 
     void InitFFTCoeffStorage();
     void InitWaveNumbers();
@@ -149,9 +141,6 @@ namespace waves
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
 
-    /// \brief Flag to select whether to use vectorised calculations. 
-    bool use_vectorised_{false};
-
     /// \brief Gravity acceleration [m/s^2]
     double gravity_{9.81};
 
@@ -180,39 +169,31 @@ namespace waves
     double  kx_f_{2.0 * M_PI / lx_};
     double  ky_f_{2.0 * M_PI / ly_};
 
-    // angular spatial frequencies in fft and math order
+    // angular spatial frequencies in fft order (nx, ny)
     Eigen::VectorXd kx_fft_;
     Eigen::VectorXd ky_fft_;
-    Eigen::VectorXd kx_math_;
-    Eigen::VectorXd ky_math_;
 
     /// \brief Set to 1 to use a symmetric spreading function (standing waves).
     bool use_symmetric_spreading_fn_{false};
 
     //////////////////////////////////////////////////
-    // storage for current amplitudes - shape depends on algo
-    Eigen::MatrixXcd zhat_;
-    Eigen::MatrixXd  cos_wt_;
-    Eigen::MatrixXd  sin_wt_;
+    // storage for current amplitudes (nx * ny)
+    Eigen::VectorXcd zhat_;
+    Eigen::VectorXd  cos_wt_;
+    Eigen::VectorXd  sin_wt_;
 
     //////////////////////////////////////////////////
-    // storage for base amplitudes - shape depends on algo
+    // storage for base amplitudes (fft order)
 
     // square-root of two-sided discrete elevation variance spectrum
-    Eigen::MatrixXd cap_psi_2s_root_;
+    Eigen::VectorXd cap_psi_2s_root_;
 
     // iid random normals for real and imaginary parts of the amplitudes
-    Eigen::MatrixXd rho_;
-    Eigen::MatrixXd sigma_;
+    Eigen::VectorXd rho_;
+    Eigen::VectorXd sigma_;
 
-    // angular temporal frequency - shape depends on algo
-    Eigen::MatrixXd omega_k_;
-
-    // precalculated amplitudes (t=0): _rc = real cos, etc.
-    Eigen::MatrixXd zhat0_rc_;
-    Eigen::MatrixXd zhat0_rs_;
-    Eigen::MatrixXd zhat0_ic_;
-    Eigen::MatrixXd zhat0_is_;
+    // angular temporal frequency   
+    Eigen::VectorXd omega_k_;
 
     /// \brief For testing
     friend class TestFixtureWaveSimulationFFT;

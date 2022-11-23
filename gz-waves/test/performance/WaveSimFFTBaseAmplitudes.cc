@@ -67,24 +67,6 @@ public:
 TEST_F(WaveSimulationFFTBaseAmplitudesPerfFixture, MatrixXdCWise)
 {
   WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
-  model.SetUseVectorised(false);
-  auto start = steady_clock::now();
-  for (int i = 0; i < num_runs_; ++i)
-  {
-    model.ComputeBaseAmplitudes();
-  }
-  auto end = steady_clock::now();
-  std::chrono::duration<double, std::milli> duration_ms = end - start;
-  std::cerr << "num_runs:         " << num_runs_ << "\n";
-  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
-  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
-}
-
-//////////////////////////////////////////////////
-TEST_F(WaveSimulationFFTBaseAmplitudesPerfFixture, MatrixXdDoubleLoop)
-{
-  WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
-  model.SetUseVectorised(true);
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
