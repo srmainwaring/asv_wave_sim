@@ -207,17 +207,24 @@ namespace waves
     gz::waves::Cos2sSpreadingFunction spreadingFn2;
     spreadingFn2.SetSpread(s_param_);
 
-    // continuous two-sided elevation variance spectrum
-    Eigen::VectorXd cap_psi_2s_math = Eigen::VectorXd::Zero(nx_ * ny_);
+    // normalisation for sqrt of two-sided discrete elevation variance spectrum
+    double cap_psi_norm = 0.5;
+    double delta_kx = kx_f_;
+    double delta_ky = ky_f_;
 
-    // calculate spectrum in math-order (not vectorised)
+    // iid random normals for real and imaginary parts of the amplitudes
+    auto seed = std::default_random_engine::default_seed;
+    std::default_random_engine generator(seed);
+    std::normal_distribution<double> distribution(0.0, 1.0);
+
+    // calculate spectrum in fft-order
     for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      double kx = kx_math_(ikx);
+      double kx = kx_fft_(ikx);
       double kx2 = kx*kx;
       for (int iky = 0; iky < ny_; ++iky)
       {
-        double ky = ky_math_(iky);
+        double ky = ky_fft_(iky);
         double ky2 = ky*ky;
         
         double k = sqrt(kx2 + ky2);
@@ -238,59 +245,17 @@ namespace waves
           cap_psi = spreadingFn2.Evaluate(phi, phi10_, k);
         }
         double cap_s = spectrum.Evaluate(k);
-        cap_psi_2s_math[idx] = cap_s * cap_psi / k;
-      }
-    }
+        double cap_psi_2s_fft = cap_s * cap_psi / k;
 
-    // convert to fft-order
-    Eigen::VectorXd cap_psi_2s_fft = Eigen::VectorXd::Zero(nx_ * ny_);
-    for (int ikx = 0; ikx < nx_; ++ikx)
-    {
-      int ikx_fft = (ikx + nx_/2) % nx_;
-      for (int iky = 0; iky < ny_; ++iky)
-      {
-        int iky_fft = (iky + ny_/2) % ny_;
+        // square-root of two-sided discrete elevation variance spectrum
+        cap_psi_2s_root_(idx, 0) =
+            cap_psi_norm * sqrt(cap_psi_2s_fft * delta_kx * delta_ky);
 
-        // index for flattened array
-        int idx = ikx * ny_ + iky;
-        int idx_fft = ikx_fft * ny_ + iky_fft;
+        // iid random normals
+        rho_(idx, 0) = distribution(generator);
+        sigma_(idx, 0) = distribution(generator);
 
-        cap_psi_2s_fft[idx_fft] = cap_psi_2s_math[idx];
-      }
-    }
-
-    // square-root of two-sided discrete elevation variance spectrum
-    double cap_psi_norm = 0.5;
-    double delta_kx = kx_f_;
-    double delta_ky = ky_f_;
-
-    // iid random normals for real and imaginary parts of the amplitudes
-    auto seed = std::default_random_engine::default_seed;
-    std::default_random_engine generator(seed);
-    std::normal_distribution<double> distribution(0.0, 1.0);
-
-    for (int i = 0; i < n2; ++i)
-    {
-      cap_psi_2s_root_(i, 0) =
-          cap_psi_norm * sqrt(cap_psi_2s_fft[i] * delta_kx * delta_ky);
-
-      rho_(i, 0) = distribution(generator);
-      sigma_(i, 0) = distribution(generator);
-    }
-
-    // angular temporal frequency for time-dependent (from dispersion)
-    for (int ikx = 0; ikx < nx_; ++ikx)
-    {
-      double kx = kx_fft_[ikx];
-      double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_; ++iky)
-      {
-        double ky = ky_fft_[iky];
-        double ky2 = ky*ky;
-        double k = sqrt(kx2 + ky2);
-
-        // index for flattened array
-        int idx = ikx * ny_ + iky;
+        // angular temporal frequency using deep water dispersion
         omega_k_(idx, 0) = sqrt(gravity_ * k);
       }
     }
