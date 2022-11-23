@@ -189,10 +189,8 @@ namespace waves
     /// \brief Set to 1 to use a symmetric spreading function (standing waves).
     bool use_symmetric_spreading_fn_{false};
 
-    /// \todo consolidate different storage structures when checked correct
-
     //////////////////////////////////////////////////
-    /// \note: flattened array storage for non-vectorised version
+    /// \note: flattened array storage
 
     // square-root of two-sided discrete elevation variance spectrum
     Eigen::VectorXd cap_psi_2s_root_;
@@ -205,7 +203,7 @@ namespace waves
     Eigen::VectorXd omega_k_;
 
     //////////////////////////////////////////////////
-    /// \note: array storage for vectorised version
+    /// \note: array storage for alternative implementation
 
     // precalculated amplitudes (t=0): _rc = real cos, etc.
     Eigen::MatrixXd zhat0_rc_;

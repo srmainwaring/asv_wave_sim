@@ -579,12 +579,20 @@ namespace waves
   void WaveSimulationFFTImpl::ComputeCurrentAmplitudesVectorised(
       double time)
   {
-    // // time update
-    Eigen::MatrixXd wt = omega_k_vec_.array() * time;
-    Eigen::MatrixXd cos_wt = Eigen::cos(wt.array());
-    Eigen::MatrixXd sin_wt = Eigen::sin(wt.array());
+    // time update
+    Eigen::MatrixXd cos_wt(nx_, ny_);
+    Eigen::MatrixXd sin_wt(nx_, ny_);
+    for (int ikx = 0; ikx < nx_; ++ikx)
+    {
+      for (int iky = 0; iky < ny_; ++iky)
+      {
+        double wt = omega_k_vec_(ikx, iky) * time;
+        cos_wt(ikx, iky) = std::cos(wt);
+        sin_wt(ikx, iky) = std::sin(wt);
+      }
+    }
 
-    // non-vectorised reference version
+    // update amplitudes
     Eigen::MatrixXcdRowMajor zhat = Eigen::MatrixXcd::Zero(nx_, ny_);
     for (int ikx = 1; ikx < nx_; ++ikx)
     {
@@ -636,12 +644,12 @@ namespace waves
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
 
-        // elevation
         complex h = zhat(ikx, iky);
         complex hi = h * iunit;
         complex hikx = hi * kx;
         complex hiky = hi * ky;
 
+        // elevation
         fft_h_(ikx, iky) = h;
         fft_h_ikx_(ikx, iky) = hikx;
         fft_h_iky_(ikx, iky) = hiky;
