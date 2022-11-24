@@ -31,11 +31,11 @@ inline namespace v2
   public:
     virtual ~OmniDirectionalWaveSpectrum();
 
-    virtual double Evaluate(double _k) const = 0;
+    virtual double Evaluate(double k) const = 0;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> _spectrum,
-        const Eigen::Ref<const Eigen::MatrixXd> &_k) const = 0;
+        Eigen::Ref<Eigen::MatrixXd> spectrum,
+        const Eigen::Ref<const Eigen::MatrixXd> &k) const = 0;
   };
 
   class PiersonMoskowitzWaveSpectrum : public OmniDirectionalWaveSpectrum
@@ -43,25 +43,25 @@ inline namespace v2
   public:
     virtual ~PiersonMoskowitzWaveSpectrum();
 
-    PiersonMoskowitzWaveSpectrum(double _u19=5.0, double _gravity=9.81);
+    PiersonMoskowitzWaveSpectrum(double u19=5.0, double gravity=9.81);
 
-    virtual double Evaluate(double _k) const override;
+    virtual double Evaluate(double k) const override;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> _spectrum,
-        const Eigen::Ref<const Eigen::MatrixXd> &_k) const override;
+        Eigen::Ref<Eigen::MatrixXd> spectrum,
+        const Eigen::Ref<const Eigen::MatrixXd> &k) const override;
 
     double Gravity() const;
 
-    void SetGravity(double _value);
+    void SetGravity(double value);
 
     double U19() const;
 
-    void SetU19(double _value);
+    void SetU19(double value);
 
   private:
-    double _gravity{9.81};
-    double _u19{5.0};
+    double gravity_{9.81};
+    double u19_{5.0};
   };
 
   class ECKVWaveSpectrum : public OmniDirectionalWaveSpectrum
@@ -70,32 +70,32 @@ inline namespace v2
     virtual ~ECKVWaveSpectrum();
 
     ECKVWaveSpectrum(
-        double _u10=5.0,
-        double _cap_omega_c=0.84,
-        double _gravity=9.81);
+        double u10=5.0,
+        double cap_omega_c=0.84,
+        double gravity=9.81);
 
-    virtual double Evaluate(double _k) const override;
+    virtual double Evaluate(double k) const override;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> _spectrum,
-        const Eigen::Ref<const Eigen::MatrixXd> &_k) const override;
+        Eigen::Ref<Eigen::MatrixXd> spectrum,
+        const Eigen::Ref<const Eigen::MatrixXd> &k) const override;
 
     double Gravity() const;
 
-    void SetGravity(double _value);
+    void SetGravity(double value);
 
     double U10() const;
 
-    void SetU10(double _value);
+    void SetU10(double value);
 
     double CapOmegaC() const;
 
-    void SetCapOmegaC(double _value);
+    void SetCapOmegaC(double value);
 
   private:
-    double _gravity{9.81};
-    double _u10{5.0};
-    double _cap_omega_c{0.84};
+    double gravity_{9.81};
+    double u10_{5.0};
+    double cap_omega_c_{0.84};
   };
 
 }

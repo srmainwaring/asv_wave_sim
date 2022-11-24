@@ -1,4 +1,4 @@
-// Copyright (C) 2019  Rhys Mainwaring
+// Copyright (C) 2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,12 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATIONSINUSOID_HH_
-#define GZ_WAVES_WAVESIMULATIONSINUSOID_HH_
+#ifndef GZ_WAVES_WAVESIMULATIONFFT_HH_
+#define GZ_WAVES_WAVESIMULATIONFFT_HH_
 
 #include <memory>
-
-#include <Eigen/Dense>
 
 #include "WaveSimulation.hh"
 
@@ -28,32 +26,17 @@ namespace gz
 {
 namespace waves
 {
-  /// The grid has sides with lengths lx and ly.
-  ///
-  /// There are nx, ny vertices in each direction.
-  ///
-  /// The simulation updates nx x ny vertices.
-  ///
-  /// The distance between vertices is dx = lx / nx and dy = ly / ny.
-  ///
-  /// All storage is assumed to be sized to nx x ny and the
-  /// vertices are traversed in column major order:
-  /// i.e. the innermost loop is over the x direction.
-  ///
-  class WaveSimulationSinusoid : public WaveSimulation
+  class WaveSimulationFFTImpl;
+
+  class WaveSimulationFFT : public WaveSimulation
   {
     public:
-      ~WaveSimulationSinusoid();
+      virtual ~WaveSimulationFFT();
 
-      WaveSimulationSinusoid(double lx, double ly, int nx, int ny);
+      WaveSimulationFFT(double lx, double ly, int nx, int ny);
 
-      void SetUseVectorised(bool value);
-
-      void SetDirection(double dir_x, double dir_y);
-
-      void SetAmplitude(double value);
-
-      void SetPeriod(double value);
+      /// \brief Set lambda which controls the horizontal wave displacement.
+      void SetLambda(double lambda);
 
       virtual void SetWindVelocity(double ux, double uy) override;
 
@@ -86,8 +69,7 @@ namespace waves
           Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
     private:
-      class Impl;
-      std::unique_ptr<Impl> impl_;
+      std::unique_ptr<WaveSimulationFFTImpl> impl_;
   };
 }
 }

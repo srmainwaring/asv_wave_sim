@@ -6,7 +6,7 @@ include_directories (
 )
 
 #============================================================================
-# Do a fake install of gz-math in order to test the examples.
+# Do a fake install in order to test the examples.
 #============================================================================
 # install to FAKE_INSTALL_PREFIX defined in root CMakeLists.txt
 
@@ -28,5 +28,5 @@ ExternalProject_Add(
 
 add_subdirectory(gtest_vendor)
 # add_subdirectory(integration)
-# add_subdirectory(performance)
+add_subdirectory(performance)
 # add_subdirectory(regression)

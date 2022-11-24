@@ -31,35 +31,35 @@ namespace waves
 
     WaveSimulation();
 
-    virtual void SetWindVelocity(double _ux, double _uy) = 0;
+    virtual void SetWindVelocity(double ux, double uy) = 0;
 
-    virtual void SetTime(double _value) = 0;
+    virtual void SetTime(double value) = 0;
 
     virtual void ComputeElevation(
-        Eigen::Ref<Eigen::MatrixXd> _h) = 0;
+        Eigen::Ref<Eigen::MatrixXd> h) = 0;
 
     virtual void ComputeElevationDerivatives(
-        Eigen::Ref<Eigen::MatrixXd> _dhdx,
-        Eigen::Ref<Eigen::MatrixXd> _dhdy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> dhdx,
+        Eigen::Ref<Eigen::MatrixXd> dhdy) = 0;
 
     virtual void ComputeDisplacements(
-        Eigen::Ref<Eigen::MatrixXd> _sx,
-        Eigen::Ref<Eigen::MatrixXd> _sy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> sx,
+        Eigen::Ref<Eigen::MatrixXd> sy) = 0;
 
     virtual void ComputeDisplacementsDerivatives(
-        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> _dsydy,
-        Eigen::Ref<Eigen::MatrixXd> _dsxdy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> dsydy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) = 0;
 
     virtual void ComputeDisplacementsAndDerivatives(
-        Eigen::Ref<Eigen::MatrixXd> _h,
-        Eigen::Ref<Eigen::MatrixXd> _sx,
-        Eigen::Ref<Eigen::MatrixXd> _sy,
-        Eigen::Ref<Eigen::MatrixXd> _dhdx,
-        Eigen::Ref<Eigen::MatrixXd> _dhdy,
-        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> _dsydy,
-        Eigen::Ref<Eigen::MatrixXd> _dsxdy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> h,
+        Eigen::Ref<Eigen::MatrixXd> sx,
+        Eigen::Ref<Eigen::MatrixXd> sy,
+        Eigen::Ref<Eigen::MatrixXd> dhdx,
+        Eigen::Ref<Eigen::MatrixXd> dhdy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> dsydy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) = 0;
   };
 }
 }

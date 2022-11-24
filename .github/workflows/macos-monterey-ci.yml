@@ -1,0 +1,42 @@
+name: macOS Monterey CI
+
+on: [pull_request]
+
+jobs:
+  macos-monterey-ci:
+    runs-on: macos-12
+    name: macOS Monterey CI
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache brew packages
+        id: cache-brew-packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/Cellar
+            /usr/local/Frameworks
+            /usr/local/Homebrew
+            /usr/local/bin
+            /usr/local/lib
+            /usr/local/opt
+            /usr/local/share
+          key: macos-build-cache-${{ hashFiles('./.github/scripts/brew_install_deps.sh') }}
+
+      - name: Install brew packages
+        run: |
+          bash ./.github/scripts/brew_install_deps.sh
+
+      - name: Install Build Tools
+        run: |
+          python3 -m pip install --user vcstool
+          python3 -m pip install --user colcon-common-extensions
+
+      - name: Build Wave Sim
+        run: |
+          bash ./.github/scripts/macos_build.sh
+
+      - name: Test Wave Sim
+        run: |
+          bash ./.github/scripts/macos_test.sh

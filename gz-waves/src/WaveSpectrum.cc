@@ -15,6 +15,7 @@
 
 #include "gz/waves/WaveSpectrum.hh"
 
+#include <algorithm>
 #include <cmath>
 
 using namespace gz;
@@ -33,34 +34,30 @@ PiersonMoskowitzWaveSpectrum::~PiersonMoskowitzWaveSpectrum()
 
 //////////////////////////////////////////////////
 PiersonMoskowitzWaveSpectrum::PiersonMoskowitzWaveSpectrum(
-    double _u19, double _gravity) :
+    double u19, double gravity) :
   OmniDirectionalWaveSpectrum(),
-  _u19(_u19),
-  _gravity(_gravity)
+  u19_(u19),
+  gravity_(gravity)
 {
 }
 
 //////////////////////////////////////////////////
-double PiersonMoskowitzWaveSpectrum::Evaluate(double _k) const
+double PiersonMoskowitzWaveSpectrum::Evaluate(double k) const
 {
-  if (std::abs(_k) < 1.0E-8 || std::abs(this->_u19) < 1.0E-8)
+  if (std::abs(k) < 1.0E-8 || std::abs(u19_) < 1.0E-8)
   {
     return 0.0;
   }
-
-  // aliases
-  double g = this->_gravity;
-  double u = this->_u19;
 
   // constants
   const double alpha = 0.0081;
   const double beta = 0.74;
 
   // intermediates
-  double g2 = g * g;
-  double k2 = _k * _k;
-  double k3 = _k * k2;
-  double u2 = u * u;
+  double g2 = gravity_ * gravity_;
+  double k2 = k * k;
+  double k3 = k * k2;
+  double u2 = u19_ * u19_;
   double u4 = u2 * u2;
 
   double cap_s = alpha / 2.0 / k3 * std::exp(-beta * g2 / k2 / u4);
@@ -69,67 +66,44 @@ double PiersonMoskowitzWaveSpectrum::Evaluate(double _k) const
 
 //////////////////////////////////////////////////
 void PiersonMoskowitzWaveSpectrum::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> _spectrum,
-    const Eigen::Ref<const Eigen::MatrixXd> &_k) const
+    Eigen::Ref<Eigen::MatrixXd> spectrum,
+    const Eigen::Ref<const Eigen::MatrixXd> &k) const
 {
-  auto rows =  _spectrum.rows();
-  auto cols =  _spectrum.cols();
-
-  if (std::abs(this->_u19) < 1.0E-8)
-  {
-    _spectrum.setZero();
-  }
-
-  // array k has no zero elements
-  Eigen::MatrixXd k = (_k.array() == 0).select(
-      Eigen::MatrixXd::Ones(rows, cols), _k);
-
-  // aliases
-  double g = this->_gravity;
-  double u = this->_u19;
-
-  // constants
-  const double alpha = 0.0081;
-  const double beta = 0.74;
-
-  // intermediates
-  double g2 = g * g;
-  double u2 = u * u;
-  double u4 = u2 * u2;
-  Eigen::MatrixXd k2 = Eigen::pow(k.array(), 2.0);
-  Eigen::MatrixXd k3 = Eigen::pow(k.array(), 3.0);
-
-  // evaluate for k
-  Eigen::MatrixXd cap_s = alpha / 2.0 / k3.array()
-      * Eigen::exp(-beta * g2 / k2.array() / u4);
-
-  // apply filter
-  _spectrum = (_k.array() == 0).select(
-      Eigen::MatrixXd::Zero(rows, cols), cap_s);
+  /// \note Eigen asserts cbegin and cend are from the same expression.
+  auto k_view = k.reshaped();
+  std::transform(
+    k_view.cbegin(),
+    k_view.cend(),
+    spectrum.reshaped().begin(),
+    [this] (double k_i) -> double
+    {
+      return this->Evaluate(k_i);
+    }
+  );
 }
 
 //////////////////////////////////////////////////
 double PiersonMoskowitzWaveSpectrum::Gravity() const
 {
-  return this->_gravity;
+  return gravity_;
 }
 
 //////////////////////////////////////////////////
-void PiersonMoskowitzWaveSpectrum::SetGravity(double _value)
+void PiersonMoskowitzWaveSpectrum::SetGravity(double value)
 {
-  this->_gravity = _value;
+  gravity_ = value;
 }
 
 //////////////////////////////////////////////////
 double PiersonMoskowitzWaveSpectrum::U19() const
 {
-  return this->_u19;
+  return u19_;
 }
 
 //////////////////////////////////////////////////
-void PiersonMoskowitzWaveSpectrum::SetU19(double _value)
+void PiersonMoskowitzWaveSpectrum::SetU19(double value)
 {
-  this->_u19 = _value;
+  u19_ = value;
 }
 
 //////////////////////////////////////////////////
@@ -140,28 +114,21 @@ ECKVWaveSpectrum::~ECKVWaveSpectrum()
 
 //////////////////////////////////////////////////
 ECKVWaveSpectrum::ECKVWaveSpectrum(
-    double _u10, double _cap_omega_c, double _gravity) :
+    double u10, double cap_omega_c, double gravity) :
   OmniDirectionalWaveSpectrum(),
-  _u10(_u10),
-  _cap_omega_c(_cap_omega_c),
-  _gravity(_gravity)
+  u10_(u10),
+  cap_omega_c_(cap_omega_c),
+  gravity_(gravity)
 {
 }
 
 //////////////////////////////////////////////////
-double ECKVWaveSpectrum::Evaluate(double _k) const
+double ECKVWaveSpectrum::Evaluate(double k) const
 {
-  if (std::abs(_k) < 1.0E-8 || std::abs(this->_u10) < 1.0E-8)
+  if (std::abs(k) < 1.0E-8 || std::abs(u10_) < 1.0E-8)
   {
     return 0.0;
   }
-
-  double k = _k;
-
-  // aliases
-  double g = this->_gravity;
-  double u10 = this->_u10;
-  double cap_omega_c = this->_cap_omega_c;
 
   // constants
   const double alpha = 0.0081;
@@ -173,21 +140,21 @@ double ECKVWaveSpectrum::Evaluate(double _k) const
   const double cm = 0.23;
 
   // intermediates
-  double u_star = std::sqrt(cd_10n) * u10;
+  double u_star = std::sqrt(cd_10n) * u10_;
   double am = 0.13 * u_star / cm;
   
   double gamma = 1.7;
-  if (cap_omega_c < 1.0)
+  if (cap_omega_c_ < 1.0)
   {
     gamma = 1.7;
   }
   else
   {
-    gamma = 1.7 + 6.0 * std::log10(cap_omega_c);
+    gamma = 1.7 + 6.0 * std::log10(cap_omega_c_);
   }
 
-  double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c, -3.0));
-  double alpha_p = 0.006 * std::pow(cap_omega_c, 0.55);
+  double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c_, -3.0));
+  double alpha_p = 0.006 * std::pow(cap_omega_c_, 0.55);
 
   double alpha_m; 
   if (u_star <= cm)
@@ -199,11 +166,11 @@ double ECKVWaveSpectrum::Evaluate(double _k) const
     alpha_m = 0.01 * (1.0 + 3.0 * std::log(u_star / cm));
   }
 
-  double ko = g / u10 / u10;
-  double kp = ko * cap_omega_c * cap_omega_c;
+  double ko = gravity_ / u10_ / u10_;
+  double kp = ko * cap_omega_c_ * cap_omega_c_;
 
-  double cp = std::sqrt(g / kp);
-  double c  = std::sqrt((g / k) * (1.0 + std::pow(k / km, 2.0)));
+  double cp = std::sqrt(gravity_ / kp);
+  double c  = std::sqrt((gravity_ / k) * (1.0 + std::pow(k / km, 2.0)));
 
   double l_pm = std::exp(-1.25 * std::pow(kp / k, 2.0));
   
@@ -215,7 +182,7 @@ double ECKVWaveSpectrum::Evaluate(double _k) const
   double j_p = std::pow(gamma, cap_gamma);
   
   double f_p = l_pm * j_p * std::exp(
-      -0.3162 * cap_omega_c * (std::sqrt(k / kp) - 1.0)
+      -0.3162 * cap_omega_c_ * (std::sqrt(k / kp) - 1.0)
   );
 
   double f_m = l_pm * j_p * std::exp(
@@ -233,133 +200,54 @@ double ECKVWaveSpectrum::Evaluate(double _k) const
 
 //////////////////////////////////////////////////
 void ECKVWaveSpectrum::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> _spectrum,
-    const Eigen::Ref<const Eigen::MatrixXd> &_k) const
+    Eigen::Ref<Eigen::MatrixXd> spectrum,
+    const Eigen::Ref<const Eigen::MatrixXd> &k) const
 {
-  auto rows =  _spectrum.rows();
-  auto cols =  _spectrum.cols();
-
-  if (std::abs(this->_u10) < 1.0E-8)
-  {
-    _spectrum.setZero();
-  }
-
-  // array k has no zero elements
-  Eigen::MatrixXd k = (_k.array() == 0).select(
-      Eigen::MatrixXd::Ones(rows, cols), _k);
-
-  // aliases
-  double g = this->_gravity;
-  double u10 = this->_u10;
-  double cap_omega_c = this->_cap_omega_c;
-
-  // constants
-  const double alpha = 0.0081;
-  const double beta = 1.25;
-  const double cd_10n = 0.00144;
-  const double ao = 0.1733;
-  const double ap = 4.0;
-  const double km = 370.0;
-  const double cm = 0.23;
-
-  // intermediates
-  double u_star = std::sqrt(cd_10n) * u10;
-  double am = 0.13 * u_star / cm;
-  
-  double gamma = 1.7;
-  if (cap_omega_c < 1.0)
-  {
-    gamma = 1.7;
-  }
-  else
-  {
-    gamma = 1.7 + 6.0 * std::log10(cap_omega_c);
-  }
-
-  double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c, -3.0));
-  double alpha_p = 0.006 * std::pow(cap_omega_c, 0.55);
-
-  double alpha_m; 
-  if (u_star <= cm)
-  {
-    alpha_m = 0.01 * (1.0 + std::log(u_star / cm));
-  }
-  else
-  {
-    alpha_m = 0.01 * (1.0 + 3.0 * std::log(u_star / cm));
-  }
-
-  double ko = g / u10 / u10;
-  double kp = ko * cap_omega_c * cap_omega_c;
-  double cp = std::sqrt(g / kp);
-
-  Eigen::MatrixXd c  = Eigen::sqrt(
-      (g / k.array()) * (1.0 + Eigen::pow(k.array() / km, 2.0))
+  auto k_view = k.reshaped();
+  std::transform(
+    k_view.cbegin(),
+    k_view.cend(),
+    spectrum.reshaped().begin(),
+    [this] (double k_i) -> double
+    {
+      return this->Evaluate(k_i);
+    }
   );
-
-  Eigen::MatrixXd l_pm = Eigen::exp(
-      -1.25 * Eigen::pow(kp / k.array(), 2.0)
-  );
-  
-  Eigen::MatrixXd cap_gamma = Eigen::exp(
-      -1.0/(2.0 * std::pow(sigma, 2.0))
-      * Eigen::pow(Eigen::sqrt(k.array() / kp) - 1.0, 2.0)
-  );
-  
-  Eigen::MatrixXd j_p = Eigen::pow(gamma, cap_gamma.array());
-  
-  Eigen::MatrixXd f_p = l_pm.array() * j_p.array() * Eigen::exp(
-      -0.3162 * cap_omega_c * (Eigen::sqrt(k.array() / kp) - 1.0)
-  );
-
-  Eigen::MatrixXd f_m = l_pm.array() * j_p.array() * Eigen::exp(
-      -0.25 * Eigen::pow(k.array() / km - 1.0, 2.0)
-  );
-
-  Eigen::MatrixXd b_l = 0.5 * alpha_p * (cp / c.array()) * f_p.array();
-  Eigen::MatrixXd b_h = 0.5 * alpha_m * (cm / c.array()) * f_m.array();
-  
-  Eigen::MatrixXd k3 = Eigen::pow(k.array(), 3.0);
-  Eigen::MatrixXd cap_s = (b_l.array() + b_h.array()) / k3.array();
-
-   // apply filter
-  _spectrum = (_k.array() == 0).select(
-      Eigen::MatrixXd::Zero(rows, cols), cap_s);
 }
 
 //////////////////////////////////////////////////
 double ECKVWaveSpectrum::Gravity() const
 {
-  return this->_gravity;
+  return gravity_;
 }
 
 //////////////////////////////////////////////////
-void ECKVWaveSpectrum::SetGravity(double _value)
+void ECKVWaveSpectrum::SetGravity(double value)
 {
-  this->_gravity = _value;
+  gravity_ = value;
 }
 
 //////////////////////////////////////////////////
 double ECKVWaveSpectrum::U10() const
 {
-  return this->_u10;
+  return u10_;
 }
 
 //////////////////////////////////////////////////
-void ECKVWaveSpectrum::SetU10(double _value)
+void ECKVWaveSpectrum::SetU10(double value)
 {
-  this->_u10 = _value;
+  u10_ = value;
 }
 
 //////////////////////////////////////////////////
 double ECKVWaveSpectrum::CapOmegaC() const
 {
-  return this->_cap_omega_c;
+  return cap_omega_c_;
 }
 
 //////////////////////////////////////////////////
-void ECKVWaveSpectrum::SetCapOmegaC(double _value)
+void ECKVWaveSpectrum::SetCapOmegaC(double value)
 {
-  this->_cap_omega_c = _value;
+  cap_omega_c_ = value;
 }
 
