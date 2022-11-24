@@ -131,7 +131,6 @@ TEST_F(WaveSimulationFFTFixture, HermitianHTimeZeroReference)
 }
 
 //////////////////////////////////////////////////
-#if 0
 TEST_F(WaveSimulationFFTFixture, HermitianDhDxTimeZeroReference)
 {
   WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
@@ -163,9 +162,8 @@ TEST_F(WaveSimulationFFTFixture, HermitianDhDxTimeZeroReference)
     }
   }
 }
-#endif
+
 //////////////////////////////////////////////////
-#if 0
 TEST_F(WaveSimulationFFTFixture, HermitianDhDyTimeZeroReference)
 {
   WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
@@ -197,7 +195,172 @@ TEST_F(WaveSimulationFFTFixture, HermitianDhDyTimeZeroReference)
     }
   }
 }
-#endif
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationFFTFixture, HermitianSxTimeZeroReference)
+{
+  WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky)
+    {
+      // index for conjugate
+      int ckx = 0;
+      if (ikx != 0)
+        ckx = nx_ - ikx;
+
+      int cky = 0;
+      if (iky != 0)
+        cky = ny_ - iky;
+
+      // look up amplitude and conjugate
+      complex h  = model.fft_sx_(ikx, iky);
+      complex hc = model.fft_sx_(ckx, cky);
+
+      // real part symmetric
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationFFTFixture, HermitianSyTimeZeroReference)
+{
+  WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky)
+    {
+      // index for conjugate
+      int ckx = 0;
+      if (ikx != 0)
+        ckx = nx_ - ikx;
+
+      int cky = 0;
+      if (iky != 0)
+        cky = ny_ - iky;
+
+      // look up amplitude and conjugate
+      complex h  = model.fft_sy_(ikx, iky);
+      complex hc = model.fft_sy_(ckx, cky);
+
+      // real part symmetric
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationFFTFixture, HermitianDsxDxTimeZeroReference)
+{
+  WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky)
+    {
+      // index for conjugate
+      int ckx = 0;
+      if (ikx != 0)
+        ckx = nx_ - ikx;
+
+      int cky = 0;
+      if (iky != 0)
+        cky = ny_ - iky;
+
+      // look up amplitude and conjugate
+      complex h  = model.fft_h_kxkx_(ikx, iky);
+      complex hc = model.fft_h_kxkx_(ckx, cky);
+
+      // real part symmetric
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationFFTFixture, HermitianDsyDyTimeZeroReference)
+{
+  WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky)
+    {
+      // index for conjugate
+      int ckx = 0;
+      if (ikx != 0)
+        ckx = nx_ - ikx;
+
+      int cky = 0;
+      if (iky != 0)
+        cky = ny_ - iky;
+
+      // look up amplitude and conjugate
+      complex h  = model.fft_h_kyky_(ikx, iky);
+      complex hc = model.fft_h_kyky_(ckx, cky);
+
+      // real part symmetric
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationFFTFixture, HermitianDsxDyTimeZeroReference)
+{
+  WaveSimulationFFTRefImpl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  model.ComputeCurrentAmplitudes(0.0);
+
+  for (int ikx=0; ikx<nx_; ++ikx)
+  {
+    for (int iky=0; iky<ny_; ++iky)
+    {
+      // index for conjugate
+      int ckx = 0;
+      if (ikx != 0)
+        ckx = nx_ - ikx;
+
+      int cky = 0;
+      if (iky != 0)
+        cky = ny_ - iky;
+
+      // look up amplitude and conjugate
+      complex h  = model.fft_h_kxky_(ikx, iky);
+      complex hc = model.fft_h_kxky_(ckx, cky);
+
+      // real part symmetric
+      EXPECT_DOUBLE_EQ(h.real(), hc.real());
+      
+      // imaginary part anti-symmetric
+      EXPECT_DOUBLE_EQ(h.imag(), -1.0 * hc.imag());
+    }
+  }
+}
+
 //////////////////////////////////////////////////
 TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZeroReference)
 {
@@ -544,7 +707,6 @@ TEST_F(WaveSimulationFFTFixture, ElevationTimeNonZero)
 }
 
 //////////////////////////////////////////////////
-#if 0
 TEST_F(WaveSimulationFFTFixture, Displacement)
 {
   int n2 = nx_ * ny_;
@@ -572,11 +734,10 @@ TEST_F(WaveSimulationFFTFixture, Displacement)
 
   for (int i=0; i<n2; ++i)
   {
-    EXPECT_DOUBLE_EQ(sx(i, 0), ref_sx(i, 0));
-    EXPECT_DOUBLE_EQ(sy(i, 0), ref_sy(i, 0));
+    EXPECT_NEAR(sx(i, 0), ref_sx(i, 0), 1.0E-15);
+    EXPECT_NEAR(sy(i, 0), ref_sy(i, 0), 1.0E-15);
   }
 }
-#endif
 
 //////////////////////////////////////////////////
 TEST_F(WaveSimulationFFTFixture, ElevationDerivatives)

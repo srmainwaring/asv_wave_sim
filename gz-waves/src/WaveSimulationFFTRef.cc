@@ -432,13 +432,21 @@ namespace waves
         // height derivatives
         complex hikx = hi * kx;
         complex hiky = hi * ky;
+        
+        // Nyquist terms for derivatives must be zero.
+        // For an explanation see:
+        // https://math.mit.edu/~stevenj/fft-deriv.pdf
+        if (ikx == nx_ / 2)
+          hikx = czero;
+        if (iky == ny_ / 2)
+          hiky = czero;
 
         fft_h_ikx_(ikx, iky) = hikx;
         fft_h_iky_(ikx, iky) = hiky;
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
-        {          
+        {
           fft_sx_(ikx, iky)     = czero;
           fft_sy_(ikx, iky)     = czero;
           fft_h_kxkx_(ikx, iky) = czero;
@@ -452,7 +460,20 @@ namespace waves
           complex hkxkx = hok * kx2;
           complex hkyky = hok * ky2;
           complex hkxky = hok * kx * ky;
-          
+
+          if (ikx == nx_ / 2)
+          {
+            dx = czero;
+            hkxkx = complex(hkxkx.real(), 0.0);
+            hkxky = czero;
+          }
+          if (iky == ny_ / 2)
+          {
+            dy = czero;
+            hkyky = complex(hkyky.real(), 0.0);
+            hkxky = czero;
+          }
+
           fft_sx_(ikx, iky)     = dx;
           fft_sy_(ikx, iky)     = dy;
           fft_h_kxkx_(ikx, iky) = hkxkx;
