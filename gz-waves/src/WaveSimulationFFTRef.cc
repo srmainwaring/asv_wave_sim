@@ -433,8 +433,8 @@ namespace waves
         complex hikx = hi * kx;
         complex hiky = hi * ky;
 
-        fft_h_ikx_(ikx, iky) = hi * kx;
-        fft_h_iky_(ikx, iky) = hi * ky;
+        fft_h_ikx_(ikx, iky) = hikx;
+        fft_h_iky_(ikx, iky) = hiky;
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)

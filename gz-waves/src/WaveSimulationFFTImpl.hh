@@ -108,7 +108,6 @@ namespace waves
     /// \brief Calculate the time-independent Fourier amplitudes
     void ComputeCurrentAmplitudes(double time);
 
-    void InitFFTCoeffStorage();
     void InitWaveNumbers();
 
     void CreateFFTWPlans();
@@ -129,14 +128,18 @@ namespace waves
     Eigen::MatrixXcdRowMajor fft_h_kyky_;  // FFT6 - d displacement y / dy
     Eigen::MatrixXcdRowMajor fft_h_kxky_;  // FFT7 - d displacement x / dy
 
-    Eigen::MatrixXcdRowMajor fft_out0_;
-    Eigen::MatrixXcdRowMajor fft_out1_;
-    Eigen::MatrixXcdRowMajor fft_out2_;
-    Eigen::MatrixXcdRowMajor fft_out3_;
-    Eigen::MatrixXcdRowMajor fft_out4_;
-    Eigen::MatrixXcdRowMajor fft_out5_;
-    Eigen::MatrixXcdRowMajor fft_out6_;
-    Eigen::MatrixXcdRowMajor fft_out7_;
+    /// \note if using fftw_plan_dft_c2r_2d:  
+    ///       complex input array has size: nx * ny / 2 + 1
+    ///       real output array has size:   nx * ny
+    ///
+    Eigen::MatrixXdRowMajor  fft_out0_;
+    Eigen::MatrixXdRowMajor  fft_out1_;
+    Eigen::MatrixXdRowMajor  fft_out2_;
+    Eigen::MatrixXdRowMajor  fft_out3_;
+    Eigen::MatrixXdRowMajor  fft_out4_;
+    Eigen::MatrixXdRowMajor  fft_out5_;
+    Eigen::MatrixXdRowMajor  fft_out6_;
+    Eigen::MatrixXdRowMajor  fft_out7_;
 
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
