@@ -319,7 +319,7 @@ namespace waves
     {
       double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_/2+1; ++iky)
+      for (int iky = 0; iky < ny_/2 + 1; ++iky)
       {
         double ky = ky_fft_[iky];
         double ky2 = ky*ky;
@@ -332,6 +332,14 @@ namespace waves
         complex hi = h * iunit;
         complex hikx = hi * kx;
         complex hiky = hi * ky;
+
+        // Nyquist terms for derivatives must be zero.
+        // For an explanation see:
+        // https://math.mit.edu/~stevenj/fft-deriv.pdf
+        if (ikx == nx_ / 2)
+          hikx = czero;
+        if (iky == ny_ / 2)
+          hiky = czero;
 
         // elevation
         fft_h_(ikx, iky) = h;
@@ -358,6 +366,15 @@ namespace waves
           complex hkyky = hok * ky2;
           complex hkxky = hok * kx * ky;
           
+          if (ikx == nx_ / 2)
+          {
+            dx = czero;
+          }
+          if (iky == ny_ / 2)
+          {
+            dy = czero;
+          }
+
           fft_sx_(ikx, iky)     = dx;
           fft_sy_(ikx, iky)     = dy;
           fft_h_kxkx_(ikx, iky) = hkxkx;
