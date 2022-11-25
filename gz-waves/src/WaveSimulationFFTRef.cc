@@ -247,7 +247,7 @@ namespace waves
             + ky_math_[iky]*ky_math_[iky]);
         double phi = atan2(ky_math_[iky], kx_math_[ikx]);
 
-        if (k == 0.0)
+        if (std::abs(k) < 1.0E-8)
         {
           cap_psi_2s_math(ikx, iky) = 0.0;
         }

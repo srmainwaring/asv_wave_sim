@@ -306,29 +306,29 @@ void Ogre2DisplacementMap::UpdateTextures(
       ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
 
   // update the image data
-  uint32_t width  = mHeightMapImage->getWidth();
-  uint32_t height = mHeightMapImage->getHeight();
+  uint32_t mapWidth  = mHeightMapImage->getWidth();
+  uint32_t mapHeight = mHeightMapImage->getHeight();
 
   Ogre::TextureBox heightBox  = mHeightMapImage->getData(0);
   Ogre::TextureBox normalBox  = mNormalMapImage->getData(0);
   Ogre::TextureBox tangentBox = mTangentMapImage->getData(0);
 
-  for (uint32_t iv=0; iv < height; ++iv)
+  for (uint32_t iv=0; iv < mapHeight; ++iv)
   {
       /// \todo: coordinates are flipped in the vertex shader
       // texture index to vertex index
-      int32_t iy = /*height - 1 - */ iv;
-      for (uint32_t iu=0; iu < width; ++iu)
+      int32_t iy = /*mapHeight - 1 - */ iv;
+      for (uint32_t iu=0; iu < mapWidth; ++iu)
       {
           // texture index to vertex index
-          int32_t ix = /* width - 1 - */ iu;
+          int32_t ix = /* mapWidth - 1 - */ iu;
 
           float Dx{0.0}, Dy{0.0}, Dz{0.0};
           float Tx{1.0}, Ty{0.0}, Tz{0.0};
           float Bx{0.0}, By{1.0}, Bz{0.0};
           float Nx{0.0}, Ny{0.0}, Nz{1.0};
 
-          int32_t idx = iy * width + ix;
+          int32_t idx = iy * mapWidth + ix;
           double h  = mHeights(idx, 0);
           double sx = mDisplacementsX(idx, 0);
           double sy = mDisplacementsY(idx, 0);

@@ -693,9 +693,9 @@ void WavesVisualPrivate::OnUpdate()
 
       if (this->waveParamsDirty)
       {
-        double ux = this->waveParams->WindVelocity().X();
-        double uy = this->waveParams->WindVelocity().Y();
-        this->oceanTile->SetWindVelocity(ux, uy);
+        double newUx = this->waveParams->WindVelocity().X();
+        double newUy = this->waveParams->WindVelocity().Y();
+        this->oceanTile->SetWindVelocity(newUx, newUy);
         this->waveParamsDirty = false;
       }
 
@@ -775,12 +775,12 @@ void WavesVisualPrivate::OnUpdate()
 
       if (this->waveParamsDirty)
       {
-        double ux = this->waveParams->WindVelocity().X();
-        double uy = this->waveParams->WindVelocity().Y();
+        double newUx = this->waveParams->WindVelocity().X();
+        double newUy = this->waveParams->WindVelocity().Y();
         // double s  = this->waveParams->Steepness();
 
         // set params
-        this->mWaveSim->SetWindVelocity(ux, uy);
+        this->mWaveSim->SetWindVelocity(newUx, newUy);
         // waveSim->SetLambda(s);
 
         this->waveParamsDirty = false;

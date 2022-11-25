@@ -958,6 +958,7 @@ void OceanTilePrivate<cgal::Point3>::UpdateMesh(
 {
   /// \note This template specialisation is supplied for compilation on
   ///       macOS M1 (arm64). It should never be called. 
+  GZ_ASSERT(false, "Should never reach here");
 }
 
 //////////////////////////////////////////////////
