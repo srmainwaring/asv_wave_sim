@@ -45,7 +45,7 @@ to store and access the coefficients, the build command must be modified
 slightly:
 
 ```zsh
-olcon build --symlink-install --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DCMAKE_CXX_STANDARD=17 -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DHIGHFIVE_USE_EIGEN=ON --packages-select  gz-waves1
+colcon build --symlink-install --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DCMAKE_CXX_STANDARD=17 -DCMAKE_MACOSX_RPATH=FALSE -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib -DHIGHFIVE_USE_EIGEN=ON --packages-select  gz-waves1
 ```
 
 where the flag `DHIGHFIVE_USE_EIGEN` allows the hdf5 datasets to be read into
