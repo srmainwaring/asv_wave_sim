@@ -422,27 +422,26 @@ namespace waves
     double cd = std::cos(wave_angle_);
     double sd = std::sin(wave_angle_);
 
-    // if (use_vectorised_)
-    // {
-    //   Eigen::MatrixXd a = k * (x_grid_.array() * cd
-    //       + y_grid_.array() * sd) - wt;
-    //   Eigen::MatrixXd ca = Eigen::cos(a.array());
-    //   Eigen::MatrixXd h1 = amplitude_ * ca.array();
-    //   h = h1.reshaped();
-    // }
-    // else
+    // value of z at index ix
+    double z = z_(iz);
+
+    // linear deep water wave pressure scaling factor
+    double e = std::exp(k * z);
+
+    if (use_vectorised_)
+    {
+      Eigen::MatrixXd a = k * (x_grid_.array() * cd
+          + y_grid_.array() * sd) - wt;
+      Eigen::MatrixXd ca = Eigen::cos(a.array());
+      Eigen::MatrixXd p  = e * amplitude_ * ca.array();
+      pressure = p.reshaped();
+    }
+    else
     {
       double dx = lx_ / nx_;
       double dy = ly_ / ny_;
       double lx_min = - lx_ / 2.0;
       double ly_min = - ly_ / 2.0;
-
-      // value of z at index ix
-      double z = z_(iz);
-
-      // debug
-      // std::cerr << "iz: " << iz << ", z: " << z << "\n"; 
-
       for (int iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy + ly_min;
@@ -452,9 +451,6 @@ namespace waves
           double a  = k * (x * cd + y * sd) - wt;
           double ca = std::cos(a);
           double h1 = amplitude_ * ca;
-
-          // linear deep water wave pressure scaling factor
-          double e = std::exp(k * z);
           double p = e * h1;
 
           pressure(idx, 0) = p;
@@ -505,6 +501,24 @@ namespace waves
   void WaveSimulationSinusoid::SetPeriod(double value)
   {
     impl_->SetPeriod(value);
+  }
+
+  //////////////////////////////////////////////////
+  Eigen::VectorXd WaveSimulationSinusoid::X() const
+  {
+    return impl_->x_;
+  }
+
+  //////////////////////////////////////////////////
+  Eigen::VectorXd WaveSimulationSinusoid::Y() const
+  {
+    return impl_->y_;
+  }
+
+  //////////////////////////////////////////////////
+  Eigen::VectorXd WaveSimulationSinusoid::Z() const
+  {
+    return impl_->z_;
   }
 
   //////////////////////////////////////////////////

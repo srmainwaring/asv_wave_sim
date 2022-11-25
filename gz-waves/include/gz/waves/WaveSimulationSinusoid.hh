@@ -45,7 +45,8 @@ namespace waves
   public:
     ~WaveSimulationSinusoid();
 
-    WaveSimulationSinusoid(double lx, double ly, int nx, int ny);
+    WaveSimulationSinusoid(double lx, double ly,
+        int nx, int ny);
 
     WaveSimulationSinusoid(double lx, double ly, double lz,
         int nx, int ny, int nz);
@@ -57,6 +58,12 @@ namespace waves
     void SetAmplitude(double value);
 
     void SetPeriod(double value);
+
+    Eigen::VectorXd X() const;
+
+    Eigen::VectorXd Y() const;
+
+    Eigen::VectorXd Z() const;
 
     virtual void SetWindVelocity(double ux, double uy) override;
 
@@ -88,10 +95,7 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-
-    void Z(Eigen::Ref<Eigen::MatrixXd> z) const;
-
-    void ComputePressureAt(
+    virtual void ComputePressureAt(
         Eigen::Ref<Eigen::MatrixXd> pressure,
         int iz);
 

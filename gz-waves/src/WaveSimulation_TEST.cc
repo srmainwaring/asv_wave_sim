@@ -110,6 +110,10 @@ protected:
   const double lx_{10.0};
   const double ly_{5.0};
 
+  // grid depth dimension for pressure
+  int nz_{5};
+  double lz_{50.0};
+
   // wave parameters
   const double amplitude_{2.0};
   const double period_{10.0};
@@ -538,10 +542,6 @@ TEST(OceanTile, WaveSimulationSinusoid)
 // Fluid pressure interpolation
 TEST_F(WaveSimulationSinusoidFixture, PressureAt)
 { 
-  /// \todo move to fixture
-  int nz_ = 5;
-  double lz_ = 50.0;
-
   // pressure sample points (z is below the free surface)
   Eigen::VectorXd zr = Eigen::VectorXd::Zero(nz_);
   Eigen::VectorXd ln_z;
@@ -552,14 +552,13 @@ TEST_F(WaveSimulationSinusoidFixture, PressureAt)
         nz_ - 1, -std::log(lz_), std::log(lz_));
     zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z.array());
   }
-  Eigen::VectorXd z_ = zr.reverse(); 
+  Eigen::VectorXd z = zr.reverse(); 
 
   // debug
   // std::cerr << "nz:     " << nz_ << "\n";
   // std::cerr << "lz:     " << lz_ << "\n";
   // std::cerr << "ln_z:\n " << ln_z.transpose() << "\n";
-  // std::cerr << "z:\n"     << z_.transpose() << "\n";
-  // std::cerr << "\n";
+  // std::cerr << "z:\n"     << z.transpose() << "\n\n";
 
   // time
   double time = 5.0;
@@ -567,10 +566,21 @@ TEST_F(WaveSimulationSinusoidFixture, PressureAt)
   // model
   std::unique_ptr<WaveSimulationSinusoid> wave_sim(
       new WaveSimulationSinusoid(lx_, ly_, lz_, nx_, ny_, nz_));
+  wave_sim->SetUseVectorised(false);
   wave_sim->SetDirection(1.0, 0.0);
   wave_sim->SetAmplitude(amplitude_);
   wave_sim->SetPeriod(period_);
   wave_sim->SetTime(time);
+
+  // verify grid sizes
+  EXPECT_EQ(wave_sim->X().size(), nx_);
+  EXPECT_EQ(wave_sim->Y().size(), ny_);
+  EXPECT_EQ(wave_sim->Z().size(), nz_);
+
+  for (int iz=0; iz<nz_; ++iz)
+  {
+    EXPECT_DOUBLE_EQ(wave_sim->Z()(iz), z(iz));
+  }
 
   // normalised pressure at free surface is the free surface elevation. 
   Eigen::VectorXd eta(nx_ * ny_);
@@ -587,18 +597,18 @@ TEST_F(WaveSimulationSinusoidFixture, PressureAt)
     }
   }
 
-  for (int iz = 0; iz < nz_; ++iz)
+  for (int iz=0; iz<nz_; ++iz)
   {
     // scale factor for depth z 
-    double ez = exp(k_ * z_(iz));
+    double ez = exp(k_ * z(iz));
 
     // pressure at z(iz)
     wave_sim->ComputePressureAt(pressure, iz);
 
     // check
-    for (int ix = 0, idx = 0; ix < nx_; ++ix)
+    for (int ix=0, idx=0; ix<nx_; ++ix)
     {
-      for (int iy = 0; iy < ny_; ++iy, ++idx)
+      for (int iy=0; iy<ny_; ++iy, ++idx)
       {
         double p_test = ez * eta(idx);
         EXPECT_DOUBLE_EQ(pressure(idx), p_test);
