@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-#include "WaveSimulationFFTImpl.hh"
+#include "gz/waves/WaveSimulationSinusoid.hh"
 
 using Eigen::MatrixXd;
 
@@ -34,14 +34,14 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class WaveSimulationFFTElevationPerfFixture: public ::testing::Test
+class WaveSimSinusoidDispPerfFixturePerfFixture: public ::testing::Test
 { 
 public: 
-  virtual ~WaveSimulationFFTElevationPerfFixture()
+  virtual ~WaveSimSinusoidDispPerfFixturePerfFixture()
   {
   }
 
-  WaveSimulationFFTElevationPerfFixture()
+  WaveSimSinusoidDispPerfFixturePerfFixture()
   {
   } 
 
@@ -64,10 +64,10 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationFFTElevationPerfFixture, Elevation)
+TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, Elevation)
 {
-  WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
-  model.ComputeBaseAmplitudes();
+  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(false);
 
   Eigen::VectorXd h(nx_ * ny_);
 
@@ -76,7 +76,6 @@ TEST_F(WaveSimulationFFTElevationPerfFixture, Elevation)
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeCurrentAmplitudes(sim_time);
     model.ComputeElevation(h);
     sim_time += sim_step;
   }
@@ -88,10 +87,33 @@ TEST_F(WaveSimulationFFTElevationPerfFixture, Elevation)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationFFTElevationPerfFixture, DisplacementsAndDeriatives)
+TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, ElevationVectorised)
 {
-  WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
-  model.ComputeBaseAmplitudes();
+  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+
+  Eigen::VectorXd h(nx_ * ny_);
+
+  double sim_time = 0.0;
+  double sim_step = 0.001;
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    model.ComputeElevation(h);
+    sim_time += sim_step;
+  }
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, DisplacementsAndDeriatives)
+{
+  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(false);
 
   Eigen::VectorXd h(nx_ * ny_);
   Eigen::VectorXd dhdx(nx_ * ny_);
@@ -107,7 +129,40 @@ TEST_F(WaveSimulationFFTElevationPerfFixture, DisplacementsAndDeriatives)
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeCurrentAmplitudes(sim_time);
+    model.ComputeElevation(h);
+    model.ComputeElevationDerivatives(dhdx, dhdy);
+    model.ComputeDisplacements(sx, sy);
+    model.ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    sim_time += sim_step;
+  }
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture,
+    DisplacementsAndDeriativesVectorised)
+{
+  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  model.SetUseVectorised(true);
+
+  Eigen::VectorXd h(nx_ * ny_);
+  Eigen::VectorXd dhdx(nx_ * ny_);
+  Eigen::VectorXd dhdy(nx_ * ny_);
+  Eigen::VectorXd sx(nx_ * ny_);
+  Eigen::VectorXd sy(nx_ * ny_);
+  Eigen::VectorXd dsxdx(nx_ * ny_);
+  Eigen::VectorXd dsydy(nx_ * ny_);
+  Eigen::VectorXd dsxdy(nx_ * ny_);
+
+  double sim_time = 0.0;
+  double sim_step = 0.001;
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
     model.ComputeElevation(h);
     model.ComputeElevationDerivatives(dhdx, dhdy);
     model.ComputeDisplacements(sx, sy);

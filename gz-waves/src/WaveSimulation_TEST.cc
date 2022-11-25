@@ -535,6 +535,80 @@ TEST(OceanTile, WaveSimulationSinusoid)
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
+// Fluid pressure interpolation
+TEST_F(WaveSimulationSinusoidFixture, PressureAt)
+{ 
+  /// \todo move to fixture
+  int nz_ = 5;
+  double lz_ = 50.0;
+
+  // pressure sample points (z is below the free surface)
+  Eigen::VectorXd zr = Eigen::VectorXd::Zero(nz_);
+  Eigen::VectorXd ln_z;
+  if (nz_ > 1)
+  {
+    // first element is zero - fill nz - 1 remaining elements
+    ln_z = Eigen::VectorXd::LinSpaced(
+        nz_ - 1, -std::log(lz_), std::log(lz_));
+    zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z.array());
+  }
+  Eigen::VectorXd z_ = zr.reverse(); 
+
+  // debug
+  // std::cerr << "nz:     " << nz_ << "\n";
+  // std::cerr << "lz:     " << lz_ << "\n";
+  // std::cerr << "ln_z:\n " << ln_z.transpose() << "\n";
+  // std::cerr << "z:\n"     << z_.transpose() << "\n";
+  // std::cerr << "\n";
+
+  // time
+  double time = 5.0;
+
+  // model
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, lz_, nx_, ny_, nz_));
+  wave_sim->SetDirection(1.0, 0.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(time);
+
+  // normalised pressure at free surface is the free surface elevation. 
+  Eigen::VectorXd eta(nx_ * ny_);
+  wave_sim->ComputeElevation(eta);
+
+  // pressure at z = 0
+  Eigen::VectorXd pressure(nx_ * ny_);
+  wave_sim->ComputePressureAt(pressure, nz_ - 1);
+  for (int ix = 0, idx = 0; ix < nx_; ++ix)
+  {
+    for (int iy = 0; iy < ny_; ++iy, ++idx)
+    {
+      EXPECT_DOUBLE_EQ(pressure(idx), eta(idx));
+    }
+  }
+
+  for (int iz = 0; iz < nz_; ++iz)
+  {
+    // scale factor for depth z 
+    double ez = exp(k_ * z_(iz));
+
+    // pressure at z(iz)
+    wave_sim->ComputePressureAt(pressure, iz);
+
+    // check
+    for (int ix = 0, idx = 0; ix < nx_; ++ix)
+    {
+      for (int iy = 0; iy < ny_; ++iy, ++idx)
+      {
+        double p_test = ez * eta(idx);
+        EXPECT_DOUBLE_EQ(pressure(idx), p_test);
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Run tests
 
 int main(int argc, char **argv)

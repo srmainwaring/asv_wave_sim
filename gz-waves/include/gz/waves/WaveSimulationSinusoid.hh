@@ -42,52 +42,62 @@ namespace waves
   ///
   class WaveSimulationSinusoid : public WaveSimulation
   {
-    public:
-      ~WaveSimulationSinusoid();
+  public:
+    ~WaveSimulationSinusoid();
 
-      WaveSimulationSinusoid(double lx, double ly, int nx, int ny);
+    WaveSimulationSinusoid(double lx, double ly, int nx, int ny);
 
-      void SetUseVectorised(bool value);
+    WaveSimulationSinusoid(double lx, double ly, double lz,
+        int nx, int ny, int nz);
 
-      void SetDirection(double dir_x, double dir_y);
+    void SetUseVectorised(bool value);
 
-      void SetAmplitude(double value);
+    void SetDirection(double dir_x, double dir_y);
 
-      void SetPeriod(double value);
+    void SetAmplitude(double value);
 
-      virtual void SetWindVelocity(double ux, double uy) override;
+    void SetPeriod(double value);
 
-      virtual void SetTime(double value) override;
+    virtual void SetWindVelocity(double ux, double uy) override;
 
-      virtual void ComputeElevation(
-          Eigen::Ref<Eigen::MatrixXd> h) override;
+    virtual void SetTime(double value) override;
 
-      virtual void ComputeElevationDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> dhdx,
-          Eigen::Ref<Eigen::MatrixXd> dhdy) override;
+    virtual void ComputeElevation(
+        Eigen::Ref<Eigen::MatrixXd> h) override;
 
-      virtual void ComputeDisplacements(
-          Eigen::Ref<Eigen::MatrixXd> sx,
-          Eigen::Ref<Eigen::MatrixXd> sy) override;
+    virtual void ComputeElevationDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> dhdx,
+        Eigen::Ref<Eigen::MatrixXd> dhdy) override;
 
-      virtual void ComputeDisplacementsDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> dsxdx,
-          Eigen::Ref<Eigen::MatrixXd> dsydy,
-          Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
+    virtual void ComputeDisplacements(
+        Eigen::Ref<Eigen::MatrixXd> sx,
+        Eigen::Ref<Eigen::MatrixXd> sy) override;
 
-      virtual void ComputeDisplacementsAndDerivatives(
-          Eigen::Ref<Eigen::MatrixXd> h,
-          Eigen::Ref<Eigen::MatrixXd> sx,
-          Eigen::Ref<Eigen::MatrixXd> sy,
-          Eigen::Ref<Eigen::MatrixXd> dhdx,
-          Eigen::Ref<Eigen::MatrixXd> dhdy,
-          Eigen::Ref<Eigen::MatrixXd> dsxdx,
-          Eigen::Ref<Eigen::MatrixXd> dsydy,
-          Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
+    virtual void ComputeDisplacementsDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> dsydy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-    private:
-      class Impl;
-      std::unique_ptr<Impl> impl_;
+    virtual void ComputeDisplacementsAndDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> h,
+        Eigen::Ref<Eigen::MatrixXd> sx,
+        Eigen::Ref<Eigen::MatrixXd> sy,
+        Eigen::Ref<Eigen::MatrixXd> dhdx,
+        Eigen::Ref<Eigen::MatrixXd> dhdy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> dsydy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
+
+
+    void Z(Eigen::Ref<Eigen::MatrixXd> z) const;
+
+    void ComputePressureAt(
+        Eigen::Ref<Eigen::MatrixXd> pressure,
+        int iz);
+
+  private:
+    class Impl;
+    std::unique_ptr<Impl> impl_;
   };
 }
 }

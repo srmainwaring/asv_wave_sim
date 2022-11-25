@@ -60,6 +60,12 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy) = 0;
+
+    // virtual double ComputePressureAt(int ix, int iy, int iz) {}
+
+    // virtual double ComputePressureAt(
+    //     Eigen::Ref<Eigen::MatrixXd> pressure,
+    //     int iz) {}
   };
 }
 }

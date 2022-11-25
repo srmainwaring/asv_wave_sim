@@ -76,6 +76,10 @@ namespace waves
 
     Impl(double lx, double ly, int nx, int ny);
 
+    Impl(double lx, double ly, double lz, int nx, int ny, int nz);
+
+    void Init();
+
     void SetUseVectorised(bool value);
 
     void SetDirection(double dir_x, double dir_y);
@@ -113,9 +117,14 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy);
-  
+
+    void ComputePressureAt(
+        Eigen::Ref<Eigen::MatrixXd> pressure, int iz);
+
+
     bool use_vectorised_{true};
 
+    // elevation
     int nx_{2};
     int ny_{2};
     double lx_{1.0};
@@ -129,6 +138,13 @@ namespace waves
     Eigen::VectorXd y_;
     Eigen::MatrixXd x_grid_;
     Eigen::MatrixXd y_grid_;
+
+    // pressure
+    double lz_{10.0};
+    int nz_{2};
+
+    Eigen::VectorXd z_;
+
   };
 
   //////////////////////////////////////////////////
@@ -143,6 +159,25 @@ namespace waves
     ny_(ny),
     lx_(lx),
     ly_(ly)
+  {
+    Init();
+  }
+
+  //////////////////////////////////////////////////
+  WaveSimulationSinusoid::Impl::Impl(
+      double lx, double ly, double lz, int nx, int ny, int nz) :
+    nx_(nx),
+    ny_(ny),
+    lx_(lx),
+    ly_(ly),
+    nz_(nz),
+    lz_(lz)
+  {
+    Init();
+  }
+
+ //////////////////////////////////////////////////
+  void WaveSimulationSinusoid::Impl::Init()
   {
     // grid spacing
     double dx = lx_ / nx_;
@@ -163,6 +198,17 @@ namespace waves
     y_grid_ = Eigen::MatrixXd::Zero(nx_, ny_);
     x_grid_.colwise() += x_;
     y_grid_.rowwise() += y_.transpose();
+
+    // pressure sample points (z is below the free surface)
+    Eigen::VectorXd zr = Eigen::VectorXd::Zero(nz_);
+    if (nz_ > 1)
+    {
+      // first element is zero - fill nz - 1 remaining elements
+      Eigen::VectorXd ln_z = Eigen::VectorXd::LinSpaced(
+          nz_ - 1, -std::log(lz_), std::log(lz_));
+      zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z.array());
+    }
+    z_ = zr.reverse();
   }
 
   //////////////////////////////////////////////////
@@ -366,6 +412,58 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  void WaveSimulationSinusoid::Impl::ComputePressureAt(
+    Eigen::Ref<Eigen::MatrixXd> pressure, int iz)
+  {
+    // derived wave properties
+    double w = 2.0 * M_PI / period_;
+    double wt = w * time_;
+    double k = Physics::DeepWaterDispersionToWavenumber(w);
+    double cd = std::cos(wave_angle_);
+    double sd = std::sin(wave_angle_);
+
+    // if (use_vectorised_)
+    // {
+    //   Eigen::MatrixXd a = k * (x_grid_.array() * cd
+    //       + y_grid_.array() * sd) - wt;
+    //   Eigen::MatrixXd ca = Eigen::cos(a.array());
+    //   Eigen::MatrixXd h1 = amplitude_ * ca.array();
+    //   h = h1.reshaped();
+    // }
+    // else
+    {
+      double dx = lx_ / nx_;
+      double dy = ly_ / ny_;
+      double lx_min = - lx_ / 2.0;
+      double ly_min = - ly_ / 2.0;
+
+      // value of z at index ix
+      double z = z_(iz);
+
+      // debug
+      // std::cerr << "iz: " << iz << ", z: " << z << "\n"; 
+
+      for (int iy=0, idx=0; iy<ny_; ++iy)
+      {
+        double y = iy * dy + ly_min;
+        for (int ix=0; ix<nx_; ++ix, ++idx)
+        {
+          double x = ix * dx + lx_min;
+          double a  = k * (x * cd + y * sd) - wt;
+          double ca = std::cos(a);
+          double h1 = amplitude_ * ca;
+
+          // linear deep water wave pressure scaling factor
+          double e = std::exp(k * z);
+          double p = e * h1;
+
+          pressure(idx, 0) = p;
+        }
+      }
+    }
+  }
+
+  //////////////////////////////////////////////////
   //////////////////////////////////////////////////
   WaveSimulationSinusoid::~WaveSimulationSinusoid()
   {
@@ -375,6 +473,13 @@ namespace waves
   WaveSimulationSinusoid::WaveSimulationSinusoid(
       double lx, double ly, int nx, int ny) :
     impl_(new WaveSimulationSinusoid::Impl(lx, ly, nx, ny))
+  {
+  }
+
+  //////////////////////////////////////////////////
+  WaveSimulationSinusoid::WaveSimulationSinusoid(
+      double lx, double ly, double lz, int nx, int ny, int nz) :
+    impl_(new WaveSimulationSinusoid::Impl(lx, ly, lz, nx, ny, nz))
   {
   }
 
@@ -464,5 +569,14 @@ namespace waves
     impl_->ComputeDisplacementsAndDerivatives(
         h, sx, sy, dhdy, dhdx, dsxdx, dsydy, dsxdy);
   }
+
+  //////////////////////////////////////////////////
+  void WaveSimulationSinusoid::ComputePressureAt(
+    Eigen::Ref<Eigen::MatrixXd> pressure,
+    int iz)
+  {
+    impl_->ComputePressureAt(pressure, iz);
+  }
+
 }
 }
