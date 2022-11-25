@@ -67,9 +67,9 @@ TEST(Wavefield, WaveSolver1D)
   {
     const double theta = wp.k * x - wp.omega * t;
     const double s = std::sin(theta);
-    const double c = std::cos(theta);
+    // const double c = std::cos(theta);
     const double px = x - wp.a * s;
-    const double pz = wp.a * c;
+    // const double pz = wp.a * c;
 
     return px;
   };
@@ -78,15 +78,15 @@ TEST(Wavefield, WaveSolver1D)
   {
     const double theta = wp.k * x - wp.omega * t;
     const double s = std::sin(theta);
-    const double c = std::cos(theta);
+    // const double c = std::cos(theta);
     const double f = p - x + wp.a * s;
     return f;
   };
 
-  auto wave_df = [=](auto x, auto p, auto t, auto& wp)
+  auto wave_df = [=](auto x, auto /*p*/, auto t, auto& wp)
   {
     const double theta = wp.k * x - wp.omega * t;
-    const double s = std::sin(theta);
+    // const double s = std::sin(theta);
     const double c = std::cos(theta);
     const double df = wp.a * wp.k * c - 1;
     return df;
@@ -192,7 +192,7 @@ TEST(Wavefield, WaveSolver2D)
     return f;
   };
 
-  auto wave_df = [=](auto x, auto p, auto t, auto& wp)
+  auto wave_df = [=](auto x, auto /*p*/, auto t, auto& wp)
   {
     const double theta = wp.k * x.dot(wp.dir)  - wp.omega * t;
     const double c = std::cos(theta);
@@ -241,7 +241,7 @@ TEST(Wavefield, WaveSolver2D)
   auto p3 = wave(x0, t, wp);
   Eigen::Vector2d p(p3(0), p3(1));
   auto F  = wave_f(x0, p, t, wp);
-  auto J = wave_df(x0, p, t, wp);
+  // auto J = wave_df(x0, p, t, wp);
 
   const double tol = 1E-8;
   const double nmax = 20;
@@ -290,8 +290,8 @@ TEST(Wavefield, NWaveSolver2D)
   auto wave = [=](auto x, auto t, auto& wp)
   {
     Eigen::Vector3d p(x.x(), x.y(), 0.0);
-    const size_t n = wp.a.size();
-    for (auto&& i=0; i<n; ++i)
+    size_t n = wp.a.size();
+    for (size_t i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -311,8 +311,8 @@ TEST(Wavefield, NWaveSolver2D)
   auto wave_f = [=](auto x, auto p, auto t, auto& wp)
   {
     Eigen::Vector2d f(p.x() - x.x(), p.y() - x.y());
-    const size_t n = wp.a.size();
-    for (auto&& i=0; i<n; ++i)
+    size_t n = wp.a.size();
+    for (size_t i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -327,15 +327,15 @@ TEST(Wavefield, NWaveSolver2D)
     return f;
   };
 
-  auto wave_df = [=](auto x, auto p, auto t, auto& wp)
+  auto wave_df = [=](auto x, auto /*p*/, auto t, auto& wp)
   {
     Eigen::Matrix2d J;
     J(0, 0) = -1;
     J(0, 1) =  0;
     J(1, 0) =  0;
     J(1, 1) = -1;
-    const size_t n = wp.a.size();
-    for (auto&& i=0; i<n; ++i)
+    size_t n = wp.a.size();
+    for (size_t i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double c = std::cos(theta);
@@ -386,7 +386,7 @@ TEST(Wavefield, NWaveSolver2D)
   auto p3 = wave(x0, t, wp);
   Eigen::Vector2d p(p3(0), p3(1));
   auto F  = wave_f(x0, p, t, wp);
-  auto J = wave_df(x0, p, t, wp);
+  // auto J = wave_df(x0, p, t, wp);
 
   const double tol = 1E-8;
   const double nmax = 20;
@@ -431,8 +431,8 @@ TEST(Wavefield, NWaveFdFSolver2D)
   auto wave = [=](auto x, auto t, auto& wp)
   {
     Eigen::Vector3d p(x.x(), x.y(), 0.0);
-    const size_t n = wp.a.size();
-    for (auto&& i=0; i<n; ++i)
+    size_t n = wp.a.size();
+    for (size_t i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -457,8 +457,8 @@ TEST(Wavefield, NWaveFdFSolver2D)
     J(0, 1) =  0;
     J(1, 0) =  0;
     J(1, 1) = -1;
-    const size_t n = wp.a.size();
-    for (auto&& i=0; i<n; ++i)
+    size_t n = wp.a.size();
+    for (size_t i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);

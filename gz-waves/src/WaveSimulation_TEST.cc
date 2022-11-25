@@ -134,18 +134,18 @@ TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirX)
 
   // Grid spacing and offset
   double lx_min = - lx_ / 2.0;
-  double ly_min = - ly_ / 2.0;
+  // double ly_min = - ly_ / 2.0;
   double dx = lx_ / nx_;
-  double dy = ly_ / ny_;
+  // double dy = ly_ / ny_;
 
   // Verify heights
   Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->ComputeElevation(h);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    double y = iy * dy + ly_min;
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    // double y = iy * dy + ly_min;
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       double x = ix * dx + lx_min;
       double a = k_ * x - w_ * time;
@@ -184,10 +184,10 @@ TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXY)
   Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->ComputeElevation(h);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
     double y = iy * dy + ly_min;
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       double x = ix * dx + lx_min;
       double a = k_ * (x * cd + y * sd) - wt;
@@ -215,9 +215,9 @@ TEST_F(WaveSimulationSinusoidFixture, TestDisplacementsDirX)
   Eigen::VectorXd sy = Eigen::VectorXd::Zero(nx_ * ny_);
   wave_sim->ComputeDisplacements(sx, sy);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(sx(idx), 0.0);
       EXPECT_DOUBLE_EQ(sy(idx), 0.0);
@@ -250,21 +250,21 @@ TEST_F(WaveSimulationSinusoidFixture, TestEigenMeshGrid)
   x_grid.colwise() += x_v;
   y_grid.rowwise() += y_v.transpose();
 
-  for (size_t ix=0; ix<nx_; ++ix)
+  for (int ix=0; ix<nx_; ++ix)
   {
     double x_test = ix * dx + lx_min;
     EXPECT_DOUBLE_EQ(x_v(ix), x_test);
   }
 
-  for (size_t iy=0; iy<ny_; ++iy)
+  for (int iy=0; iy<ny_; ++iy)
   {
     double y_test = iy * dy + ly_min;
     EXPECT_DOUBLE_EQ(y_v(iy), y_test);
   }
 
-  for (size_t ix=0; ix<nx_; ++ix)
+  for (int ix=0; ix<nx_; ++ix)
   {
-    for (size_t iy=0; iy<ny_; ++iy)
+    for (int iy=0; iy<ny_; ++iy)
     {
       double x_test = ix * dx + lx_min;
       double y_test = iy * dy + ly_min;
@@ -296,9 +296,9 @@ TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXMatrixXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevation(h2);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
     }
@@ -326,9 +326,9 @@ TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXYMatrixXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevation(h2);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
     }
@@ -358,9 +358,9 @@ TEST_F(WaveSimulationSinusoidFixture, TestDisplacmentsMatrixXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeDisplacements(sx2, sy2);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));
       EXPECT_DOUBLE_EQ(sy1(idx), sy2(idx));
@@ -391,9 +391,9 @@ TEST_F(WaveSimulationSinusoidFixture, TestHeightDerivativesMatrixXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->ComputeElevationDerivatives(dhdx2, dhdy2);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(dhdx1(idx), dhdx2(idx));
       EXPECT_DOUBLE_EQ(dhdy1(idx), dhdy2(idx));
@@ -438,9 +438,9 @@ TEST_F(WaveSimulationSinusoidFixture, TestDisplacementsAndDerivativesMatrixXd)
   wave_sim->ComputeDisplacementsAndDerivatives(
     h2, sx2, sy2, dhdx2, dhdy2, dsxdx2, dsydy2, dsxdy2);
 
-  for (size_t iy=0, idx=0; iy<ny_; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<nx_; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
       EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));
@@ -486,10 +486,10 @@ TEST(OceanTile, WaveSimulationSinusoid)
   }
 
   EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
-  for (size_t iy=0; iy<NPlus1; ++iy)
+  for (int iy=0; iy<NPlus1; ++iy)
   {
     double vy = iy * dl + lm;
-    for (size_t ix=0; ix<NPlus1; ++ix)
+    for (int ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
       size_t idx = iy * NPlus1 + ix;
@@ -507,10 +507,10 @@ TEST(OceanTile, WaveSimulationSinusoid)
   }
 
   EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
-  for (size_t iy=0; iy<NPlus1; ++iy)
+  for (int iy=0; iy<NPlus1; ++iy)
   {
     double vy = iy * dl + lm;
-    for (size_t ix=0; ix<NPlus1; ++ix)
+    for (int ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
       size_t idx = iy * NPlus1 + ix;

@@ -153,7 +153,7 @@ void Ogre2OceanGeometry::LoadMesh(gz::common::MeshPtr _mesh)
   }
 
   // Loop over all indices
-  for (auto i=0; i < subMesh->IndexCount(); ++i)
+  for (size_t i=0; i < subMesh->IndexCount(); ++i)
   {
     auto index = subMesh->Index(i);
     auto vertex = subMesh->Vertex(index);
@@ -187,7 +187,7 @@ void Ogre2OceanGeometry::UpdateMesh(gz::common::MeshPtr _mesh)
   }
 
   // Loop over all indices
-  for (auto i=0; i < subMesh->IndexCount(); ++i)
+  for (size_t i=0; i < subMesh->IndexCount(); ++i)
   {
     auto index = subMesh->Index(i);
     auto vertex = subMesh->Vertex(index);

@@ -110,8 +110,8 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumMatrixXd)
 
     double lx = 200.0;
     double ly = 100.0;
-    size_t nx = 32;
-    size_t ny = 16;
+    int nx = 32;
+    int ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -120,11 +120,11 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumMatrixXd)
     Eigen::VectorXd kx_v(nx);
     Eigen::VectorXd ky_v(ny);
 
-    for (size_t i=0; i<nx; ++i)
+    for (int i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (size_t i=0; i<ny; ++i)
+    for (int i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -239,8 +239,8 @@ TEST(WaveSpectrum, ECKVSpectrumMatrixXd)
 
     double lx = 200.0;
     double ly = 100.0;
-    size_t nx = 32;
-    size_t ny = 16;
+    int nx = 32;
+    int ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -249,11 +249,11 @@ TEST(WaveSpectrum, ECKVSpectrumMatrixXd)
     Eigen::VectorXd kx_v(nx);
     Eigen::VectorXd ky_v(ny);
 
-    for (size_t i=0; i<nx; ++i)
+    for (int i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (size_t i=0; i<ny; ++i)
+    for (int i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -295,8 +295,8 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
 
     double lx = 200.0;
     double ly = 100.0;
-    size_t nx = 32;
-    size_t ny = 16;
+    int nx = 32;
+    int ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -305,11 +305,11 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
     Eigen::VectorXd kx_v(nx);
     Eigen::VectorXd ky_v(ny);
 
-    for (size_t i=0; i<nx; ++i)
+    for (int i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (size_t i=0; i<ny; ++i)
+    for (int i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }

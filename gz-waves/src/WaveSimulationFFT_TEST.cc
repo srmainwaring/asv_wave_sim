@@ -373,18 +373,18 @@ TEST_F(WaveSimulationFFTFixture, HermitianTimeNonZeroReference)
     for (int iky=0; iky<ny_; ++iky, ++idx)
     {
       // index for conjugate
-      int cdx = 0;
+      // int cdx = 0;
       int ckx = 0;
       if (ikx != 0)
       {
         ckx = nx_ - ikx;
-        cdx += ckx * ny_;
+        // cdx += ckx * ny_;
       }
       int cky = 0;
       if (iky != 0)
       {
         cky = ny_ - iky;
-        cdx += cky;
+        // cdx += cky;
       }
 
       // look up amplitude and conjugate

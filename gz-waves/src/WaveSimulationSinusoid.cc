@@ -190,7 +190,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetWindVelocity(double _ux, double _uy)
+  void WaveSimulationSinusoid::Impl::SetWindVelocity(
+      double /*_ux*/, double /*_uy*/)
   {
     // @TODO NO IMPLEMENTATION
   }
@@ -226,10 +227,10 @@ namespace waves
       double dy = ly_ / ny_;
       double lx_min = - lx_ / 2.0;
       double ly_min = - ly_ / 2.0;
-      for (size_t iy=0, idx=0; iy<ny_; ++iy)
+      for (int iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy + ly_min;
-        for (size_t ix=0; ix<nx_; ++ix, ++idx)
+        for (int ix=0; ix<nx_; ++ix, ++idx)
         {
           double x = ix * dx + lx_min;
           double a  = k * (x * cd + y * sd) - wt;
@@ -271,10 +272,10 @@ namespace waves
       double dy = ly_ / ny_;
       double lx_min = - lx_ / 2.0;
       double ly_min = - ly_ / 2.0;
-      for (size_t iy=0, idx=0; iy<ny_; ++iy)
+      for (int iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy + ly_min;
-        for (size_t ix=0; ix<nx_; ++ix, ++idx)
+        for (int ix=0; ix<nx_; ++ix, ++idx)
         {
           double x = ix * dx + lx_min;
           double a  = k * (x * cd + y * sd) - wt;
@@ -290,17 +291,17 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+    Eigen::Ref<Eigen::MatrixXd> /*sx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*sy*/)
   {
     // No xy-displacement
   }
 
   //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
   {
     // No xy-displacement
   }
@@ -308,13 +309,13 @@ namespace waves
   //////////////////////////////////////////////////
   void WaveSimulationSinusoid::Impl::ComputeDisplacementsAndDerivatives(
     Eigen::Ref<Eigen::MatrixXd> h,
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy,
+    Eigen::Ref<Eigen::MatrixXd> /*sx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*sy*/,
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
   {
     // derived wave properties
     double w = 2.0 * M_PI / period_;
@@ -344,10 +345,10 @@ namespace waves
       double dy = ly_ / ny_;
       double lx_min = - lx_ / 2.0;
       double ly_min = - ly_ / 2.0;
-      for (size_t iy=0, idx=0; iy<ny_; ++iy)
+      for (int iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy + ly_min;
-        for (size_t ix=0; ix<nx_; ++ix, ++idx)
+        for (int ix=0; ix<nx_; ++ix, ++idx)
         {
           double x = ix * dx + lx_min;
           double a  = k * (x * cd + y * sd) - wt;

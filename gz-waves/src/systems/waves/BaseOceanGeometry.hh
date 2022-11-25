@@ -64,22 +64,22 @@ namespace gz
 
     /////////////////////////////////////////////////
     template <class T>
-    void BaseOceanGeometry<T>::LoadMesh(gz::common::MeshPtr _mesh)
+    void BaseOceanGeometry<T>::LoadMesh(gz::common::MeshPtr /*_mesh*/)
     {
       // no default implementation
     }
 
     /////////////////////////////////////////////////
     template <class T>
-    void BaseOceanGeometry<T>::UpdateMesh(gz::common::MeshPtr _mesh)
+    void BaseOceanGeometry<T>::UpdateMesh(gz::common::MeshPtr /*_mesh*/)
     {
       // no default implementation
     }
 
     /////////////////////////////////////////////////
     template <class T>
-    void BaseOceanGeometry<T>::InitObject(ScenePtr _scene,
-        unsigned int _id, const std::string &_name)
+    void BaseOceanGeometry<T>::InitObject(ScenePtr /*_scene*/,
+        unsigned int /*_id*/, const std::string &/*_name*/)
     {
       // no default implementation
     }

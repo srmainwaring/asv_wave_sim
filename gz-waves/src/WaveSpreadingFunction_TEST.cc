@@ -222,8 +222,8 @@ TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
   { // componentwise operations
     double lx = 200.0;
     double ly = 100.0;
-    size_t nx = 32;
-    size_t ny = 16;
+    int nx = 32;
+    int ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -232,11 +232,11 @@ TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
     Eigen::VectorXd kx_v(nx);
     Eigen::VectorXd ky_v(ny);
 
-    for (size_t i=0; i<nx; ++i)
+    for (int i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (size_t i=0; i<ny; ++i)
+    for (int i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -279,9 +279,9 @@ TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
     EXPECT_EQ(ky.cols(), ny);
 
     // check contents
-    for (size_t i=0; i<nx; ++i)
+    for (int i=0; i<nx; ++i)
     {
-      for (size_t j=0; j<ny; ++j)
+      for (int j=0; j<ny; ++j)
       {
         EXPECT_DOUBLE_EQ(kx(i, j), kx_v(i));
         EXPECT_DOUBLE_EQ(ky(i, j), ky_v(j));
@@ -296,9 +296,9 @@ TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
     );
 
     // check the wave number matrix and angle matrices
-    for (size_t i=0; i<nx; ++i)
+    for (int i=0; i<nx; ++i)
     { 
-      for (size_t j=0; j<ny; ++j)
+      for (int j=0; j<ny; ++j)
       {
         double kxij = kx(i, j);
         double kx2ij = kxij * kxij;
@@ -387,8 +387,8 @@ TEST(WaveSpreadingFunction, ECKVMatrixXd)
   { // Eigen array version
     double lx = 200.0;
     double ly = 100.0;
-    size_t nx = 32;
-    size_t ny = 16;
+    int nx = 32;
+    int ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -397,11 +397,11 @@ TEST(WaveSpreadingFunction, ECKVMatrixXd)
     Eigen::VectorXd kx_v(nx);
     Eigen::VectorXd ky_v(ny);
 
-    for (size_t i=0; i<nx; ++i)
+    for (int i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (size_t i=0; i<ny; ++i)
+    for (int i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }

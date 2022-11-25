@@ -36,8 +36,8 @@ TEST(TriangulatedGrid, Create) {
   // Create
   int n = 2;
   int length = 100.0;
-  std::unique_ptr<TriangulatedGrid> tri_grid 
-    = std::move(TriangulatedGrid::Create(n, length));
+  auto grid = TriangulatedGrid::Create(n, length);
+  std::unique_ptr<TriangulatedGrid> tri_grid = std::move(grid);
   // tri_grid->DebugPrintMesh();
   // tri_grid->DebugPrintTriangulation();
   EXPECT_TRUE(tri_grid->IsValid());
@@ -57,8 +57,8 @@ TEST(TriangulatedGrid, Height) {
   int n = 16;
   int length = 100.0;
   int nplus1 = n + 1;
-  std::unique_ptr<TriangulatedGrid> source 
-    = std::move(TriangulatedGrid::Create(n, length));
+  auto grid = TriangulatedGrid::Create(n, length);
+  std::unique_ptr<TriangulatedGrid> source = std::move(grid);
   EXPECT_TRUE(source->IsValid());
 
   cgal::Point3 query(-5.0, -5.0, 0.0);
@@ -89,8 +89,8 @@ TEST(TriangulatedGrid, Interpolate) {
   int n = 16;
   int length = 100.0;
   int nplus1 = n + 1;
-  std::unique_ptr<TriangulatedGrid> source 
-    = std::move(TriangulatedGrid::Create(n, length));
+  auto grid1 = TriangulatedGrid::Create(n, length);
+  std::unique_ptr<TriangulatedGrid> source = std::move(grid1);
   EXPECT_TRUE(source->IsValid());
 
   // Set points
@@ -108,8 +108,8 @@ TEST(TriangulatedGrid, Interpolate) {
   // source->DebugPrintTriangulation();
 
   // Create patch
-  std::unique_ptr<TriangulatedGrid> patch 
-    = std::move(TriangulatedGrid::Create(2, 10.0));
+  auto grid2 = TriangulatedGrid::Create(2, 10.0);
+  std::unique_ptr<TriangulatedGrid> patch = std::move(grid2);
   // patch->DebugPrintMesh();
   // patch->DebugPrintTriangulation();
   EXPECT_TRUE(patch->IsValid());

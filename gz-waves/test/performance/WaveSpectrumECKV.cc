@@ -60,11 +60,11 @@ public:
     Eigen::VectorXd kx_v(nx_);
     Eigen::VectorXd ky_v(ny_);
 
-    for (size_t i=0; i<nx_; ++i)
+    for (int i=0; i<nx_; ++i)
     {
       kx_v(i) = (i * 2.0 / nx_ - 1.0) * kx_nyquist;
     }
-    for (size_t i=0; i<ny_; ++i)
+    for (int i=0; i<ny_; ++i)
     {
       ky_v(i) = (i * 2.0 / ny_ - 1.0) * ky_nyquist;
     }
