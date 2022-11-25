@@ -215,7 +215,7 @@ void Ogre2OceanVisual::LoadOceanTile(waves::visual::OceanTilePtr _oceanTile)
   }
 
   // Add points and texture coordinates for each face
-  for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
+  for (size_t i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
   {
     auto face = _oceanTile->Face(i);
     // positions
@@ -236,7 +236,7 @@ void Ogre2OceanVisual::LoadOceanTile(waves::visual::OceanTilePtr _oceanTile)
 void Ogre2OceanVisual::UpdateOceanTile(waves::visual::OceanTilePtr _oceanTile)
 {
   // Update positions and texture coordinates for each face
-  for (auto i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
+  for (size_t i=0, v=0; i < _oceanTile->FaceCount(); i++, v+=3)
   {
     auto face = _oceanTile->Face(i);
     // positions
@@ -288,7 +288,7 @@ void Ogre2OceanVisual::LoadMesh(gz::common::MeshPtr _mesh)
   }
 
   // Loop over all indices
-  for (auto i=0; i < subMesh->IndexCount(); ++i)
+  for (size_t i=0; i < subMesh->IndexCount(); ++i)
   {
     auto index = subMesh->Index(i);
     auto vertex = subMesh->Vertex(index);
@@ -322,7 +322,7 @@ void Ogre2OceanVisual::UpdateMesh(gz::common::MeshPtr _mesh)
   }
 
   // Loop over all indices
-  for (auto i=0; i < subMesh->IndexCount(); ++i)
+  for (size_t i=0; i < subMesh->IndexCount(); ++i)
   {
     auto index = subMesh->Index(i);
     auto vertex = subMesh->Vertex(index);

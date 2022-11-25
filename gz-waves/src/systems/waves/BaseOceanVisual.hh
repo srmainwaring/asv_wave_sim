@@ -137,7 +137,7 @@ namespace gz
     //////////////////////////////////////////////////
     template <class T>
     void BaseOceanVisual<T>::LoadOceanTile(
-      waves::visual::OceanTilePtr _oceanTile)
+      waves::visual::OceanTilePtr /*_oceanTile*/)
     {
       // no default implementation
     }
@@ -145,29 +145,29 @@ namespace gz
     //////////////////////////////////////////////////
     template <class T>
     void BaseOceanVisual<T>::UpdateOceanTile(
-      waves::visual::OceanTilePtr _oceanTile)
+      waves::visual::OceanTilePtr /*_oceanTile*/)
     {
       // no default implementation
     }
 
     //////////////////////////////////////////////////
     template <class T>
-    void BaseOceanVisual<T>::LoadMesh(gz::common::MeshPtr _mesh)
+    void BaseOceanVisual<T>::LoadMesh(gz::common::MeshPtr /*_mesh*/)
     {
       // no default implementation
     }
 
     //////////////////////////////////////////////////
     template <class T>
-    void BaseOceanVisual<T>::UpdateMesh(gz::common::MeshPtr _mesh)
+    void BaseOceanVisual<T>::UpdateMesh(gz::common::MeshPtr /*_mesh*/)
     {
       // no default implementation
     }
 
     //////////////////////////////////////////////////
     template <class T>
-    void BaseOceanVisual<T>::InitObject(ScenePtr _scene,
-        unsigned int _id, const std::string &_name)
+    void BaseOceanVisual<T>::InitObject(ScenePtr /*_scene*/,
+        unsigned int /*_id*/, const std::string &/*_name*/)
     {
       // no default implementation
     }

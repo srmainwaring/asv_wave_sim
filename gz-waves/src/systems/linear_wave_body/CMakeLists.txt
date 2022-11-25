@@ -1,5 +1,5 @@
 find_package(HDF5 REQUIRED COMPONENTS CXX HL)
-find_package(HighFive REQUIRED)
+# find_package(HighFive REQUIRED)
 
 gz_add_system(linear-wave-body
   SOURCES
@@ -10,4 +10,4 @@ gz_add_system(linear-wave-body
     Eigen3::Eigen
     HighFive
     hdf5::hdf5_cpp
- )
+)

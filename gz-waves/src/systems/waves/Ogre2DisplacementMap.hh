@@ -26,8 +26,11 @@
 #include <gz/rendering/ogre2.hh>
 #include <gz/rendering/ogre2/Export.hh>
 
+#include <Eigen/Dense>
+
 #include <memory>
-#include <vector>
+
+using Eigen::MatrixXf;
 
 namespace gz
 {
@@ -50,14 +53,14 @@ namespace gz
       public: virtual void InitTextures() override;
 
       public: virtual void UpdateTextures(
-        const std::vector<double> &mHeights,
-        const std::vector<double> &mDhdx,
-        const std::vector<double> &mDhdy,
-        const std::vector<double> &mDisplacementsX,
-        const std::vector<double> &mDisplacementsY,
-        const std::vector<double> &mDxdx,
-        const std::vector<double> &mDydy,
-        const std::vector<double> &mDxdy
+        const Eigen::Ref<const Eigen::MatrixXd> &mHeights,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDhdx,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDhdy,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsX,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsY,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDxdx,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDydy,
+        const Eigen::Ref<const Eigen::MatrixXd> &mDxdy
       ) override;
 
       private: ScenePtr scene;

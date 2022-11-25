@@ -19,11 +19,11 @@
 #include "gz/waves/WavefieldSampler.hh"
 #include "gz/waves/WaveParameters.hh"
 #include "gz/waves/WaveSimulation.hh"
-#include "gz/waves/WaveSimulationFFTW.hh"
-#include "gz/waves/WaveSimulationOpenCL.hh"
 #include "gz/waves/WaveSimulationSinusoid.hh"
 #include "gz/waves/WaveSimulationTrochoid.hh"
 #include "gz/waves/WaveSpectrum.hh"
+
+#include <Eigen/Dense>
 
 #include <gtest/gtest.h>
 
@@ -34,7 +34,10 @@
 using namespace gz;
 using namespace waves;
 
-///////////////////////////////////////////////////////////////////////////////
+using Eigen::MatrixXd;
+
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Utilities
 
 std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
@@ -44,80 +47,50 @@ std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
   return os;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Define tests
-
 #if 0
-TEST(WaveSimulation, WaveSimulationOpenCL)
-{
-  // Configure the wave spectrum.
-  std::unique_ptr<WaveSpectrum> waveSpectrum(new WaveSpectrum());
-  waveSpectrum->SetWindVelocity(20.0, 20.0);
-  
-  // Create the wave simulation.
-  int N = 4;
-  double L = 4.0;
-  std::unique_ptr<WaveSimulation> waveSim(new WaveSimulationOpenCL(N, L));
-
-  // Compute the initial height field.
-  std::vector<double> h;
-  waveSim->SetTime(0.0);
-  waveSim->ComputeHeights(h);
-
-  // Wave heights should be zero. 
-  // std::cout << h << std::endl;
-
-  waveSim->SetWindVelocity(20.0, 20.0);
-  waveSim->SetTime(0.0);
-  waveSim->ComputeHeights(h);
-
-  // Wave heights should be non-zero. 
-  // std::cout << h << std::endl;
-
-  EXPECT_EQ(h.size(), N*N);
-  // EXPECT_DOUBLE_EQ(1.0, 1.0);
-}
-#endif
-
 TEST(WaveSimulation, WaveSimulationTrochoid)
 {
   // Configure the wave parameters.
-  std::shared_ptr<WaveParameters> waveParams(new WaveParameters());
-  // waveParams->;
+  std::shared_ptr<WaveParameters> wave_params(new WaveParameters());
   
   // Create the wave simulation.
-  int N = 4;
-  double L = 4.0;
-  std::unique_ptr<WaveSimulation> waveSim(new WaveSimulationTrochoid(N, L, waveParams));
+  int nx = 4;
+  int ny = 4;
+  double lx = 4.0;
+  double ly = 4.0;
+  std::unique_ptr<WaveSimulation> wave_sim(
+      new WaveSimulationTrochoid(nx, lx, wave_params));
 
   // Compute the initial height field.
-  std::vector<double> h;
-  waveSim->SetTime(0.0);
-  waveSim->ComputeHeights(h);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx * ny);
+  wave_sim->SetTime(0.0);
+  wave_sim->ComputeElevation(h);
 
   // Wave heights should be zero. 
-  // std::cout << h << std::endl;
+  // std::cerr << h << std::endl;
 
-
-  waveParams->SetNumber(3);
-  waveParams->SetAngle(0.6);
-  waveParams->SetScale(2.0);
-  waveParams->SetSteepness(1.0);
-  waveParams->SetAmplitude(1.0);
-  waveParams->SetPeriod(8.0);
-  waveParams->SetDirection(gz::math::Vector2d(1.0, 0.0));
+  wave_params->SetNumber(3);
+  wave_params->SetAngle(0.6);
+  wave_params->SetScale(2.0);
+  wave_params->SetSteepness(1.0);
+  wave_params->SetAmplitude(1.0);
+  wave_params->SetPeriod(8.0);
+  wave_params->SetDirection(gz::math::Vector2d(1.0, 0.0));
   
-  waveSim->SetTime(0.0);
-  waveSim->ComputeHeights(h);
+  wave_sim->SetTime(0.0);
+  wave_sim->ComputeElevation(h);
 
   // Wave heights should be non-zero. 
-  // std::cout << h << std::endl;
+  // std::cerr << h << std::endl;
 
-  EXPECT_EQ(h.size(), N*N);
+  EXPECT_EQ(h.size(), nx * ny);
 }
-
-
-class WaveSimulationSinusoidTestSuite : public ::testing::Test
+#endif
+//////////////////////////////////////////////////
+class WaveSimulationSinusoidFixture : public ::testing::Test
 {
 protected:
   void SetUp() override
@@ -128,119 +101,360 @@ protected:
   {
   }
 
-  // Grid dimensions
-  const int N{8};
-  const int N2{N*N};
-  const double L{10.0};
+  // simulation parameters
+  const double gravity_{9.81};
 
-  // Parameters
-  const double amplitude{2.0};
-  const double period{10.0};
+  // grid dimensions
+  const int nx_{8};
+  const int ny_{4};
+  const double lx_{10.0};
+  const double ly_{5.0};
 
-  // Wave spectrum
-  const double w{2.0 * M_PI / period};
-  const double k{w * w / 9.8};
+  // wave parameters
+  const double amplitude_{2.0};
+  const double period_{10.0};
+
+  // derived parameters
+  const double w_{2.0 * M_PI / period_};
+  const double k_{w_ * w_ / gravity_};
 };
 
-TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirX)
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirX)
 { 
   double time = 5.0;
 
   // Wave simulation
-  std::unique_ptr<WaveSimulationSinusoid> waveSim(
-      new WaveSimulationSinusoid(N, L));
-  waveSim->SetDirection(1.0, 0.0);
-  waveSim->SetAmplitude(amplitude);
-  waveSim->SetPeriod(period);
-  waveSim->SetTime(time);
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(1.0, 0.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(time);
 
   // Grid spacing and offset
-  double lm = - L / 2.0;
-  double dl = L / N;
+  double lx_min = - lx_ / 2.0;
+  // double ly_min = - ly_ / 2.0;
+  double dx = lx_ / nx_;
+  // double dy = ly_ / ny_;
 
   // Verify heights
-  std::vector<double> h(N2);
-  waveSim->ComputeHeights(h);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->ComputeElevation(h);
 
-  for (size_t iy=0, idx=0; iy<N; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    double y = iy * dl + lm;
-    for (size_t ix=0; ix<N; ++ix, ++idx)
+    // double y = iy * dy + ly_min;
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
-      double x = ix * dl + lm;
-      double a = k * x - w * time;
+      double x = ix * dx + lx_min;
+      double a = k_ * x - w_ * time;
       double c = std::cos(a);
-      double hh = amplitude * c;
+      double h_test = amplitude_ * c;
       
-      EXPECT_DOUBLE_EQ(h[idx], hh);
+      EXPECT_DOUBLE_EQ(h(idx), h_test);
     }
   }
 }
 
-TEST_F(WaveSimulationSinusoidTestSuite, TestHeightsDirXY)
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXY)
 { 
   double time = 5.0;
 
   // Wave simulation
-  std::unique_ptr<WaveSimulationSinusoid> waveSim(
-      new WaveSimulationSinusoid(N, L));
-  waveSim->SetDirection(2.0, -1.0);
-  waveSim->SetAmplitude(amplitude);
-  waveSim->SetPeriod(period);
-  waveSim->SetTime(time);
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(2.0, -1.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(time);
 
   // Grid spacing and offset
-  double lm = - L / 2.0;
-  double dl = L / N;
-  double wt = w * time;
+  double lx_min = - lx_ / 2.0;
+  double ly_min = - ly_ / 2.0;
+  double dx = lx_ / nx_;
+  double dy = ly_ / ny_;
+  double wt = w_ * time;
   double theta = std::atan2(-1.0, 2.0);
   double cd = std::cos(theta);
   double sd = std::sin(theta);
 
   // Verify heights
-  std::vector<double> h(N2);
-  waveSim->ComputeHeights(h);
+  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->ComputeElevation(h);
 
-  for (size_t iy=0, idx=0; iy<N; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    double y = iy * dl + lm;
-    for (size_t ix=0; ix<N; ++ix, ++idx)
+    double y = iy * dy + ly_min;
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
-      double x = ix * dl + lm;
-      double a = k * (x * cd + y * sd) - wt;
+      double x = ix * dx + lx_min;
+      double a = k_ * (x * cd + y * sd) - wt;
       double c = std::cos(a);
-      double hh = amplitude * c;
+      double h_test = amplitude_ * c;
       
-      EXPECT_DOUBLE_EQ(h[idx], hh);
+      EXPECT_DOUBLE_EQ(h(idx), h_test);
     }
   }
 }
 
-TEST_F(WaveSimulationSinusoidTestSuite, TestDisplacementsDirX)
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestDisplacementsDirX)
 {
   // Wave simulation
-  std::unique_ptr<WaveSimulationSinusoid> waveSim(
-      new WaveSimulationSinusoid(N, L));
-  waveSim->SetDirection(1.0, 0.0);
-  waveSim->SetAmplitude(amplitude);
-  waveSim->SetPeriod(period);
-  waveSim->SetTime(5.0);
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(1.0, 0.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(5.0);
 
   // Verify displacements (expect zero for sinusoid waves)
-  std::vector<double> sx(N2);
-  std::vector<double> sy(N2);
-  waveSim->ComputeDisplacements(sx, sy);
+  Eigen::VectorXd sx = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->ComputeDisplacements(sx, sy);
 
-  for (size_t iy=0, idx=0; iy<N; ++iy)
+  for (int iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (size_t ix=0; ix<N; ++ix, ++idx)
+    for (int ix=0; ix<nx_; ++ix, ++idx)
     {
-      EXPECT_DOUBLE_EQ(sx[idx], 0.0);
-      EXPECT_DOUBLE_EQ(sy[idx], 0.0);
+      EXPECT_DOUBLE_EQ(sx(idx), 0.0);
+      EXPECT_DOUBLE_EQ(sy(idx), 0.0);
     }
   }
 }
 
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestEigenMeshGrid)
+{
+  // check the behaviour of Eigen meshgrid
+
+  // grid spacing
+  double dx = lx_ / nx_;
+  double dy = ly_ / ny_;
+
+  // create coordinate grids
+  double lx_min = - lx_ / 2.0;
+  double lx_max =   lx_ / 2.0;
+  double ly_min = - ly_ / 2.0;
+  double ly_max =   ly_ / 2.0;
+
+  // linspaced is on closed interval (unlike Python which is open to right)
+  Eigen::VectorXd x_v = Eigen::VectorXd::LinSpaced(nx_, lx_min, lx_max - dx);
+  Eigen::VectorXd y_v = Eigen::VectorXd::LinSpaced(ny_, ly_min, ly_max - dy);
+
+  // broadcast to matrices (aka meshgrid)
+  Eigen::MatrixXd x_grid = Eigen::MatrixXd::Zero(nx_, ny_);
+  Eigen::MatrixXd y_grid = Eigen::MatrixXd::Zero(nx_, ny_);
+  x_grid.colwise() += x_v;
+  y_grid.rowwise() += y_v.transpose();
+
+  for (int ix=0; ix<nx_; ++ix)
+  {
+    double x_test = ix * dx + lx_min;
+    EXPECT_DOUBLE_EQ(x_v(ix), x_test);
+  }
+
+  for (int iy=0; iy<ny_; ++iy)
+  {
+    double y_test = iy * dy + ly_min;
+    EXPECT_DOUBLE_EQ(y_v(iy), y_test);
+  }
+
+  for (int ix=0; ix<nx_; ++ix)
+  {
+    for (int iy=0; iy<ny_; ++iy)
+    {
+      double x_test = ix * dx + lx_min;
+      double y_test = iy * dy + ly_min;
+
+      EXPECT_DOUBLE_EQ(x_grid(ix, iy), x_test);
+      EXPECT_DOUBLE_EQ(y_grid(ix, iy), y_test);
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXMatrixXd)
+{ 
+  // Wave simulation
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(1.0, 0.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(5.0);
+  
+  // array
+  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(true);
+  wave_sim->ComputeElevation(h1);
+ 
+  // non-array
+  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(false);
+  wave_sim->ComputeElevation(h2);
+
+  for (int iy=0, idx=0; iy<ny_; ++iy)
+  {
+    for (int ix=0; ix<nx_; ++ix, ++idx)
+    {
+      EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestHeightsDirXYMatrixXd)
+{ 
+  // Wave simulation
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(2.0, -1.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(5.0);
+  
+  // array
+  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(true);
+  wave_sim->ComputeElevation(h1);
+ 
+  // non-array
+  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(false);
+  wave_sim->ComputeElevation(h2);
+
+  for (int iy=0, idx=0; iy<ny_; ++iy)
+  {
+    for (int ix=0; ix<nx_; ++ix, ++idx)
+    {
+      EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestDisplacmentsMatrixXd)
+{ 
+  // Wave simulation
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(2.0, -1.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(5.0);
+  
+  // array
+  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(true);
+  wave_sim->ComputeDisplacements(sx1, sy1);
+ 
+  // non-array
+  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(false);
+  wave_sim->ComputeDisplacements(sx2, sy2);
+
+  for (int iy=0, idx=0; iy<ny_; ++iy)
+  {
+    for (int ix=0; ix<nx_; ++ix, ++idx)
+    {
+      EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));
+      EXPECT_DOUBLE_EQ(sy1(idx), sy2(idx));
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestHeightDerivativesMatrixXd)
+{ 
+  // Wave simulation
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(2.0, -1.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(5.0);
+  
+  // array
+  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(true);
+  wave_sim->ComputeElevationDerivatives(dhdx1, dhdy1);
+ 
+  // non-array
+  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(false);
+  wave_sim->ComputeElevationDerivatives(dhdx2, dhdy2);
+
+  for (int iy=0, idx=0; iy<ny_; ++iy)
+  {
+    for (int ix=0; ix<nx_; ++ix, ++idx)
+    {
+      EXPECT_DOUBLE_EQ(dhdx1(idx), dhdx2(idx));
+      EXPECT_DOUBLE_EQ(dhdy1(idx), dhdy2(idx));
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+TEST_F(WaveSimulationSinusoidFixture, TestDisplacementsAndDerivativesMatrixXd)
+{ 
+  // Wave simulation
+  std::unique_ptr<WaveSimulationSinusoid> wave_sim(
+      new WaveSimulationSinusoid(lx_, ly_, nx_, ny_));
+  wave_sim->SetDirection(2.0, -1.0);
+  wave_sim->SetAmplitude(amplitude_);
+  wave_sim->SetPeriod(period_);
+  wave_sim->SetTime(5.0);
+  
+  // array
+  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsydy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(true);
+  wave_sim->ComputeDisplacementsAndDerivatives(
+    h1, sx1, sy1, dhdx1, dhdy1, dsxdx1, dsydy1, dsxdy1);
+ 
+  // non-array
+  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsydy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::VectorXd dsxdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  wave_sim->SetUseVectorised(false);
+  wave_sim->ComputeDisplacementsAndDerivatives(
+    h2, sx2, sy2, dhdx2, dhdy2, dsxdx2, dsydy2, dsxdy2);
+
+  for (int iy=0, idx=0; iy<ny_; ++iy)
+  {
+    for (int ix=0; ix<nx_; ++ix, ++idx)
+    {
+      EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
+      EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));
+      EXPECT_DOUBLE_EQ(sy1(idx), sy2(idx));
+      EXPECT_DOUBLE_EQ(dhdx1(idx), dhdx2(idx));
+      EXPECT_DOUBLE_EQ(dhdy1(idx), dhdy2(idx));
+      EXPECT_DOUBLE_EQ(dsxdx1(idx), dsxdx2(idx));
+      EXPECT_DOUBLE_EQ(dsydy1(idx), dsydy2(idx));
+      EXPECT_DOUBLE_EQ(dsxdy1(idx), dsxdy2(idx));
+    }
+  }
+}
+
+//////////////////////////////////////////////////
 // This test fails because it assumes the OceanTile is using 
 // a WaveSimulationSinusoid (which it isnt)
 #if 0
@@ -272,10 +486,10 @@ TEST(OceanTile, WaveSimulationSinusoid)
   }
 
   EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
-  for (size_t iy=0; iy<NPlus1; ++iy)
+  for (int iy=0; iy<NPlus1; ++iy)
   {
     double vy = iy * dl + lm;
-    for (size_t ix=0; ix<NPlus1; ++ix)
+    for (int ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
       size_t idx = iy * NPlus1 + ix;
@@ -293,10 +507,10 @@ TEST(OceanTile, WaveSimulationSinusoid)
   }
 
   EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
-  for (size_t iy=0; iy<NPlus1; ++iy)
+  for (int iy=0; iy<NPlus1; ++iy)
   {
     double vy = iy * dl + lm;
-    for (size_t ix=0; ix<NPlus1; ++ix)
+    for (int ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
       size_t idx = iy * NPlus1 + ix;
@@ -319,7 +533,8 @@ TEST(OceanTile, WaveSimulationSinusoid)
 }
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Run tests
 
 int main(int argc, char **argv)

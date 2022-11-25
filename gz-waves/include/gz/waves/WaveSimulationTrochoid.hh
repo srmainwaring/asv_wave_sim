@@ -16,61 +16,64 @@
 #ifndef GZ_WAVES_WAVESIMULATIONTROCHOID_HH_
 #define GZ_WAVES_WAVESIMULATIONTROCHOID_HH_
 
+#include <memory>
+
+#include <Eigen/Dense>
+
 #include "WaveSimulation.hh"
 
-#include <memory>
-#include <vector>
+using Eigen::MatrixXd;
 
 namespace gz
 {
 namespace waves
 {
-
   class WaveParameters;
   class WaveSimulationTrochoidImpl;
 
   class WaveSimulationTrochoid : public WaveSimulation
   {
-    public: virtual ~WaveSimulationTrochoid();
+  public:
+    virtual ~WaveSimulationTrochoid();
 
-    public: WaveSimulationTrochoid(
-      int _N,
-      double _L,
-      std::shared_ptr<WaveParameters> _params);
+    WaveSimulationTrochoid(
+      int nx,
+      double lx,
+      std::shared_ptr<WaveParameters> params);
 
-    public: virtual void SetWindVelocity(double _ux, double _uy) override;
+    virtual void SetWindVelocity(double ux, double uy) override;
 
-    public: virtual void SetTime(double _time) override;
+    virtual void SetTime(double time) override;
 
-    public: virtual void ComputeHeights(
-      std::vector<double>& _h) override;
+    virtual void ComputeElevation(
+        Eigen::Ref<Eigen::MatrixXd> h) override;
 
-    public: virtual void ComputeHeightDerivatives(
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy) override;
+    virtual void ComputeElevationDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> dhdx,
+        Eigen::Ref<Eigen::MatrixXd> dhdy) override;
 
-    public: virtual void ComputeDisplacements(
-      std::vector<double>& _sx,
-      std::vector<double>& _sy) override;
+    virtual void ComputeDisplacements(
+        Eigen::Ref<Eigen::MatrixXd> sx,
+        Eigen::Ref<Eigen::MatrixXd> sy) override;
 
-    public: virtual void ComputeDisplacementDerivatives(
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) override;
+    virtual void ComputeDisplacementsDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> dsydy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-    public: virtual void ComputeDisplacementsAndDerivatives(
-      std::vector<double>& _h,
-      std::vector<double>& _sx,
-      std::vector<double>& _sy,
-      std::vector<double>& _dhdx,
-      std::vector<double>& _dhdy,
-      std::vector<double>& _dsxdx,
-      std::vector<double>& _dsydy,
-      std::vector<double>& _dsxdy) override;
+    virtual void ComputeDisplacementsAndDerivatives(
+        Eigen::Ref<Eigen::MatrixXd> h,
+        Eigen::Ref<Eigen::MatrixXd> sx,
+        Eigen::Ref<Eigen::MatrixXd> sy,
+        Eigen::Ref<Eigen::MatrixXd> dhdx,
+        Eigen::Ref<Eigen::MatrixXd> dhdy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> dsydy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-    private: std::unique_ptr<WaveSimulationTrochoidImpl> impl;
+  private:
+    std::unique_ptr<WaveSimulationTrochoidImpl> impl_;
   };
-
 }
 }
 

@@ -108,7 +108,7 @@ WavesModel::~WavesModel()
 void WavesModel::Configure(const Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     EntityComponentManager &_ecm,
-    EventManager &_eventMgr)
+    EventManager &/*_eventMgr*/)
 {
   GZ_PROFILE("WavesModel::Configure");
 
@@ -232,7 +232,7 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
 
 /////////////////////////////////////////////////
 void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
-    EntityComponentManager &_ecm)
+    EntityComponentManager &/*_ecm*/)
 {
   if (!this->isStatic)
   {  

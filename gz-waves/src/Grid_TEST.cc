@@ -106,10 +106,10 @@ TEST(Grid, FindIntersectionIndex)
   std::array<size_t, 2> cellCount = { 4, 2 };
   Grid grid(size, cellCount);
 
-  double Lx = size[0];
-  double Ly = size[1];
-  size_t nx = cellCount[0];
-  size_t ny = cellCount[1];
+  // double Lx = size[0];
+  // double Ly = size[1];
+  // size_t nx = cellCount[0];
+  // size_t ny = cellCount[1];
 
   // 16 cases to check...
   { // cell(0, 0)
@@ -281,10 +281,10 @@ TEST(Grid, FindIntersectionTriangle)
   std::array<size_t, 2> cellCount = { 4, 2 };
   Grid grid(size, cellCount);
 
-  double Lx = size[0];
-  double Ly = size[1];
-  size_t nx = cellCount[0];
-  size_t ny = cellCount[1];
+  // double Lx = size[0];
+  // double Ly = size[1];
+  // size_t nx = cellCount[0];
+  // size_t ny = cellCount[1];
 
   std::cout << std::endl;
 
@@ -361,10 +361,10 @@ TEST(Grid, FindIntersectionCell)
   std::array<size_t, 2> cellCount = { 4, 2 };
   Grid grid(size, cellCount);
 
-  double Lx = size[0];
-  double Ly = size[1];
-  size_t nx = cellCount[0];
-  size_t ny = cellCount[1];
+  // double Lx = size[0];
+  // double Ly = size[1];
+  // size_t nx = cellCount[0];
+  // size_t ny = cellCount[1];
 
   std::cout << std::endl;
 
@@ -405,10 +405,10 @@ TEST(Grid, FindIntersectionGrid)
   std::array<size_t, 2> cellCount = { 4, 2 };
   Grid grid(size, cellCount);
 
-  double Lx = size[0];
-  double Ly = size[1];
-  size_t nx = cellCount[0];
-  size_t ny = cellCount[1];
+  // double Lx = size[0];
+  // double Ly = size[1];
+  // size_t nx = cellCount[0];
+  // size_t ny = cellCount[1];
 
   std::cout << std::endl;
 

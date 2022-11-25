@@ -51,7 +51,7 @@ T SdfParam(const sdf::Element& _sdf, const std::string &_paramName, const T _def
 
 /// \brief Template function for extracting a value from a parameter message.
 template <typename T>
-T MsgParamGetValue(const gz::msgs::Param& _msg)
+T MsgParamGetValue(const gz::msgs::Param& /*_msg*/)
 {
   gzwarn << "Using default template for MsgParamGetValue" << std::endl;
   return T();  

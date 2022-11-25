@@ -27,9 +27,9 @@ Ogre2DisplacementMap::Ogre2DisplacementMap(
   uint64_t _entity,
   uint32_t _width,
   uint32_t _height) :
-  entity(_entity),
   scene(_scene),
   material(_material),
+  entity(_entity),
   width(_width),
   height(_height)
 {
@@ -286,14 +286,14 @@ void Ogre2DisplacementMap::InitTextures()
 
 //////////////////////////////////////////////////
 void Ogre2DisplacementMap::UpdateTextures(
-  const std::vector<double> &mHeights,
-  const std::vector<double> &mDhdx,
-  const std::vector<double> &mDhdy,
-  const std::vector<double> &mDisplacementsX,
-  const std::vector<double> &mDisplacementsY,
-  const std::vector<double> &mDxdx,
-  const std::vector<double> &mDydy,
-  const std::vector<double> &mDxdy
+  const Eigen::Ref<const Eigen::MatrixXd> &mHeights,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDhdx,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDhdy,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsX,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsY,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDxdx,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDydy,
+  const Eigen::Ref<const Eigen::MatrixXd> &mDxdy
 )
 {
   gz::rendering::Ogre2ScenePtr ogre2Scene =
@@ -306,37 +306,37 @@ void Ogre2DisplacementMap::UpdateTextures(
       ogre2SceneManager->getDestinationRenderSystem()->getTextureGpuManager();
 
   // update the image data
-  uint32_t width  = mHeightMapImage->getWidth();
-  uint32_t height = mHeightMapImage->getHeight();
+  uint32_t mapWidth  = mHeightMapImage->getWidth();
+  uint32_t mapHeight = mHeightMapImage->getHeight();
 
   Ogre::TextureBox heightBox  = mHeightMapImage->getData(0);
   Ogre::TextureBox normalBox  = mNormalMapImage->getData(0);
   Ogre::TextureBox tangentBox = mTangentMapImage->getData(0);
 
-  for (uint32_t iv=0; iv < height; ++iv)
+  for (uint32_t iv=0; iv < mapHeight; ++iv)
   {
       /// \todo: coordinates are flipped in the vertex shader
       // texture index to vertex index
-      int32_t iy = /*height - 1 - */ iv;
-      for (uint32_t iu=0; iu < width; ++iu)
+      int32_t iy = /*mapHeight - 1 - */ iv;
+      for (uint32_t iu=0; iu < mapWidth; ++iu)
       {
           // texture index to vertex index
-          int32_t ix = /* width - 1 - */ iu;
+          int32_t ix = /* mapWidth - 1 - */ iu;
 
           float Dx{0.0}, Dy{0.0}, Dz{0.0};
           float Tx{1.0}, Ty{0.0}, Tz{0.0};
           float Bx{0.0}, By{1.0}, Bz{0.0};
           float Nx{0.0}, Ny{0.0}, Nz{1.0};
 
-          int32_t idx = iy * width + ix;
-          double h  = mHeights[idx];
-          double sx = mDisplacementsX[idx];
-          double sy = mDisplacementsY[idx];
-          double dhdx  = mDhdx[idx]; 
-          double dhdy  = mDhdy[idx]; 
-          double dsxdx = mDxdx[idx]; 
-          double dsydy = mDydy[idx]; 
-          double dsxdy = mDxdy[idx]; 
+          int32_t idx = iy * mapWidth + ix;
+          double h  = mHeights(idx, 0);
+          double sx = mDisplacementsX(idx, 0);
+          double sy = mDisplacementsY(idx, 0);
+          double dhdx  = mDhdx(idx, 0); 
+          double dhdy  = mDhdy(idx, 0); 
+          double dsxdx = mDxdx(idx, 0); 
+          double dsydy = mDydy(idx, 0); 
+          double dsxdy = mDxdy(idx, 0); 
 
           // vertex displacements
           Dx += sy;
