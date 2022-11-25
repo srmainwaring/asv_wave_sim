@@ -732,15 +732,11 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(
     size_t v_idx, size_t w_idx)
 {
   // 1. Update vertex
-  double h  = mHeights[w_idx];
-  double sx = mDisplacementsX[w_idx];
-  double sy = mDisplacementsY[w_idx];
+  // double h  = mHeights[w_idx];
+  // double sx = mDisplacementsX[w_idx];
+  // double sy = mDisplacementsY[w_idx];
 
-  auto&& v0 = mVertices0[v_idx];
-  auto&& v  = mVertices[v_idx] = cgal::Point3(
-    v0.x() + sy,
-    v0.y() + sx,
-    v0.z() + h);
+  // auto&& v0 = mVertices0[v_idx];
 
   // 2. Update tangent and bitangent vectors (not normalised).
   // @TODO Check sign for displacement terms
@@ -782,7 +778,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
       {
         size_t v_idx_cm = iy * NPlus1 + ix;
         size_t w_idx_cm = iy * N + ix;
-        size_t w_idx_rm = ix * N + iy;
+        // size_t w_idx_rm = ix * N + iy;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
     }
@@ -794,14 +790,14 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
       {
         size_t v_idx_cm = N * NPlus1 + i;
         size_t w_idx_cm = i;
-        size_t w_idx_rm = i * N;
+        // size_t w_idx_rm = i * N;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
       // Right column (ix = N) periodic with left column (ix = 0)
       {
         size_t v_idx_cm = i * NPlus1 + N;
         size_t w_idx_cm = i * N;
-        size_t w_idx_rm = i;
+        // size_t w_idx_rm = i;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
     }
@@ -809,7 +805,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
       // Top right corner period with bottom right corner.
       size_t v_idx_cm = NPlus1 * NPlus1 - 1;
       size_t w_idx_cm = 0;
-      size_t w_idx_rm = 0;
+      // size_t w_idx_rm = 0;
       UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
     }  
   }
@@ -827,7 +823,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
       {
         size_t v_idx_cm = iy * NPlus1 + ix;
         size_t w_idx_cm = iy * N + ix;
-        size_t w_idx_rm = ix * N + iy;
+        // size_t w_idx_rm = ix * N + iy;
         UpdateVertex(v_idx_cm, w_idx_cm);
       }
     }
@@ -839,14 +835,14 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
       {
         size_t v_idx_cm = N * NPlus1 + i;
         size_t w_idx_cm = i;
-        size_t w_idx_rm = i * N;
+        // size_t w_idx_rm = i * N;
         UpdateVertex(v_idx_cm, w_idx_cm);
       }
       // Right column (ix = N) periodic with left column (ix = 0)
       {
         size_t v_idx_cm = i * NPlus1 + N;
         size_t w_idx_cm = i * N;
-        size_t w_idx_rm = i;
+        // size_t w_idx_rm = i;
         UpdateVertex(v_idx_cm, w_idx_cm);
       }
     }
@@ -854,7 +850,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
       // Top right corner period with bottom right corner.
       size_t v_idx_cm = NPlus1 * NPlus1 - 1;
       size_t w_idx_cm = 0;
-      size_t w_idx_rm = 0;
+      // size_t w_idx_rm = 0;
       UpdateVertex(v_idx_cm, w_idx_cm);
     }
   }

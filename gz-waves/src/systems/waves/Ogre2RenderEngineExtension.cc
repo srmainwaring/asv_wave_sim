@@ -83,7 +83,7 @@ std::string Ogre2RenderEngineExtension::Name() const
 
 //////////////////////////////////////////////////
 bool Ogre2RenderEngineExtension::LoadImpl(
-    const std::map<std::string, std::string> &_params)
+    const std::map<std::string, std::string> &/*_params*/)
 {
   try
   {

@@ -90,9 +90,10 @@ namespace waves
       auto&& v1 = vertices[i++];
       auto&& v2 = vertices[i++];
       cgal::Point3 p(v0, v1, v2);
-      auto&& v = _target.add_vertex(p);
       
       // @DEBUG_INFO
+      //auto& v = 
+      _target.add_vertex(p);
       // gzmsg << v << ": " << _target.point(v) << std::endl; 
     }
 

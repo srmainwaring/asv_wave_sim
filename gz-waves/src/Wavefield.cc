@@ -134,7 +134,8 @@ namespace waves
 
     // Point Locator
     gzmsg << "Creating triangulated grid." <<  std::endl;
-    this->dataPtr->triangulatedGrid = std::move(TriangulatedGrid::Create(N, L));
+    auto grid = TriangulatedGrid::Create(N, L);
+    this->dataPtr->triangulatedGrid = std::move(grid);
   }
 
   /////////////////////////////////////////////////
@@ -176,7 +177,7 @@ namespace waves
       {
         /// \todo: assert the type is double
         auto param = it->second;
-        auto type = param.type();
+        // auto type = param.type();
         auto value = param.double_value();
         windSpeed = value;
       }
@@ -187,7 +188,7 @@ namespace waves
       {
         /// \todo: assert the type is double
         auto param = it->second;
-        auto type = param.type();
+        // auto type = param.type();
         auto value = param.double_value();
         windAngleRad = M_PI/180.0*value;
       }
@@ -198,7 +199,7 @@ namespace waves
       {
         /// \todo: assert the type is double
         auto param = it->second;
-        auto type = param.type();
+        // auto type = param.type();
         auto value = param.double_value();
         steepness = value;
       }

@@ -113,7 +113,7 @@ TEST(CGAL, SurfaceMesh) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
   typedef K::Plane_3 Plane;
-  typedef K::Vector_3 Vector;
+  // typedef K::Vector_3 Vector;
   typedef K::Segment_3 Segment;
   typedef CGAL::Surface_mesh<Point3> Mesh;
   typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
@@ -157,7 +157,7 @@ TEST(CGAL, SurfaceMesh) {
   if(intersection) {
     // gets intersection object
     if(boost::get<Point3>(&(intersection->first))) {
-      Point3* p = boost::get<Point3>(&(intersection->first));
+      // Point3* p = boost::get<Point3>(&(intersection->first));
       // std::cout << "intersection object is a point " << *p <<  std::endl;
       // std::cout << "with face "<< intersection->second  <<  std::endl;
     }
@@ -181,7 +181,7 @@ TEST(CGAL, SurfaceMesh) {
   Plane_intersection plane_intersection = tree.any_intersection(plane_query);
   if(plane_intersection) {
     if(boost::get<Segment>(&(plane_intersection->first))) {
-      Segment* s = boost::get<Segment>(&(plane_intersection->first));
+      // Segment* s = boost::get<Segment>(&(plane_intersection->first));
       // std::cout << "one intersection object is the segment " << s << std::endl;
       // std::cout << "with face "<< intersection->second  <<  std::endl;
     }
@@ -194,14 +194,14 @@ TEST(CGAL, SurfaceMesh) {
 ///
 TEST(CGAL, AABBPolyhedronFacetIntersection) {
   typedef CGAL::Simple_cartesian<double> K;
-  typedef K::FT FT;
+  // typedef K::FT FT;
   typedef K::Point_3 Point3;
-  typedef K::Segment_3 Segment;
+  // typedef K::Segment_3 Segment;
   typedef CGAL::Polyhedron_3<K> Polyhedron;
   typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron> Primitive;
   typedef CGAL::AABB_traits<K, Primitive> Traits;
   typedef CGAL::AABB_tree<Traits> Tree;
-  typedef Tree::Point_and_primitive_id Point_and_primitive_id;
+  // typedef Tree::Point_and_primitive_id Point_and_primitive_id;
 
   Point3 p(1.0, 0.0, 0.0);
   Point3 q(0.0, 1.0, 0.0);
@@ -216,20 +216,20 @@ TEST(CGAL, AABBPolyhedronFacetIntersection) {
   tree.accelerate_distance_queries();
 
   // query point
-  Point3 query(0.0, 0.0, 3.0);
+  // Point3 query(0.0, 0.0, 3.0);
 
   // computes squared distance from query
-  FT sqd = tree.squared_distance(query);
+  // FT sqd = tree.squared_distance(query);
   // std::cout << "squared distance: " << sqd << std::endl;
 
   // computes closest point
-  Point3 closest = tree.closest_point(query);
+  // Point3 closest = tree.closest_point(query);
   // std::cout << "closest point: " << closest << std::endl;
 
   // computes closest point and primitive id
-  Point_and_primitive_id pp = tree.closest_point_and_primitive(query);
-  Point3 closest_point = pp.first;
-  Polyhedron::Face_handle f = pp.second; // closest primitive id
+  // Point_and_primitive_id pp = tree.closest_point_and_primitive(query);
+  // Point3 closest_point = pp.first;
+  // Polyhedron::Face_handle f = pp.second; // closest primitive id
   // std::cout << "closest point: " << closest_point << std::endl;
   // std::cout << "closest triangle: ( "
   //   << f->halfedge()->vertex()->point() << " , " 
@@ -241,21 +241,21 @@ TEST(CGAL, AABBPolyhedronFacetIntersection) {
 TEST(CGAL, SurfaceMeshGridCell) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
-  typedef K::Plane_3 Plane;
+  // typedef K::Plane_3 Plane;
   typedef K::Ray_3 Ray;
-  typedef K::Vector_3 Vector3;
-  typedef K::Segment_3 Segment;
+  // typedef K::Vector_3 Vector3;
+  // typedef K::Segment_3 Segment;
 
   typedef CGAL::Surface_mesh<Point3> Mesh;
-  typedef Mesh::Vertex_index vertex_descriptor;
-  typedef Mesh::Face_index face_descriptor;
+  // typedef Mesh::Vertex_index vertex_descriptor;
+  // typedef Mesh::Face_index face_descriptor;
 
   typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
   typedef CGAL::AABB_traits<K, Primitive> Traits;
   typedef CGAL::AABB_tree<Traits> Tree;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
-  typedef Tree::Primitive_id Primitive_id;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
+  // typedef Tree::Primitive_id Primitive_id;
 
   typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type> Ray_intersection;
 
@@ -277,19 +277,19 @@ TEST(CGAL, SurfaceMeshGridCell) {
 
  { 
     // std::cout << "Vertices " << std::endl;    
-    for(auto&& vertex : mesh.vertices()) {
-      // std::cout << vertex << std::endl;
-    }
+    // for(auto&& vertex : mesh.vertices()) {
+    //   std::cout << vertex << std::endl;
+    // }
   }
 
   { 
     // std::cout << "Faces " << std::endl;
-    for(auto&& face : mesh.faces()) {
-      // std::cout << face << std::endl;
+    // for(auto&& face : mesh.faces()) {
+    //   std::cout << face << std::endl;
 
-      Triangle tri = waves::Geometry::MakeTriangle(mesh, face);
-      // std::cout << tri << std::endl;
-    }
+    //   Triangle tri = waves::Geometry::MakeTriangle(mesh, face);
+    //   std::cout << tri << std::endl;
+    // }
   }
 
   {
@@ -315,33 +315,33 @@ TEST(CGAL, SurfaceMeshGridCell) {
     t.stop();
     // std::cout << "Intersect (x1000): " << t.time() << " sec" << std::endl;
 
-    if(intersection) {
-      if(boost::get<Point3>(&(intersection->first))) {
-        const Point3* p =  boost::get<Point3>(&(intersection->first));
-        // std::cout <<  *p << std::endl;
-      }
-    }
+    // if(intersection) {
+    //   if(boost::get<Point3>(&(intersection->first))) {
+    //     const Point3* p =  boost::get<Point3>(&(intersection->first));
+    //     std::cout <<  *p << std::endl;
+    //   }
+    // }
   }
 }
 
 TEST(CGAL, SurfaceMeshGrid) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
-  typedef K::Plane_3 Plane;
+  // typedef K::Plane_3 Plane;
   typedef K::Ray_3 Ray;
-  typedef K::Vector_3 Vector3;
-  typedef K::Segment_3 Segment;
+  // typedef K::Vector_3 Vector3;
+  // typedef K::Segment_3 Segment;
 
   typedef CGAL::Surface_mesh<Point3> Mesh;
-  typedef Mesh::Vertex_index vertex_descriptor;
-  typedef Mesh::Face_index face_descriptor;
+  // typedef Mesh::Vertex_index vertex_descriptor;
+  // typedef Mesh::Face_index face_descriptor;
 
   typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
   typedef CGAL::AABB_traits<K, Primitive> Traits;
   typedef CGAL::AABB_tree<Traits> Tree;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
-  typedef Tree::Primitive_id Primitive_id;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
+  // typedef Tree::Primitive_id Primitive_id;
 
   typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type> Ray_intersection;
 
@@ -398,37 +398,37 @@ TEST(CGAL, SurfaceMeshGrid) {
     t.stop();
     // std::cout << "Intersect (x" << sphere->number_of_vertices() << "): " << t.time() << " sec" << std::endl;
 
-    if(intersection) {
-      if(boost::get<Point3>(&(intersection->first))) {
-        const Point3* p =  boost::get<Point3>(&(intersection->first));
-        // std::cout <<  *p << std::endl;
-      }
-    }
+    // if(intersection) {
+    //   if(boost::get<Point3>(&(intersection->first))) {
+    //     const Point3* p =  boost::get<Point3>(&(intersection->first));
+    //     std::cout <<  *p << std::endl;
+    //   }
+    // }
   }
 }
 
 TEST(CGAL, SurfaceMeshModifyGrid) {
   typedef CGAL::Simple_cartesian<double> K;
   typedef K::Point_3 Point3;
-  typedef K::Plane_3 Plane;
-  typedef K::Ray_3 Ray;
+  // typedef K::Plane_3 Plane;
+  // typedef K::Ray_3 Ray;
   typedef K::Vector_3 Vector3;
-  typedef K::Segment_3 Segment;
+  // typedef K::Segment_3 Segment;
 
-  typedef CGAL::Surface_mesh<Point3> Mesh;
-  typedef Mesh::Vertex_index vertex_descriptor;
-  typedef Mesh::Face_index face_descriptor;
+  // typedef CGAL::Surface_mesh<Point3> Mesh;
+  // typedef Mesh::Vertex_index vertex_descriptor;
+  // typedef Mesh::Face_index face_descriptor;
 
-  typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
-  typedef CGAL::AABB_traits<K, Primitive> Traits;
-  typedef CGAL::AABB_tree<Traits> Tree;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
-  typedef Tree::Primitive_id Primitive_id;
+  // typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+  // typedef CGAL::AABB_traits<K, Primitive> Traits;
+  // typedef CGAL::AABB_tree<Traits> Tree;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
+  // typedef Tree::Primitive_id Primitive_id;
 
-  typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type> Ray_intersection;
+  // typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type> Ray_intersection;
 
-  typedef CGAL::Timer Timer;
+  // typedef CGAL::Timer Timer;
 
   // Create Grid
   waves::Grid grid({ 100, 100 }, { 4, 4 });
@@ -447,35 +447,35 @@ TEST(CGAL, SurfaceMeshModifyGrid) {
 
   { 
     // std::cout << "Faces" << std::endl;
-    for(auto&& face : mesh.faces()) {
-      // std::cout << face << std::endl;
+    // for(auto&& face : mesh.faces()) {
+    //   std::cout << face << std::endl;
 
-      Triangle tri = waves::Geometry::MakeTriangle(mesh, face);
-      // std::cout << tri << std::endl;
-    }
+    //   Triangle tri = waves::Geometry::MakeTriangle(mesh, face);
+    //   std::cout << tri << std::endl;
+    // }
   }
 }
 
 TEST(CGAL, SurfaceMeshWavefield) {
-  typedef CGAL::Simple_cartesian<double> K;
-  typedef K::Point_3 Point3;
-  typedef K::Plane_3 Plane;
-  typedef K::Ray_3 Ray;
-  typedef K::Vector_3 Vector3;
-  typedef K::Segment_3 Segment;
+  // typedef CGAL::Simple_cartesian<double> K;
+  // typedef K::Point_3 Point3;
+  // typedef K::Plane_3 Plane;
+  // typedef K::Ray_3 Ray;
+  // typedef K::Vector_3 Vector3;
+  // typedef K::Segment_3 Segment;
 
-  typedef CGAL::Surface_mesh<Point3> Mesh;
-  typedef Mesh::Vertex_index vertex_descriptor;
-  typedef Mesh::Face_index face_descriptor;
+  // typedef CGAL::Surface_mesh<Point3> Mesh;
+  // typedef Mesh::Vertex_index vertex_descriptor;
+  // typedef Mesh::Face_index face_descriptor;
 
-  typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
-  typedef CGAL::AABB_traits<K, Primitive> Traits;
-  typedef CGAL::AABB_tree<Traits> Tree;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
-  typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
-  typedef Tree::Primitive_id Primitive_id;
+  // typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+  // typedef CGAL::AABB_traits<K, Primitive> Traits;
+  // typedef CGAL::AABB_tree<Traits> Tree;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Segment>::Type > Segment_intersection;
+  // typedef boost::optional< Tree::Intersection_and_primitive_id<Plane>::Type > Plane_intersection;
+  // typedef Tree::Primitive_id Primitive_id;
 
-  typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type> Ray_intersection;
+  // typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type> Ray_intersection;
 
   typedef CGAL::Timer Timer;
 
@@ -553,24 +553,24 @@ TEST(CGAL, VertexRangeIterator) {
   mesh.add_face(v0, v2, v3);
 
   // Iterate over one variable
-  for (
-    auto&& vb = std::begin(mesh.vertices());
-    vb != std::end(mesh.vertices());
-    ++vb) {
-    auto&& v  = *vb;
-    const Point3& p = mesh.point(v);
-    // std::cout << p << std::endl;
-  }
+  // for (
+  //   auto&& vb = std::begin(mesh.vertices());
+  //   vb != std::end(mesh.vertices());
+  //   ++vb) {
+  //   auto&& v  = *vb;
+  //   const Point3& p = mesh.point(v);
+  //   std::cout << p << std::endl;
+  // }
 
   // Iterate over two variables using std::pair
-  for (
-    auto&& it = std::make_pair(std::begin(mesh.vertices()), 0);
-    it.first != std::end(mesh.vertices());
-    ++it.first, ++it.second) {
-    auto&& v = *it.first;
-    const Point3& p = mesh.point(v);
-    // std::cout << it.second << ": " << p << std::endl;
-  }
+  // for (
+  //   auto&& it = std::make_pair(std::begin(mesh.vertices()), 0);
+  //   it.first != std::end(mesh.vertices());
+  //   ++it.first, ++it.second) {
+  //   auto&& v = *it.first;
+  //   const Point3& p = mesh.point(v);
+  //   std::cout << it.second << ": " << p << std::endl;
+  // }
 
 }
 
@@ -1198,14 +1198,14 @@ TEST(CGAL, CreateTriangulation3) {
   typedef CGAL::Triangulation_2<K, Tds>                    TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
-  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  // typedef Triangulation::Vertex_circulator        Vertex_circulator;
   typedef Triangulation::Vertex_handle            Vertex_handle;
   typedef Triangulation::Face_handle              Face_handle;
   typedef Triangulation::Point                    Point;
-  typedef Triangulation::Face                     Face;
-  typedef Triangulation::Triangle                 Triangle;
-  typedef Triangulation::Edge                     Edge;
-  typedef Triangulation::Segment                  Segment;
+  // typedef Triangulation::Face                     Face;
+  // typedef Triangulation::Triangle                 Triangle;
+  // typedef Triangulation::Edge                     Edge;
+  // typedef Triangulation::Segment                  Segment;
 
   
   // Points
@@ -1217,7 +1217,7 @@ TEST(CGAL, CreateTriangulation3) {
   {
     // Automatically create a triangulation
     Triangulation t;
-    Triangulation::Triangulation_data_structure& tds = t.tds();
+    // Triangulation::Triangulation_data_structure& tds = t.tds();
 
     t.insert(p1);
     t.insert(p2);
@@ -1463,14 +1463,14 @@ TEST(CGAL, CreateTriangulation3) {
 TEST(CGAL, CreateTriangulation4) {
   typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
   typedef CGAL::Triangulation_2<K>                Triangulation;
-  typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  // typedef Triangulation::Vertex_circulator        Vertex_circulator;
   typedef Triangulation::Vertex_handle            Vertex_handle;
   typedef Triangulation::Face_handle              Face_handle;
   typedef Triangulation::Point                    Point;
-  typedef Triangulation::Face                     Face;
-  typedef Triangulation::Triangle                 Triangle;
-  typedef Triangulation::Edge                     Edge;
-  typedef Triangulation::Segment                  Segment;
+  // typedef Triangulation::Face                     Face;
+  // typedef Triangulation::Triangle                 Triangle;
+  // typedef Triangulation::Edge                     Edge;
+  // typedef Triangulation::Segment                  Segment;
   
   // Points
   Point p0(0, 0);
@@ -1607,15 +1607,15 @@ TEST(CGAL, CreateConstrainedTrianguation4) {
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
   typedef CGAL::Constrained_triangulation_face_base_2<K>      Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
-  typedef CGAL::No_constraint_intersection_tag                Itag;
+  // typedef CGAL::No_constraint_intersection_tag                Itag;
   typedef CGAL::Constrained_triangulation_2<K, Tds>           TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
-  typedef Triangulation::Vertex_circulator        Vertex_circulator;
-  typedef Triangulation::Vertex_handle            Vertex_handle;
-  typedef Triangulation::Face_handle              Face_handle;
+  // typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  // typedef Triangulation::Vertex_handle            Vertex_handle;
+  // typedef Triangulation::Face_handle              Face_handle;
   typedef Triangulation::Point                    Point;
-  typedef Triangulation::Face                     Face;
+  // typedef Triangulation::Face                     Face;
   
   // Points
   Point p0(0, 0);
@@ -1625,7 +1625,7 @@ TEST(CGAL, CreateConstrainedTrianguation4) {
 
   // Create a triangulation
   Triangulation t;
-  Triangulation::Triangulation_data_structure& tds = t.tds();
+  // Triangulation::Triangulation_data_structure& tds = t.tds();
 
   // Insert constraints (i.e. all edges)
   t.insert_constraint(p0, p1);
@@ -1651,15 +1651,15 @@ TEST(CGAL, CreateCTAlt) {
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
   typedef CGAL::Constrained_triangulation_face_base_2<K>      Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
-  typedef CGAL::No_constraint_intersection_tag                Itag;
+  // typedef CGAL::No_constraint_intersection_tag                Itag;
   typedef CGAL::Constrained_triangulation_2<K, Tds>           TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
-  typedef Triangulation::Vertex_circulator        Vertex_circulator;
-  typedef Triangulation::Vertex_handle            Vertex_handle;
-  typedef Triangulation::Face_handle              Face_handle;
+  // typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  // typedef Triangulation::Vertex_handle            Vertex_handle;
+  // typedef Triangulation::Face_handle              Face_handle;
   typedef Triangulation::Point                    Point;
-  typedef Triangulation::Face                     Face;
+  // typedef Triangulation::Face                     Face;
   
   // Points
   Point p0(0, 0);
@@ -1669,7 +1669,7 @@ TEST(CGAL, CreateCTAlt) {
 
   // Create a triangulation
   Triangulation t;
-  Triangulation::Triangulation_data_structure& tds = t.tds();
+  // Triangulation::Triangulation_data_structure& tds = t.tds();
 
   // Insert first row
   t.insert(p0);
@@ -1697,15 +1697,15 @@ TEST(CGAL, CreateCTAltN) {
   typedef CGAL::Triangulation_hierarchy_vertex_base_2<Vbb>    Vb;
   typedef CGAL::Constrained_triangulation_face_base_2<Kp>     Fb;
   typedef CGAL::Triangulation_data_structure_2<Vb, Fb>        Tds;
-  typedef CGAL::No_constraint_intersection_tag                Itag;
+  // typedef CGAL::No_constraint_intersection_tag                Itag;
   typedef CGAL::Constrained_Delaunay_triangulation_2<Kp, Tds> TBase;
 
   typedef CGAL::Triangulation_hierarchy_2<TBase>  Triangulation;
-  typedef Triangulation::Vertex_circulator        Vertex_circulator;
-  typedef Triangulation::Vertex_handle            Vertex_handle;
-  typedef Triangulation::Face_handle              Face_handle;
+  // typedef Triangulation::Vertex_circulator        Vertex_circulator;
+  // typedef Triangulation::Vertex_handle            Vertex_handle;
+  // typedef Triangulation::Face_handle              Face_handle;
   typedef K::Point_3                              Point;
-  typedef Triangulation::Face                     Face;
+  // typedef Triangulation::Face                     Face;
   
   // Create the mesh
   std::vector<Point> points;
@@ -1720,7 +1720,7 @@ TEST(CGAL, CreateCTAltN) {
 
   // Create a triangulation
   Triangulation t;
-  Triangulation::Triangulation_data_structure& tds = t.tds();
+  // Triangulation::Triangulation_data_structure& tds = t.tds();
 
   // Points - (N+1) points in each row / column 
   for (size_t iy=0; iy<=N; ++iy) {

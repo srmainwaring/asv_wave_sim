@@ -27,9 +27,9 @@ Ogre2DisplacementMap::Ogre2DisplacementMap(
   uint64_t _entity,
   uint32_t _width,
   uint32_t _height) :
-  entity(_entity),
   scene(_scene),
   material(_material),
+  entity(_entity),
   width(_width),
   height(_height)
 {
