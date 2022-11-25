@@ -52,11 +52,11 @@ namespace waves
   //////////////////////////////////////////////////
   WaveSimulationFFTRefImpl::WaveSimulationFFTRefImpl(
     double lx, double ly, int nx, int ny) :
-    nx_(nx),
-    ny_(ny),
+    lambda_(0.6),
     lx_(lx),
     ly_(ly),
-    lambda_(0.6)
+    nx_(nx),
+    ny_(ny)
   {
     ComputeBaseAmplitudes();
     CreateFFTWPlans();
@@ -151,7 +151,7 @@ namespace waves
     InitFFTCoeffStorage();
     InitWaveNumbers();
 
-    size_t n2 = nx_ * ny_;
+    // size_t n2 = nx_ * ny_;
 
     // arrays for reference version
     if (cap_psi_2s_root_.size() == 0)
@@ -178,8 +178,8 @@ namespace waves
     double  lambda_y_f{ly_};
 
     // nyquist wavelength [m]
-    double  lambda_x_nyquist{2.0 * delta_x};
-    double  lambda_y_nyquist{2.0 * delta_y};
+    // double  lambda_x_nyquist{2.0 * delta_x};
+    // double  lambda_y_nyquist{2.0 * delta_y};
 
     // fundamental spatial frequency [1/m]
     double  nu_x_f{1.0 / lx_};
@@ -247,7 +247,7 @@ namespace waves
             + ky_math_[iky]*ky_math_[iky]);
         double phi = atan2(ky_math_[iky], kx_math_[ikx]);
 
-        if (k == 0.0)
+        if (std::abs(k) < 1.0E-8)
         {
           cap_psi_2s_math(ikx, iky) = 0.0;
         }
@@ -597,16 +597,16 @@ namespace waves
       return 0.0;
     }
 
-    double alpha = 0.0081;
-    double beta = 1.25;
+    // double alpha = 0.0081;
+    // double beta = 1.25;
     double g = gravity;
     double Cd_10N = 0.00144;
     double u_star = sqrt(Cd_10N) * u10;
-    double ao = 0.1733;
-    double ap = 4.0;
+    // double ao = 0.1733;
+    // double ap = 4.0;
     double km = 370.0;
     double cm = 0.23;
-    double am = 0.13 * u_star / cm;
+    // double am = 0.13 * u_star / cm;
     
     double gamma = 1.7;
     if (cap_omega_c < 1.0)
@@ -705,7 +705,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   double WaveSimulationFFTRefImpl::Cos2sSpreadingFunction(
-      double s, double phi, double u10, double cap_omega_c, double gravity)
+      double s, double phi, double /*u10*/,
+      double /*cap_omega_c*/, double /*gravity*/)
   {
     // Longuet-Higgins et al. 'cosine-2S' spreading function
     //
@@ -780,7 +781,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsxdy, dsxdy);
+    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////

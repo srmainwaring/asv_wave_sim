@@ -83,7 +83,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::SetWindVelocity(double ux, double uy)
+  void WaveSimulationTrochoidImpl::SetWindVelocity(
+      double /*ux*/, double /*uy*/)
   {
     // @TODO NO IMPLEMENTATION
   }
@@ -105,7 +106,7 @@ namespace waves
     const auto& wavenumber = this->params_->Wavenumber_V();
     const auto& omega      = this->params_->AngularFrequency_V();
     const auto& phase      = this->params_->Phase_V();
-    const auto& q          = this->params_->Steepness_V();
+    // const auto& q          = this->params_->Steepness_V();
     const auto& direction  = this->params_->Direction_V();
 
     // Multiple wave update 
@@ -117,14 +118,14 @@ namespace waves
       const auto& omega_i = omega[i];
       const auto& phase_i = phase[i];
       const auto& direction_i = direction[i];
-      const auto& q_i = q[i];
+      // const auto& q_i = q[i];
 
-      for (size_t iy=0; iy<this->N_; ++iy)
+      for (int iy=0; iy<this->N_; ++iy)
       {
-        for (size_t ix=0; ix<this->N_; ++ix)
+        for (int ix=0; ix<this->N_; ++ix)
         {
           // Col major index
-          size_t idx = iy * this->N_ + ix;
+          int idx = iy * this->N_ + ix;
 
           // Regular grid
           double vx = ix * this->L_ / this->N_ - this->L_ / 2.0;
@@ -147,8 +148,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeElevationDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
+    Eigen::Ref<Eigen::MatrixXd> /*dhdx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dhdy*/)
   {
     // @TODO NO IMPLEMENTATION
   }
@@ -179,9 +180,9 @@ namespace waves
       const auto& direction_i = direction[i];
       const auto& q_i = q[i];
 
-      for (size_t iy=0; iy<this->N_; ++iy)
+      for (int iy=0; iy<this->N_; ++iy)
       {
-        for (size_t ix=0; ix<this->N_; ++ix)
+        for (int ix=0; ix<this->N_; ++ix)
         {
           // Col major index
           size_t idx = iy * this->N_ + ix;
@@ -208,9 +209,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulationTrochoidImpl::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
   {
     // @TODO NO IMPLEMENTATION
   }

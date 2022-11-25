@@ -52,7 +52,7 @@
 #include <vector>
 #include <string>
 
-#include <mlinterp>
+#include "mlinterp.hpp"
 
 using namespace gz;
 using namespace sim;
@@ -97,15 +97,15 @@ namespace
   /// \brief template specialisation for std::vector<double>. 
   ///
   /// Parse data a whitespace delimited string (commas will be ignored in XML).
-  template<>
-  std::vector<double> SdfGet<std::vector<double>>(
-      const std::shared_ptr<const sdf::Element> &_sdf,
-      const std::string &_key)
-  {
-    auto str = _sdf->Get<std::string>(_key);
-    std::vector<double> ret = whitespaceDelimitedStringToDoubleVector(str);    
-    return ret;
-  }
+  // template<>
+  // std::vector<double> SdfGet<std::vector<double>>(
+  //     const std::shared_ptr<const sdf::Element> &_sdf,
+  //     const std::string &_key)
+  // {
+  //   auto str = _sdf->Get<std::string>(_key);
+  //   std::vector<double> ret = whitespaceDelimitedStringToDoubleVector(str);    
+  //   return ret;
+  // }
 
   /// \brief template specialisation for Eigen::Matrix6d. 
   ///
@@ -716,7 +716,7 @@ namespace
 void LinearWaveBody::Configure(const Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     EntityComponentManager &_ecm,
-    EventManager &_eventMgr)
+    EventManager &/*_eventMgr*/)
 {
   GZ_PROFILE("LinearWaveBody::Configure");
 
@@ -964,8 +964,8 @@ void LinearWaveBody::Configure(const Entity &_entity,
 
     /// \todo use the scaled parameter - current assumption is all
     ///       hydro coeff overrides are dimensioned.
-    if (sdfHydro->HasElement("scaled"))
-      double scaled = sdfHydro->Get<double>("scaled");
+    // if (sdfHydro->HasElement("scaled"))
+    //   double scaled = sdfHydro->Get<double>("scaled");
 
     if (sdfHydro->HasElement("hydrostatic"))
       sdfHydrostatic = sdfHydro->GetElementImpl("hydrostatic");
@@ -1466,7 +1466,7 @@ namespace
 }
 
 /////////////////////////////////////////////////
-void LinearWaveBodyPrivate::ReadWECSim(EntityComponentManager &_ecm)
+void LinearWaveBodyPrivate::ReadWECSim(EntityComponentManager &/*_ecm*/)
 {
   auto& hydro = this->hydroData;
 
@@ -1811,7 +1811,7 @@ void LinearWaveBodyPrivate::Update(const UpdateInfo &_info,
 }
 
 /////////////////////////////////////////////////
-void LinearWaveBodyPrivate::UpdateLinkState(const UpdateInfo &_info,
+void LinearWaveBodyPrivate::UpdateLinkState(const UpdateInfo &/*_info*/,
     EntityComponentManager &_ecm)
 {
   // link properties
@@ -2291,8 +2291,8 @@ void LinearWaveBodyPrivate::UpdateRadiationAddedMassForces(
 
 /////////////////////////////////////////////////
 void LinearWaveBodyPrivate::RadiationForcesImpulseResponseFunction(
-    const UpdateInfo &_info,
-    EntityComponentManager &_ecm)
+    const UpdateInfo &/*_info*/,
+    EntityComponentManager &/*_ecm*/)
 {
   // short circuit if forces disabled
   if (!this->forceFlags.radiationDampingOn &&

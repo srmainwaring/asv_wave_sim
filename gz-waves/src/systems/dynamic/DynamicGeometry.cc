@@ -220,7 +220,7 @@ inline namespace GZ_RENDERING_VERSION_NAMESPACE {
     }
 
     /// \brief Override
-    protected: virtual bool LoadImpl(const MeshDescriptor &_desc) override
+    protected: virtual bool LoadImpl(const MeshDescriptor &/*_desc*/) override
     {
       /// \todo: currently assume we've already loaded from the tile
       /// but should handle better
@@ -377,7 +377,7 @@ DynamicGeometry::~DynamicGeometry()
 
 /////////////////////////////////////////////////
 void DynamicGeometry::Configure(const Entity &_entity,
-    const std::shared_ptr<const sdf::Element> &_sdf,
+    const std::shared_ptr<const sdf::Element> &/*_sdf*/,
     EntityComponentManager &_ecm,
     EventManager &_eventMgr)
 {
@@ -387,7 +387,7 @@ void DynamicGeometry::Configure(const Entity &_entity,
 
   // Ugly, but needed because the sdf::Element::GetElement is not a const
   // function and _sdf is a const shared pointer to a const sdf::Element.
-  auto sdf = const_cast<sdf::Element *>(_sdf.get());
+  // auto sdf = const_cast<sdf::Element *>(_sdf.get());
 
   // capture entity 
   this->dataPtr->entity = _entity;

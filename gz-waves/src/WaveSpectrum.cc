@@ -36,8 +36,8 @@ PiersonMoskowitzWaveSpectrum::~PiersonMoskowitzWaveSpectrum()
 PiersonMoskowitzWaveSpectrum::PiersonMoskowitzWaveSpectrum(
     double u19, double gravity) :
   OmniDirectionalWaveSpectrum(),
-  u19_(u19),
-  gravity_(gravity)
+  gravity_(gravity),
+  u19_(u19)
 {
 }
 
@@ -116,9 +116,9 @@ ECKVWaveSpectrum::~ECKVWaveSpectrum()
 ECKVWaveSpectrum::ECKVWaveSpectrum(
     double u10, double cap_omega_c, double gravity) :
   OmniDirectionalWaveSpectrum(),
+  gravity_(gravity),
   u10_(u10),
-  cap_omega_c_(cap_omega_c),
-  gravity_(gravity)
+  cap_omega_c_(cap_omega_c)
 {
 }
 
@@ -131,17 +131,17 @@ double ECKVWaveSpectrum::Evaluate(double k) const
   }
 
   // constants
-  const double alpha = 0.0081;
-  const double beta = 1.25;
+  // const double alpha = 0.0081;
+  // const double beta = 1.25;
   const double cd_10n = 0.00144;
-  const double ao = 0.1733;
-  const double ap = 4.0;
+  // const double ao = 0.1733;
+  // const double ap = 4.0;
   const double km = 370.0;
   const double cm = 0.23;
 
   // intermediates
   double u_star = std::sqrt(cd_10n) * u10_;
-  double am = 0.13 * u_star / cm;
+  // double am = 0.13 * u_star / cm;
   
   double gamma = 1.7;
   if (cap_omega_c_ < 1.0)

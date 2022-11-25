@@ -556,7 +556,7 @@ void WavesVisualPrivate::OnUpdate()
         // RenderUtil stores gazebo-entity user data as uint64_t
         auto variant = n->UserData("gazebo-entity");
         const uint64_t *value = std::get_if<uint64_t>(&variant);
-        if (value && *value == static_cast<int>(this->entity))
+        if (value && *value == static_cast<uint64_t>(this->entity))
         {
           this->visual = std::dynamic_pointer_cast<rendering::Visual>(n);
           break;
@@ -585,7 +585,7 @@ void WavesVisualPrivate::OnUpdate()
   double simTime = this->currentSimTimeSeconds;
 
   // ocean tile parameters
-  size_t N = this->waveParams->CellCount();
+  // size_t N = this->waveParams->CellCount();
   double L = this->waveParams->TileSize();
   double ux = this->waveParams->WindVelocity().X();
   double uy = this->waveParams->WindVelocity().Y();
@@ -693,9 +693,9 @@ void WavesVisualPrivate::OnUpdate()
 
       if (this->waveParamsDirty)
       {
-        double ux = this->waveParams->WindVelocity().X();
-        double uy = this->waveParams->WindVelocity().Y();
-        this->oceanTile->SetWindVelocity(ux, uy);
+        double newUx = this->waveParams->WindVelocity().X();
+        double newUy = this->waveParams->WindVelocity().Y();
+        this->oceanTile->SetWindVelocity(newUx, newUy);
         this->waveParamsDirty = false;
       }
 
@@ -775,12 +775,12 @@ void WavesVisualPrivate::OnUpdate()
 
       if (this->waveParamsDirty)
       {
-        double ux = this->waveParams->WindVelocity().X();
-        double uy = this->waveParams->WindVelocity().Y();
-        double s  = this->waveParams->Steepness();
+        double newUx = this->waveParams->WindVelocity().X();
+        double newUy = this->waveParams->WindVelocity().Y();
+        // double s  = this->waveParams->Steepness();
 
         // set params
-        this->mWaveSim->SetWindVelocity(ux, uy);
+        this->mWaveSim->SetWindVelocity(newUx, newUy);
         // waveSim->SetLambda(s);
 
         this->waveParamsDirty = false;
@@ -818,7 +818,7 @@ void WavesVisualPrivate::OnWaveMsg(const gz::msgs::Param &_msg)
     {
       /// \todo: assert the type is double
       auto param = it->second;
-      auto type = param.type();
+      // auto type = param.type();
       auto value = param.double_value();
       windSpeed = value;
     }
@@ -829,7 +829,7 @@ void WavesVisualPrivate::OnWaveMsg(const gz::msgs::Param &_msg)
     {
       /// \todo: assert the type is double
       auto param = it->second;
-      auto type = param.type();
+      // auto type = param.type();
       auto value = param.double_value();
       windAngleRad = M_PI/180.0*value;
     }
@@ -840,7 +840,7 @@ void WavesVisualPrivate::OnWaveMsg(const gz::msgs::Param &_msg)
     {
       /// \todo: assert the type is double
       auto param = it->second;
-      auto type = param.type();
+      // auto type = param.type();
       auto value = param.double_value();
       steepness = value;
     }

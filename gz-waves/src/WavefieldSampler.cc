@@ -204,8 +204,8 @@ namespace waves
       J(0, 1) =  0;
       J(1, 0) =  0;
       J(1, 1) = -1;
-      const size_t n = wp.a.size();
-      for (auto&& i=0; i<n; ++i)
+      size_t n = wp.a.size();
+      for (size_t i=0; i<n; ++i)
       {
         const double dx = wp.dir[i].X();
         const double dy = wp.dir[i].Y();

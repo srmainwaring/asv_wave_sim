@@ -42,7 +42,7 @@ Cos2sSpreadingFunction::Cos2sSpreadingFunction(double spread) :
 
 //////////////////////////////////////////////////
 double Cos2sSpreadingFunction::Evaluate(
-    double theta, double theta_mean, double k) const
+    double theta, double theta_mean, double /*k*/) const
 {
   double phi = theta - theta_mean;
   double cp = std::cos(phi / 2.0);
@@ -56,7 +56,7 @@ void Cos2sSpreadingFunction::Evaluate(
     Eigen::Ref<Eigen::MatrixXd> phi,
     const Eigen::Ref<const Eigen::MatrixXd> &theta,
     double theta_mean,
-    const Eigen::Ref<const Eigen::MatrixXd> &k) const
+    const Eigen::Ref<const Eigen::MatrixXd>& /*k*/) const
 {
   auto theta_view = theta.reshaped();
   std::transform(
@@ -103,9 +103,9 @@ ECKVSpreadingFunction::ECKVSpreadingFunction(
     double cap_omega_c,
     double gravity) :
   DirectionalSpreadingFunction(),
+  gravity_(gravity),
   u10_(u10),
-  cap_omega_c_(cap_omega_c),
-  gravity_(gravity)
+  cap_omega_c_(cap_omega_c)
 {
 }
 

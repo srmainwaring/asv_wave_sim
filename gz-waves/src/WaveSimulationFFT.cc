@@ -55,11 +55,11 @@ namespace waves
   //////////////////////////////////////////////////
   WaveSimulationFFTImpl::WaveSimulationFFTImpl(
     double lx, double ly, int nx, int ny) :
-    nx_(nx),
-    ny_(ny),
+    lambda_(0.6),
     lx_(lx),
     ly_(ly),
-    lambda_(0.6)
+    nx_(nx),
+    ny_(ny)
   {
     CreateFFTWPlans();
     ComputeBaseAmplitudes();
@@ -544,7 +544,7 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsxdy, dsxdy);
+    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////

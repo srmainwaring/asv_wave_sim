@@ -359,7 +359,7 @@ Hydrodynamics::~Hydrodynamics()
 void Hydrodynamics::Configure(const Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     EntityComponentManager &_ecm,
-    EventManager &_eventMgr)
+    EventManager &/*_eventMgr*/)
 {
   GZ_PROFILE("Hydrodynamics::Configure");
 
@@ -616,7 +616,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     /// \todo WorldCoGPose is currently not available
     // cgal::Vector3 linVelocityCoM = waves::ToVector3(
     //     hd->link.WorldCoGLinearVelocity(_ecm).value());
-    cgal::Vector3 linVelocityCoM = linVelocity;
+    // cgal::Vector3 linVelocityCoM = linVelocity;
 
     for (size_t j=0; j<meshCount; ++j)
     {
@@ -666,13 +666,13 @@ void HydrodynamicsPrivate::Update(const UpdateInfo &_info,
 }
 
 /////////////////////////////////////////////////
-void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
+void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
     EntityComponentManager &_ecm)
 {
   ////////// BEGIN TESTING
 
   // Get the wave height at the origin
-  double simTime = std::chrono::duration<double>(_info.simTime).count();
+  // double simTime = std::chrono::duration<double>(_info.simTime).count();
   cgal::Point3 point(0.0, 0.0, 0.0);
   double waveHeight{0.0};
   this->wavefield.lock()->Height(point, waveHeight);
@@ -715,10 +715,10 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
     /// \todo WorldCoGLinearVel is currently not available
     // cgal::Vector3 linVelocityCoM = waves::ToVector3(
     //     hd->link.WorldCoGLinearVel(_ecm).value());
-    cgal::Vector3 linVelocityCoM = linVelocity;
+    // cgal::Vector3 linVelocityCoM = linVelocity;
 
     // Meshes
-    size_t nSubTri = 0;
+    // size_t nSubTri = 0;
     for (size_t j=0; j<hd->linkMeshes.size(); ++j)
     {
       // Update link mesh
@@ -749,7 +749,7 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &_info,
       }
 
       // Info for Markers
-      nSubTri += hd->hydrodynamics[j]->GetSubmergedTriangles().size();
+      // nSubTri += hd->hydrodynamics[j]->GetSubmergedTriangles().size();
 
       // DEBUG_INFO
       // gzmsg << "Link:         " << hd->link->GetName() << "\n";
@@ -872,7 +872,7 @@ void HydrodynamicsPrivate::CreateCollisionMeshes(
         continue;
       }
 
-      double volume = 0;
+      // double volume = 0;
       switch (coll->Data().Geom()->Type())
       {
         case sdf::GeometryType::BOX:
@@ -1203,8 +1203,8 @@ void HydrodynamicsPrivate::UpdateMarkers(
 
 //////////////////////////////////////////////////
 void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
-    const UpdateInfo &_info,
-    EntityComponentManager &_ecm)
+    const UpdateInfo &/*_info*/,
+    EntityComponentManager &/*_ecm*/)
 {
   std::string topicName("/marker");
 
@@ -1233,8 +1233,8 @@ void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
 
 //////////////////////////////////////////////////
 void HydrodynamicsPrivate::UpdateWaterlineMarkers(
-    const UpdateInfo &_info,
-    EntityComponentManager &_ecm)
+    const UpdateInfo &/*_info*/,
+    EntityComponentManager &/*_ecm*/)
 {
   std::string topicName("/marker");
 
@@ -1261,8 +1261,8 @@ void HydrodynamicsPrivate::UpdateWaterlineMarkers(
 
 //////////////////////////////////////////////////
 void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
-    const UpdateInfo &_info,
-    EntityComponentManager &_ecm)
+    const UpdateInfo &/*_info*/,
+    EntityComponentManager &/*_ecm*/)
 {
   std::string topicName("/marker");
 
@@ -1300,7 +1300,7 @@ void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
     {
       /// \todo: assert the type is bool
       auto param = it->second;
-      auto type = param.type();
+      // auto type = param.type();
       auto value = param.bool_value();
       this->showWaterPatch = value;
     }
@@ -1311,7 +1311,7 @@ void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
     {
       /// \todo: assert the type is bool
       auto param = it->second;
-      auto type = param.type();
+      // auto type = param.type();
       auto value = param.bool_value();
       this->showWaterline = value;
     }
@@ -1322,7 +1322,7 @@ void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
     {
       /// \todo: assert the type is bool
       auto param = it->second;
-      auto type = param.type();
+      // auto type = param.type();
       auto value = param.bool_value();
       this->showUnderwaterSurface = value;
     }
