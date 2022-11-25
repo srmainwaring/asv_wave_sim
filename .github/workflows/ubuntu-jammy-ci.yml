@@ -38,6 +38,7 @@ jobs:
 
       - name: Build Wave Sim
         run: |
+          colcon build --symlink-install --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_STANDARD=17 -DBUILD_TESTING=ON -DHIGHFIVE_USE_EIGEN=ON
           colcon build --symlink-install --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_STANDARD=17 -DBUILD_TESTING=ON
 
       - name: Test Wave Sim
