@@ -255,7 +255,7 @@ namespace waves
     // flattened index version
     for (int ikx = 1; ikx < nx_; ++ikx)
     {
-      for (int iky = 1; iky < ny_; ++iky)
+      for (int iky = 1; iky < ny_/2 + 1; ++iky)
       {
         // index for flattened array (ikx, iky)
         int idx = ikx * ny_ + iky;
@@ -271,7 +271,7 @@ namespace waves
       }
     }
 
-    for (int iky = 1; iky < ny_/2+1; ++iky)
+    for (int iky = 1; iky < ny_/2 + 1; ++iky)
     {
       int ikx = 0;
 
@@ -289,7 +289,7 @@ namespace waves
       zhat_(cdx, 0) = std::conj(zhat_(idx));
     }
 
-    for (int ikx = 1; ikx < nx_/2+1; ++ikx)
+    for (int ikx = 1; ikx < nx_/2 + 1; ++ikx)
     {
       int iky = 0;
 
@@ -367,13 +367,9 @@ namespace waves
           complex hkxky = hok * kx * ky;
           
           if (ikx == nx_ / 2)
-          {
             dx = czero;
-          }
           if (iky == ny_ / 2)
-          {
             dy = czero;
-          }
 
           fft_sx_(ikx, iky)     = dx;
           fft_sy_(ikx, iky)     = dy;
