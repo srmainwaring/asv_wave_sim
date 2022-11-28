@@ -93,20 +93,20 @@ namespace waves
     void SetTime(double value);
 
     ///// interpolation interface
-    virtual void Elevation(
+    void Elevation(
         double x, double y,
         double &eta);
 
-    virtual void Elevation(
+    void Elevation(
         const Eigen::Ref<const Eigen::VectorXd> &x,
         const Eigen::Ref<const Eigen::VectorXd> &y,
         Eigen::Ref<Eigen::VectorXd> eta);
 
-    virtual void Pressure(
+    void Pressure(
         double x, double y, double z,
         double &pressure);
 
-    virtual void Pressure(
+    void Pressure(
         const Eigen::Ref<const Eigen::VectorXd> &x,
         const Eigen::Ref<const Eigen::VectorXd> &y,
         const Eigen::Ref<const Eigen::VectorXd> &z,
@@ -700,8 +700,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::DisplacementAt(
-    int ix, int iy,
-    double &sx, double &sy)
+    int /*ix*/, int /*iy*/,
+    double &/*sx*/, double &/*sy*/)
   {
     // No xy-displacement
   }

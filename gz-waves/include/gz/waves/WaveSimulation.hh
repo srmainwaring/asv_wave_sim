@@ -40,18 +40,16 @@ namespace waves
     ///// interpolation interface
     virtual void Elevation(
         double x, double y,
-        double &eta)
-    { assert(0 && "Not implemented"); }
+        double &eta);
 
     virtual void Elevation(
         const Eigen::Ref<const Eigen::VectorXd> &x,
         const Eigen::Ref<const Eigen::VectorXd> &y,
-        Eigen::Ref<Eigen::VectorXd> eta) {}
+        Eigen::Ref<Eigen::VectorXd> eta);
 
     virtual void Pressure(
         double x, double y, double z,
-        double &pressure)
-    { assert(0 && "Not implemented"); }
+        double &pressure);
 
     virtual void Pressure(
         const Eigen::Ref<const Eigen::VectorXd> &x,
@@ -88,24 +86,20 @@ namespace waves
 
     virtual void PressureAt(
         int iz,
-        Eigen::Ref<Eigen::MatrixXd> pressure)
-    { assert(0 && "Not implemented"); }
+        Eigen::Ref<Eigen::MatrixXd> pressure);
 
     ///// lookup interface - scalar
     virtual void ElevationAt(
         int ix, int iy,
-        double &eta)
-    { assert(0 && "Not implemented"); }
+        double &eta);
 
     virtual void DisplacementAt(
         int ix, int iy,
-        double &sx, double &sy)
-    { assert(0 && "Not implemented"); }
+        double &sx, double &sy);
 
     virtual void PressureAt(
         int ix, int iy, int iz,
-        double &pressure)
-    { assert(0 && "Not implemented"); }
+        double &pressure);
 
   };
 }

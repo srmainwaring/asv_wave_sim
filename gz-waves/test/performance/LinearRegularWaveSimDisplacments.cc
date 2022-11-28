@@ -71,13 +71,10 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture, Elevation)
 
   Eigen::VectorXd h(nx_ * ny_);
 
-  double sim_time = 0.0;
-  double sim_step = 0.001;
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
     model.ElevationAt(h);
-    sim_time += sim_step;
   }
   auto end = steady_clock::now();
   std::chrono::duration<double, std::milli> duration_ms = end - start;
@@ -94,13 +91,10 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture, ElevationVectorised)
 
   Eigen::VectorXd h(nx_ * ny_);
 
-  double sim_time = 0.0;
-  double sim_step = 0.001;
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
     model.ElevationAt(h);
-    sim_time += sim_step;
   }
   auto end = steady_clock::now();
   std::chrono::duration<double, std::milli> duration_ms = end - start;
@@ -124,8 +118,6 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture, DisplacementsAndDeriatives)
   Eigen::VectorXd dsydy(nx_ * ny_);
   Eigen::VectorXd dsxdy(nx_ * ny_);
 
-  double sim_time = 0.0;
-  double sim_step = 0.001;
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
@@ -133,7 +125,6 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture, DisplacementsAndDeriatives)
     model.ElevationDerivAt(dhdx, dhdy);
     model.DisplacementAt(sx, sy);
     model.DisplacementDerivAt(dsxdx, dsydy, dsxdy);
-    sim_time += sim_step;
   }
   auto end = steady_clock::now();
   std::chrono::duration<double, std::milli> duration_ms = end - start;
@@ -158,8 +149,6 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture,
   Eigen::VectorXd dsydy(nx_ * ny_);
   Eigen::VectorXd dsxdy(nx_ * ny_);
 
-  double sim_time = 0.0;
-  double sim_step = 0.001;
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
@@ -167,7 +156,6 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture,
     model.ElevationDerivAt(dhdx, dhdy);
     model.DisplacementAt(sx, sy);
     model.DisplacementDerivAt(dsxdx, dsydy, dsxdy);
-    sim_time += sim_step;
   }
   auto end = steady_clock::now();
   std::chrono::duration<double, std::milli> duration_ms = end - start;

@@ -30,5 +30,73 @@ namespace waves
   {
   }
 
+  //////////////////////////////////////////////////
+  void WaveSimulation::Elevation(
+      double /*x*/, double /*y*/,
+      double &/*eta*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulation::Elevation(
+      const Eigen::Ref<const Eigen::VectorXd> &/*x*/,
+      const Eigen::Ref<const Eigen::VectorXd> &/*y*/,
+      Eigen::Ref<Eigen::VectorXd> /*eta*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulation::Pressure(
+      double /*x*/, double /*y*/, double /*z*/,
+      double &/*pressure*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulation::Pressure(
+      const Eigen::Ref<const Eigen::VectorXd> &/*x*/,
+      const Eigen::Ref<const Eigen::VectorXd> &/*y*/,
+      const Eigen::Ref<const Eigen::VectorXd> &/*z*/,
+      Eigen::Ref<Eigen::VectorXd> /*pressure*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulation::PressureAt(
+      int /*iz*/,
+      Eigen::Ref<Eigen::MatrixXd> /*pressure*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulation::ElevationAt(
+      int /*ix*/, int /*iy*/,
+      double &/*eta*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulation::DisplacementAt(
+      int /*ix*/, int /*iy*/,
+      double &/*sx*/, double &/*sy*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void WaveSimulation::PressureAt(
+      int /*ix*/, int /*iy*/, int /*iz*/,
+      double &/*pressure*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
+
 }
 }

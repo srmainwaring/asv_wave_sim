@@ -40,6 +40,27 @@ namespace waves
 
     virtual void SetTime(double value) override;
 
+    ///// interpolation interface
+    virtual void Elevation(
+        double x, double y,
+        double &eta) override;
+
+    virtual void Elevation(
+        const Eigen::Ref<const Eigen::VectorXd> &x,
+        const Eigen::Ref<const Eigen::VectorXd> &y,
+        Eigen::Ref<Eigen::VectorXd> eta) override;
+
+    virtual void Pressure(
+        double x, double y, double z,
+        double &pressure) override;
+
+    virtual void Pressure(
+        const Eigen::Ref<const Eigen::VectorXd> &x,
+        const Eigen::Ref<const Eigen::VectorXd> &y,
+        const Eigen::Ref<const Eigen::VectorXd> &z,
+        Eigen::Ref<Eigen::VectorXd> pressure) override;
+
+    ///// lookup interface - array
     virtual void ElevationAt(
         Eigen::Ref<Eigen::MatrixXd> h) override;
 
