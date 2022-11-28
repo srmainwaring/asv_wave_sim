@@ -34,25 +34,9 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture: public ::testing::Test
-{ 
-public: 
-  virtual ~LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture()
-  {
-  }
-
-  LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture()
-  {
-  } 
-
-  virtual void SetUp() override
-  { 
-  }
-
-  virtual void TearDown() override
-  {
-  }
-
+class LinearRandomFFTWaveSimTest: public ::testing::Test
+{
+public:
   // number of evaluations
   int num_runs_ = 1000;
 
@@ -64,7 +48,7 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture, CurrentAmplitudes)
+TEST_F(LinearRandomFFTWaveSimTest, CurrentAmplitudes)
 {
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();

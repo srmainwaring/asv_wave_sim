@@ -34,25 +34,9 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class LinearRandomFFTWaveSimDisplacementsPerfFixture: public ::testing::Test
-{ 
+class LinearRandomFFTWaveSimTest: public ::testing::Test
+{
 public: 
-  virtual ~LinearRandomFFTWaveSimDisplacementsPerfFixture()
-  {
-  }
-
-  LinearRandomFFTWaveSimDisplacementsPerfFixture()
-  {
-  } 
-
-  virtual void SetUp() override
-  { 
-  }
-
-  virtual void TearDown() override
-  {
-  }
-
   // number of evaluations
   int num_runs_ = 1000;
 
@@ -64,8 +48,7 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(LinearRandomFFTWaveSimDisplacementsPerfFixture,
-    Elevation)
+TEST_F(LinearRandomFFTWaveSimTest, Elevation)
 {
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -89,8 +72,7 @@ TEST_F(LinearRandomFFTWaveSimDisplacementsPerfFixture,
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRandomFFTWaveSimDisplacementsPerfFixture,
-    DisplacementsAndDeriatives)
+TEST_F(LinearRandomFFTWaveSimTest, DisplacementsAndDeriatives)
 {
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();

@@ -34,25 +34,9 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class LinearRegularWaveSimDisplacementsFixture: public ::testing::Test
-{ 
-public: 
-  virtual ~LinearRegularWaveSimDisplacementsFixture()
-  {
-  }
-
-  LinearRegularWaveSimDisplacementsFixture()
-  {
-  } 
-
-  virtual void SetUp() override
-  { 
-  }
-
-  virtual void TearDown() override
-  {
-  }
-
+class LinearRegularWaveSimTest: public ::testing::Test
+{
+public:
   // number of evaluations
   int num_runs_ = 1000;
 
@@ -64,7 +48,7 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimDisplacementsFixture, Elevation)
+TEST_F(LinearRegularWaveSimTest, Elevation)
 {
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(false);
@@ -84,7 +68,7 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture, Elevation)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimDisplacementsFixture, ElevationVectorised)
+TEST_F(LinearRegularWaveSimTest, ElevationVectorised)
 {
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(true);
@@ -104,7 +88,7 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture, ElevationVectorised)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimDisplacementsFixture, DisplacementsAndDeriatives)
+TEST_F(LinearRegularWaveSimTest, DisplacementsAndDeriatives)
 {
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(false);
@@ -134,8 +118,7 @@ TEST_F(LinearRegularWaveSimDisplacementsFixture, DisplacementsAndDeriatives)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimDisplacementsFixture,
-    DisplacementsAndDeriativesVectorised)
+TEST_F(LinearRegularWaveSimTest, DisplacementsAndDeriativesVectorised)
 {
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(true);
