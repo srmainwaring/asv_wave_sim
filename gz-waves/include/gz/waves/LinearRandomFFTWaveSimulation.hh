@@ -1,4 +1,4 @@
-// Copyright (C) 2019  Rhys Mainwaring
+// Copyright (C) 2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,12 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATIONSINUSOID_HH_
-#define GZ_WAVES_WAVESIMULATIONSINUSOID_HH_
+#ifndef GZ_WAVES_LINEARRANDOMFFTWAVESIMULATION_HH_
+#define GZ_WAVES_LINEARRANDOMFFTWAVESIMULATION_HH_
 
 #include <memory>
-
-#include <Eigen/Dense>
 
 #include "WaveSimulation.hh"
 
@@ -28,64 +26,37 @@ namespace gz
 {
 namespace waves
 {
-  /// The grid has sides with lengths lx and ly.
-  ///
-  /// There are nx, ny vertices in each direction.
-  ///
-  /// The simulation updates nx x ny vertices.
-  ///
-  /// The distance between vertices is dx = lx / nx and dy = ly / ny.
-  ///
-  /// All storage is assumed to be sized to nx x ny and the
-  /// vertices are traversed in column major order:
-  /// i.e. the innermost loop is over the x direction.
-  ///
-  class WaveSimulationSinusoid : public WaveSimulation
+  class LinearRandomFFTWaveSimulation : public WaveSimulation
   {
   public:
-    ~WaveSimulationSinusoid();
+    virtual ~LinearRandomFFTWaveSimulation();
 
-    WaveSimulationSinusoid(double lx, double ly,
-        int nx, int ny);
+    LinearRandomFFTWaveSimulation(double lx, double ly, int nx, int ny);
 
-    WaveSimulationSinusoid(double lx, double ly, double lz,
-        int nx, int ny, int nz);
-
-    void SetUseVectorised(bool value);
-
-    void SetDirection(double dir_x, double dir_y);
-
-    void SetAmplitude(double value);
-
-    void SetPeriod(double value);
-
-    Eigen::VectorXd X() const;
-
-    Eigen::VectorXd Y() const;
-
-    Eigen::VectorXd Z() const;
+    /// \brief Set lambda which controls the horizontal wave displacement.
+    void SetLambda(double lambda);
 
     virtual void SetWindVelocity(double ux, double uy) override;
 
     virtual void SetTime(double value) override;
 
-    virtual void ComputeElevation(
+    virtual void ElevationAt(
         Eigen::Ref<Eigen::MatrixXd> h) override;
 
-    virtual void ComputeElevationDerivatives(
+    virtual void ElevationDerivAt(
         Eigen::Ref<Eigen::MatrixXd> dhdx,
         Eigen::Ref<Eigen::MatrixXd> dhdy) override;
 
-    virtual void ComputeDisplacements(
+    virtual void DisplacementAt(
         Eigen::Ref<Eigen::MatrixXd> sx,
         Eigen::Ref<Eigen::MatrixXd> sy) override;
 
-    virtual void ComputeDisplacementsDerivatives(
+    virtual void DisplacementDerivAt(
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-    virtual void ComputeDisplacementsAndDerivatives(
+    virtual void DisplacementAndDerivAt(
         Eigen::Ref<Eigen::MatrixXd> h,
         Eigen::Ref<Eigen::MatrixXd> sx,
         Eigen::Ref<Eigen::MatrixXd> sy,
@@ -95,12 +66,10 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-    virtual void ComputePressureAt(
-        Eigen::Ref<Eigen::MatrixXd> pressure,
-        int iz);
+    // public class declaration - for testing
+    class Impl;
 
   private:
-    class Impl;
     std::unique_ptr<Impl> impl_;
   };
 }

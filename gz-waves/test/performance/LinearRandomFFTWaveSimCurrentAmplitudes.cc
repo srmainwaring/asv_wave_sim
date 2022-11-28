@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-#include "WaveSimulationFFTImpl.hh"
+#include "LinearRandomFFTWaveSimulationImpl.hh"
 
 using Eigen::MatrixXd;
 
@@ -34,14 +34,14 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class WaveSimulationFFTBaseAmplitudesPerfFixture: public ::testing::Test
+class LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture: public ::testing::Test
 { 
 public: 
-  virtual ~WaveSimulationFFTBaseAmplitudesPerfFixture()
+  virtual ~LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture()
   {
   }
 
-  WaveSimulationFFTBaseAmplitudesPerfFixture()
+  LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture()
   {
   } 
 
@@ -54,7 +54,7 @@ public:
   }
 
   // number of evaluations
-  int num_runs_ = 100;
+  int num_runs_ = 1000;
 
   // wave number grid (nx_, ny_)
   double lx_{200.0};
@@ -64,13 +64,17 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationFFTBaseAmplitudesPerfFixture, BaseAmplitudes)
+TEST_F(LinearRandomFFTWaveSimCurrentAmplitudesPerfFixture, CurrentAmplitudes)
 {
-  WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
+  LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+  double sim_time = 0.0;
+  double sim_step = 0.001;
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeBaseAmplitudes();
+    model.ComputeCurrentAmplitudes(sim_time);
+    sim_time += sim_step;
   }
   auto end = steady_clock::now();
   std::chrono::duration<double, std::milli> duration_ms = end - start;

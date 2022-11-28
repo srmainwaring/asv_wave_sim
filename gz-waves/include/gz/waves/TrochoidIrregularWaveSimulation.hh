@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATIONTROCHOID_HH_
-#define GZ_WAVES_WAVESIMULATIONTROCHOID_HH_
+#ifndef GZ_WAVES_TROCHOIDIRREGULARWAVESIMULATION_HH_
+#define GZ_WAVES_TROCHOIDIRREGULARWAVESIMULATION_HH_
 
 #include <memory>
 
@@ -29,39 +29,38 @@ namespace gz
 namespace waves
 {
   class WaveParameters;
-  class WaveSimulationTrochoidImpl;
 
-  class WaveSimulationTrochoid : public WaveSimulation
+  class TrochoidIrregularWaveSimulation : public WaveSimulation
   {
   public:
-    virtual ~WaveSimulationTrochoid();
+    virtual ~TrochoidIrregularWaveSimulation();
 
-    WaveSimulationTrochoid(
-      int nx,
-      double lx,
-      std::shared_ptr<WaveParameters> params);
+    TrochoidIrregularWaveSimulation(
+        int nx,
+        double lx,
+        std::shared_ptr<WaveParameters> params);
 
     virtual void SetWindVelocity(double ux, double uy) override;
 
     virtual void SetTime(double time) override;
 
-    virtual void ComputeElevation(
+    virtual void ElevationAt(
         Eigen::Ref<Eigen::MatrixXd> h) override;
 
-    virtual void ComputeElevationDerivatives(
+    virtual void ElevationDerivAt(
         Eigen::Ref<Eigen::MatrixXd> dhdx,
         Eigen::Ref<Eigen::MatrixXd> dhdy) override;
 
-    virtual void ComputeDisplacements(
+    virtual void DisplacementAt(
         Eigen::Ref<Eigen::MatrixXd> sx,
         Eigen::Ref<Eigen::MatrixXd> sy) override;
 
-    virtual void ComputeDisplacementsDerivatives(
+    virtual void DisplacementDerivAt(
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-    virtual void ComputeDisplacementsAndDerivatives(
+    virtual void DisplacementAndDerivAt(
         Eigen::Ref<Eigen::MatrixXd> h,
         Eigen::Ref<Eigen::MatrixXd> sx,
         Eigen::Ref<Eigen::MatrixXd> sy,
@@ -72,7 +71,8 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
   private:
-    std::unique_ptr<WaveSimulationTrochoidImpl> impl_;
+    class Impl;
+    std::unique_ptr<Impl> impl_;
   };
 }
 }

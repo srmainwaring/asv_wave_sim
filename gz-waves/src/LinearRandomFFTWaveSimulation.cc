@@ -15,7 +15,7 @@
 
 
 // The non-vectorised time-dependent update step labelled 'non-vectorised reference version'
-// in WaveSimulationFFTImpl.ComputeCurrentAmplitudesReference is based on the Curtis Mobley's
+// in LinearRandomFFTWaveSimulation::Impl.ComputeCurrentAmplitudesReference is based on the Curtis Mobley's
 // IDL code cgAnimate_2D_SeaSurface.py
 
 //***************************************************************************************************
@@ -27,7 +27,7 @@
 //* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
 //***************************************************************************************************
 
-#include "gz/waves/WaveSimulationFFT.hh"
+#include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
 #include <complex>
 #include <random>
@@ -40,20 +40,20 @@
 
 #include "gz/waves/WaveSpectrum.hh"
 #include "gz/waves/WaveSpreadingFunction.hh"
-#include "WaveSimulationFFTImpl.hh"
+#include "LinearRandomFFTWaveSimulationImpl.hh"
 
 namespace gz
 {
 namespace waves
 {
   //////////////////////////////////////////////////
-  WaveSimulationFFTImpl::~WaveSimulationFFTImpl()
+  LinearRandomFFTWaveSimulation::Impl::~Impl()
   {
     DestroyFFTWPlans();
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationFFTImpl::WaveSimulationFFTImpl(
+  LinearRandomFFTWaveSimulation::Impl::Impl(
     double lx, double ly, int nx, int ny) :
     lambda_(0.6),
     lx_(lx),
@@ -66,14 +66,14 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::SetLambda(double value)
+  void LinearRandomFFTWaveSimulation::Impl::SetLambda(double value)
   {
     lambda_ = value;
     ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::SetWindVelocity(double ux, double uy)
+  void LinearRandomFFTWaveSimulation::Impl::SetWindVelocity(double ux, double uy)
   {
     // Update wind velocity and recompute base amplitudes.
     u10_ = sqrt(ux*ux + uy *uy);
@@ -83,13 +83,13 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::SetTime(double time)
+  void LinearRandomFFTWaveSimulation::Impl::SetTime(double time)
   {
     ComputeCurrentAmplitudes(time);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeElevation(
+  void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
     Eigen::Ref<Eigen::MatrixXd> h)
   {
     // run the FFT
@@ -101,7 +101,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeElevationDerivatives(
+  void LinearRandomFFTWaveSimulation::Impl::ElevationDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
@@ -116,7 +116,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeDisplacements(
+  void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy)
   {
@@ -131,7 +131,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeDisplacementsDerivatives(
+  void LinearRandomFFTWaveSimulation::Impl::DisplacementDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dsxdx,
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
@@ -149,7 +149,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeBaseAmplitudes()
+  void LinearRandomFFTWaveSimulation::Impl::ComputeBaseAmplitudes()
   {
     InitWaveNumbers();
 
@@ -236,7 +236,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeCurrentAmplitudes(
+  void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
       double time)
   {
     // create 1d views
@@ -382,7 +382,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::InitWaveNumbers()
+  void LinearRandomFFTWaveSimulation::Impl::InitWaveNumbers()
   {
     kx_fft_  = Eigen::VectorXd::Zero(nx_);
     ky_fft_  = Eigen::VectorXd::Zero(ny_);
@@ -402,7 +402,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::CreateFFTWPlans()
+  void LinearRandomFFTWaveSimulation::Impl::CreateFFTWPlans()
   {
     /// \note the input and output arrays may be overridden during
     ///       planning, so allocate here before initialising.
@@ -468,7 +468,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::DestroyFFTWPlans()
+  void LinearRandomFFTWaveSimulation::Impl::DestroyFFTWPlans()
   {
     fftw_destroy_plan(fft_plan0_);
     fftw_destroy_plan(fft_plan1_);
@@ -482,69 +482,69 @@ namespace waves
 
   //////////////////////////////////////////////////
   //////////////////////////////////////////////////
-  WaveSimulationFFT::~WaveSimulationFFT()
+  LinearRandomFFTWaveSimulation::~LinearRandomFFTWaveSimulation()
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationFFT::WaveSimulationFFT(
+  LinearRandomFFTWaveSimulation::LinearRandomFFTWaveSimulation(
     double lx, double ly, int nx, int ny) :
-    impl_(new WaveSimulationFFTImpl(lx, ly, nx, ny))
+    impl_(new LinearRandomFFTWaveSimulation::Impl(lx, ly, nx, ny))
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::SetLambda(double value)
+  void LinearRandomFFTWaveSimulation::SetLambda(double value)
   {
     impl_->SetLambda(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::SetWindVelocity(double ux, double uy)
+  void LinearRandomFFTWaveSimulation::SetWindVelocity(double ux, double uy)
   {
     impl_->SetWindVelocity(ux, uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::SetTime(double value)
+  void LinearRandomFFTWaveSimulation::SetTime(double value)
   {
     impl_->SetTime(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeElevation(
+  void LinearRandomFFTWaveSimulation::ElevationAt(
     Eigen::Ref<Eigen::MatrixXd> h)
   {
-    impl_->ComputeElevation(h);
+    impl_->ElevationAt(h);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeElevationDerivatives(
+  void LinearRandomFFTWaveSimulation::ElevationDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
-    impl_->ComputeElevationDerivatives(dhdx, dhdy);
+    impl_->ElevationDerivAt(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeDisplacements(
+  void LinearRandomFFTWaveSimulation::DisplacementAt(
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy)
   {
-    impl_->ComputeDisplacements(sx, sy);
+    impl_->DisplacementAt(sx, sy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeDisplacementsDerivatives(
+  void LinearRandomFFTWaveSimulation::DisplacementDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dsxdx,
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeDisplacementsAndDerivatives(
+  void LinearRandomFFTWaveSimulation::DisplacementAndDerivAt(
     Eigen::Ref<Eigen::MatrixXd> h,
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy,
@@ -554,10 +554,10 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl_->ComputeElevation(h);
-    impl_->ComputeElevationDerivatives(dhdx, dhdy);
-    impl_->ComputeDisplacements(sx, sy);
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    impl_->ElevationAt(h);
+    impl_->ElevationDerivAt(dhdx, dhdy);
+    impl_->DisplacementAt(sx, sy);
+    impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
 }
 }

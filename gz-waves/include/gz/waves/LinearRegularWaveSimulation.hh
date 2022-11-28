@@ -13,10 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATION_HH_
-#define GZ_WAVES_WAVESIMULATION_HH_
+#ifndef GZ_WAVES_LINEARREGULARWAVESIMULATION_HH_
+#define GZ_WAVES_LINEARREGULARWAVESIMULATION_HH_
+
+#include <memory>
 
 #include <Eigen/Dense>
+
+#include "WaveSimulation.hh"
 
 using Eigen::MatrixXd;
 
@@ -24,57 +28,77 @@ namespace gz
 {
 namespace waves
 {
-  /// \todo(srmainwaring) make interface = either split out interpolation
-  ///       interface (preferred) or ensure all subclasses have implmentation. 
-  class WaveSimulation
+  /// The grid has sides with lengths lx and ly.
+  ///
+  /// There are nx, ny vertices in each direction.
+  ///
+  /// The simulation updates nx x ny vertices.
+  ///
+  /// The distance between vertices is dx = lx / nx and dy = ly / ny.
+  ///
+  /// All storage is assumed to be sized to nx x ny and the
+  /// vertices are traversed in column major order:
+  /// i.e. the innermost loop is over the x direction.
+  ///
+  class LinearRegularWaveSimulation : public WaveSimulation
   {
   public:
-    virtual ~WaveSimulation();
+    ~LinearRegularWaveSimulation();
 
-    WaveSimulation();
+    LinearRegularWaveSimulation(double lx, double ly,
+        int nx, int ny);
 
-    virtual void SetWindVelocity(double ux, double uy) = 0;
+    LinearRegularWaveSimulation(double lx, double ly, double lz,
+        int nx, int ny, int nz);
 
-    virtual void SetTime(double value) = 0;
+    void SetUseVectorised(bool value);
+
+    void SetDirection(double dir_x, double dir_y);
+
+    void SetAmplitude(double value);
+
+    void SetPeriod(double value);
+
+    virtual void SetWindVelocity(double ux, double uy) override;
+
+    virtual void SetTime(double value) override;
 
     ///// interpolation interface
     virtual void Elevation(
         double x, double y,
-        double &eta)
-    { assert(0 && "Not implemented"); }
+        double &eta) override;
 
     virtual void Elevation(
         const Eigen::Ref<const Eigen::VectorXd> &x,
         const Eigen::Ref<const Eigen::VectorXd> &y,
-        Eigen::Ref<Eigen::VectorXd> eta) {}
+        Eigen::Ref<Eigen::VectorXd> eta) override;
 
     virtual void Pressure(
         double x, double y, double z,
-        double &pressure)
-    { assert(0 && "Not implemented"); }
+        double &pressure) override;
 
     virtual void Pressure(
         const Eigen::Ref<const Eigen::VectorXd> &x,
         const Eigen::Ref<const Eigen::VectorXd> &y,
         const Eigen::Ref<const Eigen::VectorXd> &z,
-        Eigen::Ref<Eigen::VectorXd> pressure);
+        Eigen::Ref<Eigen::VectorXd> pressure) override;
 
     ///// lookup interface - array
     virtual void ElevationAt(
-        Eigen::Ref<Eigen::MatrixXd> h) = 0;
+        Eigen::Ref<Eigen::MatrixXd> h) override;
 
     virtual void ElevationDerivAt(
         Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> dhdy) override;
 
     virtual void DisplacementAt(
         Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> sy) override;
 
     virtual void DisplacementDerivAt(
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
     virtual void DisplacementAndDerivAt(
         Eigen::Ref<Eigen::MatrixXd> h,
@@ -84,29 +108,28 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dhdy,
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy) = 0;
+        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
     virtual void PressureAt(
         int iz,
-        Eigen::Ref<Eigen::MatrixXd> pressure)
-    { assert(0 && "Not implemented"); }
+        Eigen::Ref<Eigen::MatrixXd> pressure) override;
 
     ///// lookup interface - scalar
     virtual void ElevationAt(
         int ix, int iy,
-        double &eta)
-    { assert(0 && "Not implemented"); }
+        double &eta) override;
 
     virtual void DisplacementAt(
         int ix, int iy,
-        double &sx, double &sy)
-    { assert(0 && "Not implemented"); }
+        double &sx, double &sy) override;
 
     virtual void PressureAt(
         int ix, int iy, int iz,
-        double &pressure)
-    { assert(0 && "Not implemented"); }
+        double &pressure) override;
 
+  private:
+    class Impl;
+    std::unique_ptr<Impl> impl_;
   };
 }
 }

@@ -26,14 +26,12 @@ namespace gz
 {
 namespace waves
 {
-  class WaveSimulationFFTRefImpl;
-
-  class WaveSimulationFFTRef : public WaveSimulation
+  class LinearRandomFFTWaveSimulationRef : public WaveSimulation
   {
     public:
-      virtual ~WaveSimulationFFTRef();
+      virtual ~LinearRandomFFTWaveSimulationRef();
 
-      WaveSimulationFFTRef(double lx, double ly, int nx, int ny);
+      LinearRandomFFTWaveSimulationRef(double lx, double ly, int nx, int ny);
 
       void SetLambda(double lambda);
 
@@ -41,23 +39,23 @@ namespace waves
 
       virtual void SetTime(double value) override;
 
-      virtual void ComputeElevation(
+      virtual void ElevationAt(
           Eigen::Ref<Eigen::MatrixXd> h) override;
 
-      virtual void ComputeElevationDerivatives(
+      virtual void ElevationDerivAt(
           Eigen::Ref<Eigen::MatrixXd> dhdx,
           Eigen::Ref<Eigen::MatrixXd> dhdy) override;
 
-      virtual void ComputeDisplacements(
+      virtual void DisplacementAt(
           Eigen::Ref<Eigen::MatrixXd> sx,
           Eigen::Ref<Eigen::MatrixXd> sy) override;
 
-      virtual void ComputeDisplacementsDerivatives(
+      virtual void DisplacementDerivAt(
           Eigen::Ref<Eigen::MatrixXd> dsxdx,
           Eigen::Ref<Eigen::MatrixXd> dsydy,
           Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
-      virtual void ComputeDisplacementsAndDerivatives(
+      virtual void DisplacementAndDerivAt(
           Eigen::Ref<Eigen::MatrixXd> h,
           Eigen::Ref<Eigen::MatrixXd> sx,
           Eigen::Ref<Eigen::MatrixXd> sy,
@@ -67,8 +65,11 @@ namespace waves
           Eigen::Ref<Eigen::MatrixXd> dsydy,
           Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
 
+    // public class declaration - for testing
+    class Impl;
+
     private:
-      std::unique_ptr<WaveSimulationFFTRefImpl> impl_;
+      std::unique_ptr<Impl> impl_;
   };
 }
 }

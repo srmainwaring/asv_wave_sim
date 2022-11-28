@@ -1,0 +1,113 @@
+@startuml Wavefield
+
+scale 2
+
+' class Point {
+' }
+
+' class Pose {
+' }
+
+'-------------------------------------------------
+class Grid {
+  + Mesh GetMesh()
+}
+
+class TriangulatedGrid {
+  + void CreateMesh()
+  + void CreateTriangulation()
+  + bool Locate(Point query, int facIndex)
+  + bool Height(Point query, double &height)
+  + bool Interpolate(TriangulatedGrid &patch)
+  + void ApplyPose(Pose pose)
+  + void UpdatePoints(Mesh from)
+}
+
+'-------------------------------------------------
+class WaveParameters {
+}
+
+class Wavefield {
+   + void Update(double time)
+   + bool Height(Point point, double &height)
+   + WaveParameters GetParameters()
+   + void SetParameters(WaveParameters value)
+}
+
+Wavefield o-- "1" OceanTile : contains
+Wavefield o-- "1" TriangulatedGrid : contains
+Wavefield o-- "1" WaveParameters : contains
+
+class WavefieldSampler {
+   + Grid GetWaterPatch()
+   + double UpdatePatch()
+   + void ApplyPose(Pose pose)
+   + double ComputeDepth(Point point)
+}
+
+WavefieldSampler o-- "1" Wavefield : contains
+WavefieldSampler o-- "1" Grid : contains
+
+class OceanTile {
+  + void Update(double time)
+  + void UpdateMesh(double time)
+}
+
+OceanTile o-- "1" WaveSimulation : contains
+
+'-------------------------------------------------
+class WaveSimulation {
+  + void SetTime(double time)
+  + void ElevationAt()
+  + void ElevationDerivAt()
+  + void DisplacementAt()
+  + void DisplacementDerivAt()
+  + void DisplacementAndDerivAt()
+}
+
+class LinearRegularWaveSimulation {
+}
+
+WaveSimulation <|-- LinearRegularWaveSimulation 
+
+class TrochoidIrregularWaveSimulation {
+}
+
+WaveSimulation <|-- TrochoidIrregularWaveSimulation 
+
+class LinearRandomFFTWaveSimulation {
+}
+
+WaveSimulation <|-- LinearRandomFFTWaveSimulation 
+
+'-------------------------------------------------
+abstract class System
+interface ISystemConfigure
+interface ISystemPreUpdate
+
+class WavesModel {
+  + void Configure()
+  + void PreUpdate()
+}
+
+System <|-- WavesModel
+ISystemConfigure <|-[dashed]- WavesModel
+ISystemPreUpdate <|-[dashed]- WavesModel
+
+WavesModel o-- "1" Wavefield : contains
+WavesModel o-- "1" WaveParameters : contains
+
+class WavesVisual {
+  + void Configure()
+  + void PreUpdate()
+}
+ 
+System <|-- WavesVisual
+ISystemConfigure <|-[dashed]- WavesVisual
+ISystemPreUpdate <|-[dashed]- WavesVisual
+
+WavesVisual o-- "1" OceanTile : contains
+WavesVisual o-- "1" WaveParameters : contains
+
+
+@enduml

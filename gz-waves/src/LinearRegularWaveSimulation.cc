@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/WaveSimulationSinusoid.hh"
+#include "gz/waves/LinearRegularWaveSimulation.hh"
 #include "gz/waves/Physics.hh"
 
 #include <Eigen/Dense>
@@ -35,7 +35,7 @@ namespace waves
   ///
 
   //////////////////////////////////////////////////
-  // WaveSimulationSinusoid::Impl
+  // LinearRegularWaveSimulation::Impl
 
   /// model description
   ///
@@ -67,7 +67,7 @@ namespace waves
   ///
 
   //////////////////////////////////////////////////
-  class WaveSimulationSinusoid::Impl
+  class LinearRegularWaveSimulation::Impl
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -78,7 +78,7 @@ namespace waves
 
     Impl(double lx, double ly, double lz, int nx, int ny, int nz);
 
-    void Init();
+    void InitGrid();
 
     void SetUseVectorised(bool value);
 
@@ -92,23 +92,35 @@ namespace waves
 
     void SetTime(double value);
 
-    void ComputeElevation(
+    ///// interpolation interface
+    virtual void Elevation(
+        double x, double y,
+        double &eta);
+
+    virtual void Elevation(
+        const Eigen::Ref<const Eigen::VectorXd> &x,
+        const Eigen::Ref<const Eigen::VectorXd> &y,
+        Eigen::Ref<Eigen::VectorXd> eta);
+
+    virtual void Pressure(
+        double x, double y, double z,
+        double &pressure);
+
+    virtual void Pressure(
+        const Eigen::Ref<const Eigen::VectorXd> &x,
+        const Eigen::Ref<const Eigen::VectorXd> &y,
+        const Eigen::Ref<const Eigen::VectorXd> &z,
+        Eigen::Ref<Eigen::VectorXd> pressure);
+
+    ///// lookup interface
+    void ElevationAt(
         Eigen::Ref<Eigen::MatrixXd> h);
 
-    void ComputeElevationDerivatives(
+    void ElevationDerivAt(
         Eigen::Ref<Eigen::MatrixXd> dhdx,
         Eigen::Ref<Eigen::MatrixXd> dhdy);
 
-    void ComputeDisplacements(
-        Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy);
-
-    void ComputeDisplacementsDerivatives(
-        Eigen::Ref<Eigen::MatrixXd> dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy);
-
-    void ComputeDisplacementsAndDerivatives(
+    void DisplacementAndDerivAt(
         Eigen::Ref<Eigen::MatrixXd> h,
         Eigen::Ref<Eigen::MatrixXd> sx,
         Eigen::Ref<Eigen::MatrixXd> sy,
@@ -118,53 +130,81 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy);
 
-    void ComputePressureAt(
-        Eigen::Ref<Eigen::MatrixXd> pressure, int iz);
+    void ElevationAt(
+        int ix, int iy,
+        double &h);
 
+    void PressureAt(
+        int ix, int iy, int iz,
+        double &pressure);
+
+    void PressureAt(
+        int iz,
+        Eigen::Ref<Eigen::MatrixXd> pressure);
+
+    static inline void PreComputeCoeff(
+      double period, double t, double wave_angle,
+      double &w, double &wt, double &k, double &cos_angle, double &sin_angle)
+    {
+      w = 2.0 * M_PI / period;
+      wt = w * t;
+      k = Physics::DeepWaterDispersionToWavenumber(w);
+      cos_angle = std::cos(wave_angle);
+      sin_angle = std::sin(wave_angle);
+    }
 
     bool use_vectorised_{true};
 
-    // elevation
+    // elevation grid params
     int nx_{2};
     int ny_{2};
     double lx_{1.0};
     double ly_{1.0};
+    
+    // pressure grid params
+    int nz_{1};
+    double lz_{0.0};
+
+    // wave params
     double wave_angle_{0.0};
     double amplitude_{1.0};
     double period_{1.0};
     double time_{0.0};
-    
+
+    // derived
+    double dx_{0.0};
+    double dy_{0.0};
+    double lx_max_{0.0};
+    double lx_min_{0.0};
+    double ly_max_{0.0};
+    double ly_min_{0.0};
+
+    // vectorised
     Eigen::VectorXd x_;
     Eigen::VectorXd y_;
     Eigen::MatrixXd x_grid_;
     Eigen::MatrixXd y_grid_;
-
-    // pressure
-    double lz_{10.0};
-    int nz_{2};
-
     Eigen::VectorXd z_;
-
   };
 
   //////////////////////////////////////////////////
-  WaveSimulationSinusoid::Impl::~Impl()
+  LinearRegularWaveSimulation::Impl::~Impl()
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationSinusoid::Impl::Impl(
+  LinearRegularWaveSimulation::Impl::Impl(
       double lx, double ly, int nx, int ny) :
     nx_(nx),
     ny_(ny),
     lx_(lx),
     ly_(ly)
   {
-    Init();
+    InitGrid();
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationSinusoid::Impl::Impl(
+  LinearRegularWaveSimulation::Impl::Impl(
       double lx, double ly, double lz, int nx, int ny, int nz) :
     nx_(nx),
     ny_(ny),
@@ -173,25 +213,25 @@ namespace waves
     nz_(nz),
     lz_(lz)
   {
-    Init();
+    InitGrid();
   }
 
  //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::Init()
+  void LinearRegularWaveSimulation::Impl::InitGrid()
   {
     // grid spacing
-    double dx = lx_ / nx_;
-    double dy = ly_ / ny_;
+    dx_ = lx_ / nx_;
+    dy_ = ly_ / ny_;
 
     // x and y coordinates
-    double lx_min = - lx_ / 2.0;
-    double lx_max =   lx_ / 2.0;
-    double ly_min = - ly_ / 2.0;
-    double ly_max =   ly_ / 2.0;
+    lx_min_ = - lx_ / 2.0;
+    lx_max_ =   lx_ / 2.0;
+    ly_min_ = - ly_ / 2.0;
+    ly_max_ =   ly_ / 2.0;
 
     // linspaced is on closed interval (unlike Python which is open to right)
-    x_ = Eigen::VectorXd::LinSpaced(nx_, lx_min, lx_max - dx);
-    y_ = Eigen::VectorXd::LinSpaced(ny_, ly_min, ly_max - dy);
+    x_ = Eigen::VectorXd::LinSpaced(nx_, lx_min_, lx_max_ - dx_);
+    y_ = Eigen::VectorXd::LinSpaced(ny_, ly_min_, ly_max_ - dy_);
 
     // broadcast to matrices (aka meshgrid)
     x_grid_ = Eigen::MatrixXd::Zero(nx_, ny_);
@@ -212,52 +252,118 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetUseVectorised(bool value)
+  void LinearRegularWaveSimulation::Impl::SetUseVectorised(bool value)
   {
     use_vectorised_ = value;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetDirection(double dir_x, double dir_y)
+  void LinearRegularWaveSimulation::Impl::SetDirection(double dir_x, double dir_y)
   {
     wave_angle_ = std::atan2(dir_y, dir_x);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetAmplitude(double value)
+  void LinearRegularWaveSimulation::Impl::SetAmplitude(double value)
   {
     amplitude_ = value;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetPeriod(double value)
+  void LinearRegularWaveSimulation::Impl::SetPeriod(double value)
   {
     period_ = value;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetWindVelocity(
+  void LinearRegularWaveSimulation::Impl::SetWindVelocity(
       double /*_ux*/, double /*_uy*/)
   {
     // @TODO NO IMPLEMENTATION
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::SetTime(double value)
+  void LinearRegularWaveSimulation::Impl::SetTime(double value)
   {
     time_ = value;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeElevation(
+  void LinearRegularWaveSimulation::Impl::Elevation(
+      double x, double y,
+      double &eta)
+  {
+    double w, wt, k, cd, sd;
+    PreComputeCoeff(
+      period_, time_, wave_angle_, w, wt, k, cd, sd);
+
+    double a  = k * (x * cd + y * sd) - wt;
+    double ca = std::cos(a);
+    double h1 = amplitude_ * ca;
+    eta = h1;
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Impl::Elevation(
+      const Eigen::Ref<const Eigen::VectorXd> &x,
+      const Eigen::Ref<const Eigen::VectorXd> &y,
+      Eigen::Ref<Eigen::VectorXd> eta)
+  {
+    auto xit = x.cbegin();
+    auto yit = y.cbegin();
+    auto eit = eta.begin();
+    for ( ; xit != x.cend() && yit != y.cend() && eit != eta.end();
+      ++xit, ++yit, ++eit)
+    {
+      Elevation(*xit, *yit, *eit);
+    }
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Impl::Pressure(
+      double x, double y, double z,
+      double &pressure)
+  {
+    double w, wt, k, cd, sd;
+    PreComputeCoeff(
+      period_, time_, wave_angle_, w, wt, k, cd, sd);
+
+    // linear wave deep water pressure scaling factor
+    double e = std::exp(k * z);
+
+    double a  = k * (x * cd + y * sd) - wt;
+    double ca = std::cos(a);
+    double h1 = amplitude_ * ca;
+    double p1 = e * h1;
+    pressure = p1;
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Impl::Pressure(
+    const Eigen::Ref<const Eigen::VectorXd> &x,
+    const Eigen::Ref<const Eigen::VectorXd> &y,
+    const Eigen::Ref<const Eigen::VectorXd> &z,
+    Eigen::Ref<Eigen::VectorXd> pressure)
+  {
+    auto xit = x.cbegin();
+    auto yit = y.cbegin();
+    auto zit = z.cbegin(); 
+    auto pit = pressure.begin();
+    for ( ; xit != x.cend() && yit != y.cend() && pit != pressure.end();
+      ++xit, ++yit, ++zit, ++pit)
+    {
+      Pressure(*xit, *yit, *zit, *pit);
+    }
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Impl::ElevationAt(
     Eigen::Ref<Eigen::MatrixXd> h)
   {
     // derived wave properties
-    double w = 2.0 * M_PI / period_;
-    double wt = w * time_;
-    double k = Physics::DeepWaterDispersionToWavenumber(w);
-    double cd = std::cos(wave_angle_);
-    double sd = std::sin(wave_angle_);
+    double w, wt, k, cd, sd;
+    PreComputeCoeff(
+      period_, time_, wave_angle_, w, wt, k, cd, sd);
 
     if (use_vectorised_)
     {
@@ -269,16 +375,12 @@ namespace waves
     }
     else
     {
-      double dx = lx_ / nx_;
-      double dy = ly_ / ny_;
-      double lx_min = - lx_ / 2.0;
-      double ly_min = - ly_ / 2.0;
       for (int iy=0, idx=0; iy<ny_; ++iy)
       {
-        double y = iy * dy + ly_min;
+        double y = iy * dy_ + ly_min_;
         for (int ix=0; ix<nx_; ++ix, ++idx)
         {
-          double x = ix * dx + lx_min;
+          double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
           double ca = std::cos(a);
           double h1 = amplitude_ * ca;
@@ -289,16 +391,15 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeElevationDerivatives(
+  void LinearRegularWaveSimulation::Impl::ElevationDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
     // derived wave properties
-    double w = 2.0 * M_PI / period_;
-    double wt = w * time_;
-    double k = Physics::DeepWaterDispersionToWavenumber(w);
-    double cd = std::cos(wave_angle_);
-    double sd = std::sin(wave_angle_);
+    double w, wt, k, cd, sd;
+    PreComputeCoeff(
+      period_, time_, wave_angle_, w, wt, k, cd, sd);
+
     double dadx = k * cd;
     double dady = k * sd;
 
@@ -314,16 +415,12 @@ namespace waves
     }
     else
     {
-      double dx = lx_ / nx_;
-      double dy = ly_ / ny_;
-      double lx_min = - lx_ / 2.0;
-      double ly_min = - ly_ / 2.0;
       for (int iy=0, idx=0; iy<ny_; ++iy)
       {
-        double y = iy * dy + ly_min;
+        double y = iy * dy_ + ly_min_;
         for (int ix=0; ix<nx_; ++ix, ++idx)
         {
-          double x = ix * dx + lx_min;
+          double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
           double sa = std::sin(a);
           double dhdx1 = - dadx * amplitude_ * sa;
@@ -336,24 +433,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> /*sx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*sy*/)
-  {
-    // No xy-displacement
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
-  {
-    // No xy-displacement
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputeDisplacementsAndDerivatives(
+  void LinearRegularWaveSimulation::Impl::DisplacementAndDerivAt(
     Eigen::Ref<Eigen::MatrixXd> h,
     Eigen::Ref<Eigen::MatrixXd> /*sx*/,
     Eigen::Ref<Eigen::MatrixXd> /*sy*/,
@@ -364,11 +444,10 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
   {
     // derived wave properties
-    double w = 2.0 * M_PI / period_;
-    double wt = w * time_;
-    double k = Physics::DeepWaterDispersionToWavenumber(w);
-    double cd = std::cos(wave_angle_);
-    double sd = std::sin(wave_angle_);
+    double w, wt, k, cd, sd;
+    PreComputeCoeff(
+      period_, time_, wave_angle_, w, wt, k, cd, sd);
+
     double dadx = k * cd;
     double dady = k * sd;
 
@@ -387,16 +466,12 @@ namespace waves
     }
     else
     {
-      double dx = lx_ / nx_;
-      double dy = ly_ / ny_;
-      double lx_min = - lx_ / 2.0;
-      double ly_min = - ly_ / 2.0;
       for (int iy=0, idx=0; iy<ny_; ++iy)
       {
-        double y = iy * dy + ly_min;
+        double y = iy * dy_ + ly_min_;
         for (int ix=0; ix<nx_; ++ix, ++idx)
         {
-          double x = ix * dx + lx_min;
+          double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
           double ca = std::cos(a);
           double sa = std::sin(a);
@@ -412,20 +487,39 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::Impl::ComputePressureAt(
-    Eigen::Ref<Eigen::MatrixXd> pressure, int iz)
+  void LinearRegularWaveSimulation::Impl::ElevationAt(
+      int ix, int iy, double &eta)
+  {
+    double y = iy * dy_ + ly_min_;
+    double x = ix * dx_ + lx_min_;
+    Elevation(x, y, eta);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Impl::PressureAt(
+    int ix, int iy, int iz,
+    double &pressure)
+  {
+    double y = iy * dy_ + ly_min_;
+    double x = ix * dx_ + lx_min_;
+    double z = z_(iz);
+    Pressure(x, y, z, pressure);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Impl::PressureAt(
+    int iz,
+    Eigen::Ref<Eigen::MatrixXd> pressure)
   {
     // derived wave properties
-    double w = 2.0 * M_PI / period_;
-    double wt = w * time_;
-    double k = Physics::DeepWaterDispersionToWavenumber(w);
-    double cd = std::cos(wave_angle_);
-    double sd = std::sin(wave_angle_);
+    double w, wt, k, cd, sd;
+    PreComputeCoeff(
+      period_, time_, wave_angle_, w, wt, k, cd, sd);
 
-    // value of z at index ix
+    // value of z at index iz
     double z = z_(iz);
 
-    // linear deep water wave pressure scaling factor
+    // linear wave deep water pressure scaling factor
     double e = std::exp(k * z);
 
     if (use_vectorised_)
@@ -438,21 +532,16 @@ namespace waves
     }
     else
     {
-      double dx = lx_ / nx_;
-      double dy = ly_ / ny_;
-      double lx_min = - lx_ / 2.0;
-      double ly_min = - ly_ / 2.0;
       for (int iy=0, idx=0; iy<ny_; ++iy)
       {
-        double y = iy * dy + ly_min;
+        double y = iy * dy_ + ly_min_;
         for (int ix=0; ix<nx_; ++ix, ++idx)
         {
-          double x = ix * dx + lx_min;
+          double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
           double ca = std::cos(a);
           double h1 = amplitude_ * ca;
           double p = e * h1;
-
           pressure(idx, 0) = p;
         }
       }
@@ -461,112 +550,129 @@ namespace waves
 
   //////////////////////////////////////////////////
   //////////////////////////////////////////////////
-  WaveSimulationSinusoid::~WaveSimulationSinusoid()
+  LinearRegularWaveSimulation::~LinearRegularWaveSimulation()
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationSinusoid::WaveSimulationSinusoid(
+  LinearRegularWaveSimulation::LinearRegularWaveSimulation(
       double lx, double ly, int nx, int ny) :
-    impl_(new WaveSimulationSinusoid::Impl(lx, ly, nx, ny))
+    impl_(new LinearRegularWaveSimulation::Impl(lx, ly, nx, ny))
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationSinusoid::WaveSimulationSinusoid(
+  LinearRegularWaveSimulation::LinearRegularWaveSimulation(
       double lx, double ly, double lz, int nx, int ny, int nz) :
-    impl_(new WaveSimulationSinusoid::Impl(lx, ly, lz, nx, ny, nz))
+    impl_(new LinearRegularWaveSimulation::Impl(lx, ly, lz, nx, ny, nz))
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetUseVectorised(bool value)
+  void LinearRegularWaveSimulation::SetUseVectorised(bool value)
   {
     impl_->SetUseVectorised(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetDirection(double dir_x, double dir_y)
+  void LinearRegularWaveSimulation::SetDirection(double dir_x, double dir_y)
   {
     impl_->SetDirection(dir_x, dir_y);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetAmplitude(double value)
+  void LinearRegularWaveSimulation::SetAmplitude(double value)
   {
     impl_->SetAmplitude(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetPeriod(double value)
+  void LinearRegularWaveSimulation::SetPeriod(double value)
   {
     impl_->SetPeriod(value);
   }
 
   //////////////////////////////////////////////////
-  Eigen::VectorXd WaveSimulationSinusoid::X() const
-  {
-    return impl_->x_;
-  }
-
-  //////////////////////////////////////////////////
-  Eigen::VectorXd WaveSimulationSinusoid::Y() const
-  {
-    return impl_->y_;
-  }
-
-  //////////////////////////////////////////////////
-  Eigen::VectorXd WaveSimulationSinusoid::Z() const
-  {
-    return impl_->z_;
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetWindVelocity(double ux, double uy)
+  void LinearRegularWaveSimulation::SetWindVelocity(double ux, double uy)
   {
     impl_->SetWindVelocity(ux, uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::SetTime(double value)
+  void LinearRegularWaveSimulation::SetTime(double value)
   {
     impl_->SetTime(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> h)
+  void LinearRegularWaveSimulation::Elevation(
+    double x, double y,
+    double &eta)
   {
-    impl_->ComputeElevation(h);
+    impl_->Elevation(x, y, eta);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeElevationDerivatives(
+  void LinearRegularWaveSimulation::Elevation(
+    const Eigen::Ref<const Eigen::VectorXd> &x,
+    const Eigen::Ref<const Eigen::VectorXd> &y,
+    Eigen::Ref<Eigen::VectorXd> eta)
+  {
+    impl_->Elevation(x, y, eta);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Pressure(
+    double x, double y, double z,
+    double &pressure)
+  {
+    impl_->Pressure(x, y, z, pressure);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::Pressure(
+    const Eigen::Ref<const Eigen::VectorXd> &x,
+    const Eigen::Ref<const Eigen::VectorXd> &y,
+    const Eigen::Ref<const Eigen::VectorXd> &z,
+    Eigen::Ref<Eigen::VectorXd> pressure)
+  {
+    impl_->Pressure(x, y, z, pressure);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::ElevationAt(
+    Eigen::Ref<Eigen::MatrixXd> h)
+  {
+    impl_->ElevationAt(h);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::ElevationDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
-    impl_->ComputeElevationDerivatives(dhdx, dhdy);
+    impl_->ElevationDerivAt(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+  void LinearRegularWaveSimulation::DisplacementAt(
+    Eigen::Ref<Eigen::MatrixXd> /*sx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*sy*/)
   {
-    impl_->ComputeDisplacements(sx, sy);
+    // No xy-displacement
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+  void LinearRegularWaveSimulation::DisplacementDerivAt(
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
+    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
   {
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    // No xy-displacement
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputeDisplacementsAndDerivatives(
+  void LinearRegularWaveSimulation::DisplacementAndDerivAt(
     Eigen::Ref<Eigen::MatrixXd> h,
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy,
@@ -576,21 +682,44 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    // impl_->ComputeDisplacementsAndDerivatives(
+    // impl_->DisplacementAndDerivAt(
     //     h, sx, sy, dhdx, dhdy, dsxdx, dsydy, dsxdy);
 
     /// \todo undo flip of dhdx <---> dhdy once render plugin fixed
-    impl_->ComputeDisplacementsAndDerivatives(
+    impl_->DisplacementAndDerivAt(
         h, sx, sy, dhdy, dhdx, dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationSinusoid::ComputePressureAt(
-    Eigen::Ref<Eigen::MatrixXd> pressure,
-    int iz)
+  void LinearRegularWaveSimulation::ElevationAt(
+    int ix, int iy,
+    double &eta)
   {
-    impl_->ComputePressureAt(pressure, iz);
+    impl_->ElevationAt(ix, iy, eta);
   }
 
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::DisplacementAt(
+    int ix, int iy,
+    double &sx, double &sy)
+  {
+    // No xy-displacement
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::PressureAt(
+    int ix, int iy, int iz,
+    double &pressure)
+  {
+    impl_->PressureAt(ix, iy, iz, pressure);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRegularWaveSimulation::PressureAt(
+    int iz,
+    Eigen::Ref<Eigen::MatrixXd> pressure)
+  {
+    impl_->PressureAt(iz, pressure);
+  }
 }
 }

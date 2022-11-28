@@ -50,7 +50,7 @@
 #include "gz/waves/WaveParameters.hh"
 
 #include "gz/waves/WaveSimulation.hh"
-#include "gz/waves/WaveSimulationFFT.hh"
+#include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
 #include <gz/msgs/any.pb.h>
 #include <gz/msgs/param.pb.h>
@@ -898,8 +898,8 @@ void WavesVisualPrivate::InitWaveSim()
   double s   = this->waveParams->Steepness();
 
   // create wave model
-  std::unique_ptr<gz::waves::WaveSimulationFFT> waveSim(
-      new gz::waves::WaveSimulationFFT(L, L, N, N));
+  std::unique_ptr<gz::waves::LinearRandomFFTWaveSimulation> waveSim(
+      new gz::waves::LinearRandomFFTWaveSimulation(L, L, N, N));
 
   // set params
   waveSim->SetWindVelocity(ux, uy);
@@ -1090,7 +1090,7 @@ void WavesVisualPrivate::UpdateWaveSim()
   double simTime = this->currentSimTimeSeconds;
 
   mWaveSim->SetTime(simTime);
-  mWaveSim->ComputeDisplacementsAndDerivatives(
+  mWaveSim->DisplacementAndDerivAt(
       mHeights, mDisplacementsX, mDisplacementsY,
       mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
 }

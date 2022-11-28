@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-#include "gz/waves/WaveSimulationSinusoid.hh"
+#include "gz/waves/LinearRegularWaveSimulation.hh"
 
 using Eigen::MatrixXd;
 
@@ -34,14 +34,14 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class WaveSimSinusoidDispPerfFixturePerfFixture: public ::testing::Test
+class LinearRegularWaveSimDisplacementsFixture: public ::testing::Test
 { 
 public: 
-  virtual ~WaveSimSinusoidDispPerfFixturePerfFixture()
+  virtual ~LinearRegularWaveSimDisplacementsFixture()
   {
   }
 
-  WaveSimSinusoidDispPerfFixturePerfFixture()
+  LinearRegularWaveSimDisplacementsFixture()
   {
   } 
 
@@ -64,9 +64,9 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, Elevation)
+TEST_F(LinearRegularWaveSimDisplacementsFixture, Elevation)
 {
-  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(false);
 
   Eigen::VectorXd h(nx_ * ny_);
@@ -76,7 +76,7 @@ TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, Elevation)
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeElevation(h);
+    model.ElevationAt(h);
     sim_time += sim_step;
   }
   auto end = steady_clock::now();
@@ -87,9 +87,9 @@ TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, Elevation)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, ElevationVectorised)
+TEST_F(LinearRegularWaveSimDisplacementsFixture, ElevationVectorised)
 {
-  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(true);
 
   Eigen::VectorXd h(nx_ * ny_);
@@ -99,7 +99,7 @@ TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, ElevationVectorised)
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeElevation(h);
+    model.ElevationAt(h);
     sim_time += sim_step;
   }
   auto end = steady_clock::now();
@@ -110,9 +110,9 @@ TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, ElevationVectorised)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, DisplacementsAndDeriatives)
+TEST_F(LinearRegularWaveSimDisplacementsFixture, DisplacementsAndDeriatives)
 {
-  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(false);
 
   Eigen::VectorXd h(nx_ * ny_);
@@ -129,10 +129,10 @@ TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, DisplacementsAndDeriatives)
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeElevation(h);
-    model.ComputeElevationDerivatives(dhdx, dhdy);
-    model.ComputeDisplacements(sx, sy);
-    model.ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    model.ElevationAt(h);
+    model.ElevationDerivAt(dhdx, dhdy);
+    model.DisplacementAt(sx, sy);
+    model.DisplacementDerivAt(dsxdx, dsydy, dsxdy);
     sim_time += sim_step;
   }
   auto end = steady_clock::now();
@@ -143,10 +143,10 @@ TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture, DisplacementsAndDeriatives)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture,
+TEST_F(LinearRegularWaveSimDisplacementsFixture,
     DisplacementsAndDeriativesVectorised)
 {
-  WaveSimulationSinusoid model(lx_, ly_, nx_, ny_);
+  LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(true);
 
   Eigen::VectorXd h(nx_ * ny_);
@@ -163,10 +163,10 @@ TEST_F(WaveSimSinusoidDispPerfFixturePerfFixture,
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeElevation(h);
-    model.ComputeElevationDerivatives(dhdx, dhdy);
-    model.ComputeDisplacements(sx, sy);
-    model.ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    model.ElevationAt(h);
+    model.ElevationDerivAt(dhdx, dhdy);
+    model.DisplacementAt(sx, sy);
+    model.DisplacementDerivAt(dsxdx, dsydy, dsxdy);
     sim_time += sim_step;
   }
   auto end = steady_clock::now();

@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATIONFFTREF_IMPL_HH_
-#define GZ_WAVES_WAVESIMULATIONFFTREF_IMPL_HH_
+#ifndef GZ_WAVES_LINEARRANDOMFTWAVESIMULATION_REF_IMPL_HH_
+#define GZ_WAVES_LINEARRANDOMFTWAVESIMULATION_REF_IMPL_HH_
 
 #include <complex>
 
@@ -23,6 +23,7 @@
 #include <fftw3.h>
 
 #include "gz/waves/WaveSimulation.hh"
+#include "LinearRandomFFTWaveSimulationRef.hh"
 
 using Eigen::MatrixXcd;
 using Eigen::MatrixXd;
@@ -44,7 +45,7 @@ namespace gz
 namespace waves
 {
   //////////////////////////////////////////////////
-  // WaveSimulationFFTRefImpl
+  // LinearRandomFFTWaveSimulationRef::Impl
 
   typedef double fftw_data_type;
   typedef std::complex<fftw_data_type> complex;
@@ -55,16 +56,16 @@ namespace waves
   ///       must be made consistent and should be column major
   ///       which is the Eigen default..
   ///
-  class WaveSimulationFFTRefImpl
+  class LinearRandomFFTWaveSimulationRef::Impl
   {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     
     /// \brief Destructor 
-    ~WaveSimulationFFTRefImpl();
+    ~Impl();
 
     /// \brief Construct a wave simulation model
-    WaveSimulationFFTRefImpl(double lx, double ly, int nx, int ny);
+    Impl(double lx, double ly, int nx, int ny);
 
     /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double ux, double uy);
@@ -76,21 +77,21 @@ namespace waves
     void SetLambda(double value);
 
     /// \brief Calculate the sea surface elevation
-    void ComputeElevation(
+    void ElevationAt(
       Eigen::Ref<Eigen::MatrixXd> h);
 
     /// \brief Calculate the derivative of the elevation wrt x and y
-    void ComputeElevationDerivatives(
+    void ElevationDerivAt(
       Eigen::Ref<Eigen::MatrixXd> dhdx,
       Eigen::Ref<Eigen::MatrixXd> dhdy);
 
     /// \brief Calculate the sea surface horizontal displacements
-    void ComputeDisplacements(
+    void DisplacementAt(
       Eigen::Ref<Eigen::MatrixXd> sx,
       Eigen::Ref<Eigen::MatrixXd> sy);
 
     /// \brief Calculate the derivative of the horizontal displacements wrt x and y
-    void ComputeDisplacementsDerivatives(
+    void DisplacementDerivAt(
       Eigen::Ref<Eigen::MatrixXd> dsxdx,
       Eigen::Ref<Eigen::MatrixXd> dsydy,
       Eigen::Ref<Eigen::MatrixXd> dsxdy);
@@ -195,7 +196,7 @@ namespace waves
         double gravity=9.81);
 
     /// \brief For testing
-    friend class TestFixtureWaveSimulationFFT;
+    friend class LinearRandomFFTWaveSimFixture;
   };
 }
 }

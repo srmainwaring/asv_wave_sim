@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/WaveSimulationTrochoid.hh"
+#include "gz/waves/TrochoidIrregularWaveSimulation.hh"
 
 #include "gz/waves/Wavefield.hh"
 #include "gz/waves/WaveParameters.hh"
@@ -26,12 +26,14 @@ namespace waves
 {
 
   //////////////////////////////////////////////////
-  class WaveSimulationTrochoidImpl
+  class TrochoidIrregularWaveSimulation::Impl
   {
   public:
-    ~WaveSimulationTrochoidImpl();
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    WaveSimulationTrochoidImpl(
+    ~Impl();
+
+    Impl(
         int N,
         double L,
         std::shared_ptr<WaveParameters> params);
@@ -40,18 +42,18 @@ namespace waves
 
     void SetTime(double time);
 
-    void ComputeElevation(
+    void ElevationAt(
         Eigen::Ref<Eigen::MatrixXd> _heights);
 
-    void ComputeElevationDerivatives(
+    void ElevationDerivAt(
         Eigen::Ref<Eigen::MatrixXd> _dhdx,
         Eigen::Ref<Eigen::MatrixXd> _dhdy);
 
-    void ComputeDisplacements(
+    void DisplacementAt(
         Eigen::Ref<Eigen::MatrixXd> _sx,
         Eigen::Ref<Eigen::MatrixXd> _sy);
 
-    void ComputeDisplacementsDerivatives(
+    void DisplacementDerivAt(
         Eigen::Ref<Eigen::MatrixXd> _dsxdx,
         Eigen::Ref<Eigen::MatrixXd> _dsydy,
         Eigen::Ref<Eigen::MatrixXd> _dsxdy);
@@ -65,12 +67,12 @@ namespace waves
   };
 
   //////////////////////////////////////////////////
-  WaveSimulationTrochoidImpl::~WaveSimulationTrochoidImpl()
+  TrochoidIrregularWaveSimulation::Impl::~Impl()
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationTrochoidImpl::WaveSimulationTrochoidImpl(
+  TrochoidIrregularWaveSimulation::Impl::Impl(
     int N,
     double L,
     std::shared_ptr<WaveParameters> params) :
@@ -83,21 +85,21 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::SetWindVelocity(
+  void TrochoidIrregularWaveSimulation::Impl::SetWindVelocity(
       double /*ux*/, double /*uy*/)
   {
     // @TODO NO IMPLEMENTATION
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::SetTime(double time)
+  void TrochoidIrregularWaveSimulation::Impl::SetTime(double time)
   {
     // @TODO NO IMPLEMENTATION
     this->time_ = time;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::ComputeElevation(
+  void TrochoidIrregularWaveSimulation::Impl::ElevationAt(
     Eigen::Ref<Eigen::MatrixXd> h)
   {
     // Multiple wave params
@@ -147,7 +149,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::ComputeElevationDerivatives(
+  void TrochoidIrregularWaveSimulation::Impl::ElevationDerivAt(
     Eigen::Ref<Eigen::MatrixXd> /*dhdx*/,
     Eigen::Ref<Eigen::MatrixXd> /*dhdy*/)
   {
@@ -155,7 +157,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::ComputeDisplacements(
+  void TrochoidIrregularWaveSimulation::Impl::DisplacementAt(
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy)
   {
@@ -208,7 +210,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoidImpl::ComputeDisplacementsDerivatives(
+  void TrochoidIrregularWaveSimulation::Impl::DisplacementDerivAt(
     Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
     Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
     Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
@@ -217,65 +219,65 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationTrochoid::~WaveSimulationTrochoid()
+  TrochoidIrregularWaveSimulation::~TrochoidIrregularWaveSimulation()
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationTrochoid::WaveSimulationTrochoid(
+  TrochoidIrregularWaveSimulation::TrochoidIrregularWaveSimulation(
     int N,
     double L,
     std::shared_ptr<WaveParameters> params) :
-    impl_(new WaveSimulationTrochoidImpl(N, L, params))
+    impl_(new TrochoidIrregularWaveSimulation::Impl(N, L, params))
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::SetWindVelocity(double ux, double uy)
+  void TrochoidIrregularWaveSimulation::SetWindVelocity(double ux, double uy)
   {
     impl_->SetWindVelocity(ux, uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::SetTime(double time)
+  void TrochoidIrregularWaveSimulation::SetTime(double time)
   {
     impl_->SetTime(time);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeElevation(
+  void TrochoidIrregularWaveSimulation::ElevationAt(
     Eigen::Ref<Eigen::MatrixXd> h)
   {
-    impl_->ComputeElevation(h);
+    impl_->ElevationAt(h);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeElevationDerivatives(
+  void TrochoidIrregularWaveSimulation::ElevationDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dhdx,
     Eigen::Ref<Eigen::MatrixXd> dhdy)
   {
-    impl_->ComputeElevationDerivatives(dhdx, dhdy);
+    impl_->ElevationDerivAt(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeDisplacements(
+  void TrochoidIrregularWaveSimulation::DisplacementAt(
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy)
   {
-    impl_->ComputeDisplacements(sx, sy);
+    impl_->DisplacementAt(sx, sy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeDisplacementsDerivatives(
+  void TrochoidIrregularWaveSimulation::DisplacementDerivAt(
     Eigen::Ref<Eigen::MatrixXd> dsxdx,
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationTrochoid::ComputeDisplacementsAndDerivatives(
+  void TrochoidIrregularWaveSimulation::DisplacementAndDerivAt(
     Eigen::Ref<Eigen::MatrixXd> h,
     Eigen::Ref<Eigen::MatrixXd> sx,
     Eigen::Ref<Eigen::MatrixXd> sy,
@@ -285,10 +287,10 @@ namespace waves
     Eigen::Ref<Eigen::MatrixXd> dsydy,
     Eigen::Ref<Eigen::MatrixXd> dsxdy)
   {
-    impl_->ComputeElevation(h);
-    impl_->ComputeElevationDerivatives(dhdx, dhdy);
-    impl_->ComputeDisplacements(sx, sy);
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    impl_->ElevationAt(h);
+    impl_->ElevationDerivAt(dhdx, dhdy);
+    impl_->DisplacementAt(sx, sy);
+    impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
 }
 }
