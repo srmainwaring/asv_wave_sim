@@ -148,6 +148,41 @@ namespace waves
     dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
   }
 
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
+      int ix, int iy,
+      double &eta)
+  {
+    // run the FFT
+    fftw_execute(fft_plan0_);
+
+    // select value
+    eta = fft_out0_(ix, iy);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
+      int ix, int iy,
+      double &sx, double &sy)
+  {
+    // run the FFTs
+    fftw_execute(fft_plan3_);
+    fftw_execute(fft_plan4_);
+
+    // change from row to column major storage and scale
+    sy = fft_out3_(ix, iy) * lambda_ * -1.0;
+    sx = fft_out4_(ix, iy) * lambda_ * -1.0;
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::PressureAt(
+      int /*ix*/, int /*iy*/, int /*iz*/,
+      double &/*pressure*/)
+  {
+    assert(0 && "Not implemented");
+  }
+
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::ComputeBaseAmplitudes()
   {
@@ -559,5 +594,30 @@ namespace waves
     impl_->DisplacementAt(sx, sy);
     impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::ElevationAt(
+      int ix, int iy,
+      double &eta)
+  {
+    impl_->ElevationAt(ix, iy, eta);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::DisplacementAt(
+      int ix, int iy,
+      double &sx, double &sy)
+  {
+    impl_->DisplacementAt(ix, iy, sx, sy);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::PressureAt(
+      int ix, int iy, int iz,
+      double &pressure)
+  {
+    impl_->PressureAt(ix, iy, iz, pressure);
+  }
+
 }
 }

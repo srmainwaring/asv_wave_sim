@@ -102,7 +102,19 @@ namespace waves
       Eigen::Ref<Eigen::MatrixXd> dsxdx,
       Eigen::Ref<Eigen::MatrixXd> dsydy,
       Eigen::Ref<Eigen::MatrixXd> dsxdy);
-   
+
+    void ElevationAt(
+        int ix, int iy,
+        double &eta);
+
+    void DisplacementAt(
+        int ix, int iy,
+        double &sx, double &sy);
+
+    void PressureAt(
+        int ix, int iy, int iz,
+        double &pressure);
+
     /// \brief Calculate the base (time-independent) Fourier amplitudes
     void ComputeBaseAmplitudes();
 

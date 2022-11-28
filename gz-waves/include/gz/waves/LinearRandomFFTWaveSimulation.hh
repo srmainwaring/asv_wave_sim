@@ -41,6 +41,7 @@ namespace waves
     virtual void SetTime(double value) override;
 
     ///// interpolation interface
+    #if 0
     virtual void Elevation(
         double x, double y,
         double &eta) override;
@@ -59,6 +60,7 @@ namespace waves
         const Eigen::Ref<const Eigen::VectorXd> &y,
         const Eigen::Ref<const Eigen::VectorXd> &z,
         Eigen::Ref<Eigen::VectorXd> pressure) override;
+    #endif
 
     ///// lookup interface - array
     virtual void ElevationAt(
@@ -86,6 +88,19 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
+
+    ///// lookup interface - scalar
+    virtual void ElevationAt(
+        int ix, int iy,
+        double &eta) override;
+
+    virtual void DisplacementAt(
+        int ix, int iy,
+        double &sx, double &sy) override;
+
+    virtual void PressureAt(
+        int ix, int iy, int iz,
+        double &pressure) override;
 
     // public class declaration - for testing
     class Impl;
