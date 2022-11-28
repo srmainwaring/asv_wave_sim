@@ -85,23 +85,27 @@ namespace waves
 
     /// \brief Calculate the sea surface elevation
     void ElevationAt(
-      Eigen::Ref<Eigen::MatrixXd> h);
+        Eigen::Ref<Eigen::MatrixXd> h);
 
     /// \brief Calculate the derivative of the elevation wrt x and y
     void ElevationDerivAt(
-      Eigen::Ref<Eigen::MatrixXd> dhdx,
-      Eigen::Ref<Eigen::MatrixXd> dhdy);
+        Eigen::Ref<Eigen::MatrixXd> dhdx,
+        Eigen::Ref<Eigen::MatrixXd> dhdy);
 
     /// \brief Calculate the sea surface horizontal displacements
     void DisplacementAt(
-      Eigen::Ref<Eigen::MatrixXd> sx,
-      Eigen::Ref<Eigen::MatrixXd> sy);
+        Eigen::Ref<Eigen::MatrixXd> sx,
+        Eigen::Ref<Eigen::MatrixXd> sy);
 
     /// \brief Calculate the derivative of the horizontal displacements wrt x and y
     void DisplacementDerivAt(
-      Eigen::Ref<Eigen::MatrixXd> dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> dsydy,
-      Eigen::Ref<Eigen::MatrixXd> dsxdy);
+        Eigen::Ref<Eigen::MatrixXd> dsxdx,
+        Eigen::Ref<Eigen::MatrixXd> dsydy,
+        Eigen::Ref<Eigen::MatrixXd> dsxdy);
+
+    void PressureAt(
+        int iz,
+        Eigen::Ref<Eigen::MatrixXd> pressure);
 
     void ElevationAt(
         int ix, int iy,

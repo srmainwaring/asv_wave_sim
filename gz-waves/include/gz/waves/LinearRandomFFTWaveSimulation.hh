@@ -40,7 +40,7 @@ namespace waves
 
     virtual void SetTime(double value) override;
 
-    ///// interpolation interface
+    ///// interpolation interface - not yet directly supported for FFT.
     #if 0
     virtual void Elevation(
         double x, double y,
@@ -88,6 +88,10 @@ namespace waves
         Eigen::Ref<Eigen::MatrixXd> dsxdx,
         Eigen::Ref<Eigen::MatrixXd> dsydy,
         Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
+
+    virtual void PressureAt(
+        int iz,
+        Eigen::Ref<Eigen::MatrixXd> pressure) override;
 
     ///// lookup interface - scalar
     virtual void ElevationAt(
