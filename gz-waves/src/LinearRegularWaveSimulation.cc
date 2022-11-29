@@ -18,8 +18,8 @@
 
 #include <Eigen/Dense>
 
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
+using Eigen::ArrayXXd;
+using Eigen::ArrayXd;
 
 namespace gz
 {
@@ -98,37 +98,37 @@ namespace waves
         double &eta);
 
     void Elevation(
-        const Eigen::Ref<const Eigen::VectorXd> &x,
-        const Eigen::Ref<const Eigen::VectorXd> &y,
-        Eigen::Ref<Eigen::VectorXd> eta);
+        const Eigen::Ref<const Eigen::ArrayXd> &x,
+        const Eigen::Ref<const Eigen::ArrayXd> &y,
+        Eigen::Ref<Eigen::ArrayXd> eta);
 
     void Pressure(
         double x, double y, double z,
         double &pressure);
 
     void Pressure(
-        const Eigen::Ref<const Eigen::VectorXd> &x,
-        const Eigen::Ref<const Eigen::VectorXd> &y,
-        const Eigen::Ref<const Eigen::VectorXd> &z,
-        Eigen::Ref<Eigen::VectorXd> pressure);
+        const Eigen::Ref<const Eigen::ArrayXd> &x,
+        const Eigen::Ref<const Eigen::ArrayXd> &y,
+        const Eigen::Ref<const Eigen::ArrayXd> &z,
+        Eigen::Ref<Eigen::ArrayXd> pressure);
 
     ///// lookup interface
     void ElevationAt(
-        Eigen::Ref<Eigen::MatrixXd> h);
+        Eigen::Ref<Eigen::ArrayXXd> h);
 
     void ElevationDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy);
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy);
 
     void DisplacementAndDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> h,
-        Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy,
-        Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy);
+        Eigen::Ref<Eigen::ArrayXXd> h,
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy,
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy);
 
     void ElevationAt(
         int ix, int iy,
@@ -140,7 +140,7 @@ namespace waves
 
     void PressureAt(
         int iz,
-        Eigen::Ref<Eigen::MatrixXd> pressure);
+        Eigen::Ref<Eigen::ArrayXXd> pressure);
 
     static inline void PreComputeCoeff(
       double period, double t, double wave_angle,
@@ -180,11 +180,11 @@ namespace waves
     double ly_min_{0.0};
 
     // vectorised
-    Eigen::VectorXd x_;
-    Eigen::VectorXd y_;
-    Eigen::MatrixXd x_grid_;
-    Eigen::MatrixXd y_grid_;
-    Eigen::VectorXd z_;
+    Eigen::ArrayXd x_;
+    Eigen::ArrayXd y_;
+    Eigen::ArrayXXd x_grid_;
+    Eigen::ArrayXXd y_grid_;
+    Eigen::ArrayXd z_;
   };
 
   //////////////////////////////////////////////////
@@ -230,23 +230,23 @@ namespace waves
     ly_max_ =   ly_ / 2.0;
 
     // linspaced is on closed interval (unlike Python which is open to right)
-    x_ = Eigen::VectorXd::LinSpaced(nx_, lx_min_, lx_max_ - dx_);
-    y_ = Eigen::VectorXd::LinSpaced(ny_, ly_min_, ly_max_ - dy_);
+    x_ = Eigen::ArrayXd::LinSpaced(nx_, lx_min_, lx_max_ - dx_);
+    y_ = Eigen::ArrayXd::LinSpaced(ny_, ly_min_, ly_max_ - dy_);
 
     // broadcast to matrices (aka meshgrid)
-    x_grid_ = Eigen::MatrixXd::Zero(nx_, ny_);
-    y_grid_ = Eigen::MatrixXd::Zero(nx_, ny_);
+    x_grid_ = Eigen::ArrayXXd::Zero(nx_, ny_);
+    y_grid_ = Eigen::ArrayXXd::Zero(nx_, ny_);
     x_grid_.colwise() += x_;
     y_grid_.rowwise() += y_.transpose();
 
     // pressure sample points (z is below the free surface)
-    Eigen::VectorXd zr = Eigen::VectorXd::Zero(nz_);
+    Eigen::ArrayXd zr = Eigen::ArrayXd::Zero(nz_);
     if (nz_ > 1)
     {
       // first element is zero - fill nz - 1 remaining elements
-      Eigen::VectorXd ln_z = Eigen::VectorXd::LinSpaced(
+      Eigen::ArrayXd ln_z = Eigen::ArrayXd::LinSpaced(
           nz_ - 1, -std::log(lz_), std::log(lz_));
-      zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z.array());
+      zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z);
     }
     z_ = zr.reverse();
   }
@@ -305,9 +305,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::Elevation(
-      const Eigen::Ref<const Eigen::VectorXd> &x,
-      const Eigen::Ref<const Eigen::VectorXd> &y,
-      Eigen::Ref<Eigen::VectorXd> eta)
+      const Eigen::Ref<const Eigen::ArrayXd> &x,
+      const Eigen::Ref<const Eigen::ArrayXd> &y,
+      Eigen::Ref<Eigen::ArrayXd> eta)
   {
     auto xit = x.cbegin();
     auto yit = y.cbegin();
@@ -340,10 +340,10 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::Pressure(
-    const Eigen::Ref<const Eigen::VectorXd> &x,
-    const Eigen::Ref<const Eigen::VectorXd> &y,
-    const Eigen::Ref<const Eigen::VectorXd> &z,
-    Eigen::Ref<Eigen::VectorXd> pressure)
+    const Eigen::Ref<const Eigen::ArrayXd> &x,
+    const Eigen::Ref<const Eigen::ArrayXd> &y,
+    const Eigen::Ref<const Eigen::ArrayXd> &z,
+    Eigen::Ref<Eigen::ArrayXd> pressure)
   {
     auto xit = x.cbegin();
     auto yit = y.cbegin();
@@ -358,7 +358,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::ElevationAt(
-    Eigen::Ref<Eigen::MatrixXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h)
   {
     // derived wave properties
     double w, wt, k, cd, sd;
@@ -367,10 +367,10 @@ namespace waves
 
     if (use_vectorised_)
     {
-      Eigen::MatrixXd a = k * (x_grid_.array() * cd
-          + y_grid_.array() * sd) - wt;
-      Eigen::MatrixXd ca = Eigen::cos(a.array());
-      Eigen::MatrixXd h1 = amplitude_ * ca.array();
+      Eigen::ArrayXXd a = k * (x_grid_ * cd
+          + y_grid_ * sd) - wt;
+      Eigen::ArrayXXd ca = Eigen::cos(a);
+      Eigen::ArrayXXd h1 = amplitude_ * ca;
       h = h1.reshaped();
     }
     else
@@ -392,8 +392,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::ElevationDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy)
   {
     // derived wave properties
     double w, wt, k, cd, sd;
@@ -405,11 +405,11 @@ namespace waves
 
     if (use_vectorised_)
     {
-      Eigen::MatrixXd a = k * (x_grid_.array() * cd
-          + y_grid_.array() * sd) - wt;
-      Eigen::MatrixXd sa = Eigen::sin(a.array());
-      Eigen::MatrixXd dhdx1 = - dadx * amplitude_ * sa.array();
-      Eigen::MatrixXd dhdy1 = - dady * amplitude_ * sa.array();
+      Eigen::ArrayXXd a = k * (x_grid_ * cd
+          + y_grid_ * sd) - wt;
+      Eigen::ArrayXXd sa = Eigen::sin(a);
+      Eigen::ArrayXXd dhdx1 = - dadx * amplitude_ * sa;
+      Eigen::ArrayXXd dhdy1 = - dady * amplitude_ * sa;
       dhdx = dhdx1.reshaped();
       dhdy = dhdy1.reshaped();
     }
@@ -434,14 +434,14 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::DisplacementAndDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> h,
-    Eigen::Ref<Eigen::MatrixXd> /*sx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*sy*/,
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy,
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
+    Eigen::Ref<Eigen::ArrayXXd> h,
+    Eigen::Ref<Eigen::ArrayXXd> /*sx*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*sy*/,
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy,
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
   {
     // derived wave properties
     double w, wt, k, cd, sd;
@@ -453,13 +453,13 @@ namespace waves
 
     if (use_vectorised_)
     {
-      Eigen::MatrixXd a = k * (x_grid_.array() * cd
-          + y_grid_.array() * sd) - wt;
-      Eigen::MatrixXd ca = Eigen::cos(a.array());
-      Eigen::MatrixXd sa = Eigen::sin(a.array());
-      Eigen::MatrixXd h1 = amplitude_ * ca.array();
-      Eigen::MatrixXd dhdx1 = - dadx * amplitude_ * sa.array();
-      Eigen::MatrixXd dhdy1 = - dady * amplitude_ * sa.array();
+      Eigen::ArrayXXd a = k * (x_grid_ * cd
+          + y_grid_ * sd) - wt;
+      Eigen::ArrayXXd ca = Eigen::cos(a);
+      Eigen::ArrayXXd sa = Eigen::sin(a);
+      Eigen::ArrayXXd h1 = amplitude_ * ca;
+      Eigen::ArrayXXd dhdx1 = - dadx * amplitude_ * sa;
+      Eigen::ArrayXXd dhdy1 = - dady * amplitude_ * sa;
       h = h1.reshaped();
       dhdx = dhdx1.reshaped();
       dhdy = dhdy1.reshaped();
@@ -509,7 +509,7 @@ namespace waves
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::PressureAt(
     int iz,
-    Eigen::Ref<Eigen::MatrixXd> pressure)
+    Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     // derived wave properties
     double w, wt, k, cd, sd;
@@ -524,10 +524,10 @@ namespace waves
 
     if (use_vectorised_)
     {
-      Eigen::MatrixXd a = k * (x_grid_.array() * cd
-          + y_grid_.array() * sd) - wt;
-      Eigen::MatrixXd ca = Eigen::cos(a.array());
-      Eigen::MatrixXd p  = e * amplitude_ * ca.array();
+      Eigen::ArrayXXd a = k * (x_grid_ * cd
+          + y_grid_ * sd) - wt;
+      Eigen::ArrayXXd ca = Eigen::cos(a);
+      Eigen::ArrayXXd p  = e * amplitude_ * ca;
       pressure = p.reshaped();
     }
     else
@@ -614,9 +614,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Elevation(
-    const Eigen::Ref<const Eigen::VectorXd> &x,
-    const Eigen::Ref<const Eigen::VectorXd> &y,
-    Eigen::Ref<Eigen::VectorXd> eta)
+    const Eigen::Ref<const Eigen::ArrayXd> &x,
+    const Eigen::Ref<const Eigen::ArrayXd> &y,
+    Eigen::Ref<Eigen::ArrayXd> eta)
   {
     impl_->Elevation(x, y, eta);
   }
@@ -631,56 +631,56 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Pressure(
-    const Eigen::Ref<const Eigen::VectorXd> &x,
-    const Eigen::Ref<const Eigen::VectorXd> &y,
-    const Eigen::Ref<const Eigen::VectorXd> &z,
-    Eigen::Ref<Eigen::VectorXd> pressure)
+    const Eigen::Ref<const Eigen::ArrayXd> &x,
+    const Eigen::Ref<const Eigen::ArrayXd> &y,
+    const Eigen::Ref<const Eigen::ArrayXd> &z,
+    Eigen::Ref<Eigen::ArrayXd> pressure)
   {
     impl_->Pressure(x, y, z, pressure);
   }
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::ElevationAt(
-    Eigen::Ref<Eigen::MatrixXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h)
   {
     impl_->ElevationAt(h);
   }
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::ElevationDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy)
   {
     impl_->ElevationDerivAt(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::DisplacementAt(
-    Eigen::Ref<Eigen::MatrixXd> /*sx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*sy*/)
+    Eigen::Ref<Eigen::ArrayXXd> /*sx*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*sy*/)
   {
     // No xy-displacement
   }
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::DisplacementDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
   {
     // No xy-displacement
   }
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::DisplacementAndDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> h,
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy,
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> h,
+    Eigen::Ref<Eigen::ArrayXXd> sx,
+    Eigen::Ref<Eigen::ArrayXXd> sy,
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+    Eigen::Ref<Eigen::ArrayXXd> dsydy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
   {
     // impl_->DisplacementAndDerivAt(
     //     h, sx, sy, dhdx, dhdy, dsxdx, dsydy, dsxdy);
@@ -717,7 +717,7 @@ namespace waves
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::PressureAt(
     int iz,
-    Eigen::Ref<Eigen::MatrixXd> pressure)
+    Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     impl_->PressureAt(iz, pressure);
   }

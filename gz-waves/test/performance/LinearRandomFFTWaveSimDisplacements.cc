@@ -23,7 +23,7 @@
 
 #include "LinearRandomFFTWaveSimulationImpl.hh"
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 using std::chrono::steady_clock;
 using std::chrono::milliseconds;
@@ -53,7 +53,7 @@ TEST_F(LinearRandomFFTWaveSimTest, Elevation)
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
 
-  Eigen::VectorXd h(nx_ * ny_);
+  Eigen::ArrayXd h(nx_ * ny_);
 
   double sim_time = 0.0;
   double sim_step = 0.001;
@@ -77,14 +77,14 @@ TEST_F(LinearRandomFFTWaveSimTest, DisplacementsAndDeriatives)
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
 
-  Eigen::VectorXd h(nx_ * ny_);
-  Eigen::VectorXd dhdx(nx_ * ny_);
-  Eigen::VectorXd dhdy(nx_ * ny_);
-  Eigen::VectorXd sx(nx_ * ny_);
-  Eigen::VectorXd sy(nx_ * ny_);
-  Eigen::VectorXd dsxdx(nx_ * ny_);
-  Eigen::VectorXd dsydy(nx_ * ny_);
-  Eigen::VectorXd dsxdy(nx_ * ny_);
+  Eigen::ArrayXd h(nx_ * ny_);
+  Eigen::ArrayXd dhdx(nx_ * ny_);
+  Eigen::ArrayXd dhdy(nx_ * ny_);
+  Eigen::ArrayXd sx(nx_ * ny_);
+  Eigen::ArrayXd sy(nx_ * ny_);
+  Eigen::ArrayXd dsxdx(nx_ * ny_);
+  Eigen::ArrayXd dsydy(nx_ * ny_);
+  Eigen::ArrayXd dsxdy(nx_ * ny_);
 
   double sim_time = 0.0;
   double sim_step = 0.001;

@@ -103,7 +103,7 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumRegression)
   }
 }
 
-TEST(WaveSpectrum, PiersonMoskowitzSpectrumMatrixXd)
+TEST(WaveSpectrum, PiersonMoskowitzSpectrumArrayXXd)
 {
   { // Eigen array version
     double tolerance = 1.0e-16;
@@ -117,8 +117,8 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumMatrixXd)
     double ky_nyquist = M_PI * ny / ly;
 
     // create wavenumber vectors
-    Eigen::VectorXd kx_v(nx);
-    Eigen::VectorXd ky_v(ny);
+    Eigen::ArrayXd kx_v(nx);
+    Eigen::ArrayXd ky_v(ny);
 
     for (int i=0; i<nx; ++i)
     {
@@ -130,19 +130,19 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumMatrixXd)
     }
 
     // broadcast to matrices (aka meshgrid)
-    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx, ny);
     kx.colwise() += kx_v;
     
-    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx, ny);
     ky.rowwise() += ky_v.transpose();
 
-    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
-    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
-    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
+    Eigen::ArrayXXd kx2 = Eigen::pow(kx, 2.0);
+    Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
+    Eigen::ArrayXXd k = Eigen::sqrt(kx2 + ky2);
 
     PiersonMoskowitzWaveSpectrum spectrum;
 
-    Eigen::MatrixXd cap_s = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd cap_s = Eigen::ArrayXXd::Zero(nx, ny);
     spectrum.Evaluate(cap_s, k);
 
     for (int i=0; i<nx; ++i)
@@ -232,7 +232,7 @@ TEST(WaveSpectrum, ECKVSpectrumRegression)
   }
 }
 
-TEST(WaveSpectrum, ECKVSpectrumMatrixXd)
+TEST(WaveSpectrum, ECKVSpectrumArrayXXd)
 {
   { // Eigen array version
     double tolerance = 1.0e-16;
@@ -246,8 +246,8 @@ TEST(WaveSpectrum, ECKVSpectrumMatrixXd)
     double ky_nyquist = M_PI * ny / ly;
 
     // create wavenumber vectors
-    Eigen::VectorXd kx_v(nx);
-    Eigen::VectorXd ky_v(ny);
+    Eigen::ArrayXd kx_v(nx);
+    Eigen::ArrayXd ky_v(ny);
 
     for (int i=0; i<nx; ++i)
     {
@@ -259,19 +259,19 @@ TEST(WaveSpectrum, ECKVSpectrumMatrixXd)
     }
 
     // broadcast to matrices (aka meshgrid)
-    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx, ny);
     kx.colwise() += kx_v;
     
-    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx, ny);
     ky.rowwise() += ky_v.transpose();
 
-    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
-    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
-    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
+    Eigen::ArrayXXd kx2 = Eigen::pow(kx, 2.0);
+    Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
+    Eigen::ArrayXXd k = Eigen::sqrt(kx2 + ky2);
 
     ECKVWaveSpectrum spectrum;
 
-    Eigen::MatrixXd cap_s = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd cap_s = Eigen::ArrayXXd::Zero(nx, ny);
     spectrum.Evaluate(cap_s, k);
 
     for (int i=0; i<nx; ++i)
@@ -302,8 +302,8 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
     double ky_nyquist = M_PI * ny / ly;
 
     // create wavenumber vectors
-    Eigen::VectorXd kx_v(nx);
-    Eigen::VectorXd ky_v(ny);
+    Eigen::ArrayXd kx_v(nx);
+    Eigen::ArrayXd ky_v(ny);
 
     for (int i=0; i<nx; ++i)
     {
@@ -315,19 +315,19 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
     }
 
     // broadcast to matrices (aka meshgrid)
-    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx, ny);
     kx.colwise() += kx_v;
     
-    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx, ny);
     ky.rowwise() += ky_v.transpose();
 
-    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
-    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
-    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
+    Eigen::ArrayXXd kx2 = Eigen::pow(kx, 2.0);
+    Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
+    Eigen::ArrayXXd k = Eigen::sqrt(kx2 + ky2);
 
     ECKVWaveSpectrum spectrum(u10, cap_omega_c);
 
-    Eigen::MatrixXd cap_s = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd cap_s = Eigen::ArrayXXd::Zero(nx, ny);
     spectrum.Evaluate(cap_s, k);
 
     for (int i=0; i<nx; ++i)

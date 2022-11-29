@@ -34,7 +34,7 @@
 using namespace gz;
 using namespace waves;
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
@@ -65,7 +65,7 @@ TEST(WaveSimulation, TrochoidIrregularWaveSimulation)
       new TrochoidIrregularWaveSimulation(nx, lx, wave_params));
 
   // Compute the initial height field.
-  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx * ny);
+  Eigen::ArrayXd h = Eigen::ArrayXd::Zero(nx * ny);
   wave_sim->SetTime(0.0);
   wave_sim->ElevationAt(h);
 
@@ -141,7 +141,7 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirX)
   double dx = lx_ / nx_;
 
   // Verify heights
-  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->ElevationAt(h);
 
   for (int iy=0, idx=0; iy<ny_; ++iy)
@@ -183,7 +183,7 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXY)
   double sd = std::sin(theta);
 
   // Verify heights
-  Eigen::VectorXd h = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->ElevationAt(h);
 
   for (int iy=0, idx=0; iy<ny_; ++iy)
@@ -213,8 +213,8 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacementsDirX)
   wave_sim->SetTime(5.0);
 
   // Verify displacements (expect zero for sinusoid waves)
-  Eigen::VectorXd sx = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd sy = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sx = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sy = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->DisplacementAt(sx, sy);
 
   for (int iy=0, idx=0; iy<ny_; ++iy)
@@ -243,12 +243,12 @@ TEST_F(LinearRegularWaveSimFixture, TestEigenMeshGrid)
   double ly_max =   ly_ / 2.0;
 
   // linspaced is on closed interval (unlike Python which is open to right)
-  Eigen::VectorXd x_v = Eigen::VectorXd::LinSpaced(nx_, lx_min, lx_max - dx);
-  Eigen::VectorXd y_v = Eigen::VectorXd::LinSpaced(ny_, ly_min, ly_max - dy);
+  Eigen::ArrayXd x_v = Eigen::ArrayXd::LinSpaced(nx_, lx_min, lx_max - dx);
+  Eigen::ArrayXd y_v = Eigen::ArrayXd::LinSpaced(ny_, ly_min, ly_max - dy);
 
   // broadcast to matrices (aka meshgrid)
-  Eigen::MatrixXd x_grid = Eigen::MatrixXd::Zero(nx_, ny_);
-  Eigen::MatrixXd y_grid = Eigen::MatrixXd::Zero(nx_, ny_);
+  Eigen::ArrayXXd x_grid = Eigen::ArrayXXd::Zero(nx_, ny_);
+  Eigen::ArrayXXd y_grid = Eigen::ArrayXXd::Zero(nx_, ny_);
   x_grid.colwise() += x_v;
   y_grid.rowwise() += y_v.transpose();
 
@@ -278,7 +278,7 @@ TEST_F(LinearRegularWaveSimFixture, TestEigenMeshGrid)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXMatrixXd)
+TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXArrayXXd)
 { 
   // Wave simulation
   std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
@@ -289,12 +289,12 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXMatrixXd)
   wave_sim->SetTime(5.0);
   
   // array
-  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h1 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ElevationAt(h1);
  
   // non-array
-  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h2 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ElevationAt(h2);
 
@@ -308,7 +308,7 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXYMatrixXd)
+TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXYArrayXXd)
 { 
   // Wave simulation
   std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
@@ -319,12 +319,12 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXYMatrixXd)
   wave_sim->SetTime(5.0);
   
   // array
-  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h1 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ElevationAt(h1);
  
   // non-array
-  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h2 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ElevationAt(h2);
 
@@ -338,7 +338,7 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXYMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimFixture, TestDisplacmentsMatrixXd)
+TEST_F(LinearRegularWaveSimFixture, TestDisplacmentsArrayXXd)
 { 
   // Wave simulation
   std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
@@ -349,14 +349,14 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacmentsMatrixXd)
   wave_sim->SetTime(5.0);
   
   // array
-  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sx1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sy1 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->DisplacementAt(sx1, sy1);
  
   // non-array
-  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sx2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sy2 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->DisplacementAt(sx2, sy2);
 
@@ -371,7 +371,7 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacmentsMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimFixture, TestHeightDerivativesMatrixXd)
+TEST_F(LinearRegularWaveSimFixture, TestHeightDerivativesArrayXXd)
 { 
   // Wave simulation
   std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
@@ -382,14 +382,14 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightDerivativesMatrixXd)
   wave_sim->SetTime(5.0);
   
   // array
-  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdx1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdy1 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->ElevationDerivAt(dhdx1, dhdy1);
  
   // non-array
-  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdx2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdy2 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->ElevationDerivAt(dhdx2, dhdy2);
 
@@ -404,7 +404,7 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightDerivativesMatrixXd)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRegularWaveSimFixture, TestDisplacementsAndDerivativesMatrixXd)
+TEST_F(LinearRegularWaveSimFixture, TestDisplacementsAndDerivativesArrayXXd)
 { 
   // Wave simulation
   std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
@@ -415,27 +415,27 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacementsAndDerivativesMatrixXd)
   wave_sim->SetTime(5.0);
   
   // array
-  Eigen::VectorXd h1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd sx1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd sy1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dhdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dhdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dsxdx1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dsydy1 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dsxdy1 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sx1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sy1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdx1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdy1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dsxdx1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dsydy1 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dsxdy1 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(true);
   wave_sim->DisplacementAndDerivAt(
     h1, sx1, sy1, dhdx1, dhdy1, dsxdx1, dsydy1, dsxdy1);
  
   // non-array
-  Eigen::VectorXd h2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd sx2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd sy2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dhdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dhdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dsxdx2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dsydy2 = Eigen::VectorXd::Zero(nx_ * ny_);
-  Eigen::VectorXd dsxdy2 = Eigen::VectorXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd h2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sx2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd sy2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdx2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dhdy2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dsxdx2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dsydy2 = Eigen::ArrayXd::Zero(nx_ * ny_);
+  Eigen::ArrayXd dsxdy2 = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->SetUseVectorised(false);
   wave_sim->DisplacementAndDerivAt(
     h2, sx2, sy2, dhdx2, dhdy2, dsxdx2, dsydy2, dsxdy2);
@@ -541,16 +541,16 @@ TEST(OceanTile, LinearRegularWaveSimulation)
 TEST_F(LinearRegularWaveSimFixture, PressureAt)
 { 
   // pressure sample points (z is below the free surface)
-  Eigen::VectorXd zr = Eigen::VectorXd::Zero(nz_);
-  Eigen::VectorXd ln_z;
+  Eigen::ArrayXd zr = Eigen::ArrayXd::Zero(nz_);
+  Eigen::ArrayXd ln_z;
   if (nz_ > 1)
   {
     // first element is zero - fill nz - 1 remaining elements
-    ln_z = Eigen::VectorXd::LinSpaced(
+    ln_z = Eigen::ArrayXd::LinSpaced(
         nz_ - 1, -std::log(lz_), std::log(lz_));
-    zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z.array());
+    zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z);
   }
-  Eigen::VectorXd z = zr.reverse(); 
+  Eigen::ArrayXd z = zr.reverse(); 
 
   // debug
   // std::cerr << "nz:     " << nz_ << "\n";
@@ -571,11 +571,11 @@ TEST_F(LinearRegularWaveSimFixture, PressureAt)
   wave_sim->SetTime(time);
 
   // normalised pressure at free surface is the free surface elevation. 
-  Eigen::VectorXd eta(nx_ * ny_);
+  Eigen::ArrayXd eta(nx_ * ny_);
   wave_sim->ElevationAt(eta);
 
   // pressure at z = 0
-  Eigen::VectorXd pressure(nx_ * ny_);
+  Eigen::ArrayXd pressure(nx_ * ny_);
   wave_sim->PressureAt(nz_ - 1, pressure);
   for (int ix = 0, idx = 0; ix < nx_; ++ix)
   {

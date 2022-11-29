@@ -26,7 +26,7 @@
 #include <memory>
 #include <string>
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 using namespace gz;
 using namespace waves;
@@ -409,7 +409,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd z = Eigen::ArrayXXd::Zero(n2, 1);
   model.ElevationAt(z);
 
   EXPECT_EQ(z.size(), n2);
@@ -436,7 +436,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(25.3);
 
-  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd z = Eigen::ArrayXXd::Zero(n2, 1);
   model.ElevationAt(z);
 
   EXPECT_EQ(z.size(), n2);
@@ -467,8 +467,8 @@ TEST_F(LinearRandomFFTWaveSimFixture, HorizontalDisplacementsLambdaZeroReference
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(10.0);
 
-  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd sx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd sy = Eigen::ArrayXXd::Zero(n2, 1);
   model.DisplacementAt(sx, sy);
 
   EXPECT_EQ(sx.size(), n2);
@@ -573,7 +573,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd z = Eigen::ArrayXXd::Zero(n2, 1);
   model.ElevationAt(z);
 
   EXPECT_EQ(z.size(), n2);
@@ -603,7 +603,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(25.3);
 
-  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd z = Eigen::ArrayXXd::Zero(n2, 1);
   model.ElevationAt(z);
 
   EXPECT_EQ(z.size(), n2);
@@ -635,8 +635,8 @@ TEST_F(LinearRandomFFTWaveSimFixture, HorizontalDisplacementsLambdaZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(10.0);
 
-  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd sx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd sy = Eigen::ArrayXXd::Zero(n2, 1);
   model.DisplacementAt(sx, sy);
 
   EXPECT_EQ(sx.size(), n2);
@@ -659,14 +659,14 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeZero)
   ref_model.ComputeBaseAmplitudes();
   ref_model.ComputeCurrentAmplitudes(0.0);
 
-  Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_z = Eigen::ArrayXXd::Zero(n2, 1);
   ref_model.ElevationAt(ref_z);
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd z = Eigen::ArrayXXd::Zero(n2, 1);
   model.ElevationAt(z);
 
   EXPECT_EQ(ref_z.size(), n2);
@@ -687,14 +687,14 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeNonZero)
   ref_model.ComputeBaseAmplitudes();
   ref_model.ComputeCurrentAmplitudes(31.7);
 
-  Eigen::MatrixXd ref_z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_z = Eigen::ArrayXXd::Zero(n2, 1);
   ref_model.ElevationAt(ref_z);
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(31.7);
 
-  Eigen::MatrixXd z = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd z = Eigen::ArrayXXd::Zero(n2, 1);
   model.ElevationAt(z);
 
   EXPECT_EQ(ref_z.size(), n2);
@@ -715,16 +715,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, Displacement)
   ref_model.ComputeBaseAmplitudes();
   ref_model.ComputeCurrentAmplitudes(12.2);
 
-  Eigen::MatrixXd ref_sx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd ref_sy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_sx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_sy = Eigen::ArrayXXd::Zero(n2, 1);
   ref_model.DisplacementAt(ref_sx, ref_sy);
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
-  Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd sx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd sy = Eigen::ArrayXXd::Zero(n2, 1);
   model.DisplacementAt(sx, sy);
 
   EXPECT_EQ(ref_sx.size(), n2);
@@ -748,16 +748,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationDerivatives)
   ref_model.ComputeBaseAmplitudes();
   ref_model.ComputeCurrentAmplitudes(12.2);
 
-  Eigen::MatrixXd ref_dhdx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd ref_dhdy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_dhdx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_dhdy = Eigen::ArrayXXd::Zero(n2, 1);
   ref_model.ElevationDerivAt(ref_dhdx, ref_dhdy);
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
-  Eigen::MatrixXd dhdx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd dhdy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd dhdx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd dhdy = Eigen::ArrayXXd::Zero(n2, 1);
   ref_model.ElevationDerivAt(dhdx, dhdy);
 
   EXPECT_EQ(ref_dhdx.size(), n2);
@@ -781,18 +781,18 @@ TEST_F(LinearRandomFFTWaveSimFixture, DisplacementDerivatives)
   ref_model.ComputeBaseAmplitudes();
   ref_model.ComputeCurrentAmplitudes(12.2);
 
-  Eigen::MatrixXd ref_dsxdx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd ref_dsydy = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd ref_dsxdy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_dsxdx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_dsydy = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd ref_dsxdy = Eigen::ArrayXXd::Zero(n2, 1);
   ref_model.DisplacementDerivAt(ref_dsxdx, ref_dsydy, ref_dsxdy);
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(12.2);
 
-  Eigen::MatrixXd dsxdx = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd dsydy = Eigen::MatrixXd::Zero(n2, 1);
-  Eigen::MatrixXd dsxdy = Eigen::MatrixXd::Zero(n2, 1);
+  Eigen::ArrayXXd dsxdx = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd dsydy = Eigen::ArrayXXd::Zero(n2, 1);
+  Eigen::ArrayXXd dsxdy = Eigen::ArrayXXd::Zero(n2, 1);
   ref_model.DisplacementDerivAt(dsxdx, dsydy, dsxdy);
 
   EXPECT_EQ(ref_dsxdx.size(), n2);

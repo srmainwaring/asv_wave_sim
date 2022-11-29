@@ -66,8 +66,8 @@ double PiersonMoskowitzWaveSpectrum::Evaluate(double k) const
 
 //////////////////////////////////////////////////
 void PiersonMoskowitzWaveSpectrum::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> spectrum,
-    const Eigen::Ref<const Eigen::MatrixXd> &k) const
+    Eigen::Ref<Eigen::ArrayXXd> spectrum,
+    const Eigen::Ref<const Eigen::ArrayXXd> &k) const
 {
   /// \note Eigen asserts cbegin and cend are from the same expression.
   auto k_view = k.reshaped();
@@ -200,8 +200,8 @@ double ECKVWaveSpectrum::Evaluate(double k) const
 
 //////////////////////////////////////////////////
 void ECKVWaveSpectrum::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> spectrum,
-    const Eigen::Ref<const Eigen::MatrixXd> &k) const
+    Eigen::Ref<Eigen::ArrayXXd> spectrum,
+    const Eigen::Ref<const Eigen::ArrayXXd> &k) const
 {
   auto k_view = k.reshaped();
   std::transform(

@@ -66,7 +66,7 @@ TEST(WaveSpreadingFunction, Cos2sVectorXd)
 
     double theta_mean = 0.0;
 
-    Eigen::VectorXd theta(21);
+    Eigen::ArrayXd theta(21);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
@@ -74,7 +74,7 @@ TEST(WaveSpreadingFunction, Cos2sVectorXd)
 
     EXPECT_EQ(theta.size(), 21);
 
-    Eigen::VectorXd phi(21);
+    Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean);
 
     for (int i=0; i<21; ++i)
@@ -92,7 +92,7 @@ TEST(WaveSpreadingFunction, Cos2sNonZeroMeanVectorXd)
 
     double theta_mean = 1.5;
 
-    Eigen::VectorXd theta(21);
+    Eigen::ArrayXd theta(21);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
@@ -100,7 +100,7 @@ TEST(WaveSpreadingFunction, Cos2sNonZeroMeanVectorXd)
 
     EXPECT_EQ(theta.size(), 21);
 
-    Eigen::VectorXd phi(21);
+    Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean);
 
     for (int i=0; i<21; ++i)
@@ -132,14 +132,14 @@ TEST(WaveSpreadingFunction, Cos2sAccessors)
 
     double theta_mean = 1.5;
 
-    Eigen::VectorXd theta(21);
+    Eigen::ArrayXd theta(21);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
       5.65486678, 5.96902604, 6.28318531;
 
-    Eigen::VectorXd phi1(21);
-    Eigen::VectorXd phi2(21);
+    Eigen::ArrayXd phi1(21);
+    Eigen::ArrayXd phi2(21);
 
     spreadingFn1.Evaluate(phi1, theta, theta_mean);
     spreadingFn2.Evaluate(phi2, theta, theta_mean);
@@ -160,7 +160,7 @@ TEST(WaveSpreadingFunction, Cos2sVirtualVectorXd)
 
     double theta_mean = 1.5;
 
-    Eigen::MatrixXd theta(21, 1);
+    Eigen::ArrayXXd theta(21, 1);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
@@ -169,7 +169,7 @@ TEST(WaveSpreadingFunction, Cos2sVirtualVectorXd)
     EXPECT_EQ(theta.rows(), 21);
     EXPECT_EQ(theta.cols(), 1);
 
-    Eigen::MatrixXd phi(21, 1);
+    Eigen::ArrayXXd phi(21, 1);
     spreadingFn->Evaluate(phi, theta, theta_mean);
 
     EXPECT_EQ(phi.rows(), 21);
@@ -196,7 +196,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
 
     double theta_mean = 0.0;
 
-    Eigen::VectorXd theta(21);
+    Eigen::ArrayXd theta(21);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
@@ -204,7 +204,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
 
     EXPECT_EQ(theta.size(), 21);
 
-    Eigen::VectorXd phi(21);
+    Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean);
 
     for (int i=0; i<21; ++i)
@@ -218,7 +218,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
   }
 }
 
-TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
+TEST(WaveSpreadingFunction, WaveNumberArrayXXd)
 {
   { // componentwise operations
     double lx = 200.0;
@@ -230,8 +230,8 @@ TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
     double ky_nyquist = M_PI * ny / ly;
 
     // create wavenumber vectors
-    Eigen::VectorXd kx_v(nx);
-    Eigen::VectorXd ky_v(ny);
+    Eigen::ArrayXd kx_v(nx);
+    Eigen::ArrayXd ky_v(ny);
 
     for (int i=0; i<nx; ++i)
     {
@@ -267,10 +267,10 @@ TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
     EXPECT_DOUBLE_EQ(ky_v(ny - 1), ky_nyquist - ky_f);
 
     // broadcast to matrices (aka meshgrid)
-    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx, ny);
     kx.colwise() += kx_v;
     
-    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx, ny);
     ky.rowwise() += ky_v.transpose();
 
     // check size
@@ -289,10 +289,10 @@ TEST(WaveSpreadingFunction, WaveNumberMatrixXd)
       }
     }
 
-    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
-    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
-    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
-    Eigen::MatrixXd theta = ky.binaryExpr(
+    Eigen::ArrayXXd kx2 = Eigen::pow(kx, 2.0);
+    Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
+    Eigen::ArrayXXd k = Eigen::sqrt(kx2 + ky2);
+    Eigen::ArrayXXd theta = ky.binaryExpr(
         kx, [] (double y, double x) { return std::atan2(y, x);}
     );
 
@@ -357,10 +357,10 @@ TEST(WaveSpreadingFunction, ECKVVectorXd)
     ECKVSpreadingFunction spreadingFn;
 
     double theta_mean = 0.0;
-    Eigen::MatrixXd k = Eigen::MatrixXd::Zero(21, 1);
-    k.array() += 1.24;
+    Eigen::ArrayXXd k = Eigen::ArrayXXd::Zero(21, 1);
+    k += 1.24;
 
-    Eigen::MatrixXd theta(21, 1);
+    Eigen::ArrayXXd theta(21, 1);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
@@ -370,7 +370,7 @@ TEST(WaveSpreadingFunction, ECKVVectorXd)
     EXPECT_EQ(theta.rows(), 21);
     EXPECT_EQ(theta.cols(), 1);
 
-    Eigen::MatrixXd phi(21, 1);
+    Eigen::ArrayXXd phi(21, 1);
     spreadingFn.Evaluate(phi, theta, theta_mean, k);
     EXPECT_EQ(phi.rows(), 21);
     EXPECT_EQ(phi.cols(), 1);
@@ -383,7 +383,7 @@ TEST(WaveSpreadingFunction, ECKVVectorXd)
   }
 }
 
-TEST(WaveSpreadingFunction, ECKVMatrixXd)
+TEST(WaveSpreadingFunction, ECKVArrayXXd)
 {
   { // Eigen array version
     double lx = 200.0;
@@ -395,8 +395,8 @@ TEST(WaveSpreadingFunction, ECKVMatrixXd)
     double ky_nyquist = M_PI * ny / ly;
 
     // create wavenumber vectors
-    Eigen::VectorXd kx_v(nx);
-    Eigen::VectorXd ky_v(ny);
+    Eigen::ArrayXd kx_v(nx);
+    Eigen::ArrayXd ky_v(ny);
 
     for (int i=0; i<nx; ++i)
     {
@@ -408,16 +408,16 @@ TEST(WaveSpreadingFunction, ECKVMatrixXd)
     }
 
     // broadcast to matrices (aka meshgrid)
-    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx, ny);
     kx.colwise() += kx_v;
     
-    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx, ny);
+    Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx, ny);
     ky.rowwise() += ky_v.transpose();
 
-    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
-    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
-    Eigen::MatrixXd k = Eigen::sqrt(kx2.array() + ky2.array());
-    Eigen::MatrixXd theta = ky.binaryExpr(
+    Eigen::ArrayXXd kx2 = Eigen::pow(kx, 2.0);
+    Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
+    Eigen::ArrayXXd k = Eigen::sqrt(kx2 + ky2);
+    Eigen::ArrayXXd theta = ky.binaryExpr(
         kx, [] (double y, double x) { return std::atan2(y, x);}
     );
 
@@ -425,7 +425,7 @@ TEST(WaveSpreadingFunction, ECKVMatrixXd)
 
     double theta_mean = 0.0;
 
-    Eigen::MatrixXd phi(nx, ny);
+    Eigen::ArrayXXd phi(nx, ny);
     spreadingFn.Evaluate(phi, theta, theta_mean, k);
 
     for (int i=0; i<nx; ++i)
@@ -451,7 +451,7 @@ TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
 
     double theta_mean = 0.0;
 
-    Eigen::VectorXd theta(21);
+    Eigen::ArrayXd theta(21);
     theta << 0.0, 0.31415927, 0.62831853, 0.9424778, 1.25663706, 1.57079633,
       1.88495559, 2.19911486, 2.51327412, 2.82743339, 3.14159265, 3.45575192,
       3.76991118, 4.08407045, 4.39822972, 4.71238898, 5.02654825, 5.34070751,
@@ -459,8 +459,8 @@ TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
 
     EXPECT_EQ(theta.size(), 21);
 
-    Eigen::VectorXd k = Eigen::VectorXd::Ones(21);
-    Eigen::VectorXd phi(21);
+    Eigen::ArrayXd k = Eigen::ArrayXd::Ones(21);
+    Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean, k);
 
     for (int i=0; i<21; ++i)

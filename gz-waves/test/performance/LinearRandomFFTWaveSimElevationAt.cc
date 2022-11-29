@@ -23,7 +23,7 @@
 
 #include "LinearRandomFFTWaveSimulationImpl.hh"
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 using std::chrono::steady_clock;
 using std::chrono::milliseconds;
@@ -77,7 +77,7 @@ TEST_F(LinearRandomFFTWaveSimTest, ElevationAtArray)
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
 
-  Eigen::MatrixXd h(nx_ * ny_, 1);
+  Eigen::ArrayXXd h(nx_ * ny_, 1);
 
   double sim_time = 0.0;
   double sim_step = 0.001;

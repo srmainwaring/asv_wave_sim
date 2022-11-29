@@ -43,20 +43,20 @@ namespace waves
     void SetTime(double time);
 
     void ElevationAt(
-        Eigen::Ref<Eigen::MatrixXd> _heights);
+        Eigen::Ref<Eigen::ArrayXXd> _heights);
 
     void ElevationDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> _dhdx,
-        Eigen::Ref<Eigen::MatrixXd> _dhdy);
+        Eigen::Ref<Eigen::ArrayXXd> _dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> _dhdy);
 
     void DisplacementAt(
-        Eigen::Ref<Eigen::MatrixXd> _sx,
-        Eigen::Ref<Eigen::MatrixXd> _sy);
+        Eigen::Ref<Eigen::ArrayXXd> _sx,
+        Eigen::Ref<Eigen::ArrayXXd> _sy);
 
     void DisplacementDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> _dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> _dsydy,
-        Eigen::Ref<Eigen::MatrixXd> _dsxdy);
+        Eigen::Ref<Eigen::ArrayXXd> _dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> _dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> _dsxdy);
   
     int N_;
     int N2_;
@@ -100,7 +100,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::Impl::ElevationAt(
-    Eigen::Ref<Eigen::MatrixXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h)
   {
     // Multiple wave params
     const auto  number     = this->params_->Number();
@@ -112,7 +112,7 @@ namespace waves
     const auto& direction  = this->params_->Direction_V();
 
     // Multiple wave update 
-    h = Eigen::MatrixXd::Zero(this->N2_, 0);
+    h = Eigen::ArrayXXd::Zero(this->N2_, 0);
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -150,16 +150,16 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::Impl::ElevationDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> /*dhdx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dhdy*/)
+    Eigen::Ref<Eigen::ArrayXXd> /*dhdx*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*dhdy*/)
   {
     // @TODO NO IMPLEMENTATION
   }
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::Impl::DisplacementAt(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+    Eigen::Ref<Eigen::ArrayXXd> sx,
+    Eigen::Ref<Eigen::ArrayXXd> sy)
   {
     // Multiple wave params
     const auto  number     = this->params_->Number();
@@ -171,8 +171,8 @@ namespace waves
     const auto& direction  = this->params_->Direction_V();
 
     // Multiple wave update
-    sx = Eigen::MatrixXd::Zero(this->N2_, 0);
-    sy = Eigen::MatrixXd::Zero(this->N2_, 0);
+    sx = Eigen::ArrayXXd::Zero(this->N2_, 0);
+    sy = Eigen::ArrayXXd::Zero(this->N2_, 0);
     for (size_t i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
@@ -211,9 +211,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::Impl::DisplacementDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdx*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsydy*/,
-    Eigen::Ref<Eigen::MatrixXd> /*dsxdy*/)
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
   {
     // @TODO NO IMPLEMENTATION
   }
@@ -246,46 +246,46 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::ElevationAt(
-    Eigen::Ref<Eigen::MatrixXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h)
   {
     impl_->ElevationAt(h);
   }
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::ElevationDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy)
   {
     impl_->ElevationDerivAt(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::DisplacementAt(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+    Eigen::Ref<Eigen::ArrayXXd> sx,
+    Eigen::Ref<Eigen::ArrayXXd> sy)
   {
     impl_->DisplacementAt(sx, sy);
   }
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::DisplacementDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+    Eigen::Ref<Eigen::ArrayXXd> dsydy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
   {
     impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::DisplacementAndDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> h,
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy,
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> h,
+    Eigen::Ref<Eigen::ArrayXXd> sx,
+    Eigen::Ref<Eigen::ArrayXXd> sy,
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+    Eigen::Ref<Eigen::ArrayXXd> dsydy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
   {
     impl_->ElevationAt(h);
     impl_->ElevationDerivAt(dhdx, dhdy);

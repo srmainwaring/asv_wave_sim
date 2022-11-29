@@ -23,7 +23,7 @@
 
 #include "LinearRandomFFTWaveSimulationImpl.hh"
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 using std::chrono::steady_clock;
 using std::chrono::milliseconds;

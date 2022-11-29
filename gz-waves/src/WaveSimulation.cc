@@ -40,9 +40,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulation::Elevation(
-      const Eigen::Ref<const Eigen::VectorXd> &/*x*/,
-      const Eigen::Ref<const Eigen::VectorXd> &/*y*/,
-      Eigen::Ref<Eigen::VectorXd> /*eta*/)
+      const Eigen::Ref<const Eigen::ArrayXd> &/*x*/,
+      const Eigen::Ref<const Eigen::ArrayXd> &/*y*/,
+      Eigen::Ref<Eigen::ArrayXd> /*eta*/)
   {
     assert(0 && "Not implemented");
   }
@@ -57,10 +57,10 @@ namespace waves
 
   //////////////////////////////////////////////////
   void WaveSimulation::Pressure(
-      const Eigen::Ref<const Eigen::VectorXd> &/*x*/,
-      const Eigen::Ref<const Eigen::VectorXd> &/*y*/,
-      const Eigen::Ref<const Eigen::VectorXd> &/*z*/,
-      Eigen::Ref<Eigen::VectorXd> /*pressure*/)
+      const Eigen::Ref<const Eigen::ArrayXd> &/*x*/,
+      const Eigen::Ref<const Eigen::ArrayXd> &/*y*/,
+      const Eigen::Ref<const Eigen::ArrayXd> &/*z*/,
+      Eigen::Ref<Eigen::ArrayXd> /*pressure*/)
   {
     assert(0 && "Not implemented");
   }
@@ -68,7 +68,7 @@ namespace waves
   //////////////////////////////////////////////////
   void WaveSimulation::PressureAt(
       int /*iz*/,
-      Eigen::Ref<Eigen::MatrixXd> /*pressure*/)
+      Eigen::Ref<Eigen::ArrayXXd> /*pressure*/)
   {
     assert(0 && "Not implemented");
   }

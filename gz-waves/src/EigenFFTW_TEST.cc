@@ -24,17 +24,17 @@
 
 #include <fftw3.h>
 
-using Eigen::MatrixXcd;
-using Eigen::VectorXcd;
+using Eigen::ArrayXXcd;
+using Eigen::ArrayXcd;
 
 namespace Eigen
 { 
-  typedef Eigen::Matrix<
+  typedef Eigen::Array<
     double,
     Eigen::Dynamic,
     Eigen::Dynamic,
     Eigen::RowMajor
-  > MatrixXdRowMajor;
+  > ArrayXXdRowMajor;
 }
 
 //////////////////////////////////////////////////
@@ -54,10 +54,10 @@ TEST(EigenFFWT, DFT_C2C_1D)
   int n = 8;
 
   // expected inputs and outputs
-  Eigen::VectorXcd x = Eigen::VectorXcd::Zero(n);
+  Eigen::ArrayXcd x = Eigen::ArrayXcd::Zero(n);
   x.real() << 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0;
 
-  Eigen::VectorXcd xhat = Eigen::VectorXcd::Zero(n);
+  Eigen::ArrayXcd xhat = Eigen::ArrayXcd::Zero(n);
   xhat.real() <<  0.25,   -0.2133883476483184,  0.125,  -0.0366116523516816,
                   0.,     -0.0366116523516816,  0.125,  -0.2133883476483184;
   xhat.imag() <<  0.,     -0.0883883476483184,  0.125,  -0.0883883476483184,
@@ -125,9 +125,9 @@ TEST(EigenFFWT, DFT_C2C_1D)
     }
   }
 
-  { // using Eigen::VectorXcd
-    Eigen::VectorXcd in = Eigen::VectorXcd::Zero(n);
-    Eigen::VectorXcd out = Eigen::VectorXcd::Zero(n);
+  { // using Eigen::ArrayXcd
+    Eigen::ArrayXcd in = Eigen::ArrayXcd::Zero(n);
+    Eigen::ArrayXcd out = Eigen::ArrayXcd::Zero(n);
 
     // create plan
     fftw_plan plan = fftw_plan_dft_1d(
@@ -161,10 +161,10 @@ TEST(EigenFFWT, DFT_C2R_1D)
   int n = 8;
 
   // expected inputs and outputs
-  Eigen::VectorXcd x = Eigen::VectorXcd::Zero(n);
+  Eigen::ArrayXcd x = Eigen::ArrayXcd::Zero(n);
   x.real() << 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0;
 
-  Eigen::VectorXcd xhat = Eigen::VectorXcd::Zero(n/2+1);
+  Eigen::ArrayXcd xhat = Eigen::ArrayXcd::Zero(n/2+1);
   xhat.real() <<  0.25,   -0.2133883476483184,  0.125,  -0.0366116523516816,
                   0.;
   xhat.imag() <<  0.,     -0.0883883476483184,  0.125,  -0.0883883476483184,
@@ -209,9 +209,9 @@ TEST(EigenFFWT, DFT_C2R_1D)
 TEST(EigenFFWT, EigenStorageOrdering)
 {
   {
-    std::cerr << "MatrixXd" << "\n";
+    std::cerr << "ArrayXXd" << "\n";
 
-    Eigen::MatrixXd col_maj(2, 3);
+    Eigen::ArrayXXd col_maj(2, 3);
     col_maj << 1, 2, 3,
                4, 5, 6;
 
@@ -224,7 +224,7 @@ TEST(EigenFFWT, EigenStorageOrdering)
     std::cerr << "\n";
     std::cerr << col_maj.reshaped().transpose() << "\n";
 
-    Eigen::MatrixXdRowMajor row_maj = col_maj;
+    Eigen::ArrayXXdRowMajor row_maj = col_maj;
 
     std::cerr << "in memory (row-major):" << "\n";
     for (int i = 0; i < row_maj.size(); i++)
@@ -234,9 +234,9 @@ TEST(EigenFFWT, EigenStorageOrdering)
   }
 
   {
-    std::cerr << "Matrix2x3d" << "\n";
+    std::cerr << "ArrayX2x3d" << "\n";
 
-    Eigen::Matrix<double, 2, 3, Eigen::ColMajor> col_maj;
+    Eigen::Array<double, 2, 3, Eigen::ColMajor> col_maj;
     col_maj << 1, 2, 3,
                4, 5, 6;
 
@@ -249,7 +249,7 @@ TEST(EigenFFWT, EigenStorageOrdering)
     std::cerr << "\n";
     std::cerr << col_maj.reshaped().transpose() << "\n";
     
-    Eigen::Matrix<double, 2, 3, Eigen::RowMajor> row_maj = col_maj;
+    Eigen::Array<double, 2, 3, Eigen::RowMajor> row_maj = col_maj;
 
     std::cerr << "in memory (row-major):" << "\n";
     for (int i = 0; i < row_maj.size(); i++)

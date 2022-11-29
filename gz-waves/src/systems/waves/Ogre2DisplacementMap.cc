@@ -286,14 +286,14 @@ void Ogre2DisplacementMap::InitTextures()
 
 //////////////////////////////////////////////////
 void Ogre2DisplacementMap::UpdateTextures(
-  const Eigen::Ref<const Eigen::MatrixXd> &mHeights,
-  const Eigen::Ref<const Eigen::MatrixXd> &mDhdx,
-  const Eigen::Ref<const Eigen::MatrixXd> &mDhdy,
-  const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsX,
-  const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsY,
-  const Eigen::Ref<const Eigen::MatrixXd> &mDxdx,
-  const Eigen::Ref<const Eigen::MatrixXd> &mDydy,
-  const Eigen::Ref<const Eigen::MatrixXd> &mDxdy
+  const Eigen::Ref<const Eigen::ArrayXXd> &mHeights,
+  const Eigen::Ref<const Eigen::ArrayXXd> &mDhdx,
+  const Eigen::Ref<const Eigen::ArrayXXd> &mDhdy,
+  const Eigen::Ref<const Eigen::ArrayXXd> &mDisplacementsX,
+  const Eigen::Ref<const Eigen::ArrayXXd> &mDisplacementsY,
+  const Eigen::Ref<const Eigen::ArrayXXd> &mDxdx,
+  const Eigen::Ref<const Eigen::ArrayXXd> &mDydy,
+  const Eigen::Ref<const Eigen::ArrayXXd> &mDxdy
 )
 {
   gz::rendering::Ogre2ScenePtr ogre2Scene =

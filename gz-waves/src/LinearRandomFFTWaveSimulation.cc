@@ -92,7 +92,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
-      Eigen::Ref<Eigen::MatrixXd> h)
+      Eigen::Ref<Eigen::ArrayXXd> h)
   {
     // run the FFT
     fftw_execute(fft_plan0_);
@@ -104,8 +104,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::ElevationDerivAt(
-      Eigen::Ref<Eigen::MatrixXd> dhdx,
-      Eigen::Ref<Eigen::MatrixXd> dhdy)
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy)
     {
       // run the FFTs
       fftw_execute(fft_plan1_);
@@ -119,8 +119,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
-      Eigen::Ref<Eigen::MatrixXd> sx,
-      Eigen::Ref<Eigen::MatrixXd> sy)
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy)
   {
     // run the FFTs
     fftw_execute(fft_plan3_);
@@ -134,9 +134,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::DisplacementDerivAt(
-      Eigen::Ref<Eigen::MatrixXd> dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> dsydy,
-      Eigen::Ref<Eigen::MatrixXd> dsxdy)
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
     {
       // run the FFTs
       fftw_execute(fft_plan5_);
@@ -153,7 +153,7 @@ namespace waves
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::PressureAt(
       int iz,
-      Eigen::Ref<Eigen::MatrixXd> pressure)
+      Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     // run the FFTs
     fftw_execute(fft_plan_p_[iz]);
@@ -210,13 +210,13 @@ namespace waves
     // initialise arrays - always update as algo switch may change shape.
     size_t n2 = nx_ * ny_;
     {
-      cap_psi_2s_root_  = Eigen::VectorXd::Zero(n2);
-      rho_              = Eigen::VectorXd::Zero(n2);
-      sigma_            = Eigen::VectorXd::Zero(n2);
-      omega_k_          = Eigen::VectorXd::Zero(n2);
-      zhat_             = Eigen::VectorXd::Zero(n2);
-      cos_wt_           = Eigen::VectorXd::Zero(n2);
-      sin_wt_           = Eigen::VectorXd::Zero(n2);
+      cap_psi_2s_root_  = Eigen::ArrayXd::Zero(n2);
+      rho_              = Eigen::ArrayXd::Zero(n2);
+      sigma_            = Eigen::ArrayXd::Zero(n2);
+      omega_k_          = Eigen::ArrayXd::Zero(n2);
+      zhat_             = Eigen::ArrayXd::Zero(n2);
+      cos_wt_           = Eigen::ArrayXd::Zero(n2);
+      sin_wt_           = Eigen::ArrayXd::Zero(n2);
     }
 
     // spectrum and spreading functions
@@ -450,8 +450,8 @@ namespace waves
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::InitWaveNumbers()
   {
-    kx_fft_  = Eigen::VectorXd::Zero(nx_);
-    ky_fft_  = Eigen::VectorXd::Zero(ny_);
+    kx_fft_  = Eigen::ArrayXd::Zero(nx_);
+    ky_fft_  = Eigen::ArrayXd::Zero(ny_);
 
     // wavenumbers in fft and math ordering
     for(int ikx = 0; ikx < nx_; ++ikx)
@@ -471,13 +471,13 @@ namespace waves
   void LinearRandomFFTWaveSimulation::Impl::InitPressureGrid()
   {
     // pressure sample points (z is below the free surface)
-    Eigen::VectorXd zr = Eigen::VectorXd::Zero(nz_);
+    Eigen::ArrayXd zr = Eigen::ArrayXd::Zero(nz_);
     if (nz_ > 1)
     {
       // first element is zero - fill nz - 1 remaining elements
-      Eigen::VectorXd ln_z = Eigen::VectorXd::LinSpaced(
+      Eigen::ArrayXd ln_z = Eigen::ArrayXd::LinSpaced(
           nz_ - 1, -std::log(lz_), std::log(lz_));
-      zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z.array());
+      zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z);
     }
     z_ = zr.reverse();
   }
@@ -490,26 +490,26 @@ namespace waves
     ///       https://www.fftw.org/fftw3_doc/Complex-DFTs.html
 
     // allocate storage for Fourier coefficients
-    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_      = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_ikx_  = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_iky_  = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_sx_     = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_sy_     = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kxkx_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kyky_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kxky_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
 
     // elevation
-    fft_out0_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out1_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out2_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out0_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out1_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out2_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
 
     // xy-displacements
-    fft_out3_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out4_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out5_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out6_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out7_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out3_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out4_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out5_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out6_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out7_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
 
     // elevation
     fft_plan0_ = fftw_plan_dft_c2r_2d(nx_, ny_,
@@ -553,8 +553,8 @@ namespace waves
     // pressure
     for (int iz=0; iz < nz_; ++iz)
     {
-      fft_in_p_.push_back(Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1));
-      fft_out_p_.push_back(Eigen::MatrixXdRowMajor::Zero(nx_, ny_));
+      fft_in_p_.push_back(Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1));
+      fft_out_p_.push_back(Eigen::ArrayXXdRowMajor::Zero(nx_, ny_));
       fft_plan_p_.push_back(fftw_plan_dft_c2r_2d(nx_, ny_,
           reinterpret_cast<fftw_complex*>(fft_in_p_[iz].data()),
           reinterpret_cast<double*>(fft_out_p_[iz].data()),
@@ -615,46 +615,46 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::ElevationAt(
-      Eigen::Ref<Eigen::MatrixXd> h)
+      Eigen::Ref<Eigen::ArrayXXd> h)
   {
     impl_->ElevationAt(h);
   }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::ElevationDerivAt(
-      Eigen::Ref<Eigen::MatrixXd> dhdx,
-      Eigen::Ref<Eigen::MatrixXd> dhdy)
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy)
     {
       impl_->ElevationDerivAt(dhdx, dhdy);
     }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::DisplacementAt(
-      Eigen::Ref<Eigen::MatrixXd> sx,
-      Eigen::Ref<Eigen::MatrixXd> sy)
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy)
     {
       impl_->DisplacementAt(sx, sy);
     }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::DisplacementDerivAt(
-      Eigen::Ref<Eigen::MatrixXd> dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> dsydy,
-      Eigen::Ref<Eigen::MatrixXd> dsxdy)
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
     {
       impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
     }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::DisplacementAndDerivAt(
-      Eigen::Ref<Eigen::MatrixXd> h,
-      Eigen::Ref<Eigen::MatrixXd> sx,
-      Eigen::Ref<Eigen::MatrixXd> sy,
-      Eigen::Ref<Eigen::MatrixXd> dhdx,
-      Eigen::Ref<Eigen::MatrixXd> dhdy,
-      Eigen::Ref<Eigen::MatrixXd> dsxdx,
-      Eigen::Ref<Eigen::MatrixXd> dsydy,
-      Eigen::Ref<Eigen::MatrixXd> dsxdy)
+      Eigen::Ref<Eigen::ArrayXXd> h,
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy,
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
     {
       impl_->ElevationAt(h);
       impl_->ElevationDerivAt(dhdx, dhdy);
@@ -665,7 +665,7 @@ namespace waves
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::PressureAt(
       int iz,
-      Eigen::Ref<Eigen::MatrixXd> pressure)
+      Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     impl_->PressureAt(iz, pressure);
   }

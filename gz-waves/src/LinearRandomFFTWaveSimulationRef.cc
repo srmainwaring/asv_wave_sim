@@ -87,7 +87,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::Impl::ElevationAt(
-    Eigen::Ref<Eigen::MatrixXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h)
   {
     // run the FFT
     fftw_execute(fft_plan0_);
@@ -99,8 +99,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::Impl::ElevationDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy)
   {
     // run the FFTs
     fftw_execute(fft_plan1_);
@@ -114,8 +114,8 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::Impl::DisplacementAt(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+    Eigen::Ref<Eigen::ArrayXXd> sx,
+    Eigen::Ref<Eigen::ArrayXXd> sy)
   {
     // run the FFTs
     fftw_execute(fft_plan3_);
@@ -129,9 +129,9 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::Impl::DisplacementDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+    Eigen::Ref<Eigen::ArrayXXd> dsydy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
   {
     // run the FFTs
     fftw_execute(fft_plan5_);
@@ -156,10 +156,10 @@ namespace waves
     // arrays for reference version
     if (cap_psi_2s_root_.size() == 0)
     {
-      cap_psi_2s_root_ = Eigen::MatrixXd::Zero(nx_, ny_);
-      rho_             = Eigen::MatrixXd::Zero(nx_, ny_);
-      sigma_           = Eigen::MatrixXd::Zero(nx_, ny_);
-      omega_k_         = Eigen::MatrixXd::Zero(nx_, ny_);
+      cap_psi_2s_root_ = Eigen::ArrayXXd::Zero(nx_, ny_);
+      rho_             = Eigen::ArrayXXd::Zero(nx_, ny_);
+      sigma_           = Eigen::ArrayXXd::Zero(nx_, ny_);
+      omega_k_         = Eigen::ArrayXXd::Zero(nx_, ny_);
     }
 
     // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
@@ -236,7 +236,7 @@ namespace waves
 #endif
 
     // continuous two-sided elevation variance spectrum
-    Eigen::MatrixXd cap_psi_2s_math = Eigen::MatrixXd::Zero(nx_, ny_);
+    Eigen::ArrayXXd cap_psi_2s_math = Eigen::ArrayXXd::Zero(nx_, ny_);
 
     // calculate spectrum in math-order (not vectorised)
     for (int ikx = 0; ikx < nx_; ++ikx)
@@ -294,7 +294,7 @@ namespace waves
 #endif
 
     // convert to fft-order
-    Eigen::MatrixXd cap_psi_2s_fft = Eigen::MatrixXd::Zero(nx_, ny_);
+    Eigen::ArrayXXd cap_psi_2s_fft = Eigen::ArrayXXd::Zero(nx_, ny_);
     for (int ikx = 0; ikx < nx_; ++ikx)
     {
       int ikx_fft = (ikx + nx_/2) % nx_;
@@ -353,13 +353,13 @@ namespace waves
       double time)
   {
     // alias
-    const Eigen::Ref<const Eigen::MatrixXd>& r = rho_;
-    const Eigen::Ref<const Eigen::MatrixXd>& s = sigma_;
-    const Eigen::Ref<const Eigen::MatrixXd>& psi_root = cap_psi_2s_root_;
+    const Eigen::Ref<const Eigen::ArrayXXd>& r = rho_;
+    const Eigen::Ref<const Eigen::ArrayXXd>& s = sigma_;
+    const Eigen::Ref<const Eigen::ArrayXXd>& psi_root = cap_psi_2s_root_;
 
     // time update
-    Eigen::MatrixXd cos_omega_k = Eigen::MatrixXd::Zero(nx_, ny_);
-    Eigen::MatrixXd sin_omega_k = Eigen::MatrixXd::Zero(nx_, ny_);
+    Eigen::ArrayXXd cos_omega_k = Eigen::ArrayXXd::Zero(nx_, ny_);
+    Eigen::ArrayXXd sin_omega_k = Eigen::ArrayXXd::Zero(nx_, ny_);
     for (int ikx = 0; ikx < nx_; ++ikx)
     {
       for (int iky = 0; iky < ny_; ++iky)
@@ -370,7 +370,7 @@ namespace waves
     }
 
     // non-vectorised reference version
-    Eigen::MatrixXcd zhat = Eigen::MatrixXcd::Zero(nx_, ny_);
+    Eigen::ArrayXXcd zhat = Eigen::ArrayXXcd::Zero(nx_, ny_);
     for (int ikx = 1; ikx < nx_; ++ikx)
     {
       for (int iky = 1; iky < ny_; ++iky)
@@ -488,23 +488,23 @@ namespace waves
   void LinearRandomFFTWaveSimulationRef::Impl::InitFFTCoeffStorage()
   {
     // initialise storage for Fourier coefficients
-    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_h_      = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_h_ikx_  = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_h_iky_  = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_sx_     = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_sy_     = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kxkx_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kyky_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_h_kxky_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
   }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::Impl::InitWaveNumbers()
   {
-    kx_fft_  = Eigen::VectorXd::Zero(nx_);
-    ky_fft_  = Eigen::VectorXd::Zero(ny_);
-    kx_math_ = Eigen::VectorXd::Zero(nx_);
-    ky_math_ = Eigen::VectorXd::Zero(ny_);
+    kx_fft_  = Eigen::ArrayXd::Zero(nx_);
+    ky_fft_  = Eigen::ArrayXd::Zero(ny_);
+    kx_math_ = Eigen::ArrayXd::Zero(nx_);
+    ky_math_ = Eigen::ArrayXd::Zero(ny_);
 
     // wavenumbers in fft and math ordering
     for(int ikx = 0; ikx < nx_; ++ikx)
@@ -526,16 +526,16 @@ namespace waves
   void LinearRandomFFTWaveSimulationRef::Impl::CreateFFTWPlans()
   {
     // elevation
-    fft_out0_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out1_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out2_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out0_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_out1_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_out2_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
 
     // xy-displacements
-    fft_out3_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out4_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out5_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out6_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
-    fft_out7_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_);
+    fft_out3_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_out4_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_out5_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_out6_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
+    fft_out7_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_);
 
     // elevation
     fft_plan0_ = fftw_plan_dft_2d(nx_, ny_,
@@ -754,46 +754,46 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::ElevationAt(
-    Eigen::Ref<Eigen::MatrixXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h)
   {
     impl_->ElevationAt(h);
   }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::ElevationDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy)
   {
     impl_->ElevationDerivAt(dhdx, dhdy);
   }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::DisplacementAt(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+    Eigen::Ref<Eigen::ArrayXXd> sx,
+    Eigen::Ref<Eigen::ArrayXXd> sy)
   {
     impl_->DisplacementAt(sx, sy);
   }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::DisplacementDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+    Eigen::Ref<Eigen::ArrayXXd> dsydy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
   {
     impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::DisplacementAndDerivAt(
-    Eigen::Ref<Eigen::MatrixXd> h,
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy,
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> h,
+    Eigen::Ref<Eigen::ArrayXXd> sx,
+    Eigen::Ref<Eigen::ArrayXXd> sy,
+    Eigen::Ref<Eigen::ArrayXXd> dhdx,
+    Eigen::Ref<Eigen::ArrayXXd> dhdy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+    Eigen::Ref<Eigen::ArrayXXd> dsydy,
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
   {
     impl_->ElevationAt(h);
     impl_->ElevationDerivAt(dhdx, dhdy);

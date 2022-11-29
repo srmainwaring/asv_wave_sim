@@ -22,7 +22,7 @@
 
 #include "WaveSimulation.hh"
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 namespace gz
 {
@@ -69,50 +69,50 @@ namespace waves
         double &eta) override;
 
     virtual void Elevation(
-        const Eigen::Ref<const Eigen::VectorXd> &x,
-        const Eigen::Ref<const Eigen::VectorXd> &y,
-        Eigen::Ref<Eigen::VectorXd> eta) override;
+        const Eigen::Ref<const Eigen::ArrayXd> &x,
+        const Eigen::Ref<const Eigen::ArrayXd> &y,
+        Eigen::Ref<Eigen::ArrayXd> eta) override;
 
     virtual void Pressure(
         double x, double y, double z,
         double &pressure) override;
 
     virtual void Pressure(
-        const Eigen::Ref<const Eigen::VectorXd> &x,
-        const Eigen::Ref<const Eigen::VectorXd> &y,
-        const Eigen::Ref<const Eigen::VectorXd> &z,
-        Eigen::Ref<Eigen::VectorXd> pressure) override;
+        const Eigen::Ref<const Eigen::ArrayXd> &x,
+        const Eigen::Ref<const Eigen::ArrayXd> &y,
+        const Eigen::Ref<const Eigen::ArrayXd> &z,
+        Eigen::Ref<Eigen::ArrayXd> pressure) override;
 
     ///// lookup interface - array
     virtual void ElevationAt(
-        Eigen::Ref<Eigen::MatrixXd> h) override;
+        Eigen::Ref<Eigen::ArrayXXd> h) override;
 
     virtual void ElevationDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy) override;
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
 
     virtual void DisplacementAt(
-        Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy) override;
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy) override;
 
     virtual void DisplacementDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
     virtual void DisplacementAndDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> h,
-        Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy,
-        Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy) override;
+        Eigen::Ref<Eigen::ArrayXXd> h,
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy,
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
     virtual void PressureAt(
         int iz,
-        Eigen::Ref<Eigen::MatrixXd> pressure) override;
+        Eigen::Ref<Eigen::ArrayXXd> pressure) override;
 
     ///// lookup interface - scalar
     virtual void ElevationAt(

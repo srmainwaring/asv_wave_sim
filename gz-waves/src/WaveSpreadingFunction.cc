@@ -53,10 +53,10 @@ double Cos2sSpreadingFunction::Evaluate(
 
 //////////////////////////////////////////////////
 void Cos2sSpreadingFunction::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> phi,
-    const Eigen::Ref<const Eigen::MatrixXd> &theta,
+    Eigen::Ref<Eigen::ArrayXXd> phi,
+    const Eigen::Ref<const Eigen::ArrayXXd> &theta,
     double theta_mean,
-    const Eigen::Ref<const Eigen::MatrixXd>& /*k*/) const
+    const Eigen::Ref<const Eigen::ArrayXXd>& /*k*/) const
 {
   auto theta_view = theta.reshaped();
   std::transform(
@@ -136,10 +136,10 @@ double ECKVSpreadingFunction::Evaluate(
 
 //////////////////////////////////////////////////
 void ECKVSpreadingFunction::Evaluate(
-    Eigen::Ref<Eigen::MatrixXd> phi,
-    const Eigen::Ref<const Eigen::MatrixXd> &theta,
+    Eigen::Ref<Eigen::ArrayXXd> phi,
+    const Eigen::Ref<const Eigen::ArrayXXd> &theta,
     double theta_mean,
-    const Eigen::Ref<const Eigen::MatrixXd> &k) const
+    const Eigen::Ref<const Eigen::ArrayXXd> &k) const
 {
   auto theta_view = theta.reshaped();
   std::transform(

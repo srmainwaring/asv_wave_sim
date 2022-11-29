@@ -23,7 +23,7 @@
 
 #include "gz/waves/LinearRegularWaveSimulation.hh"
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 using std::chrono::steady_clock;
 using std::chrono::milliseconds;
@@ -53,7 +53,7 @@ TEST_F(LinearRegularWaveSimTest, Elevation)
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(false);
 
-  Eigen::VectorXd h(nx_ * ny_);
+  Eigen::ArrayXd h(nx_ * ny_);
 
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
@@ -73,7 +73,7 @@ TEST_F(LinearRegularWaveSimTest, ElevationVectorised)
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(true);
 
-  Eigen::VectorXd h(nx_ * ny_);
+  Eigen::ArrayXd h(nx_ * ny_);
 
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
@@ -93,14 +93,14 @@ TEST_F(LinearRegularWaveSimTest, DisplacementsAndDeriatives)
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(false);
 
-  Eigen::VectorXd h(nx_ * ny_);
-  Eigen::VectorXd dhdx(nx_ * ny_);
-  Eigen::VectorXd dhdy(nx_ * ny_);
-  Eigen::VectorXd sx(nx_ * ny_);
-  Eigen::VectorXd sy(nx_ * ny_);
-  Eigen::VectorXd dsxdx(nx_ * ny_);
-  Eigen::VectorXd dsydy(nx_ * ny_);
-  Eigen::VectorXd dsxdy(nx_ * ny_);
+  Eigen::ArrayXd h(nx_ * ny_);
+  Eigen::ArrayXd dhdx(nx_ * ny_);
+  Eigen::ArrayXd dhdy(nx_ * ny_);
+  Eigen::ArrayXd sx(nx_ * ny_);
+  Eigen::ArrayXd sy(nx_ * ny_);
+  Eigen::ArrayXd dsxdx(nx_ * ny_);
+  Eigen::ArrayXd dsydy(nx_ * ny_);
+  Eigen::ArrayXd dsxdy(nx_ * ny_);
 
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
@@ -123,14 +123,14 @@ TEST_F(LinearRegularWaveSimTest, DisplacementsAndDeriativesVectorised)
   LinearRegularWaveSimulation model(lx_, ly_, nx_, ny_);
   model.SetUseVectorised(true);
 
-  Eigen::VectorXd h(nx_ * ny_);
-  Eigen::VectorXd dhdx(nx_ * ny_);
-  Eigen::VectorXd dhdy(nx_ * ny_);
-  Eigen::VectorXd sx(nx_ * ny_);
-  Eigen::VectorXd sy(nx_ * ny_);
-  Eigen::VectorXd dsxdx(nx_ * ny_);
-  Eigen::VectorXd dsydy(nx_ * ny_);
-  Eigen::VectorXd dsxdy(nx_ * ny_);
+  Eigen::ArrayXd h(nx_ * ny_);
+  Eigen::ArrayXd dhdx(nx_ * ny_);
+  Eigen::ArrayXd dhdy(nx_ * ny_);
+  Eigen::ArrayXd sx(nx_ * ny_);
+  Eigen::ArrayXd sy(nx_ * ny_);
+  Eigen::ArrayXd dsxdx(nx_ * ny_);
+  Eigen::ArrayXd dsydy(nx_ * ny_);
+  Eigen::ArrayXd dsxdy(nx_ * ny_);
 
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)

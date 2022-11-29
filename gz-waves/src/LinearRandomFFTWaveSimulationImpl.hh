@@ -26,26 +26,26 @@
 #include "gz/waves/WaveSimulation.hh"
 #include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
-using Eigen::MatrixXcd;
-using Eigen::MatrixXd;
-using Eigen::VectorXcd;
-using Eigen::VectorXd;
+using Eigen::ArrayXXcd;
+using Eigen::ArrayXXd;
+using Eigen::ArrayXcd;
+using Eigen::ArrayXd;
 
 namespace Eigen
 { 
-  typedef Eigen::Matrix<
+  typedef Eigen::Array<
     std::complex<double>,
     Eigen::Dynamic,
     Eigen::Dynamic,
     Eigen::RowMajor
-  > MatrixXcdRowMajor;
+  > ArrayXXcdRowMajor;
 
-  typedef Eigen::Matrix<
+  typedef Eigen::Array<
     double,
     Eigen::Dynamic,
     Eigen::Dynamic,
     Eigen::RowMajor
-  > MatrixXdRowMajor;
+  > ArrayXXdRowMajor;
 }
 
 namespace gz
@@ -89,27 +89,27 @@ namespace waves
 
     /// \brief Calculate the sea surface elevation
     void ElevationAt(
-        Eigen::Ref<Eigen::MatrixXd> h);
+        Eigen::Ref<Eigen::ArrayXXd> h);
 
     /// \brief Calculate the derivative of the elevation wrt x and y
     void ElevationDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy);
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy);
 
     /// \brief Calculate the sea surface horizontal displacements
     void DisplacementAt(
-        Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy);
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy);
 
     /// \brief Calculate the derivative of the horizontal displacements wrt x and y
     void DisplacementDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy);
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy);
 
     void PressureAt(
         int iz,
-        Eigen::Ref<Eigen::MatrixXd> pressure);
+        Eigen::Ref<Eigen::ArrayXXd> pressure);
 
     void ElevationAt(
         int ix, int iy,
@@ -136,39 +136,39 @@ namespace waves
     void DestroyFFTWPlans();
 
     /// \note FFTW expects the multi-dimensional arrays to be in row-major
-    ///       format. Eigen::MatrixXcd is column-major, so here we
+    ///       format. Eigen::ArrayXXcd is column-major, so here we
     ///       explicity set the storage type.
     ///
     /// https://www.fftw.org/fftw3_doc/Row_002dmajor-Format.html 
     ///
-    Eigen::MatrixXcdRowMajor fft_h_;       // FFT0 - height
-    Eigen::MatrixXcdRowMajor fft_h_ikx_;   // FFT1 - d height / dx
-    Eigen::MatrixXcdRowMajor fft_h_iky_;   // FFT1 - d height / dy
-    Eigen::MatrixXcdRowMajor fft_sx_;      // FFT3 - displacement x
-    Eigen::MatrixXcdRowMajor fft_sy_;      // FFT4 - displacement y
-    Eigen::MatrixXcdRowMajor fft_h_kxkx_;  // FFT5 - d displacement x / dx
-    Eigen::MatrixXcdRowMajor fft_h_kyky_;  // FFT6 - d displacement y / dy
-    Eigen::MatrixXcdRowMajor fft_h_kxky_;  // FFT7 - d displacement x / dy
+    Eigen::ArrayXXcdRowMajor fft_h_;       // FFT0 - height
+    Eigen::ArrayXXcdRowMajor fft_h_ikx_;   // FFT1 - d height / dx
+    Eigen::ArrayXXcdRowMajor fft_h_iky_;   // FFT1 - d height / dy
+    Eigen::ArrayXXcdRowMajor fft_sx_;      // FFT3 - displacement x
+    Eigen::ArrayXXcdRowMajor fft_sy_;      // FFT4 - displacement y
+    Eigen::ArrayXXcdRowMajor fft_h_kxkx_;  // FFT5 - d displacement x / dx
+    Eigen::ArrayXXcdRowMajor fft_h_kyky_;  // FFT6 - d displacement y / dy
+    Eigen::ArrayXXcdRowMajor fft_h_kxky_;  // FFT7 - d displacement x / dy
 
     /// \note if using fftw_plan_dft_c2r_2d:  
     ///       complex input array has size: nx * ny / 2 + 1
     ///       real output array has size:   nx * ny
     ///
-    Eigen::MatrixXdRowMajor  fft_out0_;
-    Eigen::MatrixXdRowMajor  fft_out1_;
-    Eigen::MatrixXdRowMajor  fft_out2_;
-    Eigen::MatrixXdRowMajor  fft_out3_;
-    Eigen::MatrixXdRowMajor  fft_out4_;
-    Eigen::MatrixXdRowMajor  fft_out5_;
-    Eigen::MatrixXdRowMajor  fft_out6_;
-    Eigen::MatrixXdRowMajor  fft_out7_;
+    Eigen::ArrayXXdRowMajor  fft_out0_;
+    Eigen::ArrayXXdRowMajor  fft_out1_;
+    Eigen::ArrayXXdRowMajor  fft_out2_;
+    Eigen::ArrayXXdRowMajor  fft_out3_;
+    Eigen::ArrayXXdRowMajor  fft_out4_;
+    Eigen::ArrayXXdRowMajor  fft_out5_;
+    Eigen::ArrayXXdRowMajor  fft_out6_;
+    Eigen::ArrayXXdRowMajor  fft_out7_;
 
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
 
     /// FFT storage and plans for pressure calculations
-    std::vector<Eigen::MatrixXcdRowMajor>   fft_in_p_;
-    std::vector<Eigen::MatrixXdRowMajor>    fft_out_p_;
+    std::vector<Eigen::ArrayXXcdRowMajor>   fft_in_p_;
+    std::vector<Eigen::ArrayXXdRowMajor>    fft_out_p_;
     std::vector<fftw_plan>                  fft_plan_p_;
 
     /// \brief Gravity acceleration [m/s^2]
@@ -186,7 +186,7 @@ namespace waves
     int     nz_{1};
 
     // points along z-axis at which pressure is sampled
-    Eigen::VectorXd z_;
+    Eigen::ArrayXd z_;
 
     /// \brief Wind speed at 10m above mean sea level [m]
     double  u10_{5.0};
@@ -205,30 +205,30 @@ namespace waves
     double  ky_f_{2.0 * M_PI / ly_};
 
     // angular spatial frequencies in fft order (nx, ny)
-    Eigen::VectorXd kx_fft_;
-    Eigen::VectorXd ky_fft_;
+    Eigen::ArrayXd kx_fft_;
+    Eigen::ArrayXd ky_fft_;
 
     /// \brief Set to 1 to use a symmetric spreading function (standing waves).
     bool use_symmetric_spreading_fn_{false};
 
     //////////////////////////////////////////////////
     // storage for current amplitudes (nx * ny)
-    Eigen::VectorXcd zhat_;
-    Eigen::VectorXd  cos_wt_;
-    Eigen::VectorXd  sin_wt_;
+    Eigen::ArrayXcd zhat_;
+    Eigen::ArrayXd  cos_wt_;
+    Eigen::ArrayXd  sin_wt_;
 
     //////////////////////////////////////////////////
     // storage for base amplitudes (fft order)
 
     // square-root of two-sided discrete elevation variance spectrum
-    Eigen::VectorXd cap_psi_2s_root_;
+    Eigen::ArrayXd cap_psi_2s_root_;
 
     // iid random normals for real and imaginary parts of the amplitudes
-    Eigen::VectorXd rho_;
-    Eigen::VectorXd sigma_;
+    Eigen::ArrayXd rho_;
+    Eigen::ArrayXd sigma_;
 
     // angular temporal frequency   
-    Eigen::VectorXd omega_k_;
+    Eigen::ArrayXd omega_k_;
 
     /// \brief For testing
     friend class LinearRandomFFTWaveSimFixture;

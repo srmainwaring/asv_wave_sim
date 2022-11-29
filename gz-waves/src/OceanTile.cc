@@ -33,8 +33,8 @@
 #include <iostream>
 #include <vector>
 
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
+using Eigen::ArrayXXd;
+using Eigen::ArrayXd;
 
 namespace gz
 {
@@ -90,14 +90,14 @@ public:
 
   std::unique_ptr<WaveSimulation> mWaveSim;
 
-  Eigen::VectorXd             mHeights;
-  Eigen::VectorXd             mDhdx;
-  Eigen::VectorXd             mDhdy;
-  Eigen::VectorXd             mDisplacementsX;
-  Eigen::VectorXd             mDisplacementsY;
-  Eigen::VectorXd             mDxdx;
-  Eigen::VectorXd             mDydy;
-  Eigen::VectorXd             mDxdy;
+  Eigen::ArrayXd             mHeights;
+  Eigen::ArrayXd             mDhdx;
+  Eigen::ArrayXd             mDhdy;
+  Eigen::ArrayXd             mDisplacementsX;
+  Eigen::ArrayXd             mDisplacementsY;
+  Eigen::ArrayXd             mDxdx;
+  Eigen::ArrayXd             mDydy;
+  Eigen::ArrayXd             mDxdy;
 
   void Create();
 
@@ -188,14 +188,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     mSpacing(_L / static_cast<double>(_N))
 {
   auto size = _N * _N;
-  mHeights = Eigen::VectorXd::Zero(size);
-  mDhdx = Eigen::VectorXd::Zero(size);
-  mDhdy = Eigen::VectorXd::Zero(size);
-  mDisplacementsX = Eigen::VectorXd::Zero(size);
-  mDisplacementsY = Eigen::VectorXd::Zero(size);
-  mDxdx = Eigen::VectorXd::Zero(size);
-  mDydy = Eigen::VectorXd::Zero(size);
-  mDxdy = Eigen::VectorXd::Zero(size);
+  mHeights = Eigen::ArrayXd::Zero(size);
+  mDhdx = Eigen::ArrayXd::Zero(size);
+  mDhdy = Eigen::ArrayXd::Zero(size);
+  mDisplacementsX = Eigen::ArrayXd::Zero(size);
+  mDisplacementsY = Eigen::ArrayXd::Zero(size);
+  mDxdx = Eigen::ArrayXd::Zero(size);
+  mDydy = Eigen::ArrayXd::Zero(size);
+  mDxdy = Eigen::ArrayXd::Zero(size);
 
   // Different types of wave simulator are supported...
   // 0 - LinearRegularWaveSimulation
@@ -265,14 +265,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   double _L = _params->TileSize();
 
   auto size = _N * _N;
-  mHeights = Eigen::VectorXd::Zero(size);
-  mDhdx = Eigen::VectorXd::Zero(size);
-  mDhdy = Eigen::VectorXd::Zero(size);
-  mDisplacementsX = Eigen::VectorXd::Zero(size);
-  mDisplacementsY = Eigen::VectorXd::Zero(size);
-  mDxdx = Eigen::VectorXd::Zero(size);
-  mDydy = Eigen::VectorXd::Zero(size);
-  mDxdy = Eigen::VectorXd::Zero(size);
+  mHeights = Eigen::ArrayXd::Zero(size);
+  mDhdx = Eigen::ArrayXd::Zero(size);
+  mDhdy = Eigen::ArrayXd::Zero(size);
+  mDisplacementsX = Eigen::ArrayXd::Zero(size);
+  mDisplacementsY = Eigen::ArrayXd::Zero(size);
+  mDxdx = Eigen::ArrayXd::Zero(size);
+  mDydy = Eigen::ArrayXd::Zero(size);
+  mDxdy = Eigen::ArrayXd::Zero(size);
 
   // Different types of wave simulator are supported...
   // 0 - LinearRegularWaveSimulation

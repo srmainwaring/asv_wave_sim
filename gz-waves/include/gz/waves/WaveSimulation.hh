@@ -18,7 +18,7 @@
 
 #include <Eigen/Dense>
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 namespace gz
 {
@@ -43,50 +43,50 @@ namespace waves
         double &eta);
 
     virtual void Elevation(
-        const Eigen::Ref<const Eigen::VectorXd> &x,
-        const Eigen::Ref<const Eigen::VectorXd> &y,
-        Eigen::Ref<Eigen::VectorXd> eta);
+        const Eigen::Ref<const Eigen::ArrayXd> &x,
+        const Eigen::Ref<const Eigen::ArrayXd> &y,
+        Eigen::Ref<Eigen::ArrayXd> eta);
 
     virtual void Pressure(
         double x, double y, double z,
         double &pressure);
 
     virtual void Pressure(
-        const Eigen::Ref<const Eigen::VectorXd> &x,
-        const Eigen::Ref<const Eigen::VectorXd> &y,
-        const Eigen::Ref<const Eigen::VectorXd> &z,
-        Eigen::Ref<Eigen::VectorXd> pressure);
+        const Eigen::Ref<const Eigen::ArrayXd> &x,
+        const Eigen::Ref<const Eigen::ArrayXd> &y,
+        const Eigen::Ref<const Eigen::ArrayXd> &z,
+        Eigen::Ref<Eigen::ArrayXd> pressure);
 
     ///// lookup interface - array
     virtual void ElevationAt(
-        Eigen::Ref<Eigen::MatrixXd> h) = 0;
+        Eigen::Ref<Eigen::ArrayXXd> h) = 0;
 
     virtual void ElevationDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy) = 0;
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy) = 0;
 
     virtual void DisplacementAt(
-        Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy) = 0;
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy) = 0;
 
     virtual void DisplacementDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy) = 0;
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) = 0;
 
     virtual void DisplacementAndDerivAt(
-        Eigen::Ref<Eigen::MatrixXd> h,
-        Eigen::Ref<Eigen::MatrixXd> sx,
-        Eigen::Ref<Eigen::MatrixXd> sy,
-        Eigen::Ref<Eigen::MatrixXd> dhdx,
-        Eigen::Ref<Eigen::MatrixXd> dhdy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdx,
-        Eigen::Ref<Eigen::MatrixXd> dsydy,
-        Eigen::Ref<Eigen::MatrixXd> dsxdy) = 0;
+        Eigen::Ref<Eigen::ArrayXXd> h,
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy,
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) = 0;
 
     virtual void PressureAt(
         int iz,
-        Eigen::Ref<Eigen::MatrixXd> pressure);
+        Eigen::Ref<Eigen::ArrayXXd> pressure);
 
     ///// lookup interface - scalar
     virtual void ElevationAt(
