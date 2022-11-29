@@ -31,7 +31,11 @@ namespace waves
   public:
     virtual ~LinearRandomFFTWaveSimulation();
 
-    LinearRandomFFTWaveSimulation(double lx, double ly, int nx, int ny);
+    LinearRandomFFTWaveSimulation(double lx, double ly,
+        int nx, int ny);
+
+    LinearRandomFFTWaveSimulation(double lx, double ly, double lz,
+        int nx, int ny, int nz);
 
     /// \brief Set lambda which controls the horizontal wave displacement.
     void SetLambda(double lambda);

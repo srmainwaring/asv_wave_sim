@@ -17,6 +17,7 @@
 #define GZ_WAVES_LINEARRANDOMFFTWAVESIMULATION_IMPL_HH_
 
 #include <complex>
+#include <vector>
 
 #include <Eigen/Dense>
 
@@ -74,6 +75,9 @@ namespace waves
     /// \brief Construct a wave simulation model
     Impl(double lx, double ly, int nx, int ny);
 
+    /// \brief Construct a wave simulation model
+    Impl(double lx, double ly, double lz, int nx, int ny, int nz);
+
     /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double ux, double uy);
 
@@ -126,6 +130,7 @@ namespace waves
     void ComputeCurrentAmplitudes(double time);
 
     void InitWaveNumbers();
+    void InitPressureGrid();
 
     void CreateFFTWPlans();
     void DestroyFFTWPlans();
@@ -161,17 +166,27 @@ namespace waves
     fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
     fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
 
+    /// FFT storage and plans for pressure calculations
+    std::vector<Eigen::MatrixXcdRowMajor>   fft_in_p_;
+    std::vector<Eigen::MatrixXdRowMajor>    fft_out_p_;
+    std::vector<fftw_plan>                  fft_plan_p_;
+
     /// \brief Gravity acceleration [m/s^2]
     double gravity_{9.81};
 
     /// \brief Horizontal displacement scaling factor. Zero for no displacement
-    double lambda_{0.0};
+    double lambda_{0.6};
 
-    // grid parameters
+    // elevation and pressure grid parameters
     double  lx_{1.0};
     double  ly_{1.0};
+    double  lz_{0.0};
     int     nx_{2};
     int     ny_{2};
+    int     nz_{1};
+
+    // points along z-axis at which pressure is sampled
+    Eigen::VectorXd z_;
 
     /// \brief Wind speed at 10m above mean sea level [m]
     double  u10_{5.0};

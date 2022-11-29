@@ -14,23 +14,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-// The non-vectorised time-dependent update step labelled 'non-vectorised reference version'
-// in LinearRandomFFTWaveSimulation::Impl.ComputeCurrentAmplitudesReference is based on the Curtis Mobley's
-// IDL code cgAnimate_2D_SeaSurface.py
-
-//***************************************************************************************************
-//* This code is copyright (c) 2016 by Curtis D. Mobley.                                            *
-//* Permission is hereby given to reproduce and use this code for non-commercial academic research, *
-//* provided that the user suitably acknowledges Curtis D. Mobley in any presentations, reports,    *
-//* publications, or other works that make use of the code or its output.  Depending on the extent  *
-//* of use of the code or its outputs, suitable acknowledgement can range from a footnote to offer  *
-//* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
-//***************************************************************************************************
-
 #include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
 #include <complex>
 #include <random>
+#include <vector>
 
 #include <Eigen/Dense>
 
@@ -55,11 +43,24 @@ namespace waves
   //////////////////////////////////////////////////
   LinearRandomFFTWaveSimulation::Impl::Impl(
     double lx, double ly, int nx, int ny) :
-    lambda_(0.6),
     lx_(lx),
     ly_(ly),
     nx_(nx),
     ny_(ny)
+  {
+    CreateFFTWPlans();
+    ComputeBaseAmplitudes();
+  }
+
+  //////////////////////////////////////////////////
+  LinearRandomFFTWaveSimulation::Impl::Impl(
+    double lx, double ly, double lz, int nx, int ny, int nz) :
+    lx_(lx),
+    ly_(ly),
+    lz_(lz),
+    nx_(nx),
+    ny_(ny),
+    nz_(nz)
   {
     CreateFFTWPlans();
     ComputeBaseAmplitudes();
@@ -73,7 +74,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomFFTWaveSimulation::Impl::SetWindVelocity(double ux, double uy)
+  void LinearRandomFFTWaveSimulation::Impl::SetWindVelocity(
+      double ux, double uy)
   {
     // Update wind velocity and recompute base amplitudes.
     u10_ = sqrt(ux*ux + uy *uy);
@@ -150,10 +152,15 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::PressureAt(
-      int /*iz*/,
-      Eigen::Ref<Eigen::MatrixXd> /*pressure*/)
+      int iz,
+      Eigen::Ref<Eigen::MatrixXd> pressure)
   {
-    assert(0 && "Not implemented");
+    // run the FFTs
+    fftw_execute(fft_plan_p_[iz]);
+
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    pressure = fft_out_p_[iz].reshaped<Eigen::ColMajor>(n2, 1);
   }
 
   //////////////////////////////////////////////////
@@ -184,16 +191,21 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::PressureAt(
-      int /*ix*/, int /*iy*/, int /*iz*/,
-      double &/*pressure*/)
+      int ix, int iy, int iz,
+      double &pressure)
   {
-    assert(0 && "Not implemented");
+    // run the FFT
+    fftw_execute(fft_plan_p_[iz]);
+
+    // select value
+    pressure = fft_out_p_[iz](ix, iy);
   }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::ComputeBaseAmplitudes()
   {
     InitWaveNumbers();
+    InitPressureGrid();
 
     // initialise arrays - always update as algo switch may change shape.
     size_t n2 = nx_ * ny_;
@@ -359,11 +371,11 @@ namespace waves
 
     for (int ikx = 0; ikx < nx_; ++ikx)
     {
-      double kx = kx_fft_[ikx];
+      double kx = kx_fft_(ikx);
       double kx2 = kx*kx;
       for (int iky = 0; iky < ny_/2 + 1; ++iky)
       {
-        double ky = ky_fft_[iky];
+        double ky = ky_fft_(iky);
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
 
@@ -387,6 +399,18 @@ namespace waves
         fft_h_(ikx, iky) = h;
         fft_h_ikx_(ikx, iky) = hikx;
         fft_h_iky_(ikx, iky) = hiky;
+
+        /// \todo(srmainwaring) pressure optimisation - adjust so that the
+        /// entry for z = 0 is obtained from  fft_h_ / fft_out0_ / fft_plan0_
+
+        // pressure
+        for (int iz = 0; iz < nz_; ++iz)
+        {
+          double z = z_(iz);
+          double e = std::exp(k * z);
+          complex p = e * h; 
+          fft_in_p_[iz](ikx, iky) = p;
+        }
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
@@ -441,6 +465,21 @@ namespace waves
       double ky = (iky - ny_/2) * ky_f_;
       ky_fft_((iky + ny_/2) % ny_) = ky;
     }
+  }
+
+ //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::InitPressureGrid()
+  {
+    // pressure sample points (z is below the free surface)
+    Eigen::VectorXd zr = Eigen::VectorXd::Zero(nz_);
+    if (nz_ > 1)
+    {
+      // first element is zero - fill nz - 1 remaining elements
+      Eigen::VectorXd ln_z = Eigen::VectorXd::LinSpaced(
+          nz_ - 1, -std::log(lz_), std::log(lz_));
+      zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z.array());
+    }
+    z_ = zr.reverse();
   }
 
   //////////////////////////////////////////////////
@@ -507,6 +546,20 @@ namespace waves
         reinterpret_cast<fftw_complex*>(fft_h_kxky_.data()),
         reinterpret_cast<double*>(fft_out7_.data()),
         FFTW_ESTIMATE);
+
+    /// \todo(srmainwaring) pressure optimisation - adjust so that the
+    /// entry for z = 0 is obtained from  fft_h_ / fft_out0_ / fft_plan0_
+
+    // pressure
+    for (int iz=0; iz < nz_; ++iz)
+    {
+      fft_in_p_.push_back(Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1));
+      fft_out_p_.push_back(Eigen::MatrixXdRowMajor::Zero(nx_, ny_));
+      fft_plan_p_.push_back(fftw_plan_dft_c2r_2d(nx_, ny_,
+          reinterpret_cast<fftw_complex*>(fft_in_p_[iz].data()),
+          reinterpret_cast<double*>(fft_out_p_[iz].data()),
+          FFTW_ESTIMATE));
+    }
   }
 
   //////////////////////////////////////////////////
@@ -532,6 +585,13 @@ namespace waves
   LinearRandomFFTWaveSimulation::LinearRandomFFTWaveSimulation(
       double lx, double ly, int nx, int ny) :
     impl_(new LinearRandomFFTWaveSimulation::Impl(lx, ly, nx, ny))
+  {
+  }
+
+  //////////////////////////////////////////////////
+  LinearRandomFFTWaveSimulation::LinearRandomFFTWaveSimulation(
+      double lx, double ly, double lz, int nx, int ny, int nz) :
+    impl_(new LinearRandomFFTWaveSimulation::Impl(lx, ly, lz, nx, ny, nz))
   {
   }
 
