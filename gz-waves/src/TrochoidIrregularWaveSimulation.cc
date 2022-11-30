@@ -34,7 +34,7 @@ namespace waves
     ~Impl();
 
     Impl(
-        int N,
+        Index N,
         double L,
         std::shared_ptr<WaveParameters> params);
 
@@ -58,9 +58,9 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXXd> _dsydy,
         Eigen::Ref<Eigen::ArrayXXd> _dsxdy);
   
-    int N_;
-    int N2_;
-    int NOver2_;
+    Index N_;
+    Index N2_;
+    Index NOver2_;
     double L_;
     double time_;
     std::shared_ptr<WaveParameters> params_;
@@ -73,7 +73,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   TrochoidIrregularWaveSimulation::Impl::Impl(
-    int N,
+    Index N,
     double L,
     std::shared_ptr<WaveParameters> params) :
     N_(N),
@@ -122,12 +122,12 @@ namespace waves
       const auto& direction_i = direction[i];
       // const auto& q_i = q[i];
 
-      for (int iy=0; iy<this->N_; ++iy)
+      for (Index iy=0; iy<this->N_; ++iy)
       {
-        for (int ix=0; ix<this->N_; ++ix)
+        for (Index ix=0; ix<this->N_; ++ix)
         {
           // Col major index
-          int idx = iy * this->N_ + ix;
+          Index idx = iy * this->N_ + ix;
 
           // Regular grid
           double vx = ix * this->L_ / this->N_ - this->L_ / 2.0;
@@ -182,9 +182,9 @@ namespace waves
       const auto& direction_i = direction[i];
       const auto& q_i = q[i];
 
-      for (int iy=0; iy<this->N_; ++iy)
+      for (Index iy=0; iy<this->N_; ++iy)
       {
-        for (int ix=0; ix<this->N_; ++ix)
+        for (Index ix=0; ix<this->N_; ++ix)
         {
           // Col major index
           size_t idx = iy * this->N_ + ix;
@@ -225,7 +225,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   TrochoidIrregularWaveSimulation::TrochoidIrregularWaveSimulation(
-    int N,
+    Index N,
     double L,
     std::shared_ptr<WaveParameters> params) :
     impl_(new TrochoidIrregularWaveSimulation::Impl(N, L, params))
@@ -295,7 +295,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::PressureAt(
-      int ,
+      Index ,
       Eigen::Ref<Eigen::ArrayXXd> )
   {
     assert(0 && "Not implemented");
@@ -303,7 +303,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::ElevationAt(
-      int , int ,
+      Index , Index ,
       double &)
   {
     assert(0 && "Not implemented");
@@ -311,7 +311,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::DisplacementAt(
-      int , int ,
+      Index , Index ,
       double &, double &)
   {
     assert(0 && "Not implemented");
@@ -319,7 +319,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::PressureAt(
-      int , int , int ,
+      Index , Index , Index ,
       double &)
   {
     assert(0 && "Not implemented");

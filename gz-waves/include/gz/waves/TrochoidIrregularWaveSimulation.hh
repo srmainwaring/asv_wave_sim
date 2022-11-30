@@ -37,7 +37,7 @@ namespace waves
     virtual ~TrochoidIrregularWaveSimulation();
 
     TrochoidIrregularWaveSimulation(
-        int nx,
+        Index nx,
         double lx,
         std::shared_ptr<WaveParameters> params);
 
@@ -73,20 +73,20 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
     virtual void PressureAt(
-        int iz,
+        Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure) override;
 
     // lookup interface - scalar
     virtual void ElevationAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &eta) override;
 
     virtual void DisplacementAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &sx, double &sy) override;
 
     virtual void PressureAt(
-        int ix, int iy, int iz,
+        Index ix, Index iy, Index iz,
         double &pressure) override;
 
   private:

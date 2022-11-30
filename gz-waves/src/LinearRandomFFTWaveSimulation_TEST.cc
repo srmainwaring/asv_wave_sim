@@ -62,8 +62,8 @@ public:
   // put in any custom data members that you need 
   double lx_ = 200.0;
   double ly_ = 100.0;
-  int    nx_ = 16;
-  int    ny_ = 8;
+  Index  nx_ = 16;
+  Index  ny_ = 8;
 };
 
 //////////////////////////////////////////////////
@@ -85,12 +85,12 @@ TEST_F(LinearRandomFFTWaveSimFixture, AngularSpatialWavenumber)
   };
 
   // check kx fft-ordering
-  for (int i=0; i<nx_; ++i)
+  for (Index i=0; i<nx_; ++i)
   {
     EXPECT_DOUBLE_EQ(model.kx_fft_[i] / model.kx_f_, ikx_fft[i]);
   }
   // check ky fft-ordering
-  for (int i=0; i<ny_; ++i)
+  for (Index i=0; i<ny_; ++i)
   {
     EXPECT_DOUBLE_EQ(model.ky_fft_[i] / model.ky_f_, iky_fft[i]);
   }
@@ -104,16 +104,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianHTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -137,16 +137,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianDhDxTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -170,16 +170,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianDhDyTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -203,16 +203,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianSxTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -236,16 +236,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianSyTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -269,16 +269,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianDsxDxTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -302,16 +302,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianDsyDyTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -335,16 +335,16 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianDsxDyTimeZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
         ckx = nx_ - ikx;
 
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
         cky = ny_ - iky;
 
@@ -368,19 +368,19 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianTimeNonZeroReference)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(11.2);
 
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (Index iky=0; iky<ny_; ++iky, ++idx)
     {
       // index for conjugate
-      // int cdx = 0;
-      int ckx = 0;
+      // Index cdx = 0;
+      Index ckx = 0;
       if (ikx != 0)
       {
         ckx = nx_ - ikx;
         // cdx += ckx * ny_;
       }
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
       {
         cky = ny_ - iky;
@@ -403,7 +403,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianTimeNonZeroReference)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZeroReference)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -416,9 +416,9 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZeroReference)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (Index iky=0; iky<ny_; ++iky, ++idx)
     {
       sum_z2 += z(idx, 0) * z(idx, 0);
       sum_h2 += norm(model.fft_h_(ikx, iky));
@@ -430,7 +430,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZeroReference)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZeroReference)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -443,9 +443,9 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZeroReference)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (Index iky=0; iky<ny_; ++iky, ++idx)
     {
       sum_z2 += z(idx, 0) * z(idx, 0);
       sum_h2 += norm(model.fft_h_(ikx, iky));
@@ -458,7 +458,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZeroReference)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, HorizontalDisplacementsLambdaZeroReference)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl model(lx_, ly_, nx_, ny_);
 
@@ -474,7 +474,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, HorizontalDisplacementsLambdaZeroReference
   EXPECT_EQ(sx.size(), n2);
   EXPECT_EQ(sy.size(), n2);
 
-  for (int i=0; i<n2; ++i)
+  for (Index i=0; i<n2; ++i)
   {
     EXPECT_DOUBLE_EQ(sx(i, 0), 0.0);
     EXPECT_DOUBLE_EQ(sy(i, 0), 0.0);
@@ -491,17 +491,17 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianTimeZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(0.0);
 
-  for (int ikx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky)
+    for (Index iky=0; iky<ny_; ++iky)
     {
       // index for conjugate
-      int ckx = 0;
+      Index ckx = 0;
       if (ikx != 0)
       {
         ckx = nx_ - ikx;
       }
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
       {
         cky = ny_ - iky;
@@ -530,19 +530,19 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianTimeNonZero)
   model.ComputeBaseAmplitudes();
   model.ComputeCurrentAmplitudes(11.2);
 
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (Index iky=0; iky<ny_; ++iky, ++idx)
     {
       // index for conjugate
-      int cdx = 0;
-      int ckx = 0;
+      Index cdx = 0;
+      Index ckx = 0;
       if (ikx != 0)
       {
         ckx = nx_ - ikx;
         cdx += ckx * ny_;
       }
-      int cky = 0;
+      Index cky = 0;
       if (iky != 0)
       {
         cky = ny_ - iky;
@@ -567,7 +567,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, HermitianTimeNonZero)
 #if 0
 TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZero)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -580,9 +580,9 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZero)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (Index iky=0; iky<ny_; ++iky, ++idx)
     {
       sum_z2 += z(idx, 0) * z(idx, 0);
       sum_h2 += norm(model.fft_h_(ikx, iky));
@@ -597,7 +597,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeZero)
 #if 0
 TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZero)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -610,9 +610,9 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZero)
 
   double sum_z2 = 0.0;
   double sum_h2 = 0.0;
-  for (int ikx=0, idx=0; ikx<nx_; ++ikx)
+  for (Index ikx=0, idx=0; ikx<nx_; ++ikx)
   {
-    for (int iky=0; iky<ny_; ++iky, ++idx)
+    for (Index iky=0; iky<ny_; ++iky, ++idx)
     {
       sum_z2 += z(idx, 0) * z(idx, 0);
       sum_h2 += norm(model.fft_h_(ikx, iky));
@@ -626,7 +626,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ParsevalsIdentityTimeNonZero)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, HorizontalDisplacementsLambdaZero)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
 
@@ -642,7 +642,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, HorizontalDisplacementsLambdaZero)
   EXPECT_EQ(sx.size(), n2);
   EXPECT_EQ(sy.size(), n2);
 
-  for (int i=0; i<n2; ++i)
+  for (Index i=0; i<n2; ++i)
   {
     EXPECT_DOUBLE_EQ(sx(i, 0), 0.0);
     EXPECT_DOUBLE_EQ(sy(i, 0), 0.0);
@@ -653,7 +653,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, HorizontalDisplacementsLambdaZero)
 // Cross-check optimised version against reference 
 TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeZero)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudes();
@@ -672,7 +672,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeZero)
   EXPECT_EQ(ref_z.size(), n2);
   EXPECT_EQ(z.size(), n2);
 
-  for (int i=0; i<n2; ++i)
+  for (Index i=0; i<n2; ++i)
   {
     EXPECT_NEAR(z(i, 0), ref_z(i, 0), 1.0E-15);
   }
@@ -681,7 +681,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeZero)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeNonZero)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudes();
@@ -700,7 +700,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeNonZero)
   EXPECT_EQ(ref_z.size(), n2);
   EXPECT_EQ(z.size(), n2);
 
-  for (int i=0; i<n2; ++i)
+  for (Index i=0; i<n2; ++i)
   {
     EXPECT_NEAR(z(i, 0), ref_z(i, 0), 1.0E-15);
   }
@@ -709,7 +709,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationTimeNonZero)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, Displacement)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudes();
@@ -732,7 +732,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, Displacement)
   EXPECT_EQ(sx.size(), n2);
   EXPECT_EQ(sy.size(), n2);
 
-  for (int i=0; i<n2; ++i)
+  for (Index i=0; i<n2; ++i)
   {
     EXPECT_NEAR(sx(i, 0), ref_sx(i, 0), 1.0E-15);
     EXPECT_NEAR(sy(i, 0), ref_sy(i, 0), 1.0E-15);
@@ -742,7 +742,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, Displacement)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, ElevationDerivatives)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudes();
@@ -765,7 +765,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationDerivatives)
   EXPECT_EQ(dhdx.size(), n2);
   EXPECT_EQ(dhdy.size(), n2);
 
-  for (int i=0; i<n2; ++i)
+  for (Index i=0; i<n2; ++i)
   {
     EXPECT_DOUBLE_EQ(dhdx(i, 0), ref_dhdx(i, 0));
     EXPECT_DOUBLE_EQ(dhdy(i, 0), ref_dhdy(i, 0));
@@ -775,7 +775,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, ElevationDerivatives)
 //////////////////////////////////////////////////
 TEST_F(LinearRandomFFTWaveSimFixture, DisplacementDerivatives)
 {
-  int n2 = nx_ * ny_;
+  Index n2 = nx_ * ny_;
 
   LinearRandomFFTWaveSimulationRef::Impl ref_model(lx_, ly_, nx_, ny_);
   ref_model.ComputeBaseAmplitudes();
@@ -802,7 +802,7 @@ TEST_F(LinearRandomFFTWaveSimFixture, DisplacementDerivatives)
   EXPECT_EQ(dsydy.size(), n2);
   EXPECT_EQ(dsxdy.size(), n2);
 
-  for (int i=0; i<n2; ++i)
+  for (Index i=0; i<n2; ++i)
   {
     EXPECT_DOUBLE_EQ(dsxdx(i, 0), ref_dsxdx(i, 0));
     EXPECT_DOUBLE_EQ(dsydy(i, 0), ref_dsydy(i, 0));
@@ -814,15 +814,15 @@ TEST_F(LinearRandomFFTWaveSimFixture, DisplacementDerivatives)
 // check we're the indexing / stride rules used in the FFT routines
 TEST_F(LinearRandomFFTWaveSimFixture, Indexing)
 {
-  int nxx = 4;
-  int nyy = 3;
+  Index nxx = 4;
+  Index nyy = 3;
 
   // column major storage
   std::vector<std::vector<double>> a1(nyy, std::vector<double>(nxx, 0.0));
   
-  for (int iky = 0, idx = 0; iky < nyy; ++iky)
+  for (Index iky = 0, idx = 0; iky < nyy; ++iky)
   {
-    for (int ikx = 0; ikx < nxx; ++ikx, ++idx)
+    for (Index ikx = 0; ikx < nxx; ++ikx, ++idx)
     {
       a1[iky][ikx] = idx;
     }
@@ -853,11 +853,11 @@ TEST_F(LinearRandomFFTWaveSimFixture, Indexing)
 
   EXPECT_EQ(a3.size(), nyy * nxx);
 
-  for (int iky = 0; iky < nyy; ++iky)
+  for (Index iky = 0; iky < nyy; ++iky)
   {
-    for (int ikx = 0; ikx < nxx; ++ikx)
+    for (Index ikx = 0; ikx < nxx; ++ikx)
     {
-      int idx = iky * nxx + ikx;
+      Index idx = iky * nxx + ikx;
       EXPECT_EQ(a1[iky][ikx], a2[iky][ikx]);
       EXPECT_EQ(a3[idx], a2[iky][ikx]);
     }

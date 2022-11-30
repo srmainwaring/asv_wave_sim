@@ -57,8 +57,8 @@ TEST(WaveSimulation, TrochoidIrregularWaveSimulation)
   std::shared_ptr<WaveParameters> wave_params(new WaveParameters());
   
   // Create the wave simulation.
-  int nx = 4;
-  int ny = 4;
+  Index nx = 4;
+  Index ny = 4;
   double lx = 4.0;
   double ly = 4.0;
   std::unique_ptr<IWaveSimulation> wave_sim(
@@ -105,13 +105,13 @@ protected:
   const double gravity_{9.81};
 
   // grid dimensions
-  const int nx_{8};
-  const int ny_{4};
+  const Index nx_{8};
+  const Index ny_{4};
   const double lx_{10.0};
   const double ly_{5.0};
 
   // grid depth dimension for pressure
-  int nz_{5};
+  Index nz_{5};
   double lz_{50.0};
 
   // wave parameters
@@ -144,10 +144,10 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirX)
   Eigen::ArrayXd h = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->ElevationAt(h);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
     // double y = iy * dy + ly_min;
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       double x = ix * dx + lx_min;
       double a = k_ * x - w_ * time;
@@ -186,10 +186,10 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXY)
   Eigen::ArrayXd h = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->ElevationAt(h);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
     double y = iy * dy + ly_min;
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       double x = ix * dx + lx_min;
       double a = k_ * (x * cd + y * sd) - wt;
@@ -217,9 +217,9 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacementsDirX)
   Eigen::ArrayXd sy = Eigen::ArrayXd::Zero(nx_ * ny_);
   wave_sim->DisplacementAt(sx, sy);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(sx(idx), 0.0);
       EXPECT_DOUBLE_EQ(sy(idx), 0.0);
@@ -252,21 +252,21 @@ TEST_F(LinearRegularWaveSimFixture, TestEigenMeshGrid)
   x_grid.colwise() += x_v;
   y_grid.rowwise() += y_v.transpose();
 
-  for (int ix=0; ix<nx_; ++ix)
+  for (Index ix=0; ix<nx_; ++ix)
   {
     double x_test = ix * dx + lx_min;
     EXPECT_DOUBLE_EQ(x_v(ix), x_test);
   }
 
-  for (int iy=0; iy<ny_; ++iy)
+  for (Index iy=0; iy<ny_; ++iy)
   {
     double y_test = iy * dy + ly_min;
     EXPECT_DOUBLE_EQ(y_v(iy), y_test);
   }
 
-  for (int ix=0; ix<nx_; ++ix)
+  for (Index ix=0; ix<nx_; ++ix)
   {
-    for (int iy=0; iy<ny_; ++iy)
+    for (Index iy=0; iy<ny_; ++iy)
     {
       double x_test = ix * dx + lx_min;
       double y_test = iy * dy + ly_min;
@@ -298,9 +298,9 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXArrayXXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->ElevationAt(h2);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
     }
@@ -328,9 +328,9 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightsDirXYArrayXXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->ElevationAt(h2);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
     }
@@ -360,9 +360,9 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacmentsArrayXXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->DisplacementAt(sx2, sy2);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));
       EXPECT_DOUBLE_EQ(sy1(idx), sy2(idx));
@@ -393,9 +393,9 @@ TEST_F(LinearRegularWaveSimFixture, TestHeightDerivativesArrayXXd)
   wave_sim->SetUseVectorised(false);
   wave_sim->ElevationDerivAt(dhdx2, dhdy2);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(dhdx1(idx), dhdx2(idx));
       EXPECT_DOUBLE_EQ(dhdy1(idx), dhdy2(idx));
@@ -440,9 +440,9 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacementsAndDerivativesArrayXXd)
   wave_sim->DisplacementAndDerivAt(
     h2, sx2, sy2, dhdx2, dhdy2, dsxdx2, dsydy2, dsxdy2);
 
-  for (int iy=0, idx=0; iy<ny_; ++iy)
+  for (Index iy=0, idx=0; iy<ny_; ++iy)
   {
-    for (int ix=0; ix<nx_; ++ix, ++idx)
+    for (Index ix=0; ix<nx_; ++ix, ++idx)
     {
       EXPECT_DOUBLE_EQ(h1(idx), h2(idx));
       EXPECT_DOUBLE_EQ(sx1(idx), sx2(idx));
@@ -463,10 +463,10 @@ TEST_F(LinearRegularWaveSimFixture, TestDisplacementsAndDerivativesArrayXXd)
 TEST(OceanTile, LinearRegularWaveSimulation)
 {
   // Wave parameters.
-  int N = 4;
-  int N2 = N*N;
-  int NPlus1 = N+1;
-  int NPlus12 = NPlus1*NPlus1;
+  Index N = 4;
+  Index N2 = N*N;
+  Index NPlus1 = N+1;
+  Index NPlus12 = NPlus1*NPlus1;
   double L = 10.0;
   double amplitude = 1.0;
   double period = 10.0;
@@ -488,10 +488,10 @@ TEST(OceanTile, LinearRegularWaveSimulation)
   }
 
   EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
-  for (int iy=0; iy<NPlus1; ++iy)
+  for (Index iy=0; iy<NPlus1; ++iy)
   {
     double vy = iy * dl + lm;
-    for (int ix=0; ix<NPlus1; ++ix)
+    for (Index ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
       size_t idx = iy * NPlus1 + ix;
@@ -509,10 +509,10 @@ TEST(OceanTile, LinearRegularWaveSimulation)
   }
 
   EXPECT_EQ(oceanTile->Vertices().size(), NPlus12);
-  for (int iy=0; iy<NPlus1; ++iy)
+  for (Index iy=0; iy<NPlus1; ++iy)
   {
     double vy = iy * dl + lm;
-    for (int ix=0; ix<NPlus1; ++ix)
+    for (Index ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
       size_t idx = iy * NPlus1 + ix;
@@ -577,15 +577,15 @@ TEST_F(LinearRegularWaveSimFixture, PressureAt)
   // pressure at z = 0
   Eigen::ArrayXd pressure(nx_ * ny_);
   wave_sim->PressureAt(nz_ - 1, pressure);
-  for (int ix = 0, idx = 0; ix < nx_; ++ix)
+  for (Index ix = 0, idx = 0; ix < nx_; ++ix)
   {
-    for (int iy = 0; iy < ny_; ++iy, ++idx)
+    for (Index iy = 0; iy < ny_; ++iy, ++idx)
     {
       EXPECT_DOUBLE_EQ(pressure(idx), eta(idx));
     }
   }
 
-  for (int iz=0; iz<nz_; ++iz)
+  for (Index iz=0; iz<nz_; ++iz)
   {
     // scale factor for depth z 
     double ez = exp(k_ * z(iz));
@@ -594,9 +594,9 @@ TEST_F(LinearRegularWaveSimFixture, PressureAt)
     wave_sim->PressureAt(iz, pressure);
 
     // check
-    for (int ix=0, idx=0; ix<nx_; ++ix)
+    for (Index ix=0, idx=0; ix<nx_; ++ix)
     {
-      for (int iy=0; iy<ny_; ++iy, ++idx)
+      for (Index iy=0; iy<ny_; ++iy, ++idx)
       {
         double p_test = ez * eta(idx);
         EXPECT_DOUBLE_EQ(pressure(idx), p_test);

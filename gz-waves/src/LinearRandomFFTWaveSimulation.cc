@@ -42,7 +42,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRandomFFTWaveSimulation::Impl::Impl(
-    double lx, double ly, int nx, int ny) :
+    double lx, double ly, Index nx, Index ny) :
     lx_(lx),
     ly_(ly),
     nx_(nx),
@@ -54,7 +54,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRandomFFTWaveSimulation::Impl::Impl(
-    double lx, double ly, double lz, int nx, int ny, int nz) :
+    double lx, double ly, double lz, Index nx, Index ny, Index nz) :
     lx_(lx),
     ly_(ly),
     lz_(lz),
@@ -152,7 +152,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::PressureAt(
-      int iz,
+      Index iz,
       Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     // run the FFTs
@@ -165,7 +165,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
-      int ix, int iy,
+      Index ix, Index iy,
       double &eta)
   {
     // run the FFT
@@ -177,7 +177,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
-      int ix, int iy,
+      Index ix, Index iy,
       double &sx, double &sy)
   {
     // run the FFTs
@@ -191,7 +191,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::PressureAt(
-      int ix, int iy, int iz,
+      Index ix, Index iy, Index iz,
       double &pressure)
   {
     // run the FFT
@@ -246,11 +246,11 @@ namespace waves
     std::normal_distribution<double> distribution(0.0, 1.0);
 
     // calculate spectrum in fft-order
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = kx_fft_(ikx);
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         double ky = ky_fft_(iky);
         double ky2 = ky*ky;
@@ -259,7 +259,7 @@ namespace waves
         double phi = atan2(ky, kx);
 
         // index for flattened array
-        int idx = ikx * ny_ + iky;
+        Index idx = ikx * ny_ + iky;
 
         double cap_psi = 0.0;
         if (use_symmetric_spreading_fn_)
@@ -299,7 +299,7 @@ namespace waves
     auto psi_root = cap_psi_2s_root_.reshaped();
 
     // time update
-    for (int idx = 0; idx < nx_ * ny_; ++idx)
+    for (Index idx = 0; idx < nx_ * ny_; ++idx)
     {
       double wt = omega_k_(idx) * time;
       cos_wt_(idx) = cos(wt);
@@ -307,15 +307,15 @@ namespace waves
     }
 
     // flattened index version
-    for (int ikx = 1; ikx < nx_; ++ikx)
+    for (Index ikx = 1; ikx < nx_; ++ikx)
     {
-      for (int iky = 1; iky < ny_/2 + 1; ++iky)
+      for (Index iky = 1; iky < ny_/2 + 1; ++iky)
       {
         // index for flattened array (ikx, iky)
-        int idx = ikx * ny_ + iky;
+        Index idx = ikx * ny_ + iky;
 
         // index for conjugate (nx_-ikx, ny_-iky)
-        int cdx = (nx_-ikx) * ny_ + (ny_-iky);
+        Index cdx = (nx_-ikx) * ny_ + (ny_-iky);
 
         zhat_(idx) = complex(
             + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_wt_(idx)
@@ -325,15 +325,15 @@ namespace waves
       }
     }
 
-    for (int iky = 1; iky < ny_/2 + 1; ++iky)
+    for (Index iky = 1; iky < ny_/2 + 1; ++iky)
     {
-      int ikx = 0;
+      Index ikx = 0;
 
       // index for flattened array (ikx, iky)
-      int idx = ikx * ny_ + iky;
+      Index idx = ikx * ny_ + iky;
 
       // index for conjugate (ikx, ny_-iky)
-      int cdx = ikx * ny_ + (ny_-iky);
+      Index cdx = ikx * ny_ + (ny_-iky);
 
       zhat_(idx) = complex(
           + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_wt_(idx)
@@ -343,15 +343,15 @@ namespace waves
       zhat_(cdx, 0) = std::conj(zhat_(idx));
     }
 
-    for (int ikx = 1; ikx < nx_/2 + 1; ++ikx)
+    for (Index ikx = 1; ikx < nx_/2 + 1; ++ikx)
     {
-      int iky = 0;
+      Index iky = 0;
 
       // index for flattened array (ikx, iky)
-      int idx = ikx * ny_ + iky;
+      Index idx = ikx * ny_ + iky;
 
       // index for conjugate (nx_-ikx, iky)
-      int cdx = (nx_-ikx) * ny_ + iky;
+      Index cdx = (nx_-ikx) * ny_ + iky;
 
       zhat_(idx) = complex(
           + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_wt_(idx)
@@ -369,18 +369,18 @@ namespace waves
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
 
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = kx_fft_(ikx);
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_/2 + 1; ++iky)
+      for (Index iky = 0; iky < ny_/2 + 1; ++iky)
       {
         double ky = ky_fft_(iky);
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
 
         // index for flattened arrays
-        int idx = ikx * ny_ + iky;
+        Index idx = ikx * ny_ + iky;
 
         complex h  = zhat_(idx);
         complex hi = h * iunit;
@@ -404,7 +404,7 @@ namespace waves
         /// entry for z = 0 is obtained from  fft_h_ / fft_out0_ / fft_plan0_
 
         // pressure
-        for (int iz = 0; iz < nz_; ++iz)
+        for (Index iz = 0; iz < nz_; ++iz)
         {
           double z = z_(iz);
           double e = std::exp(k * z);
@@ -454,13 +454,13 @@ namespace waves
     ky_fft_  = Eigen::ArrayXd::Zero(ny_);
 
     // wavenumbers in fft and math ordering
-    for(int ikx = 0; ikx < nx_; ++ikx)
+    for(Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = (ikx - nx_/2) * kx_f_;
       kx_fft_((ikx + nx_/2) % nx_) = kx;
     }
 
-    for(int iky = 0; iky < ny_; ++iky)
+    for(Index iky = 0; iky < ny_; ++iky)
     {
       double ky = (iky - ny_/2) * ky_f_;
       ky_fft_((iky + ny_/2) % ny_) = ky;
@@ -551,7 +551,7 @@ namespace waves
     /// entry for z = 0 is obtained from  fft_h_ / fft_out0_ / fft_plan0_
 
     // pressure
-    for (int iz=0; iz < nz_; ++iz)
+    for (Index iz=0; iz < nz_; ++iz)
     {
       fft_in_p_.push_back(Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1));
       fft_out_p_.push_back(Eigen::ArrayXXdRowMajor::Zero(nx_, ny_));
@@ -583,14 +583,14 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRandomFFTWaveSimulation::LinearRandomFFTWaveSimulation(
-      double lx, double ly, int nx, int ny) :
+      double lx, double ly, Index nx, Index ny) :
     impl_(new LinearRandomFFTWaveSimulation::Impl(lx, ly, nx, ny))
   {
   }
 
   //////////////////////////////////////////////////
   LinearRandomFFTWaveSimulation::LinearRandomFFTWaveSimulation(
-      double lx, double ly, double lz, int nx, int ny, int nz) :
+      double lx, double ly, double lz, Index nx, Index ny, Index nz) :
     impl_(new LinearRandomFFTWaveSimulation::Impl(lx, ly, lz, nx, ny, nz))
   {
   }
@@ -664,7 +664,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::PressureAt(
-      int iz,
+      Index iz,
       Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     impl_->PressureAt(iz, pressure);
@@ -672,7 +672,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::ElevationAt(
-      int ix, int iy,
+      Index ix, Index iy,
       double &eta)
   {
     impl_->ElevationAt(ix, iy, eta);
@@ -680,7 +680,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::DisplacementAt(
-      int ix, int iy,
+      Index ix, Index iy,
       double &sx, double &sy)
   {
     impl_->DisplacementAt(ix, iy, sx, sy);
@@ -688,7 +688,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::PressureAt(
-      int ix, int iy, int iz,
+      Index ix, Index iy, Index iz,
       double &pressure)
   {
     impl_->PressureAt(ix, iy, iz, pressure);

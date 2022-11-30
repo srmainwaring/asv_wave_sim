@@ -33,10 +33,10 @@ namespace waves
     virtual ~LinearRandomFFTWaveSimulation();
 
     LinearRandomFFTWaveSimulation(double lx, double ly,
-        int nx, int ny);
+        Index nx, Index ny);
 
     LinearRandomFFTWaveSimulation(double lx, double ly, double lz,
-        int nx, int ny, int nz);
+        Index nx, Index ny, Index nz);
 
     /// \brief Set lambda which controls the horizontal wave displacement.
     void SetLambda(double lambda);
@@ -95,20 +95,20 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
     virtual void PressureAt(
-        int iz,
+        Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure) override;
 
     // lookup interface - scalar
     virtual void ElevationAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &eta) override;
 
     virtual void DisplacementAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &sx, double &sy) override;
 
     virtual void PressureAt(
-        int ix, int iy, int iz,
+        Index ix, Index iy, Index iz,
         double &pressure) override;
 
     // public class declaration - for testing

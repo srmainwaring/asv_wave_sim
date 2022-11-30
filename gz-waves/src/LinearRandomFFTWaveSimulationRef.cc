@@ -51,7 +51,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRandomFFTWaveSimulationRef::Impl::Impl(
-    double lx, double ly, int nx, int ny) :
+    double lx, double ly, Index nx, Index ny) :
     lambda_(0.6),
     lx_(lx),
     ly_(ly),
@@ -239,9 +239,9 @@ namespace waves
     Eigen::ArrayXXd cap_psi_2s_math = Eigen::ArrayXXd::Zero(nx_, ny_);
 
     // calculate spectrum in math-order (not vectorised)
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         double k = sqrt(kx_math_[ikx]*kx_math_[ikx]
             + ky_math_[iky]*ky_math_[iky]);
@@ -278,7 +278,7 @@ namespace waves
     {
       std::ostringstream os;
       os << "[\n";
-      for (int ikx = 0; ikx < nx_; ++ikx)
+      for (Index ikx = 0; ikx < nx_; ++ikx)
       {
         os << " [ ";
         for (auto& v : cap_psi_2s_math[ikx])
@@ -295,12 +295,12 @@ namespace waves
 
     // convert to fft-order
     Eigen::ArrayXXd cap_psi_2s_fft = Eigen::ArrayXXd::Zero(nx_, ny_);
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
-      int ikx_fft = (ikx + nx_/2) % nx_;
-      for (int iky = 0; iky < ny_; ++iky)
+      Index ikx_fft = (ikx + nx_/2) % nx_;
+      for (Index iky = 0; iky < ny_; ++iky)
       {
-        int iky_fft = (iky + ny_/2) % ny_;
+        Index iky_fft = (iky + ny_/2) % ny_;
         cap_psi_2s_fft(ikx_fft, iky_fft) = cap_psi_2s_math(ikx, iky);
       }
     }
@@ -310,9 +310,9 @@ namespace waves
     double delta_kx = kx_f_;
     double delta_ky = ky_f_;
 
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         cap_psi_2s_root_(ikx, iky) =
             cap_psi_norm * sqrt(cap_psi_2s_fft(ikx, iky) * delta_kx * delta_ky);
@@ -324,9 +324,9 @@ namespace waves
     std::default_random_engine generator(seed);
     std::normal_distribution<double> distribution(0.0, 1.0);
 
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         rho_(ikx, iky) = distribution(generator);
         sigma_(ikx, iky) = distribution(generator);
@@ -334,11 +334,11 @@ namespace waves
     }
 
     // angular temporal frequency for time-dependent (from dispersion)
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         double ky = ky_fft_[iky];
         double ky2 = ky*ky;
@@ -360,9 +360,9 @@ namespace waves
     // time update
     Eigen::ArrayXXd cos_omega_k = Eigen::ArrayXXd::Zero(nx_, ny_);
     Eigen::ArrayXXd sin_omega_k = Eigen::ArrayXXd::Zero(nx_, ny_);
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         cos_omega_k(ikx, iky) = cos(omega_k_(ikx, iky) * time);
         sin_omega_k(ikx, iky) = sin(omega_k_(ikx, iky) * time);
@@ -371,9 +371,9 @@ namespace waves
 
     // non-vectorised reference version
     Eigen::ArrayXXcd zhat = Eigen::ArrayXXcd::Zero(nx_, ny_);
-    for (int ikx = 1; ikx < nx_; ++ikx)
+    for (Index ikx = 1; ikx < nx_; ++ikx)
     {
-      for (int iky = 1; iky < ny_; ++iky)
+      for (Index iky = 1; iky < ny_; ++iky)
       {
         zhat(ikx, iky) = complex(
             + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
@@ -383,9 +383,9 @@ namespace waves
       }
     }
 
-    for (int iky = 1; iky < ny_/2+1; ++iky)
+    for (Index iky = 1; iky < ny_/2+1; ++iky)
     {
-      int ikx = 0;
+      Index ikx = 0;
       zhat(ikx, iky) = complex(
           + ( r(ikx, iky) * psi_root(ikx, iky) + r(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
           + ( s(ikx, iky) * psi_root(ikx, iky) + s(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * sin_omega_k(ikx, iky),
@@ -394,9 +394,9 @@ namespace waves
       zhat(ikx, ny_-iky) = std::conj(zhat(ikx, iky));
     }
 
-    for (int ikx = 1; ikx < nx_/2+1; ++ikx)
+    for (Index ikx = 1; ikx < nx_/2+1; ++ikx)
     {
-      int iky = 0;
+      Index iky = 0;
       zhat(ikx, iky) = complex(
           + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * cos_omega_k(ikx, iky)
           + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * sin_omega_k(ikx, iky),
@@ -410,11 +410,11 @@ namespace waves
     // write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         double ky = ky_fft_[iky];
         double ky2 = ky*ky;
@@ -507,14 +507,14 @@ namespace waves
     ky_math_ = Eigen::ArrayXd::Zero(ny_);
 
     // wavenumbers in fft and math ordering
-    for(int ikx = 0; ikx < nx_; ++ikx)
+    for(Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = (ikx - nx_/2) * kx_f_;
       kx_math_(ikx) = kx;
       kx_fft_((ikx + nx_/2) % nx_) = kx;
     }
 
-    for(int iky = 0; iky < ny_; ++iky)
+    for(Index iky = 0; iky < ny_; ++iky)
     {
       double ky = (iky - ny_/2) * ky_f_;
       ky_math_(iky) = ky;
@@ -729,7 +729,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRandomFFTWaveSimulationRef::LinearRandomFFTWaveSimulationRef(
-    double lx, double ly, int nx, int ny) :
+    double lx, double ly, Index nx, Index ny) :
     impl_(new LinearRandomFFTWaveSimulationRef::Impl(lx, ly, nx, ny))
   {
   }

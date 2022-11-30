@@ -65,7 +65,7 @@ namespace waves
     ~Impl();
 
     /// \brief Construct a wave simulation model
-    Impl(double lx, double ly, int nx, int ny);
+    Impl(double lx, double ly, Index nx, Index ny);
 
     /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double ux, double uy);
@@ -144,8 +144,8 @@ namespace waves
     // grid parameters
     double  lx_{1.0};
     double  ly_{1.0};
-    int     nx_{2};
-    int     ny_{2};
+    Index   nx_{2};
+    Index   ny_{2};
 
     /// \brief Wind speed at 10m above mean sea level [m]
     double  u10_{5.0};

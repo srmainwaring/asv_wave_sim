@@ -74,9 +74,9 @@ namespace waves
 
     ~Impl();
 
-    Impl(double lx, double ly, int nx, int ny);
+    Impl(double lx, double ly, Index nx, Index ny);
 
-    Impl(double lx, double ly, double lz, int nx, int ny, int nz);
+    Impl(double lx, double ly, double lz, Index nx, Index ny, Index nz);
 
     void InitGrid();
 
@@ -131,15 +131,15 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXXd> dsxdy);
 
     void ElevationAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &h);
 
     void PressureAt(
-        int ix, int iy, int iz,
+        Index ix, Index iy, Index iz,
         double &pressure);
 
     void PressureAt(
-        int iz,
+        Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure);
 
     static inline void PreComputeCoeff(
@@ -156,13 +156,13 @@ namespace waves
     bool use_vectorised_{true};
 
     // elevation grid params
-    int nx_{2};
-    int ny_{2};
+    Index nx_{2};
+    Index ny_{2};
     double lx_{1.0};
     double ly_{1.0};
     
     // pressure grid params
-    int nz_{1};
+    Index nz_{1};
     double lz_{0.0};
 
     // wave params
@@ -194,7 +194,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRegularWaveSimulation::Impl::Impl(
-      double lx, double ly, int nx, int ny) :
+      double lx, double ly, Index nx, Index ny) :
     nx_(nx),
     ny_(ny),
     lx_(lx),
@@ -205,7 +205,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRegularWaveSimulation::Impl::Impl(
-      double lx, double ly, double lz, int nx, int ny, int nz) :
+      double lx, double ly, double lz, Index nx, Index ny, Index nz) :
     nx_(nx),
     ny_(ny),
     lx_(lx),
@@ -375,10 +375,10 @@ namespace waves
     }
     else
     {
-      for (int iy=0, idx=0; iy<ny_; ++iy)
+      for (Index iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy_ + ly_min_;
-        for (int ix=0; ix<nx_; ++ix, ++idx)
+        for (Index ix=0; ix<nx_; ++ix, ++idx)
         {
           double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
@@ -415,10 +415,10 @@ namespace waves
     }
     else
     {
-      for (int iy=0, idx=0; iy<ny_; ++iy)
+      for (Index iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy_ + ly_min_;
-        for (int ix=0; ix<nx_; ++ix, ++idx)
+        for (Index ix=0; ix<nx_; ++ix, ++idx)
         {
           double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
@@ -466,10 +466,10 @@ namespace waves
     }
     else
     {
-      for (int iy=0, idx=0; iy<ny_; ++iy)
+      for (Index iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy_ + ly_min_;
-        for (int ix=0; ix<nx_; ++ix, ++idx)
+        for (Index ix=0; ix<nx_; ++ix, ++idx)
         {
           double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
@@ -488,7 +488,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::ElevationAt(
-      int ix, int iy, double &eta)
+      Index ix, Index iy, double &eta)
   {
     double y = iy * dy_ + ly_min_;
     double x = ix * dx_ + lx_min_;
@@ -497,7 +497,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::PressureAt(
-    int ix, int iy, int iz,
+    Index ix, Index iy, Index iz,
     double &pressure)
   {
     double y = iy * dy_ + ly_min_;
@@ -508,7 +508,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::PressureAt(
-    int iz,
+    Index iz,
     Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     // derived wave properties
@@ -532,10 +532,10 @@ namespace waves
     }
     else
     {
-      for (int iy=0, idx=0; iy<ny_; ++iy)
+      for (Index iy=0, idx=0; iy<ny_; ++iy)
       {
         double y = iy * dy_ + ly_min_;
-        for (int ix=0; ix<nx_; ++ix, ++idx)
+        for (Index ix=0; ix<nx_; ++ix, ++idx)
         {
           double x = ix * dx_ + lx_min_;
           double a  = k * (x * cd + y * sd) - wt;
@@ -556,14 +556,14 @@ namespace waves
 
   //////////////////////////////////////////////////
   LinearRegularWaveSimulation::LinearRegularWaveSimulation(
-      double lx, double ly, int nx, int ny) :
+      double lx, double ly, Index nx, Index ny) :
     impl_(new LinearRegularWaveSimulation::Impl(lx, ly, nx, ny))
   {
   }
 
   //////////////////////////////////////////////////
   LinearRegularWaveSimulation::LinearRegularWaveSimulation(
-      double lx, double ly, double lz, int nx, int ny, int nz) :
+      double lx, double ly, double lz, Index nx, Index ny, Index nz) :
     impl_(new LinearRegularWaveSimulation::Impl(lx, ly, lz, nx, ny, nz))
   {
   }
@@ -692,7 +692,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::ElevationAt(
-    int ix, int iy,
+    Index ix, Index iy,
     double &eta)
   {
     impl_->ElevationAt(ix, iy, eta);
@@ -700,7 +700,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::DisplacementAt(
-    int /*ix*/, int /*iy*/,
+    Index /*ix*/, Index /*iy*/,
     double &/*sx*/, double &/*sy*/)
   {
     // No xy-displacement
@@ -708,7 +708,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::PressureAt(
-    int ix, int iy, int iz,
+    Index ix, Index iy, Index iz,
     double &pressure)
   {
     impl_->PressureAt(ix, iy, iz, pressure);
@@ -716,7 +716,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::PressureAt(
-    int iz,
+    Index iz,
     Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     impl_->PressureAt(iz, pressure);

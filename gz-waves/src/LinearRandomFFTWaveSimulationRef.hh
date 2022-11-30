@@ -32,7 +32,8 @@ namespace waves
     public:
       virtual ~LinearRandomFFTWaveSimulationRef();
 
-      LinearRandomFFTWaveSimulationRef(double lx, double ly, int nx, int ny);
+      LinearRandomFFTWaveSimulationRef(double lx, double ly,
+          Index nx, Index ny);
 
       void SetLambda(double lambda);
 

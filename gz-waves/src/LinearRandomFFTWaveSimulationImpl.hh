@@ -73,10 +73,10 @@ namespace waves
     ~Impl();
 
     /// \brief Construct a wave simulation model
-    Impl(double lx, double ly, int nx, int ny);
+    Impl(double lx, double ly, Index nx, Index ny);
 
     /// \brief Construct a wave simulation model
-    Impl(double lx, double ly, double lz, int nx, int ny, int nz);
+    Impl(double lx, double ly, double lz, Index nx, Index ny, Index nz);
 
     /// \brief Set the components of the wind velocity (U10) in [m/s]
     void SetWindVelocity(double ux, double uy);
@@ -108,19 +108,19 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXXd> dsxdy);
 
     void PressureAt(
-        int iz,
+        Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure);
 
     void ElevationAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &eta);
 
     void DisplacementAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &sx, double &sy);
 
     void PressureAt(
-        int ix, int iy, int iz,
+        Index ix, Index iy, Index iz,
         double &pressure);
 
     /// \brief Calculate the base (time-independent) Fourier amplitudes
@@ -181,9 +181,9 @@ namespace waves
     double  lx_{1.0};
     double  ly_{1.0};
     double  lz_{0.0};
-    int     nx_{2};
-    int     ny_{2};
-    int     nz_{1};
+    Index   nx_{2};
+    Index   ny_{2};
+    Index   nz_{1};
 
     // points along z-axis at which pressure is sampled
     Eigen::ArrayXd z_;

@@ -24,7 +24,7 @@ namespace gz
 {
 namespace waves
 {
-  /// \todo(srmainwaring) replace int with Index in array indexing and counting.
+  /// \todo(srmainwaring) move to separate file.
   typedef std::ptrdiff_t Index;
 
   // evaluate wave elevation and fluid pressure
@@ -73,15 +73,15 @@ namespace waves
 
     // lookup interface - scalar
     virtual void ElevationAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &eta) = 0;
 
     virtual void DisplacementAt(
-        int ix, int iy,
+        Index ix, Index iy,
         double &sx, double &sy) = 0;
 
     virtual void PressureAt(
-        int ix, int iy, int iz,
+        Index ix, Index iy, Index iz,
         double &pressure) = 0;
 
     // lookup interface - array
@@ -112,7 +112,7 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXXd> dsxdy) = 0;
 
     virtual void PressureAt(
-        int iz,
+        Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure) = 0;
   };
 
