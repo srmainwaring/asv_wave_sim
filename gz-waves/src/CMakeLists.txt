@@ -23,10 +23,10 @@ set(sources
   WavefieldSampler.cc
   WaveParameters.cc
   WaveSimulation.cc
-  WaveSimulationFFT.cc
-  WaveSimulationFFTRef.cc
-  WaveSimulationSinusoid.cc
-  WaveSimulationTrochoid.cc
+  LinearRandomFFTWaveSimulation.cc
+  LinearRandomFFTWaveSimulationRef.cc
+  LinearRegularWaveSimulation.cc
+  TrochoidIrregularWaveSimulation.cc
   WaveSpectrum.cc
   WaveSpreadingFunction.cc
 )
@@ -42,8 +42,8 @@ set(gtest_sources
   Physics_TEST.cc
   TriangulatedGrid_TEST.cc
   Wavefield_TEST.cc
-  WaveSimulation_TEST.cc
-  WaveSimulationFFT_TEST.cc
+  LinearRegularWaveSimulation_TEST.cc
+  LinearRandomFFTWaveSimulation_TEST
   WaveSpectrum_TEST.cc
   WaveSpreadingFunction_TEST.cc
 )

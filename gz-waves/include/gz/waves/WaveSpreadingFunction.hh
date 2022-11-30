@@ -18,7 +18,7 @@
 
 #include <Eigen/Dense>
  
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
  
 namespace gz
 {
@@ -35,10 +35,10 @@ inline namespace v2
         double theta, double theta_mean, double k=1.0) const = 0;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> phi,
-        const Eigen::Ref<const Eigen::MatrixXd> &theta,
+        Eigen::Ref<Eigen::ArrayXXd> phi,
+        const Eigen::Ref<const Eigen::ArrayXXd> &theta,
         double theta_mean,
-        const Eigen::Ref<const Eigen::MatrixXd> &k=Eigen::MatrixXd())
+        const Eigen::Ref<const Eigen::ArrayXXd> &k=Eigen::ArrayXXd())
         const = 0;
   };
 
@@ -53,10 +53,10 @@ inline namespace v2
         double theta, double theta_mean, double k=1.0) const override;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> phi,
-        const Eigen::Ref<const Eigen::MatrixXd> &theta,
+        Eigen::Ref<Eigen::ArrayXXd> phi,
+        const Eigen::Ref<const Eigen::ArrayXXd> &theta,
         double theta_mean,
-        const Eigen::Ref<const Eigen::MatrixXd> &k=Eigen::MatrixXd())
+        const Eigen::Ref<const Eigen::ArrayXXd> &k=Eigen::ArrayXXd())
         const override;
 
     double Spread() const;
@@ -84,10 +84,10 @@ inline namespace v2
         double theta, double theta_mean, double k=1.0) const override;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> phi,
-        const Eigen::Ref<const Eigen::MatrixXd> &theta,
+        Eigen::Ref<Eigen::ArrayXXd> phi,
+        const Eigen::Ref<const Eigen::ArrayXXd> &theta,
         double theta_mean,
-        const Eigen::Ref<const Eigen::MatrixXd> &k=Eigen::MatrixXd())
+        const Eigen::Ref<const Eigen::ArrayXXd> &k=Eigen::ArrayXXd())
         const override;
 
     double Gravity() const;

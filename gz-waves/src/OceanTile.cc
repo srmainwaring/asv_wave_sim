@@ -18,9 +18,9 @@
 #include "gz/common/SubMeshWithTangents.hh"
 #include "gz/waves/Geometry.hh"
 #include "gz/waves/WaveSimulation.hh"
-#include "gz/waves/WaveSimulationFFT.hh"
-#include "gz/waves/WaveSimulationSinusoid.hh"
-#include "gz/waves/WaveSimulationTrochoid.hh"
+#include "gz/waves/LinearRandomFFTWaveSimulation.hh"
+#include "gz/waves/LinearRegularWaveSimulation.hh"
+#include "gz/waves/TrochoidIrregularWaveSimulation.hh"
 #include "gz/waves/WaveParameters.hh"
 
 #include <gz/common.hh>
@@ -33,8 +33,8 @@
 #include <iostream>
 #include <vector>
 
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
+using Eigen::ArrayXXd;
+using Eigen::ArrayXd;
 
 namespace gz
 {
@@ -88,16 +88,16 @@ public:
   std::string                 mAboveOceanMeshName = "AboveOceanTileMesh";
   std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
 
-  std::unique_ptr<WaveSimulation> mWaveSim;
+  std::unique_ptr<IWaveSimulation> mWaveSim;
 
-  Eigen::VectorXd             mHeights;
-  Eigen::VectorXd             mDhdx;
-  Eigen::VectorXd             mDhdy;
-  Eigen::VectorXd             mDisplacementsX;
-  Eigen::VectorXd             mDisplacementsY;
-  Eigen::VectorXd             mDxdx;
-  Eigen::VectorXd             mDydy;
-  Eigen::VectorXd             mDxdy;
+  Eigen::ArrayXd             mHeights;
+  Eigen::ArrayXd             mDhdx;
+  Eigen::ArrayXd             mDhdy;
+  Eigen::ArrayXd             mDisplacementsX;
+  Eigen::ArrayXd             mDisplacementsY;
+  Eigen::ArrayXd             mDxdx;
+  Eigen::ArrayXd             mDydy;
+  Eigen::ArrayXd             mDxdy;
 
   void Create();
 
@@ -188,19 +188,19 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     mSpacing(_L / static_cast<double>(_N))
 {
   auto size = _N * _N;
-  mHeights = Eigen::VectorXd::Zero(size);
-  mDhdx = Eigen::VectorXd::Zero(size);
-  mDhdy = Eigen::VectorXd::Zero(size);
-  mDisplacementsX = Eigen::VectorXd::Zero(size);
-  mDisplacementsY = Eigen::VectorXd::Zero(size);
-  mDxdx = Eigen::VectorXd::Zero(size);
-  mDydy = Eigen::VectorXd::Zero(size);
-  mDxdy = Eigen::VectorXd::Zero(size);
+  mHeights = Eigen::ArrayXd::Zero(size);
+  mDhdx = Eigen::ArrayXd::Zero(size);
+  mDhdy = Eigen::ArrayXd::Zero(size);
+  mDisplacementsX = Eigen::ArrayXd::Zero(size);
+  mDisplacementsY = Eigen::ArrayXd::Zero(size);
+  mDxdx = Eigen::ArrayXd::Zero(size);
+  mDydy = Eigen::ArrayXd::Zero(size);
+  mDxdy = Eigen::ArrayXd::Zero(size);
 
   // Different types of wave simulator are supported...
-  // 0 - WaveSimulationSinusoid
-  // 1 - WaveSimulationTrochoid
-  // 2 - WaveSimulationFFT
+  // 0 - LinearRegularWaveSimulation
+  // 1 - TrochoidIrregularWaveSimulation
+  // 2 - LinearRandomFFTWaveSimulation
 
   const int wave_sim_type = 2;
   switch (wave_sim_type)
@@ -212,8 +212,8 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       double dir_y = 0.0;
       double amplitude = 3.0;
       double period = 10.0;
-      std::unique_ptr<WaveSimulationSinusoid> waveSim(
-          new WaveSimulationSinusoid(_L, _L, _N, _N));
+      std::unique_ptr<LinearRegularWaveSimulation> waveSim(
+          new LinearRegularWaveSimulation(_L, _L, _N, _N));
       waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);
@@ -231,14 +231,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       waveParams->SetAmplitude(3.0);
       waveParams->SetPeriod(7.0);
       waveParams->SetDirection(gz::math::Vector2d(1.0, 0.0));
-      mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, waveParams));
+      mWaveSim.reset(new TrochoidIrregularWaveSimulation(_N, _L, waveParams));
       break;
     }
     case 2:
     {
       // FFT2
-      std::unique_ptr<WaveSimulationFFT> waveSim(
-          new WaveSimulationFFT(_L, _L, _N, _N));
+      std::unique_ptr<LinearRandomFFTWaveSimulation> waveSim(
+          new LinearRandomFFTWaveSimulation(_L, _L, _N, _N));
       waveSim->SetLambda(1.0);   // larger lambda => steeper waves.
       mWaveSim = std::move(waveSim);
       break;
@@ -265,19 +265,19 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   double _L = _params->TileSize();
 
   auto size = _N * _N;
-  mHeights = Eigen::VectorXd::Zero(size);
-  mDhdx = Eigen::VectorXd::Zero(size);
-  mDhdy = Eigen::VectorXd::Zero(size);
-  mDisplacementsX = Eigen::VectorXd::Zero(size);
-  mDisplacementsY = Eigen::VectorXd::Zero(size);
-  mDxdx = Eigen::VectorXd::Zero(size);
-  mDydy = Eigen::VectorXd::Zero(size);
-  mDxdy = Eigen::VectorXd::Zero(size);
+  mHeights = Eigen::ArrayXd::Zero(size);
+  mDhdx = Eigen::ArrayXd::Zero(size);
+  mDhdy = Eigen::ArrayXd::Zero(size);
+  mDisplacementsX = Eigen::ArrayXd::Zero(size);
+  mDisplacementsY = Eigen::ArrayXd::Zero(size);
+  mDxdx = Eigen::ArrayXd::Zero(size);
+  mDydy = Eigen::ArrayXd::Zero(size);
+  mDxdy = Eigen::ArrayXd::Zero(size);
 
   // Different types of wave simulator are supported...
-  // 0 - WaveSimulationSinusoid
-  // 1 - WaveSimulationTrochoid
-  // 2 - WaveSimulationFFT
+  // 0 - LinearRegularWaveSimulation
+  // 1 - TrochoidIrregularWaveSimulation
+  // 2 - LinearRandomFFTWaveSimulation
 
   int wave_sim_type = 0;
   if (_params->Algorithm() == "sinusoid")
@@ -307,8 +307,8 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       double dir_y = _params->Direction().Y();
       double amplitude = _params->Amplitude();
       double period = _params->Period();
-      std::unique_ptr<WaveSimulationSinusoid> waveSim(
-          new WaveSimulationSinusoid(_L, _L, _N, _N));
+      std::unique_ptr<LinearRegularWaveSimulation> waveSim(
+          new LinearRegularWaveSimulation(_L, _L, _N, _N));
       waveSim->SetDirection(dir_x, dir_y);
       waveSim->SetAmplitude(amplitude);
       waveSim->SetPeriod(period);
@@ -318,14 +318,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     case 1:
     {
       // Trochoid
-      mWaveSim.reset(new WaveSimulationTrochoid(_N, _L, _params));
+      mWaveSim.reset(new TrochoidIrregularWaveSimulation(_N, _L, _params));
       break;
     }
     case 2:
     {
       // FFT2
-      std::unique_ptr<WaveSimulationFFT> waveSim(
-          new WaveSimulationFFT(_L, _L, _N, _N));
+      std::unique_ptr<LinearRandomFFTWaveSimulation> waveSim(
+          new LinearRandomFFTWaveSimulation(_L, _L, _N, _N));
       
       // larger lambda => steeper waves.
       waveSim->SetLambda(_params->Steepness());
@@ -765,7 +765,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
 
   if (mHasVisuals)
   {
-    mWaveSim->ComputeDisplacementsAndDerivatives(
+    mWaveSim->DisplacementAndDerivAt(
         mHeights, mDisplacementsX, mDisplacementsY,
         mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
   
@@ -811,8 +811,8 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double _time)
   }
   else
   {
-    mWaveSim->ComputeElevation(mHeights);
-    mWaveSim->ComputeDisplacements(mDisplacementsX, mDisplacementsY);
+    mWaveSim->ElevationAt(mHeights);
+    mWaveSim->DisplacementAt(mDisplacementsX, mDisplacementsY);
 
     const size_t N = mResolution;
     const size_t NPlus1  = N + 1;

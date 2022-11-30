@@ -18,7 +18,7 @@
 
 #include <Eigen/Dense>
  
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 namespace gz
 {
@@ -34,8 +34,8 @@ inline namespace v2
     virtual double Evaluate(double k) const = 0;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> spectrum,
-        const Eigen::Ref<const Eigen::MatrixXd> &k) const = 0;
+        Eigen::Ref<Eigen::ArrayXXd> spectrum,
+        const Eigen::Ref<const Eigen::ArrayXXd> &k) const = 0;
   };
 
   class PiersonMoskowitzWaveSpectrum : public OmniDirectionalWaveSpectrum
@@ -48,8 +48,8 @@ inline namespace v2
     virtual double Evaluate(double k) const override;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> spectrum,
-        const Eigen::Ref<const Eigen::MatrixXd> &k) const override;
+        Eigen::Ref<Eigen::ArrayXXd> spectrum,
+        const Eigen::Ref<const Eigen::ArrayXXd> &k) const override;
 
     double Gravity() const;
 
@@ -77,8 +77,8 @@ inline namespace v2
     virtual double Evaluate(double k) const override;
 
     virtual void Evaluate(
-        Eigen::Ref<Eigen::MatrixXd> spectrum,
-        const Eigen::Ref<const Eigen::MatrixXd> &k) const override;
+        Eigen::Ref<Eigen::ArrayXXd> spectrum,
+        const Eigen::Ref<const Eigen::ArrayXXd> &k) const override;
 
     double Gravity() const;
 

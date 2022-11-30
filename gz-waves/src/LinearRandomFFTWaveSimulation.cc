@@ -14,23 +14,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-// The non-vectorised time-dependent update step labelled 'non-vectorised reference version'
-// in WaveSimulationFFTImpl.ComputeCurrentAmplitudesReference is based on the Curtis Mobley's
-// IDL code cgAnimate_2D_SeaSurface.py
-
-//***************************************************************************************************
-//* This code is copyright (c) 2016 by Curtis D. Mobley.                                            *
-//* Permission is hereby given to reproduce and use this code for non-commercial academic research, *
-//* provided that the user suitably acknowledges Curtis D. Mobley in any presentations, reports,    *
-//* publications, or other works that make use of the code or its output.  Depending on the extent  *
-//* of use of the code or its outputs, suitable acknowledgement can range from a footnote to offer  *
-//* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
-//***************************************************************************************************
-
-#include "gz/waves/WaveSimulationFFT.hh"
+#include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
 #include <complex>
 #include <random>
+#include <vector>
 
 #include <Eigen/Dense>
 
@@ -40,22 +28,21 @@
 
 #include "gz/waves/WaveSpectrum.hh"
 #include "gz/waves/WaveSpreadingFunction.hh"
-#include "WaveSimulationFFTImpl.hh"
+#include "LinearRandomFFTWaveSimulationImpl.hh"
 
 namespace gz
 {
 namespace waves
 {
   //////////////////////////////////////////////////
-  WaveSimulationFFTImpl::~WaveSimulationFFTImpl()
+  LinearRandomFFTWaveSimulation::Impl::~Impl()
   {
     DestroyFFTWPlans();
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationFFTImpl::WaveSimulationFFTImpl(
-    double lx, double ly, int nx, int ny) :
-    lambda_(0.6),
+  LinearRandomFFTWaveSimulation::Impl::Impl(
+    double lx, double ly, Index nx, Index ny) :
     lx_(lx),
     ly_(ly),
     nx_(nx),
@@ -66,14 +53,29 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::SetLambda(double value)
+  LinearRandomFFTWaveSimulation::Impl::Impl(
+    double lx, double ly, double lz, Index nx, Index ny, Index nz) :
+    lx_(lx),
+    ly_(ly),
+    lz_(lz),
+    nx_(nx),
+    ny_(ny),
+    nz_(nz)
+  {
+    CreateFFTWPlans();
+    ComputeBaseAmplitudes();
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::SetLambda(double value)
   {
     lambda_ = value;
     ComputeBaseAmplitudes();
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::SetWindVelocity(double ux, double uy)
+  void LinearRandomFFTWaveSimulation::Impl::SetWindVelocity(
+      double ux, double uy)
   {
     // Update wind velocity and recompute base amplitudes.
     u10_ = sqrt(ux*ux + uy *uy);
@@ -83,14 +85,14 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::SetTime(double time)
+  void LinearRandomFFTWaveSimulation::Impl::SetTime(double time)
   {
     ComputeCurrentAmplitudes(time);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> h)
+  void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
+      Eigen::Ref<Eigen::ArrayXXd> h)
   {
     // run the FFT
     fftw_execute(fft_plan0_);
@@ -101,24 +103,24 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeElevationDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
-  {
-    // run the FFTs
-    fftw_execute(fft_plan1_);
-    fftw_execute(fft_plan2_);
+  void LinearRandomFFTWaveSimulation::Impl::ElevationDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy)
+    {
+      // run the FFTs
+      fftw_execute(fft_plan1_);
+      fftw_execute(fft_plan2_);
 
-    // change from row to column major storage
-    size_t n2 = nx_ * ny_;
-    dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
-    dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1);
-  }
+      // change from row to column major storage
+      size_t n2 = nx_ * ny_;
+      dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
+      dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1);
+    }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+  void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy)
   {
     // run the FFTs
     fftw_execute(fft_plan3_);
@@ -131,38 +133,90 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+  void LinearRandomFFTWaveSimulation::Impl::DisplacementDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+    {
+      // run the FFTs
+      fftw_execute(fft_plan5_);
+      fftw_execute(fft_plan6_);
+      fftw_execute(fft_plan7_);
+
+      // change from row to column major storage
+      size_t n2 = nx_ * ny_;
+      dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+      dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+      dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
+    }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::PressureAt(
+      Index iz,
+      Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     // run the FFTs
-    fftw_execute(fft_plan5_);
-    fftw_execute(fft_plan6_);
-    fftw_execute(fft_plan7_);
+    fftw_execute(fft_plan_p_[iz]);
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
-    dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-    dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-    dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
+    pressure = fft_out_p_[iz].reshaped<Eigen::ColMajor>(n2, 1);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeBaseAmplitudes()
+  void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
+      Index ix, Index iy,
+      double &eta)
+  {
+    // run the FFT
+    fftw_execute(fft_plan0_);
+
+    // select value
+    eta = fft_out0_(ix, iy);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
+      Index ix, Index iy,
+      double &sx, double &sy)
+  {
+    // run the FFTs
+    fftw_execute(fft_plan3_);
+    fftw_execute(fft_plan4_);
+
+    // change from row to column major storage and scale
+    sy = fft_out3_(ix, iy) * lambda_ * -1.0;
+    sx = fft_out4_(ix, iy) * lambda_ * -1.0;
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::PressureAt(
+      Index ix, Index iy, Index iz,
+      double &pressure)
+  {
+    // run the FFT
+    fftw_execute(fft_plan_p_[iz]);
+
+    // select value
+    pressure = fft_out_p_[iz](ix, iy);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::ComputeBaseAmplitudes()
   {
     InitWaveNumbers();
+    InitPressureGrid();
 
     // initialise arrays - always update as algo switch may change shape.
     size_t n2 = nx_ * ny_;
     {
-      cap_psi_2s_root_  = Eigen::VectorXd::Zero(n2);
-      rho_              = Eigen::VectorXd::Zero(n2);
-      sigma_            = Eigen::VectorXd::Zero(n2);
-      omega_k_          = Eigen::VectorXd::Zero(n2);
-      zhat_             = Eigen::VectorXd::Zero(n2);
-      cos_wt_           = Eigen::VectorXd::Zero(n2);
-      sin_wt_           = Eigen::VectorXd::Zero(n2);
+      cap_psi_2s_root_  = Eigen::ArrayXd::Zero(n2);
+      rho_              = Eigen::ArrayXd::Zero(n2);
+      sigma_            = Eigen::ArrayXd::Zero(n2);
+      omega_k_          = Eigen::ArrayXd::Zero(n2);
+      zhat_             = Eigen::ArrayXd::Zero(n2);
+      cos_wt_           = Eigen::ArrayXd::Zero(n2);
+      sin_wt_           = Eigen::ArrayXd::Zero(n2);
     }
 
     // spectrum and spreading functions
@@ -192,11 +246,11 @@ namespace waves
     std::normal_distribution<double> distribution(0.0, 1.0);
 
     // calculate spectrum in fft-order
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = kx_fft_(ikx);
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_; ++iky)
+      for (Index iky = 0; iky < ny_; ++iky)
       {
         double ky = ky_fft_(iky);
         double ky2 = ky*ky;
@@ -205,7 +259,7 @@ namespace waves
         double phi = atan2(ky, kx);
 
         // index for flattened array
-        int idx = ikx * ny_ + iky;
+        Index idx = ikx * ny_ + iky;
 
         double cap_psi = 0.0;
         if (use_symmetric_spreading_fn_)
@@ -236,7 +290,7 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::ComputeCurrentAmplitudes(
+  void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
       double time)
   {
     // create 1d views
@@ -245,7 +299,7 @@ namespace waves
     auto psi_root = cap_psi_2s_root_.reshaped();
 
     // time update
-    for (int idx = 0; idx < nx_ * ny_; ++idx)
+    for (Index idx = 0; idx < nx_ * ny_; ++idx)
     {
       double wt = omega_k_(idx) * time;
       cos_wt_(idx) = cos(wt);
@@ -253,15 +307,15 @@ namespace waves
     }
 
     // flattened index version
-    for (int ikx = 1; ikx < nx_; ++ikx)
+    for (Index ikx = 1; ikx < nx_; ++ikx)
     {
-      for (int iky = 1; iky < ny_; ++iky)
+      for (Index iky = 1; iky < ny_/2 + 1; ++iky)
       {
         // index for flattened array (ikx, iky)
-        int idx = ikx * ny_ + iky;
+        Index idx = ikx * ny_ + iky;
 
         // index for conjugate (nx_-ikx, ny_-iky)
-        int cdx = (nx_-ikx) * ny_ + (ny_-iky);
+        Index cdx = (nx_-ikx) * ny_ + (ny_-iky);
 
         zhat_(idx) = complex(
             + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_wt_(idx)
@@ -271,15 +325,15 @@ namespace waves
       }
     }
 
-    for (int iky = 1; iky < ny_/2+1; ++iky)
+    for (Index iky = 1; iky < ny_/2 + 1; ++iky)
     {
-      int ikx = 0;
+      Index ikx = 0;
 
       // index for flattened array (ikx, iky)
-      int idx = ikx * ny_ + iky;
+      Index idx = ikx * ny_ + iky;
 
       // index for conjugate (ikx, ny_-iky)
-      int cdx = ikx * ny_ + (ny_-iky);
+      Index cdx = ikx * ny_ + (ny_-iky);
 
       zhat_(idx) = complex(
           + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_wt_(idx)
@@ -289,15 +343,15 @@ namespace waves
       zhat_(cdx, 0) = std::conj(zhat_(idx));
     }
 
-    for (int ikx = 1; ikx < nx_/2+1; ++ikx)
+    for (Index ikx = 1; ikx < nx_/2 + 1; ++ikx)
     {
-      int iky = 0;
+      Index iky = 0;
 
       // index for flattened array (ikx, iky)
-      int idx = ikx * ny_ + iky;
+      Index idx = ikx * ny_ + iky;
 
       // index for conjugate (nx_-ikx, iky)
-      int cdx = (nx_-ikx) * ny_ + iky;
+      Index cdx = (nx_-ikx) * ny_ + iky;
 
       zhat_(idx) = complex(
           + ( r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx) ) * cos_wt_(idx)
@@ -315,18 +369,18 @@ namespace waves
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
 
-    for (int ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
-      double kx = kx_fft_[ikx];
+      double kx = kx_fft_(ikx);
       double kx2 = kx*kx;
-      for (int iky = 0; iky < ny_/2 + 1; ++iky)
+      for (Index iky = 0; iky < ny_/2 + 1; ++iky)
       {
-        double ky = ky_fft_[iky];
+        double ky = ky_fft_(iky);
         double ky2 = ky*ky;
         double k = sqrt(kx2 + ky2);
 
         // index for flattened arrays
-        int idx = ikx * ny_ + iky;
+        Index idx = ikx * ny_ + iky;
 
         complex h  = zhat_(idx);
         complex hi = h * iunit;
@@ -345,6 +399,18 @@ namespace waves
         fft_h_(ikx, iky) = h;
         fft_h_ikx_(ikx, iky) = hikx;
         fft_h_iky_(ikx, iky) = hiky;
+
+        /// \todo(srmainwaring) pressure optimisation - adjust so that the
+        /// entry for z = 0 is obtained from  fft_h_ / fft_out0_ / fft_plan0_
+
+        // pressure
+        for (Index iz = 0; iz < nz_; ++iz)
+        {
+          double z = z_(iz);
+          double e = std::exp(k * z);
+          complex p = e * h; 
+          fft_in_p_[iz](ikx, iky) = p;
+        }
 
         // displacement and derivatives
         if (std::abs(k) < 1.0E-8)
@@ -367,13 +433,9 @@ namespace waves
           complex hkxky = hok * kx * ky;
           
           if (ikx == nx_ / 2)
-          {
             dx = czero;
-          }
           if (iky == ny_ / 2)
-          {
             dy = czero;
-          }
 
           fft_sx_(ikx, iky)     = dx;
           fft_sy_(ikx, iky)     = dy;
@@ -386,53 +448,68 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::InitWaveNumbers()
+  void LinearRandomFFTWaveSimulation::Impl::InitWaveNumbers()
   {
-    kx_fft_  = Eigen::VectorXd::Zero(nx_);
-    ky_fft_  = Eigen::VectorXd::Zero(ny_);
+    kx_fft_  = Eigen::ArrayXd::Zero(nx_);
+    ky_fft_  = Eigen::ArrayXd::Zero(ny_);
 
     // wavenumbers in fft and math ordering
-    for(int ikx = 0; ikx < nx_; ++ikx)
+    for(Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = (ikx - nx_/2) * kx_f_;
       kx_fft_((ikx + nx_/2) % nx_) = kx;
     }
 
-    for(int iky = 0; iky < ny_; ++iky)
+    for(Index iky = 0; iky < ny_; ++iky)
     {
       double ky = (iky - ny_/2) * ky_f_;
       ky_fft_((iky + ny_/2) % ny_) = ky;
     }
   }
 
+ //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::Impl::InitPressureGrid()
+  {
+    // pressure sample points (z is below the free surface)
+    Eigen::ArrayXd zr = Eigen::ArrayXd::Zero(nz_);
+    if (nz_ > 1)
+    {
+      // first element is zero - fill nz - 1 remaining elements
+      Eigen::ArrayXd ln_z = Eigen::ArrayXd::LinSpaced(
+          nz_ - 1, -std::log(lz_), std::log(lz_));
+      zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z);
+    }
+    z_ = zr.reverse();
+  }
+
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::CreateFFTWPlans()
+  void LinearRandomFFTWaveSimulation::Impl::CreateFFTWPlans()
   {
     /// \note the input and output arrays may be overridden during
     ///       planning, so allocate here before initialising.
     ///       https://www.fftw.org/fftw3_doc/Complex-DFTs.html
 
     // allocate storage for Fourier coefficients
-    fft_h_      = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_ikx_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_iky_  = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_sx_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_sy_     = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_kxkx_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_kyky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
-    fft_h_kxky_ = Eigen::MatrixXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_      = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_ikx_  = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_iky_  = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_sx_     = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_sy_     = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kxkx_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kyky_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
+    fft_h_kxky_ = Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1);
 
     // elevation
-    fft_out0_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out1_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out2_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out0_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out1_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out2_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
 
     // xy-displacements
-    fft_out3_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out4_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out5_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out6_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
-    fft_out7_ = Eigen::MatrixXdRowMajor::Zero(nx_, ny_);
+    fft_out3_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out4_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out5_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out6_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
+    fft_out7_ = Eigen::ArrayXXdRowMajor::Zero(nx_, ny_);
 
     // elevation
     fft_plan0_ = fftw_plan_dft_c2r_2d(nx_, ny_,
@@ -469,10 +546,24 @@ namespace waves
         reinterpret_cast<fftw_complex*>(fft_h_kxky_.data()),
         reinterpret_cast<double*>(fft_out7_.data()),
         FFTW_ESTIMATE);
+
+    /// \todo(srmainwaring) pressure optimisation - adjust so that the
+    /// entry for z = 0 is obtained from  fft_h_ / fft_out0_ / fft_plan0_
+
+    // pressure
+    for (Index iz=0; iz < nz_; ++iz)
+    {
+      fft_in_p_.push_back(Eigen::ArrayXXcdRowMajor::Zero(nx_, ny_/2+1));
+      fft_out_p_.push_back(Eigen::ArrayXXdRowMajor::Zero(nx_, ny_));
+      fft_plan_p_.push_back(fftw_plan_dft_c2r_2d(nx_, ny_,
+          reinterpret_cast<fftw_complex*>(fft_in_p_[iz].data()),
+          reinterpret_cast<double*>(fft_out_p_[iz].data()),
+          FFTW_ESTIMATE));
+    }
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFTImpl::DestroyFFTWPlans()
+  void LinearRandomFFTWaveSimulation::Impl::DestroyFFTWPlans()
   {
     fftw_destroy_plan(fft_plan0_);
     fftw_destroy_plan(fft_plan1_);
@@ -486,82 +577,140 @@ namespace waves
 
   //////////////////////////////////////////////////
   //////////////////////////////////////////////////
-  WaveSimulationFFT::~WaveSimulationFFT()
+  LinearRandomFFTWaveSimulation::~LinearRandomFFTWaveSimulation()
   {
   }
 
   //////////////////////////////////////////////////
-  WaveSimulationFFT::WaveSimulationFFT(
-    double lx, double ly, int nx, int ny) :
-    impl_(new WaveSimulationFFTImpl(lx, ly, nx, ny))
+  LinearRandomFFTWaveSimulation::LinearRandomFFTWaveSimulation(
+      double lx, double ly, Index nx, Index ny) :
+    impl_(new LinearRandomFFTWaveSimulation::Impl(lx, ly, nx, ny))
   {
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::SetLambda(double value)
+  LinearRandomFFTWaveSimulation::LinearRandomFFTWaveSimulation(
+      double lx, double ly, double lz, Index nx, Index ny, Index nz) :
+    impl_(new LinearRandomFFTWaveSimulation::Impl(lx, ly, lz, nx, ny, nz))
+  {
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::SetLambda(double value)
   {
     impl_->SetLambda(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::SetWindVelocity(double ux, double uy)
+  void LinearRandomFFTWaveSimulation::SetWindVelocity(double ux, double uy)
   {
     impl_->SetWindVelocity(ux, uy);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::SetTime(double value)
+  void LinearRandomFFTWaveSimulation::SetTime(double value)
   {
     impl_->SetTime(value);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeElevation(
-    Eigen::Ref<Eigen::MatrixXd> h)
+  Index LinearRandomFFTWaveSimulation::SizeX() const
   {
-    impl_->ComputeElevation(h);
+    return impl_->nx_;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeElevationDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy)
+  Index LinearRandomFFTWaveSimulation::SizeY() const
   {
-    impl_->ComputeElevationDerivatives(dhdx, dhdy);
+    return impl_->ny_;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeDisplacements(
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy)
+  Index LinearRandomFFTWaveSimulation::SizeZ() const
   {
-    impl_->ComputeDisplacements(sx, sy);
+    return impl_->nz_;
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeDisplacementsDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+  void LinearRandomFFTWaveSimulation::ElevationAt(
+      Eigen::Ref<Eigen::ArrayXXd> h)
   {
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    impl_->ElevationAt(h);
   }
 
   //////////////////////////////////////////////////
-  void WaveSimulationFFT::ComputeDisplacementsAndDerivatives(
-    Eigen::Ref<Eigen::MatrixXd> h,
-    Eigen::Ref<Eigen::MatrixXd> sx,
-    Eigen::Ref<Eigen::MatrixXd> sy,
-    Eigen::Ref<Eigen::MatrixXd> dhdx,
-    Eigen::Ref<Eigen::MatrixXd> dhdy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdx,
-    Eigen::Ref<Eigen::MatrixXd> dsydy,
-    Eigen::Ref<Eigen::MatrixXd> dsxdy)
+  void LinearRandomFFTWaveSimulation::ElevationDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy)
+    {
+      impl_->ElevationDerivAt(dhdx, dhdy);
+    }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::DisplacementAt(
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy)
+    {
+      impl_->DisplacementAt(sx, sy);
+    }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::DisplacementDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+    {
+      impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
+    }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::DisplacementAndDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> h,
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy,
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+    {
+      impl_->ElevationAt(h);
+      impl_->ElevationDerivAt(dhdx, dhdy);
+      impl_->DisplacementAt(sx, sy);
+      impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
+    }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::PressureAt(
+      Index iz,
+      Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
-    impl_->ComputeElevation(h);
-    impl_->ComputeElevationDerivatives(dhdx, dhdy);
-    impl_->ComputeDisplacements(sx, sy);
-    impl_->ComputeDisplacementsDerivatives(dsxdx, dsydy, dsxdy);
+    impl_->PressureAt(iz, pressure);
   }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::ElevationAt(
+      Index ix, Index iy,
+      double &eta)
+  {
+    impl_->ElevationAt(ix, iy, eta);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::DisplacementAt(
+      Index ix, Index iy,
+      double &sx, double &sy)
+  {
+    impl_->DisplacementAt(ix, iy, sx, sy);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomFFTWaveSimulation::PressureAt(
+      Index ix, Index iy, Index iz,
+      double &pressure)
+  {
+    impl_->PressureAt(ix, iy, iz, pressure);
+  }
+
 }
 }

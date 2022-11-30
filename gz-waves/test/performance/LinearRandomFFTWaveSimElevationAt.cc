@@ -21,9 +21,9 @@
 
 #include <gtest/gtest.h>
 
-#include "WaveSimulationFFTImpl.hh"
+#include "LinearRandomFFTWaveSimulationImpl.hh"
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 using std::chrono::steady_clock;
 using std::chrono::milliseconds;
@@ -34,27 +34,11 @@ using namespace waves;
 
 //////////////////////////////////////////////////
 // Define fixture
-class WaveSimulationFFTBaseAmplitudesPerfFixture: public ::testing::Test
-{ 
-public: 
-  virtual ~WaveSimulationFFTBaseAmplitudesPerfFixture()
-  {
-  }
-
-  WaveSimulationFFTBaseAmplitudesPerfFixture()
-  {
-  } 
-
-  virtual void SetUp() override
-  { 
-  }
-
-  virtual void TearDown() override
-  {
-  }
-
+class LinearRandomFFTWaveSimTest: public ::testing::Test
+{
+public:
   // number of evaluations
-  int num_runs_ = 100;
+  int num_runs_ = 1000;
 
   // wave number grid (nx_, ny_)
   double lx_{200.0};
@@ -64,13 +48,45 @@ public:
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSimulationFFTBaseAmplitudesPerfFixture, BaseAmplitudes)
+TEST_F(LinearRandomFFTWaveSimTest, ElevationAtScalar)
 {
-  WaveSimulationFFTImpl model(lx_, ly_, nx_, ny_);
+  LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+
+  double h = 0.0;
+
+  double sim_time = 0.0;
+  double sim_step = 0.001;
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    model.ComputeBaseAmplitudes();
+    model.ComputeCurrentAmplitudes(sim_time);
+    model.ElevationAt(nx_/2, ny_/2, h);
+    sim_time += sim_step;
+  }
+  auto end = steady_clock::now();
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  std::cerr << "num_runs:         " << num_runs_ << "\n";
+  std::cerr << "total time (ms):  " << duration_ms.count() << "\n";
+  std::cerr << "av per run (ms):  " << duration_ms.count() / num_runs_ << "\n";
+}
+
+//////////////////////////////////////////////////
+TEST_F(LinearRandomFFTWaveSimTest, ElevationAtArray)
+{
+  LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
+  model.ComputeBaseAmplitudes();
+
+  Eigen::ArrayXXd h(nx_ * ny_, 1);
+
+  double sim_time = 0.0;
+  double sim_step = 0.001;
+  auto start = steady_clock::now();
+  for (int i = 0; i < num_runs_; ++i)
+  {
+    model.ComputeCurrentAmplitudes(sim_time);
+    model.ElevationAt(h);
+    sim_time += sim_step;
   }
   auto end = steady_clock::now();
   std::chrono::duration<double, std::milli> duration_ms = end - start;

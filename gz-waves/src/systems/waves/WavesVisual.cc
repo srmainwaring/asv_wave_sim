@@ -50,7 +50,7 @@
 #include "gz/waves/WaveParameters.hh"
 
 #include "gz/waves/WaveSimulation.hh"
-#include "gz/waves/WaveSimulationFFT.hh"
+#include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
 #include <gz/msgs/any.pb.h>
 #include <gz/msgs/param.pb.h>
@@ -209,15 +209,15 @@ class gz::sim::systems::WavesVisualPrivate
   // DYNAMIC_TEXTURE
   public: DisplacementMapPtr displacementMap;
 
-  std::unique_ptr<gz::waves::WaveSimulation> mWaveSim;
-  Eigen::VectorXd mHeights;
-  Eigen::VectorXd mDhdx;
-  Eigen::VectorXd mDhdy;
-  Eigen::VectorXd mDisplacementsX;
-  Eigen::VectorXd mDisplacementsY;
-  Eigen::VectorXd mDxdx;
-  Eigen::VectorXd mDydy;
-  Eigen::VectorXd mDxdy;
+  std::unique_ptr<gz::waves::IWaveSimulation> mWaveSim;
+  Eigen::ArrayXd mHeights;
+  Eigen::ArrayXd mDhdx;
+  Eigen::ArrayXd mDhdy;
+  Eigen::ArrayXd mDisplacementsX;
+  Eigen::ArrayXd mDisplacementsY;
+  Eigen::ArrayXd mDxdx;
+  Eigen::ArrayXd mDydy;
+  Eigen::ArrayXd mDxdy;
 
   public: void CreateShaderMaterial();
 
@@ -898,22 +898,22 @@ void WavesVisualPrivate::InitWaveSim()
   double s   = this->waveParams->Steepness();
 
   // create wave model
-  std::unique_ptr<gz::waves::WaveSimulationFFT> waveSim(
-      new gz::waves::WaveSimulationFFT(L, L, N, N));
+  std::unique_ptr<gz::waves::LinearRandomFFTWaveSimulation> waveSim(
+      new gz::waves::LinearRandomFFTWaveSimulation(L, L, N, N));
 
   // set params
   waveSim->SetWindVelocity(ux, uy);
   waveSim->SetLambda(s);
 
   int N2 = N * N;
-  this->mHeights = Eigen::VectorXd::Zero(N2);
-  this->mDisplacementsX = Eigen::VectorXd::Zero(N2);
-  this->mDisplacementsY = Eigen::VectorXd::Zero(N2);
-  this->mDhdx = Eigen::VectorXd::Zero(N2);
-  this->mDhdy = Eigen::VectorXd::Zero(N2);
-  this->mDxdx = Eigen::VectorXd::Zero(N2);
-  this->mDydy = Eigen::VectorXd::Zero(N2);
-  this->mDxdy = Eigen::VectorXd::Zero(N2);
+  this->mHeights = Eigen::ArrayXd::Zero(N2);
+  this->mDisplacementsX = Eigen::ArrayXd::Zero(N2);
+  this->mDisplacementsY = Eigen::ArrayXd::Zero(N2);
+  this->mDhdx = Eigen::ArrayXd::Zero(N2);
+  this->mDhdy = Eigen::ArrayXd::Zero(N2);
+  this->mDxdx = Eigen::ArrayXd::Zero(N2);
+  this->mDydy = Eigen::ArrayXd::Zero(N2);
+  this->mDxdy = Eigen::ArrayXd::Zero(N2);
 
   // move
   this->mWaveSim = std::move(waveSim);
@@ -1090,7 +1090,7 @@ void WavesVisualPrivate::UpdateWaveSim()
   double simTime = this->currentSimTimeSeconds;
 
   mWaveSim->SetTime(simTime);
-  mWaveSim->ComputeDisplacementsAndDerivatives(
+  mWaveSim->DisplacementAndDerivAt(
       mHeights, mDisplacementsX, mDisplacementsY,
       mDhdx, mDhdy, mDxdx, mDydy, mDxdy);
 }

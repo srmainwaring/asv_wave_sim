@@ -21,14 +21,10 @@ namespace waves
 {
 
   //////////////////////////////////////////////////
-  WaveSimulation::~WaveSimulation()
-  {
-  }
+  IWaveField::~IWaveField() = default;
 
   //////////////////////////////////////////////////
-  WaveSimulation::WaveSimulation()
-  {
-  }
+  IWaveSimulation::~IWaveSimulation() = default;
 
 }
 }

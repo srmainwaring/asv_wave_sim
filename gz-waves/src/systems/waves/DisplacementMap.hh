@@ -23,7 +23,7 @@
 
 #include <memory>
 
-using Eigen::MatrixXf;
+using Eigen::ArrayXXd;
 
 namespace gz
 {
@@ -38,14 +38,14 @@ namespace gz
       public: virtual void InitTextures() = 0;
 
       public: virtual void UpdateTextures(
-        const Eigen::Ref<const Eigen::MatrixXd> &mHeights,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDhdx,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDhdy,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsX,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsY,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDxdx,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDydy,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDxdy) = 0;
+        const Eigen::Ref<const Eigen::ArrayXXd> &mHeights,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDhdx,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDhdy,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDisplacementsX,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDisplacementsY,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDxdx,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDydy,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDxdy) = 0;
     };
 
     typedef std::shared_ptr<DisplacementMap> DisplacementMapPtr;

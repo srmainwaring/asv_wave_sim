@@ -30,7 +30,7 @@
 
 #include <memory>
 
-using Eigen::MatrixXf;
+using Eigen::ArrayXXd;
 
 namespace gz
 {
@@ -53,14 +53,14 @@ namespace gz
       public: virtual void InitTextures() override;
 
       public: virtual void UpdateTextures(
-        const Eigen::Ref<const Eigen::MatrixXd> &mHeights,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDhdx,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDhdy,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsX,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDisplacementsY,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDxdx,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDydy,
-        const Eigen::Ref<const Eigen::MatrixXd> &mDxdy
+        const Eigen::Ref<const Eigen::ArrayXXd> &mHeights,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDhdx,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDhdy,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDisplacementsX,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDisplacementsY,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDxdx,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDydy,
+        const Eigen::Ref<const Eigen::ArrayXXd> &mDxdy
       ) override;
 
       private: ScenePtr scene;

@@ -6,49 +6,49 @@
     <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
-      <name>asv_barrage_buoy0</name>
+      <name>buoy0</name>
     </include>
 
     <include>
       <pose>-3.0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
-      <name>barrage_buoy-1</name>
+      <name>buoy-1</name>
     </include>
 
     <include>
       <pose>3.0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
-      <name>barrage_buoy+1</name>
+      <name>buoy+1</name>
     </include>
 
     <include>
       <pose>-6.0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
-      <name>barrage_buoy-2</name>
+      <name>buoy-2</name>
     </include>
 
     <include>
       <pose>6.0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
-      <name>barrage_buoy+2</name>
+      <name>buoy+2</name>
     </include>
 
     <include>
       <pose>-9.0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
-      <name>barrage_buoy-3</name>
+      <name>buoy-3</name>
     </include>
 
     <include>
       <pose>9.0 0 0 0 0 0</pose>
       <uri>model://barrage_buoy</uri>
-      <name>barrage_buoy+3</name>
+      <name>buoy+3</name>
     </include>
 
-    <joint type="universal" name="barrage_buoy_0_-1_joint">
+    <joint type="universal" name="buoy-1_joint">
       <pose>1.5 0 0 0 0 0</pose>
-      <child>barrage_buoy-1::base_link</child>
-      <parent>asv_barrage_buoy0::base_link</parent>
+      <parent>buoy0::base_link</parent>
+      <child>buoy-1::base_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -65,10 +65,10 @@
       </axis2>
     </joint>
     
-    <joint type="universal" name="barrage_buoy_0_+1_joint">
+    <joint type="universal" name="buoy+1_joint">
       <pose>-1.5 0 0 0 0 0</pose>
-      <child>barrage_buoy+1::base_link</child>
-      <parent>asv_barrage_buoy0::base_link</parent>
+      <parent>buoy0::base_link</parent>
+      <child>buoy+1::base_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -85,10 +85,10 @@
       </axis2>
     </joint>
 
-    <joint type="universal" name="barrage_buoy_-1_-2_joint">
+    <joint type="universal" name="buoy-2_joint">
       <pose>1.5 0 0 0 0 0</pose>
-      <child>barrage_buoy-2::base_link</child>
-      <parent>barrage_buoy-1::base_link</parent>
+      <parent>buoy-1::base_link</parent>
+      <child>buoy-2::base_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -105,10 +105,10 @@
       </axis2>
     </joint>
 
-    <joint type="universal" name="barrage_buoy_+1_+2_joint">
+    <joint type="universal" name="buoy+2_joint">
       <pose>-1.5 0 0 0 0 0</pose>
-      <child>barrage_buoy+2::base_link</child>
-      <parent>barrage_buoy+1::base_link</parent>
+      <parent>buoy+1::base_link</parent>
+      <child>buoy+2::base_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -125,10 +125,10 @@
       </axis2>
     </joint>
 
-    <joint type="universal" name="barrage_buoy_-2_-3_joint">
+    <joint type="universal" name="buoy-3_joint">
       <pose>1.5 0 0 0 0 0</pose>
-      <child>barrage_buoy-3::base_link</child>
-      <parent>barrage_buoy-2::base_link</parent>
+      <parent>buoy-2::base_link</parent>
+      <child>buoy-3::base_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -145,10 +145,10 @@
       </axis2>
     </joint>
 
-    <joint type="universal" name="barrage_buoy_+2_+3_joint">
+    <joint type="universal" name="buoy+3_joint">
       <pose>-1.5 0 0 0 0 0</pose>
-      <child>barrage_buoy+3::base_link</child>
-      <parent>barrage_buoy+2::base_link</parent>
+      <parent>buoy+2::base_link</parent>
+      <child>buoy+3::base_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>

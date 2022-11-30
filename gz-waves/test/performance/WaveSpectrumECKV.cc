@@ -24,16 +24,16 @@
 
 #include "gz/waves/WaveSpectrum.hh"
 
-using Eigen::MatrixXd;
+using Eigen::ArrayXXd;
 
 namespace Eigen
 { 
-  typedef Eigen::Matrix<
+  typedef Eigen::Array<
     double,
     Eigen::Dynamic,
     Eigen::Dynamic,
     Eigen::RowMajor
-  > MatrixXdRowMajor;
+  > ArrayXXdRowMajor;
 }
 
 using std::chrono::steady_clock;
@@ -57,8 +57,8 @@ public:
     double kx_nyquist = M_PI * nx_ / lx_;
     double ky_nyquist = M_PI * ny_ / ly_;
 
-    Eigen::VectorXd kx_v(nx_);
-    Eigen::VectorXd ky_v(ny_);
+    Eigen::ArrayXd kx_v(nx_);
+    Eigen::ArrayXd ky_v(ny_);
 
     for (int i=0; i<nx_; ++i)
     {
@@ -70,15 +70,15 @@ public:
     }
 
     // broadcast to matrices (aka meshgrid)
-    Eigen::MatrixXd kx = Eigen::MatrixXd::Zero(nx_, ny_);
+    Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx_, ny_);
     kx.colwise() += kx_v;
     
-    Eigen::MatrixXd ky = Eigen::MatrixXd::Zero(nx_, ny_);
+    Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx_, ny_);
     ky.rowwise() += ky_v.transpose();
 
-    Eigen::MatrixXd kx2 = Eigen::pow(kx.array(), 2.0);
-    Eigen::MatrixXd ky2 = Eigen::pow(ky.array(), 2.0);
-    k_ = Eigen::sqrt(kx2.array() + ky2.array());
+    Eigen::ArrayXXd kx2 = Eigen::pow(kx, 2.0);
+    Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
+    k_ = Eigen::sqrt(kx2 + ky2);
 
     // create spectrum
     spectrum_ = ECKVWaveSpectrum(u19_);
@@ -86,7 +86,7 @@ public:
 
   virtual void SetUp() override
   { 
-    cap_s_ = Eigen::MatrixXd::Zero(nx_, ny_);
+    cap_s_ = Eigen::ArrayXXd::Zero(nx_, ny_);
   }
 
   virtual void TearDown() override
@@ -101,21 +101,21 @@ public:
   double ly_{100.0};
   int    nx_{256};
   int    ny_{128};
-  Eigen::MatrixXd k_;
+  Eigen::ArrayXXd k_;
 
   // spectrum
   double u19_{0.0};
   ECKVWaveSpectrum spectrum_;
 
   // workspace - reset each test
-  Eigen::MatrixXd cap_s_;
+  Eigen::ArrayXXd cap_s_;
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdDoubleLoopColMajor)
+TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdDoubleLoopColMajor)
 {
   // non-vector version
-  std::cerr << "Eigen::MatrixXd double loop\n";
+  std::cerr << "Eigen::ArrayXXd double loop\n";
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
@@ -135,10 +135,10 @@ TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdDoubleLoopColMajor)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdDoubleLoopRowMajor)
+TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdDoubleLoopRowMajor)
 {
   // loop in 'wrong' order
-  std::cerr << "Eigen::MatrixXd double loop, 'wrong' order\n";
+  std::cerr << "Eigen::ArrayXXd double loop, 'wrong' order\n";
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
@@ -158,15 +158,15 @@ TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdDoubleLoopRowMajor)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdReshapedIterator)
+TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdReshapedIterator)
 {
   // reshaped
-  std::cerr << "Eigen::MatrixXd reshaped iterator\n";
+  std::cerr << "Eigen::ArrayXXd reshaped iterator\n";
   auto start = steady_clock::now();
   for (int i = 0; i < num_runs_; ++i)
   {
-    Eigen::VectorXd k_view = k_.reshaped();
-    Eigen::VectorXd cap_s_view = cap_s_.reshaped();
+    Eigen::ArrayXd k_view = k_.reshaped();
+    Eigen::ArrayXd cap_s_view = cap_s_.reshaped();
     for (
       auto it1 = cap_s_view.begin(), it2 = k_view.begin();
       it1 != cap_s_view.end() && it2 != k_view.end();
@@ -247,7 +247,7 @@ TEST_F(WaveSpectrumECKVPerfFixture, StdVectorSingleLoop)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, MatrixXdCWise)
+TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdCWise)
 {
   // Eigen cwise-array calc
   std::cerr << "Eigen cwise-array\n";
