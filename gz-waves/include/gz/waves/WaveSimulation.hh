@@ -59,11 +59,11 @@ namespace waves
   public:
     virtual ~IWaveSimulation();
 
-    // virtual Index Rows() const = 0;
+    virtual Index SizeX() const = 0;
 
-    // virtual Index Cols() const = 0;
+    virtual Index SizeY() const = 0;
 
-    // virtual Index Depth() const = 0;
+    virtual Index SizeZ() const = 0;
 
     /// \todo(srmainwaring) deprecate or move?
     virtual void SetWindVelocity(double ux, double uy) = 0;

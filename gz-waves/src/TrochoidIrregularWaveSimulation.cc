@@ -245,6 +245,24 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  Index TrochoidIrregularWaveSimulation::SizeX() const
+  {
+    return impl_->N_;
+  }
+
+  //////////////////////////////////////////////////
+  Index TrochoidIrregularWaveSimulation::SizeY() const
+  {
+    return impl_->N_;
+  }
+
+  //////////////////////////////////////////////////
+  Index TrochoidIrregularWaveSimulation::SizeZ() const
+  {
+    return 0;
+  }
+
+  //////////////////////////////////////////////////
   void TrochoidIrregularWaveSimulation::ElevationAt(
     Eigen::Ref<Eigen::ArrayXXd> h)
   {

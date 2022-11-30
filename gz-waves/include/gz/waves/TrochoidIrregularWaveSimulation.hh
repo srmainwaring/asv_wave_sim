@@ -45,6 +45,12 @@ namespace waves
 
     virtual void SetTime(double time) override;
 
+    virtual Index SizeX() const override;
+
+    virtual Index SizeY() const override;
+
+    virtual Index SizeZ() const override;
+
     // lookup interface - array
     virtual void ElevationAt(
         Eigen::Ref<Eigen::ArrayXXd> h) override;

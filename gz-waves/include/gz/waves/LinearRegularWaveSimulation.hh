@@ -65,6 +65,12 @@ namespace waves
 
     virtual void SetTime(double value) override;
 
+    virtual Index SizeX() const override;
+
+    virtual Index SizeY() const override;
+
+    virtual Index SizeZ() const override;
+
     // interpolation interface
     virtual void Elevation(
         double x, double y,

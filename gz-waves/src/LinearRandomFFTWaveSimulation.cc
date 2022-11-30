@@ -614,6 +614,24 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  Index LinearRandomFFTWaveSimulation::SizeX() const
+  {
+    return impl_->nx_;
+  }
+
+  //////////////////////////////////////////////////
+  Index LinearRandomFFTWaveSimulation::SizeY() const
+  {
+    return impl_->ny_;
+  }
+
+  //////////////////////////////////////////////////
+  Index LinearRandomFFTWaveSimulation::SizeZ() const
+  {
+    return impl_->nz_;
+  }
+
+  //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::ElevationAt(
       Eigen::Ref<Eigen::ArrayXXd> h)
   {

@@ -605,6 +605,24 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  Index LinearRegularWaveSimulation::SizeX() const
+  {
+    return impl_->nx_;
+  }
+
+  //////////////////////////////////////////////////
+  Index LinearRegularWaveSimulation::SizeY() const
+  {
+    return impl_->ny_;
+  }
+
+  //////////////////////////////////////////////////
+  Index LinearRegularWaveSimulation::SizeZ() const
+  {
+    return impl_->nz_;
+  }
+
+  //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Elevation(
     double x, double y,
     double &eta)

@@ -45,7 +45,13 @@ namespace waves
 
     virtual void SetTime(double value) override;
 
-    // interpolation interface - not yet directly supported for FFT.
+    virtual Index SizeX() const override;
+
+    virtual Index SizeY() const override;
+
+    virtual Index SizeZ() const override;
+
+    // IWaveField - interface not supported for FFT.
     #if 0
     virtual void Elevation(
         double x, double y,
