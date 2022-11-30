@@ -16,11 +16,11 @@ class Grid {
 class TriangulatedGrid {
   + void CreateMesh()
   + void CreateTriangulation()
-  + bool Locate(Point query, int facIndex)
-  + bool Height(Point query, double &height)
-  + bool Interpolate(TriangulatedGrid &patch)
-  + void ApplyPose(Pose pose)
-  + void UpdatePoints(Mesh from)
+  + bool Locate()
+  + bool Height()
+  + bool Interpolate()
+  + void ApplyPose()
+  + void UpdatePoints()
 }
 
 '-------------------------------------------------
@@ -28,10 +28,10 @@ class WaveParameters {
 }
 
 class Wavefield {
-   + void Update(double time)
-   + bool Height(Point point, double &height)
+   + void Update()
+   + bool Height()
    + WaveParameters GetParameters()
-   + void SetParameters(WaveParameters value)
+   + void SetParameters()
 }
 
 Wavefield o-- "1" OceanTile : contains
@@ -41,44 +41,50 @@ Wavefield o-- "1" WaveParameters : contains
 class WavefieldSampler {
    + Grid GetWaterPatch()
    + double UpdatePatch()
-   + void ApplyPose(Pose pose)
-   + double ComputeDepth(Point point)
+   + void ApplyPose()
+   + double ComputeDepth()
 }
 
 WavefieldSampler o-- "1" Wavefield : contains
 WavefieldSampler o-- "1" Grid : contains
 
 class OceanTile {
-  + void Update(double time)
-  + void UpdateMesh(double time)
+  + void Update()
+  + void UpdateMesh()
 }
 
-OceanTile o-- "1" WaveSimulation : contains
+OceanTile o-- "1" IWaveSimulation : contains
 
 '-------------------------------------------------
-class WaveSimulation {
-  + void SetTime(double time)
+interface IWaveField {
+  + void Elevation()
+  + void Pressure()
+}
+
+interface IWaveSimulation {
+  + void SetTime()
   + void ElevationAt()
-  + void ElevationDerivAt()
   + void DisplacementAt()
+  + void PressureAt()
+  + void ElevationDerivAt()
   + void DisplacementDerivAt()
-  + void DisplacementAndDerivAt()
 }
 
 class LinearRegularWaveSimulation {
 }
 
-WaveSimulation <|-- LinearRegularWaveSimulation 
+IWaveField <|-- LinearRegularWaveSimulation
+IWaveSimulation <|-- LinearRegularWaveSimulation
 
 class TrochoidIrregularWaveSimulation {
 }
 
-WaveSimulation <|-- TrochoidIrregularWaveSimulation 
+IWaveSimulation <|-- TrochoidIrregularWaveSimulation
 
 class LinearRandomFFTWaveSimulation {
 }
 
-WaveSimulation <|-- LinearRandomFFTWaveSimulation 
+IWaveSimulation <|-- LinearRandomFFTWaveSimulation
 
 '-------------------------------------------------
 abstract class System
