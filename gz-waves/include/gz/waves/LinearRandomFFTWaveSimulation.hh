@@ -26,7 +26,8 @@ namespace gz
 {
 namespace waves
 {
-  class LinearRandomFFTWaveSimulation : public WaveSimulation
+  class LinearRandomFFTWaveSimulation :
+      public IWaveSimulation
   {
   public:
     virtual ~LinearRandomFFTWaveSimulation();
@@ -44,7 +45,7 @@ namespace waves
 
     virtual void SetTime(double value) override;
 
-    ///// interpolation interface - not yet directly supported for FFT.
+    // interpolation interface - not yet directly supported for FFT.
     #if 0
     virtual void Elevation(
         double x, double y,
@@ -66,7 +67,7 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXd> pressure) override;
     #endif
 
-    ///// lookup interface - array
+    // lookup interface - array
     virtual void ElevationAt(
         Eigen::Ref<Eigen::ArrayXXd> h) override;
 
@@ -97,7 +98,7 @@ namespace waves
         int iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure) override;
 
-    ///// lookup interface - scalar
+    // lookup interface - scalar
     virtual void ElevationAt(
         int ix, int iy,
         double &eta) override;

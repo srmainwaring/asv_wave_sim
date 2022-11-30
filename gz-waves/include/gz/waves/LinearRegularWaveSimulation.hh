@@ -40,7 +40,9 @@ namespace waves
   /// vertices are traversed in column major order:
   /// i.e. the innermost loop is over the x direction.
   ///
-  class LinearRegularWaveSimulation : public WaveSimulation
+  class LinearRegularWaveSimulation :
+      public IWaveSimulation,
+      public IWaveField
   {
   public:
     ~LinearRegularWaveSimulation();
@@ -63,7 +65,7 @@ namespace waves
 
     virtual void SetTime(double value) override;
 
-    ///// interpolation interface
+    // interpolation interface
     virtual void Elevation(
         double x, double y,
         double &eta) override;
@@ -83,7 +85,7 @@ namespace waves
         const Eigen::Ref<const Eigen::ArrayXd> &z,
         Eigen::Ref<Eigen::ArrayXd> pressure) override;
 
-    ///// lookup interface - array
+    // lookup interface - array
     virtual void ElevationAt(
         Eigen::Ref<Eigen::ArrayXXd> h) override;
 
@@ -114,7 +116,7 @@ namespace waves
         int iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure) override;
 
-    ///// lookup interface - scalar
+    // lookup interface - scalar
     virtual void ElevationAt(
         int ix, int iy,
         double &eta) override;

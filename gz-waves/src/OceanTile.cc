@@ -88,7 +88,7 @@ public:
   std::string                 mAboveOceanMeshName = "AboveOceanTileMesh";
   std::string                 mBelowOceanMeshName = "BelowOceanTileMesh";
 
-  std::unique_ptr<WaveSimulation> mWaveSim;
+  std::unique_ptr<IWaveSimulation> mWaveSim;
 
   Eigen::ArrayXd             mHeights;
   Eigen::ArrayXd             mDhdx;

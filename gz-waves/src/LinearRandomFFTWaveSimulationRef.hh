@@ -26,7 +26,8 @@ namespace gz
 {
 namespace waves
 {
-  class LinearRandomFFTWaveSimulationRef : public WaveSimulation
+  class LinearRandomFFTWaveSimulationRef :
+      public IWaveSimulation
   {
     public:
       virtual ~LinearRandomFFTWaveSimulationRef();

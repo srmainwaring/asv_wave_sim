@@ -30,7 +30,8 @@ namespace waves
 {
   class WaveParameters;
 
-  class TrochoidIrregularWaveSimulation : public WaveSimulation
+  class TrochoidIrregularWaveSimulation :
+      public IWaveSimulation
   {
   public:
     virtual ~TrochoidIrregularWaveSimulation();
@@ -44,6 +45,7 @@ namespace waves
 
     virtual void SetTime(double time) override;
 
+    // lookup interface - array
     virtual void ElevationAt(
         Eigen::Ref<Eigen::ArrayXXd> h) override;
 
@@ -69,6 +71,23 @@ namespace waves
         Eigen::Ref<Eigen::ArrayXXd> dsxdx,
         Eigen::Ref<Eigen::ArrayXXd> dsydy,
         Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+
+    virtual void PressureAt(
+        int iz,
+        Eigen::Ref<Eigen::ArrayXXd> pressure) override;
+
+    // lookup interface - scalar
+    virtual void ElevationAt(
+        int ix, int iy,
+        double &eta) override;
+
+    virtual void DisplacementAt(
+        int ix, int iy,
+        double &sx, double &sy) override;
+
+    virtual void PressureAt(
+        int ix, int iy, int iz,
+        double &pressure) override;
 
   private:
     class Impl;

@@ -112,7 +112,7 @@ namespace waves
         const Eigen::Ref<const Eigen::ArrayXd> &z,
         Eigen::Ref<Eigen::ArrayXd> pressure);
 
-    ///// lookup interface
+    // lookup interface
     void ElevationAt(
         Eigen::Ref<Eigen::ArrayXXd> h);
 

@@ -24,40 +24,67 @@ namespace gz
 {
 namespace waves
 {
-  /// \todo(srmainwaring) make interface = either split out interpolation
-  ///       interface (preferred) or ensure all subclasses have implmentation. 
-  class WaveSimulation
+  /// \todo(srmainwaring) replace int with Index in array indexing and counting.
+  typedef std::ptrdiff_t Index;
+
+  // evaluate wave elevation and fluid pressure
+  class IWaveField
   {
   public:
-    virtual ~WaveSimulation();
+    virtual ~IWaveField();
 
-    WaveSimulation();
-
-    virtual void SetWindVelocity(double ux, double uy) = 0;
-
-    virtual void SetTime(double value) = 0;
-
-    ///// interpolation interface
     virtual void Elevation(
         double x, double y,
-        double &eta);
+        double &eta) = 0;
 
     virtual void Elevation(
         const Eigen::Ref<const Eigen::ArrayXd> &x,
         const Eigen::Ref<const Eigen::ArrayXd> &y,
-        Eigen::Ref<Eigen::ArrayXd> eta);
+        Eigen::Ref<Eigen::ArrayXd> eta) = 0;
 
     virtual void Pressure(
         double x, double y, double z,
-        double &pressure);
+        double &pressure) = 0;
 
     virtual void Pressure(
         const Eigen::Ref<const Eigen::ArrayXd> &x,
         const Eigen::Ref<const Eigen::ArrayXd> &y,
         const Eigen::Ref<const Eigen::ArrayXd> &z,
-        Eigen::Ref<Eigen::ArrayXd> pressure);
+        Eigen::Ref<Eigen::ArrayXd> pressure) = 0;
+  };
 
-    ///// lookup interface - array
+  // compute a wave field on a discrete grid
+  class IWaveSimulation
+  {
+  public:
+    virtual ~IWaveSimulation();
+
+    // virtual Index Rows() const = 0;
+
+    // virtual Index Cols() const = 0;
+
+    // virtual Index Depth() const = 0;
+
+    /// \todo(srmainwaring) deprecate or move?
+    virtual void SetWindVelocity(double ux, double uy) = 0;
+
+    /// \todo(srmainwaring) deprecate or move?
+    virtual void SetTime(double value) = 0;
+
+    // lookup interface - scalar
+    virtual void ElevationAt(
+        int ix, int iy,
+        double &eta) = 0;
+
+    virtual void DisplacementAt(
+        int ix, int iy,
+        double &sx, double &sy) = 0;
+
+    virtual void PressureAt(
+        int ix, int iy, int iz,
+        double &pressure) = 0;
+
+    // lookup interface - array
     virtual void ElevationAt(
         Eigen::Ref<Eigen::ArrayXXd> h) = 0;
 
@@ -86,22 +113,9 @@ namespace waves
 
     virtual void PressureAt(
         int iz,
-        Eigen::Ref<Eigen::ArrayXXd> pressure);
-
-    ///// lookup interface - scalar
-    virtual void ElevationAt(
-        int ix, int iy,
-        double &eta);
-
-    virtual void DisplacementAt(
-        int ix, int iy,
-        double &sx, double &sy);
-
-    virtual void PressureAt(
-        int ix, int iy, int iz,
-        double &pressure);
-
+        Eigen::Ref<Eigen::ArrayXXd> pressure) = 0;
   };
+
 }
 }
 

@@ -61,7 +61,7 @@ TEST(WaveSimulation, TrochoidIrregularWaveSimulation)
   int ny = 4;
   double lx = 4.0;
   double ly = 4.0;
-  std::unique_ptr<WaveSimulation> wave_sim(
+  std::unique_ptr<IWaveSimulation> wave_sim(
       new TrochoidIrregularWaveSimulation(nx, lx, wave_params));
 
   // Compute the initial height field.

@@ -21,82 +21,10 @@ namespace waves
 {
 
   //////////////////////////////////////////////////
-  WaveSimulation::~WaveSimulation()
-  {
-  }
+  IWaveField::~IWaveField() = default;
 
   //////////////////////////////////////////////////
-  WaveSimulation::WaveSimulation()
-  {
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::Elevation(
-      double /*x*/, double /*y*/,
-      double &/*eta*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::Elevation(
-      const Eigen::Ref<const Eigen::ArrayXd> &/*x*/,
-      const Eigen::Ref<const Eigen::ArrayXd> &/*y*/,
-      Eigen::Ref<Eigen::ArrayXd> /*eta*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::Pressure(
-      double /*x*/, double /*y*/, double /*z*/,
-      double &/*pressure*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::Pressure(
-      const Eigen::Ref<const Eigen::ArrayXd> &/*x*/,
-      const Eigen::Ref<const Eigen::ArrayXd> &/*y*/,
-      const Eigen::Ref<const Eigen::ArrayXd> &/*z*/,
-      Eigen::Ref<Eigen::ArrayXd> /*pressure*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::PressureAt(
-      int /*iz*/,
-      Eigen::Ref<Eigen::ArrayXXd> /*pressure*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::ElevationAt(
-      int /*ix*/, int /*iy*/,
-      double &/*eta*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::DisplacementAt(
-      int /*ix*/, int /*iy*/,
-      double &/*sx*/, double &/*sy*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
-  //////////////////////////////////////////////////
-  void WaveSimulation::PressureAt(
-      int /*ix*/, int /*iy*/, int /*iz*/,
-      double &/*pressure*/)
-  {
-    assert(0 && "Not implemented");
-  }
-
+  IWaveSimulation::~IWaveSimulation() = default;
 
 }
 }

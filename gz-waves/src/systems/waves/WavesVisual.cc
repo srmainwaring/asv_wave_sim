@@ -209,7 +209,7 @@ class gz::sim::systems::WavesVisualPrivate
   // DYNAMIC_TEXTURE
   public: DisplacementMapPtr displacementMap;
 
-  std::unique_ptr<gz::waves::WaveSimulation> mWaveSim;
+  std::unique_ptr<gz::waves::IWaveSimulation> mWaveSim;
   Eigen::ArrayXd mHeights;
   Eigen::ArrayXd mDhdx;
   Eigen::ArrayXd mDhdy;

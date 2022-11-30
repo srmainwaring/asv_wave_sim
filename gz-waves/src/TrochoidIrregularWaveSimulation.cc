@@ -292,5 +292,38 @@ namespace waves
     impl_->DisplacementAt(sx, sy);
     impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
+
+  //////////////////////////////////////////////////
+  void TrochoidIrregularWaveSimulation::PressureAt(
+      int ,
+      Eigen::Ref<Eigen::ArrayXXd> )
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void TrochoidIrregularWaveSimulation::ElevationAt(
+      int , int ,
+      double &)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void TrochoidIrregularWaveSimulation::DisplacementAt(
+      int , int ,
+      double &, double &)
+  {
+    assert(0 && "Not implemented");
+  }
+
+  //////////////////////////////////////////////////
+  void TrochoidIrregularWaveSimulation::PressureAt(
+      int , int , int ,
+      double &)
+  {
+    assert(0 && "Not implemented");
+  }
+
 }
 }
