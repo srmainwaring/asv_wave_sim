@@ -41,22 +41,22 @@ namespace systems
     public: WavesClient();
 
     // Documentation inherited
-    public: void Configure(const Entity &_entity,
-                           const std::shared_ptr<const sdf::Element> &_sdf,
-                           EntityComponentManager &_ecm,
-                           EventManager &_eventMgr) final;
+    public: void Configure(
+        const Entity &entity,
+        const std::shared_ptr<const sdf::Element> &sdf,
+        EntityComponentManager &ecm,
+        EventManager &eventMgr) final;
 
     /// Documentation inherited
     public: void PreUpdate(
-                const UpdateInfo &_info,
-                EntityComponentManager &_ecm) override;
-
+        const UpdateInfo &info,
+        EntityComponentManager &ecm) override;
 
     /// \internal Private implementation
     private: class Impl;
 
     /// \internal Private implementation
-    private: std::unique_ptr<Impl> impl;
+    private: std::unique_ptr<Impl> impl_;
   };
   }
 }
