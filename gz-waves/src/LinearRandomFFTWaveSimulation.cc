@@ -95,7 +95,11 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> h)
   {
     // run the FFT
-    fftw_execute(fft_plan0_);
+    if (fft_needs_update_[0])
+    {
+      fftw_execute(fft_plan0_);
+      fft_needs_update_[0] = false;
+    }
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
@@ -108,9 +112,16 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> dhdy)
     {
       // run the FFTs
-      fftw_execute(fft_plan1_);
-      fftw_execute(fft_plan2_);
-
+      if (fft_needs_update_[1])
+      {
+        fftw_execute(fft_plan1_);
+        fft_needs_update_[1] = false;
+      }
+      if (fft_needs_update_[2])
+      {
+        fftw_execute(fft_plan2_);
+        fft_needs_update_[2] = false;
+      }
       // change from row to column major storage
       size_t n2 = nx_ * ny_;
       dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
@@ -123,8 +134,16 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> sy)
   {
     // run the FFTs
-    fftw_execute(fft_plan3_);
-    fftw_execute(fft_plan4_);
+    if (fft_needs_update_[3])
+    {
+      fftw_execute(fft_plan3_);
+      fft_needs_update_[3] = false;
+    }
+    if (fft_needs_update_[4])
+    {
+      fftw_execute(fft_plan4_);
+      fft_needs_update_[4] = false;
+    }
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
@@ -139,9 +158,21 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> dsxdy)
     {
       // run the FFTs
-      fftw_execute(fft_plan5_);
-      fftw_execute(fft_plan6_);
-      fftw_execute(fft_plan7_);
+      if (fft_needs_update_[5])
+      {
+        fftw_execute(fft_plan5_);
+        fft_needs_update_[5] = false;
+      }
+      if (fft_needs_update_[6])
+      {
+        fftw_execute(fft_plan6_);
+        fft_needs_update_[6] = false;
+      }
+      if (fft_needs_update_[7])
+      {
+        fftw_execute(fft_plan7_);
+        fft_needs_update_[7] = false;
+      }
 
       // change from row to column major storage
       size_t n2 = nx_ * ny_;
@@ -156,7 +187,11 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> pressure)
   {
     // run the FFTs
-    fftw_execute(fft_plan_p_[iz]);
+    if (fft_needs_update_[8 + iz])
+    {
+      fftw_execute(fft_plan_p_[iz]);
+      fft_needs_update_[8 + iz] = false;
+    }
 
     // change from row to column major storage
     size_t n2 = nx_ * ny_;
@@ -168,8 +203,14 @@ namespace waves
       Index ix, Index iy,
       double &eta)
   {
+    /// \todo(srmainwaring) running the FFT destroys the inputs for c2r plans 
+
     // run the FFT
-    fftw_execute(fft_plan0_);
+    if (fft_needs_update_[0])
+    {
+      fftw_execute(fft_plan0_);
+      fft_needs_update_[0] = false;
+    }
 
     // select value
     eta = fft_out0_(ix, iy);
@@ -181,8 +222,16 @@ namespace waves
       double &sx, double &sy)
   {
     // run the FFTs
-    fftw_execute(fft_plan3_);
-    fftw_execute(fft_plan4_);
+    if (fft_needs_update_[3])
+    {
+      fftw_execute(fft_plan3_);
+      fft_needs_update_[3] = false;
+    }
+    if (fft_needs_update_[4])
+    {
+      fftw_execute(fft_plan4_);
+      fft_needs_update_[4] = false;
+    }
 
     // change from row to column major storage and scale
     sy = fft_out3_(ix, iy) * lambda_ * -1.0;
@@ -195,7 +244,11 @@ namespace waves
       double &pressure)
   {
     // run the FFT
-    fftw_execute(fft_plan_p_[iz]);
+    if (fft_needs_update_[8 + iz])
+    {
+      fftw_execute(fft_plan_p_[iz]);
+      fft_needs_update_[8 + iz] = false;
+    }
 
     // select value
     pressure = fft_out_p_[iz](ix, iy);
@@ -293,6 +346,13 @@ namespace waves
   void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
       double time)
   {
+    // set all true
+    std::transform(
+      fft_needs_update_.cbegin(),
+      fft_needs_update_.cend(),
+      fft_needs_update_.begin(),
+      [] (bool) -> bool { return true; });
+
     // create 1d views
     auto r = rho_.reshaped();
     auto s = sigma_.reshaped();
@@ -560,6 +620,14 @@ namespace waves
           reinterpret_cast<double*>(fft_out_p_[iz].data()),
           FFTW_ESTIMATE));
     }
+
+    // set lazy evaluation flags.
+    fft_needs_update_.resize(8 + nz_);
+    std::transform(
+      fft_needs_update_.cbegin(),
+      fft_needs_update_.cend(),
+      fft_needs_update_.begin(),
+      [] (bool) -> bool { return true; });
   }
 
   //////////////////////////////////////////////////
