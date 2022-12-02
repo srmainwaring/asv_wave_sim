@@ -171,6 +171,9 @@ namespace waves
     std::vector<Eigen::ArrayXXdRowMajor>    fft_out_p_;
     std::vector<fftw_plan>                  fft_plan_p_;
 
+    /// \brief lazy evaluation flags
+    std::vector<bool> fft_needs_update_;
+
     /// \brief Gravity acceleration [m/s^2]
     double gravity_{9.81};
 
