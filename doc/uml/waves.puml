@@ -57,17 +57,17 @@ OceanTile o-- "1" IWaveSimulation : contains
 
 '-------------------------------------------------
 interface IWaveField {
-  + void Elevation()
-  + void Pressure()
+  {abstract} + void Elevation()
+  {abstract} + void Pressure()
 }
 
 interface IWaveSimulation {
-  + void SetTime()
-  + void ElevationAt()
-  + void DisplacementAt()
-  + void PressureAt()
-  + void ElevationDerivAt()
-  + void DisplacementDerivAt()
+  {abstract} + void SetTime()
+  {abstract} + void ElevationAt()
+  {abstract} + void DisplacementAt()
+  {abstract} + void PressureAt()
+  {abstract} + void ElevationDerivAt()
+  {abstract} + void DisplacementDerivAt()
 }
 
 class LinearRegularWaveSimulation {

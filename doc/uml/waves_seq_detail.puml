@@ -1,0 +1,24 @@
+@startuml
+
+WavesClient -> WaveField: Update
+WaveField -> OceanTile: Update
+WaveField -> OceanTile: Vertices
+WaveField -> TriangulatedGrid: UpdatePoints
+WavesClient -> WaveField: Height
+WaveField -> TriangulatedGrid: Height
+TriangulatedGrid -> Geometry : LineIntersectsTriangle
+
+
+Hydrodynamics -> Hydrodynamics: InitPhysics
+Hydrodynamics -> WavefieldSampler: WavefieldSampler
+Hydrodynamics -> WavefieldSampler: ApplyPose
+WavefieldSampler -> Grid : GetCenter
+WavefieldSampler -> Grid : SetCenter
+WavefieldSampler -> Grid : GetMesh
+Grid -> CGAL : (Get)Point
+Grid -> CGAL : (Set)Point
+
+Hydrodynamics -> WavefieldSampler: UpdatePatch
+WavefieldSampler -> Grid : GetMesh
+
+@enduml
