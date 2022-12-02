@@ -20,12 +20,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 gz_configure_project()
 
 #============================================================================
+# Include cmake
+#============================================================================
+
+include(${PROJECT_SOURCE_DIR}/cmake/URL.conf.cmake)
+
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+#============================================================================
 # Set project-specific options
 #============================================================================
 
 #============================================================================
 # Search for project-specific dependencies
 #============================================================================
+
+#--------------------------------------
+# Find gnuplot-iostream - the header is used by the examples in test/plots
+include(Add_gnuplot-iostream)
 
 #--------------------------------------
 # Find gz-math
