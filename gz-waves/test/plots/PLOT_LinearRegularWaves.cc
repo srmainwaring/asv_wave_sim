@@ -44,36 +44,6 @@ int main(int /*argc*/, const char **/*argv*/)
     Index nx = 128;
     Index ny = 128;
 
-    // {
-    //   double period = 12.0;
-
-    //   std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
-    //       new LinearRegularWaveSimulation(lx, ly, nx, ny));
-    //   wave_sim->SetDirection(1.0, 0.0);
-    //   wave_sim->SetAmplitude(2.0);
-    //   wave_sim->SetPeriod(period);
-    //   wave_sim->SetTime(0.0);
-      
-    //   std::vector<double> pts_t;
-    //   std::vector<double> pts_eta;
-    //   for (double t = 0.0; t < 4.0 * period; t += 0.1)
-    //   {
-    //     double eta;
-    //     wave_sim->SetTime(t);
-    //     wave_sim->Elevation(0.0, 0.0, eta);
-
-    //     pts_t.push_back(t);
-    //     pts_eta.push_back(eta);
-    //   }
-    //   Gnuplot gp;
-    //   gp << "set term qt title 'Wave Elevation at Origin'\n";
-    //   gp << "set grid\n";
-    //   gp << "set xlabel 'time (s)'\n";
-    //   gp << "set ylabel '(m)'\n";
-    //   gp << "plot '-' w l title 'eta'\n";
-    //   gp.send1d(std::make_tuple(pts_t, pts_eta));
-    // }
-
     { // wave elevation vs time
       std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
           new LinearRegularWaveSimulation(lx, ly, nx, ny));
