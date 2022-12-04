@@ -44,8 +44,6 @@ namespace waves
 
     Impl(double lx, double ly, double lz, Index nx, Index ny, Index nz);
 
-    void InitPressureGrid();
-
     void SetTime(double value);
 
     // interpolation interface
@@ -68,24 +66,7 @@ namespace waves
         const Eigen::Ref<const Eigen::ArrayXd> &z,
         Eigen::Ref<Eigen::ArrayXd> pressure);
 
-    // lookup interface
-    void ElevationAt(
-        Eigen::Ref<Eigen::ArrayXXd> h);
-
-    void ElevationDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> dhdx,
-        Eigen::Ref<Eigen::ArrayXXd> dhdy);
-
-    void DisplacementAndDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> h,
-        Eigen::Ref<Eigen::ArrayXXd> sx,
-        Eigen::Ref<Eigen::ArrayXXd> sy,
-        Eigen::Ref<Eigen::ArrayXXd> dhdx,
-        Eigen::Ref<Eigen::ArrayXXd> dhdy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-        Eigen::Ref<Eigen::ArrayXXd> dsydy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdy);
-
+    // lookup interface - scalar
     void ElevationAt(
         Index ix, Index iy,
         double &h);
@@ -94,9 +75,19 @@ namespace waves
         Index ix, Index iy, Index iz,
         double &pressure);
 
+    // lookup interface - array
+    void ElevationAt(
+        Eigen::Ref<Eigen::ArrayXXd> h);
+
+    void ElevationDerivAt(
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy);
+
     void PressureAt(
         Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure);
+
+    void InitPressureGrid();
 
     // elevation and pressure grid params
     Index nx_{2};
@@ -105,6 +96,8 @@ namespace waves
     double lx_{1.0};
     double ly_{1.0};
     double lz_{0.0};
+
+    double time_{0.0};
 
     // derived
     double dx_{0.0};
@@ -148,35 +141,71 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::SetTime(double time)
+  void LinearRandomWaveSimulation::Impl::SetTime(double value)
   {
+    time_ = value;
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::ElevationAt(
-      Eigen::Ref<Eigen::ArrayXXd> h)
+  void LinearRandomWaveSimulation::Impl::Elevation(
+      double /*x*/, double /*y*/,
+      double &eta)
   {
+    /// \todo(srmainwaring) implement
+    eta = 0.0;
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::ElevationDerivAt(
-      Eigen::Ref<Eigen::ArrayXXd> dhdx,
-      Eigen::Ref<Eigen::ArrayXXd> dhdy)
+  void LinearRandomWaveSimulation::Impl::Elevation(
+      const Eigen::Ref<const Eigen::ArrayXd> &x,
+      const Eigen::Ref<const Eigen::ArrayXd> &y,
+      Eigen::Ref<Eigen::ArrayXd> eta)
   {
+    auto xit = x.cbegin();
+    auto yit = y.cbegin();
+    auto eit = eta.begin();
+    for ( ; xit != x.cend() && yit != y.cend() && eit != eta.end();
+      ++xit, ++yit, ++eit)
+    {
+      Elevation(*xit, *yit, *eit);
+    }
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::PressureAt(
-      Index iz,
-      Eigen::Ref<Eigen::ArrayXXd> pressure)
+  void LinearRandomWaveSimulation::Impl::Pressure(
+      double /*x*/, double /*y*/, double /*z*/,
+      double &pressure)
   {
+    /// \todo(srmainwaring) implement
+    pressure = 0.0;
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::Pressure(
+      const Eigen::Ref<const Eigen::ArrayXd> &x,
+      const Eigen::Ref<const Eigen::ArrayXd> &y,
+      const Eigen::Ref<const Eigen::ArrayXd> &z,
+      Eigen::Ref<Eigen::ArrayXd> pressure)
+  {
+    auto xit = x.cbegin();
+    auto yit = y.cbegin();
+    auto zit = z.cbegin(); 
+    auto pit = pressure.begin();
+    for ( ; xit != x.cend() && yit != y.cend() && pit != pressure.end();
+      ++xit, ++yit, ++zit, ++pit)
+    {
+      Pressure(*xit, *yit, *zit, *pit);
+    }
   }
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::ElevationAt(
       Index ix, Index iy,
-      double &eta)
+      double &h)
   {
+    double x = ix * dx_ + lx_min_;
+    double y = iy * dy_ + ly_min_;
+    Elevation(x, y, h);
   }
 
   //////////////////////////////////////////////////
@@ -184,6 +213,49 @@ namespace waves
       Index ix, Index iy, Index iz,
       double &pressure)
   {
+    double x = ix * dx_ + lx_min_;
+    double y = iy * dy_ + ly_min_;
+    double z = z_(iz);
+    Pressure(x, y, z, pressure);
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::ElevationAt(
+      Eigen::Ref<Eigen::ArrayXXd> h)
+  {
+    for (Index ix = 0; ix < nx_; ++ix)
+    {
+      for (Index iy = 0; iy < ny_; ++iy)
+      {
+        double h1{0.0};
+        ElevationAt(ix, iy, h1);
+        h(ix, iy) = h1;
+      }
+    }
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::ElevationDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> /*dhdx*/,
+      Eigen::Ref<Eigen::ArrayXXd> /*dhdy*/)
+  {
+    /// \todo(srmainwaring) implement
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::PressureAt(
+      Index iz,
+      Eigen::Ref<Eigen::ArrayXXd> pressure)
+  {
+    for (Index ix = 0; ix < nx_; ++ix)
+    {
+      for (Index iy = 0; iy < ny_; ++iy)
+      {
+        double p1{0.0};
+        PressureAt(ix, iy, iz, p1);
+        pressure(ix, iy) = p1;
+      }
+    }
   }
 
  //////////////////////////////////////////////////
