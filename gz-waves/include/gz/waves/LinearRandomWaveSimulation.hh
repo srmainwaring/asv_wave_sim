@@ -26,6 +26,28 @@ namespace gz
 {
 namespace waves
 {
+  /// \brief A non-FFT linear random wave simulation.
+  ///
+  /// Model provided for comparison with the LinearIncidentWave model
+  /// used in buoy_sim with the wave spectrum type set to Pierson-Moskowitz.
+  ///
+  /// Properties:
+  ///   - superposition of num_waves waves.
+  ///   - sampled at constant angular frequency steps delta omega.
+  ///   - amplitude determined by Pierson-Moskowitz spectrum.
+  ///   - wave direction may be set.
+  ///   - waves do not spread, all waves propagate in the same direction.
+  ///   - waves have random phases.
+  ///
+  /// Usage:
+  ///   - performance is poor on grids with resolution greater than 64 x 64.
+  ///
+  /// \todo(srmainwaring)
+  ///   - elevation derivatives
+  ///   - pressure calculations
+  ///   - orientation checks
+  ///   - tests
+  ///
   class LinearRandomWaveSimulation :
       public IWaveSimulation,
       public IWaveField
