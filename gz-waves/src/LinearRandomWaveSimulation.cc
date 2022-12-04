@@ -31,7 +31,7 @@ namespace gz
 namespace waves
 {
 
-  constexpr Index DEFAULT_N_PHASES{300};
+  constexpr Index DEFAULT_N_PHASES{30};
   constexpr double MAX_FREQ{0.3};  // Hz
 
   //////////////////////////////////////////////////
@@ -260,7 +260,10 @@ namespace waves
       {
         double h1{0.0};
         ElevationAt(ix, iy, h1);
-        h(ix, iy) = h1;
+
+        // column major
+        Index idx = iy * nx_ + ix;
+        h(idx, 0) = h1;
       }
     }
   }
@@ -286,7 +289,10 @@ namespace waves
       {
         double p1{0.0};
         PressureAt(ix, iy, iz, p1);
-        pressure(ix, iy) = p1;
+
+        // column major
+        Index idx = iy * nx_ + ix;
+        pressure(idx, 0) = p1;
       }
     }
   }
