@@ -29,4 +29,5 @@ ExternalProject_Add(
 add_subdirectory(gtest_vendor)
 # add_subdirectory(integration)
 add_subdirectory(performance)
+add_subdirectory(plots)
 # add_subdirectory(regression)
