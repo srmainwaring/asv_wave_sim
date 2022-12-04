@@ -16,7 +16,6 @@
 
 #include "gz/waves/LinearRandomWaveSimulation.hh"
 
-#include <complex>
 #include <random>
 #include <vector>
 
@@ -25,12 +24,15 @@
 #include <gz/common.hh>
 
 #include "gz/waves/WaveSpectrum.hh"
-#include "gz/waves/WaveSpreadingFunction.hh"
+
 
 namespace gz
 {
 namespace waves
 {
+
+  constexpr Index DEFAULT_N_PHASES{300};
+  constexpr double MAX_FREQ{0.3};  // Hz
 
   //////////////////////////////////////////////////
   class LinearRandomWaveSimulation::Impl
@@ -87,7 +89,9 @@ namespace waves
         Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure);
 
-    void InitPressureGrid();
+    void InitGrid();
+
+    void ComputeAmplitudes();
 
     // elevation and pressure grid params
     Index nx_{2};
@@ -97,6 +101,24 @@ namespace waves
     double ly_{1.0};
     double lz_{0.0};
 
+    // simulation parameters
+    double gravity_{9.81};
+    double fluid_rho_{1025.0};
+
+    // parameters
+    Index num_waves_{DEFAULT_N_PHASES};
+    double u19_{5.0};
+    double wave_angle_{0.0};
+
+    bool needs_update_{true};
+
+    Eigen::ArrayXd spectrum_;
+    Eigen::ArrayXd amplitude_;
+    Eigen::ArrayXd w_;
+    Eigen::ArrayXd k_;
+    Eigen::ArrayXd phase_;
+
+    // update
     double time_{0.0};
 
     // derived
@@ -107,11 +129,7 @@ namespace waves
     double ly_max_{0.0};
     double ly_min_{0.0};
 
-    // vectorised
-    Eigen::ArrayXd x_;
-    Eigen::ArrayXd y_;
-    Eigen::ArrayXXd x_grid_;
-    Eigen::ArrayXXd y_grid_;
+    // pressure sample points
     Eigen::ArrayXd z_;
   };
   
@@ -126,6 +144,7 @@ namespace waves
     nx_(nx),
     ny_(ny)
   {
+    InitGrid();
   }
 
   //////////////////////////////////////////////////
@@ -138,6 +157,7 @@ namespace waves
     ny_(ny),
     nz_(nz)
   {
+    InitGrid();
   }
 
   //////////////////////////////////////////////////
@@ -148,11 +168,20 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::Elevation(
-      double /*x*/, double /*y*/,
+      double x, double y,
       double &eta)
   {
-    /// \todo(srmainwaring) implement
-    eta = 0.0;
+    ComputeAmplitudes();
+
+    double xx = x * std::cos(wave_angle_) + y * std::sin(wave_angle_);
+
+    double h = 0;
+    for (Index ik = 0; ik < num_waves_; ++ik)
+    {
+      double wt = w_(ik) * time_;
+      h += amplitude_(ik) * std::cos(k_(ik) * xx - wt + phase_(ik));
+    }
+    eta = h;
   }
 
   //////////////////////////////////////////////////
@@ -176,6 +205,8 @@ namespace waves
       double /*x*/, double /*y*/, double /*z*/,
       double &pressure)
   {
+    ComputeAmplitudes();
+
     /// \todo(srmainwaring) implement
     pressure = 0.0;
   }
@@ -239,6 +270,8 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> /*dhdx*/,
       Eigen::Ref<Eigen::ArrayXXd> /*dhdy*/)
   {
+    ComputeAmplitudes();
+
     /// \todo(srmainwaring) implement
   }
 
@@ -258,9 +291,19 @@ namespace waves
     }
   }
 
- //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::InitPressureGrid()
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::InitGrid()
   {
+    // grid spacing
+    dx_ = lx_ / nx_;
+    dy_ = ly_ / ny_;
+
+    // x and y coordinates
+    lx_min_ = - lx_ / 2.0;
+    lx_max_ =   lx_ / 2.0;
+    ly_min_ = - ly_ / 2.0;
+    ly_max_ =   ly_ / 2.0;
+
     // pressure sample points (z is below the free surface)
     Eigen::ArrayXd zr = Eigen::ArrayXd::Zero(nz_);
     if (nz_ > 1)
@@ -271,6 +314,50 @@ namespace waves
       zr(Eigen::seq(1, nz_ - 1)) = -1 * Eigen::exp(ln_z);
     }
     z_ = zr.reverse();
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::ComputeAmplitudes()
+  {
+    if (!needs_update_)
+      return;
+
+    // resize workspace
+    spectrum_.resize(num_waves_);
+    amplitude_.resize(num_waves_);
+    w_.resize(num_waves_);
+    k_.resize(num_waves_);
+    phase_.resize(num_waves_);
+
+    // set spectrum and parameters
+    PiersonMoskowitzWaveSpectrum spectrum;
+    spectrum.SetU19(u19_);
+
+    // angular frequency step size
+    double dw = MAX_FREQ * 2 * M_PI / num_waves_;
+
+    // random uniforms for phase
+    auto seed = std::default_random_engine::default_seed;
+    std::default_random_engine generator(seed);
+    std::uniform_real_distribution<> distribution(0.0, 2.0 * M_PI);
+
+    /// \todo(srmainwaring) check spectrum
+    double k_prev = 0.0;
+    for (Index ik = 0; ik < num_waves_; ++ik)
+    {
+      // equally-spaced w => variably-spaced k
+      w_(ik) = dw * (ik + 1);
+      k_(ik) = w_(ik) * w_(ik) / gravity_;
+      double dk = k_(ik) - k_prev;
+      k_prev = k_(ik);
+
+      // spectrum variable is k
+      spectrum_(ik) = spectrum.Evaluate(k_(ik));
+      amplitude_(ik) = std::sqrt(2.0 * dk * spectrum_(ik));
+      phase_(ik) = distribution(generator);
+    }
+
+    needs_update_ = false;
   }
 
   //////////////////////////////////////////////////
@@ -289,6 +376,22 @@ namespace waves
       double lx, double ly, double lz, Index nx, Index ny, Index nz) :
     impl_(new LinearRandomWaveSimulation::Impl(lx, ly, lz, nx, ny, nz))
   {
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::SetNumWaves(Index value)
+  {
+    impl_->num_waves_ = value;
+    impl_->needs_update_ = true;
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::SetWindVelocity(double ux, double uy)
+  {
+    /// \todo(srmainwaring) standardise reference level for wind
+    impl_->u19_ = std::sqrt(ux * ux + uy * uy);
+    impl_->wave_angle_ = std::atan2(uy, ux);
+    impl_->needs_update_ = true;
   }
 
   //////////////////////////////////////////////////

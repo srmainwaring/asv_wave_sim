@@ -42,6 +42,16 @@ target_include_directories(PLOT_LinearRandomFFTWaves
 )
 
 
+add_executable(PLOT_LinearRandomWaves PLOT_LinearRandomWaves.cc)
+target_link_libraries(PLOT_LinearRandomWaves
+  ${PROJECT_LIBRARY_TARGET_NAME}
+  Boost::iostreams
+)
+target_include_directories(PLOT_LinearRandomWaves
+  PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
+)
+
+
 add_executable(PLOT_LinearRegularWaves PLOT_LinearRegularWaves.cc)
 target_link_libraries(PLOT_LinearRegularWaves
   ${PROJECT_LIBRARY_TARGET_NAME}
@@ -69,6 +79,7 @@ install(
   TARGETS
     PLOT_GnuPlotExample
     PLOT_LinearRandomFFTWaves
+    PLOT_LinearRandomWaves
     PLOT_LinearRegularWaves
     PLOT_WaveSpectrum
   RUNTIME DESTINATION bin

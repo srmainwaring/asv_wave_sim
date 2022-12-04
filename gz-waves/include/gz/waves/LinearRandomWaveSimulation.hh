@@ -39,6 +39,10 @@ namespace waves
     LinearRandomWaveSimulation(double lx, double ly, double lz,
         Index nx, Index ny, Index nz);
 
+    void SetNumWaves(Index value);
+
+    virtual void SetWindVelocity(double ux, double uy) override;
+
     virtual void SetTime(double value) override;
 
     virtual Index SizeX() const override;
