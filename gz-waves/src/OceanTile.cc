@@ -19,6 +19,7 @@
 #include "gz/waves/Geometry.hh"
 #include "gz/waves/WaveSimulation.hh"
 #include "gz/waves/LinearRandomFFTWaveSimulation.hh"
+#include "gz/waves/LinearRandomWaveSimulation.hh"
 #include "gz/waves/LinearRegularWaveSimulation.hh"
 #include "gz/waves/TrochoidIrregularWaveSimulation.hh"
 #include "gz/waves/WaveParameters.hh"
@@ -278,9 +279,11 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   // 0 - LinearRegularWaveSimulation
   // 1 - TrochoidIrregularWaveSimulation
   // 2 - LinearRandomFFTWaveSimulation
+  // 3 - LinearRandomWaveSimulation
 
   int wave_sim_type = 0;
-  if (_params->Algorithm() == "sinusoid")
+  if (_params->Algorithm() == "sinusoid" ||
+      _params->Algorithm() == "linear_regular")
   {
     wave_sim_type = 0;
   }
@@ -288,9 +291,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   {
     wave_sim_type = 1;
   }
-  else if (_params->Algorithm() == "fft")
+  else if (_params->Algorithm() == "fft" ||
+      _params->Algorithm() == "linear_random_fft")
   {
     wave_sim_type = 2;
+  }
+  else if (_params->Algorithm() == "linear_random")
+  {
+    wave_sim_type = 3;
   }
   else
   {
@@ -302,7 +310,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   {
     case 0:
     {
-      // Simple
+      // Linear Regular (Monochromatic)
       double dir_x = _params->Direction().X();
       double dir_y = _params->Direction().Y();
       double amplitude = _params->Amplitude();
@@ -323,12 +331,20 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     }
     case 2:
     {
-      // FFT2
+      // Linear Random FFT (ECKV / Cos2s)
       std::unique_ptr<LinearRandomFFTWaveSimulation> waveSim(
           new LinearRandomFFTWaveSimulation(_L, _L, _N, _N));
       
       // larger lambda => steeper waves.
       waveSim->SetLambda(_params->Steepness());
+      mWaveSim = std::move(waveSim);
+      break;
+    }
+    case 3:
+    {
+      // Linear Random (Pierson-Moskowitz)
+      std::unique_ptr<LinearRandomWaveSimulation> waveSim(
+          new LinearRandomWaveSimulation(_L, _L, _N, _N));
       mWaveSim = std::move(waveSim);
       break;
     }
