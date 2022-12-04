@@ -110,23 +110,23 @@ namespace waves
   void LinearRandomFFTWaveSimulation::Impl::ElevationDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> dhdx,
       Eigen::Ref<Eigen::ArrayXXd> dhdy)
+  {
+    // run the FFTs
+    if (fft_needs_update_[1])
     {
-      // run the FFTs
-      if (fft_needs_update_[1])
-      {
-        fftw_execute(fft_plan1_);
-        fft_needs_update_[1] = false;
-      }
-      if (fft_needs_update_[2])
-      {
-        fftw_execute(fft_plan2_);
-        fft_needs_update_[2] = false;
-      }
-      // change from row to column major storage
-      size_t n2 = nx_ * ny_;
-      dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
-      dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1);
+      fftw_execute(fft_plan1_);
+      fft_needs_update_[1] = false;
     }
+    if (fft_needs_update_[2])
+    {
+      fftw_execute(fft_plan2_);
+      fft_needs_update_[2] = false;
+    }
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
+    dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1);
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
@@ -156,30 +156,30 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> dsxdx,
       Eigen::Ref<Eigen::ArrayXXd> dsydy,
       Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+  {
+    // run the FFTs
+    if (fft_needs_update_[5])
     {
-      // run the FFTs
-      if (fft_needs_update_[5])
-      {
-        fftw_execute(fft_plan5_);
-        fft_needs_update_[5] = false;
-      }
-      if (fft_needs_update_[6])
-      {
-        fftw_execute(fft_plan6_);
-        fft_needs_update_[6] = false;
-      }
-      if (fft_needs_update_[7])
-      {
-        fftw_execute(fft_plan7_);
-        fft_needs_update_[7] = false;
-      }
-
-      // change from row to column major storage
-      size_t n2 = nx_ * ny_;
-      dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-      dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-      dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
+      fftw_execute(fft_plan5_);
+      fft_needs_update_[5] = false;
     }
+    if (fft_needs_update_[6])
+    {
+      fftw_execute(fft_plan6_);
+      fft_needs_update_[6] = false;
+    }
+    if (fft_needs_update_[7])
+    {
+      fftw_execute(fft_plan7_);
+      fft_needs_update_[7] = false;
+    }
+
+    // change from row to column major storage
+    size_t n2 = nx_ * ny_;
+    dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+    dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+    dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::Impl::PressureAt(
@@ -710,26 +710,26 @@ namespace waves
   void LinearRandomFFTWaveSimulation::ElevationDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> dhdx,
       Eigen::Ref<Eigen::ArrayXXd> dhdy)
-    {
-      impl_->ElevationDerivAt(dhdx, dhdy);
-    }
+  {
+    impl_->ElevationDerivAt(dhdx, dhdy);
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::DisplacementAt(
       Eigen::Ref<Eigen::ArrayXXd> sx,
       Eigen::Ref<Eigen::ArrayXXd> sy)
-    {
-      impl_->DisplacementAt(sx, sy);
-    }
+  {
+    impl_->DisplacementAt(sx, sy);
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::DisplacementDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> dsxdx,
       Eigen::Ref<Eigen::ArrayXXd> dsydy,
       Eigen::Ref<Eigen::ArrayXXd> dsxdy)
-    {
-      impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
-    }
+  {
+    impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::DisplacementAndDerivAt(
@@ -741,12 +741,12 @@ namespace waves
       Eigen::Ref<Eigen::ArrayXXd> dsxdx,
       Eigen::Ref<Eigen::ArrayXXd> dsydy,
       Eigen::Ref<Eigen::ArrayXXd> dsxdy)
-    {
-      impl_->ElevationAt(h);
-      impl_->ElevationDerivAt(dhdx, dhdy);
-      impl_->DisplacementAt(sx, sy);
-      impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
-    }
+  {
+    impl_->ElevationAt(h);
+    impl_->ElevationDerivAt(dhdx, dhdy);
+    impl_->DisplacementAt(sx, sy);
+    impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulation::PressureAt(

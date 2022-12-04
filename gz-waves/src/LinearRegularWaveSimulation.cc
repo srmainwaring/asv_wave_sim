@@ -92,7 +92,7 @@ namespace waves
 
     void SetTime(double value);
 
-    ///// interpolation interface
+    // interpolation interface
     void Elevation(
         double x, double y,
         double &eta);
