@@ -53,6 +53,10 @@ namespace waves
         double x, double y,
         double &eta);
 
+    void ElevationDeriv(
+        double x, double y,
+        double &deta_dx, double &deta_dy);
+
     void Elevation(
         const Eigen::Ref<const Eigen::ArrayXd> &x,
         const Eigen::Ref<const Eigen::ArrayXd> &y,
@@ -72,6 +76,10 @@ namespace waves
     void ElevationAt(
         Index ix, Index iy,
         double &h);
+
+    void ElevationDerivAt(
+        Index ix, Index iy,
+        double &dhdx, double &dhdy);
 
     void PressureAt(
         Index ix, Index iy, Index iz,
@@ -185,6 +193,34 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::ElevationDeriv(
+      double x, double y,
+      double &deta_dx, double &deta_dy)
+  {
+    ComputeAmplitudes();
+
+    double cd = std::cos(wave_angle_);
+    double sd = std::sin(wave_angle_);
+    double xx  = x * cd + y * sd;
+
+    double dhdx = 0;
+    double dhdy = 0;
+    for (Index ik = 0; ik < num_waves_; ++ik)
+    {
+      double wt = w_(ik) * time_;
+      double a  = k_(ik) * xx - wt + phase_(ik);
+      double sa = std::sin(a);
+      double dadx = k_(ik) * cd;
+      double dady = k_(ik) * sd;
+
+      dhdx += - dadx * amplitude_(ik) * sa;
+      dhdy += - dady * amplitude_(ik) * sa;
+    }
+    deta_dx = dhdx;
+    deta_dy = dhdx;
+  }
+
+  //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::Elevation(
       const Eigen::Ref<const Eigen::ArrayXd> &x,
       const Eigen::Ref<const Eigen::ArrayXd> &y,
@@ -240,6 +276,16 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::Impl::ElevationDerivAt(
+      Index ix, Index iy,
+      double &dhdx, double &dhdy)
+  {
+    double x = ix * dx_ + lx_min_;
+    double y = iy * dy_ + ly_min_;
+    ElevationDeriv(x, y, dhdx, dhdy);
+  }
+
+  //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::PressureAt(
       Index ix, Index iy, Index iz,
       double &pressure)
@@ -270,12 +316,23 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::ElevationDerivAt(
-      Eigen::Ref<Eigen::ArrayXXd> /*dhdx*/,
-      Eigen::Ref<Eigen::ArrayXXd> /*dhdy*/)
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy)
   {
-    ComputeAmplitudes();
+    for (Index ix = 0; ix < nx_; ++ix)
+    {
+      for (Index iy = 0; iy < ny_; ++iy)
+      {
+        double dhdx1{0.0};
+        double dhdy1{0.0};
+        ElevationDerivAt(ix, iy, dhdx1, dhdy1);
 
-    /// \todo(srmainwaring) implement
+        // column major
+        Index idx = iy * nx_ + ix;
+        dhdx(idx, 0) = dhdx1;
+        dhdy(idx, 0) = dhdy1;
+      }
+    }
   }
 
   //////////////////////////////////////////////////
