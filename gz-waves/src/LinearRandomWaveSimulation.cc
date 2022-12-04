@@ -98,19 +98,6 @@ namespace waves
         Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure);
 
-    // static inline void PreComputeCoeff(
-    //   double period, double t, double wave_angle,
-    //   double &w, double &wt, double &k, double &cos_angle, double &sin_angle)
-    // {
-    //   w = 2.0 * M_PI / period;
-    //   wt = w * t;
-    //   k = Physics::DeepWaterDispersionToWavenumber(w);
-    //   cos_angle = std::cos(wave_angle);
-    //   sin_angle = std::sin(wave_angle);
-    // }
-
-    bool use_vectorised_{true};
-
     // elevation and pressure grid params
     Index nx_{2};
     Index ny_{2};
@@ -118,12 +105,6 @@ namespace waves
     double lx_{1.0};
     double ly_{1.0};
     double lz_{0.0};
-
-    // wave params
-    // double wave_angle_{0.0};
-    // double amplitude_{1.0};
-    // double period_{1.0};
-    // double time_{0.0};
 
     // derived
     double dx_{0.0};
@@ -260,6 +241,37 @@ namespace waves
   Index LinearRandomWaveSimulation::SizeZ() const
   {
     return impl_->nz_;
+  }
+
+  void LinearRandomWaveSimulation::Elevation(
+      double x, double y,
+      double &eta)
+  {
+    impl_->Elevation(x, y, eta);
+  }
+
+  void LinearRandomWaveSimulation::Elevation(
+      const Eigen::Ref<const Eigen::ArrayXd> &x,
+      const Eigen::Ref<const Eigen::ArrayXd> &y,
+      Eigen::Ref<Eigen::ArrayXd> eta)
+  {
+    impl_->Elevation(x, y, eta);
+  }
+
+  void LinearRandomWaveSimulation::Pressure(
+      double x, double y, double z,
+      double &pressure)
+  {
+    impl_->Pressure(x, y, z, pressure);
+  }
+
+  void LinearRandomWaveSimulation::Pressure(
+      const Eigen::Ref<const Eigen::ArrayXd> &x,
+      const Eigen::Ref<const Eigen::ArrayXd> &y,
+      const Eigen::Ref<const Eigen::ArrayXd> &z,
+      Eigen::Ref<Eigen::ArrayXd> pressure)
+  {
+    impl_->Pressure(x, y, z, pressure);
   }
 
   //////////////////////////////////////////////////
