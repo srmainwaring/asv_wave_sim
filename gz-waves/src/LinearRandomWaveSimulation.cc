@@ -44,7 +44,7 @@ namespace waves
 
     Impl(double lx, double ly, double lz, Index nx, Index ny, Index nz);
 
-    void InitGrid();
+    void InitPressureGrid();
 
     void SetTime(double value);
 
@@ -98,16 +98,16 @@ namespace waves
         Index iz,
         Eigen::Ref<Eigen::ArrayXXd> pressure);
 
-    static inline void PreComputeCoeff(
-      double period, double t, double wave_angle,
-      double &w, double &wt, double &k, double &cos_angle, double &sin_angle)
-    {
-      w = 2.0 * M_PI / period;
-      wt = w * t;
-      k = Physics::DeepWaterDispersionToWavenumber(w);
-      cos_angle = std::cos(wave_angle);
-      sin_angle = std::sin(wave_angle);
-    }
+    // static inline void PreComputeCoeff(
+    //   double period, double t, double wave_angle,
+    //   double &w, double &wt, double &k, double &cos_angle, double &sin_angle)
+    // {
+    //   w = 2.0 * M_PI / period;
+    //   wt = w * t;
+    //   k = Physics::DeepWaterDispersionToWavenumber(w);
+    //   cos_angle = std::cos(wave_angle);
+    //   sin_angle = std::sin(wave_angle);
+    // }
 
     bool use_vectorised_{true};
 
@@ -185,21 +185,6 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::DisplacementAt(
-      Eigen::Ref<Eigen::ArrayXXd> sx,
-      Eigen::Ref<Eigen::ArrayXXd> sy)
-  {
-  }
-
-  //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::DisplacementDerivAt(
-      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-      Eigen::Ref<Eigen::ArrayXXd> dsydy,
-      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
-  {
-  }
-
-  //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::PressureAt(
       Index iz,
       Eigen::Ref<Eigen::ArrayXXd> pressure)
@@ -214,37 +199,10 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::DisplacementAt(
-      Index ix, Index iy,
-      double &sx, double &sy)
-  {
-  }
-
-  //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::PressureAt(
       Index ix, Index iy, Index iz,
       double &pressure)
   {
-  }
-
-  //////////////////////////////////////////////////
-  void LinearRandomWaveSimulation::Impl::InitWaveNumbers()
-  {
-    kx_fft_  = Eigen::ArrayXd::Zero(nx_);
-    ky_fft_  = Eigen::ArrayXd::Zero(ny_);
-
-    // wavenumbers in fft and math ordering
-    for(Index ikx = 0; ikx < nx_; ++ikx)
-    {
-      double kx = (ikx - nx_/2) * kx_f_;
-      kx_fft_((ikx + nx_/2) % nx_) = kx;
-    }
-
-    for(Index iky = 0; iky < ny_; ++iky)
-    {
-      double ky = (iky - ny_/2) * ky_f_;
-      ky_fft_((iky + ny_/2) % ny_) = ky;
-    }
   }
 
  //////////////////////////////////////////////////
@@ -315,43 +273,41 @@ namespace waves
   void LinearRandomWaveSimulation::ElevationDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> dhdx,
       Eigen::Ref<Eigen::ArrayXXd> dhdy)
-    {
-      impl_->ElevationDerivAt(dhdx, dhdy);
-    }
+  {
+    impl_->ElevationDerivAt(dhdx, dhdy);
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::DisplacementAt(
-      Eigen::Ref<Eigen::ArrayXXd> sx,
-      Eigen::Ref<Eigen::ArrayXXd> sy)
-    {
-      impl_->DisplacementAt(sx, sy);
-    }
+      Eigen::Ref<Eigen::ArrayXXd> /*sx*/,
+      Eigen::Ref<Eigen::ArrayXXd> /*sy*/)
+  {
+    // no xy-displacement
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::DisplacementDerivAt(
-      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-      Eigen::Ref<Eigen::ArrayXXd> dsydy,
-      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
-    {
-      impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
-    }
+      Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
+      Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
+      Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
+  {
+    // no xy-displacement
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::DisplacementAndDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> h,
-      Eigen::Ref<Eigen::ArrayXXd> sx,
-      Eigen::Ref<Eigen::ArrayXXd> sy,
+      Eigen::Ref<Eigen::ArrayXXd> /*sx*/,
+      Eigen::Ref<Eigen::ArrayXXd> /*sy*/,
       Eigen::Ref<Eigen::ArrayXXd> dhdx,
       Eigen::Ref<Eigen::ArrayXXd> dhdy,
-      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-      Eigen::Ref<Eigen::ArrayXXd> dsydy,
-      Eigen::Ref<Eigen::ArrayXXd> dsxdy)
-    {
-      impl_->ElevationAt(h);
-      impl_->ElevationDerivAt(dhdx, dhdy);
-      impl_->DisplacementAt(sx, sy);
-      impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
-    }
+      Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
+      Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
+      Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
+  {
+    impl_->ElevationAt(h);
+    impl_->ElevationDerivAt(dhdx, dhdy);
+  }
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::PressureAt(
@@ -371,10 +327,10 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::DisplacementAt(
-      Index ix, Index iy,
-      double &sx, double &sy)
+      Index /*ix*/, Index /*iy*/,
+      double &/*sx*/, double &/*sy*/)
   {
-    impl_->DisplacementAt(ix, iy, sx, sy);
+    // no xy-displacement
   }
 
   //////////////////////////////////////////////////

@@ -25,6 +25,7 @@ set(sources
   WaveSimulation.cc
   LinearRandomFFTWaveSimulation.cc
   LinearRandomFFTWaveSimulationRef.cc
+  LinearRandomWaveSimulation.cc
   LinearRegularWaveSimulation.cc
   TrochoidIrregularWaveSimulation.cc
   WaveSpectrum.cc
