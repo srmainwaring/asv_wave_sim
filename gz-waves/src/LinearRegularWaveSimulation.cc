@@ -92,7 +92,7 @@ namespace waves
 
     void SetTime(double value);
 
-    ///// interpolation interface
+    // interpolation interface
     void Elevation(
         double x, double y,
         double &eta);
@@ -155,16 +155,14 @@ namespace waves
 
     bool use_vectorised_{true};
 
-    // elevation grid params
+    // elevation and pressure grid params
     Index nx_{2};
     Index ny_{2};
+    Index nz_{1};
     double lx_{1.0};
     double ly_{1.0};
-    
-    // pressure grid params
-    Index nz_{1};
     double lz_{0.0};
-
+    
     // wave params
     double wave_angle_{0.0};
     double amplitude_{1.0};
@@ -208,9 +206,9 @@ namespace waves
       double lx, double ly, double lz, Index nx, Index ny, Index nz) :
     nx_(nx),
     ny_(ny),
+    nz_(nz),
     lx_(lx),
     ly_(ly),
-    nz_(nz),
     lz_(lz)
   {
     InitGrid();
@@ -488,11 +486,11 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRegularWaveSimulation::Impl::ElevationAt(
-      Index ix, Index iy, double &eta)
+      Index ix, Index iy, double &h)
   {
-    double y = iy * dy_ + ly_min_;
     double x = ix * dx_ + lx_min_;
-    Elevation(x, y, eta);
+    double y = iy * dy_ + ly_min_;
+    Elevation(x, y, h);
   }
 
   //////////////////////////////////////////////////
@@ -500,8 +498,8 @@ namespace waves
     Index ix, Index iy, Index iz,
     double &pressure)
   {
-    double y = iy * dy_ + ly_min_;
     double x = ix * dx_ + lx_min_;
+    double y = iy * dy_ + ly_min_;
     double z = z_(iz);
     Pressure(x, y, z, pressure);
   }
