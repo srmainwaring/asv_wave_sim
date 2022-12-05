@@ -61,7 +61,17 @@ namespace waves
     LinearRandomWaveSimulation(double lx, double ly, double lz,
         Index nx, Index ny, Index nz);
 
+    /// \brief The number of wave components.
+    Index NumWaves() const; 
+
+    /// \brief Set the number of wave components (has default = 30).
     void SetNumWaves(Index value);
+
+    /// \brief The maximum angular frequency rad/s).
+    double MaxOmega() const;
+
+    /// \brief Set the maximum angular frequency (has default = 6.0 (rad/s)).
+    void SetMaxOmega(double value);
 
     virtual void SetWindVelocity(double ux, double uy) override;
 

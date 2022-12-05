@@ -47,6 +47,8 @@ int main(int /*argc*/, const char **/*argv*/)
     { // wave elevation vs time
       std::unique_ptr<LinearRandomWaveSimulation> wave_sim(
           new LinearRandomWaveSimulation(lx, ly, nx, ny));
+      wave_sim->SetNumWaves(300);
+      wave_sim->SetMaxOmega(6.0);
       wave_sim->SetWindVelocity(10.0, 0.0);
       wave_sim->SetTime(5.0);
       
@@ -75,6 +77,8 @@ int main(int /*argc*/, const char **/*argv*/)
     { // wave elevation vs position
       std::unique_ptr<LinearRandomWaveSimulation> wave_sim(
           new LinearRandomWaveSimulation(lx, ly, nx, ny));
+      wave_sim->SetNumWaves(300);
+      wave_sim->SetMaxOmega(6.0);
       wave_sim->SetWindVelocity(10.0, 0.0);
       wave_sim->SetTime(5.0);
 
@@ -115,6 +119,8 @@ int main(int /*argc*/, const char **/*argv*/)
 
       std::unique_ptr<LinearRandomWaveSimulation> wave_sim(
           new LinearRandomWaveSimulation(lx, ly, lz, nx, ny, nz));
+      wave_sim->SetNumWaves(300);
+      wave_sim->SetMaxOmega(6.0);
       wave_sim->SetWindVelocity(10.0, 0.0);
       wave_sim->SetTime(5.0);
 

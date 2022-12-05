@@ -30,10 +30,6 @@ namespace gz
 {
 namespace waves
 {
-
-  constexpr Index DEFAULT_N_PHASES{30};
-  constexpr double MAX_FREQ{0.3};  // Hz
-
   //////////////////////////////////////////////////
   class LinearRandomWaveSimulation::Impl
   {
@@ -114,7 +110,8 @@ namespace waves
     double fluid_rho_{1025.0};
 
     // parameters
-    Index num_waves_{DEFAULT_N_PHASES};
+    Index num_waves_{30};
+    double max_w_{6.0};
     double u19_{5.0};
     double wave_angle_{0.0};
 
@@ -414,7 +411,7 @@ namespace waves
     spectrum.SetU19(u19_);
 
     // angular frequency step size
-    double dw = MAX_FREQ * 2 * M_PI / num_waves_;
+    double dw = max_w_ / num_waves_;
 
     // random uniforms for phase
     auto seed = std::default_random_engine::default_seed;
@@ -459,9 +456,28 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
+  Index LinearRandomWaveSimulation::NumWaves() const
+  {
+    return impl_->num_waves_;
+  }
+
+  //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::SetNumWaves(Index value)
   {
     impl_->num_waves_ = value;
+    impl_->needs_update_ = true;
+  }
+
+  //////////////////////////////////////////////////
+  double LinearRandomWaveSimulation::MaxOmega() const
+  {
+    return impl_->max_w_;
+  }
+
+  //////////////////////////////////////////////////
+  void LinearRandomWaveSimulation::SetMaxOmega(double value)
+  {
+    impl_->max_w_ = value;
     impl_->needs_update_ = true;
   }
 
