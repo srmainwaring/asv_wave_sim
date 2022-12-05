@@ -181,13 +181,17 @@ namespace waves
   {
     ComputeAmplitudes();
 
-    double xx = x * std::cos(wave_angle_) + y * std::sin(wave_angle_);
+    double cd = std::cos(wave_angle_);
+    double sd = std::sin(wave_angle_);
+    double xd = x * cd + y * sd;
 
     double h = 0;
     for (Index ik = 0; ik < num_waves_; ++ik)
     {
       double wt = w_(ik) * time_;
-      h += amplitude_(ik) * std::cos(k_(ik) * xx - wt + phase_(ik));
+      double a  = k_(ik) * xd - wt + phase_(ik);
+      double ca = std::cos(a);
+      h += amplitude_(ik) * ca;
     }
     eta = h;
   }
@@ -201,14 +205,14 @@ namespace waves
 
     double cd = std::cos(wave_angle_);
     double sd = std::sin(wave_angle_);
-    double xx  = x * cd + y * sd;
+    double xd  = x * cd + y * sd;
 
     double dhdx = 0;
     double dhdy = 0;
     for (Index ik = 0; ik < num_waves_; ++ik)
     {
       double wt = w_(ik) * time_;
-      double a  = k_(ik) * xx - wt + phase_(ik);
+      double a  = k_(ik) * xd - wt + phase_(ik);
       double sa = std::sin(a);
       double dadx = k_(ik) * cd;
       double dady = k_(ik) * sd;
@@ -238,13 +242,26 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomWaveSimulation::Impl::Pressure(
-      double /*x*/, double /*y*/, double /*z*/,
+      double x, double y, double z,
       double &pressure)
   {
     ComputeAmplitudes();
 
-    /// \todo(srmainwaring) implement
-    pressure = 0.0;
+    double cd = std::cos(wave_angle_);
+    double sd = std::sin(wave_angle_);
+    double xd = x * cd + y * sd;
+
+    double p = 0;
+    for (Index ik = 0; ik < num_waves_; ++ik)
+    {
+      double wt = w_(ik) * time_;
+      double a  = k_(ik) * xd - wt + phase_(ik);
+      double ca = std::cos(a);
+      double h1 = amplitude_(ik) * ca;
+      double e  = std::exp(k_(ik) * z);
+      p += e * h1;
+    }
+    pressure = p;
   }
 
   //////////////////////////////////////////////////
