@@ -1,5 +1,7 @@
 # ASV Wave Simulator
 
+[![Ubuntu Focal CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yml/badge.svg?branch=feature%2Fgazebo11)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yml)
+
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
 ![Wave Simulation](https://github.com/srmainwaring/asv_wave_sim/wiki/images/ocean_waves_rs750_fft.jpg)
@@ -55,18 +57,6 @@ Install CGAL 5.02 libraries:
 sudo apt-get install libcgal-dev
 ```
 
-### macOS
-
-- OSX 10.11.6
-- ROS Melodic Morenia
-- Gazebo version 9.6.0
-
-Install CGAL 4.13 libraries:
-
-```bash
-brew install cgal
-```
-
 ## Installation
 
 ### Create and configure a workspace
@@ -75,7 +65,6 @@ Source your ROS installation:
 
 ```bash
 source /opt/ros/melodic/setup.bash
-source /usr/local/share/gazebo-9/setup.bash
 ```
 
 Create a catkin workspace:
@@ -98,7 +87,7 @@ Clone the `asv_wave_sim` repository:
 
 ```bash
 cd src
-git clone https://github.com/srmainwaring/asv_wave_sim.git
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/gazebo11
 ```
 
 Compile the packages:
@@ -171,21 +160,6 @@ Publish a hydrodynamics parameters message:
 ```
 
 For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/wiki/Example) page in the wiki.
-
-## Build Status
-
-### Develop Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.com/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.com/srmainwaring/asv_wave_sim) |
-
-
-### Release Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.com/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.com/srmainwaring/asv_wave_sim) |
 
 
 ## License
