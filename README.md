@@ -45,11 +45,11 @@ You will need a working installation of ROS and Gazebo in order to use this pack
 
 ## Ubuntu
 
-- Ubuntu 18.04
-- ROS Melodic Morenia
-- Gazebo version 9.0.0
+- Ubuntu 20.04 Focal
+- ROS Noetic
+- Gazebo version 11.12.0
 
-Install CGAL 4.13 libraries:
+Install CGAL 5.02 libraries:
 
 ```bash
 sudo apt-get install libcgal-dev
