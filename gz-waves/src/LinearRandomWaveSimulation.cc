@@ -110,7 +110,7 @@ namespace waves
     double fluid_rho_{1025.0};
 
     // parameters
-    Index num_waves_{30};
+    Index num_waves_{100};
     double max_w_{6.0};
     double u19_{5.0};
     double wave_angle_{0.0};

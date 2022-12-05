@@ -28,25 +28,21 @@ namespace waves
 {
   /// \brief A non-FFT linear random wave simulation.
   ///
-  /// Model provided for comparison with the LinearIncidentWave model
-  /// used in buoy_sim with the wave spectrum type set to Pierson-Moskowitz.
+  /// The model is provided for comparison with the LinearIncidentWave model
+  /// used in buoy_sim when the wave spectrum type is set to Pierson-Moskowitz.
   ///
   /// Properties:
-  ///   - superposition of num_waves waves.
-  ///   - sampled at constant angular frequency steps delta omega.
-  ///   - amplitude determined by Pierson-Moskowitz spectrum.
-  ///   - wave direction may be set.
-  ///   - waves do not spread, all waves propagate in the same direction.
-  ///   - waves have random phases.
+  ///   - Superposition of num_waves waves.
+  ///   - Sampled at constant angular frequency: MaxOmega / NumWaves.
+  ///   - Amplitudes determined by the Pierson-Moskowitz spectrum.
+  ///   - Wave direction may be set.
+  ///   - Waves do not spread, all waves propagate in the same direction.
+  ///   - Waves are assigned random phases.
   ///
-  /// Usage:
-  ///   - performance is poor on grids with resolution greater than 64 x 64.
-  ///
-  /// \todo(srmainwaring)
-  ///   - elevation derivatives
-  ///   - pressure calculations
-  ///   - orientation checks
-  ///   - tests
+  /// Performance estimates for various grid sizes:
+  ///   num waves       nx x ny         RTF
+  ///   100             128 x 128         6
+  ///   300             128 x 128         2
   ///
   class LinearRandomWaveSimulation :
       public IWaveSimulation,
@@ -64,7 +60,7 @@ namespace waves
     /// \brief The number of wave components.
     Index NumWaves() const; 
 
-    /// \brief Set the number of wave components (has default = 30).
+    /// \brief Set the number of wave components (has default = 100).
     void SetNumWaves(Index value);
 
     /// \brief The maximum angular frequency rad/s).
