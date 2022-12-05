@@ -17,6 +17,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install wget lsb-release gnupg curl
+          pip install catkin-tools
 
       - name: Install ROS Noetic
         run: |
