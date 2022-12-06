@@ -20,23 +20,10 @@
 
 #include "asv_wave_sim_gazebo_plugins/CGALTypes.hh"
 
+#include <gazebo/gazebo.hh>
+#include <sdf/sdf.hh>
+
 #include <memory>
-
-///////////////////////////////////////////////////////////////////////////////
-// Forward Declarations
-
-namespace gazebo
-{
-  namespace msgs
-  {
-    class Param_V;
-  }
-}
-
-namespace sdf
-{
-  class Element;
-}
 
 namespace asv
 {

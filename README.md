@@ -9,37 +9,16 @@ This package contains plugins that support the simulation of waves and surface v
 
 ## Notes
 
-This is a prototype branch `feature/fft_waves` which contains an updated wave engine
-that uses FFTs to generate the wavefield physics and visuals.
+This is a prototype branch containing an updated wave engine that uses FFTs to generate the wavefield physics and visuals.
 
-There are changes in the way that the wave parameters need to be set, and it may
-not be possible to avoid breaking the existing interface used to specify trochoidal waves.
-This is still work in progress, and the current version has a fixed set of wave parameters.
+There are changes in the way that the wave parameters need to be set, and it may not be possible to avoid breaking the existing interface used to specify trochoidal waves. This is still work in progress, and the current version has a fixed set of wave parameters.
 
 The library has additional dependencies on two FFT libraries:
 
 - [clMathLibraries/clFFT](https://github.com/clMathLibraries/clFFT)
 - [fftw](http://www.fftw.org/)
 
-These can be installed on linux with:
-
-```bash
-sudo apt-get update && apt-get install fftw clfft
-```
-
-And on macOS with:
-
-```bash
-brew fftw3 libclfft-dev libfftw3-dev
-```
-
-Aside from adding the option to use a FFT generated wavefield, the major change is
-in the way that the visuals are generated. Previously the wave displacements for visuals
-were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically
-updated in the the library then pushed into the rendering engine. This means there is no
-need to maintain various sized meshes in the media files, however it does require working
-around Gazebos requirement for static meshes and there is a custom Visual that implements
-this. The OpenCL FFT library allows this work to be offloaded to the GPU when configured.
+Aside from adding the option to use a FFT generated wavefield, the major change is in the way that the visuals are generated. Previously the wave displacements for visuals were generated in the shader code, the visual plugin was used to update shader parameters for wave amplitudes and frequency. Now the entire mesh for the visual is dynamically updated in the the library then pushed into the rendering engine. This means there is no need to maintain various sized meshes in the media files, however it does require working around Gazebos requirement for static meshes and there is a custom Visual that implements this. The OpenCL FFT library allows this work to be offloaded to the GPU when configured.
 
 ## Dependencies
 
@@ -52,10 +31,10 @@ You will need a working installation of ROS and Gazebo in order to use this pack
 - ROS Noetic
 - Gazebo version 11.12.0
 
-Install CGAL 5.02 libraries:
+Install CGAL, FFTW3, TBB and clFFT:
 
 ```bash
-sudo apt-get install libcgal-dev
+sudo apt-get install libcgal-dev libfftw3-dev libtbb-dev libclfft-dev
 ```
 
 ## Installation
@@ -84,11 +63,11 @@ catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 ### Clone and build the package
 
-Clone the `gazebo11` branch of the `asv_wave_sim` repository:
+Clone the `feature/fft-waves-v1` branch of the `asv_wave_sim` repository:
 
 ```bash
 cd src
-git clone https://github.com/srmainwaring/asv_wave_sim.git -b gazebo11
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/fft-waves-v1
 ```
 
 Compile the packages:
@@ -169,22 +148,6 @@ Publish a hydrodynamics parameters message:
 ```
 
 For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/wiki/Example) page in the wiki.
-
-## Build Status
-
-### Develop Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
-
-
-### Release Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
-
 
 ## License
 
