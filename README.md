@@ -1,4 +1,6 @@
-# ASV Wave Simulator
+# Wave Sim
+
+[![Ubuntu Bionic CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-bionic-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-bionic-ci.yml)
 
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
@@ -137,21 +139,6 @@ Publish a hydrodynamics parameters message:
 ```
 
 For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/wiki/Example) page in the wiki.
-
-## Build Status
-
-### Develop Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.com/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.com/srmainwaring/asv_wave_sim) |
-
-
-### Release Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.com/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.com/srmainwaring/asv_wave_sim) |
 
 ## License
 
