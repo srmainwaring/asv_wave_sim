@@ -1,0 +1,42 @@
+name: Ubuntu Focal CI
+
+on: [push, pull_request]
+
+jobs:
+  ubuntu-focus-ci:
+    runs-on: ubuntu-20.04
+    name: Ubuntu Focal CI
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: src/asv_wave_sim
+
+      - name: Install Build Essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget lsb-release gnupg curl
+          pip install catkin-tools
+
+      - name: Install ROS Noetic
+        run: |
+          sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+          curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+          sudo apt update
+          sudo apt install ros-noetic-desktop-full
+
+      - name: Install Wave Sim Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libcgal-dev
+
+      - name: Build Wave Sim
+        run: |
+          source /opt/ros/noetic/setup.bash
+          catkin init
+          catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          catkin build
+
+      - name: Test Wave Sim
+        run: |
+          catkin build --catkin-make-args run_tests
