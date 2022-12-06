@@ -8,7 +8,7 @@ This package contains plugins that support the simulation of waves and surface v
 
 ## Notes
 
-This branch is for legacy support and is maintenance only. The plugins target Gazebo11 / ROS Noetic running on Ubuntu 20.04 (Focal).
+This branch is for legacy support and is now maintenance only. The plugins target Gazebo11 / ROS Noetic running on Ubuntu 20.04 (Focal).
 
 It includes an in-development wave engine that uses FFTs to generate the wavefield physics and visuals. The current version of the FFT wave engine has a fixed set of wave parameters.
 
@@ -48,7 +48,7 @@ sudo apt-get install libcgal-dev
 Source your ROS installation:
 
 ```bash
-source /opt/ros/melodic/setup.bash
+source /opt/ros/noetic/setup.bash
 ```
 
 Create a catkin workspace:
@@ -67,11 +67,11 @@ catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 ### Clone and build the package
 
-Clone the `gazebo11` branch of the `asv_wave_sim` repository:
+Clone the `feature/gazebo11-fft-waves` branch of the `asv_wave_sim` repository:
 
 ```bash
 cd src
-git clone https://github.com/srmainwaring/asv_wave_sim.git -b gazebo11
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/gazebo11-fft-waves
 ```
 
 Compile the packages:
