@@ -70,6 +70,12 @@ colcon build --symlink-install --merge-install --cmake-args \
 -DCMAKE_CXX_STANDARD=17
 ```
 
+Source the workspace:
+
+```bash
+source ./install/setup.bash
+```
+
 #### macOS
 
 ```bash
