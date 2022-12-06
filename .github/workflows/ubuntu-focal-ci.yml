@@ -40,3 +40,4 @@ jobs:
       - name: Test Wave Sim
         run: |
           catkin build --catkin-make-args run_tests
+

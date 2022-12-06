@@ -1,7 +1,7 @@
 # Wave Sim
 
 [![Ubuntu Bionic CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-bionic-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-bionic-ci.yml)
-[![Ubuntu Focal CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yaml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yaml)
+[![Ubuntu Focal CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yml)
 
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
