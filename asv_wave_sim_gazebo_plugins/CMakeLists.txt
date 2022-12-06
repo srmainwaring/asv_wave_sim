@@ -60,37 +60,6 @@ find_package (OpenCL REQUIRED)
 
 find_package (clFFT REQUIRED)
 
-###############################################################################
-# Find FFTW3 (double-precision) (GPL) as FFT library.
-
-find_path(FFTW3-3_INCLUDE_DIR
-  NAMES fftw3.h
-  HINTS $ENV{FFTW3_DIR}/include
-  PATHS /usr/local/include
-        /usr/include
-)
-
-find_library(FFTW3-3_LIBRARY
-  NAMES fftw3 libfftw3
-  HINTS $ENV{FFTW3_DIR}/lib
-  PATHS /usr/local/lib
-        /usr/lib
-)
-
-add_definitions(-DUSE_FFTW3)
-set(FFT_INCLUDE_DIRS ${FFTW3-3_INCLUDE_DIR})
-set(FFT_LIBRARIES ${FFTW3-3_LIBRARY})
-
-###############################################################################
-# Find OpenCL
-
-find_package (OpenCL REQUIRED)
-
-###############################################################################
-# Find clFFT
-
-find_package (clFFT REQUIRED)
-
 ############################################################################### 
 # Catkin...
 

@@ -63,11 +63,11 @@ catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 ### Clone and build the package
 
-Clone the `feature/fft-waves-v2` branch of the `asv_wave_sim` repository:
+Clone the `feature/fft-waves-v3` branch of the `asv_wave_sim` repository:
 
 ```bash
 cd src
-git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/fft-waves-v2
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b feature/fft-waves-v3
 ```
 
 Compile the packages:
@@ -164,22 +164,6 @@ Publish a hydrodynamics parameters message:
 ```
 
 For more detail see the [Example](https://github.com/srmainwaring/asv_wave_sim/wiki/Example) page in the wiki.
-
-## Build Status
-
-### Develop Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
-
-
-### Release Job Status
-
-|    | Melodic |
-|--- |--- |
-| asv_wave_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=master)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
-
 
 ## License
 
