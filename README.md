@@ -1,4 +1,4 @@
-# ASV Wave Simulator
+# Wave Sim
 
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
