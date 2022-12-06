@@ -1,6 +1,7 @@
 # Wave Sim
 
 [![Ubuntu Bionic CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-bionic-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-bionic-ci.yml)
+[![Ubuntu Focal CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yaml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-focal-ci.yaml)
 
 This package contains plugins that support the simulation of waves and surface vessels in Gazebo.  
 
@@ -13,26 +14,14 @@ You will need a working installation of ROS and Gazebo in order to use this pack
 
 ## Ubuntu
 
-- Ubuntu 18.04
-- ROS Melodic Morenia
-- Gazebo version 9.0.0
+- Ubuntu 20.04
+- ROS Noetic
+- Gazebo version 11.12.0
 
-Install CGAL 4.13 libraries:
+Install CGAL 5.02 libraries:
 
 ```bash
 sudo apt-get install libcgal-dev
-```
-
-### macOS
-
-- OSX 10.11.6
-- ROS Melodic Morenia
-- Gazebo version 9.6.0
-
-Install CGAL 4.13 libraries:
-
-```bash
-brew install cgal
 ```
 
 ## Installation
@@ -42,8 +31,7 @@ brew install cgal
 Source your ROS installation:
 
 ```bash
-source /opt/ros/melodic/setup.bash
-source /usr/local/share/gazebo-9/setup.bash
+source /opt/ros/noetic/setup.bash
 ```
 
 Create a catkin workspace:
@@ -62,11 +50,11 @@ catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 ### Clone and build the package
 
-Clone the `asv_wave_sim` repository:
+Clone the `gazebo11` branch of the `asv_wave_sim` repository:
 
 ```bash
 cd src
-git clone https://github.com/srmainwaring/asv_wave_sim.git
+git clone https://github.com/srmainwaring/asv_wave_sim.git -b gazebo11
 ```
 
 Compile the packages:

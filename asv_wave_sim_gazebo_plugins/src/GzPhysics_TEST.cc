@@ -29,7 +29,6 @@
 using namespace ignition;
 using namespace math;
 using namespace gazebo;
-using namespace common;
 using namespace physics;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -168,7 +167,7 @@ void TestLinkProperties(gazebo::physics::WorldPtr _world)
   // Mock up the box object... 
   // Mesh: 10 x 4 x 2 box
   std::string linkMeshName(modelName + "::" + linkName);
-  MeshManager::Instance()->CreateBox(
+  gazebo::common::MeshManager::Instance()->CreateBox(
     linkMeshName,
     ignition::math::Vector3d(10, 4, 2),
     ignition::math::Vector2d(1, 1));
