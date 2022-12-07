@@ -18,15 +18,14 @@
 
 #include <Eigen/Dense>
 
+#include "gz/waves/Types.hh"
+
 using Eigen::ArrayXXd;
 
 namespace gz
 {
 namespace waves
 {
-  /// \todo(srmainwaring) move to separate file.
-  typedef std::ptrdiff_t Index;
-
   // evaluate wave elevation and fluid pressure
   class IWaveField
   {

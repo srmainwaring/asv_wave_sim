@@ -16,14 +16,16 @@
 #ifndef GZ_WAVES_OCEANTILE_HH_
 #define GZ_WAVES_OCEANTILE_HH_
 
-#include "gz/waves/CGALTypes.hh"
-#include "gz/waves/WaveParameters.hh"
+#include <memory>
 
 #include <gz/math.hh>
 #include <gz/common.hh>
 #include <gz/common/Mesh.hh>
 
-#include <memory>
+#include "gz/waves/CGALTypes.hh"
+#include "gz/waves/Types.hh"
+#include "gz/waves/WaveParameters.hh"
+
 
 namespace gz
 {
@@ -35,40 +37,46 @@ namespace waves
   template <typename Vector3>
   class OceanTileT
   {
-    public: virtual ~OceanTileT();
+  public:
+    virtual ~OceanTileT();
 
-    public: OceanTileT(unsigned int _N, double _L, bool _hasVisuals=true);
+    OceanTileT(Index nx, double lx, bool has_visuals=true);
 
-    public: OceanTileT(WaveParametersPtr _params, bool _hasVisuals=true);
+    OceanTileT(WaveParametersPtr params, bool has_visuals=true);
 
-    /// \brief The tile size (or length) L. 
+    /// \brief The tile size (or length) lx. 
     double TileSize() const;
 
-    /// \brief The tile resolution (N). The tile contains (N + 1)**2 vertices. 
-    unsigned int Resolution() const;
+    /// \brief The tile resolution (nx). The tile contains (nx + 1)**2 vertices. 
+    Index Resolution() const;
 
-    public: void SetWindVelocity(double _ux, double _uy);
+    void SetWindVelocity(double ux, double uy);
 
-    public: void Create();
+    void Create();
 
     // Returns a new gz::common::Mesh. The caller must take ownership.
-    public: gz::common::Mesh* CreateMesh();
+    gz::common::Mesh* CreateMesh();
 
-    public: void Update(double _time);
+    void Update(double time);
 
-    public: void UpdateMesh(double _time, gz::common::Mesh *_mesh);
-
+    void UpdateMesh(double time, gz::common::Mesh *mesh);
 
     ////////////////////////////////////////
     // Access to vertices, texture coordinates and faces
-    public: unsigned int VertexCount() const;
-    public: Vector3 Vertex(unsigned int _index) const;
-    public: gz::math::Vector2d UV0(unsigned int _index) const;
-    public: unsigned int FaceCount() const;
-    public: gz::math::Vector3i Face(unsigned int _index) const;
-    public: const std::vector<Vector3>& Vertices() const;
+    Index VertexCount() const;
+    
+    Vector3 Vertex(Index index) const;
 
-    private: std::unique_ptr<OceanTilePrivate<Vector3>> dataPtr;
+    gz::math::Vector2d UV0(Index index) const;
+
+    Index FaceCount() const;
+    
+    gz::math::Vector3i Face(Index index) const;
+
+    const std::vector<Vector3>& Vertices() const;
+
+  private:
+    std::unique_ptr<OceanTilePrivate<Vector3>> impl_;
   };
 
   namespace visual

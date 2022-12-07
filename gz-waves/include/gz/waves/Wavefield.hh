@@ -14,18 +14,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 /// \file Wavefield.hh
-/// \brief This file contains definitions for the class used to manage
-/// a wave field.
+/// \brief A class to interact with a wave field.
 
 #ifndef GZ_WAVES_WAVEFIELD_HH_
 #define GZ_WAVES_WAVEFIELD_HH_
 
-#include "gz/waves/CGALTypes.hh"
+#include <memory>
+#include <string>
 
 #include <gz/math.hh>
 
-#include <memory>
-#include <string>
+#include "gz/waves/CGALTypes.hh"
+
 
 namespace gz
 {
@@ -37,31 +37,32 @@ namespace waves
   /// \brief A class to manage a wave field.
   class Wavefield
   {
-    /// Destructor.
-    public: virtual ~Wavefield();
+  public:
+    /// \brief Destructor.
+    virtual ~Wavefield();
 
-    /// Constructor.
-    public: Wavefield(const std::string &_worldName);
+    /// \brief Constructor.
+    Wavefield(const std::string &world_name);
 
-    // Compute the height at a point.
-    public: bool Height(const cgal::Point3& point, double& height) const;
+    /// \brief Compute the height at a point (vertical distance to surface).
+    bool Height(const cgal::Point3 &point, double &height) const;
 
     /// \brief Get the wave parameters.
-    public: std::shared_ptr<const WaveParameters> GetParameters() const;
+    std::shared_ptr<const WaveParameters> GetParameters() const;
 
     /// \brief Set the wave parameters.
     ///
-    /// \param[in] _params    The new wave parameters.
-    public: void SetParameters(std::shared_ptr<WaveParameters> _params);
+    /// \param[in] params    The new wave parameters.
+    void SetParameters(std::shared_ptr<WaveParameters> params);
 
     /// \brief Update (recalculate) the wave field for the given time.
     ///
-    /// \param[in] _time    The time parameter for the wave evolution.
-    public: void Update(double _time);
+    /// \param[in] time    The time parameter for the wave evolution.
+    void Update(double time);
 
-    /// \internal
-    /// \brief Pointer to the class private data.
-    private: std::shared_ptr<WavefieldPrivate> dataPtr;
+  private:
+    /// \internal Private implementation.
+    std::shared_ptr<WavefieldPrivate> impl_;
   };
 
   typedef std::shared_ptr<Wavefield> WavefieldPtr;
