@@ -20,6 +20,7 @@
 #include "gz/waves/Grid.hh"
 #include "gz/waves/MeshTools.hh"
 #include "gz/waves/Physics.hh"
+#include "gz/waves/Types.hh"
 #include "gz/waves/Utilities.hh"
 #include "gz/waves/Wavefield.hh"
 #include "gz/waves/WavefieldSampler.hh"
@@ -531,10 +532,10 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       << ", meshes: " << meshes.size()
       << ", collisions: " << collisions.size() << "\n";
 
-  for (size_t i=0; i<links.size(); ++i)
+  for (waves::Index i=0; i<links.size(); ++i)
   {
     // Create storage
-    size_t meshCount = meshes[i].size();
+    waves::Index meshCount = meshes[i].size();
     std::shared_ptr<HydrodynamicsLinkData> hd(new HydrodynamicsLinkData);
     this->hydroData.push_back(hd);
     hd->initLinkMeshes.resize(meshCount);
@@ -618,7 +619,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     //     hd->link.WorldCoGLinearVelocity(_ecm).value());
     // cgal::Vector3 linVelocityCoM = linVelocity;
 
-    for (size_t j=0; j<meshCount; ++j)
+    for (waves::Index j=0; j<meshCount; ++j)
     {
       // Mesh (SurfaceMesh copy performs a deep copy of all properties)
       std::shared_ptr<cgal::Mesh> initLinkMesh = meshes[i][j];
@@ -718,8 +719,8 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
     // cgal::Vector3 linVelocityCoM = linVelocity;
 
     // Meshes
-    // size_t nSubTri = 0;
-    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    // waves::Index nSubTri = 0;
+    for (waves::Index j=0; j<hd->linkMeshes.size(); ++j)
     {
       // Update link mesh
       auto linkCollision = hd->linkCollisions[j];
@@ -1064,7 +1065,7 @@ void HydrodynamicsPrivate::InitWaterPatchMarkers(
     1.0E9/this->updateRate);
 
   std::string modelName(this->model.Name(_ecm));
-  int markerId = 0;
+  waves::Index markerId = 0;
   for (auto&& hd : this->hydroData)
   {
     hd->waterPatchMsg.set_ns(modelName + "/water_patch");
@@ -1097,10 +1098,10 @@ void HydrodynamicsPrivate::InitWaterlineMarkers(
     1.0E9/this->updateRate);
 
   std::string modelName(this->model.Name(_ecm));
-  int markerId = 0;
+  waves::Index markerId = 0;
   for (auto&& hd : this->hydroData)
   {
-    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    for (waves::Index j=0; j<hd->linkMeshes.size(); ++j)
     {
       hd->waterlineMsgs[j].set_ns(modelName + "/waterline");
       hd->waterlineMsgs[j].set_id(markerId++);
@@ -1133,10 +1134,10 @@ void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
     1.0E9/this->updateRate);
 
   std::string modelName(this->model.Name(_ecm));
-  int markerId = 0;
+  waves::Index markerId = 0;
   for (auto&& hd : this->hydroData)
   {
-    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    for (waves::Index j=0; j<hd->linkMeshes.size(); ++j)
     {
       hd->underwaterSurfaceMsgs[j].set_ns(modelName + "/underwater_surface");
       hd->underwaterSurfaceMsgs[j].set_id(markerId++);
@@ -1214,11 +1215,11 @@ void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
 
     // clear and update
     hd->waterPatchMsg.mutable_point()->Clear();
-    for (size_t ix=0; ix<grid.GetCellCount()[0]; ++ix)
+    for (waves::Index ix=0; ix<grid.GetCellCount()[0]; ++ix)
     {
-      for (size_t iy=0; iy<grid.GetCellCount()[1]; ++iy)
+      for (waves::Index iy=0; iy<grid.GetCellCount()[1]; ++iy)
       {
-        for (size_t k=0; k<2; ++k)
+        for (waves::Index k=0; k<2; ++k)
         {
           cgal::Triangle tri = grid.GetTriangle(ix, iy, k);
           gz::msgs::Set(hd->waterPatchMsg.add_point(), waves::ToGz(tri[0]));
@@ -1240,7 +1241,7 @@ void HydrodynamicsPrivate::UpdateWaterlineMarkers(
 
   for (auto&& hd : this->hydroData)
   {
-    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    for (waves::Index j=0; j<hd->linkMeshes.size(); ++j)
     {
       hd->waterlineMsgs[j].mutable_point()->Clear();
       if (hd->hydrodynamics[j]->GetWaterline().empty())
@@ -1268,7 +1269,7 @@ void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
 
   for (auto&& hd : this->hydroData)
   {
-    for (size_t j=0; j<hd->linkMeshes.size(); ++j)
+    for (waves::Index j=0; j<hd->linkMeshes.size(); ++j)
     {
       hd->underwaterSurfaceMsgs[j].mutable_point()->Clear();
       if (hd->hydrodynamics[j]->GetSubmergedTriangles().empty())

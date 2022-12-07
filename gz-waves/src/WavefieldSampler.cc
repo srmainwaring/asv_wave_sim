@@ -147,7 +147,7 @@ namespace waves
     // Calculate the depth
     cgal::Direction3 direction(0, 0, 1);
     cgal::Point3 wave_point = CGAL::ORIGIN;
-    std::array<size_t, 3> index;
+    std::array<Index, 3> index;
     bool is_found = GridTools::FindIntersectionIndex(
       patch, point.x(), point.y(), index);
     if (!is_found)
@@ -210,8 +210,8 @@ namespace waves
       J(0, 1) =  0;
       J(1, 0) =  0;
       J(1, 1) = -1;
-      size_t n = wp.a.size();
-      for (size_t i=0; i<n; ++i)
+      Index n = wp.a.size();
+      for (Index i=0; i<n; ++i)
       {
         const double dx = wp.dir[i].X();
         const double dy = wp.dir[i].Y();
@@ -243,7 +243,7 @@ namespace waves
     auto solver = [=](auto& fdfunc, auto x0, auto p, auto t,
         auto& wp, auto tol, auto nmax)
     {
-      int n = 0;
+      Index n = 0;
       double err = 1;
       double pz = 0;
       auto xn = x0;

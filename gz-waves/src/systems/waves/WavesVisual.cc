@@ -37,18 +37,16 @@
 #include "WavesVisual.hh"
 
 #include "DisplacementMap.hh"
-
 #include "OceanGeometry.hh"
 #include "OceanVisual.hh"
-#include "SceneNodeFactory.hh"
-
 #include "RenderEngineExtension.hh"
 #include "RenderEngineExtensionManager.hh"
+#include "SceneNodeFactory.hh"
 
 #include "gz/waves/OceanTile.hh"
+#include "gz/waves/Types.hh"
 #include "gz/waves/Utilities.hh"
 #include "gz/waves/WaveParameters.hh"
-
 #include "gz/waves/WaveSimulation.hh"
 #include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
@@ -585,7 +583,7 @@ void WavesVisualPrivate::OnUpdate()
   double simTime = this->currentSimTimeSeconds;
 
   // ocean tile parameters
-  // size_t N = this->waveParams->CellCount();
+  // waves::Index N = this->waveParams->CellCount();
   double L = this->waveParams->TileSize();
   double ux = this->waveParams->WindVelocity().X();
   double uy = this->waveParams->WindVelocity().Y();
@@ -629,9 +627,9 @@ void WavesVisualPrivate::OnUpdate()
 
         unsigned int objId = 50000;
         auto position = this->visual->LocalPosition();
-        for (int iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
+        for (waves::Index iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
         {
-          for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
+          for (waves::Index ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
           {
             // tile position 
             gz::math::Vector3d tilePosition(
@@ -738,9 +736,9 @@ void WavesVisualPrivate::OnUpdate()
 
         // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
         auto position = this->visual->LocalPosition();
-        for (int iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
+        for (waves::Index iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
         {
-          for (int ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
+          for (waves::Index ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
           {
             // tile position 
             gz::math::Vector3d tilePosition(
@@ -891,7 +889,7 @@ void WavesVisualPrivate::CreateShaderMaterial()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::InitWaveSim()
 {
-  int N      = this->waveParams->CellCount();
+  waves::Index N = this->waveParams->CellCount();
   double L   = this->waveParams->TileSize();
   double ux  = this->waveParams->WindVelocity().X();
   double uy  = this->waveParams->WindVelocity().Y();
@@ -905,7 +903,7 @@ void WavesVisualPrivate::InitWaveSim()
   waveSim->SetWindVelocity(ux, uy);
   waveSim->SetLambda(s);
 
-  int N2 = N * N;
+  waves::Index N2 = N * N;
   this->mHeights = Eigen::ArrayXd::Zero(N2);
   this->mDisplacementsX = Eigen::ArrayXd::Zero(N2);
   this->mDisplacementsY = Eigen::ArrayXd::Zero(N2);

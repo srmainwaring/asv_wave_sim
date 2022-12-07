@@ -15,6 +15,7 @@
 
 #include "gz/waves/TrochoidIrregularWaveSimulation.hh"
 
+#include "gz/waves/Types.hh"
 #include "gz/waves/Wavefield.hh"
 #include "gz/waves/WaveParameters.hh"
 
@@ -113,7 +114,7 @@ namespace waves
 
     // Multiple wave update 
     h = Eigen::ArrayXXd::Zero(this->N2_, 0);
-    for (size_t i=0; i<number; ++i)
+    for (Index i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
       const auto& wavenumber_i = wavenumber[i];
@@ -173,7 +174,7 @@ namespace waves
     // Multiple wave update
     sx = Eigen::ArrayXXd::Zero(this->N2_, 0);
     sy = Eigen::ArrayXXd::Zero(this->N2_, 0);
-    for (size_t i=0; i<number; ++i)
+    for (Index i=0; i<number; ++i)
     {        
       const auto& amplitude_i = amplitude[i];
       const auto& wavenumber_i = wavenumber[i];
@@ -187,7 +188,7 @@ namespace waves
         for (Index ix=0; ix<this->N_; ++ix)
         {
           // Col major index
-          size_t idx = iy * this->N_ + ix;
+          Index idx = iy * this->N_ + ix;
 
           // Regular grid
           double vx = ix * this->L_ / this->N_ - this->L_ / 2.0;

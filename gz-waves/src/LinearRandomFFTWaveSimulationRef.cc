@@ -37,6 +37,7 @@
 
 #include <gz/common.hh>
 
+#include "gz/waves/Types.hh"
 #include "LinearRandomFFTWaveSimulationRefImpl.hh"
 
 namespace gz
@@ -93,7 +94,7 @@ namespace waves
     fftw_execute(fft_plan0_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     h = fft_out0_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
 
@@ -107,7 +108,7 @@ namespace waves
     fftw_execute(fft_plan2_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1).real();
     dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
@@ -122,7 +123,7 @@ namespace waves
     fftw_execute(fft_plan4_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
     sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
   }
@@ -139,7 +140,7 @@ namespace waves
     fftw_execute(fft_plan7_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
     dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
     dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ *  1.0;
@@ -151,7 +152,7 @@ namespace waves
     InitFFTCoeffStorage();
     InitWaveNumbers();
 
-    // size_t n2 = nx_ * ny_;
+    // Index n2 = nx_ * ny_;
 
     // arrays for reference version
     if (cap_psi_2s_root_.size() == 0)

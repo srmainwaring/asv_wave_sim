@@ -160,8 +160,8 @@ public:
   /// \param v_idx  is the index for the (nx + 1) x (nx + 1) mesh vertices,
   ///               including skirt
   /// \param w_idx  is the index for the nx x nx simulated vertices
-  void UpdateVertex(size_t v_idx, size_t w_idx);
-  void UpdateVertexAndTangents(size_t v_idx, size_t w_idx);
+  void UpdateVertex(Index v_idx, Index w_idx);
+  void UpdateVertexAndTangents(Index v_idx, Index w_idx);
   void UpdateVertices(double time);
 
   gz::common::Mesh * CreateMesh(const std::string &name, double offset_z,
@@ -265,7 +265,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     tile_size_(params->TileSize()),
     spacing_(params->TileSize() / static_cast<double>(params->CellCount()))
 {
-  size_t nx = params->CellCount();
+  Index nx = params->CellCount();
   double lx = params->TileSize();
 
   auto size = nx * nx;
@@ -376,8 +376,8 @@ void OceanTilePrivate<Vector3>::Create()
   gzmsg << "Spacing:       " << spacing_     << "\n";
 
   // Grid dimensions
-  const size_t nx = nx_;
-  const size_t ny = nx_;
+  const Index nx = nx_;
+  const Index ny = nx_;
   const double lx = tile_size_;
   const double ly = tile_size_;
   const double dx = spacing_;
@@ -393,10 +393,10 @@ void OceanTilePrivate<Vector3>::Create()
 
   gzmsg << "OceanTile: calculating vertices\n";
   // Vertices - (nx+1) vertices in each row / column
-  for (size_t iy=0; iy<=ny; ++iy)
+  for (Index iy=0; iy<=ny; ++iy)
   {
     double py = iy * dy - ly/2.0;
-    for (size_t ix=0; ix<=nx; ++ix)
+    for (Index ix=0; ix<=nx; ++ix)
     {
       // Vertex position
       double px = ix * dx - lx/2.0;
@@ -412,15 +412,15 @@ void OceanTilePrivate<Vector3>::Create()
 
   gzmsg << "OceanTile: calculating indices\n";
   // Indices
-  for (size_t iy=0; iy<ny; ++iy)
+  for (Index iy=0; iy<ny; ++iy)
   {
-    for (size_t ix=0; ix<nx; ++ix)
+    for (Index ix=0; ix<nx; ++ix)
     {
       // Get the vertices in the cell coordinates
-      const size_t idx0 = iy * (nx+1) + ix;
-      const size_t idx1 = iy * (nx+1) + ix + 1;
-      const size_t idx2 = (iy+1) * (nx+1) + ix + 1;
-      const size_t idx3 = (iy+1) * (nx+1) + ix;
+      const Index idx0 = iy * (nx+1) + ix;
+      const Index idx1 = iy * (nx+1) + ix + 1;
+      const Index idx2 = (iy+1) * (nx+1) + ix + 1;
+      const Index idx3 = (iy+1) * (nx+1) + ix;
 
       // Indices
       faces_.push_back(gz::math::Vector3i(idx0, idx1, idx2));
@@ -464,7 +464,7 @@ void OceanTilePrivate<gz::math::Vector3d>::ComputeNormals()
   normals_.assign(vertices_.size(), gz::math::Vector3d::Zero);
 
   // 1. For each face calculate the normal and add to each vertex in the face
-  for (size_t i=0; i<num_faces_; ++i)
+  for (Index i=0; i<num_faces_; ++i)
   {
     // Vertices
     auto v0_idx = faces_[i][0];
@@ -510,7 +510,7 @@ void OceanTilePrivate<Vector3>::ComputeTangentSpace()
   ComputeTBN(vertices_, tex_coords_, faces_, tangents_, bitangents_, normals_);
 
 #if DEBUG
-  for (size_t i=0; i<std::min(static_cast<size_t>(20), vertices_.size()) ; ++i)
+  for (Index i=0; i<std::min(static_cast<Index>(20), vertices_.size()) ; ++i)
   {
     gzmsg << "V["  << i << "]:  "  << vertices_[i]   << "\n";
     gzmsg << "UV[" << i << "]: "   << tex_coords_[i] << "\n"
@@ -626,7 +626,7 @@ void OceanTilePrivate<gz::math::Vector3d>::ComputeTBN(
   } 
 
   // 2. Normalise each vertex's tangent space basis.
-  for (size_t i=0; i<vertices.size(); ++i)
+  for (Index i=0; i<vertices.size(); ++i)
   {
     tangents[i].Normalize();
     bitangents[i].Normalize();
@@ -667,7 +667,7 @@ void OceanTilePrivate<Vector3>::Update(double time)
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<gz::math::Vector3d>::UpdateVertex(
-  size_t v_idx, size_t w_idx)
+  Index v_idx, Index w_idx)
 {
   // 1. Update vertex
   double h  = heights_[w_idx];
@@ -683,7 +683,7 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateVertex(
 
 //////////////////////////////////////////////////
 template <>
-void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t v_idx, size_t w_idx)
+void OceanTilePrivate<cgal::Point3>::UpdateVertex(Index v_idx, Index w_idx)
 {
   // 1. Update vertex
   double h  = heights_[w_idx];
@@ -700,7 +700,7 @@ void OceanTilePrivate<cgal::Point3>::UpdateVertex(size_t v_idx, size_t w_idx)
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<gz::math::Vector3d>::UpdateVertexAndTangents(
-    size_t v_idx, size_t w_idx)
+    Index v_idx, Index w_idx)
 {
   // 1. Update vertex
   double h  = heights_[w_idx];
@@ -748,7 +748,7 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateVertexAndTangents(
 //////////////////////////////////////////////////
 template <>
 void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(
-    size_t v_idx, size_t w_idx)
+    Index v_idx, Index w_idx)
 {
   // 1. Update vertex
   // double h  = heights_[w_idx];
@@ -788,43 +788,43 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
         heights_, sx_, sy_,
         dhdx_, dhdy_, dsxdx_, dsydy_, dsxdy_);
   
-    const size_t nx = nx_;
-    const size_t nx_plus1  = nx + 1;
+    const Index nx = nx_;
+    const Index nx_plus1  = nx + 1;
 
-    for (size_t iy=0; iy<nx; ++iy)
+    for (Index iy=0; iy<nx; ++iy)
     {
-      for (size_t ix=0; ix<nx; ++ix)
+      for (Index ix=0; ix<nx; ++ix)
       {
-        size_t v_idx_cm = iy * nx_plus1 + ix;
-        size_t w_idx_cm = iy * nx + ix;
-        // size_t w_idx_rm = ix * nx + iy;
+        Index v_idx_cm = iy * nx_plus1 + ix;
+        Index w_idx_cm = iy * nx + ix;
+        // Index w_idx_rm = ix * nx + iy;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
     }
 
     // Set skirt values assuming periodic boundary conditions:
-    for (size_t i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
       // Top row (iy = nx) periodic with bottom row (iy = 0)
       {
-        size_t v_idx_cm = nx * nx_plus1 + i;
-        size_t w_idx_cm = i;
-        // size_t w_idx_rm = i * nx;
+        Index v_idx_cm = nx * nx_plus1 + i;
+        Index w_idx_cm = i;
+        // Index w_idx_rm = i * nx;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
       // Right column (ix = nx) periodic with left column (ix = 0)
       {
-        size_t v_idx_cm = i * nx_plus1 + nx;
-        size_t w_idx_cm = i * nx;
-        // size_t w_idx_rm = i;
+        Index v_idx_cm = i * nx_plus1 + nx;
+        Index w_idx_cm = i * nx;
+        // Index w_idx_rm = i;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
       }
     }
     {
       // Top right corner period with bottom right corner.
-      size_t v_idx_cm = nx_plus1 * nx_plus1 - 1;
-      size_t w_idx_cm = 0;
-      // size_t w_idx_rm = 0;
+      Index v_idx_cm = nx_plus1 * nx_plus1 - 1;
+      Index w_idx_cm = 0;
+      // Index w_idx_rm = 0;
       UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
     }  
   }
@@ -833,43 +833,43 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
     wave_sim_->ElevationAt(heights_);
     wave_sim_->DisplacementAt(sx_, sy_);
 
-    const size_t nx = nx_;
-    const size_t nx_plus1  = nx + 1;
+    const Index nx = nx_;
+    const Index nx_plus1  = nx + 1;
 
-    for (size_t iy=0; iy<nx; ++iy)
+    for (Index iy=0; iy<nx; ++iy)
     {
-      for (size_t ix=0; ix<nx; ++ix)
+      for (Index ix=0; ix<nx; ++ix)
       {
-        size_t v_idx_cm = iy * nx_plus1 + ix;
-        size_t w_idx_cm = iy * nx + ix;
-        // size_t w_idx_rm = ix * nx + iy;
+        Index v_idx_cm = iy * nx_plus1 + ix;
+        Index w_idx_cm = iy * nx + ix;
+        // Index w_idx_rm = ix * nx + iy;
         UpdateVertex(v_idx_cm, w_idx_cm);
       }
     }
 
     // Set skirt values assuming periodic boundary conditions:
-    for (size_t i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
       // Top row (iy = nx) periodic with bottom row (iy = 0)
       {
-        size_t v_idx_cm = nx * nx_plus1 + i;
-        size_t w_idx_cm = i;
-        // size_t w_idx_rm = i * nx;
+        Index v_idx_cm = nx * nx_plus1 + i;
+        Index w_idx_cm = i;
+        // Index w_idx_rm = i * nx;
         UpdateVertex(v_idx_cm, w_idx_cm);
       }
       // Right column (ix = nx) periodic with left column (ix = 0)
       {
-        size_t v_idx_cm = i * nx_plus1 + nx;
-        size_t w_idx_cm = i * nx;
-        // size_t w_idx_rm = i;
+        Index v_idx_cm = i * nx_plus1 + nx;
+        Index w_idx_cm = i * nx;
+        // Index w_idx_rm = i;
         UpdateVertex(v_idx_cm, w_idx_cm);
       }
     }
     {
       // Top right corner period with bottom right corner.
-      size_t v_idx_cm = nx_plus1 * nx_plus1 - 1;
-      size_t w_idx_cm = 0;
-      // size_t w_idx_rm = 0;
+      Index v_idx_cm = nx_plus1 * nx_plus1 - 1;
+      Index w_idx_cm = 0;
+      // Index w_idx_rm = 0;
       UpdateVertex(v_idx_cm, w_idx_cm);
     }
   }
@@ -891,7 +891,7 @@ gz::common::Mesh* OceanTilePrivate<Vector3>::CreateMesh(
       new gz::common::SubMeshWithTangents());
 
   // Add position vertices
-  for (size_t i=0; i<vertices_.size(); ++i)
+  for (Index i=0; i<vertices_.size(); ++i)
   {
     submesh->AddVertex(
         vertices_[i][0],
@@ -916,7 +916,7 @@ gz::common::Mesh* OceanTilePrivate<Vector3>::CreateMesh(
   }
 
   // Add indices
-  for (size_t i=0; i<faces_.size(); ++i)
+  for (Index i=0; i<faces_.size(); ++i)
   {
     // Reverse orientation on faces
     if (reverse_orientation)
@@ -961,7 +961,7 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateMesh(
   }
 
   // Update positions, normals, texture coords etc.
-  for (size_t i=0; i<vertices_.size(); ++i)
+  for (Index i=0; i<vertices_.size(); ++i)
   {
     submesh->SetVertex(i, vertices_[i]);
     submesh->SetNormal(i, normals_[i]);

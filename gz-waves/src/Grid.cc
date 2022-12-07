@@ -16,6 +16,7 @@
 #include "gz/waves/Grid.hh"
 #include "gz/waves/CGALTypes.hh"
 #include "gz/waves/Geometry.hh"
+#include "gz/waves/Types.hh"
 
 #include <CGAL/number_utils.h>
 #include <CGAL/Simple_cartesian.h>
@@ -43,7 +44,7 @@ namespace waves
     public: std::array<double, 2> size;
 
     /// \brief The number of cells in each direction
-    public: std::array<size_t, 2> cellCount;
+    public: std::array<Index, 2> cellCount;
     
     /// \brief The position of the grid center
     public: cgal::Point3 center;
@@ -60,7 +61,7 @@ namespace waves
 
   Grid::Grid(
     const std::array<double, 2>& _size,
-    const std::array<size_t, 2>& _cellCount
+    const std::array<Index, 2>& _cellCount
   ) : data(new GridPrivate()) 
   {
     this->data->size = _size;
@@ -69,8 +70,8 @@ namespace waves
     this->data->mesh = std::make_shared<cgal::Mesh>();
 
     // Grid dimensions
-    const size_t nx = this->data->cellCount[0];
-    const size_t ny = this->data->cellCount[1];
+    const Index nx = this->data->cellCount[0];
+    const Index ny = this->data->cellCount[1];
     const double Lx = this->data->size[0];
     const double Ly = this->data->size[1];
     const double lx = Lx/nx;
@@ -80,10 +81,10 @@ namespace waves
     auto& normals = this->data->normals;
 
     // Add vertices
-    for (size_t iy=0; iy<=ny; ++iy)
+    for (Index iy=0; iy<=ny; ++iy)
     {
       double py = iy * ly - Ly/2.0;
-      for (size_t ix=0; ix<=nx; ++ix)
+      for (Index ix=0; ix<=nx; ++ix)
       {
         double px = ix * lx - Lx/2.0;
         mesh.add_vertex(cgal::Point3(px, py, 0));
@@ -91,15 +92,15 @@ namespace waves
     }
 
     // Add faces
-    for (size_t iy=0; iy<ny; ++iy)
+    for (Index iy=0; iy<ny; ++iy)
     {
-      for (size_t ix=0; ix<nx; ++ix)
+      for (Index ix=0; ix<nx; ++ix)
       {
         // Get the vertices in the cell coordinates
-        const size_t idx0 = iy * (nx+1) + ix;
-        const size_t idx1 = iy * (nx+1) + ix + 1;
-        const size_t idx2 = (iy+1) * (nx+1) + ix + 1;
-        const size_t idx3 = (iy+1) * (nx+1) + ix;
+        const Index idx0 = iy * (nx+1) + ix;
+        const Index idx1 = iy * (nx+1) + ix + 1;
+        const Index idx2 = (iy+1) * (nx+1) + ix + 1;
+        const Index idx3 = (iy+1) * (nx+1) + ix;
 
         // Vertex iterators
         auto v0 = std::begin(mesh.vertices());
@@ -167,47 +168,47 @@ namespace waves
     return this->data->size;
   } 
 
-  const std::array<size_t, 2>& Grid::GetCellCount() const
+  const std::array<Index, 2>& Grid::GetCellCount() const
   {
     return this->data->cellCount;
   } 
 
-  size_t Grid::GetVertexCount() const
+  Index Grid::GetVertexCount() const
   {
     return this->data->mesh->number_of_vertices();
   }
 
-  size_t Grid::GetFaceCount() const
+  Index Grid::GetFaceCount() const
   {
     return this->data->mesh->number_of_faces();
   }
 
-  const cgal::Point3& Grid::GetPoint(size_t _i) const
+  const cgal::Point3& Grid::GetPoint(Index _i) const
   {
     auto vb = std::begin(this->data->mesh->vertices());
     std::advance(vb, _i);
     return this->data->mesh->point(*vb);
   }
 
-  void Grid::SetPoint(size_t _i, const cgal::Point3& _v)
+  void Grid::SetPoint(Index _i, const cgal::Point3& _v)
   {
     auto vb = std::begin(this->data->mesh->vertices());
     std::advance(vb, _i);
     this->data->mesh->point(*vb) = _v;
   }
 
-  cgal::Triangle Grid::GetTriangle(size_t _ix, size_t _iy, size_t _k) const
+  cgal::Triangle Grid::GetTriangle(Index _ix, Index _iy, Index _k) const
   {
     // Original lookup using cell indexing - keep for index arithmetic
     // // Grid dimensions
-    // const size_t nx = this->data->cellCount[0];
-    // const size_t ny = this->data->cellCount[1];
+    // const Index nx = this->data->cellCount[0];
+    // const Index ny = this->data->cellCount[1];
 
     // // Get the vertices in the cell coordinates
-    // const size_t idx0 = _iy * (nx+1) + _ix;
-    // const size_t idx1 = _iy * (nx+1) + _ix + 1;
-    // const size_t idx2 = (_iy+1) * (nx+1) + _ix + 1;
-    // const size_t idx3 = (_iy+1) * (nx+1) + _ix;
+    // const Index idx0 = _iy * (nx+1) + _ix;
+    // const Index idx1 = _iy * (nx+1) + _ix + 1;
+    // const Index idx2 = (_iy+1) * (nx+1) + _ix + 1;
+    // const Index idx3 = (_iy+1) * (nx+1) + _ix;
 
     // switch (_k) 
     // {
@@ -229,8 +230,8 @@ namespace waves
 
     // Optimised lookup using face indexing
     // Face index
-    const size_t nx = this->data->cellCount[0];
-    const size_t idx = 2 * (nx * _iy + _ix) + _k;
+    const Index nx = this->data->cellCount[0];
+    const Index idx = 2 * (nx * _iy + _ix) + _k;
 
     // Make triangle from face descriptor
     auto& mesh = *this->data->mesh;
@@ -239,11 +240,11 @@ namespace waves
     return Geometry::MakeTriangle(mesh, *fb);
   }
 
-  cgal::FaceIndex Grid::GetFace(size_t _ix, size_t _iy, size_t _k) const
+  cgal::FaceIndex Grid::GetFace(Index _ix, Index _iy, Index _k) const
   {
     // Face index
-    const size_t nx = this->data->cellCount[0];
-    const size_t idx = 2 * (nx * _iy + _ix) + _k;
+    const Index nx = this->data->cellCount[0];
+    const Index idx = 2 * (nx * _iy + _ix) + _k;
 
     // Make triangle from face descriptor
     auto& mesh = *this->data->mesh;
@@ -252,16 +253,16 @@ namespace waves
     return *fb;
   }
 
-  const cgal::Vector3& Grid::GetNormal(size_t _ix, size_t _iy, size_t _k) const
+  const cgal::Vector3& Grid::GetNormal(Index _ix, Index _iy, Index _k) const
   {
     // Face index
-    const size_t nx = this->data->cellCount[0];
-    const size_t idx = 2 * (nx * _iy + _ix) + _k;
+    const Index nx = this->data->cellCount[0];
+    const Index idx = 2 * (nx * _iy + _ix) + _k;
 
     return this->data->normals[idx];
   }
 
-  const cgal::Vector3& Grid::GetNormal(size_t _idx) const
+  const cgal::Vector3& Grid::GetNormal(Index _idx) const
   {
     return this->data->normals[_idx];
   }
@@ -314,11 +315,11 @@ namespace waves
   bool GridTools::FindIntersectionIndex(
     const Grid& _grid,
     double _x, double _y,
-    std::array<size_t, 3>& _index
+    std::array<Index, 3>& _index
   )
   {
-    const size_t nx = _grid.GetCellCount()[0];
-    const size_t ny = _grid.GetCellCount()[1];
+    const Index nx = _grid.GetCellCount()[0];
+    const Index ny = _grid.GetCellCount()[1];
     const double Lx = _grid.GetSize()[0];
     const double Ly = _grid.GetSize()[1];
     const double lx = Lx/nx;
@@ -337,15 +338,15 @@ namespace waves
       return false;
 
     // Cell
-    size_t ix = static_cast<size_t>(std::floor((_x - lowerX)/lx));
-    size_t iy = static_cast<size_t>(std::floor((_y - lowerY)/ly));
+    Index ix = static_cast<Index>(std::floor((_x - lowerX)/lx));
+    Index iy = static_cast<Index>(std::floor((_y - lowerY)/ly));
 
     // Face / triangle
     double x0 = ix * lx + lowerX;
     double y0 = iy * ly + lowerY;
     double m = ly/lx;
     double c = y0 - m * x0;
-    size_t k = _y > (m * _x + c) ? 1 : 0;
+    Index k = _y > (m * _x + c) ? 1 : 0;
 
     // @DEBUG_INFO
     // gzmsg << "ix: " << ix << std::endl;
@@ -367,7 +368,7 @@ namespace waves
     const Grid& _grid,
     const cgal::Point3& _origin,
     const cgal::Direction3& _direction,
-    const std::array<size_t, 3>& _index,
+    const std::array<Index, 3>& _index,
     cgal::Point3& _intersection
   )
   {
@@ -391,7 +392,7 @@ namespace waves
     const Grid& _grid,
     const cgal::Point3& _origin,
     const cgal::Direction3& _direction,
-    std::array<size_t, 3>& _index,
+    std::array<Index, 3>& _index,
     cgal::Point3& _intersection
   )
   {
@@ -407,13 +408,13 @@ namespace waves
       _grid, _origin, _direction, _index, _intersection); 
   }
 
-  // NOTE: This routine as written must use 'int' rather than 'unsigned int'
+  // NOTE: This routine as written must use 'Index' rather than 'unsigned int'
   // otherwise the index arithmetic will be incorrect.
   bool GridTools::FindIntersectionGrid(
     const Grid& _grid,
     const cgal::Point3& _origin,
     const cgal::Direction3& _direction,
-    std::array<size_t, 3>& _index,
+    std::array<Index, 3>& _index,
     cgal::Point3& _point
   )
   {
@@ -428,22 +429,22 @@ namespace waves
     }
     
     // Grid dimensions
-    int nx = _grid.GetCellCount()[0];
-    int ny = _grid.GetCellCount()[1];
+    Index nx = _grid.GetCellCount()[0];
+    Index ny = _grid.GetCellCount()[1];
 
     // indexes for the grid boundaries
-    int kxmin = 0;
-    int kxmax = nx - 1;
-    int kymin = 0;
-    int kymax = ny - 1;
+    Index kxmin = 0;
+    Index kxmax = nx - 1;
+    Index kymin = 0;
+    Index kymax = ny - 1;
             
     // grid boundary indexes for the first cell. 
-    int kx   = _index[0];
-    int ky   = _index[1];
-    int kxm0 = kx;
-    int kxp0 = kxm0;
-    int kym0 = ky;
-    int kyp0 = kym0;
+    Index kx   = _index[0];
+    Index ky   = _index[1];
+    Index kxm0 = kx;
+    Index kxp0 = kxm0;
+    Index kym0 = ky;
+    Index kyp0 = kym0;
 
     // loop searches the cells in an expanding shell about the area already searched. 
     while (!isDone)
@@ -451,18 +452,18 @@ namespace waves
       isDone = true;
 
       // boundary of the next shell
-      int kxm = std::max(kxm0 - 1, kxmin);
-      int kxp = std::min(kxp0 + 1, kxmax);
-      int kym = std::max(kym0 - 1, kymin);
-      int kyp = std::min(kyp0 + 1, kymax);
+      Index kxm = std::max(kxm0 - 1, kxmin);
+      Index kxp = std::min(kxp0 + 1, kxmax);
+      Index kym = std::max(kym0 - 1, kymin);
+      Index kyp = std::min(kyp0 + 1, kymax);
       
       // row0 : lower limit offset for the column loop is either 0 or 1 
-      int row0 = 0;
+      Index row0 = 0;
       if (kxm != kxm0)
       {
         isDone = false;
         row0 = 1;
-        for (int j=kym; j<=kyp; ++j)
+        for (Index j=kym; j<=kyp; ++j)
         {
           _index[0] = kxm;
           _index[1] = j;
@@ -473,12 +474,12 @@ namespace waves
       }
       
       // row1 : upper limit offset for the column loop is either 0 or 1.
-      int row1 = 0;
+      Index row1 = 0;
       if (kxp != kxp0)
       {
         isDone = false;
         row1 = 1;
-        for (int j=kym; j<=kyp; ++j)
+        for (Index j=kym; j<=kyp; ++j)
         {
           _index[0] = kxp;
           _index[1] = j;
@@ -492,7 +493,7 @@ namespace waves
       if (kym != kym0)
       {
         isDone = false;
-        for (int i=kxm+row0; i<=kxp-row1; ++i)
+        for (Index i=kxm+row0; i<=kxp-row1; ++i)
         {
           _index[0] = i;
           _index[1] = kym;
@@ -506,7 +507,7 @@ namespace waves
       if (kyp != kyp0)
       {
         isDone = false;
-        for (int i=kxm+row0; i<=kxp-row1; ++i)
+        for (Index i=kxm+row0; i<=kxp-row1; ++i)
         {
           _index[0] = i;
           _index[1] = kyp;

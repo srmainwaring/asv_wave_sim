@@ -42,7 +42,7 @@ namespace waves
   class TriangulatedGrid::Private {
    public:
     ~Private();
-    Private(int num_segments, double length);
+    Private(Index num_segments, double length);
     void CreateMesh();
     void CreateTriangulation();    
 
@@ -83,7 +83,7 @@ namespace waves
     typedef Triangulation::Face                                           Face;
 
     // Dimensions
-    int num_segments_;
+    Index num_segments_;
     double length_;
 
     // Mesh
@@ -100,14 +100,14 @@ namespace waves
   TriangulatedGrid::Private::~Private() {
   }
 
-  TriangulatedGrid::Private::Private(int num_segments, double length) : 
+  TriangulatedGrid::Private::Private(Index num_segments, double length) : 
     num_segments_(num_segments), length_(length), origin_(CGAL::ORIGIN) {  
   }
 
   void TriangulatedGrid::Private::CreateMesh() {
     double dl = length_ / num_segments_;
     double lm = - length_ / 2.0;
-    const int nplus1 = num_segments_ + 1; 
+    const Index nplus1 = num_segments_ + 1; 
 
     // Points - (num_segments_+1) points_ in each row / column 
     for (int64_t iy=0; iy<=num_segments_; ++iy) {
@@ -191,7 +191,7 @@ namespace waves
     // std::cout << "set vertex info: " << timer.time() << " s" << std::endl;
 
     // Constraint indices 
-    const int nplus1 = num_segments_ + 1; 
+    const Index nplus1 = num_segments_ + 1; 
     std::vector<std::pair<size_t, int64_t>> cindices;
     for (int64_t iy=0; iy<num_segments_; ++iy) {
       for (int64_t ix=0; ix<num_segments_; ++ix) {
@@ -544,7 +544,7 @@ namespace waves
   TriangulatedGrid::~TriangulatedGrid() {  
   }
 
-  TriangulatedGrid::TriangulatedGrid(int num_segments, double length) :
+  TriangulatedGrid::TriangulatedGrid(Index num_segments, double length) :
     impl_(new TriangulatedGrid::Private(num_segments, length))
   {  
   }
@@ -557,7 +557,7 @@ namespace waves
     impl_->CreateTriangulation();
   }
 
-  std::unique_ptr<TriangulatedGrid> TriangulatedGrid::Create(int num_segments, double length) {
+  std::unique_ptr<TriangulatedGrid> TriangulatedGrid::Create(Index num_segments, double length) {
     std::unique_ptr<TriangulatedGrid> instance = std::make_unique<TriangulatedGrid>(num_segments, length);
     instance->CreateMesh();
     instance->CreateTriangulation();

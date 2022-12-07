@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "gz/waves/Types.hh"
 #include "gz/waves/WaveSpectrum.hh"
 #include "LinearRandomFFTWaveSimulationRefImpl.hh"
 
@@ -44,7 +45,7 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumRegression)
       0., 0., 0., 0.
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -61,7 +62,7 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumRegression)
       4.20064584e-02, 4.11734258e-02, 3.39059000e-02, 2.64125839e-02
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -78,7 +79,7 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumRegression)
       0.22791438, 0.12152584, 0.07189522, 0.04588103
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -95,7 +96,7 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumRegression)
       0.24949601,  0.12877022, 0.07484505,  0.04725667
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -110,8 +111,8 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumArrayXXd)
 
     double lx = 200.0;
     double ly = 100.0;
-    int nx = 32;
-    int ny = 16;
+    Index nx = 32;
+    Index ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -120,11 +121,11 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumArrayXXd)
     Eigen::ArrayXd kx_v(nx);
     Eigen::ArrayXd ky_v(ny);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (int i=0; i<ny; ++i)
+    for (Index i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -145,9 +146,9 @@ TEST(WaveSpectrum, PiersonMoskowitzSpectrumArrayXXd)
     Eigen::ArrayXXd cap_s = Eigen::ArrayXXd::Zero(nx, ny);
     spectrum.Evaluate(cap_s, k);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
-      for (int j=0; j<ny; ++j)
+      for (Index j=0; j<ny; ++j)
       {
         double cap_s_test = spectrum.Evaluate(k(i, j));
         EXPECT_NEAR(cap_s(i, j), cap_s_test, tolerance);
@@ -173,7 +174,7 @@ TEST(WaveSpectrum, ECKVSpectrumRegression)
       0., 0., 0., 0.
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -190,7 +191,7 @@ TEST(WaveSpectrum, ECKVSpectrumRegression)
       6.43908578e-02, 6.17616606e-02, 5.05207166e-02, 3.91055100e-02
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -207,7 +208,7 @@ TEST(WaveSpectrum, ECKVSpectrumRegression)
       0.30549674, 0.15782445, 0.0924573,  0.05921628
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -224,7 +225,7 @@ TEST(WaveSpectrum, ECKVSpectrumRegression)
       0.32892719,  0.17409368,  0.10300532,  0.06576126
     };
 
-    for (int i=0; i<8; ++i)
+    for (Index i=0; i<8; ++i)
     {
       double cap_s_test = spectrum.Evaluate(k[i]);
       EXPECT_NEAR(cap_s[i], cap_s_test, tolerance);
@@ -239,8 +240,8 @@ TEST(WaveSpectrum, ECKVSpectrumArrayXXd)
 
     double lx = 200.0;
     double ly = 100.0;
-    int nx = 32;
-    int ny = 16;
+    Index nx = 32;
+    Index ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -249,11 +250,11 @@ TEST(WaveSpectrum, ECKVSpectrumArrayXXd)
     Eigen::ArrayXd kx_v(nx);
     Eigen::ArrayXd ky_v(ny);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (int i=0; i<ny; ++i)
+    for (Index i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -274,9 +275,9 @@ TEST(WaveSpectrum, ECKVSpectrumArrayXXd)
     Eigen::ArrayXXd cap_s = Eigen::ArrayXXd::Zero(nx, ny);
     spectrum.Evaluate(cap_s, k);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
-      for (int j=0; j<ny; ++j)
+      for (Index j=0; j<ny; ++j)
       {
         double cap_s_test = spectrum.Evaluate(k(i, j));
         EXPECT_NEAR(cap_s(i, j), cap_s_test, tolerance);
@@ -295,8 +296,8 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
 
     double lx = 200.0;
     double ly = 100.0;
-    int nx = 32;
-    int ny = 16;
+    Index nx = 32;
+    Index ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -305,11 +306,11 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
     Eigen::ArrayXd kx_v(nx);
     Eigen::ArrayXd ky_v(ny);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (int i=0; i<ny; ++i)
+    for (Index i=0; i<ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -330,9 +331,9 @@ TEST(WaveSpectrum, ECKVSpectrumFFT2ImplRegression)
     Eigen::ArrayXXd cap_s = Eigen::ArrayXXd::Zero(nx, ny);
     spectrum.Evaluate(cap_s, k);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i<nx; ++i)
     {
-      for (int j=0; j<ny; ++j)
+      for (Index j=0; j<ny; ++j)
       {
         double cap_s_test =
             LinearRandomFFTWaveSimulationRef::Impl::ECKVOmniDirectionalSpectrum(

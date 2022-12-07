@@ -229,7 +229,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   // Set Pose - 45 deg rotation about z
   //   std::cout << "Pose: rotate about Z..." << std::endl;
   //   Pose3d linkPose(0, 0, 0, 0, 0, M_PI/4.0);
-  //   for (size_t i=0; i<linkMesh->GetVertexCount(); ++i)
+  //   for (Index i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
   //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
   //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
@@ -248,7 +248,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   // Set Pose - 45 deg rotation about x
   //   std::cout << "Pose: rotate about X..." << std::endl;
   //   Pose3d linkPose(0, 0, 0, M_PI/4.0, 0, 0);
-  //   for (size_t i=0; i<linkMesh->GetVertexCount(); ++i)
+  //   for (Index i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
   //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
   //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
@@ -267,7 +267,7 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   // Set Pose - overflow example
   //   std::cout << "Pose: overflow example..." << std::endl;
   //   Pose3d linkPose(0, 0, 0.973235, -0.737731, 0, 0);
-  //   for (size_t i=0; i<linkMesh->GetVertexCount(); ++i)
+  //   for (Index i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
   //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
   //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();

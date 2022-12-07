@@ -307,7 +307,7 @@ namespace waves
     std::array<double, 3> heightMap;
 
     // Calculate the height above the surface (-depth)
-    for (int i=0; i<3; ++i)
+    for (Index i=0; i<3; ++i)
     {
       cgal::Point3 vertex = _triangle[i];
       heightMap[i] = -_wavefieldSampler.ComputeDepth(vertex);
@@ -522,7 +522,7 @@ namespace waves
     {
     }
 
-    public: size_t index;                       // index to the original triangle  
+    public: Index index;                       // index to the original triangle  
     public: cgal::Vector3 normal;                     // triangle normal
     public: double area;                        // area
     public: double subArea;                     // submerged area
@@ -568,7 +568,7 @@ namespace waves
     {          
     }
 
-    public: int index;              // index to the original triangle  
+    public: Index index;            // index to the original triangle  
     public: cgal::Vector3 normal;   // triangle normal
     public: cgal::Point3 centroid;  // triangle centroid = r
     public: cgal::Vector3 xr;       // xr = centroid - CoM = (r - x)
@@ -795,8 +795,8 @@ namespace waves
     TriangleProperties& _triProps)
   {
     // Calculations
-    const size_t H=0, M=1, L=2;
-    std::array<size_t, 3> idx = algorithm::sort_indexes(_triProps.heightMap);
+    const Index H=0, M=1, L=2;
+    std::array<Index, 3> idx = algorithm::sort_indexes(_triProps.heightMap);
   
     _triProps.hh = _triProps.heightMap[idx[H]];
     _triProps.hm = _triProps.heightMap[idx[M]];

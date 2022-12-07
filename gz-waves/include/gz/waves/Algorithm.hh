@@ -24,6 +24,8 @@
 #include <numeric>
 #include <vector>
 
+#include "gz/waves/Types.hh"
+
 namespace gz
 {
 namespace waves
@@ -46,15 +48,15 @@ namespace waves
     /// \param[in] _v   The array to be indexed.
     /// \return         A vector of indexes in to the input array.
     template <typename T>
-    std::vector<size_t> sort_indexes(const std::vector<T>& _v)
+    std::vector<Index> sort_indexes(const std::vector<T>& _v)
     {
       // initialize original index locations
-      std::vector<size_t> idx(_v.size());
+      std::vector<Index> idx(_v.size());
       std::iota(idx.begin(), idx.end(), 0);
 
       // sort indexes based on comparing values in _v
       std::sort(idx.begin(), idx.end(),
-          [&_v](size_t i1, size_t i2) {return _v[i1] > _v[i2];});
+          [&_v](Index i1, Index i2) {return _v[i1] > _v[i2];});
 
       return idx;
     }
@@ -65,15 +67,15 @@ namespace waves
     /// \param[in] _v   The array to be indexed.
     /// \return         An array of indexes in to the input array.
     template <typename T, std::size_t N>
-    std::array<size_t, N> sort_indexes(const std::array<T, N>& _v)
+    std::array<Index, N> sort_indexes(const std::array<T, N>& _v)
     {
       // initialize original index locations
-      std::array<size_t, N> idx;
+      std::array<Index, N> idx;
       std::iota(idx.begin(), idx.end(), 0);
 
       // sort indexes based on comparing values in _v
       std::sort(idx.begin(), idx.end(),
-          [&_v](size_t i1, size_t i2) {return _v[i1] > _v[i2];});
+          [&_v](Index i1, Index i2) {return _v[i1] > _v[i2];});
 
       return idx;
     }

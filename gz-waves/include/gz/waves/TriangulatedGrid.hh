@@ -19,6 +19,7 @@
 #define GZ_WAVES_TRIANGULATEDGRID_HH_
 
 #include "gz/waves/CGALTypes.hh"
+#include "gz/waves/Types.hh"
 
 #include <gz/math.hh>
 
@@ -42,10 +43,10 @@ namespace waves
    public:
 
     virtual ~TriangulatedGrid();    
-    TriangulatedGrid(int num_segments, double length);
+    TriangulatedGrid(Index num_segments, double length);
     void CreateMesh();
     void CreateTriangulation();
-    static std::unique_ptr<TriangulatedGrid> Create(int num_segments, double length);
+    static std::unique_ptr<TriangulatedGrid> Create(Index num_segments, double length);
 
     bool Locate(const cgal::Point3& query, int64_t& faceIndex) const;
     bool Height(const cgal::Point3& query, double& height) const;

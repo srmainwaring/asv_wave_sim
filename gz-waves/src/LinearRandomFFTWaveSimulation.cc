@@ -26,6 +26,7 @@
 
 #include <gz/common.hh>
 
+#include "gz/waves/Types.hh"
 #include "gz/waves/WaveSpectrum.hh"
 #include "gz/waves/WaveSpreadingFunction.hh"
 #include "LinearRandomFFTWaveSimulationImpl.hh"
@@ -102,7 +103,7 @@ namespace waves
     }
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     h = fft_out0_.reshaped<Eigen::ColMajor>(n2, 1);
   }
 
@@ -123,7 +124,7 @@ namespace waves
       fft_needs_update_[2] = false;
     }
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
     dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1);
   }
@@ -146,7 +147,7 @@ namespace waves
     }
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
     sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
   }
@@ -175,7 +176,7 @@ namespace waves
     }
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
     dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
     dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
@@ -194,7 +195,7 @@ namespace waves
     }
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     pressure = fft_out_p_[iz].reshaped<Eigen::ColMajor>(n2, 1);
   }
 
@@ -261,7 +262,7 @@ namespace waves
     InitPressureGrid();
 
     // initialise arrays - always update as algo switch may change shape.
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     {
       cap_psi_2s_root_  = Eigen::ArrayXd::Zero(n2);
       rho_              = Eigen::ArrayXd::Zero(n2);

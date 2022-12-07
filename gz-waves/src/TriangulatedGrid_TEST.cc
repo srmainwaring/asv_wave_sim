@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/TriangulatedGrid.hh"
+#include "gz/waves/Types.hh"
 
 #include <gtest/gtest.h>
 
@@ -34,8 +35,8 @@ using namespace waves;
 
 TEST(TriangulatedGrid, Create) {
   // Create
-  int n = 2;
-  int length = 100.0;
+  Index n = 2;
+  Index length = 100.0;
   auto grid = TriangulatedGrid::Create(n, length);
   std::unique_ptr<TriangulatedGrid> tri_grid = std::move(grid);
   // tri_grid->DebugPrintMesh();
@@ -54,9 +55,9 @@ TEST(TriangulatedGrid, Create) {
 
 TEST(TriangulatedGrid, Height) {
   // Create
-  int n = 16;
-  int length = 100.0;
-  int nplus1 = n + 1;
+  Index n = 16;
+  Index length = 100.0;
+  Index nplus1 = n + 1;
   auto grid = TriangulatedGrid::Create(n, length);
   std::unique_ptr<TriangulatedGrid> source = std::move(grid);
   EXPECT_TRUE(source->IsValid());
@@ -69,8 +70,8 @@ TEST(TriangulatedGrid, Height) {
 
   // Set points
   Point3Range points = source->Points();
-  for (int iy=0; iy<nplus1; ++iy) {
-    for (int ix=0; ix<nplus1; ++ix) {
+  for (Index iy=0; iy<nplus1; ++iy) {
+    for (Index ix=0; ix<nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];
@@ -86,17 +87,17 @@ TEST(TriangulatedGrid, Height) {
 
 TEST(TriangulatedGrid, Interpolate) {
   // Create
-  int n = 16;
-  int length = 100.0;
-  int nplus1 = n + 1;
+  Index n = 16;
+  Index length = 100.0;
+  Index nplus1 = n + 1;
   auto grid1 = TriangulatedGrid::Create(n, length);
   std::unique_ptr<TriangulatedGrid> source = std::move(grid1);
   EXPECT_TRUE(source->IsValid());
 
   // Set points
   Point3Range points = source->Points();
-  for (int iy=0; iy<nplus1; ++iy) {
-    for (int ix=0; ix<nplus1; ++ix) {
+  for (Index iy=0; iy<nplus1; ++iy) {
+    for (Index ix=0; ix<nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];

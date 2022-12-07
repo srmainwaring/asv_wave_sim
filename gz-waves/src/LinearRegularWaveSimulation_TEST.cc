@@ -21,6 +21,7 @@
 #include "gz/waves/WaveSimulation.hh"
 #include "gz/waves/LinearRegularWaveSimulation.hh"
 #include "gz/waves/TrochoidIrregularWaveSimulation.hh"
+#include "gz/waves/Types.hh"
 #include "gz/waves/WaveSpectrum.hh"
 
 #include <Eigen/Dense>
@@ -494,7 +495,7 @@ TEST(OceanTile, LinearRegularWaveSimulation)
     for (Index ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
-      size_t idx = iy * NPlus1 + ix;
+      Index idx = iy * NPlus1 + ix;
       auto& v = oceanTile->Vertices()[idx];
       EXPECT_DOUBLE_EQ(v.x, vx);
       EXPECT_DOUBLE_EQ(v.y, vy);
@@ -515,7 +516,7 @@ TEST(OceanTile, LinearRegularWaveSimulation)
     for (Index ix=0; ix<NPlus1; ++ix)
     {
       double vx = ix * dl + lm;
-      size_t idx = iy * NPlus1 + ix;
+      Index idx = iy * NPlus1 + ix;
       auto& v = oceanTile->Vertices()[idx];
 
       // @TODO: DISABLED - not working, requires investigation.

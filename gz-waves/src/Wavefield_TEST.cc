@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/CGALTypes.hh"
+#include "gz/waves/Types.hh"
 #include "gz/waves/Wavefield.hh"
 
 #include <Eigen/Dense>
@@ -94,7 +95,7 @@ TEST(Wavefield, WaveSolver1D)
 
   auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     double xn = x0;
     while (std::abs(err) > tol && n < nmax)
@@ -213,7 +214,7 @@ TEST(Wavefield, WaveSolver2D)
 
   auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     auto xn = x0;
     while (std::abs(err) > tol && n < nmax)
@@ -290,8 +291,8 @@ TEST(Wavefield, NWaveSolver2D)
   auto wave = [=](auto x, auto t, auto& wp)
   {
     Eigen::Vector3d p(x.x(), x.y(), 0.0);
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -311,8 +312,8 @@ TEST(Wavefield, NWaveSolver2D)
   auto wave_f = [=](auto x, auto p, auto t, auto& wp)
   {
     Eigen::Vector2d f(p.x() - x.x(), p.y() - x.y());
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -334,8 +335,8 @@ TEST(Wavefield, NWaveSolver2D)
     J(0, 1) =  0;
     J(1, 0) =  0;
     J(1, 1) = -1;
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double c = std::cos(theta);
@@ -356,7 +357,7 @@ TEST(Wavefield, NWaveSolver2D)
 
   auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     auto xn = x0;
     while (std::abs(err) > tol && n < nmax)
@@ -431,8 +432,8 @@ TEST(Wavefield, NWaveFdFSolver2D)
   auto wave = [=](auto x, auto t, auto& wp)
   {
     Eigen::Vector3d p(x.x(), x.y(), 0.0);
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -457,8 +458,8 @@ TEST(Wavefield, NWaveFdFSolver2D)
     J(0, 1) =  0;
     J(1, 0) =  0;
     J(1, 1) = -1;
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i<n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -482,7 +483,7 @@ TEST(Wavefield, NWaveFdFSolver2D)
 
   auto solver = [=](auto& fdfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     auto xn = x0;
     Eigen::Vector2d F;

@@ -21,6 +21,7 @@
 #define GZ_WAVES_GRID_HH_
 
 #include "gz/waves/CGALTypes.hh"
+#include "gz/waves/Types.hh"
 
 #include <array>
 #include <memory>
@@ -46,7 +47,7 @@ namespace waves
     /// \param[in] _cellCount   The number of cells in each direction.
     public: Grid(
       const std::array<double, 2>& _size,
-      const std::array<size_t, 2>& _cellCount
+      const std::array<Index, 2>& _cellCount
     );
 
     /// \brief Copy constructor. Performs a deep copy.
@@ -83,28 +84,28 @@ namespace waves
     /// \brief Get the number of cells the partioning the grid.
     ///
     /// \return             An array containing the number of grid cells.
-    public: const std::array<size_t, 2>& GetCellCount() const;
+    public: const std::array<Index, 2>& GetCellCount() const;
 
     /// \brief Get the number of vertices (and points).
     ///
     /// \return             The number of grid vertices.
-    public: size_t GetVertexCount() const;
+    public: Index GetVertexCount() const;
 
     /// \brief Get the number of faces (and triangles, normals).
     ///
     /// \return             The number of grid faces (triangles).
-    public: size_t GetFaceCount() const;
+    public: Index GetFaceCount() const;
 
     /// \brief Get the _i-th point.
     ///
     /// \return             A point.
-    public: const cgal::Point3& GetPoint(size_t _i) const;
+    public: const cgal::Point3& GetPoint(Index _i) const;
 
     /// \brief Set the _i-th point. 
     ///
     /// \param[in] _i       Index to the i-th point. Must be less than GetVertexCount().
     /// \param[in] _point   The point to set.
-    public: void SetPoint(size_t _i, const cgal::Point3& _point);
+    public: void SetPoint(Index _i, const cgal::Point3& _point);
 
     /// \brief Get the _k-th Triangle in cell(_ix, _iy), _k = 0, 1. 
     ///
@@ -112,7 +113,7 @@ namespace waves
     /// \param[in] _iy      Index to the iy-th grid cell.
     /// \param[in] _k       Index to the k-th face in cell (ix, iy).
     /// \return             A triangle.
-    public: cgal::Triangle GetTriangle(size_t _ix, size_t _iy, size_t _k) const;
+    public: cgal::Triangle GetTriangle(Index _ix, Index _iy, Index _k) const;
 
     /// \brief Get the _k-th Face (triangle) in cell(_ix, _iy), _k = 0, 1. 
     ///
@@ -120,7 +121,7 @@ namespace waves
     /// \param[in] _iy      Index to the iy-th grid cell.
     /// \param[in] _k       Index to the k-th face in cell (ix, iy).
     /// \return             A face index.
-    public: cgal::FaceIndex GetFace(size_t _ix, size_t _iy, size_t _k) const;
+    public: cgal::FaceIndex GetFace(Index _ix, Index _iy, Index _k) const;
 
     /// \brief Get the _k-th Triangle normal in cell(_ix, _iy), _k = 0, 1. 
     ///
@@ -128,13 +129,13 @@ namespace waves
     /// \param[in] _iy      Index to the iy-th grid cell.
     /// \param[in] _k       Index to the k-th face in cell (ix, iy).
     /// \return             The face normal vector.
-    public: const cgal::Vector3& GetNormal(size_t _ix, size_t _iy, size_t _k) const;
+    public: const cgal::Vector3& GetNormal(Index _ix, Index _iy, Index _k) const;
 
     /// \brief Get the Triangle normal in face _idx (face indexing).
     ///
     /// \param[in] _idx     A face index.
     /// \return             The face normal vector.
-    public: const cgal::Vector3& GetNormal(size_t _idx) const;
+    public: const cgal::Vector3& GetNormal(Index _idx) const;
 
     /// \brief Recalculate the normals. 
     public: void RecalculateNormals();
@@ -173,7 +174,7 @@ namespace waves
     public: static bool FindIntersectionIndex(
       const Grid& _grid,
       double _x, double _y,
-      std::array<size_t, 3>& _index
+      std::array<Index, 3>& _index
     );
 
     /// \brief Search one triangle for an intersection with the line defined by origin and direction. 
@@ -188,7 +189,7 @@ namespace waves
       const Grid& _grid,
       const cgal::Point3& _origin,
       const cgal::Direction3& _direction,
-      const std::array<size_t, 3>& _index,
+      const std::array<Index, 3>& _index,
       cgal::Point3& _intersection
     );
 
@@ -205,7 +206,7 @@ namespace waves
       const Grid& _grid,
       const cgal::Point3& _origin,
       const cgal::Direction3& _direction,
-      std::array<size_t, 3>& _index,
+      std::array<Index, 3>& _index,
       cgal::Point3& _intersection
     );
 
@@ -224,7 +225,7 @@ namespace waves
       const Grid& _grid,
       const cgal::Point3& _origin,
       const cgal::Direction3& _direction,
-      std::array<size_t, 3>& _index,
+      std::array<Index, 3>& _index,
       cgal::Point3& _intersection
     );
   };
