@@ -15,6 +15,8 @@
 
 #include "WavesClient.hh"
 
+#include <Eigen/Dense>
+
 #include <chrono>
 #include <string>
 
@@ -111,7 +113,7 @@ void WavesClient::Impl::Update(const UpdateInfo &info,
 {
   // wave height at the origin
   double simTime = std::chrono::duration<double>(info.simTime).count();
-  cgal::Point3 point(0.0, 0.0, 0.0);
+  Eigen::Vector3d point(0.0, 0.0, 0.0);
   double waveHeight{0.0};
   wavefield_.lock()->Height(point, waveHeight);
 
