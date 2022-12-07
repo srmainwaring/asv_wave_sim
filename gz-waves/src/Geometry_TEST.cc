@@ -13,10 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/Geometry.hh"
-#include "gz/waves/Grid.hh"
-#include "gz/waves/MeshTools.hh"
-
 #include <gtest/gtest.h>
 
 #include <array>
@@ -24,66 +20,79 @@
 #include <iterator>
 #include <string>
 
-using namespace gz;
-using namespace waves;
+#include "gz/waves/Geometry.hh"
+#include "gz/waves/Grid.hh"
+#include "gz/waves/MeshTools.hh"
 
-///////////////////////////////////////////////////////////////////////////////
-// Define tests
+namespace cgal
+{
+using gz::cgal::AABBTree;
+using gz::cgal::Direction3;
+using gz::cgal::Mesh;
+using gz::cgal::Point3;
+using gz::cgal::Triangle;
+using gz::cgal::Vector3;
+}  // namespace cgal
 
+namespace waves
+{
+using gz::waves::Grid;
+}  // namespace waves
+
+using gz::waves::Geometry;
+
+//////////////////////////////////////////////////
 TEST(Geometry, TriangleArea)
 {
   { // Case 1 - b = 1, h = 1
     cgal::Triangle t(
       cgal::Point3(0, 0, 0),
       cgal::Point3(1, 0, 0),
-      cgal::Point3(0, 1, 0)    
-    );    
+      cgal::Point3(0, 1, 0));
     double area = Geometry::TriangleArea(t);
     EXPECT_EQ(area, 0.5);
   }
 
-  { // Case 1 - b = sqrt(2), h = srqt(1^2 + (1/2)^2 + (1/2)^2) = sqrt(1.5) 
+  { // Case 1 - b = sqrt(2), h = srqt(1^2 + (1/2)^2 + (1/2)^2) = sqrt(1.5)
     cgal::Triangle t(
       cgal::Point3(1, 0, 0),
       cgal::Point3(0, 1, 0),
-      cgal::Point3(0, 0, 1)
-    );    
+      cgal::Point3(0, 0, 1));
     double area = Geometry::TriangleArea(t);
     EXPECT_EQ(area, 0.5*std::sqrt(3));
   }
 }
 
+//////////////////////////////////////////////////
 TEST(Geometry, TriangleCentroid)
 {
   { // Case 1: triangle in xy-plane
     cgal::Triangle t(
       cgal::Point3(0, 0, 0),
       cgal::Point3(1, 0, 0),
-      cgal::Point3(0, 1, 0)    
-    );    
-    cgal::Point3 c = Geometry::TriangleCentroid(t);  
+      cgal::Point3(0, 1, 0));
+    cgal::Point3 c = Geometry::TriangleCentroid(t);
     EXPECT_EQ(c, cgal::Point3(1.0/3.0, 1.0/3.0, 0));
   }
 
-  { // Case 2: triangle intersecting each axis at 1 
+  { // Case 2: triangle intersecting each axis at 1
     cgal::Triangle t(
       cgal::Point3(1, 0, 0),
       cgal::Point3(0, 1, 0),
-      cgal::Point3(0, 0, 1)    
-    );    
-    cgal::Point3 c = Geometry::TriangleCentroid(t);  
+      cgal::Point3(0, 0, 1));
+    cgal::Point3 c = Geometry::TriangleCentroid(t);
     EXPECT_EQ(c, cgal::Point3(1.0/3.0, 1.0/3.0, 1.0/3.0));
   }
 }
 
+//////////////////////////////////////////////////
 TEST(Geometry, TriangleNormal)
 {
   { // xy - plane
     cgal::Triangle t(
       cgal::Point3(0, 0, 0),
       cgal::Point3(1, 0, 0),
-      cgal::Point3(0, 1, 0)    
-    );    
+      cgal::Point3(0, 1, 0));
     cgal::Vector3 n = Geometry::Normal(t);
     EXPECT_EQ(n, cgal::Vector3(0, 0, 1));
   }
@@ -92,8 +101,7 @@ TEST(Geometry, TriangleNormal)
     cgal::Triangle t(
       cgal::Point3(0, 0, 0),
       cgal::Point3(0, 1, 0),
-      cgal::Point3(1, 0, 0)    
-    );    
+      cgal::Point3(1, 0, 0));
     cgal::Vector3 n = Geometry::Normal(t);
     EXPECT_EQ(n, cgal::Vector3(0, 0, -1));
   }
@@ -102,8 +110,7 @@ TEST(Geometry, TriangleNormal)
     cgal::Triangle t(
       cgal::Point3(0, 0, 0),
       cgal::Point3(1, 0, 0),
-      cgal::Point3(0, 0, 1)    
-    );    
+      cgal::Point3(0, 0, 1));
     cgal::Vector3 n = Geometry::Normal(t);
     EXPECT_EQ(n, cgal::Vector3(0, -1, 0));
   }
@@ -112,8 +119,7 @@ TEST(Geometry, TriangleNormal)
     cgal::Triangle t(
       cgal::Point3(0, 0, 0),
       cgal::Point3(0, 0, 1),
-      cgal::Point3(1, 0, 0)
-    );    
+      cgal::Point3(1, 0, 0));
     cgal::Vector3 n = Geometry::Normal(t);
     EXPECT_EQ(n, cgal::Vector3(0, 1, 0));
   }
@@ -122,8 +128,7 @@ TEST(Geometry, TriangleNormal)
     cgal::Triangle t(
       cgal::Point3(1, 0, 0),
       cgal::Point3(0, 1, 0),
-      cgal::Point3(0, 0, 1)    
-    );    
+      cgal::Point3(0, 0, 1));
     cgal::Vector3 n = Geometry::Normal(t);
     EXPECT_EQ(n, cgal::Vector3(1/sqrt(3), 1/sqrt(3), 1/sqrt(3)));
   }
@@ -132,8 +137,7 @@ TEST(Geometry, TriangleNormal)
     cgal::Triangle t(
       cgal::Point3(1, 0, 0),
       cgal::Point3(0, 0, 1),
-      cgal::Point3(0, 1, 0)    
-    );    
+      cgal::Point3(0, 1, 0));
     cgal::Vector3 n = Geometry::Normal(t);
     EXPECT_EQ(n, cgal::Vector3(-1/sqrt(3), -1/sqrt(3), -1/sqrt(3)));
   }
@@ -142,35 +146,35 @@ TEST(Geometry, TriangleNormal)
     cgal::Triangle t(
       cgal::Point3(0, 0, 0),
       cgal::Point3(1, 0, 0),
-      cgal::Point3(2, 0, 0)    
-    );    
+      cgal::Point3(2, 0, 0));
     cgal::Vector3 n = Geometry::Normal(t);
     EXPECT_EQ(n, cgal::Vector3(0, 0, 0));
   }
 }
 
+//////////////////////////////////////////////////
 TEST(Geometry, HorizontalIntercept)
 {
-  // Case - parallel to xz-plane 
-  { 
-    cgal::Point3 H( 0, 0, -10);
+  // Case - parallel to xz-plane
+  {
+    cgal::Point3 H(0, 0, -10);
     cgal::Point3 M(10, 0, -20);
-    cgal::Point3 L( 0, 0, -20);
+    cgal::Point3 L(0, 0, -20);
     cgal::Point3 D = Geometry::HorizontalIntercept(H, M, L);
     EXPECT_EQ(D, cgal::Point3(0, 0, -20));
   }
 
   // Case - parallel to xy-plane
-  { 
-    cgal::Point3 H( 0, 0, -10);
+  {
+    cgal::Point3 H(0, 0, -10);
     cgal::Point3 M(10, 0, -10);
-    cgal::Point3 L( 0, 10, -10);
+    cgal::Point3 L(0, 10, -10);
     cgal::Point3 D = Geometry::HorizontalIntercept(H, M, L);
     EXPECT_EQ(D, L);
   }
-
 }
 
+//////////////////////////////////////////////////
 TEST(Geometry, MidPoint)
 {
   { // General vector
@@ -202,6 +206,7 @@ TEST(Geometry, MidPoint)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(Geometry, LineIntersectsTriangle)
 {
   { // Triangle in xy-plane. Line intersects
@@ -217,7 +222,7 @@ TEST(Geometry, LineIntersectsTriangle)
     cgal::Point3 origin(0.5, 0.5, 1);
     cgal::Direction3 direction(0, 0, 1);
     cgal::Point3 point = CGAL::ORIGIN;
-    std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);  
+    std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);
     bool isFound = Geometry::SearchMesh(*tree, origin, direction, point);
     EXPECT_EQ(isFound, true);
     EXPECT_EQ(point, cgal::Point3(0.5, 0.5, 0));
@@ -236,7 +241,7 @@ TEST(Geometry, LineIntersectsTriangle)
     cgal::Point3 origin(0.5, 0.5, 1);
     cgal::Direction3 direction(0, 0, -1);
     cgal::Point3 point = CGAL::ORIGIN;
-    std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);  
+    std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);
     bool isFound = Geometry::SearchMesh(*tree, origin, direction, point);
     EXPECT_EQ(isFound, true);
     EXPECT_EQ(point, cgal::Point3(0.5, 0.5, 0));
@@ -281,14 +286,15 @@ TEST(Geometry, LineIntersectsTriangle)
   }
 }
 
+//////////////////////////////////////////////////
 // @TODO_UPDATE - these tests are over a Mesh not a cell - update
 TEST(Geometry, SearchCell)
 {
   // 2x2 Grid in xy-plane.
-  Grid grid({ 2, 2 }, { 2, 2 });
+  waves::Grid grid({ 2, 2 }, { 2, 2 });
 
   const cgal::Mesh& mesh = *grid.GetMesh();
-  std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);  
+  std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);
 
   { // Line intersects Cell(1, 1).
     cgal::Point3 origin(0.5, 0.5, 1);
@@ -309,14 +315,15 @@ TEST(Geometry, SearchCell)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(Geometry, SearchGrid)
 {
   // 2x2 Grid in xy-plane.
   std::string gridName("grid_2x2");
-  Grid grid({ 2, 2 }, { 2, 2 });
+  waves::Grid grid({ 2, 2 }, { 2, 2 });
 
   const cgal::Mesh& mesh = *grid.GetMesh();
-  std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);  
+  std::shared_ptr<cgal::AABBTree> tree = Geometry::MakeAABBTree(mesh);
 
   { // Line intersects Cell(0, 0).
     cgal::Point3 origin(-0.5, -0.5, 1);
@@ -359,9 +366,7 @@ TEST(Geometry, SearchGrid)
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Run tests
-
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

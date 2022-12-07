@@ -14,37 +14,39 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gz/waves/Utilities.hh"
-#include "gz/waves/Convert.hh"
+
+#include <algorithm>
+#include <iostream>
+#include <string>
 
 #include <gz/common.hh>
 #include <gz/math.hh>
 #include <sdf/sdf.hh>
 
-#include <algorithm>
-#include <iostream>
-#include <string>
+#include "gz/waves/Convert.hh"
 
 namespace gz
 {
 namespace waves
 {
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Templates
 
 // This code adapted vmrc/usv_gazebo_plugins/usv_gazebo_dynamics_plugin.cc
 template <typename T>
-T SdfParam(const sdf::Element& _sdf, const std::string &_paramName, const T _defaultVal)
+T SdfParam(const sdf::Element& _sdf, const std::string &_paramName,
+    const T _defaultVal)
 {
   if (!_sdf.HasElement(_paramName))
   {
-    gzmsg << "Parameter <" << _paramName << "> not found: " 
+    gzmsg << "Parameter <" << _paramName << "> not found: "
       <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
 
   T val = _sdf.Get<T>(_paramName);
-  gzmsg << "Parameter found - setting <" << _paramName 
+  gzmsg << "Parameter found - setting <" << _paramName
     << "> to <" << val << ">." << std::endl;
   return val;
 }
@@ -54,79 +56,88 @@ template <typename T>
 T MsgParamGetValue(const gz::msgs::Param& /*_msg*/)
 {
   gzwarn << "Using default template for MsgParamGetValue" << std::endl;
-  return T();  
+  return T();
 }
 
-/// \brief Template specialization for extracting a bool from a parameter message.
+/// \brief Template specialization for extracting a bool
+///        from a parameter message.
 template <>
 bool MsgParamGetValue<bool>(const gz::msgs::Param& _msg)
-{ 
+{
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   return paramValue.bool_value();
 }
 
-/// \brief Template specialization for extracting an int from a parameter message.
+/// \brief Template specialization for extracting an int
+///        from a parameter message.
 template <>
 int MsgParamGetValue<int>(const gz::msgs::Param& _msg)
-{ 
+{
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   return paramValue.int_value();
 }
 
-/// \brief Template specialization for extracting a size_t from a parameter message.
+/// \brief Template specialization for extracting a size_t
+///        from a parameter message.
 template <>
 size_t MsgParamGetValue<size_t>(const gz::msgs::Param& _msg)
-{ 
+{
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   return paramValue.int_value();
 }
 
-/// \brief Template specialization for extracting a double from a parameter message.
+/// \brief Template specialization for extracting a double
+///        from a parameter message.
 template <>
 double MsgParamGetValue<double>(const gz::msgs::Param& _msg)
-{ 
+{
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   return paramValue.double_value();
 }
 
-/// \brief Template specialization for extracting a string from a parameter message.
+/// \brief Template specialization for extracting a string
+///        from a parameter message.
 template <>
 std::string MsgParamGetValue<std::string>(const gz::msgs::Param& _msg)
-{ 
+{
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   return paramValue.string_value();
 }
 
-/// \brief Template specialization for extracting a Vector2i from a parameter message.
+/// \brief Template specialization for extracting a Vector2i
+///        from a parameter message.
 template <>
 gz::math::Vector2i MsgParamGetValue<gz::math::Vector2i>(
     const gz::msgs::Param& _msg)
-{ 
+{
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   auto vec = paramValue.vector3d_value();
   return gz::math::Vector2i(vec.x(), vec.y());
 }
 
-/// \brief Template specialization for extracting a Vector3 from a parameter message.
+/// \brief Template specialization for extracting a Vector3
+///        from a parameter message.
 template <>
 gz::math::Vector3d MsgParamGetValue<gz::math::Vector3d>(
     const gz::msgs::Param& _msg)
-{ 
+{
   auto paramValue = _msg.params().begin()->second;
   // auto paramValue = _msg.value();
   auto vec = paramValue.vector3d_value();
   return gz::math::Vector3d(vec.x(), vec.y(), vec.z());
 }
 
-/// \brief Template for extracting a named parameter from a parameter vector message.
+/// \brief Template for extracting a named parameter from
+///        a parameter vector message.
 template <typename T>
-T MsgParam(const gz::msgs::Param_V& _msg, const std::string &_paramName, const T _defaultVal)
+T MsgParam(const gz::msgs::Param_V& _msg, const std::string &_paramName,
+    const T _defaultVal)
 {
   // Custom compare for params
   auto compare = [=](auto& _param)
@@ -136,13 +147,14 @@ T MsgParam(const gz::msgs::Param_V& _msg, const std::string &_paramName, const T
     // return _param.name() == _paramName;
   };
 
-  auto it = std::find_if(std::begin(_msg.param()), std::end(_msg.param()), compare);
-  
+  auto it = std::find_if(std::begin(_msg.param()),
+      std::end(_msg.param()), compare);
+
   // Not found
   if (it == std::end(_msg.param()))
   {
   // @DEBUG_INFO
-    // gzmsg << "Parameter <" << _paramName << "> not found: " 
+    // gzmsg << "Parameter <" << _paramName << "> not found: "
     //   <<  "Using default value of <" << _defaultVal << ">." << std::endl;
     return _defaultVal;
   }
@@ -152,13 +164,13 @@ T MsgParam(const gz::msgs::Param_V& _msg, const std::string &_paramName, const T
   T val = MsgParamGetValue<T>(param);
 
   // @DEBUG_INFO
-  // gzmsg << "Parameter found - setting <" << _paramName 
+  // gzmsg << "Parameter found - setting <" << _paramName
   //   << "> to <" << val << ">." << std::endl;
   return val;
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Utilities
 
 bool Utilities::SdfParamBool(const sdf::Element& _sdf,
@@ -248,8 +260,5 @@ gz::math::Vector3d Utilities::MsgParamVector3d(const gz::msgs::Param_V& _msg,
   return MsgParam<gz::math::Vector3d>(_msg, _paramName, _defaultVal);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-
-}
-}
+}  // namespace waves
+}  // namespace gz

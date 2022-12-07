@@ -30,58 +30,57 @@ namespace gz
 {
 namespace waves
 {
-  /// \brief A small collection of static template methods for sorting arrays and vectors.
-  namespace algorithm
-  {
-    /// \brief Sort and keep track of indexes (largest first)
-    ///
-    /// See:
-    /// <https://stackoverflow.com/questions/1577475/c-sorting-and-keeping-track-of-indexes>
-    ///
-    /// Usage:
-    /// \code
-    /// for (auto i: sort_indexes(v)) {
-    ///   cout << v[i] << endl;
-    /// }
-    /// \endcode
-    ///
-    /// \param[in] _v   The array to be indexed.
-    /// \return         A vector of indexes in to the input array.
-    template <typename T>
-    std::vector<Index> sort_indexes(const std::vector<T>& _v)
-    {
-      // initialize original index locations
-      std::vector<Index> idx(_v.size());
-      std::iota(idx.begin(), idx.end(), 0);
+/// \brief Collection of static template methods for sorting arrays and vectors.
+namespace algorithm
+{
+/// \brief Sort and keep track of indexes (largest first)
+///
+/// See:
+/// <https://stackoverflow.com/questions/1577475/c-sorting-and-keeping-track-of-indexes>
+///
+/// Usage:
+/// \code
+/// for (auto i: sort_indexes(v)) {
+///   cout << v[i] << endl;
+/// }
+/// \endcode
+///
+/// \param[in] v   The array to be indexed.
+/// \return         A vector of indexes in to the input array.
+template <typename T>
+std::vector<Index> sort_indexes(const std::vector<T>& v)
+{
+  // initialize original index locations
+  std::vector<Index> idx(v.size());
+  std::iota(idx.begin(), idx.end(), 0);
 
-      // sort indexes based on comparing values in _v
-      std::sort(idx.begin(), idx.end(),
-          [&_v](Index i1, Index i2) {return _v[i1] > _v[i2];});
+  // sort indexes based on comparing values in v
+  std::sort(idx.begin(), idx.end(),
+      [&v](Index i1, Index i2) {return v[i1] > v[i2];});
 
-      return idx;
-    }
-
-    /// \brief Sort and keep track of indexes (largest first)
-    ///
-    /// This version is for sorting std::array<T, N>
-    /// \param[in] _v   The array to be indexed.
-    /// \return         An array of indexes in to the input array.
-    template <typename T, std::size_t N>
-    std::array<Index, N> sort_indexes(const std::array<T, N>& _v)
-    {
-      // initialize original index locations
-      std::array<Index, N> idx;
-      std::iota(idx.begin(), idx.end(), 0);
-
-      // sort indexes based on comparing values in _v
-      std::sort(idx.begin(), idx.end(),
-          [&_v](Index i1, Index i2) {return _v[i1] > _v[i2];});
-
-      return idx;
-    }
-
-  } 
-}
+  return idx;
 }
 
-#endif
+/// \brief Sort and keep track of indexes (largest first)
+///
+/// This version is for sorting std::array<T, N>
+/// \param[in] v    The array to be indexed.
+/// \return         An array of indexes in to the input array.
+template <typename T, std::size_t N>
+std::array<Index, N> sort_indexes(const std::array<T, N>& v) {
+  // initialize original index locations
+  std::array<Index, N> idx;
+  std::iota(idx.begin(), idx.end(), 0);
+
+  // sort indexes based on comparing values in v
+  std::sort(idx.begin(), idx.end(),
+      [&v](Index i1, Index i2) {return v[i1] > v[i2];});
+
+  return idx;
+}
+
+}  // namespace algorithm
+}  // namespace waves
+}  // namespace gz
+
+#endif  // GZ_WAVES_ALGORITHM_HH_

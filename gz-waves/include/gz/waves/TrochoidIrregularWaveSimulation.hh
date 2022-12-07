@@ -18,9 +18,9 @@
 
 #include <memory>
 
-#include <Eigen/Dense>
+#include <Eigen/Dense> // NOLINT - cpplint false positive.
 
-#include "WaveSimulation.hh"
+#include "gz/waves/WaveSimulation.hh"
 
 using Eigen::ArrayXXd;
 
@@ -28,78 +28,79 @@ namespace gz
 {
 namespace waves
 {
-  class WaveParameters;
+class WaveParameters;
 
-  class TrochoidIrregularWaveSimulation :
-      public IWaveSimulation
-  {
-  public:
-    virtual ~TrochoidIrregularWaveSimulation();
+class TrochoidIrregularWaveSimulation :
+    public IWaveSimulation
+{
+ public:
+  virtual ~TrochoidIrregularWaveSimulation();
 
-    TrochoidIrregularWaveSimulation(
-        Index nx,
-        double lx,
-        std::shared_ptr<WaveParameters> params);
+  TrochoidIrregularWaveSimulation(
+      Index nx,
+      double lx,
+      std::shared_ptr<WaveParameters> params);
 
-    virtual void SetWindVelocity(double ux, double uy) override;
+  void SetWindVelocity(double ux, double uy) override;
 
-    virtual void SetTime(double time) override;
+  void SetTime(double time) override;
 
-    virtual Index SizeX() const override;
+  Index SizeX() const override;
 
-    virtual Index SizeY() const override;
+  Index SizeY() const override;
 
-    virtual Index SizeZ() const override;
+  Index SizeZ() const override;
 
-    // lookup interface - array
-    virtual void ElevationAt(
-        Eigen::Ref<Eigen::ArrayXXd> h) override;
+  // lookup interface - array
+  void ElevationAt(
+      Eigen::Ref<Eigen::ArrayXXd> h) override;
 
-    virtual void ElevationDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> dhdx,
-        Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
+  void ElevationDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
 
-    virtual void DisplacementAt(
-        Eigen::Ref<Eigen::ArrayXXd> sx,
-        Eigen::Ref<Eigen::ArrayXXd> sy) override;
+  void DisplacementAt(
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy) override;
 
-    virtual void DisplacementDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-        Eigen::Ref<Eigen::ArrayXXd> dsydy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+  void DisplacementDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
-    virtual void DisplacementAndDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> h,
-        Eigen::Ref<Eigen::ArrayXXd> sx,
-        Eigen::Ref<Eigen::ArrayXXd> sy,
-        Eigen::Ref<Eigen::ArrayXXd> dhdx,
-        Eigen::Ref<Eigen::ArrayXXd> dhdy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-        Eigen::Ref<Eigen::ArrayXXd> dsydy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+  void DisplacementAndDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> h,
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy,
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
-    virtual void PressureAt(
-        Index iz,
-        Eigen::Ref<Eigen::ArrayXXd> pressure) override;
+  void PressureAt(
+      Index iz,
+      Eigen::Ref<Eigen::ArrayXXd> pressure) override;
 
-    // lookup interface - scalar
-    virtual void ElevationAt(
-        Index ix, Index iy,
-        double &eta) override;
+  // lookup interface - scalar
+  void ElevationAt(
+      Index ix, Index iy,
+      double &eta) override;
 
-    virtual void DisplacementAt(
-        Index ix, Index iy,
-        double &sx, double &sy) override;
+  void DisplacementAt(
+      Index ix, Index iy,
+      double& sx, double& sy) override;
 
-    virtual void PressureAt(
-        Index ix, Index iy, Index iz,
-        double &pressure) override;
+  void PressureAt(
+      Index ix, Index iy, Index iz,
+      double& pressure) override;
 
-  private:
-    class Impl;
-    std::unique_ptr<Impl> impl_;
-  };
-}
-}
+ private:
+  class Impl;
+  std::unique_ptr<Impl> impl_;
+};
 
-#endif
+}  // namespace waves
+}  // namespace gz
+
+#endif  // GZ_WAVES_TROCHOIDIRREGULARWAVESIMULATION_HH_

@@ -26,5 +26,5 @@ namespace waves
   //////////////////////////////////////////////////
   IWaveSimulation::~IWaveSimulation() = default;
 
-}
-}
+}  // namespace waves
+}  // namespace gz

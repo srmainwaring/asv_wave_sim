@@ -13,6 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <CGAL/Timer.h>
+
+#include <iostream>
+#include <string>
+
+#include <gz/common.hh>
+#include <gz/common/Util.hh>
+#include <gz/common/MeshManager.hh>
+#include <gz/common/Mesh.hh>
+#include <gz/common/SubMesh.hh>
+
 #include "gz/waves/MeshTools.hh"
 #include "gz/waves/Convert.hh"
 #include "gz/waves/Geometry.hh"
@@ -21,25 +32,21 @@
 #include "gz/waves/WaveParameters.hh"
 #include "gz/waves/CGALTypes.hh"
 
-#include <CGAL/Timer.h>
-
-#include <gz/common.hh>
-#include <gz/common/Util.hh>
-#include <gz/common/MeshManager.hh>
-#include <gz/common/Mesh.hh>
-#include <gz/common/SubMesh.hh>
-
-#include <iostream>
-#include <string>
-
-using namespace gz;
-using namespace waves;
-
 typedef CGAL::Timer Timer;
 
-///////////////////////////////////////////////////////////////////////////////
-// Define tests
+namespace cgal
+{
+using gz::cgal::Mesh;
+using gz::cgal::Triangle;
+using gz::cgal::Vector3;
+}  // namespace cgal
 
+using gz::waves::Geometry;
+using gz::waves::Grid;
+using gz::waves::MeshTools;
+using gz::waves::ToGz;
+
+//////////////////////////////////////////////////
 void TestFillArraysUnitBox()
 {
   std::cout << "TestFillArraysUnitBox..." << std::endl;
@@ -50,7 +57,7 @@ void TestFillArraysUnitBox()
     meshName,
     gz::math::Vector3d(1, 1, 1),
     gz::math::Vector2d(1, 1));
-  
+
   cgal::Mesh mesh;
   std::vector<float> vertices;
   std::vector<int> indices;
@@ -66,10 +73,10 @@ void TestFillArraysUnitBox()
   // for (auto&& i : indices)
   //   std::cout << i << std::endl;
 
-  // Vertices: 6 sides, 4 points per side, 3 coordinates per point  
+  // Vertices: 6 sides, 4 points per side, 3 coordinates per point
   std::cout << "test: " << vertices.size() << std::endl;
   std::cout << "chck: " << 6*4*3 << std::endl;
-  
+
   // Indices: 6 sides, 2 faces per side, 3 vertices per face
   std::cout << "test: " << indices.size() << std::endl;
   std::cout << "chck: " << 6*2*3 << std::endl;
@@ -85,7 +92,7 @@ void TestMakeSurfaceMeshUnitBox()
     meshName,
     gz::math::Vector3d(1, 1, 1),
     gz::math::Vector2d(1, 1));
-  
+
   cgal::Mesh mesh;
   MeshTools::MakeSurfaceMesh(
     *gz::common::MeshManager::Instance()->MeshByName(meshName),
@@ -105,13 +112,15 @@ void TestMakeSurfaceMeshUnitBox()
   // }
 }
 
-#if 0 // DEPRECATED FEATURE
+//////////////////////////////////////////////////
+#if 0  // DEPRECATED FEATURE
 void TestExportWaveMesh()
 {
   std::cout << "TestExportWaveMesh..." << std::endl;
 
   // Wave parameters
-  std::shared_ptr<WaveParameters> waveParams = std::make_shared<WaveParameters>();
+  std::shared_ptr<WaveParameters> waveParams =
+      std::make_shared<WaveParameters>();
   waveParams->SetNumber(1);
   waveParams->SetAmplitude(2.0);
   waveParams->SetPeriod(10.0);
@@ -133,9 +142,9 @@ void TestExportWaveMesh()
   std::shared_ptr<gz::common::Mesh> gzMesh(new gz::common::Mesh());
   gzMesh->SetName(name);
 
-  std::unique_ptr<gz::common::SubMesh> gzSubMesh(new gz::common::SubMesh());  
-  unsigned long iv = 0;
-  for(auto&& face : mesh.faces())
+  std::unique_ptr<gz::common::SubMesh> gzSubMesh(new gz::common::SubMesh());
+  int64_t iv = 0;
+  for (auto&& face : mesh.faces())
   {
     cgal::Triangle tri  = Geometry::MakeTriangle(mesh, face);
     cgal::Vector3 normal = Geometry::Normal(tri);
@@ -160,7 +169,7 @@ void TestExportWaveMesh()
   }
 
   gzMesh->AddSubMesh(*gzSubMesh);
-  
+
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;
 
@@ -170,15 +179,15 @@ void TestExportWaveMesh()
     gzMesh.get(),
     "/Users/rhys/Code/ros/asv_ws/tmp/wavefield",
     "dae");
-
 }
 #endif
 
+//////////////////////////////////////////////////
 void TestExportGridMesh()
 {
   std::cout << "TestExportGridMesh..." << std::endl;
 
-  // Wavefield 
+  // Wavefield
   Grid grid({500, 500}, {100, 100});
 
   // Get Mesh
@@ -192,9 +201,9 @@ void TestExportGridMesh()
   std::shared_ptr<gz::common::Mesh> gzMesh(new gz::common::Mesh());
   gzMesh->SetName(name);
 
-  std::unique_ptr<gz::common::SubMesh> gzSubMesh(new gz::common::SubMesh());  
-  unsigned long iv = 0;
-  for(auto&& face : mesh.faces())
+  std::unique_ptr<gz::common::SubMesh> gzSubMesh(new gz::common::SubMesh());
+  int64_t iv = 0;
+  for (auto&& face : mesh.faces())
   {
     cgal::Triangle tri  = Geometry::MakeTriangle(mesh, face);
     cgal::Vector3 normal = Geometry::Normal(tri);
@@ -219,7 +228,7 @@ void TestExportGridMesh()
   }
 
   gzMesh->AddSubMesh(*gzSubMesh);
-  
+
   t.stop();
   std::cout << "MakeGzMesh: " << t.time() << " sec" << std::endl;
 
@@ -229,11 +238,9 @@ void TestExportGridMesh()
     gzMesh.get(),
     std::string("/Users/rhys/Code/ros/asv_ws/tmp/").append(name),
     "dae");
-
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Run tests
+//////////////////////////////////////////////////
 void RunMeshToolsTests()
 {
   TestFillArraysUnitBox();
@@ -241,4 +248,3 @@ void RunMeshToolsTests()
   // TestExportWaveMesh();
   // TestExportGridMesh();
 }
-

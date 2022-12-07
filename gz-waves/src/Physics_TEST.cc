@@ -13,6 +13,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <gtest/gtest.h>
+
+#include <iostream>
+#include <memory>
+#include <string>
+#include <thread>
+
+#include <gz/common.hh>
+#include <gz/common/Util.hh>
+#include <gz/common/MeshManager.hh>
+#include <gz/math/Vector3.hh>
+
 #include "gz/waves/CGALTypes.hh"
 #include "gz/waves/Physics.hh"
 #include "gz/waves/Geometry.hh"
@@ -23,60 +35,61 @@
 #include "gz/waves/WavefieldSampler.hh"
 #include "gz/waves/WaveParameters.hh"
 
-#include <gz/common.hh>
-#include <gz/common/Util.hh>
-#include <gz/common/MeshManager.hh>
-#include <gz/math/Vector3.hh>
+namespace cgal
+{
+using gz::cgal::Mesh;
+using gz::cgal::Point3;
+using gz::cgal::Vector3;
+}  // namespace cgal
 
-#include <gtest/gtest.h>
+using gz::waves::Geometry;
+using gz::waves::Grid;
+using gz::waves::Hydrodynamics;
+using gz::waves::HydrodynamicsParameters;
+using gz::waves::MeshTools;
+using gz::waves::PhysicalConstants;
+using gz::waves::Physics;
+using gz::waves::Wavefield;
+using gz::waves::WavefieldSampler;
 
-#include <iostream>
-#include <memory>
-#include <string>
-#include <thread>
-
-using namespace gz;
-using namespace waves;
-
-///////////////////////////////////////////////////////////////////////////////
-// Define tests
-
+//////////////////////////////////////////////////
 TEST(Physics, CenterOfForce)
 {
   { // Limits
     double fU = 10;
-    double fL = 0;    
+    double fL = 0;
     cgal::Point3 CU(10, 20, 30);
-    cgal::Point3 CL(40, 50, 60);  
-    cgal::Point3 CF = Physics::CenterOfForce(fU, fL, CU, CL);   
+    cgal::Point3 CL(40, 50, 60);
+    cgal::Point3 CF = Physics::CenterOfForce(fU, fL, CU, CL);
     EXPECT_EQ(CF, CU);
   }
 
   { // Equal forces
     double fU = 10;
-    double fL = 10;    
+    double fL = 10;
     cgal::Point3 CU(0, 0, 0);
-    cgal::Point3 CL(5, 5, 5);    
+    cgal::Point3 CL(5, 5, 5);
     cgal::Point3 CF = Physics::CenterOfForce(fU, fL, CU, CL);
     EXPECT_EQ(CF, cgal::Point3(2.5, 2.5, 2.5));
   }
- 
 }
 
+//////////////////////////////////////////////////
 TEST(Physics, BuoyancyForceAtCenterOfPressure)
 {
   double eps = 1E-8;
 
   { // H on surface
-    cgal::Point3 H( 5, 0, 0);
+    cgal::Point3 H(5, 0, 0);
     cgal::Point3 M(-5, 0, -2);
     cgal::Point3 L(5, 0, -2);
     cgal::Point3 center;
     cgal::Vector3 force;
     cgal::Vector3 normal = Geometry::Normal(H, M, L);
     cgal::Point3 C = Geometry::TriangleCentroid(H, M, L);
-    double depthC = - C.z();    
-    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L, normal, center, force);    
+    double depthC = - C.z();
+    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L,
+        normal, center, force);
     EXPECT_NEAR(center[0], 1.25, eps);
     EXPECT_NEAR(center[1], 0.0, eps);
     EXPECT_NEAR(center[2], -1.5, eps);
@@ -86,10 +99,10 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
     // rho = 1025.0, g = -9.81
     EXPECT_NEAR(force[1], 134070.0, eps);
     EXPECT_NEAR(force[2], 0, eps);
-  }  
+  }
 
   { // H below surface
-    cgal::Point3 H( 5, 0, -9);
+    cgal::Point3 H(5, 0, -9);
     cgal::Point3 M(-5, 0, -11);
     cgal::Point3 L(5, 0, -11);
     cgal::Point3 center;
@@ -97,7 +110,8 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
     cgal::Vector3 normal = Geometry::Normal(H, M, L);
     cgal::Point3 C = Geometry::TriangleCentroid(H, M, L);
     double depthC = - C.z();
-    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L, normal, center, force);    
+    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L,
+        normal, center, force);
     EXPECT_NEAR(center[0], 1.6129032258, eps);
     EXPECT_NEAR(center[1], 0.0, eps);
     EXPECT_NEAR(center[2], -10.35483871, eps);
@@ -110,15 +124,16 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
   }
 
   { // M on surface
-    cgal::Point3 H( 5, 0, -0);
+    cgal::Point3 H(5, 0, -0);
     cgal::Point3 M(-5, 0, -0);
     cgal::Point3 L(-5, 0, -2);
     cgal::Point3 center;
     cgal::Vector3 force;
     cgal::Vector3 normal = Geometry::Normal(H, M, L);
     cgal::Point3 C = Geometry::TriangleCentroid(H, M, L);
-    double depthC = - C.z();    
-    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L, normal, center, force);    
+    double depthC = - C.z();
+    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L,
+        normal, center, force);
     EXPECT_NEAR(center[0], -2.5, eps);
     EXPECT_NEAR(center[1],  0.0, eps);
     EXPECT_NEAR(center[2], -1.0, eps);
@@ -131,15 +146,16 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
   }
 
   { // M below surface
-    cgal::Point3 H( 5, 0, -9);
+    cgal::Point3 H(5, 0, -9);
     cgal::Point3 M(-5, 0, -9);
     cgal::Point3 L(-5, 0, -11);
     cgal::Point3 center;
     cgal::Vector3 force;
     cgal::Vector3 normal = Geometry::Normal(H, M, L);
     cgal::Point3 C = Geometry::TriangleCentroid(H, M, L);
-    double depthC = - C.z();    
-    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L, normal, center, force);    
+    double depthC = - C.z();
+    Physics::BuoyancyForceAtCenterOfPressure(depthC, C, H, M, L,
+        normal, center, force);
     EXPECT_NEAR(center[0], -1.724137931, eps);
     EXPECT_NEAR(center[1], 0.0, eps);
     EXPECT_NEAR(center[2], -9.689655172, eps);
@@ -152,6 +168,7 @@ TEST(Physics, BuoyancyForceAtCenterOfPressure)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(Hydrodynamics, BuoyancyUnitBox)
 {
   double eps = 1E-8;
@@ -168,7 +185,7 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
     *gz::common::MeshManager::Instance()->MeshByName(linkMeshName),
     *linkMesh);
 
-  // Wavefield and water patch 2x2  
+  // Wavefield and water patch 2x2
   std::shared_ptr<const Wavefield> wavefield(new  Wavefield("waves"));
   std::shared_ptr<Grid> patch(
     new  Grid({ 2, 2 }, { 2, 2 }));
@@ -176,19 +193,23 @@ TEST(Hydrodynamics, BuoyancyUnitBox)
     new WavefieldSampler(wavefield, patch));
 
   // Hydrodynamics
-  std::shared_ptr<HydrodynamicsParameters> hydroParams = std::make_shared<HydrodynamicsParameters>();
+  std::shared_ptr<HydrodynamicsParameters> hydroParams =
+      std::make_shared<HydrodynamicsParameters>();
   Hydrodynamics hydrodynamics(hydroParams, linkMesh, wavefieldSampler);
-  hydrodynamics.Update(wavefieldSampler, linkPose, CGAL::NULL_VECTOR, CGAL::NULL_VECTOR);
+  hydrodynamics.Update(wavefieldSampler, linkPose,
+      CGAL::NULL_VECTOR, CGAL::NULL_VECTOR);
   cgal::Vector3 force = hydrodynamics.Force();
 
   double h = 0.5;
   double A = 1.0;
-  double f = - PhysicalConstants::WaterDensity() * PhysicalConstants::Gravity() * A * h;
+  double f = - PhysicalConstants::WaterDensity()
+      * PhysicalConstants::Gravity() * A * h;
   EXPECT_NEAR(force[0], 0, eps);
   EXPECT_NEAR(force[1], 0, eps);
   EXPECT_NEAR(force[2], f, eps);
 }
 
+//////////////////////////////////////////////////
 TEST(Hydrodynamics, Buoyancy10x4x2Box)
 {
   double eps = 1E-8;
@@ -211,20 +232,23 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
     new  Grid({ 20, 20 }, { 4, 4 }));
   std::shared_ptr<const WavefieldSampler> wavefieldSampler(
     new WavefieldSampler(wavefield, patch));
-  
+
   // Hydrodynamics
-  std::shared_ptr<HydrodynamicsParameters> hydroParams = std::make_shared<HydrodynamicsParameters>();
+  std::shared_ptr<HydrodynamicsParameters> hydroParams =
+      std::make_shared<HydrodynamicsParameters>();
   Hydrodynamics hydrodynamics(hydroParams, linkMesh, wavefieldSampler);
-  hydrodynamics.Update(wavefieldSampler, linkPose, CGAL::NULL_VECTOR, CGAL::NULL_VECTOR);
+  hydrodynamics.Update(wavefieldSampler, linkPose,
+      CGAL::NULL_VECTOR, CGAL::NULL_VECTOR);
   cgal::Vector3 force =  hydrodynamics.Force();
   double h = 0.5 * 2.0;
   double A = 10.0 * 4.0;
-  double f = - PhysicalConstants::WaterDensity() * PhysicalConstants::Gravity() * A * h;
+  double f = - PhysicalConstants::WaterDensity()
+      * PhysicalConstants::Gravity() * A * h;
   EXPECT_NEAR(force[0], 0, eps);
   EXPECT_NEAR(force[1], 0, eps);
   EXPECT_NEAR(force[2], f, eps);
 
-  // if (1) 
+  // if (1)
   // {
   //   // Set Pose - 45 deg rotation about z
   //   std::cout << "Pose: rotate about Z..." << std::endl;
@@ -232,7 +256,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   for (Index i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
   //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
-  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
+  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0)
+  //                           + linkPose.Pos();
   //     linkMesh->SetVertex(i, v1);
   //   }
 
@@ -240,8 +265,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   hydrodynamics.UpdateSubmergedTriangles();
   //   hydrodynamics.ComputeBuoyancyForce();
   //   force =  hydrodynamics.BuoyancyForce();
-  //   std::cout << "test: " << force << std::endl;    
-  //   std::cout << "chck: " << Vector3d(0, 0, f) << std::endl;    
+  //   std::cout << "test: " << force << std::endl;
+  //   std::cout << "chck: " << Vector3d(0, 0, f) << std::endl;
   // }
   // if (1)
   // {
@@ -251,7 +276,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   for (Index i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
   //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
-  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
+  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0)
+  //                           + linkPose.Pos();
   //     linkMesh->SetVertex(i, v1);
   //   }
 
@@ -259,8 +285,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   hydrodynamics.UpdateSubmergedTriangles();
   //   hydrodynamics.ComputeBuoyancyForce();
   //   force =  hydrodynamics.BuoyancyForce();
-  //   std::cout << "test: " << force << std::endl;    
-  //   std::cout << "chck: " << Vector3d(0, 0, f) << std::endl;    
+  //   std::cout << "test: " << force << std::endl;
+  //   std::cout << "chck: " << Vector3d(0, 0, f) << std::endl;
   // }
   // if (1)
   // {
@@ -270,7 +296,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   for (Index i=0; i<linkMesh->GetVertexCount(); ++i)
   //   {
   //     gz::math::Vector3d v0 = initLinkMesh->GetVertex(i);
-  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0) + linkPose.Pos();
+  //     gz::math::Vector3d v1 = linkPose.Rot().RotateVector(v0)
+  //                           + linkPose.Pos();
   //     linkMesh->SetVertex(i, v1);
   //   }
 
@@ -278,8 +305,8 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   hydrodynamics.UpdateSubmergedTriangles();
   //   hydrodynamics.ComputeBuoyancyForce();
   //   force =  hydrodynamics.BuoyancyForce();
-  //   std::cout << "test: " << force << std::endl;    
-  //   std::cout << "chck: " << Vector3d(0, 0, f) << std::endl;    
+  //   std::cout << "test: " << force << std::endl;
+  //   std::cout << "chck: " << Vector3d(0, 0, f) << std::endl;
 
   //   // Fail case
   //   // Link:         base_link
@@ -305,9 +332,9 @@ TEST(Hydrodynamics, Buoyancy10x4x2Box)
   //   // Force:        -0 -0 378659
   //   // Torque:       134954 0 0
   // }
-
 }
 
+//////////////////////////////////////////////////
 TEST(Hydrodynamics, Rotation)
 {
   // Body coordinates
@@ -329,6 +356,7 @@ TEST(Hydrodynamics, Rotation)
   // }
 }
 
+//////////////////////////////////////////////////
 TEST(Hydrodynamics, FrameTransforms)
 {
   // Body frame coordinates
@@ -344,7 +372,7 @@ TEST(Hydrodynamics, FrameTransforms)
 
   // {
   //   // World coordinates
-  //   cgal::Vector3 xw = pose.Rot().RotateVector(x) + pose.Pos(); 
+  //   cgal::Vector3 xw = pose.Rot().RotateVector(x) + pose.Pos();
   //   std::cout << "xw:   " << xw << std::endl;
   //   std::cout << "xw:   " << cgal::Vector3(10, 1, 0) << std::endl;
   // }
@@ -355,12 +383,9 @@ TEST(Hydrodynamics, FrameTransforms)
   //   std::cout << "xw:   " << xw << std::endl;
   //   std::cout << "xw:   " << Vector3d(10, 1, 0) << std::endl;
   // }
-
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Run tests
-
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

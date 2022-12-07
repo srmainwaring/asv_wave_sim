@@ -13,23 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/Algorithm.hh"
+#include <gtest/gtest.h>
 
 #include <array>
 #include <iostream>
 #include <string>
 
-#include <gtest/gtest.h>
-
+#include "gz/waves/Algorithm.hh"
 #include "gz/waves/Types.hh"
 
-using namespace gz;
-using namespace waves;
-using namespace algorithm;
+using gz::waves::Index;
+using gz::waves::algorithm::sort_indexes;
 
-///////////////////////////////////////////////////////////////////////////////
-// Define tests
-
+//////////////////////////////////////////////////
 TEST(Algorithm, SortIndexArray2)
 {
   { // Case 1
@@ -44,9 +40,10 @@ TEST(Algorithm, SortIndexArray2)
     std::array<Index, 2> idx = sort_indexes(v);
     EXPECT_EQ(v[idx[0]], 1.0);
     EXPECT_EQ(v[idx[1]], 0.0);
-  } 
+  }
 }
 
+//////////////////////////////////////////////////
 TEST(Algorithm, SortIndexVector2)
 {
   { // Case 1
@@ -61,9 +58,10 @@ TEST(Algorithm, SortIndexVector2)
     std::vector<Index> idx = sort_indexes(v);
     EXPECT_EQ(v[idx[0]], 1.0);
     EXPECT_EQ(v[idx[1]], 0.0);
-  }  
+  }
 }
 
+//////////////////////////////////////////////////
 TEST(Algorithm, SortIndex3)
 {
   { // Case 1
@@ -72,7 +70,7 @@ TEST(Algorithm, SortIndex3)
     EXPECT_EQ(v[idx[0]], 2.0);
     EXPECT_EQ(v[idx[1]], 1.0);
     EXPECT_EQ(v[idx[2]], 0.0);
-  }  
+  }
 
   { // Case 2
     std::vector<double> v {0, 2, 1};
@@ -80,7 +78,7 @@ TEST(Algorithm, SortIndex3)
     EXPECT_EQ(v[idx[0]], 2.0);
     EXPECT_EQ(v[idx[1]], 1.0);
     EXPECT_EQ(v[idx[2]], 0.0);
-  }  
+  }
 
   { // Case 3
     std::vector<double> v {1, 0, 2};
@@ -88,7 +86,7 @@ TEST(Algorithm, SortIndex3)
     EXPECT_EQ(v[idx[0]], 2.0);
     EXPECT_EQ(v[idx[1]], 1.0);
     EXPECT_EQ(v[idx[2]], 0.0);
-  }  
+  }
 
   { // Case 4
     std::vector<double> v {1, 2, 0};
@@ -96,7 +94,7 @@ TEST(Algorithm, SortIndex3)
     EXPECT_EQ(v[idx[0]], 2.0);
     EXPECT_EQ(v[idx[1]], 1.0);
     EXPECT_EQ(v[idx[2]], 0.0);
-  }  
+  }
 
   { // Case 5
     std::vector<double> v {2, 0, 1};
@@ -104,7 +102,7 @@ TEST(Algorithm, SortIndex3)
     EXPECT_EQ(v[idx[0]], 2.0);
     EXPECT_EQ(v[idx[1]], 1.0);
     EXPECT_EQ(v[idx[2]], 0.0);
-  }  
+  }
 
   { // Case 6
     std::vector<double> v {2, 1, 0};
@@ -112,13 +110,10 @@ TEST(Algorithm, SortIndex3)
     EXPECT_EQ(v[idx[0]], 2.0);
     EXPECT_EQ(v[idx[1]], 1.0);
     EXPECT_EQ(v[idx[2]], 0.0);
-  }  
-
+  }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Run tests
-
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

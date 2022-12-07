@@ -17,89 +17,87 @@
 #define GZ_WAVES_WAVESPECTRUM_HH_
 
 #include <Eigen/Dense>
- 
+
 using Eigen::ArrayXXd;
 
 namespace gz
 {
 namespace waves
 {
-inline namespace v2
+class OmniDirectionalWaveSpectrum
 {
-  class OmniDirectionalWaveSpectrum
-  {
-  public:
-    virtual ~OmniDirectionalWaveSpectrum();
+ public:
+  virtual ~OmniDirectionalWaveSpectrum();
 
-    virtual double Evaluate(double k) const = 0;
+  virtual double Evaluate(double k) const = 0;
 
-    virtual void Evaluate(
-        Eigen::Ref<Eigen::ArrayXXd> spectrum,
-        const Eigen::Ref<const Eigen::ArrayXXd> &k) const = 0;
-  };
+  virtual void Evaluate(
+      Eigen::Ref<Eigen::ArrayXXd> spectrum,
+      const Eigen::Ref<const Eigen::ArrayXXd>& k) const = 0;
+};
 
-  class PiersonMoskowitzWaveSpectrum : public OmniDirectionalWaveSpectrum
-  {
-  public:
-    virtual ~PiersonMoskowitzWaveSpectrum();
+class PiersonMoskowitzWaveSpectrum : public OmniDirectionalWaveSpectrum
+{
+ public:
+  virtual ~PiersonMoskowitzWaveSpectrum();
 
-    PiersonMoskowitzWaveSpectrum(double u19=5.0, double gravity=9.81);
+  explicit PiersonMoskowitzWaveSpectrum(
+      double u19 = 5.0,
+      double gravity = 9.81);
 
-    virtual double Evaluate(double k) const override;
+  double Evaluate(double k) const override;
 
-    virtual void Evaluate(
-        Eigen::Ref<Eigen::ArrayXXd> spectrum,
-        const Eigen::Ref<const Eigen::ArrayXXd> &k) const override;
+  void Evaluate(
+      Eigen::Ref<Eigen::ArrayXXd> spectrum,
+      const Eigen::Ref<const Eigen::ArrayXXd>& k) const override;
 
-    double Gravity() const;
+  double Gravity() const;
 
-    void SetGravity(double value);
+  void SetGravity(double value);
 
-    double U19() const;
+  double U19() const;
 
-    void SetU19(double value);
+  void SetU19(double value);
 
-  private:
-    double gravity_{9.81};
-    double u19_{5.0};
-  };
+ private:
+  double gravity_{9.81};
+  double u19_{5.0};
+};
 
-  class ECKVWaveSpectrum : public OmniDirectionalWaveSpectrum
-  {
-  public:
-    virtual ~ECKVWaveSpectrum();
+class ECKVWaveSpectrum : public OmniDirectionalWaveSpectrum
+{
+ public:
+  virtual ~ECKVWaveSpectrum();
 
-    ECKVWaveSpectrum(
-        double u10=5.0,
-        double cap_omega_c=0.84,
-        double gravity=9.81);
+  explicit ECKVWaveSpectrum(
+      double u10 = 5.0,
+      double cap_omega_c = 0.84,
+      double gravity = 9.81);
 
-    virtual double Evaluate(double k) const override;
+  double Evaluate(double k) const override;
 
-    virtual void Evaluate(
-        Eigen::Ref<Eigen::ArrayXXd> spectrum,
-        const Eigen::Ref<const Eigen::ArrayXXd> &k) const override;
+  void Evaluate(
+      Eigen::Ref<Eigen::ArrayXXd> spectrum,
+      const Eigen::Ref<const Eigen::ArrayXXd>& k) const override;
 
-    double Gravity() const;
+  double Gravity() const;
 
-    void SetGravity(double value);
+  void SetGravity(double value);
 
-    double U10() const;
+  double U10() const;
 
-    void SetU10(double value);
+  void SetU10(double value);
 
-    double CapOmegaC() const;
+  double CapOmegaC() const;
 
-    void SetCapOmegaC(double value);
+  void SetCapOmegaC(double value);
 
-  private:
-    double gravity_{9.81};
-    double u10_{5.0};
-    double cap_omega_c_{0.84};
-  };
+ private:
+  double gravity_{9.81};
+  double u10_{5.0};
+  double cap_omega_c_{0.84};
+};
+}  // namespace waves
+}  // namespace gz
 
-}
-}
-}
-
-#endif
+#endif  // GZ_WAVES_WAVESPECTRUM_HH_

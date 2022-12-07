@@ -26,48 +26,47 @@
 
 #include "gz/waves/CGALTypes.hh"
 
-
 namespace gz
 {
 namespace waves
 {
-  class WaveParameters;
-  class WavefieldPrivate;
+class WaveParameters;
+class WavefieldPrivate;
 
-  /// \brief A class to manage a wave field.
-  class Wavefield
-  {
-  public:
-    /// \brief Destructor.
-    virtual ~Wavefield();
+/// \brief A class to manage a wave field.
+class Wavefield
+{
+ public:
+  /// \brief Destructor.
+  virtual ~Wavefield();
 
-    /// \brief Constructor.
-    Wavefield(const std::string &world_name);
+  /// \brief Constructor.
+  explicit Wavefield(const std::string& world_name);
 
-    /// \brief Compute the height at a point (vertical distance to surface).
-    bool Height(const cgal::Point3 &point, double &height) const;
+  /// \brief Compute the height at a point (vertical distance to surface).
+  bool Height(const cgal::Point3& point, double& height) const;
 
-    /// \brief Get the wave parameters.
-    std::shared_ptr<const WaveParameters> GetParameters() const;
+  /// \brief Get the wave parameters.
+  std::shared_ptr<const WaveParameters> GetParameters() const;
 
-    /// \brief Set the wave parameters.
-    ///
-    /// \param[in] params    The new wave parameters.
-    void SetParameters(std::shared_ptr<WaveParameters> params);
+  /// \brief Set the wave parameters.
+  ///
+  /// \param[in] params    The new wave parameters.
+  void SetParameters(std::shared_ptr<WaveParameters> params);
 
-    /// \brief Update (recalculate) the wave field for the given time.
-    ///
-    /// \param[in] time    The time parameter for the wave evolution.
-    void Update(double time);
+  /// \brief Update (recalculate) the wave field for the given time.
+  ///
+  /// \param[in] time    The time parameter for the wave evolution.
+  void Update(double time);
 
-  private:
-    /// \internal Private implementation.
-    std::shared_ptr<WavefieldPrivate> impl_;
-  };
+ private:
+  /// \internal Private implementation.
+  std::shared_ptr<WavefieldPrivate> impl_;
+};
 
-  typedef std::shared_ptr<Wavefield> WavefieldPtr;
-  typedef std::weak_ptr<Wavefield> WavefieldWeakPtr;
-}
-}
+typedef std::shared_ptr<Wavefield> WavefieldPtr;
+typedef std::weak_ptr<Wavefield> WavefieldWeakPtr;
+}  // namespace waves
+}  // namespace gz
 
-#endif
+#endif  // GZ_WAVES_WAVEFIELD_HH_

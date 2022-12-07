@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/TriangulatedGrid.hh"
-#include "gz/waves/Types.hh"
-
 #include <gtest/gtest.h>
-
-#include <gz/math/Pose3.hh>
 
 #include <algorithm>
 #include <iostream>
@@ -27,12 +22,21 @@
 #include <memory>
 #include <string>
 
-///////////////////////////////////////////////////////////////////////////////
-// Define tests
+#include <gz/math/Pose3.hh>
 
-using namespace gz;
-using namespace waves;
+#include "gz/waves/TriangulatedGrid.hh"
+#include "gz/waves/Types.hh"
 
+namespace cgal
+{
+using gz::cgal::Point3;
+}  // namespace cgal
+
+using gz::waves::Index;
+using gz::waves::Point3Range;
+using gz::waves::TriangulatedGrid;
+
+//////////////////////////////////////////////////
 TEST(TriangulatedGrid, Create) {
   // Create
   Index n = 2;
@@ -53,6 +57,7 @@ TEST(TriangulatedGrid, Create) {
   EXPECT_EQ(tri_grid->Origin(), cgal::Point3(10.0, 0.0, 0.0));
 }
 
+//////////////////////////////////////////////////
 TEST(TriangulatedGrid, Height) {
   // Create
   Index n = 16;
@@ -70,8 +75,8 @@ TEST(TriangulatedGrid, Height) {
 
   // Set points
   Point3Range points = source->Points();
-  for (Index iy=0; iy<nplus1; ++iy) {
-    for (Index ix=0; ix<nplus1; ++ix) {
+  for (Index iy=0; iy < nplus1; ++iy) {
+    for (Index ix=0; ix < nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];
@@ -85,6 +90,7 @@ TEST(TriangulatedGrid, Height) {
   EXPECT_DOUBLE_EQ(height, 14.4);
 }
 
+//////////////////////////////////////////////////
 TEST(TriangulatedGrid, Interpolate) {
   // Create
   Index n = 16;
@@ -96,8 +102,8 @@ TEST(TriangulatedGrid, Interpolate) {
 
   // Set points
   Point3Range points = source->Points();
-  for (Index iy=0; iy<nplus1; ++iy) {
-    for (Index ix=0; ix<nplus1; ++ix) {
+  for (Index iy=0; iy < nplus1; ++iy) {
+    for (Index ix=0; ix < nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];
@@ -136,11 +142,7 @@ TEST(TriangulatedGrid, Interpolate) {
   EXPECT_TRUE(found);
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Run tests
-
+//////////////////////////////////////////////////
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

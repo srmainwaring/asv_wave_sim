@@ -31,34 +31,34 @@ namespace gz
 {
 namespace cgal
 {
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // CGAL Typedefs
 
-  // 2D/3D Linear Geometry
-  typedef CGAL::Simple_cartesian<double>  Kernel;
-  typedef Kernel::Direction_2             Direction2;
-  typedef Kernel::Direction_3             Direction3;
-  typedef Kernel::Point_3                 Point3;
-  typedef Kernel::Line_3                  Line;
-  typedef Kernel::Ray_3                   Ray;
-  typedef Kernel::Triangle_3              Triangle;
-  typedef Kernel::Vector_2                Vector2;
-  typedef Kernel::Vector_3                Vector3;
+// 2D/3D Linear Geometry
+typedef CGAL::Simple_cartesian<double>  Kernel;
+typedef Kernel::Direction_2             Direction2;
+typedef Kernel::Direction_3             Direction3;
+typedef Kernel::Point_3                 Point3;
+typedef Kernel::Line_3                  Line;
+typedef Kernel::Ray_3                   Ray;
+typedef Kernel::Triangle_3              Triangle;
+typedef Kernel::Vector_2                Vector2;
+typedef Kernel::Vector_3                Vector3;
 
-  // SurfaceMesh
-  typedef CGAL::Surface_mesh<Point3>      Mesh;
-  typedef Mesh::Face_index                FaceIndex;
-  typedef Mesh::Halfedge_index            HalfedgeIndex; 
-  typedef Mesh::Vertex_index              VertexIndex; 
+// SurfaceMesh
+typedef CGAL::Surface_mesh<Point3>      Mesh;
+typedef Mesh::Face_index                FaceIndex;
+typedef Mesh::Halfedge_index            HalfedgeIndex;
+typedef Mesh::Vertex_index              VertexIndex;
 
-  // AABB Tree
-  typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
-  typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
-  typedef CGAL::AABB_tree<Traits> AABBTree;
+// AABB Tree
+typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
+typedef CGAL::AABB_tree<Traits> AABBTree;
 
-  // Pointers
-  typedef std::shared_ptr<Mesh>           MeshPtr;
-}
-}
+// Pointers
+typedef std::shared_ptr<Mesh>           MeshPtr;
+}  // namespace cgal
+}  // namespace gz
 
-#endif
+#endif  // GZ_WAVES_CGALTYPES_HH_

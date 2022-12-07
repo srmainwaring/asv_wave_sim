@@ -18,63 +18,58 @@
 #ifndef GZ_WAVES_TRIANGULATEDGRID_HH_
 #define GZ_WAVES_TRIANGULATEDGRID_HH_
 
+#include <memory>
+#include <vector>
+
 #include "gz/waves/CGALTypes.hh"
 #include "gz/waves/Types.hh"
 
 #include <gz/math.hh>
-
-#include <memory>
-#include <vector>
 
 namespace gz
 {
 namespace waves
 {
 
-///////////////////////////////////////////////////////////////////////////////
-// TriangulatedGrid
-  
-  
-  typedef std::array<int64_t, 3>    Index3;
-  typedef std::vector<cgal::Point3> Point3Range;
-  typedef std::vector<Index3>       Index3Range;
+typedef std::array<int64_t, 3>    Index3;
+typedef std::vector<cgal::Point3> Point3Range;
+typedef std::vector<Index3>       Index3Range;
 
-  class TriangulatedGrid {
-   public:
+class TriangulatedGrid
+{
+ public:
+  virtual ~TriangulatedGrid();
+  TriangulatedGrid(Index num_segments, double length);
+  void CreateMesh();
+  void CreateTriangulation();
+  static std::unique_ptr<TriangulatedGrid> Create(
+      Index num_segments, double length);
 
-    virtual ~TriangulatedGrid();    
-    TriangulatedGrid(Index num_segments, double length);
-    void CreateMesh();
-    void CreateTriangulation();
-    static std::unique_ptr<TriangulatedGrid> Create(Index num_segments, double length);
+  bool Locate(const cgal::Point3& query, int64_t& faceIndex) const;
+  bool Height(const cgal::Point3& query, double& height) const;
+  bool Height(const std::vector<cgal::Point3>& queries,
+      std::vector<double>& heights) const;
 
-    bool Locate(const cgal::Point3& query, int64_t& faceIndex) const;
-    bool Height(const cgal::Point3& query, double& height) const;
-    bool Height(const std::vector<cgal::Point3>& queries, std::vector<double>& heights) const;
-    
-    bool Interpolate(TriangulatedGrid& patch) const;
+  bool Interpolate(TriangulatedGrid& patch) const;
 
-    const Point3Range& Points() const;
-    const Index3Range& Indices() const;
-    const cgal::Point3& Origin() const;
-    void ApplyPose(const math::Pose3d& pose);
+  const Point3Range& Points() const;
+  const Index3Range& Indices() const;
+  const cgal::Point3& Origin() const;
+  void ApplyPose(const math::Pose3d& pose);
 
-    bool IsValid(bool verbose=false) const;
-    void DebugPrintMesh() const;
-    void DebugPrintTriangulation() const;
-    void UpdatePoints(const std::vector<cgal::Point3>& from);
-    void UpdatePoints(const std::vector<math::Vector3d>& from);
-    // void UpdatePoints(const std::vector<Ogre::Vector3>& from);
-    void UpdatePoints(const cgal::Mesh& from);
+  bool IsValid(bool verbose = false) const;
+  void DebugPrintMesh() const;
+  void DebugPrintTriangulation() const;
+  void UpdatePoints(const std::vector<cgal::Point3>& from);
+  void UpdatePoints(const std::vector<math::Vector3d>& from);
+  void UpdatePoints(const cgal::Mesh& from);
 
-   private:
-    class Private;
-    std::unique_ptr<Private> impl_;
-  };
+ private:
+  class Private;
+  std::unique_ptr<Private> impl_;
+};
 
-///////////////////////////////////////////////////////////////////////////////
+}  // namespace waves
+}  // namespace gz
 
-}
-}
-
-#endif
+#endif  // GZ_WAVES_TRIANGULATEDGRID_HH_

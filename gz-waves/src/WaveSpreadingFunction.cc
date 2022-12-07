@@ -18,8 +18,10 @@
 #include <algorithm>
 #include <cmath>
 
-using namespace gz; 
-using namespace waves; 
+namespace gz
+{
+namespace waves
+{
 
 //////////////////////////////////////////////////
 DirectionalSpreadingFunction::~DirectionalSpreadingFunction()
@@ -54,7 +56,7 @@ double Cos2sSpreadingFunction::Evaluate(
 //////////////////////////////////////////////////
 void Cos2sSpreadingFunction::Evaluate(
     Eigen::Ref<Eigen::ArrayXXd> phi,
-    const Eigen::Ref<const Eigen::ArrayXXd> &theta,
+    const Eigen::Ref<const Eigen::ArrayXXd>& theta,
     double theta_mean,
     const Eigen::Ref<const Eigen::ArrayXXd>& /*k*/) const
 {
@@ -66,8 +68,7 @@ void Cos2sSpreadingFunction::Evaluate(
     [&, this] (double theta_i) -> double
     {
       return this->Evaluate(theta_i, theta_mean);
-    }
-  );
+    });
 }
 
 //////////////////////////////////////////////////
@@ -137,9 +138,9 @@ double ECKVSpreadingFunction::Evaluate(
 //////////////////////////////////////////////////
 void ECKVSpreadingFunction::Evaluate(
     Eigen::Ref<Eigen::ArrayXXd> phi,
-    const Eigen::Ref<const Eigen::ArrayXXd> &theta,
+    const Eigen::Ref<const Eigen::ArrayXXd>& theta,
     double theta_mean,
-    const Eigen::Ref<const Eigen::ArrayXXd> &k) const
+    const Eigen::Ref<const Eigen::ArrayXXd>& k) const
 {
   auto theta_view = theta.reshaped();
   std::transform(
@@ -150,8 +151,7 @@ void ECKVSpreadingFunction::Evaluate(
     [&, this] (double theta_i, double k_i) -> double
     {
       return this->Evaluate(theta_i, theta_mean, k_i);
-    }
-  );
+    });
 }
 
 //////////////////////////////////////////////////
@@ -190,3 +190,5 @@ void ECKVSpreadingFunction::SetCapOmegaC(double value)
   cap_omega_c_ = value;
 }
 
+}  // namespace waves
+}  // namespace gz

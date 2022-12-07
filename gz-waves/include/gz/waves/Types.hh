@@ -22,9 +22,10 @@ namespace gz
 {
 namespace waves
 {
-  /// \brief Use gz::waves::Index for counting and indexing.
-  typedef std::ptrdiff_t Index;
-}
-}
+/// \brief Use Index for counting and indexing.
+typedef std::ptrdiff_t Index;
 
-#endif
+}  // namespace waves
+}  // namespace gz
+
+#endif  // GZ_WAVES_TYPES_HH_

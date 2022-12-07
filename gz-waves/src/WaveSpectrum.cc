@@ -18,8 +18,10 @@
 #include <algorithm>
 #include <cmath>
 
-using namespace gz;
-using namespace waves;
+namespace gz
+{
+namespace waves
+{
 
 //////////////////////////////////////////////////
 OmniDirectionalWaveSpectrum::~OmniDirectionalWaveSpectrum()
@@ -67,7 +69,7 @@ double PiersonMoskowitzWaveSpectrum::Evaluate(double k) const
 //////////////////////////////////////////////////
 void PiersonMoskowitzWaveSpectrum::Evaluate(
     Eigen::Ref<Eigen::ArrayXXd> spectrum,
-    const Eigen::Ref<const Eigen::ArrayXXd> &k) const
+    const Eigen::Ref<const Eigen::ArrayXXd>& k) const
 {
   /// \note Eigen asserts cbegin and cend are from the same expression.
   auto k_view = k.reshaped();
@@ -78,8 +80,7 @@ void PiersonMoskowitzWaveSpectrum::Evaluate(
     [this] (double k_i) -> double
     {
       return this->Evaluate(k_i);
-    }
-  );
+    });
 }
 
 //////////////////////////////////////////////////
@@ -142,27 +143,23 @@ double ECKVWaveSpectrum::Evaluate(double k) const
   // intermediates
   double u_star = std::sqrt(cd_10n) * u10_;
   // double am = 0.13 * u_star / cm;
-  
+
   double gamma = 1.7;
   if (cap_omega_c_ < 1.0)
   {
     gamma = 1.7;
-  }
-  else
-  {
+  } else {
     gamma = 1.7 + 6.0 * std::log10(cap_omega_c_);
   }
 
   double sigma = 0.08 * (1.0 + 4.0 * std::pow(cap_omega_c_, -3.0));
   double alpha_p = 0.006 * std::pow(cap_omega_c_, 0.55);
 
-  double alpha_m; 
+  double alpha_m;
   if (u_star <= cm)
   {
     alpha_m = 0.01 * (1.0 + std::log(u_star / cm));
-  }
-  else
-  {
+  } else {
     alpha_m = 0.01 * (1.0 + 3.0 * std::log(u_star / cm));
   }
 
@@ -173,35 +170,32 @@ double ECKVWaveSpectrum::Evaluate(double k) const
   double c  = std::sqrt((gravity_ / k) * (1.0 + std::pow(k / km, 2.0)));
 
   double l_pm = std::exp(-1.25 * std::pow(kp / k, 2.0));
-  
+
   double cap_gamma = std::exp(
       -1.0/(2.0 * std::pow(sigma, 2.0))
-      * std::pow(std::sqrt(k / kp) - 1.0, 2.0)
-  );
-  
+      * std::pow(std::sqrt(k / kp) - 1.0, 2.0));
+
   double j_p = std::pow(gamma, cap_gamma);
-  
+
   double f_p = l_pm * j_p * std::exp(
-      -0.3162 * cap_omega_c_ * (std::sqrt(k / kp) - 1.0)
-  );
+      -0.3162 * cap_omega_c_ * (std::sqrt(k / kp) - 1.0));
 
   double f_m = l_pm * j_p * std::exp(
-      -0.25 * std::pow(k / km - 1.0, 2.0)
-  );
+      -0.25 * std::pow(k / km - 1.0, 2.0));
 
   double b_l = 0.5 * alpha_p * (cp / c) * f_p;
   double b_h = 0.5 * alpha_m * (cm / c) * f_m;
-  
+
   double k3 = k * k * k;
   double cap_s = (b_l + b_h) / k3;
-  
+
   return cap_s;
 }
 
 //////////////////////////////////////////////////
 void ECKVWaveSpectrum::Evaluate(
     Eigen::Ref<Eigen::ArrayXXd> spectrum,
-    const Eigen::Ref<const Eigen::ArrayXXd> &k) const
+    const Eigen::Ref<const Eigen::ArrayXXd>& k) const
 {
   auto k_view = k.reshaped();
   std::transform(
@@ -211,8 +205,7 @@ void ECKVWaveSpectrum::Evaluate(
     [this] (double k_i) -> double
     {
       return this->Evaluate(k_i);
-    }
-  );
+    });
 }
 
 //////////////////////////////////////////////////
@@ -251,3 +244,5 @@ void ECKVWaveSpectrum::SetCapOmegaC(double value)
   cap_omega_c_ = value;
 }
 
+}  // namespace waves
+}  // namespace gz

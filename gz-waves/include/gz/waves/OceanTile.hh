@@ -17,6 +17,7 @@
 #define GZ_WAVES_OCEANTILE_HH_
 
 #include <memory>
+#include <vector>
 
 #include <gz/math.hh>
 #include <gz/common.hh>
@@ -26,70 +27,70 @@
 #include "gz/waves/Types.hh"
 #include "gz/waves/WaveParameters.hh"
 
-
 namespace gz
 {
 namespace waves
 {
-  template <typename Vector3>
-  class OceanTilePrivate;
+template <typename Vector3>
+class OceanTilePrivate;
 
-  template <typename Vector3>
-  class OceanTileT
-  {
-  public:
-    virtual ~OceanTileT();
+template <typename Vector3>
+class OceanTileT
+{
+ public:
+  virtual ~OceanTileT();
 
-    OceanTileT(Index nx, double lx, bool has_visuals=true);
+  explicit OceanTileT(Index nx, double lx, bool has_visuals = true);
 
-    OceanTileT(WaveParametersPtr params, bool has_visuals=true);
+  explicit OceanTileT(WaveParametersPtr params, bool has_visuals = true);
 
-    /// \brief The tile size (or length) lx. 
-    double TileSize() const;
+  /// \brief The tile size (or length) lx.
+  double TileSize() const;
 
-    /// \brief The tile resolution (nx). The tile contains (nx + 1)**2 vertices. 
-    Index Resolution() const;
+  /// \brief The tile resolution (nx). The tile contains (nx + 1)**2 vertices.
+  Index Resolution() const;
 
-    void SetWindVelocity(double ux, double uy);
+  void SetWindVelocity(double ux, double uy);
 
-    void Create();
+  void Create();
 
-    // Returns a new gz::common::Mesh. The caller must take ownership.
-    gz::common::Mesh* CreateMesh();
+  // Returns a new gz::common::Mesh. The caller must take ownership.
+  gz::common::Mesh* CreateMesh();
 
-    void Update(double time);
+  void Update(double time);
 
-    void UpdateMesh(double time, gz::common::Mesh *mesh);
+  void UpdateMesh(double time, gz::common::Mesh* mesh);
 
-    ////////////////////////////////////////
-    // Access to vertices, texture coordinates and faces
-    Index VertexCount() const;
-    
-    Vector3 Vertex(Index index) const;
+  // Access to vertices, texture coordinates and faces
+  Index VertexCount() const;
 
-    gz::math::Vector2d UV0(Index index) const;
+  Vector3 Vertex(Index index) const;
 
-    Index FaceCount() const;
-    
-    gz::math::Vector3i Face(Index index) const;
+  gz::math::Vector2d UV0(Index index) const;
 
-    const std::vector<Vector3>& Vertices() const;
+  Index FaceCount() const;
 
-  private:
-    std::unique_ptr<OceanTilePrivate<Vector3>> impl_;
-  };
+  gz::math::Vector3i Face(Index index) const;
 
-  namespace visual
-  {
-    typedef OceanTileT<gz::math::Vector3d> OceanTile;
-    typedef std::shared_ptr<OceanTile> OceanTilePtr;
-  }
-  namespace physics
-  {
-    typedef OceanTileT<cgal::Point3>   OceanTile;
-    typedef std::shared_ptr<OceanTile> OceanTilePtr;
-  }
-}
-}
+  const std::vector<Vector3>& Vertices() const;
 
-#endif
+ private:
+  std::unique_ptr<OceanTilePrivate<Vector3>> impl_;
+};
+
+namespace visual
+{
+typedef OceanTileT<gz::math::Vector3d> OceanTile;
+typedef std::shared_ptr<OceanTile> OceanTilePtr;
+}  // namespace visual
+
+namespace physics
+{
+typedef OceanTileT<cgal::Point3>   OceanTile;
+typedef std::shared_ptr<OceanTile> OceanTilePtr;
+}  // namespace physics
+
+}  // namespace waves
+}  // namespace gz
+
+#endif  // GZ_WAVES_OCEANTILE_HH_

@@ -18,7 +18,9 @@
 
 #include <memory>
 
-#include "WaveSimulation.hh"
+#include <Eigen/Dense> // NOLINT - cpplint false positive.
+
+#include "gz/waves/WaveSimulation.hh"
 
 using Eigen::ArrayXXd;
 
@@ -26,128 +28,129 @@ namespace gz
 {
 namespace waves
 {
-  /// \brief A non-FFT linear random wave simulation.
-  ///
-  /// The model is provided for comparison with the LinearIncidentWave model
-  /// used in buoy_sim when the wave spectrum type is set to Pierson-Moskowitz.
-  ///
-  /// Properties:
-  ///   - Superposition of num_waves waves.
-  ///   - Sampled at constant angular frequency: MaxOmega / NumWaves.
-  ///   - Amplitudes determined by the Pierson-Moskowitz spectrum.
-  ///   - Wave direction may be set.
-  ///   - Waves do not spread, all waves propagate in the same direction.
-  ///   - Waves are assigned random phases.
-  ///
-  /// Performance estimates for various grid sizes:
-  ///   num waves       nx x ny         RTF
-  ///   100             128 x 128         6
-  ///   300             128 x 128         2
-  ///
-  class LinearRandomWaveSimulation :
-      public IWaveSimulation,
-      public IWaveField
-  {
-  public:
-    virtual ~LinearRandomWaveSimulation();
+/// \brief A non-FFT linear random wave simulation.
+///
+/// The model is provided for comparison with the LinearIncidentWave model
+/// used in buoy_sim when the wave spectrum type is set to Pierson-Moskowitz.
+///
+/// Properties:
+///   - Superposition of num_waves waves.
+///   - Sampled at constant angular frequency: MaxOmega / NumWaves.
+///   - Amplitudes determined by the Pierson-Moskowitz spectrum.
+///   - Wave direction may be set.
+///   - Waves do not spread, all waves propagate in the same direction.
+///   - Waves are assigned random phases.
+///
+/// Performance estimates for various grid sizes:
+///   num waves       nx x ny         RTF
+///   100             128 x 128         6
+///   300             128 x 128         2
+///
+class LinearRandomWaveSimulation :
+    public IWaveSimulation,
+    public IWaveField
+{
+ public:
+  virtual ~LinearRandomWaveSimulation();
 
-    LinearRandomWaveSimulation(double lx, double ly,
-        Index nx, Index ny);
+  LinearRandomWaveSimulation(double lx, double ly,
+      Index nx, Index ny);
 
-    LinearRandomWaveSimulation(double lx, double ly, double lz,
-        Index nx, Index ny, Index nz);
+  LinearRandomWaveSimulation(double lx, double ly, double lz,
+      Index nx, Index ny, Index nz);
 
-    /// \brief The number of wave components.
-    Index NumWaves() const; 
+  /// \brief The number of wave components.
+  Index NumWaves() const;
 
-    /// \brief Set the number of wave components (has default = 100).
-    void SetNumWaves(Index value);
+  /// \brief Set the number of wave components (has default = 100).
+  void SetNumWaves(Index value);
 
-    /// \brief The maximum angular frequency rad/s).
-    double MaxOmega() const;
+  /// \brief The maximum angular frequency rad/s).
+  double MaxOmega() const;
 
-    /// \brief Set the maximum angular frequency (has default = 6.0 (rad/s)).
-    void SetMaxOmega(double value);
+  /// \brief Set the maximum angular frequency (has default = 6.0 (rad/s)).
+  void SetMaxOmega(double value);
 
-    virtual void SetWindVelocity(double ux, double uy) override;
+  void SetWindVelocity(double ux, double uy) override;
 
-    virtual void SetTime(double value) override;
+  void SetTime(double value) override;
 
-    virtual Index SizeX() const override;
+  Index SizeX() const override;
 
-    virtual Index SizeY() const override;
+  Index SizeY() const override;
 
-    virtual Index SizeZ() const override;
+  Index SizeZ() const override;
 
-    // IWaveField - interface.
-    virtual void Elevation(
-        double x, double y,
-        double &eta) override;
+  // IWaveField - interface.
+  void Elevation(
+      double x, double y,
+      double &eta) override;
 
-    virtual void Elevation(
-        const Eigen::Ref<const Eigen::ArrayXd> &x,
-        const Eigen::Ref<const Eigen::ArrayXd> &y,
-        Eigen::Ref<Eigen::ArrayXd> eta) override;
+  void Elevation(
+      const Eigen::Ref<const Eigen::ArrayXd>& x,
+      const Eigen::Ref<const Eigen::ArrayXd>& y,
+      Eigen::Ref<Eigen::ArrayXd> eta) override;
 
-    virtual void Pressure(
-        double x, double y, double z,
-        double &pressure) override;
+  void Pressure(
+      double x, double y, double z,
+      double& pressure) override;
 
-    virtual void Pressure(
-        const Eigen::Ref<const Eigen::ArrayXd> &x,
-        const Eigen::Ref<const Eigen::ArrayXd> &y,
-        const Eigen::Ref<const Eigen::ArrayXd> &z,
-        Eigen::Ref<Eigen::ArrayXd> pressure) override;
+  void Pressure(
+      const Eigen::Ref<const Eigen::ArrayXd>& x,
+      const Eigen::Ref<const Eigen::ArrayXd>& y,
+      const Eigen::Ref<const Eigen::ArrayXd>& z,
+      Eigen::Ref<Eigen::ArrayXd> pressure) override;
 
-    // lookup interface - array
-    virtual void ElevationAt(
-        Eigen::Ref<Eigen::ArrayXXd> h) override;
+  // lookup interface - array
+  void ElevationAt(
+      Eigen::Ref<Eigen::ArrayXXd> h) override;
 
-    virtual void ElevationDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> dhdx,
-        Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
+  void ElevationDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
 
-    virtual void DisplacementAt(
-        Eigen::Ref<Eigen::ArrayXXd> sx,
-        Eigen::Ref<Eigen::ArrayXXd> sy) override;
+  void DisplacementAt(
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy) override;
 
-    virtual void DisplacementDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-        Eigen::Ref<Eigen::ArrayXXd> dsydy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+  void DisplacementDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
-    virtual void DisplacementAndDerivAt(
-        Eigen::Ref<Eigen::ArrayXXd> h,
-        Eigen::Ref<Eigen::ArrayXXd> sx,
-        Eigen::Ref<Eigen::ArrayXXd> sy,
-        Eigen::Ref<Eigen::ArrayXXd> dhdx,
-        Eigen::Ref<Eigen::ArrayXXd> dhdy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-        Eigen::Ref<Eigen::ArrayXXd> dsydy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+  void DisplacementAndDerivAt(
+      Eigen::Ref<Eigen::ArrayXXd> h,
+      Eigen::Ref<Eigen::ArrayXXd> sx,
+      Eigen::Ref<Eigen::ArrayXXd> sy,
+      Eigen::Ref<Eigen::ArrayXXd> dhdx,
+      Eigen::Ref<Eigen::ArrayXXd> dhdy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+      Eigen::Ref<Eigen::ArrayXXd> dsydy,
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
-    virtual void PressureAt(
-        Index iz,
-        Eigen::Ref<Eigen::ArrayXXd> pressure) override;
+  void PressureAt(
+      Index iz,
+      Eigen::Ref<Eigen::ArrayXXd> pressure) override;
 
-    // lookup interface - scalar
-    virtual void ElevationAt(
-        Index ix, Index iy,
-        double &eta) override;
+  // lookup interface - scalar
+  void ElevationAt(
+      Index ix, Index iy,
+      double& eta) override;
 
-    virtual void DisplacementAt(
-        Index ix, Index iy,
-        double &sx, double &sy) override;
+  void DisplacementAt(
+      Index ix, Index iy,
+      double& sx, double& sy) override;
 
-    virtual void PressureAt(
-        Index ix, Index iy, Index iz,
-        double &pressure) override;
+  void PressureAt(
+      Index ix, Index iy, Index iz,
+      double& pressure) override;
 
-  private:
-    class Impl;
-    std::unique_ptr<Impl> impl_;
-  };
-}
-}
+ private:
+  class Impl;
+  std::unique_ptr<Impl> impl_;
+};
 
-#endif
+}  // namespace waves
+}  // namespace gz
+
+#endif  // GZ_WAVES_LINEARRANDOMWAVESIMULATION_HH_
