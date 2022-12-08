@@ -1,0 +1,40 @@
+# GitHub Action to run cpplint recursively on all pushes and pull requests
+# https://github.com/cpplint/GitHub-Action-for-cpplint
+
+# The cpplint configuration file is:
+#
+#   ./CPPLINT.cfg
+#
+# Equivalent command line check:
+# 
+# 1. core library headers
+# 
+#   cpplint ./gz-waves/include/gz/waves/*.hh
+# 
+# 2. core library source
+# 
+#   cpplint ./gz-waves/src/*.cc ./gz-waves/src/*.hh
+# 
+
+name: Cpplint
+
+on: [push, pull_request]
+
+jobs:
+  cpplint:
+    runs-on: ubuntu-latest
+    name: Cpplint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Cpplint
+        run: |
+          pip install cpplint
+      - name: Cpplint
+        run: |
+          cpplint ./gz-waves/include/gz/waves/*.hh
+          cpplint ./gz-waves/src/*.cc ./gz-waves/src/*.hh
