@@ -14,16 +14,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Ogre2OceanGeometry.hh"
-#include "Ogre2DynamicMesh.hh"
-
-#include "gz/common/SubMeshWithTangents.hh"
 
 #include <gz/common.hh>
 #include <gz/rendering/ogre2/Ogre2Material.hh>
 #include <gz/rendering/ogre2/Ogre2Scene.hh>
 
+#include "gz/common/SubMeshWithTangents.hh"
+
+#include "Ogre2DynamicMesh.hh"
+
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
+
 /// \brief Private implementation
-class gz::rendering::Ogre2OceanGeometryPrivate
+class Ogre2OceanGeometryPrivate
 {
   /// \brief OceanGeometry materal
   public: Ogre2MaterialPtr material{nullptr};
@@ -34,9 +41,6 @@ class gz::rendering::Ogre2OceanGeometryPrivate
   /// \brief Lazy evaluation flag
   // public: bool dirty{true};
 };
-
-using namespace gz;
-using namespace rendering;
 
 //////////////////////////////////////////////////
 Ogre2OceanGeometry::Ogre2OceanGeometry() :
@@ -219,3 +223,7 @@ void Ogre2OceanGeometry::InitObject(ScenePtr _scene,
   this->Load();
   this->Init();
 }
+
+}
+}  // namespace rendering
+}  // namespace gz

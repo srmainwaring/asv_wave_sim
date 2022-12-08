@@ -56,149 +56,151 @@
 
 namespace Ogre
 {
-  class MovableObject;
-}
+class MovableObject;
+}  // namespace Ogre
 
 namespace gz
 {
-  namespace rendering
-  {
-    inline namespace GZ_RENDERING_VERSION_NAMESPACE {
-    //
-    // forward declarations
-    class Ogre2DynamicMeshPrivate;
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-    /*  \class Ogre2DynamicMesh Ogre2DynamicMesh.hh \
-     *  gz/rendering/ogre2/Ogre2DynamicMesh.hh
-     */
-    /// \brief Dynamic mesh class that manages hardware buffers for
-    /// a dynamic mesh
-    class GZ_RENDERING_OGRE2_VISIBLE Ogre2DynamicMesh :
-        public Ogre2Geometry
-    {
-      /// \brief Constructor
-      /// \param[in] _scene Pointer to scene
-      public: explicit Ogre2DynamicMesh(ScenePtr _scene);
+// forward declarations
+class Ogre2DynamicMeshPrivate;
 
-      /// \brief Virtual destructor
-      public: virtual ~Ogre2DynamicMesh();
+/*  \class Ogre2DynamicMesh Ogre2DynamicMesh.hh \
+  *  gz/rendering/ogre2/Ogre2DynamicMesh.hh
+  */
+/// \brief Dynamic mesh class that manages hardware buffers for
+/// a dynamic mesh
+class GZ_RENDERING_OGRE2_VISIBLE Ogre2DynamicMesh :
+    public Ogre2Geometry
+{
+  /// \brief Constructor
+  /// \param[in] _scene Pointer to scene
+  public: explicit Ogre2DynamicMesh(ScenePtr _scene);
 
-      // Documentation inherited.
-      public: virtual void Destroy() override;
+  /// \brief Virtual destructor
+  public: virtual ~Ogre2DynamicMesh();
 
-      // Documentation inherited.
-      public: virtual Ogre::MovableObject *OgreObject() const override;
+  // Documentation inherited.
+  public: virtual void Destroy() override;
 
-      // Documentation inherited.
-      public: virtual MaterialPtr Material() const override;
+  // Documentation inherited.
+  public: virtual Ogre::MovableObject *OgreObject() const override;
 
-      // Documentation inherited.
-      public: virtual void
-          SetMaterial(MaterialPtr _material, bool _unique) override;
+  // Documentation inherited.
+  public: virtual MaterialPtr Material() const override;
 
-      /////////// FROM DYNAMIC RENDERABLE
+  // Documentation inherited.
+  public: virtual void
+      SetMaterial(MaterialPtr _material, bool _unique) override;
 
-      /// \brief Set the render operation type
-      /// \param[in] _opType The type of render operation to perform.
-      public: void SetOperationType(MarkerType _opType);
+  /////////// FROM DYNAMIC RENDERABLE
 
-      /// \brief Get the render operation type
-      /// \return The render operation type.
-      public: MarkerType OperationType() const;
+  /// \brief Set the render operation type
+  /// \param[in] _opType The type of render operation to perform.
+  public: void SetOperationType(MarkerType _opType);
 
-      /// \brief Update the dynamic renderable
-      public: void Update();
+  /// \brief Get the render operation type
+  /// \return The render operation type.
+  public: MarkerType OperationType() const;
 
-      /// \brief Add a point to the point list
-      /// \param[in] _pt gz::math::Vector3d point
-      /// \param[in] _color gz::math::Color Point color
-      public: void AddPoint(const gz::math::Vector3d &_pt,
-            const gz::math::Color &_color = gz::math::Color::White);
+  /// \brief Update the dynamic renderable
+  public: void Update();
 
-      /// \brief Add a point to the point list.
-      /// \param[in] _x X position
-      /// \param[in] _y Y position
-      /// \param[in] _z Z position
-      /// \param[in] _color Point color
-      public: void AddPoint(const double _x, const double _y, const double _z,
-            const gz::math::Color &_color = gz::math::Color::White);
+  /// \brief Add a point to the point list
+  /// \param[in] _pt gz::math::Vector3d point
+  /// \param[in] _color gz::math::Color Point color
+  public: void AddPoint(const gz::math::Vector3d &_pt,
+        const gz::math::Color &_color = gz::math::Color::White);
 
-      /// \brief Change the location of an existing point in the point list
-      /// \param[in] _index Index of the point to set
-      /// \param[in] _value Position of the point
-      public: void SetPoint(unsigned int _index,
-                            const gz::math::Vector3d &_value);
+  /// \brief Add a point to the point list.
+  /// \param[in] _x X position
+  /// \param[in] _y Y position
+  /// \param[in] _z Z position
+  /// \param[in] _color Point color
+  public: void AddPoint(const double _x, const double _y, const double _z,
+        const gz::math::Color &_color = gz::math::Color::White);
 
-      /// \brief Change the color of an existing point in the point list
-      /// \param[in] _index Index of the point to set
-      /// \param[in] _color color to set the point to
-      public: void SetColor(unsigned int _index,
-                            const gz::math::Color &_color);
+  /// \brief Change the location of an existing point in the point list
+  /// \param[in] _index Index of the point to set
+  /// \param[in] _value Position of the point
+  public: void SetPoint(unsigned int _index,
+                        const gz::math::Vector3d &_value);
 
-      /// \brief Change the normal vector of an existing point in the point list
-      /// \param[in] _index Index of the point to set
-      /// \param[in] _normal Normal of the point
-      public: void SetNormal(unsigned int _index,
-                            const gz::math::Vector3d &_normal);
+  /// \brief Change the color of an existing point in the point list
+  /// \param[in] _index Index of the point to set
+  /// \param[in] _color color to set the point to
+  public: void SetColor(unsigned int _index,
+                        const gz::math::Color &_color);
 
-      /// \brief Change the tangent vector of an existing point in the point list
-      /// \param[in] _index Index of the point to set
-      /// \param[in] _normal Tangent of the point
-      public: void SetTangent(unsigned int _index,
-                            const gz::math::Vector3d &_tangent);
+  /// \brief Change the normal vector of an existing point in the point list
+  /// \param[in] _index Index of the point to set
+  /// \param[in] _normal Normal of the point
+  public: void SetNormal(unsigned int _index,
+                        const gz::math::Vector3d &_normal);
 
-      /// \brief Change the texture coordinate of an existing point in the point list
-      /// \param[in] _index Index of the point to set
-      /// \param[in] _uv0 Texture coordinate of the point
-      public: void SetUV0(unsigned int _index,
-                            const gz::math::Vector2d &_uv0);
+  /// \brief Change the tangent vector of an existing point in the point list
+  /// \param[in] _index Index of the point to set
+  /// \param[in] _normal Tangent of the point
+  public: void SetTangent(unsigned int _index,
+                        const gz::math::Vector3d &_tangent);
 
-      /// \brief Return the position of an existing point in the point list
-      /// \param[in] _index Get the point at this index
-      /// \return position of point. A vector of
-      /// [gz::math::INF_D, gz::math::INF_D, gz::math::INF_D]
-      /// is returned when then the _index is out of bounds.
-      /// gz::math::INF_D==std::numeric_limits<double>::infinity()
-      public: gz::math::Vector3d Point(unsigned int _index) const;
+  /// \brief Change the texture coordinate of an existing point
+  ///        in the point list
+  /// \param[in] _index Index of the point to set
+  /// \param[in] _uv0 Texture coordinate of the point
+  public: void SetUV0(unsigned int _index,
+                        const gz::math::Vector2d &_uv0);
 
-      /// \brief Return the total number of points in the point list
-      /// \return Number of points
-      public: unsigned int PointCount() const;
+  /// \brief Return the position of an existing point in the point list
+  /// \param[in] _index Get the point at this index
+  /// \return position of point. A vector of
+  /// [gz::math::INF_D, gz::math::INF_D, gz::math::INF_D]
+  /// is returned when then the _index is out of bounds.
+  /// gz::math::INF_D==std::numeric_limits<double>::infinity()
+  public: gz::math::Vector3d Point(unsigned int _index) const;
 
-      /// \brief Remove all points from the point list
-      public: void Clear();
+  /// \brief Return the total number of points in the point list
+  /// \return Number of points
+  public: unsigned int PointCount() const;
 
-      /// \brief Create the dynamic mesh
-      private: void CreateDynamicMesh();
+  /// \brief Remove all points from the point list
+  public: void Clear();
 
-      /// \brief Update vertex buffer if vertices have changes
-      private: void UpdateBuffer();
+  /// \brief Create the dynamic mesh
+  private: void CreateDynamicMesh();
 
-      /// \brief Helper function to generate normals
-      /// \param[in] _opType Ogre render operation type
-      /// \param[in] _vertices a list of vertices
-      /// \param[in,out] _vbuffer vertex buffer to be filled
-      private: void GenerateNormals(Ogre::OperationType _opType,
-          const std::vector<gz::math::Vector3d> &_vertices, float *_vbuffer);
+  /// \brief Update vertex buffer if vertices have changes
+  private: void UpdateBuffer();
 
-      /// \brief Helper function to generate colors per-vertex. Only applies
-      /// to points. The colors fill the normal slots on the vertex buffer.
-      /// \param[in] _opType Ogre render operation type
-      /// \param[in] _vertices a list of vertices
-      /// \param[in,out] _vbuffer vertex buffer to be filled
-      private: void GenerateColors(Ogre::OperationType _opType,
-          const std::vector<gz::math::Vector3d> &_vertices, float *_vbuffer);
+  /// \brief Helper function to generate normals
+  /// \param[in] _opType Ogre render operation type
+  /// \param[in] _vertices a list of vertices
+  /// \param[in,out] _vbuffer vertex buffer to be filled
+  private: void GenerateNormals(Ogre::OperationType _opType,
+      const std::vector<gz::math::Vector3d> &_vertices, float *_vbuffer);
 
-      /// \brief Destroy the vertex buffer
-      private: void DestroyBuffer();
+  /// \brief Helper function to generate colors per-vertex. Only applies
+  /// to points. The colors fill the normal slots on the vertex buffer.
+  /// \param[in] _opType Ogre render operation type
+  /// \param[in] _vertices a list of vertices
+  /// \param[in,out] _vbuffer vertex buffer to be filled
+  private: void GenerateColors(Ogre::OperationType _opType,
+      const std::vector<gz::math::Vector3d> &_vertices, float *_vbuffer);
 
-      /// \brief Pointer to private data
-      private: std::unique_ptr<Ogre2DynamicMeshPrivate> dataPtr;
-    };
+  /// \brief Destroy the vertex buffer
+  private: void DestroyBuffer();
 
-    typedef std::shared_ptr<Ogre2DynamicMesh> Ogre2DynamicMeshPtr;
+  /// \brief Pointer to private data
+  private: std::unique_ptr<Ogre2DynamicMeshPrivate> dataPtr;
+};
 
-    }
-  }
+typedef std::shared_ptr<Ogre2DynamicMesh> Ogre2DynamicMeshPtr;
+
 }
-#endif
+}  // namespace rendering
+}  // namespace gz
+
+#endif  // GZ_RENDERING_OGRE2_OGRE2DYNAMICMESH_HH_

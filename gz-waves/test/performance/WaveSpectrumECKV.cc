@@ -13,21 +13,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <gtest/gtest.h>
+
+#include <Eigen/Dense>
+
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include <Eigen/Dense>
-
-#include <gtest/gtest.h>
 
 #include "gz/waves/WaveSpectrum.hh"
 
 using Eigen::ArrayXXd;
 
 namespace Eigen
-{ 
+{
   typedef Eigen::Array<
     double,
     Eigen::Dynamic,
@@ -40,18 +40,13 @@ using std::chrono::steady_clock;
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
 
-using namespace gz;
-using namespace waves;
+using gz::waves::ECKVWaveSpectrum;
 
 //////////////////////////////////////////////////
 // Define fixture
 class WaveSpectrumECKVPerfFixture: public ::testing::Test
-{ 
-public: 
-  virtual ~WaveSpectrumECKVPerfFixture()
-  {
-  }
-
+{
+ public:
   WaveSpectrumECKVPerfFixture()
   {
     double kx_nyquist = M_PI * nx_ / lx_;
@@ -60,11 +55,11 @@ public:
     Eigen::ArrayXd kx_v(nx_);
     Eigen::ArrayXd ky_v(ny_);
 
-    for (int i=0; i<nx_; ++i)
+    for (int i=0; i < nx_; ++i)
     {
       kx_v(i) = (i * 2.0 / nx_ - 1.0) * kx_nyquist;
     }
-    for (int i=0; i<ny_; ++i)
+    for (int i=0; i < ny_; ++i)
     {
       ky_v(i) = (i * 2.0 / ny_ - 1.0) * ky_nyquist;
     }
@@ -72,7 +67,7 @@ public:
     // broadcast to matrices (aka meshgrid)
     Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx_, ny_);
     kx.colwise() += kx_v;
-    
+
     Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx_, ny_);
     ky.rowwise() += ky_v.transpose();
 
@@ -82,15 +77,11 @@ public:
 
     // create spectrum
     spectrum_ = ECKVWaveSpectrum(u19_);
-  } 
-
-  virtual void SetUp() override
-  { 
-    cap_s_ = Eigen::ArrayXXd::Zero(nx_, ny_);
   }
 
-  virtual void TearDown() override
+  void SetUp() override
   {
+    cap_s_ = Eigen::ArrayXXd::Zero(nx_, ny_);
   }
 
   // number of evaluations

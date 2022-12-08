@@ -44,37 +44,39 @@
 
 namespace gz
 {
-  namespace rendering
-  {
-    inline namespace GZ_RENDERING_VERSION_NAMESPACE {
-    //
-    // Forward declarations
-    class RenderEngineExtension;
-    class RenderEngineExtensionPluginPrivate;
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-    /// \brief Base plugin class for render engine extensions
-    class GZ_RENDERING_VISIBLE RenderEngineExtensionPlugin
-    {
-      /// \brief Constructor
-      public: RenderEngineExtensionPlugin();
+// Forward declarations
+class RenderEngineExtension;
+class RenderEngineExtensionPluginPrivate;
 
-      /// \brief Destructor
-      public: virtual ~RenderEngineExtensionPlugin();
+/// \brief Base plugin class for render engine extensions
+class GZ_RENDERING_VISIBLE RenderEngineExtensionPlugin
+{
+  /// \brief Constructor
+  public: RenderEngineExtensionPlugin();
 
-      /// \brief Get the name of extension
-      /// \return Name of render engine extension
-      public: virtual std::string Name() const = 0;
+  /// \brief Destructor
+  public: virtual ~RenderEngineExtensionPlugin();
 
-      /// \brief Get a pointer to the extension
-      /// \return Render engine extension instance
-      public: virtual RenderEngineExtension *Extension() const = 0;
+  /// \brief Get the name of extension
+  /// \return Name of render engine extension
+  public: virtual std::string Name() const = 0;
 
-      /// \brief Pointer to private data class
-      GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
-      public: std::unique_ptr<RenderEngineExtensionPluginPrivate> dataPtr;
-      GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
-    };
-    }
-  }
+  /// \brief Get a pointer to the extension
+  /// \return Render engine extension instance
+  public: virtual RenderEngineExtension *Extension() const = 0;
+
+  /// \brief Pointer to private data class
+  GZ_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+  public: std::unique_ptr<RenderEngineExtensionPluginPrivate> dataPtr;
+  GZ_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
+};
+
 }
-#endif
+}  // namespace rendering
+}  // namespace gz
+
+#endif  // GZ_RENDERING_RENDERENGINEEXTENSIONPLUGIN_HH_

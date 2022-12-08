@@ -34,12 +34,16 @@
 
 #include "RenderEngineExtensionPlugin.hh"
 
-class gz::rendering::RenderEngineExtensionPluginPrivate
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
+
+//////////////////////////////////////////////////
+class RenderEngineExtensionPluginPrivate
 {
 };
-
-using namespace gz;
-using namespace rendering;
 
 //////////////////////////////////////////////////
 RenderEngineExtensionPlugin::RenderEngineExtensionPlugin()
@@ -50,3 +54,6 @@ RenderEngineExtensionPlugin::RenderEngineExtensionPlugin()
 //////////////////////////////////////////////////
 RenderEngineExtensionPlugin::~RenderEngineExtensionPlugin() = default;
 
+}
+}  // namespace rendering
+}  // namespace gz

@@ -15,9 +15,15 @@
 
 #include "SceneNodeFactory.hh"
 
-using namespace gz;
-using namespace rendering;
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-//////////////////////////////////////////////////
 SceneNodeFactory::~SceneNodeFactory() = default;
+
+}
+}  // namespace rendering
+}  // namespace gz
 

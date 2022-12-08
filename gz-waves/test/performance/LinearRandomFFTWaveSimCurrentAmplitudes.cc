@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <chrono>
-#include <iostream>
-#include <string>
+#include <gtest/gtest.h>
 
 #include <Eigen/Dense>
 
-#include <gtest/gtest.h>
+#include <chrono>
+#include <iostream>
+#include <string>
 
 #include "LinearRandomFFTWaveSimulationImpl.hh"
 
@@ -29,14 +29,13 @@ using std::chrono::steady_clock;
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
 
-using namespace gz;
-using namespace waves;
+using gz::waves::LinearRandomFFTWaveSimulation;
 
 //////////////////////////////////////////////////
 // Define fixture
 class LinearRandomFFTWaveSimTest: public ::testing::Test
 {
-public:
+ public:
   // number of evaluations
   int num_runs_ = 1000;
 

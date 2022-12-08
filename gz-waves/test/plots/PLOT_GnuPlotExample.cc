@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <gnuplot-iostream.h>
+
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <gnuplot-iostream.h>
 
 int main(int /*argc*/, const char **/*argv*/)
 {
@@ -54,7 +55,6 @@ int main(int /*argc*/, const char **/*argv*/)
       gp << "plot '-' w l title 'eta'\n";
       gp.send1d(std::make_tuple(pts_t, pts_eta));
     }
-
   }
   catch(...)
   {

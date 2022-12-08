@@ -28,38 +28,39 @@ namespace sim
 inline namespace GZ_SIM_VERSION_NAMESPACE {
 namespace systems
 {
-  // Forward declaration
-  class WavesVisualPrivate;
+// Forward declaration
+class WavesVisualPrivate;
 
-  /// \brief A plugin for surface waves
-  class WavesVisual
-      : public System,
-        public ISystemConfigure,
-        public ISystemPreUpdate
-  {
-    /// \brief Constructor
-    public: WavesVisual();
+/// \brief A plugin for surface waves
+class WavesVisual
+    : public System,
+      public ISystemConfigure,
+      public ISystemPreUpdate
+{
+  /// \brief Constructor
+  public: WavesVisual();
 
-    /// \brief Destructor
-    public: ~WavesVisual() override;
+  /// \brief Destructor
+  public: ~WavesVisual() override;
 
-    // Documentation inherited
-    public: void Configure(const Entity &_entity,
-                           const std::shared_ptr<const sdf::Element> &_sdf,
-                           EntityComponentManager &_ecm,
-                           EventManager &_eventMgr) final;
+  // Documentation inherited
+  public: void Configure(const Entity &_entity,
+                          const std::shared_ptr<const sdf::Element> &_sdf,
+                          EntityComponentManager &_ecm,
+                          EventManager &_eventMgr) final;
 
-    /// Documentation inherited
-    public: void PreUpdate(
-                const UpdateInfo &_info,
-                EntityComponentManager &_ecm) override;
+  /// Documentation inherited
+  public: void PreUpdate(
+              const UpdateInfo &_info,
+              EntityComponentManager &_ecm) override;
 
-    /// \brief Private data pointer
-    private: std::unique_ptr<WavesVisualPrivate> dataPtr;
-  };
-  }
+  /// \brief Private data pointer
+  private: std::unique_ptr<WavesVisualPrivate> dataPtr;
+};
+
+}  // namespace systems
 }
-}
-}
+}  // namespace sim
+}  // namespace gz
 
-#endif
+#endif  // GZ_SIM_SYSTEMS_WAVESVISUAL_HH_

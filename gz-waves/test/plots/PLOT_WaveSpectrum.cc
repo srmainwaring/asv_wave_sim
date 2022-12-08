@@ -13,22 +13,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <gnuplot-iostream.h>
+
+#include <Eigen/Dense>
+
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <vector>
-
- #include <Eigen/Dense>
-
-#include <gnuplot-iostream.h>
 
 #include <gz/waves/WaveSimulation.hh>
 #include <gz/waves/WaveSpectrum.hh>
 
 using Eigen::ArrayXd;
 
-using namespace gz;
-using namespace waves;
+using gz::waves::Index;
+using gz::waves::ECKVWaveSpectrum;
+using gz::waves::PiersonMoskowitzWaveSpectrum;
 
 // https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values
 template <typename T>
@@ -125,7 +126,6 @@ int main(int /*argc*/, const char **/*argv*/)
           pts_s[iu].push_back(s);
         }
       }
-
 
       // assume we always have at least one plot
       std::string plot_str("plot '-' w l title 'u19 = ");

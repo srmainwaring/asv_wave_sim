@@ -17,8 +17,11 @@
 
 #include <gz/rendering/RenderingIface.hh>
 
-using namespace gz;
-using namespace rendering;
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
 //////////////////////////////////////////////////
 Ogre2DisplacementMap::Ogre2DisplacementMap(
@@ -45,7 +48,7 @@ Ogre2DisplacementMap::~Ogre2DisplacementMap()
     std::dynamic_pointer_cast<gz::rendering::Ogre2Scene>(
         this->scene);
 
-  if(ogre2Scene != nullptr)
+  if (ogre2Scene != nullptr)
   {
     Ogre::SceneManager *ogre2SceneManager = ogre2Scene->OgreSceneManager();
 
@@ -57,7 +60,7 @@ Ogre2DisplacementMap::~Ogre2DisplacementMap()
 
       if (ogre2TextureManager != nullptr)
       {
-        for (uint8_t i=0; i<3; ++i)   {
+        for (uint8_t i=0; i < 3; ++i)   {
           if (mHeightMapStagingTextures[i]) {
               ogre2TextureManager->removeStagingTexture(
                   mHeightMapStagingTextures[i]);
@@ -140,7 +143,7 @@ void Ogre2DisplacementMap::InitTextures()
       "HeightMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
-      Ogre::TextureTypes::Type2D );
+      Ogre::TextureTypes::Type2D);
 
   mHeightMapTex->setResolution(mHeightMapImage->getWidth(),
       mHeightMapImage->getHeight());
@@ -154,7 +157,7 @@ void Ogre2DisplacementMap::InitTextures()
       "NormalMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
-      Ogre::TextureTypes::Type2D );
+      Ogre::TextureTypes::Type2D);
 
   mNormalMapTex->setResolution(mNormalMapImage->getWidth(),
       mNormalMapImage->getHeight());
@@ -168,7 +171,7 @@ void Ogre2DisplacementMap::InitTextures()
       "TangentMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
-      Ogre::TextureTypes::Type2D );
+      Ogre::TextureTypes::Type2D);
 
   mTangentMapTex->setResolution(mTangentMapImage->getWidth(),
       mTangentMapImage->getHeight());
@@ -332,11 +335,11 @@ void Ogre2DisplacementMap::UpdateTextures(
           double h  = mHeights(idx, 0);
           double sx = mDisplacementsX(idx, 0);
           double sy = mDisplacementsY(idx, 0);
-          double dhdx  = mDhdx(idx, 0); 
-          double dhdy  = mDhdy(idx, 0); 
-          double dsxdx = mDxdx(idx, 0); 
-          double dsydy = mDydy(idx, 0); 
-          double dsxdy = mDxdy(idx, 0); 
+          double dhdx  = mDhdx(idx, 0);
+          double dhdy  = mDhdy(idx, 0);
+          double dsxdx = mDxdx(idx, 0);
+          double dsydy = mDydy(idx, 0);
+          double dsxdy = mDxdy(idx, 0);
 
           // vertex displacements
           Dx += sy;
@@ -415,7 +418,7 @@ void Ogre2DisplacementMap::UpdateTextures(
     Ogre::StagingTexture *stagingTexture =
       mNormalMapStagingTextures[mNormalMapFrameIdx];
     mNormalMapFrameIdx = (mNormalMapFrameIdx + 1) % 3;
-    
+
     stagingTexture->startMapRegion();
     Ogre::TextureBox texBox = stagingTexture->mapRegion(
         mNormalMapImage->getWidth(), mNormalMapImage->getHeight(), 1u, 1u,
@@ -457,3 +460,7 @@ void Ogre2DisplacementMap::UpdateTextures(
     }
   }
 }
+
+}
+}  // namespace rendering
+}  // namespace gz

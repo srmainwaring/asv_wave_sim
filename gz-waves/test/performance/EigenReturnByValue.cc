@@ -17,5 +17,4 @@
 
 TEST(EigenReturnByValue, ArrayReturnByValue)
 {
-
 }

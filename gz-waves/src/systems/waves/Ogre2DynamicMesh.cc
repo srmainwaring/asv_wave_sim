@@ -63,8 +63,14 @@
   #pragma warning(pop)
 #endif
 
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
+
 /// \brief Private implementation
-class gz::rendering::Ogre2DynamicMeshPrivate
+class Ogre2DynamicMeshPrivate
 {
   /// \brief list of colors at each point
   public: std::vector<gz::math::Color> colors;
@@ -105,11 +111,18 @@ class gz::rendering::Ogre2DynamicMeshPrivate
   /// \brief Ogre item created from the dynamic geometry
   public: Ogre::Item *ogreItem {nullptr};
 
-  /// \todo if we use binormals then update teh stride and ensure they are set elsewhere
-  /// \brief vertex buffer stride = vertex.xyz + normal.xyz + tangent.xyz + binormal.xyz + uv0.xy
+  /// \todo if we use binormals then update teh stride and ensure
+  ///       they are set elsewhere
+  /// \brief vertex buffer stride =
+  ///             vertex.xyz
+  ///             + normal.xyz + tangent.xyz + binormal.xyz
+  ///             + uv0.xy
   // public: unsigned int stride {3 + 3 + 3 + 3 + 2};
 
-  /// \brief vertex buffer stride = vertex.xyz + normal.xyz + tangent.xyz + uv0.xy
+  /// \brief vertex buffer stride =
+  ///             vertex.xyz
+  ///             + normal.xyz + tangent.xyz
+  ///             + uv0.xy
   public: unsigned int stride {3 + 3 + 3 + 2};
 
   /// \brief raw vertex buffer
@@ -131,10 +144,6 @@ class gz::rendering::Ogre2DynamicMeshPrivate
   /// \brief Pointer to the ogre scene manager
   public: Ogre::SceneManager *sceneManager = nullptr;
 };
-
-
-using namespace gz;
-using namespace rendering;
 
 //////////////////////////////////////////////////
 Ogre2DynamicMesh::Ogre2DynamicMesh(ScenePtr _scene)
@@ -457,11 +466,12 @@ void Ogre2DynamicMesh::UpdateBuffer()
     }
   }
 
-  // \todo add condition to check if normals are to be set or generated, ditto colors
+  /// \todo add condition to check if normals are to be set or generated,
+  ///       ditto colors
 
   // fill normals
-  // this->GenerateNormals(this->dataPtr->operationType, this->dataPtr->vertices,
-  //     vertices);
+  // this->GenerateNormals(this->dataPtr->operationType,
+  //    this->dataPtr->vertices, vertices);
 
   // fill colors for points
   // this->GenerateColors(this->dataPtr->operationType, this->dataPtr->vertices,
@@ -903,9 +913,9 @@ void Ogre2DynamicMesh::GenerateColors(Ogre::OperationType _opType,
 
   unsigned int stride = this->dataPtr->stride;
 
-  // Each vertex occupies 3 + 3 + 2 elements in the vbuffer float array. Normally,
-  // the last 3 are reserved for normals. But for types that don't use normals,
-  // we use them for per-vertex coloring.
+  // Each vertex occupies 3 + 3 + 2 elements in the vbuffer float array.
+  // Normally, the last 3 are reserved for normals. But for types that
+  // don't use normals, we use them for per-vertex coloring.
   // vbuffer[i]   : position x
   // vbuffer[i+1] : position y
   // vbuffer[i+2] : position z
@@ -934,3 +944,7 @@ void Ogre2DynamicMesh::GenerateColors(Ogre::OperationType _opType,
       break;
   }
 }
+
+}
+}  // namespace rendering
+}  // namespace gz

@@ -15,25 +15,26 @@
 
 #include "Ogre2RenderEngineExtension.hh"
 
-#include "SceneNodeFactory.hh"
-#include "Ogre2SceneNodeFactory.hh"
-
 #include <gz/common/Console.hh>
 #include <gz/plugin/Register.hh>
 
 #include <gz/rendering/RenderEngine.hh>
 #include <gz/rendering/RenderingIface.hh>
 
+#include "SceneNodeFactory.hh"
+#include "Ogre2SceneNodeFactory.hh"
+
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
 //////////////////////////////////////////////////
-class GZ_RENDERING_OGRE2_HIDDEN
-    gz::rendering::Ogre2RenderEngineExtensionPrivate
+class GZ_RENDERING_OGRE2_HIDDEN Ogre2RenderEngineExtensionPrivate
 {
-  public: gz::rendering::SceneNodeFactoryPtr sceneNodeFactory;
+  public: SceneNodeFactoryPtr sceneNodeFactory;
 };
-
-using namespace gz;
-using namespace rendering;
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
@@ -156,6 +157,10 @@ SceneNodeFactoryPtr Ogre2RenderEngineExtension::SceneNodeFactory() const
 {
   return this->dataPtr->sceneNodeFactory;
 }
+
+}
+}  // namespace rendering
+}  // namespace gz
 
 //////////////////////////////////////////////////
 // Register this plugin
