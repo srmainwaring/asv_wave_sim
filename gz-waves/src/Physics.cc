@@ -814,6 +814,9 @@ void Hydrodynamics::UpdateSubmergedTriangles()
   for (auto&& v : linkMesh.vertices())
   {
     this->data->depths[v] = wavefieldSampler.ComputeDepth(linkMesh.point(v));
+
+    // display depth at vertex
+    gzmsg << linkMesh.point(v) << ": " << this->data->depths[v] << "\n";
   }
 
   // Get a list of the meshes exterior triangles
