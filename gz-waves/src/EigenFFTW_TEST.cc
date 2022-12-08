@@ -15,27 +15,27 @@
 
 #include <gtest/gtest.h>
 
+#include <Eigen/Dense>
+
+#include <fftw3.h>
+
 #include <complex>
 #include <iostream>
 #include <memory>
 #include <string>
 
-#include <Eigen/Dense>
-
-#include <fftw3.h>
-
 using Eigen::ArrayXXcd;
 using Eigen::ArrayXcd;
 
 namespace Eigen
-{ 
+{
   typedef Eigen::Array<
     double,
     Eigen::Dynamic,
     Eigen::Dynamic,
     Eigen::RowMajor
   > ArrayXXdRowMajor;
-}
+}  // namespace Eigen
 
 //////////////////////////////////////////////////
 TEST(EigenFFWT, DFT_C2C_1D)
@@ -62,16 +62,18 @@ TEST(EigenFFWT, DFT_C2C_1D)
                   0.,     -0.0366116523516816,  0.125,  -0.2133883476483184;
   xhat.imag() <<  0.,     -0.0883883476483184,  0.125,  -0.0883883476483184,
                   0.,      0.0883883476483184, -0.125,   0.0883883476483184;
-  
+
   { // using fftw_complex
-    fftw_complex* in  = (fftw_complex*)fftw_malloc(n * sizeof(fftw_complex));
-    fftw_complex* out = (fftw_complex*)fftw_malloc(n * sizeof(fftw_complex));
+    fftw_complex* in  =
+        reinterpret_cast<fftw_complex*>(fftw_malloc(n * sizeof(fftw_complex)));
+    fftw_complex* out =
+        reinterpret_cast<fftw_complex*>(fftw_malloc(n * sizeof(fftw_complex)));
 
     // create plan
     fftw_plan plan = fftw_plan_dft_1d(n, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
     // populate input
-    for (int i=0; i<n; ++i)
+    for (int i=0; i < n; ++i)
     {
       in[i][0] = xhat(i).real();
       in[i][1] = xhat(i).imag();
@@ -81,7 +83,7 @@ TEST(EigenFFWT, DFT_C2C_1D)
     fftw_execute(plan);
 
     // check output
-    for (int i=0; i<n; ++i)
+    for (int i=0; i < n; ++i)
     {
       // std::cerr << "[" << i << "] "
       //   << out[i][0] << " + " << out[i][1]
@@ -109,7 +111,7 @@ TEST(EigenFFWT, DFT_C2C_1D)
       FFTW_BACKWARD, FFTW_ESTIMATE);
 
     // populate input
-    for (int i=0; i<n; ++i)
+    for (int i=0; i < n; ++i)
     {
       in[i] = xhat(i);
     }
@@ -118,7 +120,7 @@ TEST(EigenFFWT, DFT_C2C_1D)
     fftw_execute(plan);
 
     // check output
-    for (int i=0; i<n; ++i)
+    for (int i=0; i < n; ++i)
     {
       EXPECT_NEAR(out[i].real(), x(i).real(), 1.0E-15);
       EXPECT_NEAR(out[i].imag(), 0.0, 1.0E-15);
@@ -137,7 +139,7 @@ TEST(EigenFFWT, DFT_C2C_1D)
       FFTW_BACKWARD, FFTW_ESTIMATE);
 
     // populate input
-    for (int i=0; i<n; ++i)
+    for (int i=0; i < n; ++i)
     {
       in(i) = xhat(i);
     }
@@ -146,7 +148,7 @@ TEST(EigenFFWT, DFT_C2C_1D)
     fftw_execute(plan);
 
     // check output
-    for (int i=0; i<n; ++i)
+    for (int i=0; i < n; ++i)
     {
       EXPECT_NEAR(out(i).real(), x(i).real(), 1.0E-15);
       EXPECT_NEAR(out(i).imag(), 0.0, 1.0E-15);
@@ -169,7 +171,7 @@ TEST(EigenFFWT, DFT_C2R_1D)
                   0.;
   xhat.imag() <<  0.,     -0.0883883476483184,  0.125,  -0.0883883476483184,
                   0.;
-  
+
   {
     std::vector<std::complex<double>> in(n/2+1, 0.0);
     std::vector<double> out(n, 0.0);
@@ -182,7 +184,7 @@ TEST(EigenFFWT, DFT_C2R_1D)
         FFTW_ESTIMATE);
 
     // populate input
-    for (int i=0; i<n/2+1; ++i)
+    for (int i=0; i < n/2+1; ++i)
     {
       in[i] = xhat(i);
     }
@@ -191,7 +193,7 @@ TEST(EigenFFWT, DFT_C2R_1D)
     fftw_execute(plan);
 
     // check output
-    for (int i=0; i<n; ++i)
+    for (int i=0; i < n; ++i)
     {
       EXPECT_NEAR(out[i], x(i).real(), 1.0E-15);
     }
@@ -248,7 +250,7 @@ TEST(EigenFFWT, EigenStorageOrdering)
       std::cerr << *(col_maj.data() + i) << " ";
     std::cerr << "\n";
     std::cerr << col_maj.reshaped().transpose() << "\n";
-    
+
     Eigen::Array<double, 2, 3, Eigen::RowMajor> row_maj = col_maj;
 
     std::cerr << "in memory (row-major):" << "\n";
@@ -261,8 +263,6 @@ TEST(EigenFFWT, EigenStorageOrdering)
 #endif
 
 //////////////////////////////////////////////////
-// Run tests
-
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

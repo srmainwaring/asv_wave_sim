@@ -17,26 +17,29 @@
 // The time-dependent update step in ComputeCurrentAmplitudes is based
 // on the Curtis Mobley's IDL code cgAnimate_2D_SeaSurface.py
 
-//***************************************************************************************************
-//* This code is copyright (c) 2016 by Curtis D. Mobley.                                            *
-//* Permission is hereby given to reproduce and use this code for non-commercial academic research, *
-//* provided that the user suitably acknowledges Curtis D. Mobley in any presentations, reports,    *
-//* publications, or other works that make use of the code or its output.  Depending on the extent  *
-//* of use of the code or its outputs, suitable acknowledgement can range from a footnote to offer  *
-//* of coauthorship.  Further questions can be directed to curtis.mobley@sequoiasci.com.            *
-//***************************************************************************************************
+//*****************************************************************************
+//* This code is copyright (c) 2016 by Curtis D. Mobley.
+//* Permission is hereby given to reproduce and use this code for
+//* non-commercial academic research, provided that the user suitably
+//* acknowledges Curtis D. Mobley in any presentations, reports, publications,
+//* or other works that make use of the code or its output.  Depending on the
+//* extent of use of the code or its outputs, suitable acknowledgement can
+//* range from a footnote to offer of coauthorship.  Further questions can be
+//* directed to curtis.mobley@sequoiasci.com.
+//*****************************************************************************
 
 #include "LinearRandomFFTWaveSimulationRef.hh"
-
-#include <complex>
-#include <random>
 
 #include <Eigen/Dense>
 
 #include <fftw3.h>
 
+#include <complex>
+#include <random>
+
 #include <gz/common.hh>
 
+#include "gz/waves/Types.hh"
 #include "LinearRandomFFTWaveSimulationRefImpl.hh"
 
 namespace gz
@@ -70,7 +73,8 @@ namespace waves
   }
 
   //////////////////////////////////////////////////
-  void LinearRandomFFTWaveSimulationRef::Impl::SetWindVelocity(double ux, double uy)
+  void LinearRandomFFTWaveSimulationRef::Impl::SetWindVelocity(
+      double ux, double uy)
   {
     // Update wind velocity and recompute base amplitudes.
     u10_ = sqrt(ux*ux + uy *uy);
@@ -93,7 +97,7 @@ namespace waves
     fftw_execute(fft_plan0_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     h = fft_out0_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
 
@@ -107,7 +111,7 @@ namespace waves
     fftw_execute(fft_plan2_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1).real();
     dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1).real();
   }
@@ -122,7 +126,7 @@ namespace waves
     fftw_execute(fft_plan4_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
     sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
   }
@@ -139,7 +143,7 @@ namespace waves
     fftw_execute(fft_plan7_);
 
     // change from row to column major storage
-    size_t n2 = nx_ * ny_;
+    Index n2 = nx_ * ny_;
     dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
     dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ * -1.0;
     dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1).real() * lambda_ *  1.0;
@@ -151,7 +155,7 @@ namespace waves
     InitFFTCoeffStorage();
     InitWaveNumbers();
 
-    // size_t n2 = nx_ * ny_;
+    // Index n2 = nx_ * ny_;
 
     // arrays for reference version
     if (cap_psi_2s_root_.size() == 0)
@@ -163,11 +167,11 @@ namespace waves
     }
 
     // Guide to indexing conventions:  1. index, 2. math-order, 3. fft-order
-    // 
+    //
     // 1. [ 0,  1,  2,  3,  4,  5,  6,  7]
     // 2. [-4, -3, -2, -1,  0,  1,  2,  3]
     // 3.                 [ 0,  1,  2,  3, -4, -3, -2, -3]
-    // 
+    //
 
     // sample spacing [m]
     double  delta_x{lx_ / nx_};
@@ -239,9 +243,9 @@ namespace waves
     Eigen::ArrayXXd cap_psi_2s_math = Eigen::ArrayXXd::Zero(nx_, ny_);
 
     // calculate spectrum in math-order (not vectorised)
-    for (Index ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx=0; ikx < nx_; ++ikx)
     {
-      for (Index iky = 0; iky < ny_; ++iky)
+      for (Index iky=0; iky < ny_; ++iky)
       {
         double k = sqrt(kx_math_[ikx]*kx_math_[ikx]
             + ky_math_[iky]*ky_math_[iky]);
@@ -250,18 +254,14 @@ namespace waves
         if (std::abs(k) < 1.0E-8)
         {
           cap_psi_2s_math(ikx, iky) = 0.0;
-        }
-        else
-        {
+        } else {
           double cap_psi = 0.0;
           if (use_symmetric_spreading_fn_)
           {
             // standing waves - symmetric spreading function
             cap_psi = Impl::ECKVSpreadingFunction(
                 k, phi - phi10_, u10_, cap_omega_c_, gravity_);
-          }
-          else
-          {
+          } else {
             // travelling waves - asymmetric spreading function
             cap_psi = Impl::Cos2sSpreadingFunction(
                 s_param_, phi - phi10_, u10_, cap_omega_c_, gravity_);
@@ -295,10 +295,10 @@ namespace waves
 
     // convert to fft-order
     Eigen::ArrayXXd cap_psi_2s_fft = Eigen::ArrayXXd::Zero(nx_, ny_);
-    for (Index ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx=0; ikx < nx_; ++ikx)
     {
       Index ikx_fft = (ikx + nx_/2) % nx_;
-      for (Index iky = 0; iky < ny_; ++iky)
+      for (Index iky=0; iky < ny_; ++iky)
       {
         Index iky_fft = (iky + ny_/2) % ny_;
         cap_psi_2s_fft(ikx_fft, iky_fft) = cap_psi_2s_math(ikx, iky);
@@ -310,9 +310,9 @@ namespace waves
     double delta_kx = kx_f_;
     double delta_ky = ky_f_;
 
-    for (Index ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx=0; ikx < nx_; ++ikx)
     {
-      for (Index iky = 0; iky < ny_; ++iky)
+      for (Index iky=0; iky < ny_; ++iky)
       {
         cap_psi_2s_root_(ikx, iky) =
             cap_psi_norm * sqrt(cap_psi_2s_fft(ikx, iky) * delta_kx * delta_ky);
@@ -324,9 +324,9 @@ namespace waves
     std::default_random_engine generator(seed);
     std::normal_distribution<double> distribution(0.0, 1.0);
 
-    for (Index ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx=0; ikx < nx_; ++ikx)
     {
-      for (Index iky = 0; iky < ny_; ++iky)
+      for (Index iky=0; iky < ny_; ++iky)
       {
         rho_(ikx, iky) = distribution(generator);
         sigma_(ikx, iky) = distribution(generator);
@@ -338,7 +338,7 @@ namespace waves
     {
       double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (Index iky = 0; iky < ny_; ++iky)
+      for (Index iky=0; iky < ny_; ++iky)
       {
         double ky = ky_fft_[iky];
         double ky2 = ky*ky;
@@ -360,9 +360,9 @@ namespace waves
     // time update
     Eigen::ArrayXXd cos_omega_k = Eigen::ArrayXXd::Zero(nx_, ny_);
     Eigen::ArrayXXd sin_omega_k = Eigen::ArrayXXd::Zero(nx_, ny_);
-    for (Index ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx=0; ikx < nx_; ++ikx)
     {
-      for (Index iky = 0; iky < ny_; ++iky)
+      for (Index iky=0; iky < ny_; ++iky)
       {
         cos_omega_k(ikx, iky) = cos(omega_k_(ikx, iky) * time);
         sin_omega_k(ikx, iky) = sin(omega_k_(ikx, iky) * time);
@@ -371,15 +371,23 @@ namespace waves
 
     // non-vectorised reference version
     Eigen::ArrayXXcd zhat = Eigen::ArrayXXcd::Zero(nx_, ny_);
-    for (Index ikx = 1; ikx < nx_; ++ikx)
+    for (Index ikx=1; ikx < nx_; ++ikx)
     {
-      for (Index iky = 1; iky < ny_; ++iky)
+      for (Index iky=1; iky < ny_; ++iky)
       {
         zhat(ikx, iky) = complex(
-            + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
-            + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * sin_omega_k(ikx, iky),
-            - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * sin_omega_k(ikx, iky)
-            + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky) ) * cos_omega_k(ikx, iky));
+            + (r(ikx, iky) * psi_root(ikx, iky)
+            + r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky))
+            * cos_omega_k(ikx, iky)
+            + (s(ikx, iky) * psi_root(ikx, iky)
+            + s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky))
+            * sin_omega_k(ikx, iky),
+            - (r(ikx, iky) * psi_root(ikx, iky)
+            - r(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky))
+            * sin_omega_k(ikx, iky)
+            + (s(ikx, iky) * psi_root(ikx, iky)
+            - s(nx_-ikx, ny_-iky) * psi_root(nx_-ikx, ny_-iky))
+            * cos_omega_k(ikx, iky));
       }
     }
 
@@ -387,10 +395,14 @@ namespace waves
     {
       Index ikx = 0;
       zhat(ikx, iky) = complex(
-          + ( r(ikx, iky) * psi_root(ikx, iky) + r(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * cos_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) + s(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * sin_omega_k(ikx, iky),
-          - ( r(ikx, iky) * psi_root(ikx, iky) - r(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * sin_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) - s(ikx, ny_-iky) * psi_root(ikx, ny_-iky) ) * cos_omega_k(ikx, iky));
+          + (r(ikx, iky) * psi_root(ikx, iky)
+          + r(ikx, ny_-iky) * psi_root(ikx, ny_-iky)) * cos_omega_k(ikx, iky)
+          + (s(ikx, iky) * psi_root(ikx, iky)
+          + s(ikx, ny_-iky) * psi_root(ikx, ny_-iky)) * sin_omega_k(ikx, iky),
+          - (r(ikx, iky) * psi_root(ikx, iky)
+          - r(ikx, ny_-iky) * psi_root(ikx, ny_-iky)) * sin_omega_k(ikx, iky)
+          + (s(ikx, iky) * psi_root(ikx, iky)
+          - s(ikx, ny_-iky) * psi_root(ikx, ny_-iky)) * cos_omega_k(ikx, iky));
       zhat(ikx, ny_-iky) = std::conj(zhat(ikx, iky));
     }
 
@@ -398,10 +410,14 @@ namespace waves
     {
       Index iky = 0;
       zhat(ikx, iky) = complex(
-          + ( r(ikx, iky) * psi_root(ikx, iky) + r(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * cos_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) + s(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * sin_omega_k(ikx, iky),
-          - ( r(ikx, iky) * psi_root(ikx, iky) - r(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * sin_omega_k(ikx, iky)
-          + ( s(ikx, iky) * psi_root(ikx, iky) - s(nx_-ikx, iky) * psi_root(nx_-ikx, iky) ) * cos_omega_k(ikx, iky));
+          + (r(ikx, iky) * psi_root(ikx, iky)
+          + r(nx_-ikx, iky) * psi_root(nx_-ikx, iky)) * cos_omega_k(ikx, iky)
+          + (s(ikx, iky) * psi_root(ikx, iky)
+          + s(nx_-ikx, iky) * psi_root(nx_-ikx, iky)) * sin_omega_k(ikx, iky),
+          - (r(ikx, iky) * psi_root(ikx, iky)
+          - r(nx_-ikx, iky) * psi_root(nx_-ikx, iky)) * sin_omega_k(ikx, iky)
+          + (s(ikx, iky) * psi_root(ikx, iky)
+          - s(nx_-ikx, iky) * psi_root(nx_-ikx, iky)) * cos_omega_k(ikx, iky));
       zhat(nx_-ikx, iky) = std::conj(zhat(ikx, iky));
     }
 
@@ -410,11 +426,11 @@ namespace waves
     // write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
     const complex iunit(0.0, 1.0);
     const complex czero(0.0, 0.0);
-    for (Index ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx=0; ikx < nx_; ++ikx)
     {
       double kx = kx_fft_[ikx];
       double kx2 = kx*kx;
-      for (Index iky = 0; iky < ny_; ++iky)
+      for (Index iky=0; iky < ny_; ++iky)
       {
         double ky = ky_fft_[iky];
         double ky2 = ky*ky;
@@ -432,7 +448,7 @@ namespace waves
         // height derivatives
         complex hikx = hi * kx;
         complex hiky = hi * ky;
-        
+
         // Nyquist terms for derivatives must be zero.
         // For an explanation see:
         // https://math.mit.edu/~stevenj/fft-deriv.pdf
@@ -452,9 +468,7 @@ namespace waves
           fft_h_kxkx_(ikx, iky) = czero;
           fft_h_kyky_(ikx, iky) = czero;
           fft_h_kxky_(ikx, iky) = czero;
-        }
-        else
-        {
+        } else {
           complex dx  = - hiok * kx;
           complex dy  = - hiok * ky;
           complex hkxkx = hok * kx2;
@@ -507,14 +521,14 @@ namespace waves
     ky_math_ = Eigen::ArrayXd::Zero(ny_);
 
     // wavenumbers in fft and math ordering
-    for(Index ikx = 0; ikx < nx_; ++ikx)
+    for (Index ikx = 0; ikx < nx_; ++ikx)
     {
       double kx = (ikx - nx_/2) * kx_f_;
       kx_math_(ikx) = kx;
       kx_fft_((ikx + nx_/2) % nx_) = kx;
     }
 
-    for(Index iky = 0; iky < ny_; ++iky)
+    for (Index iky = 0; iky < ny_; ++iky)
     {
       double ky = (iky - ny_/2) * ky_f_;
       ky_math_(iky) = ky;
@@ -607,27 +621,23 @@ namespace waves
     double km = 370.0;
     double cm = 0.23;
     // double am = 0.13 * u_star / cm;
-    
+
     double gamma = 1.7;
     if (cap_omega_c < 1.0)
     {
       gamma = 1.7;
-    }
-    else
-    {
+    } else {
       gamma = 1.7 + 6.0 * log10(cap_omega_c);
     }
 
     double sigma = 0.08 * (1.0 + 4.0 * pow(cap_omega_c, -3.0));
     double alpha_p = 0.006 * pow(cap_omega_c, 0.55);
 
-    double alpha_m; 
+    double alpha_m;
     if (u_star <= cm)
     {
       alpha_m = 0.01 * (1.0 + log(u_star / cm));
-    }
-    else
-    {
+    } else {
       alpha_m = 0.01 * (1.0 + 3.0 * log(u_star / cm));
     }
 
@@ -636,20 +646,22 @@ namespace waves
 
     double cp = sqrt(g / kp);
     double c  = sqrt((g / k) * (1.0 + pow(k / km, 2.0)));
-        
+
     double L_PM = exp(-1.25 * pow(kp / k, 2.0));
-    
-    double Gamma = exp(-1.0/(2.0 * pow(sigma, 2.0)) * pow(sqrt(k / kp) - 1.0, 2.0));
-    
+
+    double Gamma = exp(-1.0/(2.0 * pow(sigma, 2.0))
+        * pow(sqrt(k / kp) - 1.0, 2.0));
+
     double J_p = pow(gamma, Gamma);
-    
-    double F_p = L_PM * J_p * exp(-0.3162 * cap_omega_c * (sqrt(k / kp) - 1.0));
+
+    double F_p = L_PM * J_p * exp(-0.3162 * cap_omega_c
+        * (sqrt(k / kp) - 1.0));
 
     double F_m = L_PM * J_p * exp(-0.25 * pow(k / km - 1.0, 2.0));
 
     double B_l = 0.5 * alpha_p * (cp / c) * F_p;
     double B_h = 0.5 * alpha_m * (cm / c) * F_m;
-    
+
     double k3 = k * k * k;
     double S = (B_l + B_h) / k3;
 
@@ -678,7 +690,7 @@ namespace waves
     // gzmsg << "Bl:      " << B_l << "\n";
     // gzmsg << "Fm:      " << F_m << "\n";
     // gzmsg << "Bh:      " << B_h << "\n";
-    
+
     return S;
   }
 
@@ -818,5 +830,5 @@ namespace waves
     impl_->DisplacementAt(sx, sy);
     impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
-}
-}
+}  // namespace waves
+}  // namespace gz

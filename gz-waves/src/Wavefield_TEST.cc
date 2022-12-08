@@ -13,9 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/CGALTypes.hh"
-#include "gz/waves/Wavefield.hh"
-
 #include <Eigen/Dense>
 
 #include <gtest/gtest.h>
@@ -24,27 +21,33 @@
 #include <memory>
 #include <string>
 
-using namespace gz;
-using namespace waves;
+#include "gz/waves/CGALTypes.hh"
+#include "gz/waves/Types.hh"
+#include "gz/waves/Wavefield.hh"
 
-///////////////////////////////////////////////////////////////////////////////
+using gz::waves::Index;
+
+//////////////////////////////////////////////////
 // Utilities
 
-std::ostream& operator<<(std::ostream& os, const std::vector<double>& _vec)
-{ 
-  for (auto&& v : _vec )
+std::ostream& operator<<(std::ostream& os,
+    const std::vector<double>& vec)
+{
+  for (auto& v : vec)
     os << v << ", ";
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const std::vector<Eigen::Vector2d>& _vec)
-{ 
-  for (auto&& v : _vec )
+//////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& os,
+    const std::vector<Eigen::Vector2d>& vec)
+{
+  for (auto& v : vec)
     os << v.transpose() << ", ";
   return os;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Define tests
 
 // One dimension, one wave component
@@ -60,7 +63,7 @@ TEST(Wavefield, WaveSolver1D)
 
   auto dispersion = [=](auto omega)
   {
-    return omega * omega / 9.8; 
+    return omega * omega / 9.8;
   };
 
   auto wave = [=](auto x, auto t, auto& wp)
@@ -92,9 +95,10 @@ TEST(Wavefield, WaveSolver1D)
     return df;
   };
 
-  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
+  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t,
+      auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     double xn = x0;
     while (std::abs(err) > tol && n < nmax)
@@ -125,8 +129,8 @@ TEST(Wavefield, WaveSolver1D)
 
   const double tol = 1E-8;
   const double nmax = 20;
-  double x = solver(wave_f, wave_df, p, p, t, wp, tol, nmax); 
-  
+  double x = solver(wave_f, wave_df, p, p, t, wp, tol, nmax);
+
   const double eps = 1E-8;
   EXPECT_NEAR(wp.a, 3.0, eps);
   EXPECT_NEAR(wp.k, 0.251775622, eps);
@@ -147,6 +151,7 @@ TEST(Wavefield, WaveSolver1D)
   // std::cout << "x:      " << x << std::endl;
 }
 
+//////////////////////////////////////////////////
 // Two dimensions, one wave component
 TEST(Wavefield, WaveSolver2D)
 {
@@ -161,7 +166,7 @@ TEST(Wavefield, WaveSolver2D)
 
   auto dispersion = [=](auto omega)
   {
-    return omega * omega / 9.8; 
+    return omega * omega / 9.8;
   };
 
   auto wave = [=](auto x, auto t, auto& wp)
@@ -174,8 +179,7 @@ TEST(Wavefield, WaveSolver2D)
     const Eigen::Vector3d p(
       x.x() - wp.a * dx * s,
       x.y() - wp.a * dy * s,
-      wp.a * c
-    );
+      wp.a * c);
     return p;
   };
 
@@ -187,8 +191,7 @@ TEST(Wavefield, WaveSolver2D)
     const double dy = wp.dir.y();
     const Eigen::Vector2d f(
       p.x() - x.x() + wp.a * dx * s,
-      p.y() - x.y() + wp.a * dy * s
-    );
+      p.y() - x.y() + wp.a * dy * s);
     return f;
   };
 
@@ -211,9 +214,10 @@ TEST(Wavefield, WaveSolver2D)
     return J;
   };
 
-  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
+  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t,
+      auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     auto xn = x0;
     while (std::abs(err) > tol && n < nmax)
@@ -245,8 +249,8 @@ TEST(Wavefield, WaveSolver2D)
 
   const double tol = 1E-8;
   const double nmax = 20;
-  auto x = solver(wave_f, wave_df, p, p, t, wp, tol, nmax); 
-  
+  auto x = solver(wave_f, wave_df, p, p, t, wp, tol, nmax);
+
   const double eps = 1E-8;
   EXPECT_NEAR(wp.a, 3.0, eps);
   EXPECT_NEAR(wp.k, 0.251775622, eps);
@@ -270,6 +274,7 @@ TEST(Wavefield, WaveSolver2D)
   // std::cout << "x:      " << x.transpose() << std::endl;
 }
 
+//////////////////////////////////////////////////
 // Two dimensions, many wave components
 TEST(Wavefield, NWaveSolver2D)
 {
@@ -284,14 +289,14 @@ TEST(Wavefield, NWaveSolver2D)
 
   auto dispersion = [=](auto omega)
   {
-    return omega * omega / 9.8; 
+    return omega * omega / 9.8;
   };
 
   auto wave = [=](auto x, auto t, auto& wp)
   {
     Eigen::Vector3d p(x.x(), x.y(), 0.0);
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i < n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -302,8 +307,7 @@ TEST(Wavefield, NWaveSolver2D)
       p += Eigen::Vector3d(
         - a * dx * s,
         - a * dy * s,
-        a * c
-      );
+        a * c);
     }
     return p;
   };
@@ -311,8 +315,8 @@ TEST(Wavefield, NWaveSolver2D)
   auto wave_f = [=](auto x, auto p, auto t, auto& wp)
   {
     Eigen::Vector2d f(p.x() - x.x(), p.y() - x.y());
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i < n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -321,8 +325,7 @@ TEST(Wavefield, NWaveSolver2D)
       const double a = wp.a[i];
       f += Eigen::Vector2d(
         a * dx * s,
-        a * dy * s
-      );
+        a * dy * s);
     }
     return f;
   };
@@ -334,8 +337,8 @@ TEST(Wavefield, NWaveSolver2D)
     J(0, 1) =  0;
     J(1, 0) =  0;
     J(1, 1) = -1;
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i < n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double c = std::cos(theta);
@@ -350,13 +353,14 @@ TEST(Wavefield, NWaveSolver2D)
       J(0, 1) += df1y;
       J(1, 0) += df2x;
       J(1, 1) += df2y;
-    }    
+    }
     return J;
   };
 
-  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
+  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p, auto t,
+      auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     auto xn = x0;
     while (std::abs(err) > tol && n < nmax)
@@ -376,9 +380,11 @@ TEST(Wavefield, NWaveSolver2D)
   // wp.omega = { 2*M_PI/4.0, 2*M_PI, 2*M_PI };
   wp.a = { 1.0, 2.0, 3.0 };
   wp.omega = { 2*M_PI/50.0, 2*M_PI/10.0, 2*M_PI/20.0 };
-  wp.k = { dispersion(wp.omega[0]), dispersion(wp.omega[1]), dispersion(wp.omega[2]) };
+  wp.k = { dispersion(wp.omega[0]), dispersion(wp.omega[1]),
+      dispersion(wp.omega[2]) };
   wp.phi = { 0.0, 0.0, 0.0 };
-  wp.dir = { Eigen::Vector2d(1, 0), Eigen::Vector2d(1, 0), Eigen::Vector2d(1, 0) };
+  wp.dir = { Eigen::Vector2d(1, 0), Eigen::Vector2d(1, 0),
+      Eigen::Vector2d(1, 0) };
 
   double t = 0;
   Eigen::Vector2d x0(2.0, 3.0);
@@ -390,8 +396,8 @@ TEST(Wavefield, NWaveSolver2D)
 
   const double tol = 1E-8;
   const double nmax = 20;
-  auto x = solver(wave_f, wave_df, p, p, t, wp, tol, nmax); 
-  
+  auto x = solver(wave_f, wave_df, p, p, t, wp, tol, nmax);
+
   const double eps = 1E-8;
   EXPECT_DOUBLE_EQ(x0.x(), 2.0);
   EXPECT_DOUBLE_EQ(x0.y(), 3.0);
@@ -411,7 +417,9 @@ TEST(Wavefield, NWaveSolver2D)
   // std::cout << "x:      " << x.transpose() << std::endl;
 }
 
-// Two dimensions, many wave components, combined function and jacobian calculation
+//////////////////////////////////////////////////
+// Two dimensions, many wave components, combined function
+/// and jacobian calculation
 TEST(Wavefield, NWaveFdFSolver2D)
 {
   struct WaveParams
@@ -425,14 +433,14 @@ TEST(Wavefield, NWaveFdFSolver2D)
 
   auto dispersion = [=](auto omega)
   {
-    return omega * omega / 9.8; 
+    return omega * omega / 9.8;
   };
 
   auto wave = [=](auto x, auto t, auto& wp)
   {
     Eigen::Vector3d p(x.x(), x.y(), 0.0);
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i < n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -443,8 +451,7 @@ TEST(Wavefield, NWaveFdFSolver2D)
       p += Eigen::Vector3d(
         - a * dx * s,
         - a * dy * s,
-        a * c
-      );
+        a * c);
     }
     return p;
   };
@@ -457,8 +464,8 @@ TEST(Wavefield, NWaveFdFSolver2D)
     J(0, 1) =  0;
     J(1, 0) =  0;
     J(1, 1) = -1;
-    size_t n = wp.a.size();
-    for (size_t i=0; i<n; ++i)
+    Index n = wp.a.size();
+    for (Index i=0; i < n; ++i)
     {
       const double theta = wp.k[i] * x.dot(wp.dir[i])  - wp.omega[i] * t;
       const double s = std::sin(theta);
@@ -477,12 +484,13 @@ TEST(Wavefield, NWaveFdFSolver2D)
       J(0, 1) += df1y;
       J(1, 0) += df2x;
       J(1, 1) += df2y;
-    }    
+    }
   };
 
-  auto solver = [=](auto& fdfunc, auto x0, auto p, auto t, auto& wp, auto tol, auto nmax)
+  auto solver = [=](auto& fdfunc, auto x0, auto p, auto t,
+      auto& wp, auto tol, auto nmax)
   {
-    int n = 0;
+    Index n = 0;
     double err = 1;
     auto xn = x0;
     Eigen::Vector2d F;
@@ -501,9 +509,11 @@ TEST(Wavefield, NWaveFdFSolver2D)
   WaveParams wp;
   wp.a = { 1.0, 2.0, 3.0 };
   wp.omega = { 2*M_PI/50.0, 2*M_PI/10.0, 2*M_PI/20.0 };
-  wp.k = { dispersion(wp.omega[0]), dispersion(wp.omega[1]), dispersion(wp.omega[2]) };
+  wp.k = { dispersion(wp.omega[0]), dispersion(wp.omega[1]),
+      dispersion(wp.omega[2]) };
   wp.phi = { 0.0, 0.0, 0.0 };
-  wp.dir = { Eigen::Vector2d(1, 0), Eigen::Vector2d(1, 0), Eigen::Vector2d(1, 0) };
+  wp.dir = { Eigen::Vector2d(1, 0), Eigen::Vector2d(1, 0),
+      Eigen::Vector2d(1, 0) };
 
   double t = 0;
   Eigen::Vector2d x0(2.0, 3.0);
@@ -516,8 +526,8 @@ TEST(Wavefield, NWaveFdFSolver2D)
 
   const double tol = 1E-8;
   const double nmax = 20;
-  auto x = solver(wave_fdf, p, p, t, wp, tol, nmax); 
-  
+  auto x = solver(wave_fdf, p, p, t, wp, tol, nmax);
+
   const double eps = 1E-8;
   EXPECT_DOUBLE_EQ(x0.x(), 2.0);
   EXPECT_DOUBLE_EQ(x0.y(), 3.0);
@@ -526,7 +536,7 @@ TEST(Wavefield, NWaveFdFSolver2D)
   EXPECT_LE(F.norm(), eps);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // Run tests
 
 int main(int argc, char **argv)

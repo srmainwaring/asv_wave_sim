@@ -13,20 +13,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/WaveSpreadingFunction.hh"
-#include "LinearRandomFFTWaveSimulationRefImpl.hh"
+#include <gtest/gtest.h>
 
 #include <memory>
 #include <vector>
 
-#include <gtest/gtest.h>
+#include "gz/waves/Types.hh"
+#include "gz/waves/WaveSpreadingFunction.hh"
+#include "LinearRandomFFTWaveSimulationRefImpl.hh"
 
-using namespace gz;
-using namespace waves;
+using gz::waves::Cos2sSpreadingFunction;
+using gz::waves::DirectionalSpreadingFunction;
+using gz::waves::ECKVSpreadingFunction;
+using gz::waves::Index;
+using gz::waves::LinearRandomFFTWaveSimulationRef;
 
-///////////////////////////////////////////////////////////////////////////////
-// Define tests
-
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, Cos2sRegression)
 {
   { // Regress against values generate from Python reference version
@@ -51,7 +53,7 @@ TEST(WaveSpreadingFunction, Cos2sRegression)
       9.03278127e-01
     };
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double phi_test = spreadingFn.Evaluate(theta[i], theta_mean);
       EXPECT_NEAR(phi[i], phi_test, tolerance);
@@ -59,6 +61,7 @@ TEST(WaveSpreadingFunction, Cos2sRegression)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, Cos2sVectorXd)
 {
   { // Eigen array version
@@ -77,7 +80,7 @@ TEST(WaveSpreadingFunction, Cos2sVectorXd)
     Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean);
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double phi_test = spreadingFn.Evaluate(theta(i), theta_mean);
       EXPECT_DOUBLE_EQ(phi(i), phi_test);
@@ -85,6 +88,7 @@ TEST(WaveSpreadingFunction, Cos2sVectorXd)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, Cos2sNonZeroMeanVectorXd)
 {
   { // Eigen array version - non-zero mean
@@ -103,7 +107,7 @@ TEST(WaveSpreadingFunction, Cos2sNonZeroMeanVectorXd)
     Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean);
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double phi_test = spreadingFn.Evaluate(theta(i), theta_mean);
       EXPECT_DOUBLE_EQ(phi(i), phi_test);
@@ -111,6 +115,7 @@ TEST(WaveSpreadingFunction, Cos2sNonZeroMeanVectorXd)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, Cos2sAccessors)
 {
   { // accessor returns set value
@@ -144,13 +149,14 @@ TEST(WaveSpreadingFunction, Cos2sAccessors)
     spreadingFn1.Evaluate(phi1, theta, theta_mean);
     spreadingFn2.Evaluate(phi2, theta, theta_mean);
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       EXPECT_DOUBLE_EQ(phi1(i), phi2(i));
     }
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, Cos2sVirtualVectorXd)
 {
   { // Call virtually from base class ptr.
@@ -175,7 +181,7 @@ TEST(WaveSpreadingFunction, Cos2sVirtualVectorXd)
     EXPECT_EQ(phi.rows(), 21);
     EXPECT_EQ(phi.cols(), 1);
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double phi_test = spreadingFn->Evaluate(theta(i, 0), theta_mean);
       EXPECT_DOUBLE_EQ(phi(i, 0), phi_test);
@@ -183,6 +189,7 @@ TEST(WaveSpreadingFunction, Cos2sVirtualVectorXd)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
 {
   const double spread = 10.0;
@@ -207,7 +214,7 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
     Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean);
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double dtheta = theta(i) - theta_mean;
       double phi_test =
@@ -218,13 +225,14 @@ TEST(WaveSpreadingFunction, Cos2sFFT2ImplRegression)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, WaveNumberArrayXXd)
 {
   { // componentwise operations
     double lx = 200.0;
     double ly = 100.0;
-    int nx = 32;
-    int ny = 16;
+    Index nx = 32;
+    Index ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -233,11 +241,11 @@ TEST(WaveSpreadingFunction, WaveNumberArrayXXd)
     Eigen::ArrayXd kx_v(nx);
     Eigen::ArrayXd ky_v(ny);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i < nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (int i=0; i<ny; ++i)
+    for (Index i=0; i < ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -269,7 +277,7 @@ TEST(WaveSpreadingFunction, WaveNumberArrayXXd)
     // broadcast to matrices (aka meshgrid)
     Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx, ny);
     kx.colwise() += kx_v;
-    
+
     Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx, ny);
     ky.rowwise() += ky_v.transpose();
 
@@ -280,9 +288,9 @@ TEST(WaveSpreadingFunction, WaveNumberArrayXXd)
     EXPECT_EQ(ky.cols(), ny);
 
     // check contents
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i < nx; ++i)
     {
-      for (int j=0; j<ny; ++j)
+      for (Index j=0; j < ny; ++j)
       {
         EXPECT_DOUBLE_EQ(kx(i, j), kx_v(i));
         EXPECT_DOUBLE_EQ(ky(i, j), ky_v(j));
@@ -293,13 +301,12 @@ TEST(WaveSpreadingFunction, WaveNumberArrayXXd)
     Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
     Eigen::ArrayXXd k = Eigen::sqrt(kx2 + ky2);
     Eigen::ArrayXXd theta = ky.binaryExpr(
-        kx, [] (double y, double x) { return std::atan2(y, x);}
-    );
+        kx, [] (double y, double x) { return std::atan2(y, x);});
 
     // check the wave number matrix and angle matrices
-    for (int i=0; i<nx; ++i)
-    { 
-      for (int j=0; j<ny; ++j)
+    for (Index i=0; i < nx; ++i)
+    {
+      for (Index j=0; j < ny; ++j)
       {
         double kxij = kx(i, j);
         double kx2ij = kxij * kxij;
@@ -316,10 +323,10 @@ TEST(WaveSpreadingFunction, WaveNumberArrayXXd)
         EXPECT_DOUBLE_EQ(theta(i, j), thetaij);
       }
     }
-
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, ECKVRegression)
 {
   { // Regress against values generate from Python reference version
@@ -343,7 +350,7 @@ TEST(WaveSpreadingFunction, ECKVRegression)
       0.19146613, 0.24374672, 0.26371613
     };
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double phi_test = spreadingFn.Evaluate(theta[i], theta_mean, k);
       EXPECT_NEAR(phi[i], phi_test, tolerance);
@@ -351,6 +358,7 @@ TEST(WaveSpreadingFunction, ECKVRegression)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, ECKVVectorXd)
 {
   { // Eigen array version
@@ -375,7 +383,7 @@ TEST(WaveSpreadingFunction, ECKVVectorXd)
     EXPECT_EQ(phi.rows(), 21);
     EXPECT_EQ(phi.cols(), 1);
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double phi_test = spreadingFn.Evaluate(theta(i, 0), theta_mean, k(i, 0));
       EXPECT_DOUBLE_EQ(phi(i, 0), phi_test);
@@ -383,13 +391,14 @@ TEST(WaveSpreadingFunction, ECKVVectorXd)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, ECKVArrayXXd)
 {
   { // Eigen array version
     double lx = 200.0;
     double ly = 100.0;
-    int nx = 32;
-    int ny = 16;
+    Index nx = 32;
+    Index ny = 16;
 
     double kx_nyquist = M_PI * nx / lx;
     double ky_nyquist = M_PI * ny / ly;
@@ -398,11 +407,11 @@ TEST(WaveSpreadingFunction, ECKVArrayXXd)
     Eigen::ArrayXd kx_v(nx);
     Eigen::ArrayXd ky_v(ny);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i < nx; ++i)
     {
       kx_v(i) = (i * 2.0 / nx - 1.0) * kx_nyquist;
     }
-    for (int i=0; i<ny; ++i)
+    for (Index i=0; i < ny; ++i)
     {
       ky_v(i) = (i * 2.0 / ny - 1.0) * ky_nyquist;
     }
@@ -410,7 +419,7 @@ TEST(WaveSpreadingFunction, ECKVArrayXXd)
     // broadcast to matrices (aka meshgrid)
     Eigen::ArrayXXd kx = Eigen::ArrayXXd::Zero(nx, ny);
     kx.colwise() += kx_v;
-    
+
     Eigen::ArrayXXd ky = Eigen::ArrayXXd::Zero(nx, ny);
     ky.rowwise() += ky_v.transpose();
 
@@ -418,8 +427,7 @@ TEST(WaveSpreadingFunction, ECKVArrayXXd)
     Eigen::ArrayXXd ky2 = Eigen::pow(ky, 2.0);
     Eigen::ArrayXXd k = Eigen::sqrt(kx2 + ky2);
     Eigen::ArrayXXd theta = ky.binaryExpr(
-        kx, [] (double y, double x) { return std::atan2(y, x);}
-    );
+        kx, [] (double y, double x) { return std::atan2(y, x);});
 
     ECKVSpreadingFunction spreadingFn;
 
@@ -428,9 +436,9 @@ TEST(WaveSpreadingFunction, ECKVArrayXXd)
     Eigen::ArrayXXd phi(nx, ny);
     spreadingFn.Evaluate(phi, theta, theta_mean, k);
 
-    for (int i=0; i<nx; ++i)
+    for (Index i=0; i < nx; ++i)
     {
-      for (int j=0; j<ny; ++j)
+      for (Index j=0; j < ny; ++j)
       {
         double phi_test =
             spreadingFn.Evaluate(theta(i, j), theta_mean, k(i, j));
@@ -440,6 +448,7 @@ TEST(WaveSpreadingFunction, ECKVArrayXXd)
   }
 }
 
+//////////////////////////////////////////////////
 TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
 {
   // coefficients
@@ -463,7 +472,7 @@ TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
     Eigen::ArrayXd phi(21);
     spreadingFn.Evaluate(phi, theta, theta_mean, k);
 
-    for (int i=0; i<21; ++i)
+    for (Index i=0; i < 21; ++i)
     {
       double dtheta = theta(i) - theta_mean;
       double phi_test =
@@ -474,9 +483,7 @@ TEST(WaveSpreadingFunction, ECKVFFT2ImplRegression)
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Run tests
-
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

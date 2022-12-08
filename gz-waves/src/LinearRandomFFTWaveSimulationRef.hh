@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef GZ_WAVES_WAVESIMULATIONFFT_HH_
-#define GZ_WAVES_WAVESIMULATIONFFT_HH_
+#ifndef GZ_WAVES_SRC_LINEARRANDOMFFTWAVESIMULATIONREF_HH_
+#define GZ_WAVES_SRC_LINEARRANDOMFFTWAVESIMULATIONREF_HH_
 
 #include <memory>
 
@@ -26,60 +26,60 @@ namespace gz
 {
 namespace waves
 {
-  class LinearRandomFFTWaveSimulationRef :
-      public IWaveSimulation
-  {
-    public:
-      virtual ~LinearRandomFFTWaveSimulationRef();
+class LinearRandomFFTWaveSimulationRef :
+    public IWaveSimulation
+{
+ public:
+    virtual ~LinearRandomFFTWaveSimulationRef();
 
-      LinearRandomFFTWaveSimulationRef(double lx, double ly,
-          Index nx, Index ny);
+    LinearRandomFFTWaveSimulationRef(double lx, double ly,
+        Index nx, Index ny);
 
-      void SetLambda(double lambda);
+    void SetLambda(double lambda);
 
-      virtual void SetWindVelocity(double ux, double uy) override;
+    void SetWindVelocity(double ux, double uy) override;
 
-      virtual void SetTime(double value) override;
+    void SetTime(double value) override;
 
-      virtual Index SizeX() const override;
+    Index SizeX() const override;
 
-      virtual Index SizeY() const override;
+    Index SizeY() const override;
 
-      virtual Index SizeZ() const override;
+    Index SizeZ() const override;
 
-      virtual void ElevationAt(
-          Eigen::Ref<Eigen::ArrayXXd> h) override;
+    void ElevationAt(
+        Eigen::Ref<Eigen::ArrayXXd> h) override;
 
-      virtual void ElevationDerivAt(
-          Eigen::Ref<Eigen::ArrayXXd> dhdx,
-          Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
+    void ElevationDerivAt(
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
 
-      virtual void DisplacementAt(
-          Eigen::Ref<Eigen::ArrayXXd> sx,
-          Eigen::Ref<Eigen::ArrayXXd> sy) override;
+    void DisplacementAt(
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy) override;
 
-      virtual void DisplacementDerivAt(
-          Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-          Eigen::Ref<Eigen::ArrayXXd> dsydy,
-          Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+    void DisplacementDerivAt(
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
-      virtual void DisplacementAndDerivAt(
-          Eigen::Ref<Eigen::ArrayXXd> h,
-          Eigen::Ref<Eigen::ArrayXXd> sx,
-          Eigen::Ref<Eigen::ArrayXXd> sy,
-          Eigen::Ref<Eigen::ArrayXXd> dhdx,
-          Eigen::Ref<Eigen::ArrayXXd> dhdy,
-          Eigen::Ref<Eigen::ArrayXXd> dsxdx,
-          Eigen::Ref<Eigen::ArrayXXd> dsydy,
-          Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+    void DisplacementAndDerivAt(
+        Eigen::Ref<Eigen::ArrayXXd> h,
+        Eigen::Ref<Eigen::ArrayXXd> sx,
+        Eigen::Ref<Eigen::ArrayXXd> sy,
+        Eigen::Ref<Eigen::ArrayXXd> dhdx,
+        Eigen::Ref<Eigen::ArrayXXd> dhdy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdx,
+        Eigen::Ref<Eigen::ArrayXXd> dsydy,
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
 
-    // public class declaration - for testing
-    class Impl;
+  // public class declaration - for testing
+  class Impl;
 
-    private:
-      std::unique_ptr<Impl> impl_;
-  };
-}
-}
+ private:
+    std::unique_ptr<Impl> impl_;
+};
+}  // namespace waves
+}  // namespace gz
 
-#endif
+#endif  // GZ_WAVES_SRC_LINEARRANDOMFFTWAVESIMULATIONREF_HH_

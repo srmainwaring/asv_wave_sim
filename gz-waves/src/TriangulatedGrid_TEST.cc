@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/TriangulatedGrid.hh"
-
 #include <gtest/gtest.h>
-
-#include <gz/math/Pose3.hh>
 
 #include <algorithm>
 #include <iostream>
@@ -26,16 +22,25 @@
 #include <memory>
 #include <string>
 
-///////////////////////////////////////////////////////////////////////////////
-// Define tests
+#include <gz/math/Pose3.hh>
 
-using namespace gz;
-using namespace waves;
+#include "gz/waves/TriangulatedGrid.hh"
+#include "gz/waves/Types.hh"
 
+namespace cgal
+{
+using gz::cgal::Point3;
+}  // namespace cgal
+
+using gz::waves::Index;
+using gz::waves::Point3Range;
+using gz::waves::TriangulatedGrid;
+
+//////////////////////////////////////////////////
 TEST(TriangulatedGrid, Create) {
   // Create
-  int n = 2;
-  int length = 100.0;
+  Index n = 2;
+  Index length = 100.0;
   auto grid = TriangulatedGrid::Create(n, length);
   std::unique_ptr<TriangulatedGrid> tri_grid = std::move(grid);
   // tri_grid->DebugPrintMesh();
@@ -52,11 +57,12 @@ TEST(TriangulatedGrid, Create) {
   EXPECT_EQ(tri_grid->Origin(), cgal::Point3(10.0, 0.0, 0.0));
 }
 
+//////////////////////////////////////////////////
 TEST(TriangulatedGrid, Height) {
   // Create
-  int n = 16;
-  int length = 100.0;
-  int nplus1 = n + 1;
+  Index n = 16;
+  Index length = 100.0;
+  Index nplus1 = n + 1;
   auto grid = TriangulatedGrid::Create(n, length);
   std::unique_ptr<TriangulatedGrid> source = std::move(grid);
   EXPECT_TRUE(source->IsValid());
@@ -69,8 +75,8 @@ TEST(TriangulatedGrid, Height) {
 
   // Set points
   Point3Range points = source->Points();
-  for (int iy=0; iy<nplus1; ++iy) {
-    for (int ix=0; ix<nplus1; ++ix) {
+  for (Index iy=0; iy < nplus1; ++iy) {
+    for (Index ix=0; ix < nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];
@@ -84,19 +90,20 @@ TEST(TriangulatedGrid, Height) {
   EXPECT_DOUBLE_EQ(height, 14.4);
 }
 
+//////////////////////////////////////////////////
 TEST(TriangulatedGrid, Interpolate) {
   // Create
-  int n = 16;
-  int length = 100.0;
-  int nplus1 = n + 1;
+  Index n = 16;
+  Index length = 100.0;
+  Index nplus1 = n + 1;
   auto grid1 = TriangulatedGrid::Create(n, length);
   std::unique_ptr<TriangulatedGrid> source = std::move(grid1);
   EXPECT_TRUE(source->IsValid());
 
   // Set points
   Point3Range points = source->Points();
-  for (int iy=0; iy<nplus1; ++iy) {
-    for (int ix=0; ix<nplus1; ++ix) {
+  for (Index iy=0; iy < nplus1; ++iy) {
+    for (Index ix=0; ix < nplus1; ++ix) {
       int64_t idx = iy * nplus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];
@@ -135,11 +142,7 @@ TEST(TriangulatedGrid, Interpolate) {
   EXPECT_TRUE(found);
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Run tests
-
+//////////////////////////////////////////////////
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

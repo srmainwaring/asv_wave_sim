@@ -1,4 +1,4 @@
-// Copyright (C) 2019  Rhys Mainwaring
+// Copyright (C) 2022  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,18 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "gz/waves/WaveSimulation.hh"
+#ifndef GZ_WAVES_TYPES_HH_
+#define GZ_WAVES_TYPES_HH_
+
+#include <cstddef>
 
 namespace gz
 {
 namespace waves
 {
-
-  //////////////////////////////////////////////////
-  IWaveField::~IWaveField() = default;
-
-  //////////////////////////////////////////////////
-  IWaveSimulation::~IWaveSimulation() = default;
+/// \brief Use Index for counting and indexing.
+typedef std::ptrdiff_t Index;
 
 }  // namespace waves
 }  // namespace gz
+
+#endif  // GZ_WAVES_TYPES_HH_

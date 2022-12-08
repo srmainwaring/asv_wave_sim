@@ -15,51 +15,50 @@
 
 /// \file MeshTools.hh
 /// \brief This file defines methods used to convert between CGAL
-/// and Gazebo meshes.     
+/// and Gazebo meshes.
 
 #ifndef GZ_WAVES_MESHTOOLS_HH_
 #define GZ_WAVES_MESHTOOLS_HH_
+
+#include <memory>
+#include <vector>
 
 #include "gz/waves/CGALTypes.hh"
 
 #include <gz/common.hh>
 #include <gz/common/Mesh.hh>
 
-#include <memory>
-
 namespace gz
 {
 namespace waves
 {
 
-///////////////////////////////////////////////////////////////////////////////
-// MeshTools
+/// \brief A collection of static methods for switching between
+///        Gazebo and CGAL meshes.
+class MeshTools
+{
+ public:
+  /// \brief Wrapper around gz::sim::common::Mesh::FillArrays
+  ///        to populate vectors instead of raw arrays.
+  ///
+  /// \param[in] _source      The source mesh (a Gazebo Mesh).
+  /// \param[out] _vertices   The vector of vertices to populate.
+  /// \param[out] _indices    The vector of indices to populate.
+  static void FillArrays(
+    const gz::common::Mesh& _source,
+    std::vector<float>& _vertices,
+    std::vector<int>& _indices);
 
-  /// \brief A collection of static methods for switching between Gazebo and CGAL meshes.
-  class MeshTools
-  {
-    /// \brief Wrapper around gz::sim::common::Mesh::FillArrays to populate vectors instead of raw arrays.
-    ///
-    /// \param[in] _source      The source mesh (a Gazebo Mesh).
-    /// \param[out] _vertices   The vector of vertices to populate.
-    /// \param[out] _indices    The vector of indices to populate.
-    public: static void FillArrays(
-      const gz::common::Mesh& _source,
-      std::vector<float>& _vertices,
-      std::vector<int>& _indices
-    );
+  /// \brief Make a SurfaceMesh from a Gazebo Mesh.
+  ///
+  /// \param[in] _source      The source mesh (a Gazebo Mesh).
+  /// \param[out] _target     The target mesg (a CGAL SurfaceMesh).
+  static void MakeSurfaceMesh(
+    const gz::common::Mesh& _source,
+    cgal::Mesh& _target);
+};
 
-    /// \brief Make a SurfaceMesh from a Gazebo Mesh.
-    /// 
-    /// \param[in] _source      The source mesh (a Gazebo Mesh).
-    /// \param[out] _target     The target mesg (a CGAL SurfaceMesh).
-    public: static void MakeSurfaceMesh(
-      const gz::common::Mesh& _source,
-      cgal::Mesh& _target
-    );
-  };
+}  // namespace waves
+}  // namespace gz
 
-}
-}
-
-#endif
+#endif  // GZ_WAVES_MESHTOOLS_HH_
