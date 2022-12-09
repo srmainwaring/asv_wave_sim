@@ -33,7 +33,7 @@ using gz::waves::LinearRandomFFTWaveSimulation;
 
 //////////////////////////////////////////////////
 // Define fixture
-class LinearRandomFFTWaveSimTest: public ::testing::Test
+class LinearRandomFFTWaveSimDisplacementsTest: public ::testing::Test
 {
  public:
   // number of evaluations
@@ -47,7 +47,7 @@ class LinearRandomFFTWaveSimTest: public ::testing::Test
 };
 
 //////////////////////////////////////////////////
-TEST_F(LinearRandomFFTWaveSimTest, Elevation)
+TEST_F(LinearRandomFFTWaveSimDisplacementsTest, Elevation)
 {
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();
@@ -71,7 +71,7 @@ TEST_F(LinearRandomFFTWaveSimTest, Elevation)
 }
 
 //////////////////////////////////////////////////
-TEST_F(LinearRandomFFTWaveSimTest, DisplacementsAndDeriatives)
+TEST_F(LinearRandomFFTWaveSimDisplacementsTest, DisplacementsAndDeriatives)
 {
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();

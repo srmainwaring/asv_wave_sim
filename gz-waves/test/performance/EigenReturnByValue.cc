@@ -15,6 +15,6 @@
 
 #include <gtest/gtest.h>
 
-TEST(EigenReturnByValue, ArrayReturnByValue)
+TEST(EigenReturnByValueTest, ArrayReturnByValue)
 {
 }
