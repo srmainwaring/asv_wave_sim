@@ -103,11 +103,15 @@ void LinearRandomFFTWaveSimulation::Impl::SetTime(double time)
 void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
     Eigen::Ref<Eigen::ArrayXXd> h)
 {
-  // run the FFT
-  if (fft_needs_update_[0])
+  if (fft_in_needs_update_[0])
+  {
+    ComputeDisplacementAmplitudes();
+  }
+
+  if (fft_out_needs_update_[0])
   {
     fftw_execute(fft_plan0_);
-    fft_needs_update_[0] = false;
+    fft_out_needs_update_[0] = false;
   }
 
   // change from row to column major storage
@@ -120,21 +124,26 @@ void LinearRandomFFTWaveSimulation::Impl::ElevationDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dhdx,
     Eigen::Ref<Eigen::ArrayXXd> dhdy)
 {
-  // run the FFTs
-  if (fft_needs_update_[1])
+  if (fft_in_needs_update_[1])
+  {
+    ComputeDisplacementDerivAmplitudes();
+  }
+
+  if (fft_out_needs_update_[1])
   {
     fftw_execute(fft_plan1_);
-    fft_needs_update_[1] = false;
+    fft_out_needs_update_[1] = false;
   }
-  if (fft_needs_update_[2])
+  if (fft_out_needs_update_[2])
   {
     fftw_execute(fft_plan2_);
-    fft_needs_update_[2] = false;
+    fft_out_needs_update_[2] = false;
   }
   // change from row to column major storage
   Index n2 = nx_ * ny_;
   dhdy = fft_out1_.reshaped<Eigen::ColMajor>(n2, 1);
   dhdx = fft_out2_.reshaped<Eigen::ColMajor>(n2, 1);
+  /// \todo SWITCHED x(1) <=> y(2)
 }
 
 //////////////////////////////////////////////////
@@ -142,22 +151,27 @@ void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
     Eigen::Ref<Eigen::ArrayXXd> sx,
     Eigen::Ref<Eigen::ArrayXXd> sy)
 {
-  // run the FFTs
-  if (fft_needs_update_[3])
+  if (fft_in_needs_update_[0])
+  {
+    ComputeDisplacementAmplitudes();
+  }
+
+  if (fft_out_needs_update_[3])
   {
     fftw_execute(fft_plan3_);
-    fft_needs_update_[3] = false;
+    fft_out_needs_update_[3] = false;
   }
-  if (fft_needs_update_[4])
+  if (fft_out_needs_update_[4])
   {
     fftw_execute(fft_plan4_);
-    fft_needs_update_[4] = false;
+    fft_out_needs_update_[4] = false;
   }
 
   // change from row to column major storage
   Index n2 = nx_ * ny_;
-  sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-  sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+  sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1);
+  sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1);
+  /// \todo SWITCHED x(3) <=> y(4)
 }
 
 //////////////////////////////////////////////////
@@ -166,28 +180,33 @@ void LinearRandomFFTWaveSimulation::Impl::DisplacementDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dsydy,
     Eigen::Ref<Eigen::ArrayXXd> dsxdy)
 {
-  // run the FFTs
-  if (fft_needs_update_[5])
+  if (fft_in_needs_update_[1])
+  {
+    ComputeDisplacementDerivAmplitudes();
+  }
+
+  if (fft_out_needs_update_[5])
   {
     fftw_execute(fft_plan5_);
-    fft_needs_update_[5] = false;
+    fft_out_needs_update_[5] = false;
   }
-  if (fft_needs_update_[6])
+  if (fft_out_needs_update_[6])
   {
     fftw_execute(fft_plan6_);
-    fft_needs_update_[6] = false;
+    fft_out_needs_update_[6] = false;
   }
-  if (fft_needs_update_[7])
+  if (fft_out_needs_update_[7])
   {
     fftw_execute(fft_plan7_);
-    fft_needs_update_[7] = false;
+    fft_out_needs_update_[7] = false;
   }
 
   // change from row to column major storage
   Index n2 = nx_ * ny_;
-  dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-  dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-  dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
+  dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1);
+  dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1);
+  dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1);
+  /// \todo SWITCHED x(5) <=> y(6)
 }
 
 //////////////////////////////////////////////////
@@ -195,11 +214,15 @@ void LinearRandomFFTWaveSimulation::Impl::PressureAt(
     Index iz,
     Eigen::Ref<Eigen::ArrayXXd> pressure)
 {
-  // run the FFTs
-  if (fft_needs_update_[8 + iz])
+  if (fft_in_needs_update_[8])
+  {
+    ComputePressureAmplitudes();
+  }
+
+  if (fft_out_needs_update_[8 + iz])
   {
     fftw_execute(fft_plan_p_[iz]);
-    fft_needs_update_[8 + iz] = false;
+    fft_out_needs_update_[8 + iz] = false;
   }
 
   // change from row to column major storage
@@ -212,13 +235,18 @@ void LinearRandomFFTWaveSimulation::Impl::ElevationAt(
     Index ix, Index iy,
     double &eta)
 {
+  if (fft_in_needs_update_[8])
+  {
+    ComputePressureAmplitudes();
+  }
+
   /// \todo(srmainwaring) running the FFT destroys the inputs for c2r plans
 
   // run the FFT
-  if (fft_needs_update_[0])
+  if (fft_out_needs_update_[0])
   {
     fftw_execute(fft_plan0_);
-    fft_needs_update_[0] = false;
+    fft_out_needs_update_[0] = false;
   }
 
   // select value
@@ -230,21 +258,27 @@ void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
     Index ix, Index iy,
     double &sx, double &sy)
 {
+  if (fft_in_needs_update_[3])
+  {
+    ComputePressureAmplitudes();
+  }
+
   // run the FFTs
-  if (fft_needs_update_[3])
+  if (fft_out_needs_update_[3])
   {
     fftw_execute(fft_plan3_);
-    fft_needs_update_[3] = false;
+    fft_out_needs_update_[3] = false;
   }
-  if (fft_needs_update_[4])
+  if (fft_out_needs_update_[4])
   {
     fftw_execute(fft_plan4_);
-    fft_needs_update_[4] = false;
+    fft_out_needs_update_[4] = false;
   }
 
   // change from row to column major storage and scale
-  sy = fft_out3_(ix, iy) * lambda_ * -1.0;
-  sx = fft_out4_(ix, iy) * lambda_ * -1.0;
+  sy = fft_out3_(ix, iy);
+  sx = fft_out4_(ix, iy);
+  /// \todo SWITCHED x(3) <=> y(4)
 }
 
 //////////////////////////////////////////////////
@@ -252,15 +286,170 @@ void LinearRandomFFTWaveSimulation::Impl::PressureAt(
     Index ix, Index iy, Index iz,
     double &pressure)
 {
-  // run the FFT
-  if (fft_needs_update_[8 + iz])
+  // updates all inputs
+  if (fft_in_needs_update_[8 + iz])
+  {
+    ComputePressureAmplitudes();
+  }
+
+  if (fft_out_needs_update_[8 + iz])
   {
     fftw_execute(fft_plan_p_[iz]);
-    fft_needs_update_[8 + iz] = false;
+    fft_out_needs_update_[8 + iz] = false;
   }
 
   // select value
   pressure = fft_out_p_[iz](ix, iy);
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::Sz()
+{
+  if (fft_in_needs_update_[0])
+  {
+    ComputeDisplacementAmplitudes();
+  }
+
+  if (fft_out_needs_update_[0])
+  {
+    fftw_execute(fft_plan0_);
+    fft_out_needs_update_[0] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out0_);
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::DSzDx()
+{
+  if (fft_in_needs_update_[2])
+  {
+    ComputeDisplacementDerivAmplitudes();
+  }
+
+  if (fft_out_needs_update_[2])
+  {
+    fftw_execute(fft_plan2_);
+    fft_out_needs_update_[2] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out2_);
+  /// \todo SWITCHED x(1) <=> y(2)
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::DSzDy()
+{
+  if (fft_in_needs_update_[1])
+  {
+    ComputeDisplacementDerivAmplitudes();
+  }
+
+  if (fft_out_needs_update_[1])
+  {
+    fftw_execute(fft_plan1_);
+    fft_out_needs_update_[1] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out1_);
+  /// \todo SWITCHED x(1) <=> y(2)
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::Sx()
+{
+  if (fft_in_needs_update_[4])
+  {
+    ComputeDisplacementAmplitudes();
+  }
+
+  if (fft_out_needs_update_[4])
+  {
+    fftw_execute(fft_plan4_);
+    fft_out_needs_update_[4] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out4_);
+  /// \todo SWITCHED x(3) <=> y(4)
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::Sy()
+{
+  if (fft_in_needs_update_[3])
+  {
+    ComputeDisplacementAmplitudes();
+  }
+
+  if (fft_out_needs_update_[3])
+  {
+    fftw_execute(fft_plan3_);
+    fft_out_needs_update_[3] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out3_);
+  /// \todo SWITCHED x(3) <=> y(4)
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::DSxDx()
+{
+  if (fft_in_needs_update_[6])
+  {
+    ComputeDisplacementDerivAmplitudes();
+  }
+
+  if (fft_out_needs_update_[6])
+  {
+    fftw_execute(fft_plan6_);
+    fft_out_needs_update_[6] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out6_);
+  /// \todo SWITCHED x(5) <=> y(6)
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::DSyDy()
+{
+  if (fft_in_needs_update_[5])
+  {
+    ComputeDisplacementDerivAmplitudes();
+  }
+
+  if (fft_out_needs_update_[5])
+  {
+    fftw_execute(fft_plan5_);
+    fft_out_needs_update_[5] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out5_);
+  /// \todo SWITCHED x(5) <=> y(6)
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor>
+LinearRandomFFTWaveSimulation::Impl::DSxDy()
+{
+  if (fft_in_needs_update_[7])
+  {
+    ComputeDisplacementDerivAmplitudes();
+  }
+
+  if (fft_out_needs_update_[7])
+  {
+    fftw_execute(fft_plan7_);
+    fft_out_needs_update_[7] = false;
+  }
+
+  return Eigen::Ref<const Eigen::ArrayXXdRowMajor>(fft_out7_);
 }
 
 //////////////////////////////////////////////////
@@ -364,11 +553,17 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeBaseAmplitudes()
 void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
     double time)
 {
-  // set all true
+  // set lazy evaluation flags true
   std::transform(
-    fft_needs_update_.cbegin(),
-    fft_needs_update_.cend(),
-    fft_needs_update_.begin(),
+    fft_in_needs_update_.cbegin(),
+    fft_in_needs_update_.cend(),
+    fft_in_needs_update_.begin(),
+    [] (bool) -> bool { return true; });
+
+  std::transform(
+    fft_out_needs_update_.cbegin(),
+    fft_out_needs_update_.cend(),
+    fft_out_needs_update_.begin(),
     [] (bool) -> bool { return true; });
 
   // create 1d views
@@ -443,12 +638,12 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
   }
 
   zhat_(0, 0) = complex(0.0, 0.0);
-
+#if 0
   /// write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
   /// \note the inner loop has iky < ny_ / 2 + 1
   ///       as we exploit the Hermitian symmetry in the FFT
-  const complex iunit(0.0, 1.0);
-  const complex czero(0.0, 0.0);
+  constexpr complex iunit(0.0, 1.0);
+  constexpr complex czero(0.0, 0.0);
 
   for (Index ikx = 0; ikx < nx_; ++ikx)
   {
@@ -516,13 +711,158 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
         if (iky == ny_ / 2)
           dy = czero;
 
-        fft_sx_(ikx, iky)     = dx;
-        fft_sy_(ikx, iky)     = dy;
-        fft_h_kxkx_(ikx, iky) = hkxkx;
-        fft_h_kyky_(ikx, iky) = hkyky;
-        fft_h_kxky_(ikx, iky) = hkxky;
+        fft_sx_(ikx, iky)     = dx * lambda_ * -1.0;
+        fft_sy_(ikx, iky)     = dy * lambda_ * -1.0;
+        fft_h_kxkx_(ikx, iky) = hkxkx * lambda_ * -1.0;
+        fft_h_kyky_(ikx, iky) = hkyky * lambda_ * -1.0;
+        fft_h_kxky_(ikx, iky) = hkxky * lambda_ * -1.0;
       }
     }
+  }
+#endif
+}
+
+//////////////////////////////////////////////////
+void LinearRandomFFTWaveSimulation::Impl::ComputeDisplacementAmplitudes()
+{
+  /// write into fft_h_, fft_h_ikx_, fft_h_iky_, etc.
+  /// \note the inner loop has iky < ny_ / 2 + 1
+  ///       as we exploit the Hermitian symmetry in the FFT
+  constexpr complex iunit{0.0, 1.0};
+  constexpr complex czero{0.0, 0.0};
+
+  for (Index ikx = 0; ikx < nx_; ++ikx)
+  {
+    double kx = kx_fft_(ikx);
+    double kx2 = kx*kx;
+    for (Index iky = 0; iky < ny_/2 + 1; ++iky)
+    {
+      double ky = ky_fft_(iky);
+      double ky2 = ky*ky;
+      double k = sqrt(kx2 + ky2);
+
+      // index for flattened arrays
+      Index idx = ikx * ny_ + iky;
+
+      // elevation
+      fft_h_(ikx, iky) = zhat_(idx);
+
+      // displacement
+      if (std::abs(k) < 1.0E-8)
+      {
+        fft_sx_(ikx, iky) = czero;
+        fft_sy_(ikx, iky) = czero;
+      }
+      else
+      {
+        if (ikx == nx_ / 2)
+          fft_sx_(ikx, iky) = czero;
+        else
+          fft_sx_(ikx, iky) = zhat_(idx) * iunit * lambda_ * kx / k;
+
+        if (iky == ny_ / 2)
+          fft_sy_(ikx, iky) = czero;
+        else
+          fft_sy_(ikx, iky) = zhat_(idx) * iunit * lambda_ * ky / k;
+      }
+    }
+  }
+
+  fft_in_needs_update_[0] = false;
+  fft_in_needs_update_[3] = false;
+  fft_in_needs_update_[4] = false;
+}
+
+//////////////////////////////////////////////////
+void LinearRandomFFTWaveSimulation::Impl::ComputeDisplacementDerivAmplitudes()
+{
+  constexpr complex iunit{0.0, 1.0};
+  constexpr complex czero{0.0, 0.0};
+
+  for (Index ikx = 0; ikx < nx_; ++ikx)
+  {
+    double kx = kx_fft_(ikx);
+    double kx2 = kx*kx;
+    for (Index iky = 0; iky < ny_/2 + 1; ++iky)
+    {
+      double ky = ky_fft_(iky);
+      double ky2 = ky*ky;
+      double k = sqrt(kx2 + ky2);
+
+      // index for flattened arrays
+      Index idx = ikx * ny_ + iky;
+
+      // Nyquist terms for derivatives must be zero.
+      // For an explanation see:
+      // https://math.mit.edu/~stevenj/fft-deriv.pdf
+
+      // elevation deriv
+      if (ikx == nx_ / 2)
+        fft_h_ikx_(ikx, iky) = czero;
+      else
+        fft_h_ikx_(ikx, iky) = zhat_(idx) * iunit * kx;
+  
+      if (iky == ny_ / 2)
+        fft_h_iky_(ikx, iky) = czero;
+      else
+        fft_h_iky_(ikx, iky) = zhat_(idx) * iunit * ky;
+
+      // displacement deriv
+      if (std::abs(k) < 1.0E-8)
+      {
+        fft_h_kxkx_(ikx, iky) = czero;
+        fft_h_kyky_(ikx, iky) = czero;
+        fft_h_kxky_(ikx, iky) = czero;
+      }
+      else
+      {
+        fft_h_kxkx_(ikx, iky) = zhat_(idx) * -1.0 * lambda_ * kx2 / k;
+        fft_h_kyky_(ikx, iky) = zhat_(idx) * -1.0 * lambda_ * ky2 / k;
+        fft_h_kxky_(ikx, iky) = zhat_(idx) * -1.0 * lambda_ * kx * ky / k;
+      }
+    }
+  }
+
+  fft_in_needs_update_[1] = false;
+  fft_in_needs_update_[2] = false;
+  fft_in_needs_update_[5] = false;
+  fft_in_needs_update_[6] = false;
+  fft_in_needs_update_[7] = false;
+}
+
+//////////////////////////////////////////////////
+void LinearRandomFFTWaveSimulation::Impl::ComputePressureAmplitudes()
+{
+  constexpr complex iunit{0.0, 1.0};
+  constexpr complex czero{0.0, 0.0};
+
+  for (Index ikx = 0; ikx < nx_; ++ikx)
+  {
+    double kx = kx_fft_(ikx);
+    double kx2 = kx*kx;
+    for (Index iky = 0; iky < ny_/2 + 1; ++iky)
+    {
+      double ky = ky_fft_(iky);
+      double ky2 = ky*ky;
+      double k = sqrt(kx2 + ky2);
+
+      // index for flattened arrays
+      Index idx = ikx * ny_ + iky;
+
+      /// \todo(srmainwaring) pressure optimisation - adjust so that the
+      /// entry for z = 0 is obtained from  fft_h_ / fft_out0_ / fft_plan0_
+
+      // pressure
+      for (Index iz = 0; iz < nz_; ++iz)
+      {
+        fft_in_p_[iz](ikx, iky) = std::exp(k * z_(iz)) * zhat_(idx);
+      }
+    }
+  }
+
+  for (Index i = 8; i < nz_; ++i)
+  {
+    fft_in_needs_update_[i] = false;
   }
 }
 
@@ -641,11 +981,17 @@ void LinearRandomFFTWaveSimulation::Impl::CreateFFTWPlans()
   }
 
   // set lazy evaluation flags.
-  fft_needs_update_.resize(8 + nz_);
+  fft_in_needs_update_.resize(8 + nz_);
+  fft_out_needs_update_.resize(8 + nz_);
   std::transform(
-    fft_needs_update_.cbegin(),
-    fft_needs_update_.cend(),
-    fft_needs_update_.begin(),
+    fft_in_needs_update_.cbegin(),
+    fft_in_needs_update_.cend(),
+    fft_in_needs_update_.begin(),
+    [] (bool) -> bool { return true; });
+  std::transform(
+    fft_out_needs_update_.cbegin(),
+    fft_out_needs_update_.cend(),
+    fft_out_needs_update_.begin(),
     [] (bool) -> bool { return true; });
 }
 
@@ -803,6 +1149,54 @@ void LinearRandomFFTWaveSimulation::PressureAt(
     double& pressure) const
 {
   impl_->PressureAt(ix, iy, iz, pressure);
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::Sz() const
+{
+  return impl_->Sz();
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::DSzDx() const
+{
+  return impl_->DSzDx();
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::DSzDy() const
+{
+  return impl_->DSzDy();
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::Sy() const
+{
+  return impl_->Sy();
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::Sx() const
+{
+  return impl_->Sx();
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::DSxDx() const
+{
+  return impl_->DSxDx();
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::DSyDy() const
+{
+  return impl_->DSyDy();
+}
+
+//////////////////////////////////////////////////
+Eigen::Ref<const Eigen::ArrayXXdRowMajor> LinearRandomFFTWaveSimulation::DSxDy() const
+{
+  return impl_->DSxDy();
 }
 
 }  // namespace waves

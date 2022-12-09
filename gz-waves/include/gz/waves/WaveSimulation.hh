@@ -22,6 +22,23 @@
 
 #include "gz/waves/Types.hh"
 
+namespace Eigen
+{
+  typedef Eigen::Array<
+    std::complex<double>,
+    Eigen::Dynamic,
+    Eigen::Dynamic,
+    Eigen::RowMajor
+  > ArrayXXcdRowMajor;
+
+  typedef Eigen::Array<
+    double,
+    Eigen::Dynamic,
+    Eigen::Dynamic,
+    Eigen::RowMajor
+  > ArrayXXdRowMajor;
+}  // namespace Eigen
+
 namespace gz
 {
 namespace waves
@@ -117,6 +134,23 @@ class IWaveSimulation
       Index iz,
       Eigen::Ref<Eigen::ArrayXXd> pressure) const = 0;
 };
+
+class IWaveSimulation2
+{
+ public:
+  virtual ~IWaveSimulation2();
+
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sz() const = 0;
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSzDx() const = 0;
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSzDy() const = 0;
+
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sx() const = 0;
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sy() const = 0;
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSxDx() const = 0;
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSyDy() const = 0;
+  virtual Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSxDy() const = 0;
+};
+
 
 }  // namespace waves
 }  // namespace gz

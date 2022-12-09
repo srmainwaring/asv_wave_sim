@@ -27,7 +27,8 @@ namespace gz
 namespace waves
 {
 class LinearRandomFFTWaveSimulation :
-    public IWaveSimulation
+    public IWaveSimulation,
+    public IWaveSimulation2
 {
  public:
   virtual ~LinearRandomFFTWaveSimulation();
@@ -118,6 +119,16 @@ class LinearRandomFFTWaveSimulation :
   void PressureAt(
       Index ix, Index iy, Index iz,
       double& pressure) const override;
+
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sz() const override;
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSzDx() const override;
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSzDy() const override;
+
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sx() const override;
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sy() const override;
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSxDx() const override;
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSyDy() const override;
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSxDy() const override;
 
   // public class declaration - for testing
   class Impl;

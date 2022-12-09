@@ -97,14 +97,15 @@ class OceanTilePrivate
 
   std::unique_ptr<IWaveSimulation> wave_sim_;
 
-  Eigen::ArrayXd             heights_;  // height
-  Eigen::ArrayXd             dhdx_;     // height deriv
-  Eigen::ArrayXd             dhdy_;     // height deriv
-  Eigen::ArrayXd             sx_;       // x displacement
-  Eigen::ArrayXd             sy_;       // y displacement
-  Eigen::ArrayXd             dsxdx_;
-  Eigen::ArrayXd             dsydy_;
-  Eigen::ArrayXd             dsxdy_;
+  // Eigen::ArrayXd             heights_;  // height
+  // Eigen::ArrayXd             dhdx_;     // height deriv
+  // Eigen::ArrayXd             dhdy_;     // height deriv
+  // Eigen::ArrayXd             sx_;       // x displacement
+  // Eigen::ArrayXd             sy_;       // y displacement
+  // Eigen::ArrayXd             dsxdx_;
+  // Eigen::ArrayXd             dsydy_;
+  // Eigen::ArrayXd             dsxdy_;
+  IWaveSimulation2*                wave_sim2_{nullptr};
 
   void Create();
 
@@ -195,14 +196,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     ly_(ly)
 {
   auto size = nx_ * ny_;
-  heights_ = Eigen::ArrayXd::Zero(size);
-  dhdx_ = Eigen::ArrayXd::Zero(size);
-  dhdy_ = Eigen::ArrayXd::Zero(size);
-  sx_ = Eigen::ArrayXd::Zero(size);
-  sy_ = Eigen::ArrayXd::Zero(size);
-  dsxdx_ = Eigen::ArrayXd::Zero(size);
-  dsydy_ = Eigen::ArrayXd::Zero(size);
-  dsxdy_ = Eigen::ArrayXd::Zero(size);
+  // heights_ = Eigen::ArrayXd::Zero(size);
+  // dhdx_ = Eigen::ArrayXd::Zero(size);
+  // dhdy_ = Eigen::ArrayXd::Zero(size);
+  // sx_ = Eigen::ArrayXd::Zero(size);
+  // sy_ = Eigen::ArrayXd::Zero(size);
+  // dsxdx_ = Eigen::ArrayXd::Zero(size);
+  // dsydy_ = Eigen::ArrayXd::Zero(size);
+  // dsxdy_ = Eigen::ArrayXd::Zero(size);
 
   // Different types of wave simulator are supported...
   // 0 - LinearRegularWaveSimulation
@@ -252,6 +253,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
 
       wave_sim->SetLambda(1.0);
       wave_sim_ = std::move(wave_sim);
+      wave_sim2_ = dynamic_cast<IWaveSimulation2*>(wave_sim.get());
       break;
     }
     default:
@@ -272,14 +274,18 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     ly_(std::get<1>(params->TileSize()))
 {
   auto size = nx_ * ny_;
-  heights_ = Eigen::ArrayXd::Zero(size);
-  dhdx_ = Eigen::ArrayXd::Zero(size);
-  dhdy_ = Eigen::ArrayXd::Zero(size);
-  sx_ = Eigen::ArrayXd::Zero(size);
-  sy_ = Eigen::ArrayXd::Zero(size);
-  dsxdx_ = Eigen::ArrayXd::Zero(size);
-  dsydy_ = Eigen::ArrayXd::Zero(size);
-  dsxdy_ = Eigen::ArrayXd::Zero(size);
+  // heights_ = Eigen::ArrayXd::Zero(size);
+  // dhdx_ = Eigen::ArrayXd::Zero(size);
+  // dhdy_ = Eigen::ArrayXd::Zero(size);
+  // sx_ = Eigen::ArrayXd::Zero(size);
+  // sy_ = Eigen::ArrayXd::Zero(size);
+  // dsxdx_ = Eigen::ArrayXd::Zero(size);
+  // dsydy_ = Eigen::ArrayXd::Zero(size);
+  // dsxdy_ = Eigen::ArrayXd::Zero(size);
+  // Index nx = params->CellCount();
+  // double lx = params->TileSize();
+
+  // auto size = nx * nx;
 
   // Different types of wave simulator are supported...
   // 0 - LinearRegularWaveSimulation
@@ -366,6 +372,9 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     default:
       break;
   }
+
+  // get other interfaces
+  wave_sim2_ = dynamic_cast<IWaveSimulation2*>(wave_sim_.get());
 }
 
 //////////////////////////////////////////////////
@@ -679,115 +688,28 @@ void OceanTilePrivate<Vector3>::Update(double time)
 }
 
 //////////////////////////////////////////////////
-template <>
-void OceanTilePrivate<gz::math::Vector3d>::UpdateVertex(
-  Index v_idx, Index w_idx)
-{
-  // 1. Update vertex
-  double h  = heights_[w_idx];
-  double sx = sx_[w_idx];
-  double sy = sy_[w_idx];
+template<typename Vector3>
+Vector3 Cross(const Vector3& a, const Vector3& b, double sign = 1.0);
 
-  auto&& v0 = vertices0_[v_idx];
-  auto&& v  = vertices_[v_idx];
-  v.X() = v0.X() + sy;
-  v.Y() = v0.Y() + sx;
-  v.Z() = v0.Z() + h;
+//////////////////////////////////////////////////
+template<>
+gz::math::Vector3d Cross(
+    const gz::math::Vector3d& a,
+    const gz::math::Vector3d& b,
+    double sign)
+{
+  return sign * a.Cross(b);
 }
 
 //////////////////////////////////////////////////
-template <>
-void OceanTilePrivate<cgal::Point3>::UpdateVertex(Index v_idx, Index w_idx)
+template<>
+cgal::Point3 Cross(
+    const cgal::Point3& a,
+    const cgal::Point3& b,
+    double sign)
 {
-  // 1. Update vertex
-  double h  = heights_[w_idx];
-  double sx = sx_[w_idx];
-  double sy = sy_[w_idx];
-
-  auto&& v0 = vertices0_[v_idx];
-  vertices_[v_idx] = cgal::Point3(
-    v0.x() + sy,
-    v0.y() + sx,
-    v0.z() + h);
-}
-
-//////////////////////////////////////////////////
-template <>
-void OceanTilePrivate<gz::math::Vector3d>::UpdateVertexAndTangents(
-    Index v_idx, Index w_idx)
-{
-  // 1. Update vertex
-  double h  = heights_[w_idx];
-  double sx = sx_[w_idx];
-  double sy = sy_[w_idx];
-
-  auto&& v0 = vertices0_[v_idx];
-  auto&& v  = vertices_[v_idx];
-  v.X() = v0.X() + sy;
-  v.Y() = v0.Y() + sx;
-  v.Z() = v0.Z() + h;
-
-  // 2. Update tangent and bitangent vectors (not normalised).
-  // @TODO Check sign for displacement terms
-  double dhdx  = dhdx_[w_idx];
-  double dhdy  = dhdy_[w_idx];
-  double dsxdx = dsxdx_[w_idx];
-  double dsydy = dsydy_[w_idx];
-  double dsxdy = dsxdy_[w_idx];
-
-  auto&& t = tangents_[v_idx];
-  t.X() = dsydy + 1.0;
-  t.Y() = dsxdy;
-  t.Z() = dhdy;
-
-  auto&& b = bitangents_[v_idx];
-  b.X() = dsxdy;
-  b.Y() = dsxdx + 1.0;
-  b.Z() = dhdx;
-
-  auto&& n = normals_[v_idx];
-  auto normal =  t.Cross(b);
-  n.X() = normal.X();
-  n.Y() = normal.Y();
-  n.Z() = normal.Z();
-
-  /// \todo add check if this is required for non-FFT models
-  // 3. Normal must be reversed when using FTT waves. This is because
-  // the coordinate change from matrix indexing to cartesian indexing
-  // reflects the surface in the line x=y which flips the
-  // surface orientation.
-  n *= -1.0;
-}
-
-//////////////////////////////////////////////////
-template <>
-void OceanTilePrivate<cgal::Point3>::UpdateVertexAndTangents(
-    Index v_idx, Index w_idx)
-{
-  // 1. Update vertex
-  // double h  = heights_[w_idx];
-  // double sx = sx_[w_idx];
-  // double sy = sy_[w_idx];
-
-  // auto&& v0 = vertices0_[v_idx];
-
-  // 2. Update tangent and bitangent vectors (not normalised).
-  // @TODO Check sign for displacement terms
-  double dhdx  = dhdx_[w_idx];
-  double dhdy  = dhdy_[w_idx];
-  double dsxdx = dsxdx_[w_idx];
-  double dsydy = dsydy_[w_idx];
-  double dsxdy = dsxdy_[w_idx];
-
-  tangents_[v_idx] = cgal::Point3(
-    dsydy + 1.0,
-    dsxdy,
-    dhdy);
-
-  bitangents_[v_idx] = cgal::Point3(
-    dsxdy,
-    dsxdx + 1.0,
-    dhdx);
+  /// \todo fix
+  return a;
 }
 
 //////////////////////////////////////////////////
@@ -798,9 +720,60 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
 
   if (has_visuals_)
   {
-    wave_sim_->DisplacementAndDerivAt(
-        heights_, sx_, sy_,
-        dhdx_, dhdy_, dsxdx_, dsydy_, dsxdy_);
+    auto ref_sz = wave_sim2_->Sz();
+    auto ref_dszdx = wave_sim2_->DSzDx();
+    auto ref_dszdy = wave_sim2_->DSzDy();
+
+    auto ref_sx = wave_sim2_->Sx();
+    auto ref_sy = wave_sim2_->Sy();
+    auto ref_dsxdx = wave_sim2_->DSxDx();
+    auto ref_dsydy = wave_sim2_->DSyDy();
+    auto ref_dsxdy = wave_sim2_->DSxDy();
+
+    auto UpdateVertexAndTangents =
+        [&](Index v_idx, Index ix, Index iy) -> void
+    {
+      // 1. Update vertex
+      double h  = ref_sz(ix, iy);
+      double sx = ref_sx(ix, iy);
+      double sy = ref_sy(ix, iy);
+
+      auto&& v0 = vertices0_[v_idx];
+      vertices_[v_idx] = Vector3(
+          v0[0] + sy,
+          v0[1] + sx,
+          v0[2] + h);
+      /// \todo SWITCHED sx <=> sy
+
+      // 2. Update tangent and bitangent vectors (not normalised).
+      // @TODO Check sign for displacement terms
+      double dhdx  = ref_dszdx(ix, iy);
+      double dhdy  = ref_dszdy(ix, iy);
+      double dsxdx = ref_dsxdx(ix, iy);
+      double dsydy = ref_dsydy(ix, iy);
+      double dsxdy = ref_dsxdy(ix, iy);
+
+      tangents_[v_idx] = Vector3(
+          dsydy + 1.0,
+          dsxdy,
+          dhdy);
+      /// \todo SWITCHED dsxdx <=> dsydy
+
+      bitangents_[v_idx] = Vector3(
+          dsxdy,
+          dsxdx + 1.0,
+          dhdx);
+      /// \todo SWITCHED dsxdx <=> dsydy
+
+      normals_[v_idx] = Cross(tangents_[v_idx], bitangents_[v_idx], -1.0);
+
+      /// \todo add check if this is required for non-FFT models
+      // 3. Normal must be reversed when using FTT waves. This is because
+      // the coordinate change from matrix indexing to cartesian indexing
+      // reflects the surface in the line x=y which flips the
+      // surface orientation.
+      // normals_[v_idx] *= -1.0;
+    };
 
     // const Index nx = nx_;
     // const Index ny = ny_;
@@ -814,6 +787,7 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
         Index v_idx_cm = iy * nx_plus1 + ix;
         Index w_idx_cm = iy * nx_ + ix;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
+        // UpdateVertexAndTangents(v_idx_cm, ix, iy);
       }
     }
 
@@ -825,6 +799,8 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
         Index v_idx_cm = ny_ * nx_plus1 + ix;
         Index w_idx_cm = ix;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
+        // Index v_idx_cm = nx * nx_plus1 + i;
+        // UpdateVertexAndTangents(v_idx_cm, i, 0);
       }
     }
     for (Index iy=0; iy < ny_; ++iy)
@@ -834,6 +810,8 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
         Index v_idx_cm = iy * nx_plus1 + nx_;
         Index w_idx_cm = iy * nx_;
         UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
+        // Index v_idx_cm = i * nx_plus1 + nx;
+        // UpdateVertexAndTangents(v_idx_cm, 0, i);
       }
     }
     {
@@ -841,10 +819,25 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
       Index v_idx_cm = nx_plus1 * ny_plus1 - 1;
       Index w_idx_cm = 0;
       UpdateVertexAndTangents(v_idx_cm, w_idx_cm);
+      // Index v_idx_cm = nx_plus1 * nx_plus1 - 1;
+      // UpdateVertexAndTangents(v_idx_cm, 0, 0);
     }
-  } else {
-    wave_sim_->ElevationAt(heights_);
-    wave_sim_->DisplacementAt(sx_, sy_);
+  }
+  else
+  {
+    auto ref_sx = wave_sim2_->Sx();
+    auto ref_sy = wave_sim2_->Sy();
+    auto ref_sz = wave_sim2_->Sz();
+
+    auto UpdateVertex = [&](Index v_idx, Index ix, Index iy) -> void
+    {
+      auto&& v0 = vertices0_[v_idx];
+      vertices_[v_idx] = Vector3(
+        v0[0] + ref_sx(ix, iy),
+        v0[1] + ref_sy(ix, iy),
+        v0[2] + ref_sz(ix, iy));
+      /// \todo SWITCHED sx <=> sy
+    };
 
     // const Index nx = nx_;
     // const Index ny = ny_;
@@ -858,6 +851,35 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
         Index v_idx_cm = iy * nx_plus1 + ix;
         Index w_idx_cm = iy * nx_ + ix;
         UpdateVertex(v_idx_cm, w_idx_cm);
+// =======
+    // // set main tile values
+    // {
+    //   auto sx_col = ref_sx.colwise().cbegin();
+    //   auto sy_col = ref_sy.colwise().cbegin();
+    //   auto sz_col = ref_sz.colwise().cbegin();
+
+    //   for (Index iy=0; iy < nx; ++iy,
+    //     ++sx_col, ++sy_col, ++sz_col)
+    //   {
+
+    //     auto sx_row = sx_col->cbegin();
+    //     auto sy_row = sy_col->cbegin();
+    //     auto sz_row = sz_col->cbegin();
+
+    //     for (Index ix=0; ix < nx; ++ix,
+    //       ++sx_row, ++sy_row, ++sz_row)
+    //     {
+    //       Index v_idx_cm = iy * nx_plus1 + ix;
+    //       UpdateVertex(v_idx_cm, ix, iy);
+
+    //       // auto&& v0 = vertices0_[v_idx_cm];
+    //       // vertices_[v_idx_cm] = Vector3(
+    //       //   v0[0] + *sx_row,
+    //       //   v0[1] + *sy_roo,
+    //       //   v0[2] + *sz_row);
+    //       /// \todo SWITCHED sx <=> sy
+    //     }
+// >>>>>>> 764a881 (Waves: optimise wave field interpolation)
       }
     }
 
@@ -869,22 +891,36 @@ void OceanTilePrivate<Vector3>::UpdateVertices(double time)
         Index v_idx_cm = ny_ * nx_plus1 + ix;
         Index w_idx_cm = ix;
         UpdateVertex(v_idx_cm, w_idx_cm);
+// =======
+//         Index v_idx_cm = nx * nx_plus1 + i;
+//         UpdateVertex(v_idx_cm, i, 0);
+// >>>>>>> 764a881 (Waves: optimise wave field interpolation)
       }
     }
     for (Index iy=0; iy < ny_; ++iy)
     {
       // Right column (ix = nx) periodic with left column (ix = 0)
       {
+// <<<<<<< HEAD
         Index v_idx_cm = iy * nx_plus1 + nx_;
         Index w_idx_cm = iy * nx_;
         UpdateVertex(v_idx_cm, w_idx_cm);
+// =======
+//         Index v_idx_cm = i * nx_plus1 + nx;
+//         UpdateVertex(v_idx_cm, 0, i);
+// >>>>>>> 764a881 (Waves: optimise wave field interpolation)
       }
     }
     {
       // Top right corner period with bottom right corner.
+// <<<<<<< HEAD
       Index v_idx_cm = nx_plus1 * ny_plus1 - 1;
       Index w_idx_cm = 0;
       UpdateVertex(v_idx_cm, w_idx_cm);
+// =======
+//       Index v_idx_cm = nx_plus1 * nx_plus1 - 1;
+//       UpdateVertex(v_idx_cm, 0, 0);
+// >>>>>>> 764a881 (Waves: optimise wave field interpolation)
     }
   }
 }

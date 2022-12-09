@@ -9,6 +9,6 @@ endif()
 gz_build_tests(
   TYPE PERFORMANCE
   SOURCES ${tests}
-  INCLUDE_DIRS     
+  INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/src
 )

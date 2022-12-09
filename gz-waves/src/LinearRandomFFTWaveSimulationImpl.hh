@@ -121,11 +121,27 @@ class LinearRandomFFTWaveSimulation::Impl
       Index ix, Index iy, Index iz,
       double& pressure);
 
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sz();
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSzDx();
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSzDy();
+
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sx();
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> Sy();
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSxDx();
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSyDy();
+  Eigen::Ref<const Eigen::ArrayXXdRowMajor> DSxDy();
+
   /// \brief Calculate the base (time-independent) Fourier amplitudes
   void ComputeBaseAmplitudes();
 
   /// \brief Calculate the time-independent Fourier amplitudes
   void ComputeCurrentAmplitudes(double time);
+
+  void ComputeDisplacementAmplitudes();
+
+  void ComputeDisplacementDerivAmplitudes();
+
+  void ComputePressureAmplitudes();
 
   void InitWaveNumbers();
   void InitPressureGrid();
@@ -139,27 +155,27 @@ class LinearRandomFFTWaveSimulation::Impl
   ///
   /// https://www.fftw.org/fftw3_doc/Row_002dmajor-Format.html
   ///
-  Eigen::ArrayXXcdRowMajor fft_h_;       // FFT0 - height
-  Eigen::ArrayXXcdRowMajor fft_h_ikx_;   // FFT1 - d height / dx
-  Eigen::ArrayXXcdRowMajor fft_h_iky_;   // FFT1 - d height / dy
-  Eigen::ArrayXXcdRowMajor fft_sx_;      // FFT3 - displacement x
-  Eigen::ArrayXXcdRowMajor fft_sy_;      // FFT4 - displacement y
-  Eigen::ArrayXXcdRowMajor fft_h_kxkx_;  // FFT5 - d displacement x / dx
-  Eigen::ArrayXXcdRowMajor fft_h_kyky_;  // FFT6 - d displacement y / dy
-  Eigen::ArrayXXcdRowMajor fft_h_kxky_;  // FFT7 - d displacement x / dy
+  Eigen::ArrayXXcdRowMajor fft_h_;        // sz
+  Eigen::ArrayXXcdRowMajor fft_h_ikx_;    // dsz/dx
+  Eigen::ArrayXXcdRowMajor fft_h_iky_;    // dsz/dy
+  Eigen::ArrayXXcdRowMajor fft_sx_;       // sx
+  Eigen::ArrayXXcdRowMajor fft_sy_;       // sy
+  Eigen::ArrayXXcdRowMajor fft_h_kxkx_;   // dsx/dx
+  Eigen::ArrayXXcdRowMajor fft_h_kyky_;   // dsy/dy
+  Eigen::ArrayXXcdRowMajor fft_h_kxky_;   // dsx/dy
 
   /// \note if using fftw_plan_dft_c2r_2d:
   ///       complex input array has size: nx * ny / 2 + 1
   ///       real output array has size:   nx * ny
   ///
-  Eigen::ArrayXXdRowMajor  fft_out0_;
-  Eigen::ArrayXXdRowMajor  fft_out1_;
-  Eigen::ArrayXXdRowMajor  fft_out2_;
-  Eigen::ArrayXXdRowMajor  fft_out3_;
-  Eigen::ArrayXXdRowMajor  fft_out4_;
-  Eigen::ArrayXXdRowMajor  fft_out5_;
-  Eigen::ArrayXXdRowMajor  fft_out6_;
-  Eigen::ArrayXXdRowMajor  fft_out7_;
+  Eigen::ArrayXXdRowMajor  fft_out0_;     // sz
+  Eigen::ArrayXXdRowMajor  fft_out1_;     // dsz/dx
+  Eigen::ArrayXXdRowMajor  fft_out2_;     // dsz/dy
+  Eigen::ArrayXXdRowMajor  fft_out3_;     // sx
+  Eigen::ArrayXXdRowMajor  fft_out4_;     // sy
+  Eigen::ArrayXXdRowMajor  fft_out5_;     // dsx/dx
+  Eigen::ArrayXXdRowMajor  fft_out6_;     // dsy/dy
+  Eigen::ArrayXXdRowMajor  fft_out7_;     // dsx/dy
 
   fftw_plan fft_plan0_, fft_plan1_, fft_plan2_, fft_plan3_;
   fftw_plan fft_plan4_, fft_plan5_, fft_plan6_, fft_plan7_;
@@ -170,7 +186,8 @@ class LinearRandomFFTWaveSimulation::Impl
   std::vector<fftw_plan>                  fft_plan_p_;
 
   /// \brief lazy evaluation flags
-  std::vector<bool> fft_needs_update_;
+  std::vector<bool> fft_in_needs_update_;
+  std::vector<bool> fft_out_needs_update_;
 
   /// \brief Gravity acceleration [m/s^2]
   double gravity_{9.81};
