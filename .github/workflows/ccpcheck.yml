@@ -1,0 +1,45 @@
+# GitHub Action to run cppcheck
+# 
+name: Cppcheck
+
+on: [push, pull_request]
+
+jobs:
+  cpplint:
+    runs-on: ubuntu-latest
+    name: Cppcheck
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install cppcheck
+      - name: Cppcheck Core Library
+        run: |
+          cppcheck --std=c++17 ./gz-waves/include/gz/waves/*.hh
+          cppcheck --std=c++17 ./gz-waves/src/*.cc ./gz-waves/src/*.hh
+      - name: Cppcheck Tests
+        run: |
+          cppcheck --std=c++17 ./gz-waves/test/performance/*.cc
+          cppcheck --std=c++17 ./gz-waves/test/plots/*.cc
+      - name: Cppcheck Hydrodynamics Plugin
+        run: |
+          cppcheck --std=c++17 --suppress=unknownMacro \
+            ./gz-waves/src/systems/hydrodynamics/*.hh
+          cppcheck --std=c++17 --suppress=unknownMacro \
+            ./gz-waves/src/systems/hydrodynamics/*.cc
+      - name: Cppcheck DynamicGeometry Plugin
+        run: |
+          cppcheck --std=c++17 --suppress=unknownMacro \
+            ./gz-waves/src/systems/dynamic/*.hh
+          cppcheck --std=c++17 --suppress=unknownMacro \
+            ./gz-waves/src/systems/dynamic/*.cc
+      - name: Cppcheck Waves Plugin
+        run: |
+          cppcheck --std=c++17 ./gz-waves/include/gz/common/*.hh
+          cppcheck --std=c++17 --suppress=unknownMacro \
+            ./gz-waves/src/systems/waves/*.hh
+          cppcheck --std=c++17 --suppress=unknownMacro \
+            ./gz-waves/src/systems/waves/*.cc
+

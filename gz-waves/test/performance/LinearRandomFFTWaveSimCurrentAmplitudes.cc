@@ -33,7 +33,7 @@ using gz::waves::LinearRandomFFTWaveSimulation;
 
 //////////////////////////////////////////////////
 // Define fixture
-class LinearRandomFFTWaveSimTest: public ::testing::Test
+class LinearRandomFFTWaveSimCurrentAmplitudesTest: public ::testing::Test
 {
  public:
   // number of evaluations
@@ -47,7 +47,7 @@ class LinearRandomFFTWaveSimTest: public ::testing::Test
 };
 
 //////////////////////////////////////////////////
-TEST_F(LinearRandomFFTWaveSimTest, CurrentAmplitudes)
+TEST_F(LinearRandomFFTWaveSimCurrentAmplitudesTest, CurrentAmplitudes)
 {
   LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
   model.ComputeBaseAmplitudes();

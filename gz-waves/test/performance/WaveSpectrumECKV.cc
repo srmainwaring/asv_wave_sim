@@ -44,10 +44,10 @@ using gz::waves::ECKVWaveSpectrum;
 
 //////////////////////////////////////////////////
 // Define fixture
-class WaveSpectrumECKVPerfFixture: public ::testing::Test
+class WaveSpectrumECKVTest: public ::testing::Test
 {
  public:
-  WaveSpectrumECKVPerfFixture()
+  WaveSpectrumECKVTest()
   {
     double kx_nyquist = M_PI * nx_ / lx_;
     double ky_nyquist = M_PI * ny_ / ly_;
@@ -103,7 +103,7 @@ class WaveSpectrumECKVPerfFixture: public ::testing::Test
 };
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdDoubleLoopColMajor)
+TEST_F(WaveSpectrumECKVTest, ArrayXXdDoubleLoopColMajor)
 {
   // non-vector version
   std::cerr << "Eigen::ArrayXXd double loop\n";
@@ -126,7 +126,7 @@ TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdDoubleLoopColMajor)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdDoubleLoopRowMajor)
+TEST_F(WaveSpectrumECKVTest, ArrayXXdDoubleLoopRowMajor)
 {
   // loop in 'wrong' order
   std::cerr << "Eigen::ArrayXXd double loop, 'wrong' order\n";
@@ -149,7 +149,7 @@ TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdDoubleLoopRowMajor)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdReshapedIterator)
+TEST_F(WaveSpectrumECKVTest, ArrayXXdReshapedIterator)
 {
   // reshaped
   std::cerr << "Eigen::ArrayXXd reshaped iterator\n";
@@ -175,7 +175,7 @@ TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdReshapedIterator)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, StdVectorDoubleLoop)
+TEST_F(WaveSpectrumECKVTest, StdVectorDoubleLoop)
 {
   // using row major std::vector
   std::cerr << "std::vector double loop\n";
@@ -208,7 +208,7 @@ TEST_F(WaveSpectrumECKVPerfFixture, StdVectorDoubleLoop)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, StdVectorSingleLoop)
+TEST_F(WaveSpectrumECKVTest, StdVectorSingleLoop)
 {
   // using row major std::vector
   std::cerr << "std::vector single loop\n";
@@ -238,7 +238,7 @@ TEST_F(WaveSpectrumECKVPerfFixture, StdVectorSingleLoop)
 }
 
 //////////////////////////////////////////////////
-TEST_F(WaveSpectrumECKVPerfFixture, ArrayXXdCWise)
+TEST_F(WaveSpectrumECKVTest, ArrayXXdCWise)
 {
   // Eigen cwise-array calc
   std::cerr << "Eigen cwise-array\n";

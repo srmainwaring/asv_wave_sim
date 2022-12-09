@@ -30,15 +30,20 @@ jobs:
         run: |
           cpplint ./gz-waves/test/performance/*.cc
           cpplint ./gz-waves/test/plots/*.cc
-          cpplint --filter=-whitespace/blank_line,-whitespace/indent ./gz-waves/include/gz/common/*.hh
       - name: Cpplint Hydrodynamics Plugin
         run: |
-          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard ./gz-waves/src/systems/hydrodynamics/*
+          cpplint \
+            --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard \
+            ./gz-waves/src/systems/hydrodynamics/*
       - name: Cpplint DynamicGeometry Plugin
         run: |
-          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard ./gz-waves/src/systems/dynamic/*
+          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard \
+            ./gz-waves/src/systems/dynamic/*
       - name: Cpplint Waves Plugin
         run: |
-          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard ./gz-waves/src/systems/waves/*.hh
-          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard,-whitespace/newline ./gz-waves/src/systems/waves/*.cc
-
+          cpplint --filter=-whitespace/blank_line,-whitespace/indent \
+            ./gz-waves/include/gz/common/*.hh
+          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard \
+            ./gz-waves/src/systems/waves/*.hh
+          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard,-whitespace/newline \
+            ./gz-waves/src/systems/waves/*.cc
