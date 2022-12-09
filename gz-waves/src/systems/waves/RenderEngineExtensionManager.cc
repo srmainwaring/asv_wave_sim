@@ -32,19 +32,23 @@
  *
  */
 
-#include "RenderEngineExtensionManager.hh"
-#include "RenderEngineExtension.hh"
-#include "RenderEngineExtensionPlugin.hh"
-
+#include <map>
+#include <mutex>
 
 #include <gz/common/Console.hh>
 #include <gz/common/SystemPaths.hh>
 #include <gz/plugin/Loader.hh>
 #include <gz/rendering/config.hh>
 
-#include <map>
-#include <mutex>
+#include "RenderEngineExtensionManager.hh"
+#include "RenderEngineExtension.hh"
+#include "RenderEngineExtensionPlugin.hh"
 
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
 /// \brief Holds information about an extension
 struct ExtensionInfo
@@ -54,11 +58,11 @@ struct ExtensionInfo
   std::string name;
 
   /// \brief The pointer to the render extension.
-  gz::rendering::RenderEngineExtension *extension;
+  RenderEngineExtension *extension;
 };
 
 /// \brief Private implementation of the RenderEngineExtensionManager class.
-class gz::rendering::RenderEngineExtensionManagerPrivate
+class RenderEngineExtensionManagerPrivate
 {
   /// \brief ExtensionMap that maps extension name to an extension pointer.
   typedef std::map<std::string, RenderEngineExtension *> ExtensionMap;
@@ -85,8 +89,9 @@ class gz::rendering::RenderEngineExtensionManagerPrivate
 
   /// \brief Unregister an extension using an ExtensionMap iterator.
   /// Once an extension is unregistered, it can no longer be loaded. Use
-  /// RenderEngineExtensionManagerPrivate::UnloadExtension to unload the extension
-  /// without unregistering it if you wish to load the extension again
+  /// RenderEngineExtensionManagerPrivate::UnloadExtension to unload the
+  /// extension without unregistering it if you wish to load the
+  /// extension again
   /// \param[in] _iter ExtensionMap iterator
   public: void UnregisterExtension(ExtensionIter _iter);
 
@@ -124,11 +129,7 @@ class gz::rendering::RenderEngineExtensionManagerPrivate
   public: std::recursive_mutex extensionsMutex;
 };
 
-using namespace gz;
-using namespace rendering;
-
 //////////////////////////////////////////////////
-// RenderEngineExtensionManager
 //////////////////////////////////////////////////
 RenderEngineExtensionManager::RenderEngineExtensionManager() :
   dataPtr(new RenderEngineExtensionManagerPrivate)
@@ -578,10 +579,15 @@ bool RenderEngineExtensionManagerPrivate::UnloadExtensionPlugin(
 }
 
 //////////////////////////////////////////////////
-void RenderEngineExtensionManagerPrivate::UnregisterExtension(ExtensionIter _iter)
+void RenderEngineExtensionManagerPrivate::UnregisterExtension(
+    ExtensionIter _iter)
 {
   _iter->second->Destroy();
 
   std::lock_guard<std::recursive_mutex> lock(this->extensionsMutex);
   this->extensions.erase(_iter);
 }
+
+}
+}  // namespace rendering
+}  // namespace gz

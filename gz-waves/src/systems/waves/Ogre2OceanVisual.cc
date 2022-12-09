@@ -14,9 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Ogre2OceanVisual.hh"
-#include "Ogre2DynamicMesh.hh"
-
-#include "gz/common/SubMeshWithTangents.hh"
 
 #include <gz/common.hh>
 #include <gz/common/SubMesh.hh>
@@ -31,10 +28,17 @@
   #pragma warning(pop)
 #endif
 
-using namespace gz;
-using namespace rendering;
+#include "gz/common/SubMeshWithTangents.hh"
 
-class gz::rendering::Ogre2OceanVisualPrivate
+#include "Ogre2DynamicMesh.hh"
+
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
+
+class Ogre2OceanVisualPrivate
 {
   /// \brief visual materal
   public: Ogre2MaterialPtr material = nullptr;
@@ -133,12 +137,12 @@ void Ogre2OceanVisual::LoadCube()
   // must specify vertices for each face and get
   // the orientation correct.
   gz::math::Vector3d p0(-1, -1,  1);
-  gz::math::Vector3d p1( 1, -1,  1);
-  gz::math::Vector3d p2( 1,  1,  1);
+  gz::math::Vector3d p1(+1, -1,  1);
+  gz::math::Vector3d p2(+1,  1,  1);
   gz::math::Vector3d p3(-1,  1,  1);
   gz::math::Vector3d p4(-1, -1, -1);
-  gz::math::Vector3d p5( 1, -1, -1);
-  gz::math::Vector3d p6( 1,  1, -1);
+  gz::math::Vector3d p5(+1, -1, -1);
+  gz::math::Vector3d p6(+1,  1, -1);
   gz::math::Vector3d p7(-1,  1, -1);
 
   // front face
@@ -361,3 +365,7 @@ void Ogre2OceanVisual::InitObject(ScenePtr _scene,
   this->Load();
   this->Init();
 }
+
+}
+}  // namespace rendering
+}  // namespace gz

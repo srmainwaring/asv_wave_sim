@@ -16,15 +16,16 @@
 #ifndef GZ_SIM_COLLISION_HH_
 #define GZ_SIM_COLLISION_HH_
 
+#include <memory>
+#include <optional>
+#include <string>
+
 #include <gz/sim/config.hh>
 #include <gz/sim/EntityComponentManager.hh>
 #include <gz/sim/Export.hh>
 #include <gz/sim/Model.hh>
 #include <gz/sim/System.hh>
 #include <gz/sim/Types.hh>
-
-#include <memory>
-#include <optional>
 
 namespace gz
 {
@@ -91,7 +92,7 @@ inline namespace GZ_SIM_VERSION_NAMESPACE {
     private: std::unique_ptr<CollisionPrivate> dataPtr;
   };
 }
-}
-}
+}  // namespace sim
+}  // namespace gz
 
-#endif
+#endif  // GZ_SIM_COLLISION_HH_

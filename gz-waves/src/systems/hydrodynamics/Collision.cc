@@ -26,8 +26,10 @@ class gz::sim::CollisionPrivate
   public: Entity id{kNullEntity};
 };
 
-using namespace gz;
-using namespace sim;
+namespace gz
+{
+namespace sim
+{
 
 //////////////////////////////////////////////////
 Collision::~Collision() = default;
@@ -90,3 +92,5 @@ std::optional<Model> Collision::ParentLink(
   return std::optional<Model>(parent->Data());
 }
 
+}  // namespace sim
+}  // namespace gz

@@ -16,9 +16,9 @@
 #ifndef GZ_RENDERING_OGRE2_RENDERENGINEEXTENSION_HH_
 #define GZ_RENDERING_OGRE2_RENDERENGINEEXTENSION_HH_
 
-#include "BaseRenderEngineExtension.hh"
-#include "RenderEngineExtensionPlugin.hh"
-#include "RenderEngineExtension.hh"
+#include <map>
+#include <memory>
+#include <string>
 
 #include <gz/common/SingletonT.hh>
 
@@ -28,63 +28,63 @@
 #include "gz/rendering/ogre2/Ogre2RenderTypes.hh"
 #include <gz/rendering/ogre2/Export.hh>
 
-#include <map>
-#include <memory>
-#include <string>
+#include "BaseRenderEngineExtension.hh"
+#include "RenderEngineExtensionPlugin.hh"
+#include "RenderEngineExtension.hh"
 
 namespace gz
 {
-  namespace rendering
-  {
-    inline namespace GZ_RENDERING_VERSION_NAMESPACE {
-    
-    // Forward declaration
-    class  Ogre2RenderEngineExtensionPrivate;
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-    class GZ_RENDERING_OGRE2_VISIBLE Ogre2RenderEngineExtensionPlugin :
-      public RenderEngineExtensionPlugin
-    {
-      public: Ogre2RenderEngineExtensionPlugin();
+// Forward declaration
+class  Ogre2RenderEngineExtensionPrivate;
 
-      public: ~Ogre2RenderEngineExtensionPlugin();
+class GZ_RENDERING_OGRE2_VISIBLE Ogre2RenderEngineExtensionPlugin :
+  public RenderEngineExtensionPlugin
+{
+  public: Ogre2RenderEngineExtensionPlugin();
 
-      public: std::string Name() const;
+  public: ~Ogre2RenderEngineExtensionPlugin();
 
-      public: RenderEngineExtension *Extension() const;
-    };
+  public: std::string Name() const;
 
-    class GZ_RENDERING_OGRE2_VISIBLE Ogre2RenderEngineExtension :
-        public virtual BaseRenderEngineExtension,
-        public common::SingletonT<Ogre2RenderEngineExtension>
-    {
-      private: Ogre2RenderEngineExtension();
+  public: RenderEngineExtension *Extension() const;
+};
 
-      public: virtual ~Ogre2RenderEngineExtension();
+class GZ_RENDERING_OGRE2_VISIBLE Ogre2RenderEngineExtension :
+    public virtual BaseRenderEngineExtension,
+    public common::SingletonT<Ogre2RenderEngineExtension>
+{
+  private: Ogre2RenderEngineExtension();
 
-      public: virtual void Destroy() override;
+  public: virtual ~Ogre2RenderEngineExtension();
 
-      public: virtual std::string Name() const override;
+  public: virtual void Destroy() override;
 
-      public: virtual SceneNodeFactoryPtr SceneNodeFactory() const override;
+  public: virtual std::string Name() const override;
 
-      protected: virtual bool LoadImpl(
-          const std::map<std::string, std::string> &_params) override;
+  public: virtual SceneNodeFactoryPtr SceneNodeFactory() const override;
 
-      protected: virtual bool InitImpl() override;
+  protected: virtual bool LoadImpl(
+      const std::map<std::string, std::string> &_params) override;
 
-      private: void LoadAttempt();
+  protected: virtual bool InitImpl() override;
 
-      private: void InitAttempt();
+  private: void LoadAttempt();
 
-      /// \brief Pointer to private data
-      private: std::unique_ptr<Ogre2RenderEngineExtensionPrivate> dataPtr;
+  private: void InitAttempt();
 
-      /// \brief Singleton setup
-      private: friend class common::SingletonT<Ogre2RenderEngineExtension>;
-    };
+  /// \brief Pointer to private data
+  private: std::unique_ptr<Ogre2RenderEngineExtensionPrivate> dataPtr;
 
-    }
-  }
+  /// \brief Singleton setup
+  private: friend class common::SingletonT<Ogre2RenderEngineExtension>;
+};
+
 }
+}  // namespace rendering
+}  // namespace gz
 
-#endif
+#endif  // GZ_RENDERING_OGRE2_RENDERENGINEEXTENSION_HH_

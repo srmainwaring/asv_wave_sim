@@ -36,36 +36,29 @@
 
 #include "WavesVisual.hh"
 
-#include "DisplacementMap.hh"
-#include "OceanGeometry.hh"
-#include "OceanVisual.hh"
-#include "RenderEngineExtension.hh"
-#include "RenderEngineExtensionManager.hh"
-#include "SceneNodeFactory.hh"
-
-#include "gz/waves/OceanTile.hh"
-#include "gz/waves/Types.hh"
-#include "gz/waves/Utilities.hh"
-#include "gz/waves/WaveParameters.hh"
-#include "gz/waves/WaveSimulation.hh"
-#include "gz/waves/LinearRandomFFTWaveSimulation.hh"
-
 #include <gz/msgs/any.pb.h>
 #include <gz/msgs/param.pb.h>
 #include <gz/msgs/param_v.pb.h>
 
+#include <algorithm>
+#include <chrono>
+#include <list>
+#include <map>
+#include <mutex>
+#include <utility>
+#include <vector>
+#include <string>
+
 #include <gz/common/Profiler.hh>
 
 #include <gz/plugin/Register.hh>
+
+#include <gz/rendering/Grid.hh>
 #include <gz/rendering/Material.hh>
 #include <gz/rendering/RenderingIface.hh>
 #include <gz/rendering/Scene.hh>
 #include <gz/rendering/ShaderParams.hh>
 #include <gz/rendering/Visual.hh>
-
-#include <gz/rendering/Grid.hh>
-
-#include <gz/transport/Node.hh>
 
 #include <gz/sim/components/Name.hh>
 #include <gz/sim/components/World.hh>
@@ -74,20 +67,35 @@
 #include <gz/sim/rendering/RenderUtil.hh>
 #include <gz/sim/Util.hh>
 
+#include <gz/transport/Node.hh>
+
 #include <sdf/Element.hh>
 
-#include <chrono>
-#include <list>
-#include <mutex>
-#include <vector>
-#include <string>
+#include "gz/waves/OceanTile.hh"
+#include "gz/waves/Types.hh"
+#include "gz/waves/Utilities.hh"
+#include "gz/waves/WaveParameters.hh"
+#include "gz/waves/WaveSimulation.hh"
+#include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
-using namespace gz;
-using namespace rendering;
-using namespace sim;
-using namespace systems;
+#include "DisplacementMap.hh"
+#include "OceanGeometry.hh"
+#include "OceanVisual.hh"
+#include "RenderEngineExtension.hh"
+#include "RenderEngineExtensionManager.hh"
+#include "SceneNodeFactory.hh"
 
-class gz::sim::systems::WavesVisualPrivate
+// using namespace rendering;
+
+namespace gz
+{
+namespace sim
+{
+inline namespace GZ_SIM_VERSION_NAMESPACE {
+namespace systems
+{
+
+class WavesVisualPrivate
 {
   /// \brief Data structure for storing shader param info
   public: class ShaderParamValue
@@ -205,7 +213,7 @@ class gz::sim::systems::WavesVisualPrivate
 
   /////////////////
   // DYNAMIC_TEXTURE
-  public: DisplacementMapPtr displacementMap;
+  public: rendering::DisplacementMapPtr displacementMap;
 
   std::unique_ptr<gz::waves::IWaveSimulation> mWaveSim;
   Eigen::ArrayXd mHeights;
@@ -302,7 +310,7 @@ void WavesVisual::Configure(const Entity &_entity,
   // function and _sdf is a const shared pointer to a const sdf::Element.
   auto sdf = const_cast<sdf::Element *>(_sdf.get());
 
-  // Capture entity 
+  // Capture entity
   this->dataPtr->entity = _entity;
   auto nameComp = _ecm.Component<components::Name>(_entity);
   this->dataPtr->visualName = nameComp->Data();
@@ -597,9 +605,12 @@ void WavesVisualPrivate::OnUpdate()
       {
         gzmsg << "WavesVisual: creating dynamic geometry ocean visual\n";
 
-        // retrive the material from the visual's geometry (it's not set on the visual)
-        gzmsg << "WavesVisual: Visual Name:          " << this->visual->Name() << "\n";
-        gzmsg << "WavesVisual: Visual GeometryCount: " << this->visual->GeometryCount() << "\n";
+        // retrive the material from the visual's geometry
+        // (it's not set on the visual)
+        gzmsg << "WavesVisual: Visual Name:          "
+            << this->visual->Name() << "\n";
+        gzmsg << "WavesVisual: Visual GeometryCount: "
+            << this->visual->GeometryCount() << "\n";
         auto visualGeometry = this->visual->GeometryByIndex(0);
         this->oceanMaterial = visualGeometry->Material();
         if (!this->oceanMaterial)
@@ -627,16 +638,15 @@ void WavesVisualPrivate::OnUpdate()
 
         unsigned int objId = 50000;
         auto position = this->visual->LocalPosition();
-        for (waves::Index iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
+        for (waves::Index iy=this->tiles_y[0]; iy <= this->tiles_y[1]; ++iy)
         {
-          for (waves::Index ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
+          for (waves::Index ix=this->tiles_x[0]; ix <= this->tiles_x[1]; ++ix)
           {
-            // tile position 
+            // tile position
             gz::math::Vector3d tilePosition(
               position.X() + ix * L,
               position.Y() + iy * L,
-              position.Z() + 0.0
-            );
+              position.Z() + 0.0);
 
 #define GZ_WAVES_UPDATE_VISUALS 1
 #if GZ_WAVES_UPDATE_VISUALS
@@ -686,7 +696,8 @@ void WavesVisualPrivate::OnUpdate()
         }
       }
 
-      if ((this->oceanVisuals2.empty() && oceanVisuals.empty()) || this->isStatic)
+      if ((this->oceanVisuals2.empty() && oceanVisuals.empty()) ||
+          this->isStatic)
         return;
 
       if (this->waveParamsDirty)
@@ -736,20 +747,19 @@ void WavesVisualPrivate::OnUpdate()
 
         // Water tiles: tiles_x[0], tiles_x[0] + 1, ..., tiles_x[1], etc.
         auto position = this->visual->LocalPosition();
-        for (waves::Index iy=this->tiles_y[0]; iy<=this->tiles_y[1]; ++iy)
+        for (waves::Index iy=this->tiles_y[0]; iy <= this->tiles_y[1]; ++iy)
         {
-          for (waves::Index ix=this->tiles_x[0]; ix<=this->tiles_x[1]; ++ix)
+          for (waves::Index ix=this->tiles_x[0]; ix <= this->tiles_x[1]; ++ix)
           {
-            // tile position 
+            // tile position
             gz::math::Vector3d tilePosition(
               position.X() + ix * L,
               position.Y() + iy * L,
-              position.Z() + 0.0
-            );
+              position.Z() + 0.0);
 
             /// \note: replaced with cloned geometry from primary visual
             // auto geometry = this->scene->CreateMesh(descriptor);
-  
+
             // create ocean visual
             auto oceanVisual = this->scene->CreateVisual();
             oceanVisual->AddGeometry(geometry->Clone());
@@ -920,7 +930,7 @@ void WavesVisualPrivate::InitWaveSim()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::InitUniforms()
 {
-  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc 
+  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc
   /// ShaderParamPrivate::OnUpdate
 
   // set the shader params read from SDF
@@ -961,8 +971,8 @@ void WavesVisualPrivate::InitUniforms()
           asFullPath(spv.value, this->modelPath));
       (*params)[spv.name].SetTexture(texPath,
           rendering::ShaderParam::ParamType::PARAM_TEXTURE, uvSetIndex);
-      
-      gzmsg << "Shader param [" << spv.name << "]" 
+
+      gzmsg << "Shader param [" << spv.name << "]"
           << ", type: " << spv.type
           << ", tex coord set: " << uvSetIndex << "\n";
     }
@@ -975,7 +985,7 @@ void WavesVisualPrivate::InitUniforms()
       (*params)[spv.name].SetTexture(texPath,
           rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, uvSetIndex);
 
-      gzmsg << "Shader param [" << spv.name << "]" 
+      gzmsg << "Shader param [" << spv.name << "]"
           << ", type: " << spv.type
           << ", tex coord set: " << uvSetIndex << "\n";
     }
@@ -1096,7 +1106,7 @@ void WavesVisualPrivate::UpdateWaveSim()
 //////////////////////////////////////////////////
 void WavesVisualPrivate::UpdateUniforms()
 {
-  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc 
+  /// \note: Adapted from gz-sim/src/systems/shader_param/ShaderParam.cc
   /// ShaderParamPrivate::OnUpdate
 
   float simTime = static_cast<float>(this->currentSimTimeSeconds);
@@ -1128,15 +1138,19 @@ void WavesVisualPrivate::UpdateTextures()
     this->mDisplacementsY,
     this->mDxdx,
     this->mDydy,
-    this->mDxdy
-  );
+    this->mDxdy);
 }
 
-//////////////////////////////////////////////////
-GZ_ADD_PLUGIN(WavesVisual,
-              gz::sim::System,
-              WavesVisual::ISystemConfigure,
-              WavesVisual::ISystemPreUpdate)
+}  // namespace systems
+}
+}  // namespace sim
+}  // namespace gz
 
-GZ_ADD_PLUGIN_ALIAS(WavesVisual,
-  "gz::sim::systems::WavesVisual")
+//////////////////////////////////////////////////
+GZ_ADD_PLUGIN(gz::sim::systems::WavesVisual,
+              gz::sim::System,
+              gz::sim::systems::WavesVisual::ISystemConfigure,
+              gz::sim::systems::WavesVisual::ISystemPreUpdate)
+
+GZ_ADD_PLUGIN_ALIAS(gz::sim::systems::WavesVisual,
+                   "gz::sim::systems::WavesVisual")

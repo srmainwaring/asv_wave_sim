@@ -13,20 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <gnuplot-iostream.h>
+
+#include <Eigen/Dense>
+
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <vector>
 
- #include <Eigen/Dense>
-
-#include <gnuplot-iostream.h>
-
 #include <gz/waves/WaveSimulation.hh>
 #include <gz/waves/LinearRandomFFTWaveSimulation.hh>
 
-using namespace gz;
-using namespace waves;
+using gz::waves::Index;
+using gz::waves::LinearRandomFFTWaveSimulation;
 
 int main(int /*argc*/, const char **/*argv*/)
 {
@@ -50,7 +50,7 @@ int main(int /*argc*/, const char **/*argv*/)
       wave_sim->SetWindVelocity(10.0, 0.0);
       wave_sim->SetLambda(0.0);
       wave_sim->SetTime(5.0);
-      
+
       double sample_time = 60.0;
       std::vector<double> pts_t;
       std::vector<double> pts_eta;
@@ -157,7 +157,6 @@ int main(int /*argc*/, const char **/*argv*/)
         gp.send1d(std::make_tuple(pts_x, pts_p[iz]));
       }
     }
-
   }
   catch(...)
   {

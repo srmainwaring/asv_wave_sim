@@ -34,58 +34,61 @@
 #ifndef GZ_RENDERING_RENDERENGINEEXTENSION_HH_
 #define GZ_RENDERING_RENDERENGINEEXTENSION_HH_
 
-#include "SceneNodeFactory.hh"
-
 #include <map>
 #include <string>
+
 #include <gz/rendering/config.hh>
 #include <gz/rendering/GraphicsAPI.hh>
 #include <gz/rendering/RenderTypes.hh>
 #include <gz/rendering/Export.hh>
 
+#include "SceneNodeFactory.hh"
+
 namespace gz
 {
-  namespace rendering
-  {
-    inline namespace GZ_RENDERING_VERSION_NAMESPACE {
-    //
-    /// \brief An abstract interface to a concrete render-engine extension.
-    class GZ_RENDERING_VISIBLE RenderEngineExtension
-    {
-      /// \brief Destructor
-      public: virtual ~RenderEngineExtension();
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
+//
+/// \brief An abstract interface to a concrete render-engine extension.
+class GZ_RENDERING_VISIBLE RenderEngineExtension
+{
+  /// \brief Destructor
+  public: virtual ~RenderEngineExtension();
 
-      /// \brief Load any necessary resources to set up the extension. This
-      /// should called before any other function.
-      /// \param[in] _params Parameters to be passed to the underlying
-      /// rendering engine extension.
-      /// \return True if the extension was successfully loaded
-      public: virtual bool Load(
-          const std::map<std::string, std::string> &_params = {}) = 0;
+  /// \brief Load any necessary resources to set up the extension. This
+  /// should called before any other function.
+  /// \param[in] _params Parameters to be passed to the underlying
+  /// rendering engine extension.
+  /// \return True if the extension was successfully loaded
+  public: virtual bool Load(
+      const std::map<std::string, std::string> &_params = {}) = 0;
 
-      /// \brief Initialize the extension. This should be called immediately
-      /// after a successful call to Load.
-      /// \return True if the extension was successfully initialized
-      public: virtual bool Init() = 0;
+  /// \brief Initialize the extension. This should be called immediately
+  /// after a successful call to Load.
+  /// \return True if the extension was successfully initialized
+  public: virtual bool Init() = 0;
 
-      /// \brief Destroys all scenes created by extension and releases all
-      /// loaded resources. This should be called when the given extension
-      /// will no longer be used during runtime.
-      /// \return True if the extension was successfully destroyed
-      public: virtual void Destroy() = 0;
+  /// \brief Destroys all scenes created by extension and releases all
+  /// loaded resources. This should be called when the given extension
+  /// will no longer be used during runtime.
+  /// \return True if the extension was successfully destroyed
+  public: virtual void Destroy() = 0;
 
-      /// \brief Determines if the extension has been initialized.
-      /// \return True if the extension is initialized
-      public: virtual bool IsInitialized() const = 0;
+  /// \brief Determines if the extension has been initialized.
+  /// \return True if the extension is initialized
+  public: virtual bool IsInitialized() const = 0;
 
-      /// \brief Get name of the extension.
-      /// \return The extension name
-      public: virtual std::string Name() const = 0;
+  /// \brief Get name of the extension.
+  /// \return The extension name
+  public: virtual std::string Name() const = 0;
 
-      /// \brief Get the SceneNodeFactory.
-      public: virtual SceneNodeFactoryPtr SceneNodeFactory() const = 0;
-    };
-    }
-  }
+  /// \brief Get the SceneNodeFactory.
+  public: virtual SceneNodeFactoryPtr SceneNodeFactory() const = 0;
+};
+
 }
-#endif
+}  // namespace rendering
+}  // namespace gz
+
+#endif  // GZ_RENDERING_RENDERENGINEEXTENSION_HH_

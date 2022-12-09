@@ -15,36 +15,37 @@
 
 #include "WavesModel.hh"
 
-#include "gz/waves/Utilities.hh"
-#include "gz/waves/Wavefield.hh"
-#include "gz/waves/WaveParameters.hh"
-
-#include "gz/waves/components/Wavefield.hh"
-
-#include <gz/common/Profiler.hh>
-#include <gz/plugin/Register.hh>
-
-#include <gz/sim/components/Name.hh>
-#include <gz/sim/components/World.hh>
-
-#include <gz/sim/Model.hh>
-#include <gz/sim/Util.hh>
-
-#include <sdf/Element.hh>
-
 #include <chrono>
 #include <list>
 #include <mutex>
 #include <vector>
 #include <string>
 
-using namespace gz;
-using namespace sim;
-using namespace systems;
+#include <gz/common/Profiler.hh>
+#include <gz/plugin/Register.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/Util.hh>
+
+#include <sdf/Element.hh>
+
+#include "gz/waves/Utilities.hh"
+#include "gz/waves/Wavefield.hh"
+#include "gz/waves/WaveParameters.hh"
+#include "gz/waves/components/Wavefield.hh"
+
+namespace gz
+{
+namespace sim
+{
+inline namespace GZ_SIM_VERSION_NAMESPACE {
+namespace systems
+{
 
 /// \brief Modelled on the Wind and LiftDrags systems.
-/// Applies at the model level rather than the world 
-class gz::sim::systems::WavesModelPrivate
+/// Applies at the model level rather than the world
+class WavesModelPrivate
 {
   /// \brief Destructor
   public: ~WavesModelPrivate();
@@ -215,7 +216,8 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
       << this->wavefieldEntity << "]\n";
 
   // fetch the wavefield back to check...
-  auto wfComp = _ecm.Component<waves::components::Wavefield>(this->wavefieldEntity);
+  auto wfComp = _ecm.Component<waves::components::Wavefield>(
+      this->wavefieldEntity);
   if (!wfComp)
   {
     gzwarn << "WavesModel: could not find wavefield in entity ["
@@ -235,7 +237,7 @@ void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
     EntityComponentManager &/*_ecm*/)
 {
   if (!this->isStatic)
-  {  
+  {
     // Throttle update [30 FPS by default]
     auto updatePeriod = 1.0/this->updateRate;
     double simTime = std::chrono::duration<double>(_info.simTime).count();
@@ -247,11 +249,16 @@ void WavesModelPrivate::UpdateWaves(const UpdateInfo &_info,
   }
 }
 
-//////////////////////////////////////////////////
-GZ_ADD_PLUGIN(WavesModel,
-                    gz::sim::System,
-                    WavesModel::ISystemConfigure,
-                    WavesModel::ISystemPreUpdate)
+}  // namespace systems
+}
+}  // namespace sim
+}  // namespace gz
 
-GZ_ADD_PLUGIN_ALIAS(WavesModel,
-  "gz::sim::systems::WavesModel")
+//////////////////////////////////////////////////
+GZ_ADD_PLUGIN(gz::sim::systems::WavesModel,
+              gz::sim::System,
+              gz::sim::systems::WavesModel::ISystemConfigure,
+              gz::sim::systems::WavesModel::ISystemPreUpdate)
+
+GZ_ADD_PLUGIN_ALIAS(gz::sim::systems::WavesModel,
+                   "gz::sim::systems::WavesModel")

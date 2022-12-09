@@ -15,6 +15,9 @@
 
 #include "Ogre2SceneNodeFactory.hh"
 
+#include <memory>
+#include <string>
+
 #include "DisplacementMap.hh"
 #include "OceanGeometry.hh"
 #include "OceanVisual.hh"
@@ -23,8 +26,11 @@
 #include "Ogre2OceanGeometry.hh"
 #include "Ogre2OceanVisual.hh"
 
-using namespace gz;
-using namespace rendering;
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
 //////////////////////////////////////////////////
 Ogre2SceneNodeFactory::Ogre2SceneNodeFactory()
@@ -46,7 +52,7 @@ OceanVisualPtr Ogre2SceneNodeFactory::CreateOceanVisual(ScenePtr _scene)
 
   // create visual
   rendering::OceanVisualPtr visual =
-      std::make_shared<rendering::Ogre2OceanVisual>(); 
+      std::make_shared<rendering::Ogre2OceanVisual>();
   visual->InitObject(_scene, objId, objName);
 
   return visual;
@@ -62,7 +68,7 @@ OceanGeometryPtr Ogre2SceneNodeFactory::CreateOceanGeometry(ScenePtr _scene)
 
   // create geometry
   rendering::OceanGeometryPtr geometry =
-      std::make_shared<rendering::Ogre2OceanGeometry>(); 
+      std::make_shared<rendering::Ogre2OceanGeometry>();
   geometry->InitObject(_scene, objId, objName);
 
   return geometry;
@@ -78,7 +84,11 @@ DisplacementMapPtr Ogre2SceneNodeFactory::CreateDisplacementMap(
 {
   rendering::DisplacementMapPtr displacementMap =
       std::make_shared<rendering::Ogre2DisplacementMap>(
-          _scene, _material, _entity, _width, _height); 
+          _scene, _material, _entity, _width, _height);
 
   return displacementMap;
 }
+
+}
+}  // namespace rendering
+}  // namespace gz

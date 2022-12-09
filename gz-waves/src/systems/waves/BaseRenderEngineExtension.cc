@@ -17,8 +17,11 @@
 
 #include <gz/common/Console.hh>
 
-using namespace gz;
-using namespace rendering;
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
 //////////////////////////////////////////////////
 BaseRenderEngineExtension::BaseRenderEngineExtension()
@@ -75,3 +78,7 @@ bool BaseRenderEngineExtension::IsInitialized() const
 void BaseRenderEngineExtension::Destroy()
 {
 }
+
+}
+}  // namespace rendering
+}  // namespace gz

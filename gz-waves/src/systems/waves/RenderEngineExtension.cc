@@ -15,9 +15,15 @@
 
 #include "RenderEngineExtension.hh"
 
-using namespace gz;
-using namespace rendering;
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-//////////////////////////////////////////////////
 RenderEngineExtension::~RenderEngineExtension() = default;
+
+}
+}  // namespace rendering
+}  // namespace gz
 

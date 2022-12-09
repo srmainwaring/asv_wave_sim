@@ -15,8 +15,14 @@
 
 #include "OceanVisual.hh"
 
-using namespace gz;
-using namespace rendering;
+namespace gz
+{
+namespace rendering
+{
+inline namespace GZ_RENDERING_VERSION_NAMESPACE {
 
-//////////////////////////////////////////////////
 OceanVisual::~OceanVisual() = default;
+
+}
+}  // namespace rendering
+}  // namespace gz
