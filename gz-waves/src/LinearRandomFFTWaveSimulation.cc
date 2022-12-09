@@ -22,10 +22,12 @@
 
 #include <complex>
 #include <random>
+#include <unordered_map>
 #include <vector>
 
 #include <gz/common.hh>
 
+#include "gz/waves/Algorithm.hh"
 #include "gz/waves/Types.hh"
 #include "gz/waves/WaveSpectrum.hh"
 #include "gz/waves/WaveSpreadingFunction.hh"
@@ -263,14 +265,13 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeBaseAmplitudes()
 
   // initialise arrays - always update as algo switch may change shape.
   Index n2 = nx_ * ny_;
+  Eigen::ArrayXd omega_k;
   {
     cap_psi_2s_root_  = Eigen::ArrayXd::Zero(n2);
     rho_              = Eigen::ArrayXd::Zero(n2);
     sigma_            = Eigen::ArrayXd::Zero(n2);
-    omega_k_          = Eigen::ArrayXd::Zero(n2);
+    omega_k           = Eigen::ArrayXd::Zero(n2);
     zhat_             = Eigen::ArrayXd::Zero(n2);
-    cos_wt_           = Eigen::ArrayXd::Zero(n2);
-    sin_wt_           = Eigen::ArrayXd::Zero(n2);
   }
 
   // spectrum and spreading functions
@@ -336,9 +337,21 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeBaseAmplitudes()
       sigma_(idx) = distribution(generator);
 
       // angular temporal frequency using deep water dispersion
-      omega_k_(idx) = sqrt(gravity_ * k);
+      omega_k(idx) = sqrt(gravity_ * k);
     }
   }
+
+  // compute unique elements of omega_k
+  algorithm::unordered_unique(
+      omega_k.cbegin(),
+      omega_k.cend(),
+      &uomega_k_,
+      &uindex_,
+      &uinverse_);
+
+  // resize workspace for time dependent phase
+  ucos_wt_.resize(uomega_k_.size());
+  usin_wt_.resize(uomega_k_.size());
 }
 
 //////////////////////////////////////////////////
@@ -357,12 +370,12 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
   auto s = sigma_.reshaped();
   auto psi_root = cap_psi_2s_root_.reshaped();
 
-  // time update
-  for (Index idx = 0; idx < nx_ * ny_; ++idx)
+  // time update for unique omega_k (reduce number of calls to sincos)
+  for (Index uidx = 0; uidx < uomega_k_.size(); ++uidx)
   {
-    double wt = omega_k_(idx) * time;
-    cos_wt_(idx) = cos(wt);
-    sin_wt_(idx) = sin(wt);
+    double wt = uomega_k_[uidx] * time;
+    ucos_wt_(uidx) = cos(wt);
+    usin_wt_(uidx) = sin(wt);
   }
 
   // flattened index version
@@ -372,15 +385,16 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
     {
       // index for flattened array (ikx, iky)
       Index idx = ikx * ny_ + iky;
+      Index uidx = uinverse_[idx];
 
       // index for conjugate (nx_-ikx, ny_-iky)
       Index cdx = (nx_-ikx) * ny_ + (ny_-iky);
 
       zhat_(idx) = complex(
-          + (r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx)) * cos_wt_(idx)
-          + (s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx)) * sin_wt_(idx),
-          - (r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx)) * sin_wt_(idx)
-          + (s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx)) * cos_wt_(idx));
+          + (r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx)) * ucos_wt_(uidx)
+          + (s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx)) * usin_wt_(uidx),
+          - (r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx)) * usin_wt_(uidx)
+          + (s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx)) * ucos_wt_(uidx));
     }
   }
 
@@ -390,15 +404,16 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
 
     // index for flattened array (ikx, iky)
     Index idx = ikx * ny_ + iky;
+    Index uidx = uinverse_[idx];
 
     // index for conjugate (ikx, ny_-iky)
     Index cdx = ikx * ny_ + (ny_-iky);
 
     zhat_(idx) = complex(
-        + (r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx)) * cos_wt_(idx)
-        + (s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx)) * sin_wt_(idx),
-        - (r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx)) * sin_wt_(idx)
-        + (s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx)) * cos_wt_(idx));
+        + (r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx)) * ucos_wt_(uidx)
+        + (s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx)) * usin_wt_(uidx),
+        - (r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx)) * usin_wt_(uidx)
+        + (s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx)) * ucos_wt_(uidx));
     zhat_(cdx, 0) = std::conj(zhat_(idx));
   }
 
@@ -408,15 +423,16 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
 
     // index for flattened array (ikx, iky)
     Index idx = ikx * ny_ + iky;
+    Index uidx = uinverse_[idx];
 
     // index for conjugate (nx_-ikx, iky)
     Index cdx = (nx_-ikx) * ny_ + iky;
 
     zhat_(idx) = complex(
-        + (r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx)) * cos_wt_(idx)
-        + (s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx)) * sin_wt_(idx),
-        - (r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx)) * sin_wt_(idx)
-        + (s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx)) * cos_wt_(idx));
+        + (r(idx) * psi_root(idx) + r(cdx) * psi_root(cdx)) * ucos_wt_(uidx)
+        + (s(idx) * psi_root(idx) + s(cdx) * psi_root(cdx)) * usin_wt_(uidx),
+        - (r(idx) * psi_root(idx) - r(cdx) * psi_root(cdx)) * usin_wt_(uidx)
+        + (s(idx) * psi_root(idx) - s(cdx) * psi_root(cdx)) * ucos_wt_(uidx));
     zhat_(cdx, 0) = std::conj(zhat_(idx));
   }
 

@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <array>
 #include <numeric>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "gz/waves/Types.hh"
@@ -30,7 +32,6 @@ namespace gz
 {
 namespace waves
 {
-/// \brief Collection of static template methods for sorting arrays and vectors.
 namespace algorithm
 {
 /// \brief Sort and keep track of indexes (largest first)
@@ -77,6 +78,50 @@ std::array<Index, N> sort_indexes(const std::array<T, N>& v) {
       [&v](Index i1, Index i2) {return v[i1] > v[i2];});
 
   return idx;
+}
+
+/// \brief C++ equivalent of numpy.unique
+///
+/// Adapted from homer512's SO answer.
+/// https://stackoverflow.com/questions/70868307/c-equivalent-of-numpy-unique-on-stdvector-with-return-index-and-return-inver
+///
+template<typename T, typename Iterator, typename Idx>
+void unordered_unique(
+    Iterator first, Iterator last,
+    std::vector<T>* unique,
+    std::vector<Idx>* index = nullptr,
+    std::vector<Idx>* inverse = nullptr,
+    std::vector<Idx>* count = nullptr)
+{
+  using index_map = std::unordered_map<T, Idx>;
+  using map_iter = typename index_map::iterator;
+  using map_value = typename index_map::value_type;
+  for (auto&& arg : {index, inverse, count}) {
+    if (arg) {
+      arg->clear();
+    }
+  }
+  index_map map;
+  std::size_t cur_idx = 0;
+  for (auto i = first; i != last; ++cur_idx, ++i) {
+    const std::pair<map_iter, bool> inserted =
+      map.emplace(*i, unique->size());
+    map_value& ival = *inserted.first;
+    if (inserted.second) {
+      unique->push_back(ival.first);
+      if (index) {
+        index->push_back(cur_idx);
+      }
+      if (count) {
+        count->push_back(1);
+      }
+    } else if (count) {
+      (*count)[ival.second] += 1;
+    }
+    if (inverse) {
+      inverse->push_back(ival.second);
+    }
+  }
 }
 
 }  // namespace algorithm

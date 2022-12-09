@@ -218,8 +218,6 @@ class LinearRandomFFTWaveSimulation::Impl
   //////////////////////////////////////////////////
   // storage for current amplitudes (nx * ny)
   Eigen::ArrayXcd zhat_;
-  Eigen::ArrayXd  cos_wt_;
-  Eigen::ArrayXd  sin_wt_;
 
   //////////////////////////////////////////////////
   // storage for base amplitudes (fft order)
@@ -231,8 +229,12 @@ class LinearRandomFFTWaveSimulation::Impl
   Eigen::ArrayXd rho_;
   Eigen::ArrayXd sigma_;
 
-  // angular temporal frequency
-  Eigen::ArrayXd omega_k_;
+  // unique angular temporal frequency, index and reverse lookup
+  std::vector<double> uomega_k_;
+  std::vector<Index>  uindex_;
+  std::vector<Index>  uinverse_;
+  Eigen::ArrayXd      ucos_wt_;
+  Eigen::ArrayXd      usin_wt_;
 
   /// \brief For testing
   friend class LinearRandomFFTWaveSimFixture;
