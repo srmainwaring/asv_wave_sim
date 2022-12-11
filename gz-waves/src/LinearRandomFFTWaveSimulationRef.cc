@@ -784,7 +784,7 @@ namespace waves
 
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::ElevationAt(
-    Eigen::Ref<Eigen::ArrayXXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h) const
   {
     impl_->ElevationAt(h);
   }
@@ -792,7 +792,7 @@ namespace waves
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::ElevationDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dhdx,
-    Eigen::Ref<Eigen::ArrayXXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdy) const
   {
     impl_->ElevationDerivAt(dhdx, dhdy);
   }
@@ -800,7 +800,7 @@ namespace waves
   //////////////////////////////////////////////////
   void LinearRandomFFTWaveSimulationRef::DisplacementAt(
     Eigen::Ref<Eigen::ArrayXXd> sx,
-    Eigen::Ref<Eigen::ArrayXXd> sy)
+    Eigen::Ref<Eigen::ArrayXXd> sy) const
   {
     impl_->DisplacementAt(sx, sy);
   }
@@ -809,7 +809,7 @@ namespace waves
   void LinearRandomFFTWaveSimulationRef::DisplacementDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dsxdx,
     Eigen::Ref<Eigen::ArrayXXd> dsydy,
-    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy) const
   {
     impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
   }
@@ -823,7 +823,7 @@ namespace waves
     Eigen::Ref<Eigen::ArrayXXd> dhdy,
     Eigen::Ref<Eigen::ArrayXXd> dsxdx,
     Eigen::Ref<Eigen::ArrayXXd> dsydy,
-    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy) const
   {
     impl_->ElevationAt(h);
     impl_->ElevationDerivAt(dhdx, dhdy);

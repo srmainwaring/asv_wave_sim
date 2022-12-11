@@ -714,7 +714,7 @@ Index LinearRandomFFTWaveSimulation::SizeZ() const
 
 //////////////////////////////////////////////////
 void LinearRandomFFTWaveSimulation::ElevationAt(
-    Eigen::Ref<Eigen::ArrayXXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h) const
 {
   impl_->ElevationAt(h);
 }
@@ -722,7 +722,7 @@ void LinearRandomFFTWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void LinearRandomFFTWaveSimulation::ElevationDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dhdx,
-    Eigen::Ref<Eigen::ArrayXXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdy) const
 {
   impl_->ElevationDerivAt(dhdx, dhdy);
 }
@@ -730,7 +730,7 @@ void LinearRandomFFTWaveSimulation::ElevationDerivAt(
 //////////////////////////////////////////////////
 void LinearRandomFFTWaveSimulation::DisplacementAt(
     Eigen::Ref<Eigen::ArrayXXd> sx,
-    Eigen::Ref<Eigen::ArrayXXd> sy)
+    Eigen::Ref<Eigen::ArrayXXd> sy) const
 {
   impl_->DisplacementAt(sx, sy);
 }
@@ -739,7 +739,7 @@ void LinearRandomFFTWaveSimulation::DisplacementAt(
 void LinearRandomFFTWaveSimulation::DisplacementDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dsxdx,
     Eigen::Ref<Eigen::ArrayXXd> dsydy,
-    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy) const
 {
   impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
 }
@@ -753,7 +753,7 @@ void LinearRandomFFTWaveSimulation::DisplacementAndDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dhdy,
     Eigen::Ref<Eigen::ArrayXXd> dsxdx,
     Eigen::Ref<Eigen::ArrayXXd> dsydy,
-    Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+    Eigen::Ref<Eigen::ArrayXXd> dsxdy) const
 {
   impl_->ElevationAt(h);
   impl_->ElevationDerivAt(dhdx, dhdy);
@@ -764,7 +764,7 @@ void LinearRandomFFTWaveSimulation::DisplacementAndDerivAt(
 //////////////////////////////////////////////////
 void LinearRandomFFTWaveSimulation::PressureAt(
     Index iz,
-    Eigen::Ref<Eigen::ArrayXXd> pressure)
+    Eigen::Ref<Eigen::ArrayXXd> pressure) const
 {
   impl_->PressureAt(iz, pressure);
 }
@@ -772,7 +772,7 @@ void LinearRandomFFTWaveSimulation::PressureAt(
 //////////////////////////////////////////////////
 void LinearRandomFFTWaveSimulation::ElevationAt(
     Index ix, Index iy,
-    double& eta)
+    double& eta) const
 {
   impl_->ElevationAt(ix, iy, eta);
 }
@@ -780,7 +780,7 @@ void LinearRandomFFTWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void LinearRandomFFTWaveSimulation::DisplacementAt(
     Index ix, Index iy,
-    double& sx, double& sy)
+    double& sx, double& sy) const
 {
   impl_->DisplacementAt(ix, iy, sx, sy);
 }
@@ -788,7 +788,7 @@ void LinearRandomFFTWaveSimulation::DisplacementAt(
 //////////////////////////////////////////////////
 void LinearRandomFFTWaveSimulation::PressureAt(
     Index ix, Index iy, Index iz,
-    double& pressure)
+    double& pressure) const
 {
   impl_->PressureAt(ix, iy, iz, pressure);
 }
