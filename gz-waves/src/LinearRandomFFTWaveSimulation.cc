@@ -156,8 +156,8 @@ void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
 
   // change from row to column major storage
   Index n2 = nx_ * ny_;
-  sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-  sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
+  sy = fft_out3_.reshaped<Eigen::ColMajor>(n2, 1);
+  sx = fft_out4_.reshaped<Eigen::ColMajor>(n2, 1);
 }
 
 //////////////////////////////////////////////////
@@ -185,9 +185,9 @@ void LinearRandomFFTWaveSimulation::Impl::DisplacementDerivAt(
 
   // change from row to column major storage
   Index n2 = nx_ * ny_;
-  dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-  dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ * -1.0;
-  dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1) * lambda_ *  1.0;
+  dsydy = fft_out5_.reshaped<Eigen::ColMajor>(n2, 1);
+  dsxdx = fft_out6_.reshaped<Eigen::ColMajor>(n2, 1);
+  dsxdy = fft_out7_.reshaped<Eigen::ColMajor>(n2, 1);
 }
 
 //////////////////////////////////////////////////
@@ -243,8 +243,8 @@ void LinearRandomFFTWaveSimulation::Impl::DisplacementAt(
   }
 
   // change from row to column major storage and scale
-  sy = fft_out3_(ix, iy) * lambda_ * -1.0;
-  sx = fft_out4_(ix, iy) * lambda_ * -1.0;
+  sy = fft_out3_(ix, iy);
+  sx = fft_out4_(ix, iy);
 }
 
 //////////////////////////////////////////////////
@@ -516,11 +516,11 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
         if (iky == ny_ / 2)
           dy = czero;
 
-        fft_sx_(ikx, iky)     = dx;
-        fft_sy_(ikx, iky)     = dy;
-        fft_h_kxkx_(ikx, iky) = hkxkx;
-        fft_h_kyky_(ikx, iky) = hkyky;
-        fft_h_kxky_(ikx, iky) = hkxky;
+        fft_sx_(ikx, iky)     = dx * lambda_ * -1.0;
+        fft_sy_(ikx, iky)     = dy * lambda_ * -1.0;
+        fft_h_kxkx_(ikx, iky) = hkxkx * lambda_ * -1.0;
+        fft_h_kyky_(ikx, iky) = hkyky * lambda_ * -1.0;
+        fft_h_kxky_(ikx, iky) = hkxky * lambda_ * -1.0;
       }
     }
   }
