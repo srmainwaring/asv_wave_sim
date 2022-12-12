@@ -89,4 +89,5 @@ endfunction()
 
 add_subdirectory(dynamic)
 add_subdirectory(hydrodynamics)
+add_subdirectory(waves_client)
 add_subdirectory(waves)

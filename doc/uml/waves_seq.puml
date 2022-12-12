@@ -1,0 +1,54 @@
+@startuml
+
+' define and order participants 
+participant ECM order 5
+participant WavesModel order 10
+participant Wavefield order 20
+participant Hydrodynamics order 30
+participant WavefieldSampler order 31
+' participant WavesClient order 30
+
+participant WavesVisual order 40
+participant OceanTile order 50
+participant RenderUtil order 60
+
+group Waves model plugin
+  group Initialise waves model
+    WavesModel -> WavesModel: PreUpdate
+    WavesModel -> WavesModel: Load
+    WavesModel -> ECM: CreateComponent
+    note right: Create Wavefield component and set its Data to WavefieldPtr
+  end
+
+  group Update waves model
+    WavesModel -> WavesModel: PreUpdate
+    WavesModel -> WavesModel: UpdateWaves
+    WavesModel -> Wavefield: Update(time)  
+  end
+end
+
+group Hydrodynamics plugin
+  group Initialise hydrodynamics
+    Hydrodynamics -> Hydrodynamics: Init
+    Hydrodynamics -> Hydrodynamics: InitWavefield
+    Hydrodynamics -> ECM: EntityByComponents
+    note right: Retrieve Wavefield component and get WavefieldPtr from Data
+    Hydrodynamics -> Hydrodynamics: InitPhysics
+    Hydrodynamics -> WavefieldSampler: Construct
+    Hydrodynamics -> WavefieldSampler: ApplyPose
+  end
+
+  group Update hydrodynamics
+    Hydrodynamics -> WavefieldSampler: UpdatePatch
+  end
+end
+
+group Waves visual plugin
+  group Update waves visual
+    WavesVisual <- RenderUtil : SceneUpdate
+    WavesVisual -> WavesVisual: OnUpdate
+    WavesVisual -> OceanTile: UpdateMesh
+  end
+end
+
+@enduml
