@@ -19,7 +19,8 @@ inline namespace GZ_WAVES_VERSION_NAMESPACE {
 namespace components
 {
   /// \brief This component holds an entity's wavefield.
-  using Wavefield = gz::sim::components::Component<waves::WavefieldPtr, class WavefieldTag>;
+  using Wavefield = gz::sim::components::Component<
+      waves::WavefieldConstWeakPtr, class WavefieldTag>;
   GZ_SIM_REGISTER_COMPONENT("gz_waves_components.Wavefield", Wavefield)
 }
 }

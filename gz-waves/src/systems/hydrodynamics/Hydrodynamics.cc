@@ -276,7 +276,7 @@ class HydrodynamicsPrivate
   public: Entity wavefieldEntity{kNullEntity};
 
   /// \brief The wavefield.
-  public: waves::WavefieldWeakPtr wavefield;
+  public: waves::WavefieldConstWeakPtr wavefield;
 
   ////////// BEGIN HYDRODYNAMICS PLUGIN
 

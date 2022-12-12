@@ -65,7 +65,9 @@ class Wavefield
 };
 
 typedef std::shared_ptr<Wavefield> WavefieldPtr;
+typedef std::shared_ptr<const Wavefield> WavefieldConstPtr;
 typedef std::weak_ptr<Wavefield> WavefieldWeakPtr;
+typedef std::weak_ptr<const Wavefield> WavefieldConstWeakPtr;
 }  // namespace waves
 }  // namespace gz
 
