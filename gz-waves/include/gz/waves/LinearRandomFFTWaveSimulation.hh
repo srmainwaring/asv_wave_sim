@@ -16,13 +16,11 @@
 #ifndef GZ_WAVES_LINEARRANDOMFFTWAVESIMULATION_HH_
 #define GZ_WAVES_LINEARRANDOMFFTWAVESIMULATION_HH_
 
+#include <Eigen/Dense>
+
 #include <memory>
 
-#include <Eigen/Dense> // NOLINT - cpplint false positive.
-
 #include "gz/waves/WaveSimulation.hh"
-
-using Eigen::ArrayXXd;
 
 namespace gz
 {

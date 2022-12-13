@@ -19,9 +19,6 @@
 
 #include "gz/waves/Physics.hh"
 
-using Eigen::ArrayXXd;
-using Eigen::ArrayXd;
-
 namespace gz
 {
 namespace waves

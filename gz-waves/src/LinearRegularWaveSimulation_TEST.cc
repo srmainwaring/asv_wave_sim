@@ -32,11 +32,6 @@
 #include "gz/waves/Types.hh"
 #include "gz/waves/WaveSpectrum.hh"
 
-// using namespace gz;
-// using namespace waves;
-
-using Eigen::ArrayXXd;
-
 using gz::waves::Index;
 using gz::waves::IWaveSimulation;
 using gz::waves::LinearRegularWaveSimulation;

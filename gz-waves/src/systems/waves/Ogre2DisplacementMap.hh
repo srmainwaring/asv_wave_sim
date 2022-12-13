@@ -30,8 +30,6 @@
 
 #include "DisplacementMap.hh"
 
-using Eigen::ArrayXXd;
-
 namespace gz
 {
 namespace rendering

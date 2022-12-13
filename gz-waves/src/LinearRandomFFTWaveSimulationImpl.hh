@@ -26,11 +26,6 @@
 #include "gz/waves/WaveSimulation.hh"
 #include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 
-using Eigen::ArrayXXcd;
-using Eigen::ArrayXXd;
-using Eigen::ArrayXcd;
-using Eigen::ArrayXd;
-
 namespace Eigen
 {
   typedef Eigen::Array<

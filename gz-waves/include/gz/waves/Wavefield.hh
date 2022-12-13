@@ -19,6 +19,8 @@
 #ifndef GZ_WAVES_WAVEFIELD_HH_
 #define GZ_WAVES_WAVEFIELD_HH_
 
+#include <Eigen/Dense>
+
 #include <memory>
 #include <string>
 
