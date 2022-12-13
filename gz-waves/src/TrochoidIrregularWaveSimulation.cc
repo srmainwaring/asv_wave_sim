@@ -315,7 +315,7 @@ void TrochoidIrregularWaveSimulation::DisplacementAndDerivAt(
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::PressureAt(
     Index ,
-    Eigen::Ref<Eigen::ArrayXXd> ) const
+    Eigen::Ref<Eigen::ArrayXXd>) const
 {
   assert(0 && "Not implemented");
 }
