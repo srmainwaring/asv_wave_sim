@@ -616,7 +616,7 @@ Index LinearRegularWaveSimulation::SizeZ() const
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::Elevation(
   double x, double y,
-  double &eta)
+  double &eta) const
 {
   impl_->Elevation(x, y, eta);
 }
@@ -625,7 +625,7 @@ void LinearRegularWaveSimulation::Elevation(
 void LinearRegularWaveSimulation::Elevation(
   const Eigen::Ref<const Eigen::ArrayXd>& x,
   const Eigen::Ref<const Eigen::ArrayXd>& y,
-  Eigen::Ref<Eigen::ArrayXd> eta)
+  Eigen::Ref<Eigen::ArrayXd> eta) const
 {
   impl_->Elevation(x, y, eta);
 }
@@ -633,7 +633,7 @@ void LinearRegularWaveSimulation::Elevation(
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::Pressure(
   double x, double y, double z,
-  double& pressure)
+  double& pressure) const
 {
   impl_->Pressure(x, y, z, pressure);
 }
@@ -643,14 +643,14 @@ void LinearRegularWaveSimulation::Pressure(
   const Eigen::Ref<const Eigen::ArrayXd>& x,
   const Eigen::Ref<const Eigen::ArrayXd>& y,
   const Eigen::Ref<const Eigen::ArrayXd>& z,
-  Eigen::Ref<Eigen::ArrayXd> pressure)
+  Eigen::Ref<Eigen::ArrayXd> pressure) const
 {
   impl_->Pressure(x, y, z, pressure);
 }
 
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::ElevationAt(
-  Eigen::Ref<Eigen::ArrayXXd> h)
+  Eigen::Ref<Eigen::ArrayXXd> h) const
 {
   impl_->ElevationAt(h);
 }
@@ -658,7 +658,7 @@ void LinearRegularWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::ElevationDerivAt(
   Eigen::Ref<Eigen::ArrayXXd> dhdx,
-  Eigen::Ref<Eigen::ArrayXXd> dhdy)
+  Eigen::Ref<Eigen::ArrayXXd> dhdy) const
 {
   impl_->ElevationDerivAt(dhdx, dhdy);
 }
@@ -666,7 +666,7 @@ void LinearRegularWaveSimulation::ElevationDerivAt(
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::DisplacementAt(
   Eigen::Ref<Eigen::ArrayXXd> /*sx*/,
-  Eigen::Ref<Eigen::ArrayXXd> /*sy*/)
+  Eigen::Ref<Eigen::ArrayXXd> /*sy*/) const
 {
   // No xy-displacement
 }
@@ -675,7 +675,7 @@ void LinearRegularWaveSimulation::DisplacementAt(
 void LinearRegularWaveSimulation::DisplacementDerivAt(
   Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
   Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
-  Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
+  Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/) const
 {
   // No xy-displacement
 }
@@ -689,7 +689,7 @@ void LinearRegularWaveSimulation::DisplacementAndDerivAt(
   Eigen::Ref<Eigen::ArrayXXd> dhdy,
   Eigen::Ref<Eigen::ArrayXXd> dsxdx,
   Eigen::Ref<Eigen::ArrayXXd> dsydy,
-  Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+  Eigen::Ref<Eigen::ArrayXXd> dsxdy) const
 {
   // impl_->DisplacementAndDerivAt(
   //     h, sx, sy, dhdx, dhdy, dsxdx, dsydy, dsxdy);
@@ -702,7 +702,7 @@ void LinearRegularWaveSimulation::DisplacementAndDerivAt(
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::ElevationAt(
   Index ix, Index iy,
-  double& eta)
+  double& eta) const
 {
   impl_->ElevationAt(ix, iy, eta);
 }
@@ -710,7 +710,7 @@ void LinearRegularWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::DisplacementAt(
   Index /*ix*/, Index /*iy*/,
-  double& /*sx*/, double& /*sy*/)
+  double& /*sx*/, double& /*sy*/) const
 {
   // No xy-displacement
 }
@@ -718,7 +718,7 @@ void LinearRegularWaveSimulation::DisplacementAt(
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::PressureAt(
   Index ix, Index iy, Index iz,
-  double& pressure)
+  double& pressure) const
 {
   impl_->PressureAt(ix, iy, iz, pressure);
 }
@@ -726,7 +726,7 @@ void LinearRegularWaveSimulation::PressureAt(
 //////////////////////////////////////////////////
 void LinearRegularWaveSimulation::PressureAt(
   Index iz,
-  Eigen::Ref<Eigen::ArrayXXd> pressure)
+  Eigen::Ref<Eigen::ArrayXXd> pressure) const
 {
   impl_->PressureAt(iz, pressure);
 }

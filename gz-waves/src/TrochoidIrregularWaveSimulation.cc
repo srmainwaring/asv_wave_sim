@@ -265,7 +265,7 @@ Index TrochoidIrregularWaveSimulation::SizeZ() const
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::ElevationAt(
-  Eigen::Ref<Eigen::ArrayXXd> h)
+  Eigen::Ref<Eigen::ArrayXXd> h) const
 {
   impl_->ElevationAt(h);
 }
@@ -273,7 +273,7 @@ void TrochoidIrregularWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::ElevationDerivAt(
   Eigen::Ref<Eigen::ArrayXXd> dhdx,
-  Eigen::Ref<Eigen::ArrayXXd> dhdy)
+  Eigen::Ref<Eigen::ArrayXXd> dhdy) const
 {
   impl_->ElevationDerivAt(dhdx, dhdy);
 }
@@ -281,7 +281,7 @@ void TrochoidIrregularWaveSimulation::ElevationDerivAt(
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::DisplacementAt(
   Eigen::Ref<Eigen::ArrayXXd> sx,
-  Eigen::Ref<Eigen::ArrayXXd> sy)
+  Eigen::Ref<Eigen::ArrayXXd> sy) const
 {
   impl_->DisplacementAt(sx, sy);
 }
@@ -290,7 +290,7 @@ void TrochoidIrregularWaveSimulation::DisplacementAt(
 void TrochoidIrregularWaveSimulation::DisplacementDerivAt(
   Eigen::Ref<Eigen::ArrayXXd> dsxdx,
   Eigen::Ref<Eigen::ArrayXXd> dsydy,
-  Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+  Eigen::Ref<Eigen::ArrayXXd> dsxdy) const
 {
   impl_->DisplacementDerivAt(dsxdx, dsydy, dsxdy);
 }
@@ -304,7 +304,7 @@ void TrochoidIrregularWaveSimulation::DisplacementAndDerivAt(
   Eigen::Ref<Eigen::ArrayXXd> dhdy,
   Eigen::Ref<Eigen::ArrayXXd> dsxdx,
   Eigen::Ref<Eigen::ArrayXXd> dsydy,
-  Eigen::Ref<Eigen::ArrayXXd> dsxdy)
+  Eigen::Ref<Eigen::ArrayXXd> dsxdy) const
 {
   impl_->ElevationAt(h);
   impl_->ElevationDerivAt(dhdx, dhdy);
@@ -315,7 +315,7 @@ void TrochoidIrregularWaveSimulation::DisplacementAndDerivAt(
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::PressureAt(
     Index ,
-    Eigen::Ref<Eigen::ArrayXXd> )
+    Eigen::Ref<Eigen::ArrayXXd>) const
 {
   assert(0 && "Not implemented");
 }
@@ -323,7 +323,7 @@ void TrochoidIrregularWaveSimulation::PressureAt(
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::ElevationAt(
     Index , Index ,
-    double&)
+    double&) const
 {
   assert(0 && "Not implemented");
 }
@@ -331,7 +331,7 @@ void TrochoidIrregularWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::DisplacementAt(
     Index , Index ,
-    double&, double&)
+    double&, double&) const
 {
   assert(0 && "Not implemented");
 }
@@ -339,7 +339,7 @@ void TrochoidIrregularWaveSimulation::DisplacementAt(
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::PressureAt(
     Index , Index , Index ,
-    double&)
+    double&) const
 {
   assert(0 && "Not implemented");
 }

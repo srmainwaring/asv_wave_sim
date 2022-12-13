@@ -516,7 +516,7 @@ Index LinearRandomWaveSimulation::SizeZ() const
 
 void LinearRandomWaveSimulation::Elevation(
     double x, double y,
-    double &eta)
+    double &eta) const
 {
   impl_->Elevation(x, y, eta);
 }
@@ -524,14 +524,14 @@ void LinearRandomWaveSimulation::Elevation(
 void LinearRandomWaveSimulation::Elevation(
     const Eigen::Ref<const Eigen::ArrayXd>& x,
     const Eigen::Ref<const Eigen::ArrayXd>& y,
-    Eigen::Ref<Eigen::ArrayXd> eta)
+    Eigen::Ref<Eigen::ArrayXd> eta) const
 {
   impl_->Elevation(x, y, eta);
 }
 
 void LinearRandomWaveSimulation::Pressure(
     double x, double y, double z,
-    double& pressure)
+    double& pressure) const
 {
   impl_->Pressure(x, y, z, pressure);
 }
@@ -540,14 +540,14 @@ void LinearRandomWaveSimulation::Pressure(
     const Eigen::Ref<const Eigen::ArrayXd>& x,
     const Eigen::Ref<const Eigen::ArrayXd>& y,
     const Eigen::Ref<const Eigen::ArrayXd>& z,
-    Eigen::Ref<Eigen::ArrayXd> pressure)
+    Eigen::Ref<Eigen::ArrayXd> pressure) const
 {
   impl_->Pressure(x, y, z, pressure);
 }
 
 //////////////////////////////////////////////////
 void LinearRandomWaveSimulation::ElevationAt(
-    Eigen::Ref<Eigen::ArrayXXd> h)
+    Eigen::Ref<Eigen::ArrayXXd> h) const
 {
   impl_->ElevationAt(h);
 }
@@ -555,7 +555,7 @@ void LinearRandomWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void LinearRandomWaveSimulation::ElevationDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dhdx,
-    Eigen::Ref<Eigen::ArrayXXd> dhdy)
+    Eigen::Ref<Eigen::ArrayXXd> dhdy) const
 {
   impl_->ElevationDerivAt(dhdx, dhdy);
 }
@@ -563,7 +563,7 @@ void LinearRandomWaveSimulation::ElevationDerivAt(
 //////////////////////////////////////////////////
 void LinearRandomWaveSimulation::DisplacementAt(
     Eigen::Ref<Eigen::ArrayXXd> /*sx*/,
-    Eigen::Ref<Eigen::ArrayXXd> /*sy*/)
+    Eigen::Ref<Eigen::ArrayXXd> /*sy*/) const
 {
   // no xy-displacement
 }
@@ -572,7 +572,7 @@ void LinearRandomWaveSimulation::DisplacementAt(
 void LinearRandomWaveSimulation::DisplacementDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
     Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
-    Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/) const
 {
   // no xy-displacement
 }
@@ -586,7 +586,7 @@ void LinearRandomWaveSimulation::DisplacementAndDerivAt(
     Eigen::Ref<Eigen::ArrayXXd> dhdy,
     Eigen::Ref<Eigen::ArrayXXd> /*dsxdx*/,
     Eigen::Ref<Eigen::ArrayXXd> /*dsydy*/,
-    Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/)
+    Eigen::Ref<Eigen::ArrayXXd> /*dsxdy*/) const
 {
   impl_->ElevationAt(h);
   impl_->ElevationDerivAt(dhdx, dhdy);
@@ -595,7 +595,7 @@ void LinearRandomWaveSimulation::DisplacementAndDerivAt(
 //////////////////////////////////////////////////
 void LinearRandomWaveSimulation::PressureAt(
     Index iz,
-    Eigen::Ref<Eigen::ArrayXXd> pressure)
+    Eigen::Ref<Eigen::ArrayXXd> pressure) const
 {
   impl_->PressureAt(iz, pressure);
 }
@@ -603,7 +603,7 @@ void LinearRandomWaveSimulation::PressureAt(
 //////////////////////////////////////////////////
 void LinearRandomWaveSimulation::ElevationAt(
     Index ix, Index iy,
-    double& eta)
+    double& eta) const
 {
   impl_->ElevationAt(ix, iy, eta);
 }
@@ -611,7 +611,7 @@ void LinearRandomWaveSimulation::ElevationAt(
 //////////////////////////////////////////////////
 void LinearRandomWaveSimulation::DisplacementAt(
     Index /*ix*/, Index /*iy*/,
-    double& /*sx*/, double& /*sy*/)
+    double& /*sx*/, double& /*sy*/) const
 {
   // no xy-displacement
 }
@@ -619,7 +619,7 @@ void LinearRandomWaveSimulation::DisplacementAt(
 //////////////////////////////////////////////////
 void LinearRandomWaveSimulation::PressureAt(
     Index ix, Index iy, Index iz,
-    double& pressure)
+    double& pressure) const
 {
   impl_->PressureAt(ix, iy, iz, pressure);
 }

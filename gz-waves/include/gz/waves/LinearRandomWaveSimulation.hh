@@ -84,39 +84,39 @@ class LinearRandomWaveSimulation :
   // IWaveField - interface.
   void Elevation(
       double x, double y,
-      double &eta) override;
+      double &eta) const override;
 
   void Elevation(
       const Eigen::Ref<const Eigen::ArrayXd>& x,
       const Eigen::Ref<const Eigen::ArrayXd>& y,
-      Eigen::Ref<Eigen::ArrayXd> eta) override;
+      Eigen::Ref<Eigen::ArrayXd> eta) const override;
 
   void Pressure(
       double x, double y, double z,
-      double& pressure) override;
+      double& pressure) const override;
 
   void Pressure(
       const Eigen::Ref<const Eigen::ArrayXd>& x,
       const Eigen::Ref<const Eigen::ArrayXd>& y,
       const Eigen::Ref<const Eigen::ArrayXd>& z,
-      Eigen::Ref<Eigen::ArrayXd> pressure) override;
+      Eigen::Ref<Eigen::ArrayXd> pressure) const override;
 
   // lookup interface - array
   void ElevationAt(
-      Eigen::Ref<Eigen::ArrayXXd> h) override;
+      Eigen::Ref<Eigen::ArrayXXd> h) const override;
 
   void ElevationDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> dhdx,
-      Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
+      Eigen::Ref<Eigen::ArrayXXd> dhdy) const override;
 
   void DisplacementAt(
       Eigen::Ref<Eigen::ArrayXXd> sx,
-      Eigen::Ref<Eigen::ArrayXXd> sy) override;
+      Eigen::Ref<Eigen::ArrayXXd> sy) const override;
 
   void DisplacementDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> dsxdx,
       Eigen::Ref<Eigen::ArrayXXd> dsydy,
-      Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy) const override;
 
   void DisplacementAndDerivAt(
       Eigen::Ref<Eigen::ArrayXXd> h,
@@ -126,24 +126,24 @@ class LinearRandomWaveSimulation :
       Eigen::Ref<Eigen::ArrayXXd> dhdy,
       Eigen::Ref<Eigen::ArrayXXd> dsxdx,
       Eigen::Ref<Eigen::ArrayXXd> dsydy,
-      Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+      Eigen::Ref<Eigen::ArrayXXd> dsxdy) const override;
 
   void PressureAt(
       Index iz,
-      Eigen::Ref<Eigen::ArrayXXd> pressure) override;
+      Eigen::Ref<Eigen::ArrayXXd> pressure) const override;
 
   // lookup interface - scalar
   void ElevationAt(
       Index ix, Index iy,
-      double& eta) override;
+      double& eta) const override;
 
   void DisplacementAt(
       Index ix, Index iy,
-      double& sx, double& sy) override;
+      double& sx, double& sy) const override;
 
   void PressureAt(
       Index ix, Index iy, Index iz,
-      double& pressure) override;
+      double& pressure) const override;
 
  private:
   class Impl;

@@ -48,20 +48,20 @@ class LinearRandomFFTWaveSimulationRef :
     Index SizeZ() const override;
 
     void ElevationAt(
-        Eigen::Ref<Eigen::ArrayXXd> h) override;
+        Eigen::Ref<Eigen::ArrayXXd> h) const override;
 
     void ElevationDerivAt(
         Eigen::Ref<Eigen::ArrayXXd> dhdx,
-        Eigen::Ref<Eigen::ArrayXXd> dhdy) override;
+        Eigen::Ref<Eigen::ArrayXXd> dhdy) const override;
 
     void DisplacementAt(
         Eigen::Ref<Eigen::ArrayXXd> sx,
-        Eigen::Ref<Eigen::ArrayXXd> sy) override;
+        Eigen::Ref<Eigen::ArrayXXd> sy) const override;
 
     void DisplacementDerivAt(
         Eigen::Ref<Eigen::ArrayXXd> dsxdx,
         Eigen::Ref<Eigen::ArrayXXd> dsydy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) const override;
 
     void DisplacementAndDerivAt(
         Eigen::Ref<Eigen::ArrayXXd> h,
@@ -71,7 +71,7 @@ class LinearRandomFFTWaveSimulationRef :
         Eigen::Ref<Eigen::ArrayXXd> dhdy,
         Eigen::Ref<Eigen::ArrayXXd> dsxdx,
         Eigen::Ref<Eigen::ArrayXXd> dsydy,
-        Eigen::Ref<Eigen::ArrayXXd> dsxdy) override;
+        Eigen::Ref<Eigen::ArrayXXd> dsxdy) const override;
 
   // public class declaration - for testing
   class Impl;
