@@ -70,6 +70,8 @@ class LinearRandomFFTWaveSimulationRef::Impl
   /// \brief Set the components of the wind velocity (U10) in [m/s]
   void SetWindVelocity(double ux, double uy);
 
+  void SetSteepness(double value);
+
   /// \brief Set the current time in seconds
   void SetTime(double value);
 

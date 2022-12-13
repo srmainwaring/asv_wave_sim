@@ -72,6 +72,7 @@ class OceanTilePrivate
   explicit OceanTilePrivate(WaveParametersPtr params, bool has_visuals = true);
 
   void SetWindVelocity(double ux, double uy);
+  void SetSteepness(double value);
 
   bool                        has_visuals_;
   /// \brief FFT size (nx, ny must be a power of 2)
@@ -367,6 +368,13 @@ template <typename Vector3>
 void OceanTilePrivate<Vector3>::SetWindVelocity(double ux, double uy)
 {
   wave_sim_->SetWindVelocity(ux, uy);
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::SetSteepness(double value)
+{
+  wave_sim_->SetSteepness(value);
 }
 
 //////////////////////////////////////////////////
@@ -1014,6 +1022,13 @@ void OceanTileT<gz::math::Vector3d>::SetWindVelocity(double ux, double uy)
 
 //////////////////////////////////////////////////
 template <>
+void OceanTileT<gz::math::Vector3d>::SetSteepness(double value)
+{
+  impl_->SetSteepness(value);
+}
+
+//////////////////////////////////////////////////
+template <>
 std::array<double, 2> OceanTileT<gz::math::Vector3d>::TileSize() const
 {
   return {impl_->lx_, impl_->ly_};
@@ -1132,6 +1147,13 @@ template <>
 void OceanTileT<cgal::Point3>::SetWindVelocity(double ux, double uy)
 {
   impl_->SetWindVelocity(ux, uy);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::SetSteepness(double value)
+{
+  impl_->SetSteepness(value);
 }
 
 //////////////////////////////////////////////////
