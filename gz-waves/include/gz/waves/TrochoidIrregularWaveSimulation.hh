@@ -1,4 +1,4 @@
-// Copyright (C) 2019  Rhys Mainwaring
+// Copyright (C) 2019-2023  Rhys Mainwaring
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,37 +16,51 @@
 #ifndef GZ_WAVES_TROCHOIDIRREGULARWAVESIMULATION_HH_
 #define GZ_WAVES_TROCHOIDIRREGULARWAVESIMULATION_HH_
 
-#include <memory>
+#include <Eigen/Dense>
 
-#include <Eigen/Dense> // NOLINT - cpplint false positive.
+#include <memory>
+#include <vector>
+
+#include <gz/math/Vector2.hh>
 
 #include "gz/waves/WaveSimulation.hh"
-
-using Eigen::ArrayXXd;
 
 namespace gz
 {
 namespace waves
 {
-class WaveParameters;
 
 class TrochoidIrregularWaveSimulation :
-    public IWaveSimulation
+    public IWaveSimulation,
+    public IWaveField
 {
  public:
   virtual ~TrochoidIrregularWaveSimulation();
 
-  TrochoidIrregularWaveSimulation(
-      Index nx,
-      double lx,
-      std::shared_ptr<WaveParameters> params);
+  TrochoidIrregularWaveSimulation(double lx, double ly,
+      Index nx, Index ny);
 
+  void SetNumber(Index value);
+
+  void SetAmplitude(const std::vector<double>& value);
+
+  void SetWaveNumber(const std::vector<double>& value);
+
+  void SetOmega(const std::vector<double>& value);
+
+  void SetPhase(const std::vector<double>& value);
+
+  void SetSteepness(const std::vector<double>& value);
+
+  void SetDirection(const std::vector<math::Vector2d>& value);
+
+  // Documentation inhertited.
   void SetWindVelocity(double ux, double uy) override;
 
-  /// \todo(srmainwaring) deprecate / remove
+  // Documentation inhertited.
   void SetSteepness(double value) override;
 
-  /// \todo(srmainwaring) deprecate / remove
+  // Documentation inhertited.
   void SetTime(double time) override;
 
   Index SizeX() const override;
@@ -54,6 +68,26 @@ class TrochoidIrregularWaveSimulation :
   Index SizeY() const override;
 
   Index SizeZ() const override;
+
+  // interpolation interface
+  void Elevation(
+      double x, double y,
+      double& eta) const override;
+
+  void Elevation(
+      const Eigen::Ref<const Eigen::ArrayXd>& x,
+      const Eigen::Ref<const Eigen::ArrayXd>& y,
+      Eigen::Ref<Eigen::ArrayXd> eta) const override;
+
+  void Pressure(
+      double x, double y, double z,
+      double& pressure) const override;
+
+  void Pressure(
+      const Eigen::Ref<const Eigen::ArrayXd>& x,
+      const Eigen::Ref<const Eigen::ArrayXd>& y,
+      const Eigen::Ref<const Eigen::ArrayXd>& z,
+      Eigen::Ref<Eigen::ArrayXd> pressure) const override;
 
   // lookup interface - array
   void ElevationAt(
