@@ -44,7 +44,7 @@ class OceanTileT
   explicit OceanTileT(Index nx, Index ny, double lx, double ly,
       bool has_visuals = true);
 
-  explicit OceanTileT(WaveParametersPtr params, bool has_visuals = true);
+  explicit OceanTileT(const WaveParameters& params, bool has_visuals = true);
 
   /// \brief The size of the wave tile (m).
   std::array<double, 2> TileSize() const;

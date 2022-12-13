@@ -84,9 +84,6 @@ class WavesModelPrivate
   /// \brief Update rate [Hz].
   public: double updateRate{30.0};
 
-  /// \brief The wave parameters.
-  public: waves::WaveParametersPtr waveParams;
-
   /// \brief The wavefield.
   public: waves::WavefieldPtr wavefield;
 
@@ -189,18 +186,18 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
       *this->sdf,  "update_rate", this->updateRate);
 
   // Wave parameters
-  this->waveParams.reset(new waves::WaveParameters());
+  waves::WaveParameters waveParams;
   if (this->sdf->HasElement("wave"))
   {
     auto sdfWave = this->sdf->GetElement("wave");
-    this->waveParams->SetFromSDF(*sdfWave);
+    waveParams.SetFromSDF(*sdfWave);
   }
 
   // Wavefield
   std::string entityName = "wavefield";
 
   this->wavefield.reset(new waves::Wavefield(worldName));
-  this->wavefield->SetParameters(this->waveParams);
+  this->wavefield->SetParameters(waveParams);
 
   // Create a new entity and register a wavefield component with it.
   this->wavefieldEntity = _ecm.CreateEntity();
@@ -226,7 +223,7 @@ void WavesModelPrivate::Load(EntityComponentManager &_ecm)
   else
   {
     gzmsg << "WavesModel: found wavefield with params" <<  std::endl;
-    this->waveParams->DebugPrint();
+    waveParams.DebugPrint();
   }
 
   this->validConfig = true;

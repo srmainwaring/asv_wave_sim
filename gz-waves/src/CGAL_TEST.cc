@@ -508,12 +508,11 @@ TEST(CGAL, SurfaceMeshWavefield) {
   typedef CGAL::Timer Timer;
 
   // Wavefield Parameters
-  std::shared_ptr<waves::WaveParameters> params(
-      new waves::WaveParameters());
-  params->SetNumber(1);
-  params->SetAmplitude(3.0);
-  params->SetPeriod(10.0);
-  params->SetPhase(0.0);
+  waves::WaveParameters params;
+  params.SetNumber(1);
+  params.SetAmplitude(3.0);
+  params.SetPeriod(10.0);
+  params.SetPhase(0.0);
 
   // Wavefield
   waves::Wavefield wavefield("waves");

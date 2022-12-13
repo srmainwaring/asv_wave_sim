@@ -26,6 +26,43 @@ namespace gz
 {
 namespace waves
 {
+
+class WaveParameters;
+
+// Original wavefield interface
+class IWaveField1
+{
+ public:
+  /// \brief Destructor.
+  virtual ~IWaveField1();
+
+  /// \brief The vertical distance from the wave surface to a point.
+  ///
+  /// \param[in] point
+  ///   The point at which the height is calculated.
+  /// \param[out] height
+  ///   The resulting vertical distance from the surface to the point.
+  /// \return True if the interpolation succeeded.
+  virtual bool Height(const Eigen::Vector3d& point, double& height) const = 0;
+
+  /// \brief Update (recalculate) the wave field for the given time.
+  ///
+  /// \param[in] time
+  ///   The time parameter for the wave evolution.
+  virtual void Update(double time) = 0;
+
+  /// \brief Get the wave parameters.
+  ///
+  /// \return The wave parameters.
+  virtual const WaveParameters& GetParameters() const = 0;
+
+  /// \brief Set the wave parameters.
+  ///
+  /// \param[in] value
+  ///   The wave parameters.
+  virtual void SetParameters(const WaveParameters& value) = 0;
+};
+
 // evaluate wave elevation and fluid pressure
 class IWaveField
 {

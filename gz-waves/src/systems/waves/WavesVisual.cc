@@ -620,7 +620,7 @@ void WavesVisualPrivate::OnUpdate()
         }
 
         // create ocean tile
-        this->oceanTile.reset(new waves::visual::OceanTile(this->waveParams));
+        this->oceanTile.reset(new waves::visual::OceanTile(*this->waveParams));
         this->oceanTile->SetWindVelocity(ux, uy);
 
         // create mesh - do not store in MeshManager as it will be modified

@@ -26,38 +26,42 @@
 
 #include <gz/math.hh>
 
+#include <gz/waves/WaveSimulation.hh>
+
 namespace gz
 {
 namespace waves
 {
+
 class WaveParameters;
 class WavefieldPrivate;
 
 /// \brief A class to manage a wave field.
-class Wavefield
+class Wavefield : public IWaveField1
 {
  public:
   /// \brief Destructor.
   virtual ~Wavefield();
 
   /// \brief Constructor.
+  ///
+  /// \param[in] world_name
+  ///   The name of the world containing the wavefield. Used to construct
+  ///   a topic string for subscribing to parameter updates.
+  ///   \todo(srmainwaring) replace with the topic string.
   explicit Wavefield(const std::string& world_name);
 
-  /// \brief Compute the height at a point (vertical distance to surface).
-  bool Height(const Eigen::Vector3d& point, double& height) const;
+  /// \copydoc IWaveField1::Height()
+  bool Height(const Eigen::Vector3d& point, double& height) const override;
 
-  /// \brief Get the wave parameters.
-  std::shared_ptr<const WaveParameters> GetParameters() const;
+  /// \copydoc IWaveField1::GetParameters()
+  const WaveParameters& GetParameters() const override;
 
-  /// \brief Set the wave parameters.
-  ///
-  /// \param[in] params    The new wave parameters.
-  void SetParameters(std::shared_ptr<WaveParameters> params);
+  /// \copydoc IWaveField1::SetParameters()
+  void SetParameters(const WaveParameters& params) override;
 
-  /// \brief Update (recalculate) the wave field for the given time.
-  ///
-  /// \param[in] time    The time parameter for the wave evolution.
-  void Update(double time);
+  /// \copydoc IWaveField1::Update()
+  void Update(double time) override;
 
  private:
   /// \internal Private implementation.

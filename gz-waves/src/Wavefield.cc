@@ -46,7 +46,7 @@ class WavefieldPrivate
   void OnWaveMsg(const gz::msgs::Param& msg);
 
   /// \brief Wave parameters
-  std::shared_ptr<WaveParameters> params_;
+  WaveParameters params_;
 
   /// \brief Ocean tile
   std::unique_ptr<physics::OceanTile> ocean_tile_;
@@ -79,7 +79,7 @@ Wavefield::Wavefield(const std::string& world_name) :
 
   // Wave parameters
   gzmsg << "Creating WaveParameters." <<  std::endl;
-  auto params = std::make_shared<WaveParameters>();
+  WaveParameters params;
   SetParameters(params);
 
   // Update
@@ -120,21 +120,21 @@ bool Wavefield::Height(const Eigen::Vector3d& point, double& height) const
 }
 
 //////////////////////////////////////////////////
-std::shared_ptr<const WaveParameters> Wavefield::GetParameters() const
+const WaveParameters& Wavefield::GetParameters() const
 {
   return impl_->params_;
 }
 
 //////////////////////////////////////////////////
-void Wavefield::SetParameters(std::shared_ptr<WaveParameters> params)
+void Wavefield::SetParameters(const WaveParameters& params)
 {
   impl_->params_ = params;
 
   // Force an update of the ocean tile and point locator
-  auto [nx, ny] = impl_->params_->CellCount();
-  auto [lx, ly] = impl_->params_->TileSize();
-  double u = impl_->params_->WindVelocity().X();
-  double v = impl_->params_->WindVelocity().Y();
+  auto [nx, ny] = impl_->params_.CellCount();
+  auto [lx, ly] = impl_->params_.TileSize();
+  double u = impl_->params_.WindVelocity().X();
+  double v = impl_->params_.WindVelocity().Y();
 
   // OceanTile
   gzmsg << "Creating OceanTile.\n";
@@ -171,9 +171,9 @@ void WavefieldPrivate::OnWaveMsg(const gz::msgs::Param& msg)
   // gzmsg << msg.DebugString();
 
   // current wind speed and angle
-  double wind_speed = params_->WindSpeed();
-  double wind_angle_rad = params_->WindAngleRad();
-  double steepness = params_->Steepness();
+  double wind_speed = params_.WindSpeed();
+  double wind_angle_rad = params_.WindAngleRad();
+  double steepness = params_.Steepness();
 
   // extract parameters
   {
@@ -211,14 +211,14 @@ void WavefieldPrivate::OnWaveMsg(const gz::msgs::Param& msg)
   }
 
   // update parameters and wavefield
-  params_->SetWindSpeedAndAngle(wind_speed, wind_angle_rad);
-  params_->SetSteepness(steepness);
+  params_.SetWindSpeedAndAngle(wind_speed, wind_angle_rad);
+  params_.SetSteepness(steepness);
 
   ocean_tile_->SetWindVelocity(
-      params_->WindVelocity().X(),
-      params_->WindVelocity().Y());
+      params_.WindVelocity().X(),
+      params_.WindVelocity().Y());
   ocean_tile_->SetSteepness(
-      params_->Steepness());
+      params_.Steepness());
 }
 
 }  // namespace waves

@@ -66,7 +66,8 @@ class OceanTilePrivate
   explicit OceanTilePrivate(Index nx, Index ny, double lx, double ly,
       bool has_visuals = true);
 
-  explicit OceanTilePrivate(WaveParametersPtr params, bool has_visuals = true);
+  explicit OceanTilePrivate(const WaveParameters& params,
+      bool has_visuals = true);
 
   void SetWindVelocity(double ux, double uy);
   void SetSteepness(double value);
@@ -262,14 +263,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
 //////////////////////////////////////////////////
 template <typename Vector3>
 OceanTilePrivate<Vector3>::OceanTilePrivate(
-    WaveParametersPtr params,
+    const WaveParameters& params,
     bool has_visuals) :
     has_visuals_(has_visuals),
-    nx_(std::get<0>(params->CellCount())),
-    ny_(std::get<1>(params->CellCount())),
+    nx_(std::get<0>(params.CellCount())),
+    ny_(std::get<1>(params.CellCount())),
     num_faces_(2 * nx_ * ny_),
-    lx_(std::get<0>(params->TileSize())),
-    ly_(std::get<1>(params->TileSize()))
+    lx_(std::get<0>(params.TileSize())),
+    ly_(std::get<1>(params.TileSize()))
 {
   auto size = nx_ * ny_;
   heights_ = Eigen::ArrayXd::Zero(size);
@@ -288,29 +289,29 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   // 3 - LinearRandomWaveSimulation
 
   Index wave_sim_type = -1;
-  if (params->Algorithm() == "sinusoid" ||
-      params->Algorithm() == "linear_regular")
+  if (params.Algorithm() == "sinusoid" ||
+      params.Algorithm() == "linear_regular")
   {
     wave_sim_type = 0;
   }
-  if (params->Algorithm() == "trochoid" ||
-      params->Algorithm() == "trochoid_irregular")
+  if (params.Algorithm() == "trochoid" ||
+      params.Algorithm() == "trochoid_irregular")
   {
     wave_sim_type = 1;
   }
-  if (params->Algorithm() == "fft" ||
-      params->Algorithm() == "linear_random_fft")
+  if (params.Algorithm() == "fft" ||
+      params.Algorithm() == "linear_random_fft")
   {
     wave_sim_type = 2;
   }
-  if (params->Algorithm() == "linear_random")
+  if (params.Algorithm() == "linear_random")
   {
     wave_sim_type = 3;
   }
   if (wave_sim_type < 0)
   {
     gzerr << "Invalid wave algorithm type: "
-        << params->Algorithm() << "\n";
+        << params.Algorithm() << "\n";
   }
 
   switch (wave_sim_type)
@@ -320,9 +321,9 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       auto wave_sim = std::make_unique<LinearRegularWaveSimulation>(
           lx_, ly_, nx_, ny_);
 
-      wave_sim->SetAmplitude(params->Amplitude());
-      wave_sim->SetPeriod(params->Period());
-      wave_sim->SetDirection(params->Direction().X(), params->Direction().Y());
+      wave_sim->SetAmplitude(params.Amplitude());
+      wave_sim->SetPeriod(params.Period());
+      wave_sim->SetDirection(params.Direction().X(), params.Direction().Y());
 
       wave_sim_ = std::move(wave_sim);
       break;
@@ -332,13 +333,13 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       auto wave_sim = std::make_unique<TrochoidIrregularWaveSimulation>(
           lx_, ly_, nx_, ny_);
 
-      wave_sim->SetNumber(params->Number());
-      wave_sim->SetAmplitude(params->Amplitude_V());
-      wave_sim->SetWaveNumber(params->Wavenumber_V());
-      wave_sim->SetOmega(params->AngularFrequency_V());
-      wave_sim->SetPhase(params->Phase_V());
-      wave_sim->SetSteepness(params->Steepness_V());
-      wave_sim->SetDirection(params->Direction_V());
+      wave_sim->SetNumber(params.Number());
+      wave_sim->SetAmplitude(params.Amplitude_V());
+      wave_sim->SetWaveNumber(params.Wavenumber_V());
+      wave_sim->SetOmega(params.AngularFrequency_V());
+      wave_sim->SetPhase(params.Phase_V());
+      wave_sim->SetSteepness(params.Steepness_V());
+      wave_sim->SetDirection(params.Direction_V());
 
       wave_sim_ = std::move(wave_sim);
       break;
@@ -348,7 +349,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       auto wave_sim = std::make_unique<LinearRandomFFTWaveSimulation>(
           lx_, ly_, nx_, ny_);
 
-      wave_sim->SetLambda(params->Steepness());
+      wave_sim->SetLambda(params.Steepness());
 
       wave_sim_ = std::move(wave_sim);
       break;
@@ -358,7 +359,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       auto wave_sim = std::make_unique<LinearRandomWaveSimulation>(
           lx_, ly_, nx_, ny_);
 
-      wave_sim->SetNumWaves(params->Number());
+      wave_sim->SetNumWaves(params.Number());
 
       wave_sim_ = std::move(wave_sim);
       break;
@@ -1012,7 +1013,7 @@ OceanTileT<gz::math::Vector3d>::OceanTileT(
 //////////////////////////////////////////////////
 template <>
 OceanTileT<gz::math::Vector3d>::OceanTileT(
-    WaveParametersPtr params, bool has_visuals) :
+    const WaveParameters& params, bool has_visuals) :
     impl_(std::make_unique<OceanTilePrivate<gz::math::Vector3d>>(
         params, has_visuals))
 {
@@ -1141,7 +1142,7 @@ OceanTileT<cgal::Point3>::OceanTileT(
 //////////////////////////////////////////////////
 template <>
 OceanTileT<cgal::Point3>::OceanTileT(
-    WaveParametersPtr params, bool has_visuals) :
+    const WaveParameters& params, bool has_visuals) :
     impl_(std::make_unique<OceanTilePrivate<cgal::Point3>>(
         params, has_visuals))
 {
