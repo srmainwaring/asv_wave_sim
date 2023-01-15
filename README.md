@@ -66,10 +66,12 @@ Compile the package:
 #### Ubuntu
 
 ```bash
-colcon build --symlink-install --merge-install --cmake-args \
--DCMAKE_BUILD_TYPE=RelWithDebInfo \
--DBUILD_TESTING=ON \
--DCMAKE_CXX_STANDARD=17
+colcon build --symlink-install --merge-install
+--cmake-args \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  -DBUILD_TESTING=ON \
+  -DCMAKE_CXX_STANDARD=17
+  -DHIGHFIVE_USE_EIGEN=ON
 ```
 
 Source the workspace:
@@ -81,12 +83,14 @@ source ./install/setup.bash
 #### macOS
 
 ```bash
-colcon build --symlink-install --merge-install --cmake-args \
--DCMAKE_BUILD_TYPE=RelWithDebInfo \
--DBUILD_TESTING=ON \
--DCMAKE_CXX_STANDARD=17 \
--DCMAKE_MACOSX_RPATH=FALSE \
--DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib
+colcon build --symlink-install --merge-install
+--cmake-args \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  -DBUILD_TESTING=ON \
+  -DCMAKE_CXX_STANDARD=17 \
+  -DCMAKE_MACOSX_RPATH=FALSE \
+  -DCMAKE_INSTALL_NAME_DIR=$(pwd)/install/lib
+  -DHIGHFIVE_USE_EIGEN=ON
 ```
 
 Source the workspace:
