@@ -1,22 +1,9 @@
 
 #============================================================================
-# Find dependencies
+# Find additional dependencies
 #============================================================================
 
-#--------------------------------------
-# Check gnuplot-iostream is populated
-# message("gnuplot-iostream_POPULATED: ${gnuplot-iostream_POPULATED}")
-# message("gnuplot-iostream_INCLUDE_DIRS: ${gnuplot-iostream_INCLUDE_DIRS}")
-# message("gnuplot-iostream_SOURCE_DIR: ${gnuplot-iostream_SOURCE_DIR}")
-
-#--------------------------------------
-# Find gnuplot-iostream
-# 
-# The header is used by the examples in test/plots.
-# gnuplot-iostream_INCLUDE_DIRS is not set by the project so we use
-# gnuplot-iostream_SOURCE_DIR instead.
 find_package(Boost COMPONENTS iostreams)
-set(gnuplot-iostream_INCLUDE_DIRS ${gnuplot-iostream_SOURCE_DIR})
 
 #============================================================================
 # Add executables
