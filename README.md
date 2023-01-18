@@ -116,10 +116,6 @@ export GZ_VERSION=garden
 # not usually required as should default to localhost address
 export GZ_IP=127.0.0.1
 
-# ensure gazebo finds the config for this installation
-export GZ_CONFIG_PATH=\
-$HOME/gz_ws/install/share/gz
-
 # ensure the model and world files are found
 export GZ_SIM_RESOURCE_PATH=\
 $HOME/gz_ws/src/asv_wave_sim/gz-waves-models/models:\
