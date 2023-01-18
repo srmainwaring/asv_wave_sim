@@ -39,9 +39,11 @@ using gz::waves::TriangulatedGrid;
 //////////////////////////////////////////////////
 TEST(TriangulatedGrid, Create) {
   // Create
-  Index n = 2;
-  Index length = 100.0;
-  auto grid = TriangulatedGrid::Create(n, length);
+  Index nx = 16;
+  Index ny = 16;
+  Index lx = 100.0;
+  Index ly = 100.0;
+  auto grid = TriangulatedGrid::Create(nx, ny, lx, ly);
   std::unique_ptr<TriangulatedGrid> tri_grid = std::move(grid);
   // tri_grid->DebugPrintMesh();
   // tri_grid->DebugPrintTriangulation();
@@ -60,10 +62,13 @@ TEST(TriangulatedGrid, Create) {
 //////////////////////////////////////////////////
 TEST(TriangulatedGrid, Height) {
   // Create
-  Index n = 16;
-  Index length = 100.0;
-  Index nplus1 = n + 1;
-  auto grid = TriangulatedGrid::Create(n, length);
+  Index nx = 16;
+  Index ny = 16;
+  Index lx = 100.0;
+  Index ly = 100.0;
+  Index nx_plus1 = nx + 1;
+  Index ny_plus1 = ny + 1;
+  auto grid = TriangulatedGrid::Create(nx, ny, lx, ly);
   std::unique_ptr<TriangulatedGrid> source = std::move(grid);
   EXPECT_TRUE(source->IsValid());
 
@@ -75,9 +80,9 @@ TEST(TriangulatedGrid, Height) {
 
   // Set points
   Point3Range points = source->Points();
-  for (Index iy=0; iy < nplus1; ++iy) {
-    for (Index ix=0; ix < nplus1; ++ix) {
-      int64_t idx = iy * nplus1 + ix;
+  for (Index iy=0; iy < ny_plus1; ++iy) {
+    for (Index ix=0; ix < nx_plus1; ++ix) {
+      int64_t idx = iy * nx_plus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];
       points[idx] = cgal::Point3(p.x(), p.y(), value);
@@ -93,18 +98,21 @@ TEST(TriangulatedGrid, Height) {
 //////////////////////////////////////////////////
 TEST(TriangulatedGrid, Interpolate) {
   // Create
-  Index n = 16;
-  Index length = 100.0;
-  Index nplus1 = n + 1;
-  auto grid1 = TriangulatedGrid::Create(n, length);
+  Index nx = 16;
+  Index ny = 16;
+  Index lx = 100.0;
+  Index ly = 100.0;
+  Index nx_plus1 = nx + 1;
+  Index ny_plus1 = ny + 1;
+  auto grid1 = TriangulatedGrid::Create(nx, ny, lx, ly);
   std::unique_ptr<TriangulatedGrid> source = std::move(grid1);
   EXPECT_TRUE(source->IsValid());
 
   // Set points
   Point3Range points = source->Points();
-  for (Index iy=0; iy < nplus1; ++iy) {
-    for (Index ix=0; ix < nplus1; ++ix) {
-      int64_t idx = iy * nplus1 + ix;
+  for (Index iy=0; iy < ny_plus1; ++iy) {
+    for (Index ix=0; ix < nx_plus1; ++ix) {
+      int64_t idx = iy * nx_plus1 + ix;
       double value = ix + iy;
       const cgal::Point3& p = points[idx];
       points[idx] = cgal::Point3(p.x(), p.y(), value);
@@ -115,7 +123,7 @@ TEST(TriangulatedGrid, Interpolate) {
   // source->DebugPrintTriangulation();
 
   // Create patch
-  auto grid2 = TriangulatedGrid::Create(2, 10.0);
+  auto grid2 = TriangulatedGrid::Create(2, 2, 10.0, 10.0);
   std::unique_ptr<TriangulatedGrid> patch = std::move(grid2);
   // patch->DebugPrintMesh();
   // patch->DebugPrintTriangulation();

@@ -93,9 +93,11 @@ bool Wavefield::Height(const cgal::Point3& point, double& height) const
 {
   /// \todo(srmainwaring) the calculation assumes that the tile origin
   /// is at its center.
-  const double lx = impl_->ocean_tile_->TileSize();
+  auto [lx, ly] = impl_->ocean_tile_->TileSize();
 
-  auto pmod = [&](double x)
+  // See this SO article covering the lambda capture of a structured binding.
+  // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+  auto px_mod = [lx = lx](double x)
   {
       if (x < 0.0)
         return std::fmod(x - lx/2.0, lx) + lx/2.0;
@@ -103,8 +105,16 @@ bool Wavefield::Height(const cgal::Point3& point, double& height) const
         return std::fmod(x + lx/2.0, lx) - lx/2.0;
   };
 
+  auto py_mod = [ly = ly](double y)
+  {
+      if (y < 0.0)
+        return std::fmod(y - ly/2.0, ly) + ly/2.0;
+      else
+        return std::fmod(y + ly/2.0, ly) - ly/2.0;
+  };
+
   // Obtain the point modulo the tile dimensions
-  cgal::Point3 modulo_point(pmod(point.x()), pmod(point.y()), point.z());
+  cgal::Point3 modulo_point(px_mod(point.x()), py_mod(point.y()), point.z());
 
   return impl_->tri_grid_->Height(modulo_point, height);
 }
@@ -121,21 +131,21 @@ void Wavefield::SetParameters(std::shared_ptr<WaveParameters> params)
   impl_->params_ = params;
 
   // Force an update of the ocean tile and point locator
-  Index nx = impl_->params_->CellCount();
-  double lx = impl_->params_->TileSize();
+  auto [nx, ny] = impl_->params_->CellCount();
+  auto [lx, ly] = impl_->params_->TileSize();
   double u = impl_->params_->WindVelocity().X();
   double v = impl_->params_->WindVelocity().Y();
 
   // OceanTile
-  gzmsg << "Creating OceanTile." <<  std::endl;
+  gzmsg << "Creating OceanTile.\n";
   impl_->ocean_tile_.reset(new physics::OceanTile(
       impl_->params_, false));
   impl_->ocean_tile_->SetWindVelocity(u, v);
   impl_->ocean_tile_->Create();
 
   // Point Locator
-  gzmsg << "Creating triangulated grid." <<  std::endl;
-  auto grid = TriangulatedGrid::Create(nx, lx);
+  gzmsg << "Creating triangulated grid.\n";
+  auto grid = TriangulatedGrid::Create(nx, ny, lx, ly);
   impl_->tri_grid_ = std::move(grid);
 }
 

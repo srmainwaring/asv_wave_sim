@@ -39,11 +39,11 @@ class TriangulatedGrid
 {
  public:
   virtual ~TriangulatedGrid();
-  TriangulatedGrid(Index num_segments, double length);
+  TriangulatedGrid(Index nx, Index ny, double lx, double ly);
   void CreateMesh();
   void CreateTriangulation();
   static std::unique_ptr<TriangulatedGrid> Create(
-      Index num_segments, double length);
+      Index nx, Index ny, double lx, double ly);
 
   bool Locate(const cgal::Point3& query, int64_t& faceIndex) const;
   bool Height(const cgal::Point3& query, double& height) const;
