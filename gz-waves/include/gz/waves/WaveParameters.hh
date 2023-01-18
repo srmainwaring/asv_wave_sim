@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <gz/math/Vector2.hh>
@@ -66,12 +67,12 @@ class WaveParameters
   std::string Algorithm() const;
 
   /// \brief The size of the wave tile (m).
-  double TileSize() const;
+  std::tuple<double, double> TileSize() const;
 
-  /// \brief The number of cells in the wave tile in each direction (N).
-  Index CellCount() const;
+  /// \brief The number of cells in the wave tile in each direction.
+  std::tuple<Index, Index> CellCount() const;
 
-  /// \brief The number of wave components (3 max if visualisation required).
+  /// \brief The number of wave components.
   Index Number() const;
 
   /// \brief The angle between the mean wave direction and the
@@ -127,14 +128,27 @@ class WaveParameters
 
   /// \brief Set the size of the wave tile (m).
   ///
-  /// \param[in] value  The size of the wave tile (m).
+  /// \param[in] value  The size of the wave tile in both directions (m).
   void SetTileSize(double value);
+
+  /// \brief Set the size of the wave tile (m).
+  ///
+  /// \param[in] lx  The size of the wave tile in the x-direction (m).
+  /// \param[in] ly  The size of the wave tile in the y-direction (m).
+  void SetTileSize(double lx, double ly);
 
   /// \brief Set the number of cells in the wave tile
   ///        in each direction.
   ///
-  /// \param[in] value  The number of cells.
+  /// \param[in] value  The number of cells in both directions.
   void SetCellCount(Index value);
+
+  /// \brief Set the number of cells in the wave tile
+  ///        in each direction.
+  ///
+  /// \param[in] nx  The number of cells in the x-direction.
+  /// \param[in] ny  The number of cells in the y-direction.
+  void SetCellCount(Index nx, Index ny);
 
   /// \brief Set the number of wave components (3 max).
   ///
