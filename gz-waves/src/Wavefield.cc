@@ -125,9 +125,9 @@ bool Wavefield::FluidPotential(
 {
   /// \todo(srmainwaring) the calculation assumes that the tile origin
   /// is at its center.
-  const double lx = impl_->ocean_tile_->TileSize();
+  auto [lx, ly] = impl_->ocean_tile_->TileSize();
 
-  auto pmod = [&](double x)
+  auto px_mod = [lx = lx](double x)
   {
       if (x < 0.0)
         return std::fmod(x - lx/2.0, lx) + lx/2.0;
@@ -135,8 +135,16 @@ bool Wavefield::FluidPotential(
         return std::fmod(x + lx/2.0, lx) - lx/2.0;
   };
 
+  auto py_mod = [ly = ly](double y)
+  {
+      if (y < 0.0)
+        return std::fmod(y - ly/2.0, ly) + ly/2.0;
+      else
+        return std::fmod(y + ly/2.0, ly) - ly/2.0;
+  };
+
   // Obtain the point modulo the tile dimensions
-  cgal::Point3 moduloPoint(pmod(point.x()), pmod(point.y()), point.z());
+  cgal::Point3 moduloPoint(px_mod(point.x()), py_mod(point.y()), point.z());
 
   /// \todo IMPLEMENT_FLUID_POTENTIAL
   return 0.0;
