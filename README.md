@@ -182,19 +182,33 @@ There are some changes to the plugin SDF schema for hydrodynamics and waves.
     <static>0</static>
     <update_rate>30</update_rate>
     <wave>
-      <!-- Algorithm: sinusoid, trochoid, fft  -->
-      <algorithm>fft</algorithm>
-
-      <!-- Cell count must be a power of 2 for fft waves -->
-      <tile_size>256</tile_size>
+      <!-- Grid dimensions
+        - The tile_size and cell_count may be a single value
+          for square grids, or a 2d vector if different resolution
+          is desired along the x and y axis.
+        - The cell_count must be a power of 2 for fft waves
+      -->
+      <!-- Either: single value for square grids -->
+      <tile_size>256.0</tile_size>
       <cell_count>128</cell_count>
-      
+
+      <!-- Or: 2d vectors for different resolution in each axis -->
+      <tile_size>256.0 64.0</tile_size>
+      <cell_count>128 32</cell_count>
+
+      <!-- Wave algorithms
+        - These elements specify the wave generation method
+          and wave spectrum parameters.
+      -->
+
       <!-- Either: `fft` waves parameters -->
+      <algorithm>fft</algorithm>
       <wind_speed>5.0</wind_speed>
-      <wind_angle_deg>45</wind_angle_deg>
-      <steepness>1</steepness>
+      <wind_angle_deg>135</wind_angle_deg>
+      <steepness>2</steepness>
 
       <!-- Or: `trochoid` waves parameters -->
+      <algorithm>trochoid</algorithm>
       <number>3</number>
       <scale>1.5</scale>
       <angle>0.4</angle>
@@ -227,9 +241,9 @@ The waves visual plugin has the same algorithm elements as the model plugin and 
   <wave>
     <!-- `fft` wave parameters -->
     <algorithm>fft</algorithm>
-    <tile_size>100</tile_size>
-    <cell_count>256</cell_count>
-    <wind_speed>5</wind_speed>
+    <tile_size>256.0</tile_size>
+    <cell_count>128</cell_count>
+    <wind_speed>5.0</wind_speed>
     <wind_angle_deg>135</wind_angle_deg>
     <steepness>2</steepness>
   </wave>
