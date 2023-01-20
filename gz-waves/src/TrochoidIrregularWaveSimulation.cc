@@ -240,7 +240,8 @@ void TrochoidIrregularWaveSimulation::SetWindVelocity(double ux, double uy)
 }
 
 //////////////////////////////////////////////////
-void TrochoidIrregularWaveSimulation::SetSteepness(double /*value*/)
+void TrochoidIrregularWaveSimulation::SetSteepness(
+    double /*value*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
 }
