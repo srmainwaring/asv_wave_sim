@@ -153,7 +153,6 @@ int main(int /*argc*/, const char **/*argv*/)
 
     tri_grid->UpdatePoints(points);
     plotTriangulation(*tri_grid);
-
   }
   catch(...)
   {
