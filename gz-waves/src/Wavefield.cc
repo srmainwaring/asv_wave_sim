@@ -170,12 +170,6 @@ void WavefieldPrivate::OnWaveMsg(const gz::msgs::Param& msg)
 
   // gzmsg << msg.DebugString();
 
-  // // Get parameters from message
-  // double wind_angle = 0.0;
-  // double wind_speed = 0.0;
-  // wind_angle = Utilities::MsgParamDouble(*msg, "wind_angle", wind_angle);
-  // wind_speed = Utilities::MsgParamDouble(*msg, "wind_speed", wind_speed);
-
   // current wind speed and angle
   double wind_speed = params_->WindSpeed();
   double wind_angle_rad = params_->WindAngleRad();
@@ -223,6 +217,8 @@ void WavefieldPrivate::OnWaveMsg(const gz::msgs::Param& msg)
   ocean_tile_->SetWindVelocity(
       params_->WindVelocity().X(),
       params_->WindVelocity().Y());
+  ocean_tile_->SetSteepness(
+      params_->Steepness());
 }
 
 }  // namespace waves

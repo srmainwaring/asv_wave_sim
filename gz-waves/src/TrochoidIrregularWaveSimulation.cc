@@ -240,6 +240,13 @@ void TrochoidIrregularWaveSimulation::SetWindVelocity(double ux, double uy)
 }
 
 //////////////////////////////////////////////////
+void TrochoidIrregularWaveSimulation::SetSteepness(
+    double /*value*/)
+{
+  /// \todo(srmainwaring) IMPLEMENT
+}
+
+//////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::SetTime(double time)
 {
   impl_->SetTime(time);

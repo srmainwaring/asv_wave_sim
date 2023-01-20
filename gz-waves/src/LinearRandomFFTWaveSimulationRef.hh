@@ -39,6 +39,8 @@ class LinearRandomFFTWaveSimulationRef :
 
     void SetWindVelocity(double ux, double uy) override;
 
+    void SetSteepness(double value) override;
+
     void SetTime(double value) override;
 
     Index SizeX() const override;

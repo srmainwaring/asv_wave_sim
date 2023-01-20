@@ -55,6 +55,8 @@ class OceanTileT
 
   void SetWindVelocity(double ux, double uy);
 
+  void SetSteepness(double value);
+
   void Create();
 
   // Returns a new gz::common::Mesh. The caller must take ownership.

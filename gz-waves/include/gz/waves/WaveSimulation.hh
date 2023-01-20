@@ -68,6 +68,9 @@ class IWaveSimulation
   virtual void SetWindVelocity(double ux, double uy) = 0;
 
   /// \todo(srmainwaring) deprecate or move?
+  virtual void SetSteepness(double value) = 0;
+
+  /// \todo(srmainwaring) deprecate or move?
   virtual void SetTime(double value) = 0;
 
   // lookup interface - scalar

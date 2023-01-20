@@ -43,6 +43,10 @@ class TrochoidIrregularWaveSimulation :
 
   void SetWindVelocity(double ux, double uy) override;
 
+  /// \todo(srmainwaring) deprecate / remove
+  void SetSteepness(double value) override;
+
+  /// \todo(srmainwaring) deprecate / remove
   void SetTime(double time) override;
 
   Index SizeX() const override;

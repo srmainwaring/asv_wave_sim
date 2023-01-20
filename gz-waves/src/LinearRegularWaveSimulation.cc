@@ -89,8 +89,6 @@ class LinearRegularWaveSimulation::Impl
 
   void SetPeriod(double value);
 
-  void SetWindVelocity(double ux, double uy);
-
   void SetTime(double value);
 
   // interpolation interface
@@ -272,13 +270,6 @@ void LinearRegularWaveSimulation::Impl::SetAmplitude(double value)
 void LinearRegularWaveSimulation::Impl::SetPeriod(double value)
 {
   period_ = value;
-}
-
-//////////////////////////////////////////////////
-void LinearRegularWaveSimulation::Impl::SetWindVelocity(
-    double /*_ux*/, double /*_uy*/)
-{
-  // @TODO NO IMPLEMENTATION
 }
 
 //////////////////////////////////////////////////
@@ -584,9 +575,15 @@ void LinearRegularWaveSimulation::SetPeriod(double value)
 }
 
 //////////////////////////////////////////////////
-void LinearRegularWaveSimulation::SetWindVelocity(double ux, double uy)
+void LinearRegularWaveSimulation::SetWindVelocity(double /*ux*/, double /*uy*/)
 {
-  impl_->SetWindVelocity(ux, uy);
+  /// \todo(srmainwaring) IMPLEMENT
+}
+
+//////////////////////////////////////////////////
+void LinearRegularWaveSimulation::SetSteepness(double value)
+{
+  /// \todo(srmainwaring) IMPLEMENT
 }
 
 //////////////////////////////////////////////////
