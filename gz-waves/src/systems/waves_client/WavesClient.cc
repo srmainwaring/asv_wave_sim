@@ -65,7 +65,7 @@ public:
   Entity wavefield_entity_{kNullEntity};
 
   /// \brief The wavefield.
-  waves::WavefieldWeakPtr wavefield_;
+  waves::WavefieldConstWeakPtr wavefield_;
 };
 
 //////////////////////////////////////////////////
