@@ -48,6 +48,14 @@ target_include_directories(PLOT_LinearRegularWaves
   PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
 )
 
+add_executable(PLOT_TriangulatedGrid PLOT_TriangulatedGrid.cc)
+target_link_libraries(PLOT_TriangulatedGrid
+  ${PROJECT_LIBRARY_TARGET_NAME}
+  Boost::iostreams
+)
+target_include_directories(PLOT_TriangulatedGrid
+  PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
+)
 
 add_executable(PLOT_WaveSpectrum PLOT_WaveSpectrum.cc)
 target_link_libraries(PLOT_WaveSpectrum
@@ -68,6 +76,7 @@ install(
     PLOT_LinearRandomFFTWaves
     PLOT_LinearRandomWaves
     PLOT_LinearRegularWaves
+    PLOT_TriangulatedGrid
     PLOT_WaveSpectrum
   RUNTIME DESTINATION bin
 )

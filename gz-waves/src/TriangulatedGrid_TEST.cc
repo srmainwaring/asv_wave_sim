@@ -39,10 +39,10 @@ using gz::waves::TriangulatedGrid;
 //////////////////////////////////////////////////
 TEST(TriangulatedGrid, Create) {
   // Create
+  double lx = 100.0;
+  double ly = 100.0;
   Index nx = 16;
   Index ny = 16;
-  Index lx = 100.0;
-  Index ly = 100.0;
   auto grid = TriangulatedGrid::Create(nx, ny, lx, ly);
   std::unique_ptr<TriangulatedGrid> tri_grid = std::move(grid);
   // tri_grid->DebugPrintMesh();
@@ -62,10 +62,10 @@ TEST(TriangulatedGrid, Create) {
 //////////////////////////////////////////////////
 TEST(TriangulatedGrid, Height) {
   // Create
+  double lx = 100.0;
+  double ly = 100.0;
   Index nx = 16;
   Index ny = 16;
-  Index lx = 100.0;
-  Index ly = 100.0;
   Index nx_plus1 = nx + 1;
   Index ny_plus1 = ny + 1;
   auto grid = TriangulatedGrid::Create(nx, ny, lx, ly);
@@ -98,10 +98,10 @@ TEST(TriangulatedGrid, Height) {
 //////////////////////////////////////////////////
 TEST(TriangulatedGrid, Interpolate) {
   // Create
+  double lx = 100.0;
+  double ly = 100.0;
   Index nx = 16;
   Index ny = 16;
-  Index lx = 100.0;
-  Index ly = 100.0;
   Index nx_plus1 = nx + 1;
   Index ny_plus1 = ny + 1;
   auto grid1 = TriangulatedGrid::Create(nx, ny, lx, ly);
