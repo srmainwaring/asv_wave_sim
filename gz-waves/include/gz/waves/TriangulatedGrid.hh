@@ -18,6 +18,7 @@
 #ifndef GZ_WAVES_TRIANGULATEDGRID_HH_
 #define GZ_WAVES_TRIANGULATEDGRID_HH_
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -63,6 +64,9 @@ class TriangulatedGrid
   void UpdatePoints(const std::vector<cgal::Point3>& from);
   void UpdatePoints(const std::vector<math::Vector3d>& from);
   void UpdatePoints(const cgal::Mesh& from);
+
+  std::array<double, 2> TileSize() const;
+  std::array<Index, 2> CellCount() const;
 
  private:
   class Private;

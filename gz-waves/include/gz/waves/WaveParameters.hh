@@ -18,9 +18,9 @@
 #ifndef GZ_WAVES_WAVEPARAMETERS_HH_
 #define GZ_WAVES_WAVEPARAMETERS_HH_
 
+#include <array>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include <gz/math/Vector2.hh>
@@ -67,10 +67,10 @@ class WaveParameters
   std::string Algorithm() const;
 
   /// \brief The size of the wave tile (m).
-  std::tuple<double, double> TileSize() const;
+  std::array<double, 2> TileSize() const;
 
   /// \brief The number of cells in the wave tile in each direction.
-  std::tuple<Index, Index> CellCount() const;
+  std::array<Index, 2> CellCount() const;
 
   /// \brief The number of wave components.
   Index Number() const;
