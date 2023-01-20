@@ -53,7 +53,7 @@ TEST(TriangulatedGridTest, UpdatePoints)
   std::cerr << "IsValid: " << tri_grid->IsValid() << "\n";
 
   // get the grid points
-  const auto& points = tri_grid->Points(); 
+  const auto& points = tri_grid->Points();
 
   // points to interpolate
   std::vector<cgal::Point3> queries;
