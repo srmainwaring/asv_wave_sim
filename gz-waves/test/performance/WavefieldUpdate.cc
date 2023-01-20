@@ -37,7 +37,6 @@ using gz::waves::WaveParameters;
 class WavefieldUpdateTest: public ::testing::Test
 {
  public:
-
   void SetUp() override
   {
     // wave parameters
