@@ -17,6 +17,7 @@
 
 #include <Eigen/Dense>
 
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -1013,16 +1014,16 @@ void OceanTileT<gz::math::Vector3d>::SetWindVelocity(double ux, double uy)
 
 //////////////////////////////////////////////////
 template <>
-std::tuple<double, double> OceanTileT<gz::math::Vector3d>::TileSize() const
+std::array<double, 2> OceanTileT<gz::math::Vector3d>::TileSize() const
 {
-  return std::make_tuple(impl_->lx_, impl_->ly_);
+  return {impl_->lx_, impl_->ly_};
 }
 
 //////////////////////////////////////////////////
 template <>
-std::tuple<Index, Index> OceanTileT<gz::math::Vector3d>::CellCount() const
+std::array<Index, 2> OceanTileT<gz::math::Vector3d>::CellCount() const
 {
-  return std::make_tuple(impl_->nx_, impl_->ny_);
+  return {impl_->nx_, impl_->ny_};
 }
 
 //////////////////////////////////////////////////
@@ -1135,16 +1136,16 @@ void OceanTileT<cgal::Point3>::SetWindVelocity(double ux, double uy)
 
 //////////////////////////////////////////////////
 template <>
-std::tuple<double, double> OceanTileT<cgal::Point3>::TileSize() const
+std::array<double, 2> OceanTileT<cgal::Point3>::TileSize() const
 {
-  return std::make_tuple(impl_->lx_, impl_->ly_);
+  return {impl_->lx_, impl_->ly_};
 }
 
 //////////////////////////////////////////////////
 template <>
-std::tuple<Index, Index> OceanTileT<cgal::Point3>::CellCount() const
+std::array<Index, 2> OceanTileT<cgal::Point3>::CellCount() const
 {
-  return std::make_tuple(impl_->nx_, impl_->ny_);
+  return {impl_->nx_, impl_->ny_};
 }
 
 //////////////////////////////////////////////////

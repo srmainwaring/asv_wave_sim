@@ -15,10 +15,10 @@
 
 #include "gz/waves/WaveParameters.hh"
 
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <string>
-#include <tuple>
 
 #include <gz/common.hh>
 #include <gz/msgs.hh>
@@ -58,10 +58,10 @@ class WaveParametersPrivate
   std::string algorithm_{"fft"};
 
   /// \brief The size of the wave tile.
-  std::tuple<double, double> tile_size_{256.0, 256.0};
+  std::array<double, 2> tile_size_{256.0, 256.0};
 
   /// \brief The size of the wave tile.
-  std::tuple<Index, Index> cell_count_{128, 128};
+  std::array<Index, 2> cell_count_{128, 128};
 
   /// \brief The number of component waves.
   Index number_{1};
@@ -292,7 +292,7 @@ void WaveParameters::SetFromSDF(sdf::Element& sdf)
       sdf::Errors errors;
       if (param->Get(value, errors))
       {
-        impl_->tile_size_ = std::make_tuple(value[0], value[1]);
+        impl_->tile_size_ = {value[0], value[1]};
         found = true;
       }
     }
@@ -302,7 +302,7 @@ void WaveParameters::SetFromSDF(sdf::Element& sdf)
       sdf::Errors errors;
       if (param->Get(value, errors))
       {
-        impl_->tile_size_ = std::make_tuple(value, value);
+        impl_->tile_size_ = {value, value};
         found = true;
       }
     }
@@ -323,7 +323,7 @@ void WaveParameters::SetFromSDF(sdf::Element& sdf)
       sdf::Errors errors;
       if (param->Get(value, errors))
       {
-        impl_->cell_count_ = std::make_tuple(value[0], value[1]);
+        impl_->cell_count_ = {value[0], value[1]};
         found = true;
       }
     }
@@ -334,7 +334,7 @@ void WaveParameters::SetFromSDF(sdf::Element& sdf)
       if (param->Get(value, errors))
       {
         Index index = value;
-        impl_->cell_count_ = std::make_tuple(index, index);
+        impl_->cell_count_ = {index, index};
         found = true;
       }
     }
@@ -393,13 +393,13 @@ std::string WaveParameters::Algorithm() const
 }
 
 //////////////////////////////////////////////////
-std::tuple<double, double> WaveParameters::TileSize() const
+std::array<double, 2> WaveParameters::TileSize() const
 {
   return impl_->tile_size_;
 }
 
 //////////////////////////////////////////////////
-std::tuple<Index, Index> WaveParameters::CellCount() const
+std::array<Index, 2> WaveParameters::CellCount() const
 {
   return impl_->cell_count_;
 }
@@ -504,27 +504,27 @@ void WaveParameters::SetAlgorithm(const std::string& value)
 //////////////////////////////////////////////////
 void WaveParameters::SetTileSize(double value)
 {
-  impl_->tile_size_ = std::make_tuple(value, value);
+  impl_->tile_size_ = {value, value};
   impl_->Recalculate();
 }
 
 void WaveParameters::SetTileSize(double lx, double ly)
 {
-  impl_->tile_size_ = std::make_tuple(lx, ly);
+  impl_->tile_size_ = {lx, ly};
   impl_->Recalculate();
 }
 
 //////////////////////////////////////////////////
 void WaveParameters::SetCellCount(Index value)
 {
-  impl_->cell_count_ = std::make_tuple(value, value);
+  impl_->cell_count_ = {value, value};
   impl_->Recalculate();
 }
 
 //////////////////////////////////////////////////
 void WaveParameters::SetCellCount(Index nx, Index ny)
 {
-  impl_->cell_count_ = std::make_tuple(nx, ny);
+  impl_->cell_count_ = {nx, ny};
   impl_->Recalculate();
 }
 

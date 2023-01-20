@@ -568,7 +568,8 @@ void TriangulatedGrid::Private::UpdatePoints(const cgal::Mesh& from) {
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
-TriangulatedGrid::~TriangulatedGrid() {
+TriangulatedGrid::~TriangulatedGrid()
+{
 }
 
 //////////////////////////////////////////////////
@@ -578,18 +579,21 @@ TriangulatedGrid::TriangulatedGrid(Index nx, Index ny, double lx, double ly) :
 }
 
 //////////////////////////////////////////////////
-void TriangulatedGrid::CreateMesh() {
+void TriangulatedGrid::CreateMesh()
+{
   impl_->CreateMesh();
 }
 
 //////////////////////////////////////////////////
-void TriangulatedGrid::CreateTriangulation() {
+void TriangulatedGrid::CreateTriangulation()
+{
   impl_->CreateTriangulation();
 }
 
 //////////////////////////////////////////////////
 std::unique_ptr<TriangulatedGrid> TriangulatedGrid::Create(
-    Index nx, Index ny, double lx, double ly) {
+    Index nx, Index ny, double lx, double ly)
+{
   std::unique_ptr<TriangulatedGrid> instance =
       std::make_unique<TriangulatedGrid>(nx, ny, lx, ly);
   instance->CreateMesh();
@@ -599,76 +603,102 @@ std::unique_ptr<TriangulatedGrid> TriangulatedGrid::Create(
 
 //////////////////////////////////////////////////
 bool TriangulatedGrid::Locate(const cgal::Point3& query,
-    int64_t& faceIndex) const {
+    int64_t& faceIndex) const
+{
   return impl_->Locate(query, faceIndex);
 }
 
 //////////////////////////////////////////////////
 bool TriangulatedGrid::Height(const cgal::Point3& query,
-    double& height) const {
+    double& height) const
+{
   return impl_->Height(query, height);
 }
 
 //////////////////////////////////////////////////
 bool TriangulatedGrid::Height(const std::vector<cgal::Point3>& queries,
-    std::vector<double>& heights) const {
+    std::vector<double>& heights) const
+{
   return impl_->Height(queries, heights);
 }
 
 //////////////////////////////////////////////////
-bool TriangulatedGrid::Interpolate(TriangulatedGrid& patch) const {
+bool TriangulatedGrid::Interpolate(TriangulatedGrid& patch) const
+{
   return impl_->Interpolate(patch);
 }
 
 //////////////////////////////////////////////////
-const Point3Range& TriangulatedGrid::Points() const {
+const Point3Range& TriangulatedGrid::Points() const
+{
   return impl_->Points();
 }
 
 //////////////////////////////////////////////////
-const Index3Range& TriangulatedGrid::Indices() const {
+const Index3Range& TriangulatedGrid::Indices() const
+{
   return impl_->Indices();
 }
 
 //////////////////////////////////////////////////
-const cgal::Point3& TriangulatedGrid::Origin() const {
+const cgal::Point3& TriangulatedGrid::Origin() const
+{
   return impl_->Origin();
 }
 
 //////////////////////////////////////////////////
-void TriangulatedGrid::ApplyPose(const gz::math::Pose3d& pose) {
+void TriangulatedGrid::ApplyPose(const gz::math::Pose3d& pose)
+{
   impl_->ApplyPose(pose);
 }
 
 //////////////////////////////////////////////////
-bool TriangulatedGrid::IsValid(bool verbose) const {
+bool TriangulatedGrid::IsValid(bool verbose) const
+{
   return impl_->IsValid(verbose);
 }
 
 //////////////////////////////////////////////////
-void TriangulatedGrid::DebugPrintMesh() const {
+void TriangulatedGrid::DebugPrintMesh() const
+{
   impl_->DebugPrintMesh();
 }
 
 //////////////////////////////////////////////////
-void TriangulatedGrid::DebugPrintTriangulation() const {
+void TriangulatedGrid::DebugPrintTriangulation() const
+{
   impl_->DebugPrintTriangulation();
 }
 
 //////////////////////////////////////////////////
-void TriangulatedGrid::UpdatePoints(const std::vector<cgal::Point3>& from) {
+void TriangulatedGrid::UpdatePoints(const std::vector<cgal::Point3>& from)
+{
   impl_->UpdatePoints(from);
 }
 
 //////////////////////////////////////////////////
 void TriangulatedGrid::UpdatePoints(
-    const std::vector<gz::math::Vector3d>& from) {
+    const std::vector<gz::math::Vector3d>& from)
+{
   impl_->UpdatePoints(from);
 }
 
 //////////////////////////////////////////////////
-void TriangulatedGrid::UpdatePoints(const cgal::Mesh& from) {
+void TriangulatedGrid::UpdatePoints(const cgal::Mesh& from)
+{
   impl_->UpdatePoints(from);
+}
+
+//////////////////////////////////////////////////
+std::array<double, 2> TriangulatedGrid::TileSize() const
+{
+  return {impl_->lx_, impl_->ly_};
+}
+
+//////////////////////////////////////////////////
+std::array<Index, 2> TriangulatedGrid::CellCount() const
+{
+  return {impl_->nx_, impl_->ny_};
 }
 
 }  // namespace waves
