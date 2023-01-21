@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <!-- RM3 WEC
+    https://wec-sim.github.io/WEC-Sim/dev/user/tutorials.html
+
+    body    mass (x1000 kg)
+    - - - - - - - - - - - -
+    float   727.01
+    plate   878.30
+
+    body    dir   CoM (m)  inertia tensor (kg m^2)
+    - - - - - - - - - - - - - - - - - - - - - - - - - -
+    float   x      0      20907301         0         0
+            y      0             0  21306091         0
+            z     -0.72          0         0  37085481
+    plate   x      0      94419615         0         0
+            y      0             0  94407091         0
+            z    -21.29          0         0  28542225
+
+    plate
+                      dim (m)
+    cylinder radius    3.0
+    cylinder length   38.0
+    base radius       15.0
+    base length        0.1
+
+    float radius      10.0
+    float length       5.0
+
+    model origin at SWL.
+  -->
+  <model name="rm3_wec">
+    <link name="base_link">
+      <pose>0 0 -7 0 0 0</pose>
+      <inertial>
+        <pose>0 0 -14.29 0 0 0</pose>
+        <mass>878300</mass>
+        <inertia>
+          <ixx>94419615</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>94419615</iyy>
+          <iyz>0.0</iyz>
+          <izz>28542225</izz>
+        </inertia>
+      </inertial>
+      <collision name="base_collision">
+        <pose>0 0 -18.95 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>15.0</radius>
+            <length>0.1</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="plate_collision">
+        <geometry>
+          <cylinder>
+            <radius>3.0</radius>
+            <length>38</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <!-- <visual name="base_visual">
+        <pose>0 0 -18.95 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>15.0</radius>
+            <length>0.1</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1.0</ambient>
+          <diffuse>0.1 0.1 0.1 1.0</diffuse>
+          <specular>0.01 0.01 0.01 1.0</specular>
+        </material>
+      </visual>
+      <visual name="plate_visual">
+        <geometry>
+          <cylinder>
+            <radius>3.0</radius>
+            <length>38</length>
+            </cylinder>
+          </geometry>
+          <material>
+          <ambient>0.1 0.1 0.1 1.0</ambient>
+          <diffuse>0.1 0.1 0.1 1.0</diffuse>
+          <specular>0.01 0.01 0.01 1.0</specular>
+        </material>
+      </visual> -->
+      <visual name="mesh_visual">
+        <pose>0 0 -10.2 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://rm3_wec/meshes/plate.stl</uri>
+            </mesh>
+          </geometry>
+          <material>
+          <ambient>0.1 0.1 0.1 1.0</ambient>
+          <diffuse>0.1 0.1 0.1 1.0</diffuse>
+          <specular>0.01 0.01 0.01 1.0</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="base_joint" type="revolute">
+      <child>base_link</child>
+      <parent>world</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+        </limit>
+        <dynamics>
+          <damping>1.0</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="float_link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>727010</mass>
+        <inertia>
+          <ixx>20907301</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>21306091</iyy>
+          <iyz>0.0</iyz>
+          <izz>37085481</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>10.0</radius>
+            <length>5</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <!-- <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>10.0</radius>
+            <length>5</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>1 1 0.1 1.0</ambient>
+          <diffuse>1 1 0.1 1.0</diffuse>
+          <specular>0.01 0.01 0.01 1.0</specular>
+        </material>
+      </visual> -->
+      <visual name="visual">
+        <pose>0 0 -0.225 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://rm3_wec/meshes/float.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1 1 0.1 1.0</ambient>
+          <diffuse>1 1 0.1 1.0</diffuse>
+          <specular>0.01 0.01 0.01 1.0</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="float_joint" type="prismatic">
+      <child>float_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-10</lower>
+          <upper>10</upper>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <!-- plugins -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+    <plugin filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <odom_topic>model/rm3_wec/odometry</odom_topic>
+      <dimensions>3</dimensions>
+    </plugin>
+    <plugin filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <static_publisher>true</static_publisher>
+      <static_update_frequency>1</static_update_frequency>
+    </plugin>
+    <plugin filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+      <enable>rm3_wec::float_link</enable>
+      <hydrodynamics>
+        <damping_on>1</damping_on>
+        <viscous_drag_on>1</viscous_drag_on>
+        <pressure_drag_on>1</pressure_drag_on>
+      </hydrodynamics>
+    </plugin>
+  </model>
+</sdf>
