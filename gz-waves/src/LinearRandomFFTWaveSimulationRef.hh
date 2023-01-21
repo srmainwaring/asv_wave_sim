@@ -20,8 +20,6 @@
 
 #include "gz/waves/WaveSimulation.hh"
 
-using Eigen::ArrayXXd;
-
 namespace gz
 {
 namespace waves

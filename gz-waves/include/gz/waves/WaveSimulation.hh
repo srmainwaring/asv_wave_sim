@@ -18,9 +18,9 @@
 
 #include <Eigen/Dense>
 
-#include "gz/waves/Types.hh"
+#include <memory>
 
-using Eigen::ArrayXXd;
+#include "gz/waves/Types.hh"
 
 namespace gz
 {

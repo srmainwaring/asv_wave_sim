@@ -15,6 +15,8 @@
 
 #include "gz/waves/TrochoidIrregularWaveSimulation.hh"
 
+#include <Eigen/Dense>
+
 #include <vector>
 
 #include "gz/waves/Types.hh"
