@@ -26,6 +26,7 @@ setup(
     entry_points={
         "console_scripts": [
             "body_response_publisher = gz_waves_bridge.body_response_publisher:main",
+            "wave_height_publisher = gz_waves_bridge.wave_height_publisher:main",
         ],
     },
 )
