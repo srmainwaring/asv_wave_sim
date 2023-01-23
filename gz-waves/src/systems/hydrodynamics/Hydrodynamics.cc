@@ -15,6 +15,7 @@
 
 #include "Hydrodynamics.hh"
 
+#include <algorithm>
 #include <chrono>
 #include <list>
 #include <mutex>
@@ -30,6 +31,7 @@
 
 #include <gz/transport.hh>
 
+#include <gz/sim/components/AxisAlignedBox.hh>
 #include <gz/sim/components/AngularVelocity.hh>
 #include <gz/sim/components/Collision.hh>
 #include <gz/sim/components/Inertial.hh>
@@ -153,7 +155,49 @@ void AddWorldAngularVelocity(const Entity &_entity,
     _ecm.CreateComponent(_entity, components::WorldAngularVelocity());
   }
 }
+
+//////////////////////////////////////////////////
+void AddAxisAlignedBox(const Entity &_entity,
+    EntityComponentManager &_ecm)
+{
+  if (!_ecm.Component<components::AxisAlignedBox>(_entity))
+  {
+    _ecm.CreateComponent(_entity, components::AxisAlignedBox());
+  }
+}
 #endif
+
+//////////////////////////////////////////////////
+math::AxisAlignedBox CreateAxisAlignedBox(cgal::MeshPtr _mesh)
+{
+  if (std::begin(_mesh->vertices()) == std::end(_mesh->vertices()))
+    return math::AxisAlignedBox();
+
+  auto v0 = std::begin(_mesh->vertices());
+  auto& p0 = _mesh->point(*v0);
+
+  double min_x = p0.x();
+  double min_y = p0.y();
+  double min_z = p0.z();
+  double max_x = min_x;
+  double max_y = min_y;
+  double max_z = min_z;
+
+  for (auto& vertex : _mesh->vertices())
+  {
+    auto& point = _mesh->point(vertex);
+    min_x = std::min(point.x(), min_x);
+    min_y = std::min(point.y(), min_y);
+    min_z = std::min(point.z(), min_z);
+    max_x = std::max(point.x(), max_x);
+    max_y = std::max(point.y(), max_y);
+    max_z = std::max(point.z(), max_z);
+  }
+
+  math::Vector3d vec1(min_x, min_y, min_z);
+  math::Vector3d vec2(max_x, max_y, max_z);
+  return math::AxisAlignedBox(vec1, vec2);
+}
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
@@ -265,8 +309,8 @@ class HydrodynamicsPrivate
   /// \brief Copy of the sdf configuration used for this plugin
   public: sdf::ElementPtr sdf;
 
-  /// \brief Initialization flag
-  public: bool initialized{false};
+  /// \brief General initialisation
+  public: bool initialised{false};
 
   /// \brief Set during Load to true if the configuration for the system is
   /// valid and the post-update can run
@@ -390,7 +434,7 @@ void Hydrodynamics::Configure(const Entity &_entity,
   if (!this->dataPtr->model.Valid(_ecm))
   {
     gzerr << "The Hydrodynamics system should be attached to a model entity. "
-           << "Failed to initialize." << "\n";
+           << "Failed to initialise." << "\n";
     return;
   }
   this->dataPtr->sdf = _sdf->Clone();
@@ -457,18 +501,18 @@ void Hydrodynamics::PreUpdate(
         << "s]. System may not work properly." << "\n";
   }
 
-  if (!this->dataPtr->initialized)
+  if (!this->dataPtr->initialised)
   {
     // We call Init here instead of Configure because we can't be guaranteed
     // that all entities have been created when Configure is called
     this->dataPtr->Init(_ecm);
-    this->dataPtr->initialized = true;
+    this->dataPtr->initialised = true;
   }
 
   if (_info.paused)
     return;
 
-  if (this->dataPtr->initialized && this->dataPtr->validConfig)
+  if (this->dataPtr->initialised && this->dataPtr->validConfig)
   {
     this->dataPtr->Update(_info, _ecm);
   }
@@ -528,11 +572,10 @@ bool HydrodynamicsPrivate::InitWavefield(EntityComponentManager &_ecm)
 }
 
 //////////////////////////////////////////////////
+/// \todo add checks for a valid wavefield and lock the weak_ptr
 bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
 {
   gzmsg << "Hydrodynamics: initialise physics\n";
-
-  /// \todo add checks for a valid wavefield and lock the waek_ptr
 
   std::string modelName(this->model.Name(_ecm));
 
@@ -571,8 +614,6 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     gzmsg << "Hydrodynamics: link has ["
         << meshCount << "] collision meshes\n";
 
-    /// \todo check that the link has valid pose components
-
     /// \note bug on initialisation
     /// Issue 1:
     /// The link may contain more than one collision, and at present the
@@ -583,7 +624,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     /// Issue 2:
     /// The hd->link.WorldInertialPose does not appear to be updated when
     /// this function is called, so on the first call (initialisation) the
-    /// value retured is the origin. The utility function worldPose is
+    /// value returned is the origin. The utility function worldPose is
     /// correct, and its usage for the linkPose, linkCoGPose and collisionPose
     /// ensure that they are correct.
     ///
@@ -592,6 +633,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     /// data for the link is updated one time-step behind.
     ///
 
+    /// \todo check that the link has valid pose components
     // The link pose is required for the water patch, the CoM pose for dynamics.
     // gz::math::Pose3d linkPose = hd->link.WorldPose(_ecm).value();
     gz::math::Pose3d linkPose = worldPose(hd->link.Entity(), _ecm);
@@ -605,24 +647,6 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     gz::math::Pose3d linkCoMPose = linkPose * inertial->Data().Pose();
     gzmsg << "Hydrodynamics: link world CoM pose: " << linkCoMPose << "\n";
 
-    // Water patch grid
-    /// \todo fix hardcoded patch size. CollisionBoundingBox
-    ///       is not currently available
-    // auto boundingBox = hd->link->CollisionBoundingBox();
-    // double patchSize = 2.2 * boundingBox.Size().Length();
-    double patchSize = 20.0;
-    gzmsg << "Hydrodynamics: set water patch size: "
-        << patchSize << "\n";
-    std::shared_ptr<waves::Grid> initWaterPatch(
-        new waves::Grid({patchSize, patchSize}, { 4, 4 }));
-
-    // WavefieldSampler - this is updated by the pose of the link (not the CoM).
-    /// \todo add checks that the wavefield weak_ptr is valid
-    hd->wavefieldSampler.reset(new waves::WavefieldSampler(
-        this->wavefield.lock(), initWaterPatch));
-    hd->wavefieldSampler->ApplyPose(linkPose);
-    hd->wavefieldSampler->UpdatePatch();
-
     // RigidBody - the pose of the CoM is required for the dynamics.
     cgal::Vector3 linVelocity = waves::ToVector3(
         hd->link.WorldLinearVelocity(_ecm).value());
@@ -633,6 +657,8 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
     //     hd->link.WorldCoGLinearVelocity(_ecm).value());
     // cgal::Vector3 linVelocityCoM = linVelocity;
 
+    // First pass - store collisions and create bounding box
+    auto bbox = math::AxisAlignedBox();
     for (waves::Index j=0; j < meshCount; ++j)
     {
       // Mesh (SurfaceMesh copy performs a deep copy of all properties)
@@ -650,14 +676,44 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       hd->linkCollisions[j] = linkCollision;
 
       // Update link mesh
-      auto collisionPose = worldPose(linkCollision, _ecm);
+      auto collisionPose = worldPose(hd->linkCollisions[j], _ecm);
       ApplyPose(collisionPose, *hd->initLinkMeshes[j], *hd->linkMeshes[j]);
 
       // DEBUG_INFO
       // gzmsg << "Hydrodynamics: collision pose\n";
       // gzmsg << collisionPose << "\n";
 
-      // Initialise Hydrodynamics
+      // Axis aligned box
+      bbox += CreateAxisAlignedBox(hd->linkMeshes[j]);
+    }
+    gzmsg << "Hydrodynamics: link bounding box:"
+          << " size: " << bbox.Size()
+          << " center: " << bbox.Center() << "\n";
+
+    // Compute the size of the water patch for this link. Scale the patch
+    // so that it's bounding sphere contains the bbox
+    // (i.e. the scale factor >= sqrt(3)).
+    double patchSize = 1.0;
+    patchSize = std::max(bbox.XLength(), patchSize);
+    patchSize = std::max(bbox.YLength(), patchSize);
+    patchSize = std::max(bbox.ZLength(), patchSize);
+    patchSize *= 2.0;
+
+    gzmsg << "Hydrodynamics: set water patch size: " << patchSize << "\n";
+    std::shared_ptr<waves::Grid> initWaterPatch(
+        new waves::Grid({patchSize, patchSize}, {4, 4}));
+
+    // WavefieldSampler - this is updated by the pose of the link (not the CoM).
+    /// \todo add checks that the wavefield weak_ptr is valid
+    hd->wavefieldSampler.reset(new waves::WavefieldSampler(
+        this->wavefield.lock(), initWaterPatch));
+    hd->wavefieldSampler->ApplyPose(linkPose);
+    hd->wavefieldSampler->UpdatePatch();
+
+    // Second pass - create hydrodynamics
+    for (waves::Index j=0; j < meshCount; ++j)
+    {
+      // Initialise hydrodynamics for each collision.
       hd->hydrodynamics[j].reset(
         new waves::Hydrodynamics(
           this->hydroParams,
