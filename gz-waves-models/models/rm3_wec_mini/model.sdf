@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="rm3_wec_mini">
+    <link name="base_link">
+      <pose>0 0 -7 0 0 0</pose>
+      <inertial>
+        <pose>0 0 -14.29 0 0 0</pose>
+        <mass>878300</mass>
+        <inertia>
+          <ixx>94419615</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>94419615</iyy>
+          <iyz>0.0</iyz>
+          <izz>28542225</izz>
+        </inertia>
+      </inertial>
+      <collision name="base_collision">
+        <pose>0 0 -18.95 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>1.50</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="plate_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.30</radius>
+            <length>38</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="mesh_visual">
+        <pose>0 0 -10.2 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://rm3_wec/meshes/plate.stl</uri>
+            <scale>0.1 0.1 1</scale>
+            </mesh>
+          </geometry>
+          <material>
+          <ambient>0.1 0.1 0.1 1.0</ambient>
+          <diffuse>0.1 0.1 0.1 1.0</diffuse>
+          <specular>0.01 0.01 0.01 1.0</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="base_joint" type="revolute">
+      <child>base_link</child>
+      <parent>world</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+        </limit>
+        <dynamics>
+          <damping>1.0</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="float_link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>727.010</mass>
+        <inertia>
+          <ixx>20907.301</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>21306.091</iyy>
+          <iyz>0.0</iyz>
+          <izz>37085.481</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>1.0</radius>
+            <length>0.5</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <pose>0 0 -0.0225 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>models://rm3_wec/meshes/float.stl</uri>
+            <scale>0.1 0.1 0.1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1 1 0.1 1.0</ambient>
+          <diffuse>1 1 0.1 1.0</diffuse>
+          <specular>0.01 0.01 0.01 1.0</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="float_joint" type="prismatic">
+      <child>float_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-10</lower>
+          <upper>10</upper>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <!-- plugins -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+    <plugin filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <odom_topic>model/rm3_wec_mini/odometry</odom_topic>
+      <dimensions>3</dimensions>
+    </plugin>
+    <plugin filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <static_publisher>true</static_publisher>
+      <static_update_frequency>1</static_update_frequency>
+    </plugin>
+    <plugin filename="gz-waves1-hydrodynamics-system"
+        name="gz::sim::systems::Hydrodynamics">
+      <enable>rm3_wec_mini::float_link</enable>
+      <hydrodynamics>
+        <damping_on>1</damping_on>
+        <viscous_drag_on>1</viscous_drag_on>
+        <pressure_drag_on>1</pressure_drag_on>
+      </hydrodynamics>
+    </plugin>
+  </model>
+</sdf>
