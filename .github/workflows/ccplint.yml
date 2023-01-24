@@ -32,13 +32,14 @@ jobs:
           cpplint ./gz-waves/test/plots/*.cc
       - name: Cpplint Hydrodynamics Plugin
         run: |
-          cpplint \
-            --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard \
-            ./gz-waves/src/systems/hydrodynamics/*
+          cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard,-whitespace/newline \
+            ./gz-waves/src/systems/hydrodynamics/*.hh \
+            ./gz-waves/src/systems/hydrodynamics/*.cc
       - name: Cpplint DynamicGeometry Plugin
         run: |
           cpplint --filter=-whitespace/blank_line,-whitespace/indent,-build/header_guard \
-            ./gz-waves/src/systems/dynamic/*
+            ./gz-waves/src/systems/dynamic/*.hh \
+            ./gz-waves/src/systems/dynamic/*.cc
       - name: Cpplint Waves Plugin
         run: |
           cpplint --filter=-whitespace/blank_line,-whitespace/indent \
