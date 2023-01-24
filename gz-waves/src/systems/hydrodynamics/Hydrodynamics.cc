@@ -741,15 +741,14 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
     EntityComponentManager &_ecm)
 {
   ////////// BEGIN TESTING
-
+  #if 0
   // Get the wave height at the origin
-  // double simTime = std::chrono::duration<double>(_info.simTime).count();
-  cgal::Point3 point(0.0, 0.0, 0.0);
+  double simTime = std::chrono::duration<double>(_info.simTime).count();
+  Eigen::Vector3d point(0.0, 0.0, 0.0);
   double waveHeight{0.0};
   this->wavefield.lock()->Height(point, waveHeight);
-
-  // gzmsg << "[" << simTime << "] : " << waveHeight << "\n";
-
+  gzmsg << "[" << simTime << "] : " << waveHeight << "\n";
+  #endif
   ////////// END TESTING
 
   /// \todo add checks for a valid wavefield and lock the waek_ptr

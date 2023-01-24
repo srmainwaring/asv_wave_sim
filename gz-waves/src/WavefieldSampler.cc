@@ -119,7 +119,8 @@ void WavefieldSampler::UpdatePatch()
     const auto& vertex = *vb;
     const auto& p0 = target->point(vertex);
     double height = 0.0;
-    impl_->wavefield_->Height(p0, height);
+    impl_->wavefield_->Height(
+        Eigen::Vector3d(p0.x(), p0.y(), p0.z()), height);
     cgal::Point3 p1(p0.x(), p0.y(), height);
     target->point(vertex) = p1;
     // gzmsg << target->point(vertex) << std::endl;
