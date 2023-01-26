@@ -344,13 +344,14 @@ class HydrodynamicsPrivate
   public: void InitUnderwaterSurfaceMarkers(EntityComponentManager &_ecm);
 
   public: void UpdateMarkers(const UpdateInfo &_info,
-                        EntityComponentManager &_ecm);
-  public: void UpdateWaterPatchMarkers(const UpdateInfo &_info,
-                        EntityComponentManager &_ecm);
-  public: void UpdateWaterlineMarkers(const UpdateInfo &_info,
-                        EntityComponentManager &_ecm);
-  public: void UpdateUnderwaterSurfaceMarkers(const UpdateInfo &_info,
-                        EntityComponentManager &_ecm);
+                             EntityComponentManager &_ecm);
+  public: void UpdateWaterPatchMarkers();
+  public: void UpdateWaterlineMarkers();
+  public: void UpdateUnderwaterSurfaceMarkers();
+
+  public: void DeleteWaterPatchMarkers();
+  public: void DeleteWaterlineMarkers();
+  public: void DeleteUnderwaterSurfaceMarkers();
 
   /// \brief Callback for topic "/world/<world>/waves/markers".
   ///
@@ -372,11 +373,20 @@ class HydrodynamicsPrivate
   /// \brief Show the water patch markers.
   public: bool showWaterPatch {false};
 
+  /// \brief Mark water patch markers for deletion.
+  public: bool shouldDeleteWaterPatch {false};
+
   /// \brief Show the waterline markers.
   public: bool showWaterline {false};
 
+  /// \brief Mark waterline markers for deletion.
+  public: bool shouldDeleteWaterline {false};
+
   /// \brief Show the underwater surface.
   public: bool showUnderwaterSurface {false};
+
+  /// \brief Mark underwater surface for deletion.
+  public: bool shouldDeleteUnderwaterSurface {false};
 
   /// \brief The update rate for visual markers (Hz).
   public: double updateRate {30.0};
@@ -522,6 +532,14 @@ void Hydrodynamics::PreUpdate(
 ///////////////////////////////////////////////////
 HydrodynamicsPrivate::~HydrodynamicsPrivate()
 {
+  if (this->initializedWaterPatch)
+    this->DeleteWaterPatchMarkers();
+
+  if (this->initializedWaterline)
+    this->DeleteWaterlineMarkers();
+
+  if (this->initializedUnderwaterSurface)
+    this->DeleteUnderwaterSurfaceMarkers();
 };
 
 //////////////////////////////////////////////////
@@ -1132,12 +1150,8 @@ bool HydrodynamicsPrivate::InitMarkers(
 void HydrodynamicsPrivate::InitWaterPatchMarkers(
     EntityComponentManager &_ecm)
 {
-  // marker lifetime
-  double updatePeriodNsec = static_cast<uint32_t>(
-    1.0E9/this->updateRate);
-
   std::string modelName(this->model.Name(_ecm));
-  waves::Index markerId = 0;
+  waves::Index markerId = 1;
   for (auto&& hd : this->hydroData)
   {
     hd->waterPatchMsg.set_ns(modelName + "/water_patch");
@@ -1145,10 +1159,6 @@ void HydrodynamicsPrivate::InitWaterPatchMarkers(
     hd->waterPatchMsg.set_action(gz::msgs::Marker::ADD_MODIFY);
     hd->waterPatchMsg.set_type(gz::msgs::Marker::TRIANGLE_LIST);
     hd->waterPatchMsg.set_visibility(gz::msgs::Marker::GUI);
-
-    // set lifetime
-    hd->waterPatchMsg.mutable_lifetime()->set_sec(0);
-    hd->waterPatchMsg.mutable_lifetime()->set_nsec(updatePeriodNsec);
 
     // Set material properties
     gz::msgs::Set(
@@ -1165,12 +1175,8 @@ void HydrodynamicsPrivate::InitWaterPatchMarkers(
 void HydrodynamicsPrivate::InitWaterlineMarkers(
     EntityComponentManager &_ecm)
 {
-  // marker lifetime
-  double updatePeriodNsec = static_cast<uint32_t>(
-    1.0E9/this->updateRate);
-
   std::string modelName(this->model.Name(_ecm));
-  waves::Index markerId = 0;
+  waves::Index markerId = 1;
   for (auto&& hd : this->hydroData)
   {
     for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
@@ -1180,10 +1186,6 @@ void HydrodynamicsPrivate::InitWaterlineMarkers(
       hd->waterlineMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
       hd->waterlineMsgs[j].set_type(gz::msgs::Marker::LINE_LIST);
       hd->waterlineMsgs[j].set_visibility(gz::msgs::Marker::GUI);
-
-      // set lifetime
-      hd->waterlineMsgs[j].mutable_lifetime()->set_sec(0);
-      hd->waterlineMsgs[j].mutable_lifetime()->set_nsec(updatePeriodNsec);
 
       // Set material properties
       gz::msgs::Set(
@@ -1201,12 +1203,8 @@ void HydrodynamicsPrivate::InitWaterlineMarkers(
 void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
     EntityComponentManager &_ecm)
 {
-  // marker lifetime
-  double updatePeriodNsec = static_cast<uint32_t>(
-    1.0E9/this->updateRate);
-
   std::string modelName(this->model.Name(_ecm));
-  waves::Index markerId = 0;
+  waves::Index markerId = 1;
   for (auto&& hd : this->hydroData)
   {
     for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
@@ -1217,18 +1215,13 @@ void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
       hd->underwaterSurfaceMsgs[j].set_type(gz::msgs::Marker::TRIANGLE_LIST);
       hd->underwaterSurfaceMsgs[j].set_visibility(gz::msgs::Marker::GUI);
 
-      // set lifetime
-      hd->underwaterSurfaceMsgs[j].mutable_lifetime()->set_sec(0);
-      hd->underwaterSurfaceMsgs[j].mutable_lifetime()->
-          set_nsec(updatePeriodNsec);
-
       // Set material properties
       gz::msgs::Set(
         hd->underwaterSurfaceMsgs[j].mutable_material()->mutable_ambient(),
-        gz::math::Color(0, 0, 1, 0.7));
+        gz::math::Color(0, 1, 0, 0.7));
       gz::msgs::Set(
         hd->underwaterSurfaceMsgs[j].mutable_material()->mutable_diffuse(),
-        gz::math::Color(0, 0, 1, 0.7));
+        gz::math::Color(0, 1, 0, 0.7));
     }
   }
   this->initializedUnderwaterSurface = true;
@@ -1239,8 +1232,6 @@ void HydrodynamicsPrivate::UpdateMarkers(
     const UpdateInfo &_info,
     EntityComponentManager &_ecm)
 {
-  std::string topicName("/marker");
-
   // Throttle update [30 FPS by default]
   double updatePeriod = 1.0/this->updateRate;
   double currentTime = std::chrono::duration<double>(_info.simTime).count();
@@ -1255,7 +1246,15 @@ void HydrodynamicsPrivate::UpdateMarkers(
     if (!this->initializedWaterPatch)
       this->InitWaterPatchMarkers(_ecm);
 
-    this->UpdateWaterPatchMarkers(_info, _ecm);
+    this->UpdateWaterPatchMarkers();
+  }
+  else
+  {
+    if (this->shouldDeleteWaterPatch)
+    {
+      this->DeleteWaterPatchMarkers();
+      this->shouldDeleteWaterPatch = false;
+    }
   }
 
   if (this->showWaterline)
@@ -1263,7 +1262,15 @@ void HydrodynamicsPrivate::UpdateMarkers(
     if (!this->initializedWaterline)
       this->InitWaterlineMarkers(_ecm);
 
-    this->UpdateWaterlineMarkers(_info, _ecm);
+    this->UpdateWaterlineMarkers();
+  }
+  else
+  {
+    if (this->shouldDeleteWaterline)
+    {
+      this->DeleteWaterlineMarkers();
+      this->shouldDeleteWaterline = false;
+    }
   }
 
   if (this->showUnderwaterSurface)
@@ -1271,23 +1278,28 @@ void HydrodynamicsPrivate::UpdateMarkers(
     if (!this->initializedUnderwaterSurface)
       this->InitUnderwaterSurfaceMarkers(_ecm);
 
-    this->UpdateUnderwaterSurfaceMarkers(_info, _ecm);
+    this->UpdateUnderwaterSurfaceMarkers();
+  }
+  else
+  {
+    if (this->shouldDeleteUnderwaterSurface)
+    {
+      this->DeleteUnderwaterSurfaceMarkers();
+      this->shouldDeleteUnderwaterSurface = false;
+    }
   }
 }
 
 //////////////////////////////////////////////////
-void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
-    const UpdateInfo &/*_info*/,
-    EntityComponentManager &/*_ecm*/)
+void HydrodynamicsPrivate::UpdateWaterPatchMarkers()
 {
-  std::string topicName("/marker");
-
   for (auto&& hd : this->hydroData)
   {
     auto& grid = *hd->wavefieldSampler->GetWaterPatch();
 
     // clear and update
     hd->waterPatchMsg.mutable_point()->Clear();
+    hd->waterPatchMsg.set_action(gz::msgs::Marker::ADD_MODIFY);
     for (waves::Index ix=0; ix < grid.GetCellCount()[0]; ++ix)
     {
       for (waves::Index iy=0; iy < grid.GetCellCount()[1]; ++iy)
@@ -1301,22 +1313,19 @@ void HydrodynamicsPrivate::UpdateWaterPatchMarkers(
         }
       }
     }
-    this->node.Request(topicName, hd->waterPatchMsg);
+    this->node.Request("/marker", hd->waterPatchMsg);
   }
 }
 
 //////////////////////////////////////////////////
-void HydrodynamicsPrivate::UpdateWaterlineMarkers(
-    const UpdateInfo &/*_info*/,
-    EntityComponentManager &/*_ecm*/)
+void HydrodynamicsPrivate::UpdateWaterlineMarkers()
 {
-  std::string topicName("/marker");
-
   for (auto&& hd : this->hydroData)
   {
     for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
     {
       hd->waterlineMsgs[j].mutable_point()->Clear();
+      hd->waterlineMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
       if (hd->hydrodynamics[j]->GetWaterline().empty())
       {
         /// \todo workaround. The previous marker is not cleared
@@ -1333,23 +1342,20 @@ void HydrodynamicsPrivate::UpdateWaterlineMarkers(
         gz::msgs::Set(hd->waterlineMsgs[j]
             .add_point(), waves::ToGz(line.point(1)));
       }
-      this->node.Request(topicName, hd->waterlineMsgs[j]);
+      this->node.Request("/marker", hd->waterlineMsgs[j]);
     }
   }
 }
 
 //////////////////////////////////////////////////
-void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
-    const UpdateInfo &/*_info*/,
-    EntityComponentManager &/*_ecm*/)
+void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers()
 {
-  std::string topicName("/marker");
-
   for (auto&& hd : this->hydroData)
   {
     for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
     {
       hd->underwaterSurfaceMsgs[j].mutable_point()->Clear();
+      hd->underwaterSurfaceMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
       if (hd->hydrodynamics[j]->GetSubmergedTriangles().empty())
       {
         gz::msgs::Set(hd->underwaterSurfaceMsgs[j]
@@ -1368,7 +1374,46 @@ void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers(
         gz::msgs::Set(hd->underwaterSurfaceMsgs[j]
             .add_point(), waves::ToGz(tri[2]));
       }
-      this->node.Request(topicName, hd->underwaterSurfaceMsgs[j]);
+      this->node.Request("/marker", hd->underwaterSurfaceMsgs[j]);
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::DeleteWaterPatchMarkers()
+{
+  for (auto&& hd : this->hydroData)
+  {
+    hd->waterPatchMsg.mutable_point()->Clear();
+    hd->waterPatchMsg.set_action(gz::msgs::Marker::DELETE_MARKER);
+    this->node.Request("/marker", hd->waterPatchMsg);
+  }
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::DeleteWaterlineMarkers()
+{
+  for (auto&& hd : this->hydroData)
+  {
+    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    {
+      hd->waterlineMsgs[j].mutable_point()->Clear();
+      hd->waterlineMsgs[j].set_action(gz::msgs::Marker::DELETE_MARKER);
+      this->node.Request("/marker", hd->waterlineMsgs[j]);
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void HydrodynamicsPrivate::DeleteUnderwaterSurfaceMarkers()
+{
+  for (auto&& hd : this->hydroData)
+  {
+    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    {
+      hd->underwaterSurfaceMsgs[j].mutable_point()->Clear();
+      hd->underwaterSurfaceMsgs[j].set_action(gz::msgs::Marker::DELETE_MARKER);
+      this->node.Request("/marker", hd->underwaterSurfaceMsgs[j]);
     }
   }
 }
@@ -1387,6 +1432,10 @@ void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
       auto param = it->second;
       // auto type = param.type();
       auto value = param.bool_value();
+      if (this->showWaterPatch && !value)
+      {
+        this->shouldDeleteWaterPatch = true;
+      }
       this->showWaterPatch = value;
     }
   }
@@ -1398,6 +1447,10 @@ void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
       auto param = it->second;
       // auto type = param.type();
       auto value = param.bool_value();
+      if (this->showWaterline && !value)
+      {
+        this->shouldDeleteWaterline = true;
+      }
       this->showWaterline = value;
     }
   }
@@ -1409,6 +1462,10 @@ void HydrodynamicsPrivate::OnWaveMarkersMsg(const gz::msgs::Param &_msg)
       auto param = it->second;
       // auto type = param.type();
       auto value = param.bool_value();
+      if (this->showUnderwaterSurface && !value)
+      {
+        this->shouldDeleteUnderwaterSurface = true;
+      }
       this->showUnderwaterSurface = value;
     }
   }
