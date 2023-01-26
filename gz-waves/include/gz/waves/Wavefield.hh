@@ -26,8 +26,6 @@
 
 #include <gz/math.hh>
 
-#include "gz/waves/CGALTypes.hh"
-
 namespace gz
 {
 namespace waves
@@ -46,7 +44,7 @@ class Wavefield
   explicit Wavefield(const std::string& world_name);
 
   /// \brief Compute the height at a point (vertical distance to surface).
-  bool Height(const cgal::Point3& point, double& height) const;
+  bool Height(const Eigen::Vector3d& point, double& height) const;
 
   /// \brief Get the wave parameters.
   std::shared_ptr<const WaveParameters> GetParameters() const;

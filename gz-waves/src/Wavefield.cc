@@ -89,7 +89,7 @@ Wavefield::Wavefield(const std::string& world_name) :
 }
 
 //////////////////////////////////////////////////
-bool Wavefield::Height(const cgal::Point3& point, double& height) const
+bool Wavefield::Height(const Eigen::Vector3d& point, double& height) const
 {
   /// \todo(srmainwaring) the calculation assumes that the tile origin
   /// is at its center.
