@@ -121,7 +121,7 @@ bool Wavefield::Height(const Eigen::Vector3d& point, double& height) const
 
 /////////////////////////////////////////////////
 bool Wavefield::FluidPotential(
-    const cgal::Point3& point, double& /*phi*/) const
+    const Eigen::Vector3d& point, double& /*phi*/) const
 {
   /// \todo(srmainwaring) the calculation assumes that the tile origin
   /// is at its center.
