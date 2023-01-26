@@ -847,6 +847,75 @@ TEST_F(LinearRandomFFTWaveSimFixture, Indexing)
 }
 
 //////////////////////////////////////////////////
+TEST_F(LinearRandomFFTWaveSimFixture, DisplacementDerivativesWindDirection)
+{
+  int n2 = nx_ * ny_;
+  double dt = 6.0;
+  double du = 2.5;
+  double da = 18.0;
+
+  // test over a range of times, windspeeds and  directions
+  for (int it=0; it < 10; ++it)
+  {
+    double time = it * dt;
+    for (int iu=0; iu < 10; ++iu)
+    {
+      double u = iu * du;
+      for (int ia=0; ia < 20; ++ia)
+      {
+        double angle_deg = ia * da;
+        double angle_rad = angle_deg * M_PI / 180.0;
+
+        double ux = u * std::cos(angle_rad);
+        double uy = u * std::sin(angle_rad);
+
+        // std::cerr << "angle: " << angle_rad << "\n";
+
+        LinearRandomFFTWaveSimulationRef::Impl ref_model(lx_, ly_, nx_, ny_);
+        ref_model.SetWindVelocity(ux, uy);
+        ref_model.ComputeBaseAmplitudes();
+        ref_model.ComputeCurrentAmplitudes(time);
+
+        Eigen::MatrixXd ref_h = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd ref_sx = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd ref_sy = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd ref_dhdx = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd ref_dhdy = Eigen::MatrixXd::Zero(n2, 1);
+        ref_model.ElevationAt(ref_h);
+        ref_model.ElevationDerivAt(ref_dhdx, ref_dhdy);
+        ref_model.DisplacementAt(ref_sx, ref_sy);
+
+        LinearRandomFFTWaveSimulation::Impl model(lx_, ly_, nx_, ny_);
+        model.SetWindVelocity(ux, uy);
+        model.ComputeBaseAmplitudes();
+        model.ComputeCurrentAmplitudes(time);
+
+        Eigen::MatrixXd h = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd sx = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd sy = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd dhdx = Eigen::MatrixXd::Zero(n2, 1);
+        Eigen::MatrixXd dhdy = Eigen::MatrixXd::Zero(n2, 1);
+        model.ElevationAt(h);
+        model.ElevationDerivAt(dhdx, dhdy);
+        model.DisplacementAt(sx, sy);
+
+        EXPECT_EQ(ref_h.size(), n2);
+        EXPECT_EQ(h.size(), n2);
+
+        for (int i=0; i < n2; ++i)
+        {
+          EXPECT_NEAR(h(i, 0), ref_h(i, 0), 1.0E-14);
+          EXPECT_NEAR(sx(i, 0), ref_sx(i, 0), 1.0E-14);
+          EXPECT_NEAR(sy(i, 0), ref_sy(i, 0), 1.0E-14);
+          EXPECT_NEAR(dhdx(i, 0), ref_dhdx(i, 0), 1.0E-14);
+          EXPECT_NEAR(dhdy(i, 0), ref_dhdy(i, 0), 1.0E-14);
+        }
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////
 // Run tests
 
 int main(int argc, char **argv)
