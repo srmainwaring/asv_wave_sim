@@ -1,6 +1,6 @@
 <?xml version='1.0' ?>
 <sdf version="1.6">
-  <model name="regular_waves">
+  <model name="trochoid_waves">
     <static>true</static>
 
     <plugin
@@ -12,9 +12,13 @@
         <tile_size>1024</tile_size>
         <cell_count>128</cell_count>
 
-        <algorithm>sinusoid</algorithm>
-        <amplitude>2.0</amplitude>
-        <period>6.0</period>
+        <algorithm>trochoid</algorithm>
+        <number>3</number>
+        <scale>1.5</scale>
+        <angle>0.4</angle>
+        <amplitude>1.5</amplitude>
+        <period>8.0</period>
+        <steepness>2.0</steepness>
         <direction>1 0</direction>
       </wave>
     </plugin>
@@ -52,9 +56,13 @@
             <tile_size>1024</tile_size>
             <cell_count>128</cell_count>
 
-            <algorithm>sinusoid</algorithm>
-            <amplitude>2.0</amplitude>
-            <period>6.0</period>
+            <algorithm>trochoid</algorithm>
+            <number>3</number>
+            <scale>1.5</scale>
+            <angle>0.4</angle>
+            <amplitude>1.5</amplitude>
+            <period>8.0</period>
+            <steepness>2.0</steepness>
             <direction>1 0</direction>
           </wave>
 

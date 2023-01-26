@@ -36,9 +36,6 @@
 #include "gz/waves/WaveParameters.hh"
 #include "gz/waves/WaveSimulation.hh"
 
-using Eigen::ArrayXXd;
-using Eigen::ArrayXd;
-
 namespace gz
 {
 namespace waves
@@ -217,13 +214,14 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   {
     case 0:
     {
-      // Simple
+      auto wave_sim = std::make_unique<LinearRegularWaveSimulation>(
+          lx_, ly_, nx_, ny_);
+
       double dir_x = 1.0;
       double dir_y = 0.0;
       double amplitude = 3.0;
       double period = 10.0;
-      std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
-          new LinearRegularWaveSimulation(lx_, ly_, nx_, ny_));
+
       wave_sim->SetDirection(dir_x, dir_y);
       wave_sim->SetAmplitude(amplitude);
       wave_sim->SetPeriod(period);
@@ -232,7 +230,9 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
     }
     case 1:
     {
-      // Trochoid
+      auto wave_sim = std::make_unique<TrochoidIrregularWaveSimulation>(
+          lx_, ly_, nx_, ny_);
+
       std::shared_ptr<WaveParameters> wave_params(new WaveParameters());
       wave_params->SetNumber(3);
       wave_params->SetAngle(0.6);
@@ -241,16 +241,16 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       wave_params->SetAmplitude(3.0);
       wave_params->SetPeriod(7.0);
       wave_params->SetDirection(gz::math::Vector2d(1.0, 0.0));
-      wave_sim_.reset(new TrochoidIrregularWaveSimulation(
-          nx_, lx_, wave_params));
+
+      wave_sim_ = std::move(wave_sim);
       break;
     }
     case 2:
     {
-      // FFT2
-      std::unique_ptr<LinearRandomFFTWaveSimulation> wave_sim(
-          new LinearRandomFFTWaveSimulation(lx_, ly_, nx_, ny_));
-      wave_sim->SetLambda(1.0);   // larger lambda => steeper waves.
+      auto wave_sim = std::make_unique<LinearRandomFFTWaveSimulation>(
+          lx_, ly_, nx_, ny_);
+
+      wave_sim->SetLambda(1.0);
       wave_sim_ = std::move(wave_sim);
       break;
     }
@@ -293,7 +293,8 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   {
     wave_sim_type = 0;
   }
-  if (params->Algorithm() == "trochoid")
+  if (params->Algorithm() == "trochoid" ||
+      params->Algorithm() == "trochoid_irregular")
   {
     wave_sim_type = 1;
   }
@@ -316,44 +317,48 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   {
     case 0:
     {
-      // Linear Regular (Monochromatic)
-      double dir_x = params->Direction().X();
-      double dir_y = params->Direction().Y();
-      double amplitude = params->Amplitude();
-      double period = params->Period();
-      std::unique_ptr<LinearRegularWaveSimulation> wave_sim(
-          new LinearRegularWaveSimulation(lx_, ly_, nx_, ny_));
-      wave_sim->SetDirection(dir_x, dir_y);
-      wave_sim->SetAmplitude(amplitude);
-      wave_sim->SetPeriod(period);
+      auto wave_sim = std::make_unique<LinearRegularWaveSimulation>(
+          lx_, ly_, nx_, ny_);
+
+      wave_sim->SetAmplitude(params->Amplitude());
+      wave_sim->SetPeriod(params->Period());
+      wave_sim->SetDirection(params->Direction().X(), params->Direction().Y());
+
       wave_sim_ = std::move(wave_sim);
       break;
     }
     case 1:
     {
-      // Trochoid
-      wave_sim_.reset(new TrochoidIrregularWaveSimulation(nx_, lx_, params));
+      auto wave_sim = std::make_unique<TrochoidIrregularWaveSimulation>(
+          lx_, ly_, nx_, ny_);
+
+      wave_sim->SetNumber(params->Number());
+      wave_sim->SetAmplitude(params->Amplitude_V());
+      wave_sim->SetWaveNumber(params->Wavenumber_V());
+      wave_sim->SetOmega(params->AngularFrequency_V());
+      wave_sim->SetPhase(params->Phase_V());
+      wave_sim->SetSteepness(params->Steepness_V());
+      wave_sim->SetDirection(params->Direction_V());
+
+      wave_sim_ = std::move(wave_sim);
       break;
     }
     case 2:
     {
-      // Linear Random FFT (ECKV / Cos2s)
-      std::unique_ptr<LinearRandomFFTWaveSimulation> wave_sim(
-          new LinearRandomFFTWaveSimulation(lx_, ly_, nx_, ny_));
+      auto wave_sim = std::make_unique<LinearRandomFFTWaveSimulation>(
+          lx_, ly_, nx_, ny_);
 
-      // larger lambda => steeper waves.
       wave_sim->SetLambda(params->Steepness());
+
       wave_sim_ = std::move(wave_sim);
       break;
     }
     case 3:
     {
-      Index num_waves = params->Number();
+      auto wave_sim = std::make_unique<LinearRandomWaveSimulation>(
+          lx_, ly_, nx_, ny_);
 
-      // Linear Random (Pierson-Moskowitz)
-      std::unique_ptr<LinearRandomWaveSimulation> wave_sim(
-          new LinearRandomWaveSimulation(lx_, ly_, nx_, ny_));
-      wave_sim->SetNumWaves(num_waves);
+      wave_sim->SetNumWaves(params->Number());
 
       wave_sim_ = std::move(wave_sim);
       break;
