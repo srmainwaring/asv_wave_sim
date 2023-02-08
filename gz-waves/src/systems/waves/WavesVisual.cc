@@ -591,7 +591,6 @@ void WavesVisualPrivate::OnUpdate()
   double simTime = this->currentSimTimeSeconds;
 
   // ocean tile parameters
-  auto [nx, ny] = this->waveParams->CellCount();
   auto [lx, ly] = this->waveParams->TileSize();
   double ux = this->waveParams->WindVelocity().X();
   double uy = this->waveParams->WindVelocity().Y();

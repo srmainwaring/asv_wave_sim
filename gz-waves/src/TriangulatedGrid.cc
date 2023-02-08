@@ -115,7 +115,6 @@ void TriangulatedGrid::Private::CreateMesh() {
   double lxm = - lx_ / 2.0;
   double lym = - ly_ / 2.0;
   const Index nx_plus1 = nx_ + 1;
-  const Index ny_plus1 = ny_ + 1;
 
   // Points - (nx_+1) points_ in each row / column
   for (int64_t iy=0; iy <= ny_; ++iy) {

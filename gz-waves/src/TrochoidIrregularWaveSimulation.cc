@@ -165,8 +165,8 @@ void TrochoidIrregularWaveSimulation::Impl::InitGrid()
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::Elevation(
-    double x, double y,
-    double &eta)
+    double /*x*/, double /*y*/,
+    double &/*eta*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "Elevation: Not implemented!\n";
@@ -174,9 +174,9 @@ void TrochoidIrregularWaveSimulation::Impl::Elevation(
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::Elevation(
-    const Eigen::Ref<const Eigen::ArrayXd>& x,
-    const Eigen::Ref<const Eigen::ArrayXd>& y,
-    Eigen::Ref<Eigen::ArrayXd> eta)
+    const Eigen::Ref<const Eigen::ArrayXd>& /*x*/,
+    const Eigen::Ref<const Eigen::ArrayXd>& /*y*/,
+    Eigen::Ref<Eigen::ArrayXd> /*eta*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "Elevation: Not implemented!\n";
@@ -360,7 +360,6 @@ void TrochoidIrregularWaveSimulation::Impl::DisplacementDerivAt(
         double x = ix * dx_ + lx_min_;
         double ddotx = x * cd_i + y * sd_i;
         double angle  = ddotx * k_i - w_i * time_ + phi_i;
-        double sa = std::sin(angle);
         double ca = std::cos(angle);
         double dsxdx1 = - cd_i * q_i * a_i * dadx * ca;
         double dsydy1 = - sd_i * q_i * a_i * dady * ca;
@@ -417,32 +416,32 @@ bool TrochoidIrregularWaveSimulation::Impl::CheckValid()
 
   is_valid_ = true;
 
-  if (amplitude_.size() != number_)
+  if (amplitude_.size() != static_cast<size_t>(number_))
   {
     gzerr << "Amplitude array must have size = " << number_ << ".\n";
     is_valid_ &= false;
   }
-  if (wavenumber_.size() != number_)
+  if (wavenumber_.size() != static_cast<size_t>(number_))
   {
     gzerr << "Wavenumber array must have size = " << number_ << ".\n";
     is_valid_ &= false;
   }
-  if (omega_.size() != number_)
+  if (omega_.size() != static_cast<size_t>(number_))
   {
     gzerr << "Angular frequency array must have size = " << number_ << ".\n";
     is_valid_ &= false;
   }
-  if (phase_.size() != number_)
+  if (phase_.size() != static_cast<size_t>(number_))
   {
     gzerr << "Phase array must have size = " << number_ << ".\n";
     is_valid_ &= false;
   }
-  if (q_.size() != number_)
+  if (q_.size() != static_cast<size_t>(number_))
   {
     gzerr << "Steepness array must have size = " << number_ << ".\n";
     is_valid_ &= false;
   }
-  if (direction_.size() != number_)
+  if (direction_.size() != static_cast<size_t>(number_))
   {
     gzerr << "Direction array must have size = " << number_ << ".\n";
     is_valid_ &= false;

@@ -66,7 +66,8 @@ cgal::Point3 Physics::CenterOfForce(
 {
   /// \todo provide robust floating point checks
   double div = _fA + _fB;
-  if (div != 0)
+  constexpr double tol = 1.0E-16;
+  if (std::fabs(div) > tol)
   {
     double t = _fA / div;
     return _B + (_A - _B) * t;
@@ -114,7 +115,8 @@ cgal::Point3 Physics::CenterOfPressureApexUp(
   double h = _H.z() - _M.z();
   double tc = 2.0/3.0;
   double div = 6.0 * _z0 + 4.0 * h;
-  if (div != 0)
+  constexpr double tol = 1.0E-16;
+  if (std::fabs(div) > tol)
   {
     tc = (4.0 * _z0 + 3.0 * h) / div;
   }
@@ -133,7 +135,8 @@ cgal::Point3 Physics::CenterOfPressureApexDn(
   double h = _M.z() - _L.z();
   double tc = 1.0/3.0;
   double div = 6.0 * _z0 + 2.0 * h;
-  if (div != 0)
+  constexpr double tol = 1.0E-16;
+  if (std::fabs(div) > tol)
   {
     tc = (2.0 * _z0 + h) / div;
   }
