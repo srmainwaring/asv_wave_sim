@@ -606,7 +606,7 @@ bool HydrodynamicsPrivate::InitPhysics(EntityComponentManager &_ecm)
       << ", meshes: " << meshes.size()
       << ", collisions: " << collisions.size() << "\n";
 
-  for (waves::Index i=0; i < links.size(); ++i)
+  for (size_t i = 0; i < links.size(); ++i)
   {
     // Create storage
     waves::Index meshCount = meshes[i].size();
@@ -807,7 +807,7 @@ void HydrodynamicsPrivate::UpdatePhysics(const UpdateInfo &/*_info*/,
 
     // Meshes
     // waves::Index nSubTri = 0;
-    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    for (size_t j = 0; j < hd->linkMeshes.size(); ++j)
     {
       // Update link mesh
       auto linkCollision = hd->linkCollisions[j];
@@ -1179,7 +1179,7 @@ void HydrodynamicsPrivate::InitWaterlineMarkers(
   waves::Index markerId = 1;
   for (auto&& hd : this->hydroData)
   {
-    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    for (size_t j = 0; j < hd->linkMeshes.size(); ++j)
     {
       hd->waterlineMsgs[j].set_ns(modelName + "/waterline");
       hd->waterlineMsgs[j].set_id(markerId++);
@@ -1207,7 +1207,7 @@ void HydrodynamicsPrivate::InitUnderwaterSurfaceMarkers(
   waves::Index markerId = 1;
   for (auto&& hd : this->hydroData)
   {
-    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    for (size_t j = 0; j < hd->linkMeshes.size(); ++j)
     {
       hd->underwaterSurfaceMsgs[j].set_ns(modelName + "/underwater_surface");
       hd->underwaterSurfaceMsgs[j].set_id(markerId++);
@@ -1322,7 +1322,7 @@ void HydrodynamicsPrivate::UpdateWaterlineMarkers()
 {
   for (auto&& hd : this->hydroData)
   {
-    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    for (size_t j = 0; j < hd->linkMeshes.size(); ++j)
     {
       hd->waterlineMsgs[j].mutable_point()->Clear();
       hd->waterlineMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
@@ -1352,7 +1352,7 @@ void HydrodynamicsPrivate::UpdateUnderwaterSurfaceMarkers()
 {
   for (auto&& hd : this->hydroData)
   {
-    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    for (size_t j = 0; j < hd->linkMeshes.size(); ++j)
     {
       hd->underwaterSurfaceMsgs[j].mutable_point()->Clear();
       hd->underwaterSurfaceMsgs[j].set_action(gz::msgs::Marker::ADD_MODIFY);
@@ -1395,7 +1395,7 @@ void HydrodynamicsPrivate::DeleteWaterlineMarkers()
 {
   for (auto&& hd : this->hydroData)
   {
-    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    for (size_t j = 0; j < hd->linkMeshes.size(); ++j)
     {
       hd->waterlineMsgs[j].mutable_point()->Clear();
       hd->waterlineMsgs[j].set_action(gz::msgs::Marker::DELETE_MARKER);
@@ -1409,7 +1409,7 @@ void HydrodynamicsPrivate::DeleteUnderwaterSurfaceMarkers()
 {
   for (auto&& hd : this->hydroData)
   {
-    for (waves::Index j=0; j < hd->linkMeshes.size(); ++j)
+    for (size_t j = 0; j < hd->linkMeshes.size(); ++j)
     {
       hd->underwaterSurfaceMsgs[j].mutable_point()->Clear();
       hd->underwaterSurfaceMsgs[j].set_action(gz::msgs::Marker::DELETE_MARKER);

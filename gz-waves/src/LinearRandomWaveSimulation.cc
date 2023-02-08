@@ -144,10 +144,10 @@ LinearRandomWaveSimulation::Impl::~Impl() = default;
 //////////////////////////////////////////////////
 LinearRandomWaveSimulation::Impl::Impl(
   double lx, double ly, Index nx, Index ny) :
-  lx_(lx),
-  ly_(ly),
   nx_(nx),
-  ny_(ny)
+  ny_(ny),
+  lx_(lx),
+  ly_(ly)
 {
   InitGrid();
 }
@@ -155,12 +155,12 @@ LinearRandomWaveSimulation::Impl::Impl(
 //////////////////////////////////////////////////
 LinearRandomWaveSimulation::Impl::Impl(
   double lx, double ly, double lz, Index nx, Index ny, Index nz) :
-  lx_(lx),
-  ly_(ly),
-  lz_(lz),
   nx_(nx),
   ny_(ny),
-  nz_(nz)
+  nz_(nz),
+  lx_(lx),
+  ly_(ly),
+  lz_(lz)
 {
   InitGrid();
 }
@@ -218,7 +218,7 @@ void LinearRandomWaveSimulation::Impl::ElevationDeriv(
     dhdy += - dady * amplitude_(ik) * sa;
   }
   deta_dx = dhdx;
-  deta_dy = dhdx;
+  deta_dy = dhdy;
 }
 
 //////////////////////////////////////////////////

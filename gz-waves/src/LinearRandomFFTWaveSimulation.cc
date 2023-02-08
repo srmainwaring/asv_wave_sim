@@ -377,7 +377,7 @@ void LinearRandomFFTWaveSimulation::Impl::ComputeCurrentAmplitudes(
   auto psi_root = cap_psi_2s_root_.reshaped();
 
   // time update for unique omega_k (reduce number of calls to sincos)
-  for (Index uidx = 0; uidx < uomega_k_.size(); ++uidx)
+  for (size_t uidx = 0; uidx < uomega_k_.size(); ++uidx)
   {
     double wt = uomega_k_[uidx] * time;
     ucos_wt_(uidx) = cos(wt);

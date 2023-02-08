@@ -640,7 +640,7 @@ void OceanTilePrivate<gz::math::Vector3d>::ComputeTBN(
   }
 
   // 2. Normalise each vertex's tangent space basis.
-  for (Index i=0; i < vertices.size(); ++i)
+  for (size_t i = 0; i < vertices.size(); ++i)
   {
     tangents[i].Normalize();
     bitangents[i].Normalize();
@@ -905,7 +905,7 @@ gz::common::Mesh* OceanTilePrivate<Vector3>::CreateMesh(
       new gz::common::SubMeshWithTangents());
 
   // Add position vertices
-  for (Index i=0; i < vertices_.size(); ++i)
+  for (size_t i = 0; i < vertices_.size(); ++i)
   {
     submesh->AddVertex(
         vertices_[i][0],
@@ -930,7 +930,7 @@ gz::common::Mesh* OceanTilePrivate<Vector3>::CreateMesh(
   }
 
   // Add indices
-  for (Index i=0; i < faces_.size(); ++i)
+  for (size_t i = 0; i < faces_.size(); ++i)
   {
     // Reverse orientation on faces
     if (reverse_orientation)
@@ -973,7 +973,7 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateMesh(
   }
 
   // Update positions, normals, texture coords etc.
-  for (Index i=0; i < vertices_.size(); ++i)
+  for (size_t i = 0; i < vertices_.size(); ++i)
   {
     submesh->SetVertex(i, vertices_[i]);
     submesh->SetNormal(i, normals_[i]);

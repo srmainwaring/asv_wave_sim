@@ -148,7 +148,8 @@ class WaveParametersPrivate
       const double omega = Physics::DeepWaterDispersionToOmega(k);
       const double phi = phase_;
       double q = 0.0;
-      if (a != 0)
+      constexpr double tol = 1.0E-16;
+      if (std::fabs(a) > tol)
       {
         q = std::min(1.0, steepness_ / (a * k * number_));
       }
