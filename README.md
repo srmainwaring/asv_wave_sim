@@ -7,7 +7,7 @@
 
 This package contains plugins that support the simulation of waves and surface vessels in [Gazebo](https://gazebosim.org/home).
 
-![Gazebo Waves](https://github.com/srmainwaring/asv_wave_sim/wiki/images/gz-waves-v5b.jpg)
+![rs750_ardupilot_v3_upwind](https://user-images.githubusercontent.com/24916364/228044489-b434b1ae-c30f-4676-9415-1719ee75479b.gif)
 
 
 The main branch targets [Gazebo Garden](https://gazebosim.org/docs/garden) and no longer has a dependency on ROS. 
