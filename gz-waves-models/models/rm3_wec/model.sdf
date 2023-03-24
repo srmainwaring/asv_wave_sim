@@ -93,9 +93,9 @@
         <geometry>
           <mesh>
             <uri>models://rm3_wec/meshes/plate.stl</uri>
-            </mesh>
-          </geometry>
-          <material>
+          </mesh>
+        </geometry>
+        <material>
           <ambient>0.1 0.1 0.1 1.0</ambient>
           <diffuse>0.1 0.1 0.1 1.0</diffuse>
           <specular>0.01 0.01 0.01 1.0</specular>
