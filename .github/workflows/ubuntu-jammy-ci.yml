@@ -34,7 +34,7 @@ jobs:
       - name: Install Wave Sim Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libcgal-dev libfftw3-dev libtbb-dev
+          sudo apt-get install libcgal-dev libfftw3-dev
 
       - name: Build Wave Sim
         run: |

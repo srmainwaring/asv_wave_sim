@@ -61,7 +61,6 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   gz-common${GZ_COMMON_VER}::profiler
   gz-transport${GZ_TRANSPORT_VER}::gz-transport${GZ_TRANSPORT_VER}
   sdformat${SDF_VER}::sdformat${SDF_VER}
-  ${TBB_LIBRARIES}
   ${FFT_LIBRARIES}
 )
 if (UNIX AND NOT APPLE)
@@ -84,5 +83,4 @@ gz_build_tests(TYPE UNIT
   LIB_DEPS
     ${PROJECT_LIBRARY_TARGET_NAME}
     ${FFT_LIBRARIES}
-    ${TBB_LIBRARIES}
 )

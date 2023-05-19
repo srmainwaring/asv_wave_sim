@@ -121,17 +121,8 @@ endif()
 
 #--------------------------------------
 # Find eigen3
-# gz_find_package(
-#   EIGEN3
-#   REQUIRED_BY eigen3
-#   PRETTY eigen3
-#   PURPOSE "Provide conversions to eigen3 types")
-
-#--------------------------------------
-# Other dependencies...
 
 find_package(Eigen3 REQUIRED)
-find_package(TBB REQUIRED)
 
 #--------------------------------------
 # CGAL and its components...

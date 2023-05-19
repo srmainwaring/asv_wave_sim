@@ -16,14 +16,25 @@
 #include <gtest/gtest.h>
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
-#include <CGAL/AABB_tree.h>
 #include <CGAL/AABB_traits.h>
-#include <CGAL/number_utils.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/Constrained_Delaunay_triangulation_2.h>
+#include <CGAL/Constrained_triangulation_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polyhedron_3.h>
+#include <CGAL/Projection_traits_xy_3.h>
+#include <CGAL/Regular_triangulation_2.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Timer.h>
+#include <CGAL/Triangulation_2.h>
+#include <CGAL/Triangulation_face_base_with_info_2.h>
+#include <CGAL/Triangulation_hierarchy_2.h>
+
+#include <CGAL/algorithm.h>
 #include <CGAL/boost/graph/Euler_operations.h>
+#include <CGAL/number_utils.h>
+#include <CGAL/point_generators_2.h>
 
 #include <algorithm>
 #include <iostream>
@@ -540,35 +551,6 @@ TEST(CGAL, SurfaceMeshWavefield) {
 }
 
 //////////////////////////////////////////////////
-/// \todo: resolve TBB issues
-#if 0
-TEST(CGAL, TBBParallelFor) {
-  typedef std::vector<double>::iterator Iterator;
-
-  std::vector<double> a(10);
-
-  // kernel lambda...
-  auto kernel = [=](double& a) {
-    // do stuff with a
-    a = 1;
-  };
-
-  // loop lambda
-  auto applyKernel = [=](const tbb::blocked_range<Iterator>& _r) {
-    for (Iterator it=_r.begin(); it != _r.end(); ++it) {
-      kernel(*it);
-    }
-  };
-
-  tbb::parallel_for(tbb::blocked_range<Iterator>(
-      a.begin(), a.end()), applyKernel);
-  for (auto v : a) {
-    // std::cout << v << "\n";
-  }
-}
-#endif
-
-//////////////////////////////////////////////////
 TEST(CGAL, VertexRangeIterator) {
   // Mesh
   Point3 p0(0, 0, 0);
@@ -606,16 +588,6 @@ TEST(CGAL, VertexRangeIterator) {
 }
 
 //////////////////////////////////////////////////
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Constrained_triangulation_2.h>
-#include <CGAL/Projection_traits_xy_3.h>
-#include <CGAL/Triangulation_2.h>
-#include <CGAL/Triangulation_face_base_with_info_2.h>
-#include <CGAL/Triangulation_hierarchy_2.h>
-#include <CGAL/Regular_triangulation_2.h>
-#include <CGAL/point_generators_2.h>
-#include <CGAL/algorithm.h>
 /// \todo(srmainwaring) resolve why this test is failing on Ubuntu.
 #if 0
 TEST(CGAL, CreateTriangulationN) {
