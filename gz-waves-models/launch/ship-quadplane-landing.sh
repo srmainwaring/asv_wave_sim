@@ -58,9 +58,9 @@ EOF
 
 mkdir -p sitl/quadplane/scripts
 
-cp $ARDUPILOT_ROOT/libraries/AP_Scripting/examples/plane_ship_landing.lua sitl/quadplane/scripts
+cp $ARDUPILOT_ROOT/libraries/AP_Scripting/applets/plane_ship_landing.lua  sitl/quadplane/scripts
 
-QUADPLANE_DEFAULTS="$SITL_MODELS_DIR/Ignition/config/alti_transition_quad.param"
+QUADPLANE_DEFAULTS="$SITL_MODELS_DIR/Gazebo/config/alti_transition_quad.param"
 
 # additional parameter file for the quadplane
 cat <<EOF > sitl/quadplane/follower.param
