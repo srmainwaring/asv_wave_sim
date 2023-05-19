@@ -1,7 +1,10 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
   <world name="mumbles_head_world">
-    
+    <physics name="1ms" type="ignore">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
     <plugin
       filename="gz-sim-physics-system"
       name="gz::sim::systems::Physics">
@@ -20,6 +23,12 @@
       filename="gz-sim-user-commands-system"
       name="gz::sim::systems::UserCommands">
     </plugin>
+    <plugin filename="gz-sim-imu-system"
+      name="gz::sim::systems::Imu">
+    </plugin>
+    <plugin filename="gz-sim-navsat-system"
+      name="gz::sim::systems::NavSat">
+    </plugin>
 
     <scene>
       <ambient>1.0 1.0 1.0</ambient>
@@ -36,8 +45,8 @@
     </light>
 
     <spherical_coordinates>
-      <latitude_deg>-4.028765</latitude_deg>
-      <longitude_deg>51.5732315</longitude_deg>
+      <latitude_deg>51.525571</latitude_deg>
+      <longitude_deg>-3.954478</longitude_deg>
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
       <surface_model>EARTH_WGS84</surface_model>
@@ -47,6 +56,63 @@
       <pose>0 0 0 0 0 0</pose>
       <uri>model://ocean_waves</uri>
     </include>
+
+    <model name="axes">
+      <static>1</static>
+      <link name="link">
+        <visual name="r">
+          <cast_shadows>0</cast_shadows>
+          <pose>5 0 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>10 0.01 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+            <emissive>1 0 0 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <visual name="g">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 5 0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 10 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <emissive>0 1 0 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <visual name="b">
+          <cast_shadows>0</cast_shadows>
+          <pose>0 0 5.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.01 0.01 10</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 1 1</ambient>
+            <diffuse>0 0 1 1</diffuse>
+            <emissive>0 0 1 1</emissive>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+
+        <sensor name="navsat_sensor" type="navsat">
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+        </sensor>
+
+      </link>
+    </model>
 
     <include>
       <uri>model://mumbles_head</uri>
