@@ -19,8 +19,8 @@ ROVER=$ROOTDIR/build/sitl/bin/ardurover
 
 # drones will be located here
 # Swansea Bay
-HOMELAT=51.587587
-HOMELONG=-3.954579
+HOMELAT=51.525571
+HOMELONG=-3.954478
 HOMEALT=0.0
 
 # Default: CUAV
