@@ -82,16 +82,16 @@ GridLayout {
     text: "Wind speed (m/s)"
   }
 
-  GzSpinBox {
+  GzDoubleSpinBox {
     Layout.columnSpan: 2
     Layout.fillWidth: true
     id: windSpeed
-    maximumValue: 100.0
-    minimumValue: 0.5
+    to: 100.0
+    from: 0.5
     value: 5.0
     decimals: 1
     stepSize: 0.5
-    onEditingFinished: WavesControl.UpdateWindSpeed(windSpeed.value)
+    onValueModified: WavesControl.UpdateWindSpeed(windSpeed.value)
   }
 
   // wind angle
@@ -102,16 +102,16 @@ GridLayout {
     text: "Wind angle (deg)"
   }
 
-  GzSpinBox {
+  GzDoubleSpinBox {
     Layout.columnSpan: 2
     Layout.fillWidth: true
     id: windAngle
-    maximumValue: 180
-    minimumValue: -180
+    to: 180
+    from: -180
     value: 135
     decimals: 0
     stepSize: 10
-    onEditingFinished: WavesControl.UpdateWindAngle(windAngle.value)
+    onValueModified: WavesControl.UpdateWindAngle(windAngle.value)
   }
 
   // steepness
@@ -122,16 +122,16 @@ GridLayout {
     text: "Steepness"
   }
 
-  GzSpinBox {
+  GzDoubleSpinBox {
     Layout.columnSpan: 2
     Layout.fillWidth: true
     id: steepness
-    maximumValue: 10
-    minimumValue: 0
+    to: 10
+    from: 0
     value: 2
     decimals: 1
     stepSize: 0.1
-    onEditingFinished: WavesControl.UpdateSteepness(steepness.value)
+    onValueModified: WavesControl.UpdateSteepness(steepness.value)
   }
 
   // Bottom spacer
