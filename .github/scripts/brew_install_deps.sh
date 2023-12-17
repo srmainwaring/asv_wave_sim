@@ -51,3 +51,33 @@ do
      brew link $DEP_PKG
   done
 done
+
+
+# keg only packages to install - only link dependencies
+PKGS_KEG_ONLY=(
+  dartsim@6.10.0
+)
+
+# install packages
+for PKG in "${PKGS_KEG_ONLY[@]}"
+do
+  brew install ${PKG}
+done
+
+# The GitHub actions cache does restore links, so we force
+# (re-)linking on all dependencies of packages we install. 
+
+for PKG in "${PKGS_KEG_ONLY[@]}"
+do
+  # keg only do not link package
+
+  DEPS=$(brew deps ${PKG})
+  declare -a DEPS_ARRAY
+  DEPS_ARRAY=(${DEPS})
+
+  for DEP_PKG in "${DEPS_ARRAY[@]}"
+  do
+    # link package dependencies
+     brew link $DEP_PKG
+  done
+done
