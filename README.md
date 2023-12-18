@@ -1,7 +1,8 @@
 # Wave Sim
 
 [![Ubuntu Jammy CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-jammy-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ubuntu-jammy-ci.yml)
-[![macOS Monterey CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos-monterey-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos-monterey-ci.yml)
+[![macOS Monterey CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos12-monterey-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos12-monterey-ci.yml)
+[![macOS Ventura CI](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos13-ventura-ci.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/macos13-ventura-ci.yml)
 [![Cpplint](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ccplint.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ccplint.yml)
 [![Cppcheck](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ccpcheck.yml/badge.svg)](https://github.com/srmainwaring/asv_wave_sim/actions/workflows/ccpcheck.yml)
 
