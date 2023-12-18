@@ -94,8 +94,8 @@ void WavefieldSampler::ApplyPose(const gz::math::Pose3d& pose)
         it.second != std::end(target.vertices());
     ++it.first, ++it.second)
   {
-    auto& v0 = *it.first;
-    auto& v1 = *it.second;
+    const auto& v0 = *it.first;
+    const auto& v1 = *it.second;
     const cgal::Point3& p0 = source.point(v0);
 
     // Transformation: slide the patch in the xy - plane only
