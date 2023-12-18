@@ -91,8 +91,8 @@ void ApplyPose(
         it.second != std::end(_target.vertices());
     ++it.first, ++it.second)
   {
-    auto& v0 = *it.first;
-    auto& v1 = *it.second;
+    const auto& v0 = *it.first;
+    const auto& v1 = *it.second;
     const cgal::Point3& p0 = _source.point(v0);
 
     // Affine transformation
@@ -183,7 +183,7 @@ math::AxisAlignedBox CreateAxisAlignedBox(cgal::MeshPtr _mesh)
   double max_y = min_y;
   double max_z = min_z;
 
-  for (auto& vertex : _mesh->vertices())
+  for (const auto& vertex : _mesh->vertices())
   {
     auto& point = _mesh->point(vertex);
     min_x = std::min(point.x(), min_x);
