@@ -25,8 +25,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <gz/common.hh>
-
 #include "gz/waves/Algorithm.hh"
 #include "gz/waves/Types.hh"
 #include "gz/waves/WaveSpectrum.hh"

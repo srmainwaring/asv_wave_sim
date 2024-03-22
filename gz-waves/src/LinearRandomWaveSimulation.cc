@@ -21,8 +21,6 @@
 #include <random>
 #include <vector>
 
-#include <gz/common.hh>
-
 #include "gz/waves/WaveSpectrum.hh"
 
 

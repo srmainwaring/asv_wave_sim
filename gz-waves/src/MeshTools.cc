@@ -20,10 +20,11 @@
 #include <iterator>
 #include <string>
 
-#include <gz/common.hh>
 #include <gz/math.hh>
 
 #include "gz/waves/CGALTypes.hh"
+
+#include <gz/common/Console.hh>
 
 namespace gz
 {

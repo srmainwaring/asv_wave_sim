@@ -18,7 +18,6 @@
 #include <iostream>
 #include <string>
 
-#include <gz/common.hh>
 #include <gz/common/Util.hh>
 #include <gz/common/MeshManager.hh>
 #include <gz/common/Mesh.hh>

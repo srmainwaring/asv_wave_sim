@@ -21,7 +21,7 @@
 #include <vector>
 
 #include <gz/math.hh>
-#include <gz/common.hh>
+#include <gz/common/Console.hh>
 #include <gz/common/Mesh.hh>
 
 #include "gz/waves/CGALTypes.hh"
