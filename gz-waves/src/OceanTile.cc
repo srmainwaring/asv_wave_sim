@@ -22,7 +22,6 @@
 #include <iostream>
 #include <vector>
 
-#include <gz/common.hh>
 #include <gz/common/Mesh.hh>
 #include <gz/common/SubMesh.hh>
 

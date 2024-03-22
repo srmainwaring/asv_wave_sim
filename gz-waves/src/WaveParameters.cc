@@ -20,7 +20,7 @@
 #include <iostream>
 #include <string>
 
-#include <gz/common.hh>
+#include <gz/common/Console.hh>
 #include <gz/msgs.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/math/Vector2.hh>

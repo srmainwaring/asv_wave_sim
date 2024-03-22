@@ -25,7 +25,6 @@
 
 #include "gz/waves/CGALTypes.hh"
 
-#include <gz/common.hh>
 #include <gz/common/Mesh.hh>
 
 namespace gz
