@@ -50,7 +50,7 @@
 #include "gz/waves/Wavefield.hh"
 #include "gz/waves/WaveParameters.hh"
 
-#include <gz/common.hh>
+#include <gz/common/Console.hh>
 #include <gz/common/Util.hh>
 #include <gz/common/MeshManager.hh>
 #include <gz/math/Vector3.hh>

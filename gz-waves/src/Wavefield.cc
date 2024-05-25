@@ -21,7 +21,8 @@
 #include <string>
 #include <thread>
 
-#include <gz/transport.hh>
+#include <gz/common/Console.hh>
+#include <gz/transport/Node.hh>
 
 #include "gz/waves/CGALTypes.hh"
 #include "gz/waves/OceanTile.hh"
@@ -29,7 +30,6 @@
 #include "gz/waves/Types.hh"
 #include "gz/waves/Utilities.hh"
 #include "gz/waves/WaveParameters.hh"
-
 
 namespace gz
 {

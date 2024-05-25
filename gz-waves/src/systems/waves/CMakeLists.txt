@@ -65,6 +65,13 @@ target_link_libraries(${rendering_ogre2_target}
     gz-plugin${GZ_PLUGIN_VER}::register
 )
 
+# Suppress an Ogre warning about adding _DEBUG to precompiler definitions.
+# TODO: set conditional on the cmake build type. 
+target_compile_definitions(${rendering_ogre2_target}
+  PUBLIC
+    OGRE_IGNORE_UNKNOWN_DEBUG
+)
+
 #################################################
 gz_add_system(waves-visual
   SOURCES

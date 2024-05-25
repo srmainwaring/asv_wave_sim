@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-#include <gz/common.hh>
+#include <gz/common/Console.hh>
 
 #include "gz/waves/CGALTypes.hh"
 #include "gz/waves/Geometry.hh"

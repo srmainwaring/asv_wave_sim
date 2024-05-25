@@ -26,9 +26,9 @@
 #include <limits>
 #include <string>
 
+#include <gz/common/Console.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/math/Vector3.hh>
-#include <gz/common.hh>
 
 #include <sdf/sdf.hh>
 
