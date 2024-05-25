@@ -21,7 +21,7 @@
 #include <random>
 #include <vector>
 
-#include <gz/common.hh>
+#include <gz/common/Console.hh>
 
 #include "gz/waves/WaveSpectrum.hh"
 
@@ -491,7 +491,7 @@ void LinearRandomWaveSimulation::SetWindVelocity(double ux, double uy)
 }
 
 //////////////////////////////////////////////////
-void LinearRandomWaveSimulation::SetSteepness(double value)
+void LinearRandomWaveSimulation::SetSteepness(double /*value*/) // NOLINT
 {
   /// \todo(srmainwaring) IMPLEMENT
 }

@@ -24,8 +24,6 @@
 #include <memory>
 #include <string>
 
-#include <gz/math.hh>
-
 namespace gz
 {
 namespace waves

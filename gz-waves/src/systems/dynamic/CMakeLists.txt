@@ -13,4 +13,6 @@ gz_add_system(dynamic-geometry
     gz-rendering${GZ_RENDERING_VER}-ogre2
     gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
     GzOGRE2::GzOGRE2
+  PRIVATE_COMPILE_DEFS
+    OGRE_IGNORE_UNKNOWN_DEBUG
 )

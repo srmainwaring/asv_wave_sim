@@ -578,7 +578,7 @@ void LinearRegularWaveSimulation::SetWindVelocity(double /*ux*/, double /*uy*/)
 }
 
 //////////////////////////////////////////////////
-void LinearRegularWaveSimulation::SetSteepness(double value)
+void LinearRegularWaveSimulation::SetSteepness(double /*value*/) // NOLINT
 {
   /// \todo(srmainwaring) IMPLEMENT
 }

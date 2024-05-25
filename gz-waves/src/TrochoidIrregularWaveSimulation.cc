@@ -184,8 +184,8 @@ void TrochoidIrregularWaveSimulation::Impl::Elevation(
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::Pressure(
-    double x, double y, double z,
-    double &pressure)
+    double /*x*/, double /*y*/, double /*z*/,
+    double &/*pressure*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "Pressure: Not implemented!\n";
@@ -193,10 +193,10 @@ void TrochoidIrregularWaveSimulation::Impl::Pressure(
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::Pressure(
-    const Eigen::Ref<const Eigen::ArrayXd>& x,
-    const Eigen::Ref<const Eigen::ArrayXd>& y,
-    const Eigen::Ref<const Eigen::ArrayXd>& z,
-    Eigen::Ref<Eigen::ArrayXd> pressure)
+    const Eigen::Ref<const Eigen::ArrayXd>& /*x*/,
+    const Eigen::Ref<const Eigen::ArrayXd>& /*y*/,
+    const Eigen::Ref<const Eigen::ArrayXd>& /*z*/,
+    Eigen::Ref<Eigen::ArrayXd> /*pressure*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "Pressure: Not implemented!\n";
@@ -374,8 +374,8 @@ void TrochoidIrregularWaveSimulation::Impl::DisplacementDerivAt(
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::ElevationAt(
-    Index ix, Index iy,
-    double &h)
+    Index /*ix*/, Index /*iy*/,
+    double &/*h*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "ElevationAt: Not implemented!\n";
@@ -383,8 +383,8 @@ void TrochoidIrregularWaveSimulation::Impl::ElevationAt(
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::DisplacementAt(
-    Index ix, Index iy,
-    double& sx, double& sy)
+    Index /*ix*/, Index /*iy*/,
+    double& /*sx*/, double& /*sy*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "DisplacementAt: Not implemented!\n";
@@ -392,8 +392,8 @@ void TrochoidIrregularWaveSimulation::Impl::DisplacementAt(
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::PressureAt(
-    Index ix, Index iy, Index iz,
-    double &pressure)
+    Index /*ix*/, Index /*iy*/, Index /*iz*/,
+    double &/*pressure*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "PressureAt: Not implemented!\n";
@@ -401,8 +401,8 @@ void TrochoidIrregularWaveSimulation::Impl::PressureAt(
 
 //////////////////////////////////////////////////
 void TrochoidIrregularWaveSimulation::Impl::PressureAt(
-    Index iz,
-    Eigen::Ref<Eigen::ArrayXXd> pressure)
+    Index /*iz*/,
+    Eigen::Ref<Eigen::ArrayXXd> /*pressure*/)
 {
   /// \todo(srmainwaring) IMPLEMENT
   gzerr << "PressureAt: Not implemented!\n";

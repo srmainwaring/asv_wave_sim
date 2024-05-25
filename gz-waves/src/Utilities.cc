@@ -19,7 +19,7 @@
 #include <iostream>
 #include <string>
 
-#include <gz/common.hh>
+#include <gz/common/Console.hh>
 #include <gz/math.hh>
 #include <sdf/sdf.hh>
 

@@ -17,7 +17,9 @@ target_link_libraries(PLOT_GnuPlotExample
 target_include_directories(PLOT_GnuPlotExample
   PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
 )
-
+target_compile_options(PLOT_GnuPlotExample
+  PRIVATE "-Wno-unused-result"
+)
 
 add_executable(PLOT_LinearRandomFFTWaves PLOT_LinearRandomFFTWaves.cc)
 target_link_libraries(PLOT_LinearRandomFFTWaves
@@ -27,7 +29,9 @@ target_link_libraries(PLOT_LinearRandomFFTWaves
 target_include_directories(PLOT_LinearRandomFFTWaves
   PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
 )
-
+target_compile_options(PLOT_LinearRandomFFTWaves
+  PRIVATE "-Wno-unused-result"
+)
 
 add_executable(PLOT_LinearRandomWaves PLOT_LinearRandomWaves.cc)
 target_link_libraries(PLOT_LinearRandomWaves
@@ -37,7 +41,9 @@ target_link_libraries(PLOT_LinearRandomWaves
 target_include_directories(PLOT_LinearRandomWaves
   PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
 )
-
+target_compile_options(PLOT_LinearRandomWaves
+  PRIVATE "-Wno-unused-result"
+)
 
 add_executable(PLOT_LinearRegularWaves PLOT_LinearRegularWaves.cc)
 target_link_libraries(PLOT_LinearRegularWaves
@@ -47,7 +53,9 @@ target_link_libraries(PLOT_LinearRegularWaves
 target_include_directories(PLOT_LinearRegularWaves
   PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
 )
-
+target_compile_options(PLOT_LinearRegularWaves
+  PRIVATE "-Wno-unused-result"
+)
 
 add_executable(PLOT_WaveSpectrum PLOT_WaveSpectrum.cc)
 target_link_libraries(PLOT_WaveSpectrum
@@ -56,6 +64,9 @@ target_link_libraries(PLOT_WaveSpectrum
 )
 target_include_directories(PLOT_WaveSpectrum
   PUBLIC ${gnuplot-iostream_INCLUDE_DIRS}
+)
+target_compile_options(PLOT_WaveSpectrum
+  PRIVATE "-Wno-unused-result"
 )
 
 #============================================================================

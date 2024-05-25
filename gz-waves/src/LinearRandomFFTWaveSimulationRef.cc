@@ -37,7 +37,7 @@
 #include <complex>
 #include <random>
 
-#include <gz/common.hh>
+#include <gz/common/Console.hh>
 
 #include "gz/waves/Types.hh"
 #include "LinearRandomFFTWaveSimulationRefImpl.hh"
