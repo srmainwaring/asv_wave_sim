@@ -42,6 +42,8 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "gz/waves/Geometry.hh"
 #include "gz/waves/Grid.hh"

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <vector>
 
 #include <gz/common/Console.hh>
 

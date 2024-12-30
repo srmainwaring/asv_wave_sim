@@ -23,10 +23,11 @@
 #include <CGAL/Timer.h>
 
 #include <array>
+#include <cmath>
 #include <functional>
 #include <iostream>
-#include <cmath>
 #include <limits>
+#include <memory>
 #include <string>
 
 namespace gz

@@ -18,6 +18,7 @@
 #include <array>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "gz/waves/Algorithm.hh"
 #include "gz/waves/Types.hh"

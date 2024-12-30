@@ -18,8 +18,10 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <thread>
+#include <utility>
 
 #include <gz/common/Console.hh>
 #include <gz/transport/Node.hh>

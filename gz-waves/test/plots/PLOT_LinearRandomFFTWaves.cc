@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <gz/waves/WaveSimulation.hh>

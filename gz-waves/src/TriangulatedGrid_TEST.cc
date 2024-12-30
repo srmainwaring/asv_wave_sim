@@ -21,6 +21,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <gz/math/Pose3.hh>
 

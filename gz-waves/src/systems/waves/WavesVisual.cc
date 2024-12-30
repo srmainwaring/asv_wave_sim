@@ -44,6 +44,7 @@
 #include <chrono>
 #include <list>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <utility>
 #include <vector>

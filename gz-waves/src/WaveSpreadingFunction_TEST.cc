@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "gz/waves/Types.hh"

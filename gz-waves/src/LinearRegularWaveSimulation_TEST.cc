@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "gz/waves/OceanTile.hh"
 #include "gz/waves/Grid.hh"

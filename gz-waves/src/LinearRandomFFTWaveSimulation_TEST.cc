@@ -21,6 +21,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 #include "LinearRandomFFTWaveSimulationImpl.hh"

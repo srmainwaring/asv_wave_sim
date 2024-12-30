@@ -30,6 +30,11 @@
 #include <CGAL/algorithm.h>
 #include <CGAL/point_generators_2.h>
 
+#include <iostream>
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include "gz/waves/Geometry.hh"
 
 namespace gz

@@ -32,8 +32,11 @@
  *
  */
 
+#include <list>
 #include <map>
 #include <mutex>
+#include <string>
+#include <vector>
 
 #include <gz/common/Console.hh>
 #include <gz/common/SystemPaths.hh>

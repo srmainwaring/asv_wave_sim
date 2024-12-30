@@ -15,6 +15,8 @@
 
 #include "Collision.hh"
 
+#include <string>
+
 #include "gz/sim/components/Collision.hh"
 #include "gz/sim/components/Name.hh"
 #include "gz/sim/components/ParentEntity.hh"

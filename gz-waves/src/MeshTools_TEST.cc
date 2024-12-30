@@ -16,7 +16,9 @@
 #include <CGAL/Timer.h>
 
 #include <iostream>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Util.hh>
