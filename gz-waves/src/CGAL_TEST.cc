@@ -16,7 +16,11 @@
 #include <gtest/gtest.h>
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
+#if CGAL_VERSION_MAJOR >= 6
+#include <CGAL/AABB_traits_3.h>
+#else
 #include <CGAL/AABB_traits.h>
+#endif
 #include <CGAL/AABB_tree.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_2.h>
@@ -33,6 +37,7 @@
 
 #include <CGAL/algorithm.h>
 #include <CGAL/boost/graph/Euler_operations.h>
+#include <CGAL/boost/graph/generators.h>
 #include <CGAL/number_utils.h>
 #include <CGAL/point_generators_2.h>
 
@@ -137,12 +142,23 @@ TEST(CGAL, SurfaceMesh) {
   typedef K::Segment_3 Segment;
   typedef CGAL::Surface_mesh<Point3> Mesh;
   typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+#if CGAL_VERSION_MAJOR >= 6
+  typedef CGAL::AABB_traits_3<K, Primitive> Traits;
+#else
   typedef CGAL::AABB_traits<K, Primitive> Traits;
+#endif
   typedef CGAL::AABB_tree<Traits> Tree;
+#if CGAL_VERSION_MAJOR >= 6
+  typedef std::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
+  Segment_intersection;
+  typedef std::optional<Tree::Intersection_and_primitive_id<Plane>::Type>
+  Plane_intersection;
+#else
   typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
   Segment_intersection;
   typedef boost::optional<Tree::Intersection_and_primitive_id<Plane>::Type>
   Plane_intersection;
+#endif
   typedef Tree::Primitive_id Primitive_id;
 
   Point3 p(1.0, 0.0, 0.0);
@@ -177,8 +193,13 @@ TEST(CGAL, SurfaceMesh) {
       tree.any_intersection(segment_query);
   if (intersection) {
     // gets intersection object
+#if CGAL_VERSION_MAJOR >= 6
+    if (std::get_if<Point3>(&(intersection->first))) {
+      // Point3* p = std::get_if<Point3>(&(intersection->first));
+#else
     if (boost::get<Point3>(&(intersection->first))) {
       // Point3* p = boost::get<Point3>(&(intersection->first));
+#endif
       // std::cout << "intersection object is a point " << *p <<  "\n";
       // std::cout << "with face "<< intersection->second  <<  "\n";
     }
@@ -203,8 +224,13 @@ TEST(CGAL, SurfaceMesh) {
   // (generally a segment)
   Plane_intersection plane_intersection = tree.any_intersection(plane_query);
   if (plane_intersection) {
+#if CGAL_VERSION_MAJOR >= 6
+    if (std::get_if<Segment>(&(plane_intersection->first))) {
+      // Segment* s = std::get_if<Segment>(&(plane_intersection->first));
+#else
     if (boost::get<Segment>(&(plane_intersection->first))) {
       // Segment* s = boost::get<Segment>(&(plane_intersection->first));
+#endif
       // std::cout << "one intersection object is the segment " << s << "\n";
       // std::cout << "with face "<< intersection->second  <<  "\n";
     }
@@ -223,7 +249,11 @@ TEST(CGAL, AABBPolyhedronFacetIntersection) {
   // typedef K::Segment_3 Segment;
   typedef CGAL::Polyhedron_3<K> Polyhedron;
   typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron> Primitive;
+#if CGAL_VERSION_MAJOR >= 6
+  typedef CGAL::AABB_traits_3<K, Primitive> Traits;
+#else
   typedef CGAL::AABB_traits<K, Primitive> Traits;
+#endif
   typedef CGAL::AABB_tree<Traits> Tree;
   // typedef Tree::Point_and_primitive_id Point_and_primitive_id;
 
@@ -276,7 +306,11 @@ TEST(CGAL, SurfaceMeshGridCell) {
   // typedef Mesh::Face_index face_descriptor;
 
   typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+#if CGAL_VERSION_MAJOR >= 6
+  typedef CGAL::AABB_traits_3<K, Primitive> Traits;
+#else
   typedef CGAL::AABB_traits<K, Primitive> Traits;
+#endif
   typedef CGAL::AABB_tree<Traits> Tree;
   // typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
   // Segment_intersection;
@@ -284,9 +318,13 @@ TEST(CGAL, SurfaceMeshGridCell) {
   // Plane_intersection;
   // typedef Tree::Primitive_id Primitive_id;
 
+#if CGAL_VERSION_MAJOR >= 6
+  typedef std::optional<Tree::Intersection_and_primitive_id<Ray>::Type>
+  Ray_intersection;
+#else
   typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type>
   Ray_intersection;
-
+#endif
   typedef CGAL::Timer Timer;
 
   Point3 p0(-1.0, -1.0, 1.0);
@@ -344,8 +382,13 @@ TEST(CGAL, SurfaceMeshGridCell) {
     // std::cout << "Intersect (x1000): " << t.time() << " sec" << "\n";
 
     // if(intersection) {
+#if CGAL_VERSION_MAJOR >= 6
+    //   if(std::get_if<Point3>(&(intersection->first))) {
+    //     const Point3* p = std::get_if<Point3>(&(intersection->first));
+#else
     //   if(boost::get<Point3>(&(intersection->first))) {
-    //     const Point3* p =  boost::get<Point3>(&(intersection->first));
+    //     const Point3* p = boost::get<Point3>(&(intersection->first));
+#endif
     //     std::cout <<  *p << "\n";
     //   }
     // }
@@ -366,7 +409,11 @@ TEST(CGAL, SurfaceMeshGrid) {
   // typedef Mesh::Face_index face_descriptor;
 
   typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+#if CGAL_VERSION_MAJOR >= 6
+  typedef CGAL::AABB_traits_3<K, Primitive> Traits;
+#else
   typedef CGAL::AABB_traits<K, Primitive> Traits;
+#endif
   typedef CGAL::AABB_tree<Traits> Tree;
   // typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
   // Segment_intersection;
@@ -374,9 +421,13 @@ TEST(CGAL, SurfaceMeshGrid) {
   // Plane_intersection;
   // typedef Tree::Primitive_id Primitive_id;
 
+#if CGAL_VERSION_MAJOR >= 6
+  typedef std::optional<Tree::Intersection_and_primitive_id<Ray>::Type>
+  Ray_intersection;
+#else
   typedef boost::optional<Tree::Intersection_and_primitive_id<Ray>::Type>
   Ray_intersection;
-
+#endif
   typedef CGAL::Timer Timer;
 
   // Create Grid
@@ -432,8 +483,13 @@ TEST(CGAL, SurfaceMeshGrid) {
     //    << "): " << t.time() << " sec" << "\n";
 
     // if(intersection) {
+#if CGAL_VERSION_MAJOR >= 6
+    //   if(std::get_if<Point3>(&(intersection->first))) {
+    //     const Point3* p = std::get_if<Point3>(&(intersection->first));
+#else
     //   if(boost::get<Point3>(&(intersection->first))) {
-    //     const Point3* p =  boost::get<Point3>(&(intersection->first));
+    //     const Point3* p = boost::get<Point3>(&(intersection->first));
+#endif
     //     std::cout <<  *p << "\n";
     //   }
     // }
@@ -454,7 +510,11 @@ TEST(CGAL, SurfaceMeshModifyGrid) {
   // typedef Mesh::Face_index face_descriptor;
 
   // typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+#if CGAL_VERSION_MAJOR >= 6
+  // typedef CGAL::AABB_traits_3<K, Primitive> Traits;
+#else
   // typedef CGAL::AABB_traits<K, Primitive> Traits;
+#endif
   // typedef CGAL::AABB_tree<Traits> Tree;
   // typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
   // Segment_intersection;
@@ -507,7 +567,7 @@ TEST(CGAL, SurfaceMeshWavefield) {
   // typedef Mesh::Face_index face_descriptor;
 
   // typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
-  // typedef CGAL::AABB_traits<K, Primitive> Traits;
+  // typedef CGAL::AABB_traits_3<K, Primitive> Traits;
   // typedef CGAL::AABB_tree<Traits> Tree;
   // typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
   // Segment_intersection;

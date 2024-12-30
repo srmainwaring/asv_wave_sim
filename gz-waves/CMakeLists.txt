@@ -244,8 +244,12 @@ if(NOT CGAL_FOUND)
   return()  
 endif()
 
-# include helper file
-include(${CGAL_USE_FILE})
+message("CGAL_VERSION_MAJOR: ${CGAL_VERSION_MAJOR}")
+
+if (${CGAL_VERSION_MAJOR} LESS 6)
+  # include helper file
+  include(${CGAL_USE_FILE})
+endif()
 
 #--------------------------------------
 # Find FFTW3 (double-precision) (GPL) as FFT library.
