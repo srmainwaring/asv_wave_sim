@@ -30,13 +30,19 @@ jobs:
 
       - name: Install Build Tools
         run: |
-          python3 -m pip install --user vcstool
-          python3 -m pip install --user colcon-common-extensions
+          python3 -m venv /Users/runner/venv
+          source /Users/runner/venv/bin/activate
+          python3 -m pip install vcstool
+          python3 -m pip install colcon-common-extensions
 
       - name: Build Wave Sim
         run: |
+          source /Users/runner/venv/bin/activate
+          export GZ_VERSION=harmonic
           bash ./.github/scripts/macos_build.sh
 
       - name: Test Wave Sim
         run: |
+          source /Users/runner/venv/bin/activate
+          export GZ_VERSION=harmonic
           bash ./.github/scripts/macos_test.sh

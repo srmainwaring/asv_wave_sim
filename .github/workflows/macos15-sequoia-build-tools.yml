@@ -1,11 +1,11 @@
-name: macOS Ventura Build Tools
+name: macOS Sequoia Build Tools
 
 on: [pull_request]
 
 jobs:
-  macos-ventura-ci:
-    runs-on: macos-13
-    name: macOS Ventura Build Tools
+  macos-15-ci:
+    runs-on: macos-15
+    name: macOS Sequoia Build Tools
     steps:
       - name: Checkout
         uses: actions/checkout@v3

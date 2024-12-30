@@ -22,7 +22,7 @@ brew tap osrf/simulation
 
 # packages to install 
 PKGS=(
-  gz-garden
+  gz-harmonic
   cgal
   fftw
 )
