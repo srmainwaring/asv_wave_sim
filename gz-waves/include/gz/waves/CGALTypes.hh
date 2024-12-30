@@ -20,7 +20,14 @@
 #define GZ_WAVES_CGALTYPES_HH_
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
+#ifndef CGAL_VERSION_MAJOR
+#error
+#endif
+#if CGAL_VERSION_MAJOR >= 6
+#include <CGAL/AABB_traits_3.h>
+#else
 #include <CGAL/AABB_traits.h>
+#endif
 #include <CGAL/AABB_tree.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
@@ -53,7 +60,11 @@ typedef Mesh::Vertex_index              VertexIndex;
 
 // AABB Tree
 typedef CGAL::AABB_face_graph_triangle_primitive<Mesh> Primitive;
+#if CGAL_VERSION_MAJOR >= 6
+typedef CGAL::AABB_traits_3<Kernel, Primitive> Traits;
+#else
 typedef CGAL::AABB_traits<Kernel, Primitive> Traits;
+#endif
 typedef CGAL::AABB_tree<Traits> AABBTree;
 
 // Pointers

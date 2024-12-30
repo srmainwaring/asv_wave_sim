@@ -63,6 +63,12 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   sdformat${SDF_VER}::sdformat${SDF_VER}
   ${FFT_LIBRARIES}
 )
+if (${CGAL_VERSION_MAJOR} GREATER_EQUAL 6)
+  target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
+    PUBLIC
+    CGAL::CGAL
+  )
+endif()
 if (UNIX AND NOT APPLE)
   target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     PRIVATE stdc++fs)

@@ -17,7 +17,11 @@
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/AABB_tree.h>
+#if CGAL_VERSION_MAJOR >= 6
+#include <CGAL/AABB_traits_3.h>
+#else
 #include <CGAL/AABB_traits.h>
+#endif
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Timer.h>
@@ -29,15 +33,20 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <variant>
 
 namespace gz
 {
 namespace waves
 {
 // Typedefs
+#if CGAL_VERSION_MAJOR >= 6
+typedef std::optional<cgal::AABBTree::Intersection_and_primitive_id<
+    cgal::Ray>::Type> RayIntersection;
+#else
 typedef boost::optional<cgal::AABBTree::Intersection_and_primitive_id<
     cgal::Ray>::Type> RayIntersection;
-
+#endif
 double Geometry::TriangleArea(
   const cgal::Point3& _p0,
   const cgal::Point3& _p1,
@@ -305,9 +314,15 @@ bool Geometry::SearchMesh(
   // Retrieve intersection point
   if (intersection)
   {
+#if CGAL_VERSION_MAJOR >= 6
+    if (std::get_if<cgal::Point3>(&(intersection->first)))
+    {
+      const cgal::Point3* p = std::get_if<cgal::Point3>(&(intersection->first));
+#else
     if (boost::get<cgal::Point3>(&(intersection->first)))
     {
-      const cgal::Point3* p =  boost::get<cgal::Point3>(&(intersection->first));
+      const cgal::Point3* p = boost::get<cgal::Point3>(&(intersection->first));
+#endif
       _intersection = *p;
       return true;
     }
@@ -333,9 +348,15 @@ bool Geometry::SearchMesh(
   // Retrieve intersection point
   if (intersection)
   {
+#if CGAL_VERSION_MAJOR >= 6
+    if (std::get_if<cgal::Point3>(&(intersection->first)))
+    {
+      const cgal::Point3* p = std::get_if<cgal::Point3>(&(intersection->first));
+#else
     if (boost::get<cgal::Point3>(&(intersection->first)))
     {
-      const cgal::Point3* p =  boost::get<cgal::Point3>(&(intersection->first));
+      const cgal::Point3* p = boost::get<cgal::Point3>(&(intersection->first));
+#endif
       _intersection = *p;
       return true;
     }
