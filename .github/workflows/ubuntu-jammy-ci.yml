@@ -15,7 +15,7 @@ jobs:
       - name: Install Build Essentials
         run: |
           sudo apt-get update
-          sudo apt-get install wget lsb-release gnupg curl
+          sudo apt-get install wget lsb-release gnupg curl libboost-iostreams-dev libboost-filesystem-dev
 
       - name: Install Build Tools
         run: |
@@ -24,12 +24,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install python3-pip python3-vcstool python3-colcon-common-extensions
 
-      - name: Install Gazebo Garden
+      - name: Install Gazebo Harmonic
         run: |
           sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
           sudo apt-get update
-          sudo apt-get install gz-garden
+          sudo apt-get install gz-harmonic
 
       - name: Install Wave Sim Dependencies
         run: |
@@ -38,9 +38,11 @@ jobs:
 
       - name: Build Wave Sim
         run: |
+          export GZ_VERSION=harmonic
           colcon build --symlink-install --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_STANDARD=17 -DBUILD_TESTING=ON
 
       - name: Test Wave Sim
         run: |
+          export GZ_VERSION=harmonic
           colcon test --merge-install
           colcon test-result --all --verbose
