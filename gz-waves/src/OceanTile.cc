@@ -968,7 +968,7 @@ void OceanTilePrivate<gz::math::Vector3d>::UpdateMesh(
       gz::common::SubMeshWithTangents>(base_submesh);
   if (!submesh)
   {
-    ignwarn << "OceanTile: submesh does not support tangents\n";
+    gzwarn << "OceanTile: submesh does not support tangents\n";
     return;
   }
 
