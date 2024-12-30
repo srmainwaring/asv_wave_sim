@@ -19,7 +19,9 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 
+#include <algorithm>
 #include <array>
+#include <memory>
 #include <iostream>
 #include <iterator>
 #include <string>

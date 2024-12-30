@@ -19,6 +19,7 @@
 #include "gz/common/SubMeshWithTangents.hh"
 
 #include <string>
+#include <vector>
 
 #include <gz/common/Console.hh>
 

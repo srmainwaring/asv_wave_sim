@@ -15,6 +15,9 @@
 
 #include "BaseRenderEngineExtension.hh"
 
+#include <map>
+#include <string>
+
 #include <gz/common/Console.hh>
 
 namespace gz

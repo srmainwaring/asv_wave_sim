@@ -17,9 +17,13 @@
 
 #include <Eigen/Dense>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <gz/common/Console.hh>

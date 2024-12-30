@@ -18,6 +18,7 @@
 #include <array>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <string>
 
 #include "gz/waves/Geometry.hh"

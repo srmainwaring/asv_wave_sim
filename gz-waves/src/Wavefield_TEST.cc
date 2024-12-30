@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "gz/waves/CGALTypes.hh"
 #include "gz/waves/Types.hh"

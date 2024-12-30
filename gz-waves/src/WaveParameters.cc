@@ -15,10 +15,12 @@
 
 #include "gz/waves/WaveParameters.hh"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <gz/common/Console.hh>
 #include <gz/msgs.hh>

@@ -15,6 +15,10 @@
 
 #include "Ogre2RenderEngineExtension.hh"
 
+#include <map>
+#include <memory>
+#include <string>
+
 #include <gz/common/Console.hh>
 #include <gz/plugin/Register.hh>
 

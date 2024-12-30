@@ -15,6 +15,9 @@
 
 #include "Ogre2OceanVisual.hh"
 
+#include <memory>
+#include <string>
+
 #include <gz/common/Console.hh>
 #include <gz/common/SubMesh.hh>
 #include <gz/rendering/ogre2/Ogre2Material.hh>

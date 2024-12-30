@@ -50,6 +50,7 @@
 
 #include <chrono>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <utility>
 #include <vector>

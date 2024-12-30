@@ -34,6 +34,8 @@
 
 #include "Ogre2DynamicMesh.hh"
 
+#include <vector>
+
 // Note this include is placed in the src file because
 // otherwise ogre produces compile errors
 #ifdef _MSC_VER

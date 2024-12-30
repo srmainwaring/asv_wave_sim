@@ -15,6 +15,8 @@
 
 #include "Ogre2OceanGeometry.hh"
 
+#include <string>
+
 #include <gz/common/Console.hh>
 #include <gz/rendering/ogre2/Ogre2Material.hh>
 #include <gz/rendering/ogre2/Ogre2Scene.hh>

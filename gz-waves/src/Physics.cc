@@ -19,12 +19,16 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Timer.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include <gz/common/Console.hh>
 #include <gz/math/Pose3.hh>
