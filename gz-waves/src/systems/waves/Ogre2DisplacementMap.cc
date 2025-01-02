@@ -139,7 +139,7 @@ void Ogre2DisplacementMap::InitTextures()
 
   // Create displacement texture
   gzmsg << "Create HeightMap texture\n";
-  mHeightMapTex = ogre2TextureManager->createTexture(
+  mHeightMapTex = ogre2TextureManager->createOrRetrieveTexture(
       "HeightMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
@@ -153,7 +153,7 @@ void Ogre2DisplacementMap::InitTextures()
 
   // Create normal texture
   gzmsg << "Create NormalMap texture\n";
-  mNormalMapTex = ogre2TextureManager->createTexture(
+  mNormalMapTex = ogre2TextureManager->createOrRetrieveTexture(
       "NormalMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
@@ -167,7 +167,7 @@ void Ogre2DisplacementMap::InitTextures()
 
   // Create tangent texture
   gzmsg << "Create TangentMap texture\n";
-  mTangentMapTex = ogre2TextureManager->createTexture(
+  mTangentMapTex = ogre2TextureManager->createOrRetrieveTexture(
       "TangentMapTex(" + std::to_string(this->entity) + ")",
       Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
