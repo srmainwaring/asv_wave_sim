@@ -292,7 +292,7 @@ set(FAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/fake/install")
 # Configure the build
 #============================================================================
 
-gz_configure_build(QUIT_IF_BUILD_ERRORS)
+gz_configure_build(QUIT_IF_BUILD_ERRORS EXPOSE_SYMBOLS_BY_DEFAULT)
 
 # add_subdirectory(examples)
 
