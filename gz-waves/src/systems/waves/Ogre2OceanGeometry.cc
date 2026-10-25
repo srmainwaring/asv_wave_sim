@@ -37,6 +37,9 @@ class Ogre2OceanGeometryPrivate
   /// \brief OceanGeometry materal
   public: Ogre2MaterialPtr material{nullptr};
 
+  /// Whether this object owns a private material clone.
+  public: bool ownsMaterial{false};
+
   /// \brief OceanGeometry dynamic mesh
   public: Ogre2DynamicMeshPtr dynMesh{nullptr};
 
@@ -70,7 +73,7 @@ void Ogre2OceanGeometry::Destroy()
     this->dataPtr->dynMesh.reset();
   }
 
-  if (this->dataPtr->material && this->Scene())
+  if (this->dataPtr->material && this->dataPtr->ownsMaterial && this->Scene())
   {
     this->Scene()->DestroyMaterial(this->dataPtr->material);
     this->dataPtr->material.reset();
@@ -119,6 +122,7 @@ void Ogre2OceanGeometry::SetMaterial(MaterialPtr _material, bool _unique)
   }
 
   // Set material for the underlying dynamic renderable
+  this->dataPtr->ownsMaterial = _unique;
   this->dataPtr->dynMesh->SetMaterial(derived, false);
   this->dataPtr->material = derived;
 }

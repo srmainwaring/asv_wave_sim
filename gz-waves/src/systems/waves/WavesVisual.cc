@@ -166,6 +166,9 @@ class WavesVisualPrivate
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
 
+  /// Release custom Ogre objects on the rendering thread before scene teardown.
+  public: void OnRenderTeardown();
+
   /// \brief Callback for topic "/world/<world>/waves".
   ///
   /// \param[in] _msg Wave parameters message.
@@ -278,6 +281,7 @@ class WavesVisualPrivate
 
   /// \brief Connection to pre-render event callback
   public: gz::common::ConnectionPtr connection{nullptr};
+  public: gz::common::ConnectionPtr teardownConnection{nullptr};
 
   /// \brief RenderEngineExtension
   public: rendering::RenderEngineExtension *extension{nullptr};
@@ -445,6 +449,11 @@ void WavesVisual::Configure(const Entity &_entity,
   //
   // The callback is executed in the rendering thread so do all
   // rendering operations in that thread
+  this->dataPtr->teardownConnection =
+      _eventMgr.Connect<events::RenderTeardown>(
+          std::bind(&WavesVisualPrivate::OnRenderTeardown,
+          this->dataPtr.get()));
+
   this->dataPtr->connection =
       _eventMgr.Connect<gz::sim::events::SceneUpdate>(
       std::bind(&WavesVisualPrivate::OnUpdate, this->dataPtr.get()));
@@ -505,18 +514,38 @@ WavesVisualPrivate::SetMeshDeformationMethod(const std::string &_str)
 }
 
 //////////////////////////////////////////////////
-WavesVisualPrivate::~WavesVisualPrivate()
+WavesVisualPrivate::~WavesVisualPrivate() = default;
+
+//////////////////////////////////////////////////
+void WavesVisualPrivate::OnRenderTeardown()
 {
-  // Remove visuals
-  for (auto& vis : this->oceanVisuals2)
+  std::lock_guard<std::mutex> lock(this->mutex);
+  // The custom visuals are not in Gazebo's visual store. Destroy their
+  // renderables before the scene destroys the shared ocean material.
+  for (auto &vis : this->oceanVisuals)
   {
-    if (vis != nullptr)
+    if (vis)
     {
+      if (auto parent = vis->Parent())
+        parent->RemoveChild(vis);
       vis->Destroy();
-      vis.reset();
     }
   }
-};
+  this->oceanVisuals.clear();
+  for (auto &vis : this->oceanVisuals2)
+  {
+    if (vis && this->scene)
+      this->scene->DestroyVisual(vis);
+  }
+  this->oceanVisuals2.clear();
+  this->oceanGeometries.clear();
+  this->displacementMap.reset();
+  if (this->oceanMaterial && this->scene)
+    this->scene->DestroyMaterial(this->oceanMaterial);
+  this->oceanMaterial.reset();
+  this->visual.reset();
+  this->scene.reset();
+}
 
 //////////////////////////////////////////////////
 void WavesVisualPrivate::OnUpdate()
@@ -612,7 +641,12 @@ void WavesVisualPrivate::OnUpdate()
         gzmsg << "WavesVisual: Visual GeometryCount: "
             << this->visual->GeometryCount() << "\n";
         auto visualGeometry = this->visual->GeometryByIndex(0);
-        this->oceanMaterial = visualGeometry->Material();
+        // The primary geometry owns its material and may be destroyed before
+        // these custom ocean visuals during GUI scene teardown. Keep an
+        // identical, scene-registered clone alive for the ocean tiles.
+        auto sourceMaterial = visualGeometry->Material();
+        this->oceanMaterial =
+            sourceMaterial ? sourceMaterial->Clone() : nullptr;
         if (!this->oceanMaterial)
         {
           gzerr << "WavesVisual: invalid material\n";

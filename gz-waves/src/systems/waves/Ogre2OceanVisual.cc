@@ -46,6 +46,9 @@ class Ogre2OceanVisualPrivate
   /// \brief visual materal
   public: Ogre2MaterialPtr material = nullptr;
 
+  /// Whether this object owns a private material clone.
+  public: bool ownsMaterial{false};
+
   /// \brief Ogre renderable used to render the ocean tile.
   public: std::shared_ptr<Ogre2DynamicMesh> dynMesh = nullptr;
 };
@@ -81,7 +84,7 @@ void Ogre2OceanVisual::Destroy()
     this->dataPtr->dynMesh.reset();
   }
 
-  if (this->dataPtr->material && this->Scene())
+  if (this->dataPtr->material && this->dataPtr->ownsMaterial && this->Scene())
   {
     this->Scene()->DestroyMaterial(this->dataPtr->material);
     this->dataPtr->material.reset();
@@ -110,6 +113,7 @@ void Ogre2OceanVisual::SetMaterial(MaterialPtr _material, bool _unique)
     return;
   }
 
+  this->dataPtr->ownsMaterial = _unique;
   this->dataPtr->dynMesh->SetMaterial(_material, false);
   this->SetMaterialImpl(derived);
 }
