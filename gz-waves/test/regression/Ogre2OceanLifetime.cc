@@ -26,6 +26,57 @@
 #include <gz/rendering/ogre2/Ogre2RenderEngine.hh>
 #include "Ogre2SceneNodeFactory.hh"
 
+// Exercise ownership transitions independently of render-thread teardown.
+template<typename OceanPtr>
+int CheckOwnership(const OceanPtr &_ocean,
+    const gz::rendering::ScenePtr &_scene,
+    const gz::rendering::MaterialPtr &_shared, const std::string &_mode)
+{
+  int result = 0;
+  const auto defaultName = _ocean->Material()->Name();
+  if (_mode == "replace")
+  {
+    _ocean->SetMaterial(_shared, true);
+    if (_scene->MaterialRegistered(defaultName))
+    {
+      std::cerr << "Default clone remains registered after replacement\n";
+      result = 40;
+    }
+    const auto uniqueName = _ocean->Material()->Name();
+    _ocean->SetMaterial(_shared, false);
+    if (_scene->MaterialRegistered(uniqueName))
+    {
+      std::cerr << "Owned clone remains registered after replacement\n";
+      result = 41;
+    }
+  }
+  else if (_mode == "alias")
+  {
+    _ocean->SetMaterial(_shared, true);
+    // Reassigning the same pointer must not relinquish owned-clone cleanup.
+    const auto owned = _ocean->Material();
+    _ocean->SetMaterial(owned, false);
+    if (_ocean->Material() != owned)
+      result = 42;
+  }
+  const auto lastName = _ocean->Material()->Name();
+  _ocean->Destroy();
+  _ocean->Destroy();
+  if (_mode != "replace" && _scene->MaterialRegistered(lastName))
+  {
+    std::cerr << "Owned material remains registered after Destroy\n";
+    result = 43;
+  }
+  if (!_scene->MaterialRegistered(_shared->Name()))
+    result = 44;
+  if (_ocean->Material())
+  {
+    std::cerr << "Destroyed ocean still holds a material reference\n";
+    result = 45;
+  }
+  return result;
+}
+
 int main(int argc, char **argv)
 {
   const std::string kind = argc > 1 ? argv[1] : "visual";
@@ -55,7 +106,29 @@ int main(int argc, char **argv)
   shared->SetRoughness(0.3);
   shared->SetMetalness(0.1);
 
-  if (kind == "scene")
+  if (mode == "default" || mode == "replace" || mode == "alias")
+  {
+    int result = 0;
+    if (kind == "visual")
+    {
+      auto ocean = factory->CreateOceanVisual(scene);
+      ocean->LoadMesh(mesh);
+      result = CheckOwnership(ocean, scene, shared, mode);
+    }
+    else
+    {
+      auto ocean = factory->CreateOceanGeometry(scene);
+      ocean->LoadMesh(mesh);
+      result = CheckOwnership(ocean, scene, shared, mode);
+    }
+    scene->DestroyMaterial(shared);
+    shared.reset();
+    engine->DestroyScene(scene);
+    scene.reset();
+    if (result)
+      return result;
+  }
+  else if (kind == "scene")
   {
     // Simulate GUI teardown without the server's RenderTeardown event.
     auto primary = scene->CreateVisual();

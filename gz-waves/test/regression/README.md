@@ -13,8 +13,10 @@ DYLD_LIBRARY_PATH="$PWD/build/lib:${DYLD_LIBRARY_PATH:-}" \
 ctest --test-dir build/test/regression -R '^ocean_lifetime_' --output-on-failure
 ```
 
-The four visual/geometry tests check that borrowed materials stay registered,
-private clones are released, and repeated destruction is safe. The scene test
+The visual/geometry cases cover borrowed and private materials, default clones,
+replacement of an owned clone, and reassignment of the same owned pointer.
+They check scene registration, release of references after destruction, and
+repeated destruction. The scene test
 checks the lifetime needed by the dynamic-geometry path: after the primary
 visual is removed, its material clone must remain registered until the custom
 ocean renderable is destroyed by scene teardown. It also checks initial clone
