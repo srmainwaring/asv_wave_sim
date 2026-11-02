@@ -46,6 +46,9 @@ class Ogre2OceanVisualPrivate
   /// \brief visual materal
   public: Ogre2MaterialPtr material = nullptr;
 
+  /// Whether this object owns a private material clone.
+  public: bool ownsMaterial{false};
+
   /// \brief Ogre renderable used to render the ocean tile.
   public: std::shared_ptr<Ogre2DynamicMesh> dynMesh = nullptr;
 };
@@ -81,11 +84,12 @@ void Ogre2OceanVisual::Destroy()
     this->dataPtr->dynMesh.reset();
   }
 
-  if (this->dataPtr->material && this->Scene())
+  if (this->dataPtr->material && this->dataPtr->ownsMaterial && this->Scene())
   {
     this->Scene()->DestroyMaterial(this->dataPtr->material);
-    this->dataPtr->material.reset();
   }
+  this->dataPtr->material.reset();
+  this->dataPtr->ownsMaterial = false;
 }
 
 //////////////////////////////////////////////////
@@ -110,8 +114,15 @@ void Ogre2OceanVisual::SetMaterial(MaterialPtr _material, bool _unique)
     return;
   }
 
-  this->dataPtr->dynMesh->SetMaterial(_material, false);
+  const auto previous = this->dataPtr->material;
+  const bool ownedPrevious = this->dataPtr->ownsMaterial;
+  // Bind the replacement before destroying a material used by the renderable.
+  this->dataPtr->dynMesh->SetMaterial(derived, false);
   this->SetMaterialImpl(derived);
+  this->dataPtr->ownsMaterial =
+      _unique || (previous == derived && ownedPrevious);
+  if (previous && previous != derived && ownedPrevious && this->Scene())
+    this->Scene()->DestroyMaterial(previous);
 }
 
 //////////////////////////////////////////////////
@@ -131,9 +142,7 @@ void Ogre2OceanVisual::LoadCube()
   this->dataPtr->dynMesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
   if (this->dataPtr->material == nullptr)
   {
-    MaterialPtr defaultMat =
-        this->Scene()->Material("Default/TransBlue")->Clone();
-    this->SetMaterial(defaultMat, false);
+    this->SetMaterial(this->Scene()->Material("Default/TransBlue"), true);
   }
 
   // Position indicator - with dynamic geometry
@@ -216,9 +225,7 @@ void Ogre2OceanVisual::LoadOceanTile(waves::visual::OceanTilePtr _oceanTile)
   this->dataPtr->dynMesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
   if (this->dataPtr->material == nullptr)
   {
-    MaterialPtr defaultMat =
-        this->Scene()->Material("Default/TransBlue")->Clone();
-    this->SetMaterial(defaultMat, false);
+    this->SetMaterial(this->Scene()->Material("Default/TransBlue"), true);
   }
 
   // Add points and texture coordinates for each face
@@ -276,9 +283,7 @@ void Ogre2OceanVisual::LoadMesh(gz::common::MeshPtr _mesh)
   this->dataPtr->dynMesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
   if (this->dataPtr->material == nullptr)
   {
-    MaterialPtr defaultMat =
-        this->Scene()->Material("Default/TransBlue")->Clone();
-    this->SetMaterial(defaultMat, false);
+    this->SetMaterial(this->Scene()->Material("Default/TransBlue"), true);
   }
 
   // \todo add checks

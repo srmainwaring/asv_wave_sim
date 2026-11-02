@@ -37,6 +37,9 @@ class Ogre2OceanGeometryPrivate
   /// \brief OceanGeometry materal
   public: Ogre2MaterialPtr material{nullptr};
 
+  /// Whether this object owns a private material clone.
+  public: bool ownsMaterial{false};
+
   /// \brief OceanGeometry dynamic mesh
   public: Ogre2DynamicMeshPtr dynMesh{nullptr};
 
@@ -70,11 +73,12 @@ void Ogre2OceanGeometry::Destroy()
     this->dataPtr->dynMesh.reset();
   }
 
-  if (this->dataPtr->material && this->Scene())
+  if (this->dataPtr->material && this->dataPtr->ownsMaterial && this->Scene())
   {
     this->Scene()->DestroyMaterial(this->dataPtr->material);
-    this->dataPtr->material.reset();
   }
+  this->dataPtr->material.reset();
+  this->dataPtr->ownsMaterial = false;
 }
 
 //////////////////////////////////////////////////
@@ -118,9 +122,15 @@ void Ogre2OceanGeometry::SetMaterial(MaterialPtr _material, bool _unique)
     return;
   }
 
-  // Set material for the underlying dynamic renderable
+  const auto previous = this->dataPtr->material;
+  const bool ownedPrevious = this->dataPtr->ownsMaterial;
+  // Bind the replacement before destroying a material used by the renderable.
   this->dataPtr->dynMesh->SetMaterial(derived, false);
   this->dataPtr->material = derived;
+  this->dataPtr->ownsMaterial =
+      _unique || (previous == derived && ownedPrevious);
+  if (previous && previous != derived && ownedPrevious && this->Scene())
+    this->Scene()->DestroyMaterial(previous);
 }
 
 //////////////////////////////////////////////////
@@ -140,9 +150,7 @@ void Ogre2OceanGeometry::LoadMesh(gz::common::MeshPtr _mesh)
   this->dataPtr->dynMesh->SetOperationType(MarkerType::MT_TRIANGLE_LIST);
   if (this->dataPtr->material == nullptr)
   {
-    MaterialPtr defaultMat =
-        this->Scene()->Material("Default/TransBlue")->Clone();
-    this->SetMaterial(defaultMat, false);
+    this->SetMaterial(this->Scene()->Material("Default/TransBlue"), true);
   }
 
   // \todo add checks

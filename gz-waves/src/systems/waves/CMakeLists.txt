@@ -90,3 +90,6 @@ gz_add_system(waves-model
     gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
     gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
 )
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/test/regression
+  ${PROJECT_BINARY_DIR}/test/regression)
