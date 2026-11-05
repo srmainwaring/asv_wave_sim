@@ -3,6 +3,6 @@
 
 # gnuplot-iostream: master HEAD
 set(gnuplot-iostream_URL https://github.com/dstahlke/gnuplot-iostream.git)
-set(gnuplot-iostream_TAG d674bdf23b93c76d491f03246d2e6f72bf5739ce
+set(gnuplot-iostream_TAG 82b6f0b750c11ef3c857368327751c39b8d856bd
   CACHE STRING "gnuplot-iostream version")
 
